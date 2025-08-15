@@ -1,0 +1,291 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="bg-white shadow-sm border-b">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-6">
+        <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
+              <mat-icon class="text-white">medical_services</mat-icon>
+            </div>
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900">Doctor Dashboard</h1>
+              <p class="text-gray-600">Welcome back, Dr. {{ currentUser?.firstName }}!</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+          <!-- Notifications -->
+          <button 
+            mat-icon-button 
+            [matBadge]="unreadNotifications" 
+            matBadgeColor="warn"
+            matTooltip="Notifications"
+            (click)="openNotifications()"
+          >
+            <mat-icon>notifications</mat-icon>
+          </button>
+          
+          <!-- User Menu -->
+          <button mat-icon-button [matMenuTriggerFor]="userMenu">
+            <mat-icon>account_circle</mat-icon>
+          </button>
+          <mat-menu #userMenu="matMenu">
+            <button mat-menu-item routerLink="/doctor/profile">
+              <mat-icon>person</mat-icon>
+              <span>Profile</span>
+            </button>
+            <button mat-menu-item routerLink="/doctor/settings">
+              <mat-icon>settings</mat-icon>
+              <span>Settings</span>
+            </button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="logout()">
+              <mat-icon>logout</mat-icon>
+              <span>Logout</span>
+            </button>
+          </mat-menu>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div *ngIf="isLoading" class="flex justify-center items-center h-64">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+
+    <div *ngIf="!isLoading" class="space-y-8">
+      <!-- Quick Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <mat-card class="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+          <mat-card-content class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-blue-100 text-sm font-medium">Today's Appointments</p>
+                <p class="text-3xl font-bold">{{ todayAppointmentsCount }}</p>
+              </div>
+              <mat-icon class="text-blue-200 text-4xl">event</mat-icon>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="bg-gradient-to-r from-green-500 to-green-600 text-white">
+          <mat-card-content class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-green-100 text-sm font-medium">Total Patients</p>
+                <p class="text-3xl font-bold">{{ totalPatientsCount }}</p>
+              </div>
+              <mat-icon class="text-green-200 text-4xl">people</mat-icon>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+          <mat-card-content class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-purple-100 text-sm font-medium">Monthly Revenue</p>
+                <p class="text-3xl font-bold">${{ monthlyRevenue | number }}</p>
+              </div>
+              <mat-icon class="text-purple-200 text-4xl">attach_money</mat-icon>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+          <mat-card-content class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-orange-100 text-sm font-medium">Pending Reviews</p>
+                <p class="text-3xl font-bold">{{ pendingReviewsCount }}</p>
+              </div>
+              <mat-icon class="text-orange-200 text-4xl">rate_review</mat-icon>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Main Dashboard Content -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Left Column -->
+        <div class="lg:col-span-2 space-y-8">
+          <!-- Today's Schedule -->
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title class="flex items-center space-x-2">
+                <mat-icon>schedule</mat-icon>
+                <span>Today's Schedule</span>
+              </mat-card-title>
+              <mat-card-subtitle>Your appointments for today</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content class="p-0">
+              <div *ngIf="todayAppointments.length === 0" class="p-6 text-center text-gray-500">
+                <mat-icon class="text-4xl mb-4">event_busy</mat-icon>
+                <p>No appointments scheduled for today</p>
+              </div>
+              <mat-list *ngIf="todayAppointments.length > 0">
+                <mat-list-item *ngFor="let appointment of todayAppointments" class="border-b">
+                  <div class="flex items-center justify-between w-full py-4">
+                    <div class="flex items-center space-x-4">
+                      <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                        <mat-icon class="text-green-600">person</mat-icon>
+                      </div>
+                      <div>
+                        <h3 class="font-medium">{{ appointment.patient?.firstName }} {{ appointment.patient?.lastName }}</h3>
+                        <p class="text-sm text-gray-600">{{ appointment.reason }}</p>
+                        <p class="text-sm text-gray-500">{{ appointment.appointmentDateTime | date:'shortTime' }}</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                      <mat-chip [color]="getStatusColor(appointment.status)" selected>
+                        {{ appointment.status }}
+                      </mat-chip>
+                      <button mat-icon-button [matMenuTriggerFor]="appointmentMenu">
+                        <mat-icon>more_vert</mat-icon>
+                      </button>
+                      <mat-menu #appointmentMenu="matMenu">
+                        <button mat-menu-item [routerLink]="['/doctor/appointments', appointment.id]">
+                          <mat-icon>visibility</mat-icon>
+                          <span>View Details</span>
+                        </button>
+                        <button mat-menu-item (click)="startAppointment(appointment)">
+                          <mat-icon>play_arrow</mat-icon>
+                          <span>Start Appointment</span>
+                        </button>
+                        <button mat-menu-item (click)="completeAppointment(appointment)">
+                          <mat-icon>check_circle</mat-icon>
+                          <span>Complete</span>
+                        </button>
+                      </mat-menu>
+                    </div>
+                  </div>
+                </mat-list-item>
+              </mat-list>
+            </mat-card-content>
+            <mat-card-actions class="p-4">
+              <button mat-button routerLink="/doctor/appointments">View All Appointments</button>
+              <button mat-raised-button color="primary" routerLink="/doctor/schedule">Manage Schedule</button>
+            </mat-card-actions>
+          </mat-card>
+
+          <!-- Performance Analytics -->
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title class="flex items-center space-x-2">
+                <mat-icon>analytics</mat-icon>
+                <span>Performance Analytics</span>
+              </mat-card-title>
+              <mat-card-subtitle>Your performance metrics and insights</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="h-64">
+                  <canvas #patientSatisfactionChart></canvas>
+                </div>
+                <div class="h-64">
+                  <canvas #revenueChart></canvas>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Right Column -->
+        <div class="space-y-8">
+          <!-- Quick Actions -->
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Quick Actions</mat-card-title>
+            </mat-card-header>
+            <mat-card-content class="p-4">
+              <div class="space-y-3">
+                <button mat-raised-button color="primary" routerLink="/doctor/appointments/schedule" class="w-full">
+                  <mat-icon>add</mat-icon>
+                  Schedule Appointment
+                </button>
+                <button mat-outlined-button routerLink="/doctor/patients" class="w-full">
+                  <mat-icon>people</mat-icon>
+                  View Patients
+                </button>
+                <button mat-outlined-button routerLink="/doctor/medical-records/create" class="w-full">
+                  <mat-icon>medical_services</mat-icon>
+                  Create Medical Record
+                </button>
+                <button mat-outlined-button routerLink="/doctor/analytics" class="w-full">
+                  <mat-icon>insights</mat-icon>
+                  View Analytics
+                </button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Recent Patients -->
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Recent Patients</mat-card-title>
+            </mat-card-header>
+            <mat-card-content class="p-0">
+              <div *ngIf="recentPatients.length === 0" class="p-6 text-center text-gray-500">
+                <mat-icon class="text-4xl mb-4">people</mat-icon>
+                <p>No recent patients</p>
+              </div>
+              <mat-list *ngIf="recentPatients.length > 0">
+                <mat-list-item *ngFor="let patient of recentPatients" class="border-b">
+                  <div class="w-full py-2">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <h4 class="font-medium">{{ patient.firstName }} {{ patient.lastName }}</h4>
+                        <p class="text-sm text-gray-600">{{ patient.email }}</p>
+                        <p class="text-sm text-gray-500">Last visit: {{ patient.lastVisit | date:'shortDate' }}</p>
+                      </div>
+                      <button mat-icon-button [routerLink]="['/doctor/patients', patient.id]">
+                        <mat-icon>visibility</mat-icon>
+                      </button>
+                    </div>
+                  </div>
+                </mat-list-item>
+              </mat-list>
+            </mat-card-content>
+            <mat-card-actions class="p-4">
+              <button mat-button routerLink="/doctor/patients">View All Patients</button>
+            </mat-card-actions>
+          </mat-card>
+
+          <!-- Recent Notifications -->
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Recent Notifications</mat-card-title>
+            </mat-card-header>
+            <mat-card-content class="p-0">
+              <div *ngIf="recentNotifications.length === 0" class="p-6 text-center text-gray-500">
+                <mat-icon class="text-4xl mb-4">notifications_none</mat-icon>
+                <p>No notifications</p>
+              </div>
+              <mat-list *ngIf="recentNotifications.length > 0">
+                <mat-list-item *ngFor="let notification of recentNotifications" class="border-b">
+                  <div class="w-full py-2">
+                    <div class="flex items-start space-x-3">
+                      <mat-icon class="text-blue-600 mt-1">info</mat-icon>
+                      <div class="flex-1">
+                        <h4 class="font-medium text-sm">{{ notification.title }}</h4>
+                        <p class="text-xs text-gray-600">{{ notification.message }}</p>
+                        <p class="text-xs text-gray-500">{{ notification.createdAt | date:'short' }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </mat-list-item>
+              </mat-list>
+            </mat-card-content>
+            <mat-card-actions class="p-4">
+              <button mat-button routerLink="/doctor/notifications">View All Notifications</button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

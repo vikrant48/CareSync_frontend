@@ -1,0 +1,263 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="bg-white shadow-sm border-b">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-6">
+        <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center">
+              <mat-icon class="text-white">admin_panel_settings</mat-icon>
+            </div>
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+              <p class="text-gray-600">System overview and management</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+          <!-- Notifications -->
+          <button 
+            mat-icon-button 
+            [matBadge]="unreadNotifications" 
+            matBadgeColor="warn"
+            matTooltip="Notifications"
+            (click)="openNotifications()"
+          >
+            <mat-icon>notifications</mat-icon>
+          </button>
+          
+          <!-- User Menu -->
+          <button mat-icon-button [matMenuTriggerFor]="userMenu">
+            <mat-icon>account_circle</mat-icon>
+          </button>
+          <mat-menu #userMenu="matMenu">
+            <button mat-menu-item routerLink="/admin/profile">
+              <mat-icon>person</mat-icon>
+              <span>Profile</span>
+            </button>
+            <button mat-menu-item routerLink="/admin/settings">
+              <mat-icon>settings</mat-icon>
+              <span>Settings</span>
+            </button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="logout()">
+              <mat-icon>logout</mat-icon>
+              <span>Logout</span>
+            </button>
+          </mat-menu>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div *ngIf="isLoading" class="flex justify-center items-center h-64">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+
+    <div *ngIf="!isLoading" class="space-y-8">
+      <!-- System Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <mat-card class="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+          <mat-card-content class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-blue-100 text-sm font-medium">Total Users</p>
+                <p class="text-3xl font-bold">{{ totalUsers }}</p>
+              </div>
+              <mat-icon class="text-blue-200 text-4xl">people</mat-icon>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="bg-gradient-to-r from-green-500 to-green-600 text-white">
+          <mat-card-content class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-green-100 text-sm font-medium">Active Appointments</p>
+                <p class="text-3xl font-bold">{{ activeAppointmentsCount }}</p>
+              </div>
+              <mat-icon class="text-green-200 text-4xl">event</mat-icon>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+          <mat-card-content class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-purple-100 text-sm font-medium">System Revenue</p>
+                <p class="text-3xl font-bold">${{ systemRevenue | number }}</p>
+              </div>
+              <mat-icon class="text-purple-200 text-4xl">attach_money</mat-icon>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+          <mat-card-content class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-orange-100 text-sm font-medium">System Health</p>
+                <p class="text-3xl font-bold">{{ systemHealth }}%</p>
+              </div>
+              <mat-icon class="text-orange-200 text-4xl">monitor_heart</mat-icon>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Main Dashboard Content -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Left Column -->
+        <div class="lg:col-span-2 space-y-8">
+          <!-- System Analytics -->
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title class="flex items-center space-x-2">
+                <mat-icon>analytics</mat-icon>
+                <span>System Analytics</span>
+              </mat-card-title>
+              <mat-card-subtitle>System performance and user growth</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="h-64">
+                  <canvas #userGrowthChart></canvas>
+                </div>
+                <div class="h-64">
+                  <canvas #revenueChart></canvas>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Recent System Activities -->
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title class="flex items-center space-x-2">
+                <mat-icon>history</mat-icon>
+                <span>Recent System Activities</span>
+              </mat-card-title>
+              <mat-card-subtitle>Latest system events and activities</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content class="p-0">
+              <div *ngIf="recentActivities.length === 0" class="p-6 text-center text-gray-500">
+                <mat-icon class="text-4xl mb-4">history</mat-icon>
+                <p>No recent activities</p>
+              </div>
+              <mat-list *ngIf="recentActivities.length > 0">
+                <mat-list-item *ngFor="let activity of recentActivities" class="border-b">
+                  <div class="w-full py-2">
+                    <div class="flex items-center space-x-3">
+                      <mat-icon class="text-blue-600">info</mat-icon>
+                      <div class="flex-1">
+                        <h4 class="font-medium">{{ activity.title }}</h4>
+                        <p class="text-sm text-gray-600">{{ activity.description }}</p>
+                        <p class="text-xs text-gray-500">{{ activity.timestamp | date:'short' }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </mat-list-item>
+              </mat-list>
+            </mat-card-content>
+            <mat-card-actions class="p-4">
+              <button mat-button routerLink="/admin/audit">View All Activities</button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+
+        <!-- Right Column -->
+        <div class="space-y-8">
+          <!-- Quick Actions -->
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Quick Actions</mat-card-title>
+            </mat-card-header>
+            <mat-card-content class="p-4">
+              <div class="space-y-3">
+                <button mat-raised-button color="primary" routerLink="/admin/users/create" class="w-full">
+                  <mat-icon>person_add</mat-icon>
+                  Create User
+                </button>
+                <button mat-outlined-button routerLink="/admin/users" class="w-full">
+                  <mat-icon>people</mat-icon>
+                  Manage Users
+                </button>
+                <button mat-outlined-button routerLink="/admin/reports" class="w-full">
+                  <mat-icon>assessment</mat-icon>
+                  View Reports
+                </button>
+                <button mat-outlined-button routerLink="/admin/settings" class="w-full">
+                  <mat-icon>settings</mat-icon>
+                  System Settings
+                </button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- System Status -->
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>System Status</mat-card-title>
+            </mat-card-header>
+            <mat-card-content class="p-4">
+              <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-medium">Database</span>
+                  <mat-chip color="primary" selected>Online</mat-chip>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-medium">API Services</span>
+                  <mat-chip color="primary" selected>Online</mat-chip>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-medium">File Storage</span>
+                  <mat-chip color="primary" selected>Online</mat-chip>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-medium">Email Service</span>
+                  <mat-chip color="primary" selected>Online</mat-chip>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Recent Users -->
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Recent Users</mat-card-title>
+            </mat-card-header>
+            <mat-card-content class="p-0">
+              <div *ngIf="recentUsers.length === 0" class="p-6 text-center text-gray-500">
+                <mat-icon class="text-4xl mb-4">people</mat-icon>
+                <p>No recent users</p>
+              </div>
+              <mat-list *ngIf="recentUsers.length > 0">
+                <mat-list-item *ngFor="let user of recentUsers" class="border-b">
+                  <div class="w-full py-2">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <h4 class="font-medium">{{ user.firstName }} {{ user.lastName }}</h4>
+                        <p class="text-sm text-gray-600">{{ user.email }}</p>
+                        <p class="text-xs text-gray-500">{{ user.role }}</p>
+                      </div>
+                      <button mat-icon-button [routerLink]="['/admin/users', user.id]">
+                        <mat-icon>visibility</mat-icon>
+                      </button>
+                    </div>
+                  </div>
+                </mat-list-item>
+              </mat-list>
+            </mat-card-content>
+            <mat-card-actions class="p-4">
+              <button mat-button routerLink="/admin/users">View All Users</button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

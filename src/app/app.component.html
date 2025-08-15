@@ -1,0 +1,70 @@
+<header class="bg-white shadow-sm border-b border-gray-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <!-- Logo -->
+      <div class="flex items-center">
+        <h1 class="text-2xl font-bold text-primary-600">CareSync</h1>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="hidden md:flex space-x-8">
+        <a routerLink="/" class="nav-link">Home</a>
+        <a routerLink="/doctors" class="nav-link">Find Doctors</a>
+        <a routerLink="/appointments" class="nav-link">Appointments</a>
+        <a routerLink="/about" class="nav-link">About</a>
+      </nav>
+
+      <!-- User Menu -->
+      <div class="flex items-center space-x-4">
+        <ng-container *ngIf="!authService.isAuthenticated(); else userMenu">
+          <a routerLink="/login" class="btn btn-primary">Login</a>
+          <a routerLink="/register" class="btn btn-outline">Register</a>
+        </ng-container>
+
+        <ng-template #userMenu>
+          <div class="relative">
+            <button class="flex items-center space-x-2 text-gray-700 hover:text-primary-600 focus:outline-none">
+              <span class="text-sm font-medium">{{ authService.getCurrentUser()?.firstName }} {{ authService.getCurrentUser()?.lastName }}</span>
+              <span class="text-xs text-gray-500">({{ authService.getUserRole() }})</span>
+            </button>
+          </div>
+          <button (click)="logout()" class="btn btn-outline">Logout</button>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <router-outlet></router-outlet>
+</main>
+
+<footer class="bg-gray-800 text-white mt-auto">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div>
+        <h3 class="text-lg font-semibold mb-4">CareSync</h3>
+        <p class="text-gray-300">Making healthcare management simple, efficient, and patient-centered.</p>
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+        <ul class="space-y-2">
+          <li><a href="#" class="text-gray-300 hover:text-white">Privacy Policy</a></li>
+          <li><a href="#" class="text-gray-300 hover:text-white">Terms of Service</a></li>
+          <li><a href="#" class="text-gray-300 hover:text-white">Contact Us</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold mb-4">Support</h3>
+        <ul class="space-y-2">
+          <li><a href="#" class="text-gray-300 hover:text-white">Help Center</a></li>
+          <li><a href="#" class="text-gray-300 hover:text-white">FAQs</a></li>
+          <li><a href="#" class="text-gray-300 hover:text-white">Report Issue</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
+      <p>&copy; 2024 CareSync. All rights reserved.</p>
+    </div>
+  </div>
+</footer>

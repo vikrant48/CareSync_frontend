@@ -1,0 +1,199 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center">
+    <h1 class="text-3xl font-bold text-gray-900">Patient Dashboard</h1>
+    <div class="flex space-x-3">
+      <button class="btn btn-primary">Book Appointment</button>
+      <button class="btn btn-outline">View Profile</button>
+    </div>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="card">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+            <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500">Upcoming Appointments</p>
+          <p class="text-2xl font-semibold text-gray-900">{{ upcomingAppointments.length }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-secondary-100 rounded-full flex items-center justify-center">
+            <svg class="w-5 h-5 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500">Completed Appointments</p>
+          <p class="text-2xl font-semibold text-gray-900">{{ getCompletedAppointmentsCount() }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-accent-100 rounded-full flex items-center justify-center">
+            <svg class="w-5 h-5 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500">Health Status</p>
+          <p class="text-2xl font-semibold text-gray-900">{{ getHealthStatus() }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upcoming Appointments -->
+  <div class="card">
+    <h2 class="text-xl font-semibold text-gray-900 mb-4">Upcoming Appointments</h2>
+    
+    <div *ngIf="loading" class="flex justify-center py-8">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+    </div>
+
+    <div *ngIf="!loading && upcomingAppointments.length === 0" class="text-center py-8">
+      <p class="text-gray-500">No upcoming appointments scheduled.</p>
+      <button class="btn btn-primary mt-4">Book Your First Appointment</button>
+    </div>
+
+    <div *ngIf="!loading && upcomingAppointments.length > 0" class="space-y-4">
+      <div *ngFor="let appointment of upcomingAppointments" class="border border-gray-200 rounded-lg p-4">
+        <div class="flex justify-between items-start">
+          <div class="flex-1">
+            <h3 class="text-lg font-medium text-gray-900">
+              Dr. {{ appointment.doctor?.firstName }} {{ appointment.doctor?.lastName }}
+            </h3>
+            <p class="text-sm text-gray-600">{{ appointment.appointmentDateTime | date:'short' }}</p>
+            <p class="text-sm text-gray-500">{{ appointment.doctor?.specialization }}</p>
+            <p class="text-sm text-gray-500">{{ appointment.reason }}</p>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  [ngClass]="{
+                    'bg-yellow-100 text-yellow-800': appointment.status === AppointmentStatus.PENDING,
+                    'bg-blue-100 text-blue-800': appointment.status === AppointmentStatus.CONFIRMED,
+                    'bg-green-100 text-green-800': appointment.status === AppointmentStatus.COMPLETED,
+                    'bg-red-100 text-red-800': appointment.status === AppointmentStatus.CANCELLED
+                  }">
+              {{ appointment.status }}
+            </span>
+          </div>
+          <div class="flex space-x-2">
+            <button class="btn btn-outline text-sm">View Details</button>
+            <button *ngIf="appointment.status !== AppointmentStatus.COMPLETED && appointment.status !== AppointmentStatus.CANCELLED"
+                    (click)="cancelAppointment(appointment.id)"
+                    class="btn btn-outline text-sm">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Past Appointments -->
+  <div class="card">
+    <h2 class="text-xl font-semibold text-gray-900 mb-4">Past Appointments</h2>
+    
+    <div *ngIf="pastAppointments.length === 0" class="text-center py-8">
+      <p class="text-gray-500">No past appointments found.</p>
+    </div>
+
+    <div *ngIf="pastAppointments.length > 0" class="space-y-4">
+      <div *ngFor="let appointment of pastAppointments" class="border border-gray-200 rounded-lg p-4">
+        <div class="flex justify-between items-start">
+          <div class="flex-1">
+            <h3 class="text-lg font-medium text-gray-900">
+              Dr. {{ appointment.doctor?.firstName }} {{ appointment.doctor?.lastName }}
+            </h3>
+            <p class="text-sm text-gray-600">{{ appointment.appointmentDateTime | date:'short' }}</p>
+            <p class="text-sm text-gray-500">{{ appointment.doctor?.specialization }}</p>
+            <p class="text-sm text-gray-500">{{ appointment.reason }}</p>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  [ngClass]="{
+                    'bg-green-100 text-green-800': appointment.status === AppointmentStatus.COMPLETED,
+                    'bg-red-100 text-red-800': appointment.status === AppointmentStatus.CANCELLED,
+                    'bg-gray-100 text-gray-800': appointment.status === AppointmentStatus.RESCHEDULED
+                  }">
+              {{ appointment.status }}
+            </span>
+          </div>
+          <div class="flex space-x-2">
+            <button class="btn btn-outline text-sm">View Details</button>
+            <button *ngIf="appointment.status === AppointmentStatus.COMPLETED" class="btn btn-outline text-sm">Leave Feedback</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="card">
+    <h2 class="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <button class="btn btn-outline text-left p-4">
+        <div class="flex items-center">
+          <svg class="w-6 h-6 text-primary-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          <span>Book Appointment</span>
+        </div>
+      </button>
+      
+      <button class="btn btn-outline text-left p-4">
+        <div class="flex items-center">
+          <svg class="w-6 h-6 text-secondary-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+          </svg>
+          <span>View Profile</span>
+        </div>
+      </button>
+      
+      <button class="btn btn-outline text-left p-4">
+        <div class="flex items-center">
+          <svg class="w-6 h-6 text-accent-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <span>Medical History</span>
+        </div>
+      </button>
+      
+      <button class="btn btn-outline text-left p-4">
+        <div class="flex items-center">
+          <svg class="w-6 h-6 text-gray-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <span>Find Doctors</span>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="bg-red-50 border border-red-200 rounded-md p-4">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <div class="ml-3">
+        <p class="text-sm text-red-800">{{ errorMessage }}</p>
+      </div>
+    </div>
+  </div>
+</div>
