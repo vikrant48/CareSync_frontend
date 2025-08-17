@@ -38,60 +38,7 @@ import { UserRole } from '../../models/user.model';
     MatStepperModule
   ],
   templateUrl: './register.component.html',
-  styles: [`
-    :host {
-      display: block;
-      min-height: 100vh;
-    }
-    
-    mat-card {
-      border-radius: 16px;
-    }
-    
-    .role-option:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-    }
-    
-    .role-option {
-      transition: all 0.3s ease;
-      border-width: 2px;
-    }
-    
-    mat-form-field {
-      margin-bottom: 0;
-    }
-    
-    .mat-mdc-form-field {
-      width: 100%;
-    }
-    
-    .mat-mdc-raised-button {
-      border-radius: 8px;
-    }
-
-    ::ng-deep .mat-step-header {
-      padding: 16px;
-      border-radius: 8px;
-      transition: background-color 0.3s ease;
-    }
-
-    ::ng-deep .mat-step-header:hover {
-      background-color: rgba(0, 0, 0, 0.04);
-    }
-
-    ::ng-deep .mat-step-header .mat-step-icon {
-      transition: transform 0.3s ease;
-    }
-
-    ::ng-deep .mat-step-header:hover .mat-step-icon {
-      transform: scale(1.1);
-    }
-
-    ::ng-deep .mat-horizontal-stepper-header-container {
-      margin-bottom: 24px;
-    }
-  `]
+  styleUrls: ['./register.component.css']
 })
 export class RegisterComponent implements OnInit {
   UserRole = UserRole;
