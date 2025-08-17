@@ -66,7 +66,7 @@ export const SHARED_ROUTES: Routes = [
       },
       {
         path: 'submit',
-        loadComponent: () => import('./feedback/submit-feedback/submit-feedback.component').then(m => m.SubmitFeedbackComponent),
+        loadComponent: () => import('./feedback/submit-feedback.component').then(m => m.SubmitFeedbackComponent),
         title: 'Submit Feedback - CareSync'
       }
     ]
@@ -76,7 +76,7 @@ export const SHARED_ROUTES: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () => import('./files/shared-files.component').then(m => m.SharedFilesComponent),
+        loadComponent: () => import('./files/file-list/file-list.component').then(m => m.FileListComponent),
         title: 'Files - CareSync'
       },
       {

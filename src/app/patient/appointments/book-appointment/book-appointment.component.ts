@@ -16,8 +16,15 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { MatChipsModule } from '@angular/material/chips';
 import { AppointmentService } from '../../../services/appointment.service';
 import { DoctorService } from '../../../services/doctor.service';
-import { AppointmentCreate, AvailableSlot, AppointmentSlot } from '../../../models/appointment.model';
+import { AppointmentCreate, AvailableSlot as ApiAvailableSlot } from '../../../models/appointment.model';
 import { Doctor } from '../../../models/user.model';
+
+// Local interface for time slots that matches the component usage
+interface AvailableSlot {
+  startTime: string;
+  endTime: string;
+  isAvailable: boolean;
+}
 
 @Component({
   selector: 'app-book-appointment',
@@ -500,8 +507,8 @@ export class BookAppointmentComponent implements OnInit {
   doctors: Doctor[] = [];
   selectedDoctor: Doctor | null = null;
   selectedDate: Date | null = null;
-  selectedSlot: AppointmentSlot | null = null;
-  availableSlots: AppointmentSlot[] = [];
+  selectedSlot: AvailableSlot | null = null;
+  availableSlots: AvailableSlot[] = [];
   
   isLoadingDoctors = false;
   isBooking = false;
@@ -566,11 +573,23 @@ export class BookAppointmentComponent implements OnInit {
 
   loadAvailableSlots(): void {
     if (!this.selectedDoctor || !this.selectedDate) return;
-    
     const dateString = this.selectedDate.toISOString().split('T')[0];
     this.appointmentService.getAvailableSlots(this.selectedDoctor.id, dateString).subscribe({
-      next: (availableSlot) => {
-        this.availableSlots = availableSlot.slots.filter(slot => slot.isAvailable);
+      next: (response: ApiAvailableSlot) => {
+        // Transform the API response to match our local interface
+        if (response && response.timeSlots) {
+          this.availableSlots = response.timeSlots.map(timeSlot => {
+            // Parse the time slot string (assuming format like "09:00-10:00")
+            const [startTime, endTime] = timeSlot.split('-');
+            return {
+              startTime: startTime.trim(),
+              endTime: endTime.trim(),
+              isAvailable: true
+            };
+          });
+        } else {
+          this.availableSlots = [];
+        }
       },
       error: (error) => {
         console.error('Error loading available slots:', error);
@@ -579,7 +598,7 @@ export class BookAppointmentComponent implements OnInit {
     });
   }
 
-  selectTimeSlot(slot: AppointmentSlot): void {
+  selectTimeSlot(slot: AvailableSlot): void {
     this.selectedSlot = slot;
   }
 

@@ -15,6 +15,7 @@ export interface MedicalHistory {
 
 export interface MedicalHistoryCreate {
   patientId: number;
+  doctorId?: number;
   visitDate: string;
   symptoms: string;
   diagnosis: string;
@@ -23,6 +24,8 @@ export interface MedicalHistoryCreate {
   prescription?: string;
   followUpDate?: string;
 }
+
+export interface MedicalHistoryUpdate extends MedicalHistoryCreate {}
 
 export interface MedicalHistoryUpdate {
   patientId: number;

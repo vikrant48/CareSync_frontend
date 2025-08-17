@@ -40,7 +40,7 @@ export class FileUploadService {
     if (uploadRequest.tags) formData.append('tags', uploadRequest.tags.join(','));
     if (uploadRequest.customFields) {
       Object.keys(uploadRequest.customFields).forEach(key => {
-        formData.append(`customFields.${key}`, uploadRequest.customFields[key]);
+        formData.append(`customFields.${key}`, uploadRequest.customFields![key]);
       });
     }
 
@@ -57,7 +57,7 @@ export class FileUploadService {
     if (uploadRequest.tags) formData.append('tags', uploadRequest.tags.join(','));
     if (uploadRequest.customFields) {
       Object.keys(uploadRequest.customFields).forEach(key => {
-        formData.append(`customFields.${key}`, uploadRequest.customFields[key]);
+        formData.append(`customFields.${key}`, uploadRequest.customFields![key]);
       });
     }
 
@@ -68,7 +68,7 @@ export class FileUploadService {
       map((event: HttpEvent<any>) => {
         switch (event.type) {
           case HttpEventType.UploadProgress:
-            const progress = Math.round(100 * event.loaded / event.total);
+            const progress = Math.round(100 * event.loaded / (event.total || event.loaded));
             return {
               loaded: event.loaded,
               total: event.total,
@@ -77,8 +77,8 @@ export class FileUploadService {
             } as FileUploadProgress;
           case HttpEventType.Response:
             return {
-              loaded: event.total,
-              total: event.total,
+              loaded: event.body?.total || 0,
+              total: event.body?.total || 0,
               percentage: 100,
               fileName: uploadRequest.file.name
             } as FileUploadProgress;

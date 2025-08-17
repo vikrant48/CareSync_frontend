@@ -40,15 +40,23 @@ export class AppointmentService {
   }
 
   getPatientUpcomingAppointments(): Observable<Appointment[]> {
-    return this.http.get<Appointment[]>(`${this.baseUrl}/patient/my-appointments/upcoming`);
+    return this.http.get<Appointment[]>(`${this.baseUrl}/patient/upcoming`);
   }
 
   updatePatientAppointment(id: number, appointment: AppointmentUpdate): Observable<Appointment> {
     return this.http.put<Appointment>(`${this.baseUrl}/patient/${id}`, appointment);
   }
 
-  cancelPatientAppointment(id: number): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/patient/${id}`);
+  reschedulePatientAppointment(id: number, newDateTime: string): Observable<Appointment> {
+    return this.http.put<Appointment>(`${this.baseUrl}/patient/${id}/reschedule`, { appointmentDateTime: newDateTime });
+  }
+
+  cancelPatientAppointment(id: number, reason?: string): Observable<any> {
+    let params = new HttpParams();
+    if (reason) {
+      params = params.set('reason', reason);
+    }
+    return this.http.delete(`${this.baseUrl}/patient/${id}`, { params });
   }
 
   // Doctor Appointment Management

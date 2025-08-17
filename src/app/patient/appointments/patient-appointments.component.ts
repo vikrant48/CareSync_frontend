@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -95,12 +95,12 @@ import { Appointment, AppointmentStatus } from '../../models/appointment.model';
                           View Details
                         </button>
                         <button mat-menu-item (click)="rescheduleAppointment(appointment)" 
-                                *ngIf="appointment.status === AppointmentStatus.SCHEDULED">
+                                *ngIf="appointment.status === AppointmentStatus.SCHEDULED || appointment.status === AppointmentStatus.CONFIRMED || appointment.status === AppointmentStatus.PENDING">
                           <mat-icon>schedule</mat-icon>
                           Reschedule
                         </button>
                         <button mat-menu-item (click)="cancelAppointment(appointment)"
-                                *ngIf="appointment.status === AppointmentStatus.SCHEDULED">
+                                *ngIf="appointment.status === AppointmentStatus.SCHEDULED || appointment.status === AppointmentStatus.CONFIRMED || appointment.status === AppointmentStatus.PENDING">
                           <mat-icon>cancel</mat-icon>
                           Cancel
                         </button>
@@ -335,7 +335,8 @@ export class PatientAppointmentsComponent implements OnInit {
   constructor(
     private appointmentService: AppointmentService,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -394,19 +395,25 @@ export class PatientAppointmentsComponent implements OnInit {
   }
 
   viewAppointment(appointment: Appointment): void {
-    console.log('View appointment:', appointment);
+    this.router.navigate([`/patient/appointments/${appointment.id}`]);
   }
 
   rescheduleAppointment(appointment: Appointment): void {
-    console.log('Reschedule appointment:', appointment);
+    this.router.navigate([`/patient/appointments/${appointment.id}/reschedule`]);
   }
 
   cancelAppointment(appointment: Appointment): void {
-    console.log('Cancel appointment:', appointment);
+    this.router.navigate([`/patient/appointments/${appointment.id}/cancel`]);
   }
 
   bookFollowUp(appointment: Appointment): void {
-    console.log('Book follow-up with:', appointment.doctor);
+    if (appointment.doctor) {
+      this.router.navigate(['/patient/appointments/book'], {
+        queryParams: { doctorId: appointment.doctor.id }
+      });
+    } else {
+      this.showErrorMessage('Doctor information not available for follow-up booking.');
+    }
   }
 
   private showErrorMessage(message: string): void {

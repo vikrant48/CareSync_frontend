@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -13,7 +13,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatStepperModule } from '@angular/material/stepper';
+import { MatStepperModule, MatStepper } from '@angular/material/stepper';
 
 import { AuthService } from '../../services/auth.service';
 import { UserRole } from '../../models/user.model';
@@ -42,7 +42,7 @@ import { UserRole } from '../../models/user.model';
       <div class="max-w-2xl w-full">
         <!-- Logo and Title -->
         <div class="text-center mb-8">
-          <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4 shadow-lg transform hover:scale-105 transition-transform duration-300">
             <mat-icon class="text-white text-2xl">medical_services</mat-icon>
           </div>
           <h1 class="text-3xl font-bold text-gray-900 mb-2">Join CareSync</h1>
@@ -50,9 +50,9 @@ import { UserRole } from '../../models/user.model';
         </div>
 
         <!-- Registration Form -->
-        <mat-card class="shadow-xl">
+        <mat-card class="shadow-xl rounded-xl overflow-hidden">
           <mat-card-content class="p-8">
-            <mat-stepper #stepper [linear]="true" class="w-full">
+            <mat-stepper #stepper [linear]="true" class="w-full" [selectedIndex]="0">
               <!-- Step 1: Basic Information -->
               <mat-step [stepControl]="basicInfoForm" label="Basic Information">
                 <form [formGroup]="basicInfoForm" class="space-y-6">
@@ -100,9 +100,13 @@ import { UserRole } from '../../models/user.model';
                     </mat-error>
                   </mat-form-field>
 
-                  <div class="flex justify-end">
-                    <button mat-raised-button color="primary" (click)="nextStep()" [disabled]="basicInfoForm.invalid">
-                      Next
+                  <div class="flex justify-between mt-6">
+                    <button mat-button disabled class="opacity-0">
+                      <mat-icon>arrow_back</mat-icon>
+                      Back
+                    </button>
+                    <button mat-raised-button color="primary" (click)="nextStep()" [disabled]="basicInfoForm.invalid" class="px-6 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
+                      <span class="mr-2">Next</span>
                       <mat-icon>arrow_forward</mat-icon>
                     </button>
                   </div>
@@ -177,13 +181,13 @@ import { UserRole } from '../../models/user.model';
                     </mat-form-field>
                   </div>
 
-                  <div class="flex justify-between">
-                    <button mat-button (click)="previousStep()">
-                      <mat-icon>arrow_back</mat-icon>
-                      Back
+                  <div class="flex justify-between mt-6">
+                    <button mat-button (click)="previousStep()" class="px-6 py-2 rounded-lg hover:bg-gray-100 transition-all duration-300">
+                      <mat-icon class="mr-2">arrow_back</mat-icon>
+                      <span>Back</span>
                     </button>
-                    <button mat-raised-button color="primary" (click)="nextStep()" [disabled]="accountForm.invalid">
-                      Next
+                    <button mat-raised-button color="primary" (click)="nextStep()" [disabled]="accountForm.invalid" class="px-6 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
+                      <span class="mr-2">Next</span>
                       <mat-icon>arrow_forward</mat-icon>
                     </button>
                   </div>
@@ -201,63 +205,63 @@ import { UserRole } from '../../models/user.model';
                   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <!-- Patient Role -->
                     <div 
-                      class="role-option p-6 border-2 rounded-lg cursor-pointer transition-all"
+                      class="role-option p-6 border-2 rounded-xl cursor-pointer transition-all shadow-sm hover:shadow-xl"
                       [class.border-blue-500]="roleForm.get('role')?.value === 'PATIENT'"
                       [class.bg-blue-50]="roleForm.get('role')?.value === 'PATIENT'"
                       [class.border-gray-200]="roleForm.get('role')?.value !== 'PATIENT'"
-                                             (click)="selectRole(UserRole.PATIENT)"
+                      (click)="selectRole(UserRole.PATIENT)"
                     >
                       <div class="text-center">
-                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <mat-icon class="text-blue-600 text-2xl">person</mat-icon>
+                        <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 transform transition-transform duration-500 hover:rotate-12">
+                          <mat-icon class="text-blue-600 text-3xl">person</mat-icon>
                         </div>
-                        <h4 class="font-medium text-gray-900 mb-2">Patient</h4>
+                        <h4 class="font-semibold text-gray-900 mb-2 text-lg">Patient</h4>
                         <p class="text-sm text-gray-600">I want to book appointments and manage my health</p>
                       </div>
                     </div>
 
                     <!-- Doctor Role -->
                     <div 
-                      class="role-option p-6 border-2 rounded-lg cursor-pointer transition-all"
+                      class="role-option p-6 border-2 rounded-xl cursor-pointer transition-all shadow-sm hover:shadow-xl"
                       [class.border-green-500]="roleForm.get('role')?.value === 'DOCTOR'"
                       [class.bg-green-50]="roleForm.get('role')?.value === 'DOCTOR'"
                       [class.border-gray-200]="roleForm.get('role')?.value !== 'DOCTOR'"
-                                             (click)="selectRole(UserRole.DOCTOR)"
+                      (click)="selectRole(UserRole.DOCTOR)"
                     >
                       <div class="text-center">
-                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <mat-icon class="text-green-600 text-2xl">medical_services</mat-icon>
+                        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 transform transition-transform duration-500 hover:rotate-12">
+                          <mat-icon class="text-green-600 text-3xl">medical_services</mat-icon>
                         </div>
-                        <h4 class="font-medium text-gray-900 mb-2">Doctor</h4>
+                        <h4 class="font-semibold text-gray-900 mb-2 text-lg">Doctor</h4>
                         <p class="text-sm text-gray-600">I provide medical services and manage patients</p>
                       </div>
                     </div>
 
                     <!-- Admin Role -->
                     <div 
-                      class="role-option p-6 border-2 rounded-lg cursor-pointer transition-all"
+                      class="role-option p-6 border-2 rounded-xl cursor-pointer transition-all shadow-sm hover:shadow-xl"
                       [class.border-purple-500]="roleForm.get('role')?.value === 'ADMIN'"
                       [class.bg-purple-50]="roleForm.get('role')?.value === 'ADMIN'"
                       [class.border-gray-200]="roleForm.get('role')?.value !== 'ADMIN'"
-                                             (click)="selectRole(UserRole.ADMIN)"
+                      (click)="selectRole(UserRole.ADMIN)"
                     >
                       <div class="text-center">
-                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <mat-icon class="text-purple-600 text-2xl">admin_panel_settings</mat-icon>
+                        <div class="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 transform transition-transform duration-500 hover:rotate-12">
+                          <mat-icon class="text-purple-600 text-3xl">admin_panel_settings</mat-icon>
                         </div>
-                        <h4 class="font-medium text-gray-900 mb-2">Admin</h4>
+                        <h4 class="font-semibold text-gray-900 mb-2 text-lg">Admin</h4>
                         <p class="text-sm text-gray-600">I manage the system and user accounts</p>
                       </div>
                     </div>
                   </div>
 
-                  <div class="flex justify-between">
-                    <button mat-button (click)="previousStep()">
-                      <mat-icon>arrow_back</mat-icon>
-                      Back
+                  <div class="flex justify-between mt-6">
+                    <button mat-button (click)="previousStep()" class="px-6 py-2 rounded-lg hover:bg-gray-100 transition-all duration-300">
+                      <mat-icon class="mr-2">arrow_back</mat-icon>
+                      <span>Back</span>
                     </button>
-                    <button mat-raised-button color="primary" (click)="nextStep()" [disabled]="roleForm.invalid">
-                      Next
+                    <button mat-raised-button color="primary" (click)="nextStep()" [disabled]="roleForm.invalid" class="px-6 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
+                      <span class="mr-2">Next</span>
                       <mat-icon>arrow_forward</mat-icon>
                     </button>
                   </div>
@@ -286,6 +290,18 @@ import { UserRole } from '../../models/user.model';
                       <mat-label>Years of Experience</mat-label>
                       <input matInput type="number" formControlName="yearsOfExperience" placeholder="Number of years">
                       <mat-icon matSuffix>schedule</mat-icon>
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Date of Birth</mat-label>
+                      <input matInput type="date" formControlName="dateOfBirth">
+                      <mat-icon matSuffix>cake</mat-icon>
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Contact Information</mat-label>
+                      <input matInput formControlName="contactInfo" placeholder="Alternative contact information">
+                      <mat-icon matSuffix>contact_phone</mat-icon>
                     </mat-form-field>
                   </div>
 
@@ -320,14 +336,16 @@ import { UserRole } from '../../models/user.model';
                     </mat-checkbox>
                   </div>
 
-                  <div class="flex justify-between">
-                    <button mat-button (click)="previousStep()">
-                      <mat-icon>arrow_back</mat-icon>
-                      Back
+                  <div class="flex justify-between mt-6">
+                    <button mat-button (click)="previousStep()" class="px-6 py-2 rounded-lg hover:bg-gray-100 transition-all duration-300">
+                      <mat-icon class="mr-2">arrow_back</mat-icon>
+                      <span>Back</span>
                     </button>
-                    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="additionalForm.invalid || isLoading">
-                      <mat-spinner *ngIf="isLoading" diameter="20" class="mr-2"></mat-spinner>
-                      {{ isLoading ? 'Creating Account...' : 'Create Account' }}
+                    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="additionalForm.invalid || isLoading" class="px-6 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
+                      <div class="flex items-center justify-center">
+                        <mat-spinner *ngIf="isLoading" diameter="20" class="mr-2"></mat-spinner>
+                        <span>{{ isLoading ? 'Creating Account...' : 'Create Account' }}</span>
+                      </div>
                     </button>
                   </div>
                 </form>
@@ -359,12 +377,13 @@ import { UserRole } from '../../models/user.model';
     }
     
     .role-option:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
     }
     
     .role-option {
-      transition: all 0.2s ease;
+      transition: all 0.3s ease;
+      border-width: 2px;
     }
     
     mat-form-field {
@@ -377,6 +396,28 @@ import { UserRole } from '../../models/user.model';
     
     .mat-mdc-raised-button {
       border-radius: 8px;
+    }
+
+    ::ng-deep .mat-step-header {
+      padding: 16px;
+      border-radius: 8px;
+      transition: background-color 0.3s ease;
+    }
+
+    ::ng-deep .mat-step-header:hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    ::ng-deep .mat-step-header .mat-step-icon {
+      transition: transform 0.3s ease;
+    }
+
+    ::ng-deep .mat-step-header:hover .mat-step-icon {
+      transform: scale(1.1);
+    }
+
+    ::ng-deep .mat-horizontal-stepper-header-container {
+      margin-bottom: 24px;
     }
   `]
 })
@@ -429,6 +470,7 @@ export class RegisterComponent implements OnInit {
       licenseNumber: [''],
       yearsOfExperience: [''],
       dateOfBirth: [''],
+      contactInfo: [''],
       emergencyContact: [''],
       address: ['', Validators.required],
       termsAccepted: [false, Validators.requiredTrue]
@@ -445,12 +487,18 @@ export class RegisterComponent implements OnInit {
     return null;
   }
 
+  @ViewChild('stepper') stepper!: MatStepper;
+
   nextStep(): void {
-    // This will be handled by the stepper
+    if (this.stepper) {
+      this.stepper.next();
+    }
   }
 
   previousStep(): void {
-    // This will be handled by the stepper
+    if (this.stepper) {
+      this.stepper.previous();
+    }
   }
 
   selectRole(role: UserRole): void {

@@ -23,6 +23,8 @@ export interface Doctor extends User {
   role: UserRole.DOCTOR;
   specialization: string;
   licenseNumber?: string;
+  dateOfBirth?: string;
+  contactInfo?: string;
   education: Education[];
   experience: Experience[];
   certificates: Certificate[];
@@ -185,6 +187,7 @@ export interface RegisterRequest {
   address: string;
   specialization?: string;
   dateOfBirth?: string;
+  contactInfo?: string;
   emergencyContact?: string;
 }
 

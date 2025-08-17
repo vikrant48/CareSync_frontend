@@ -494,7 +494,7 @@ export class AdvancedAnalyticsComponent implements OnInit, OnDestroy {
     const ctx = document.getElementById('profitMarginsChart') as HTMLCanvasElement;
     if (ctx) {
       this.profitMarginsChart = new Chart(ctx, {
-        type: 'horizontalBar',
+        type: 'bar',
         data: {
           labels: ['Consultations', 'Procedures', 'Medications', 'Lab Tests'],
           datasets: [{

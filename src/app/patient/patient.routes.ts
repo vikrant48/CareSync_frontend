@@ -29,11 +29,21 @@ export const PATIENT_ROUTES: Routes = [
         loadComponent: () => import('./appointments/book-appointment/book-appointment.component').then(m => m.BookAppointmentComponent),
         title: 'Book Appointment - CareSync'
       },
-      // {
-      //   path: ':id',
-      //   loadComponent: () => import('./appointments/appointment-details/appointment-details.component').then(m => m.AppointmentDetailsComponent),
-      //   title: 'Appointment Details - CareSync'
-      // }
+      {
+        path: ':id',
+        loadComponent: () => import('./appointments/appointment-details/appointment-details.component').then(m => m.AppointmentDetailsComponent),
+        title: 'Appointment Details - CareSync'
+      },
+      {
+        path: ':id/reschedule',
+        loadComponent: () => import('./appointments/reschedule-appointment/reschedule-appointment.component').then(m => m.RescheduleAppointmentComponent),
+        title: 'Reschedule Appointment - CareSync'
+      },
+      {
+        path: ':id/cancel',
+        loadComponent: () => import('./appointments/cancel-appointment/cancel-appointment.component').then(m => m.CancelAppointmentComponent),
+        title: 'Cancel Appointment - CareSync'
+      }
     ]
   },
   // {

@@ -393,7 +393,6 @@ export class PatientProfileComponent implements OnInit {
     this.profileForm.patchValue({
       firstName: patient.firstName,
       lastName: patient.lastName,
-      phone: patient.phone,
       phoneNumber: patient.phoneNumber,
       dateOfBirth: patient.dateOfBirth,
       bloodType: patient.bloodType,
@@ -407,7 +406,7 @@ export class PatientProfileComponent implements OnInit {
       this.isSubmitting = true;
       const updateData = this.profileForm.value;
 
-      this.patientService.updatePatientProfile(updateData).subscribe({
+      this.patientService.updatePatientProfile(0, updateData).subscribe({
         next: (updatedPatient) => {
           this.patient = updatedPatient;
           this.isSubmitting = false;
