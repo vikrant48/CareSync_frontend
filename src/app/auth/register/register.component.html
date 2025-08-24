@@ -66,16 +66,16 @@
                   placeholder="Enter your email"
                 />
                 <mat-icon matSuffix>email</mat-icon>
-                <mat-error
-                  *ngIf="basicInfoForm.get('email')?.hasError('required')"
-                >
-                  Email is required
-                </mat-error>
-                <mat-error
-                  *ngIf="basicInfoForm.get('email')?.hasError('email')"
-                >
-                  Please enter a valid email
-                </mat-error>
+                @if (basicInfoForm.get('email')?.hasError('required')) {
+                  <mat-error>
+                    Email is required
+                  </mat-error>
+                }
+                @if (basicInfoForm.get('email')?.hasError('email')) {
+                  <mat-error>
+                    Please enter a valid email
+                  </mat-error>
+                }
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="w-full">
@@ -86,16 +86,16 @@
                   placeholder="Enter your phone number"
                 />
                 <mat-icon matSuffix>phone</mat-icon>
-                <mat-error
-                  *ngIf="basicInfoForm.get('phoneNumber')?.hasError('required')"
-                >
-                  Phone number is required
-                </mat-error>
-                <mat-error
-                  *ngIf="basicInfoForm.get('phoneNumber')?.hasError('pattern')"
-                >
-                  Please enter a valid phone number
-                </mat-error>
+                @if (basicInfoForm.get('phoneNumber')?.hasError('required')) {
+                  <mat-error>
+                    Phone number is required
+                  </mat-error>
+                }
+                @if (basicInfoForm.get('phoneNumber')?.hasError('pattern')) {
+                  <mat-error>
+                    Please enter a valid phone number
+                  </mat-error>
+                }
               </mat-form-field>
 
               <div class="flex justify-between mt-6">
@@ -176,6 +176,9 @@
                     lowercase letter, and one number
                   </mat-error>
                 </mat-form-field>
+                
+                <!-- Password Strength Meter -->
+                <app-password-strength [password]="accountForm.get('password')?.value || ''"></app-password-strength>
 
                 <mat-form-field appearance="outline" class="w-full">
                   <mat-label>Confirm Password</mat-label>

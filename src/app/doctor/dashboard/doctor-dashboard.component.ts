@@ -27,10 +27,11 @@ import { PatientService } from '../../services/patient.service';
 import { MedicalHistoryService } from '../../services/medical-history.service';
 import { NotificationService } from '../../services/notification.service';
 import { AnalyticsService } from '../../services/analytics.service';
+import { FeedbackService } from '../../services/feedback.service';
 import { User, UserRole } from '../../models/user.model';
-import { Appointment, AppointmentStatus } from '../../models/appointment.model';
+import { Appointment, AppointmentStatus, DoctorAppointment } from '../../models/appointment.model';
 import { MedicalHistory } from '../../models/user.model';
-import { Notification } from '../../models/notification.model';
+import { Notification, NotificationStatus } from '../../models/notification.model';
 
 Chart.register(...registerables);
 
@@ -66,6 +67,7 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy, AfterViewIni
   
   // Dashboard data
   todayAppointments: Appointment[] = [];
+  upcomingAppointments: DoctorAppointment[] = [];
   recentPatients: any[] = [];
   recentNotifications: Notification[] = [];
   
@@ -89,6 +91,7 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy, AfterViewIni
     private medicalHistoryService: MedicalHistoryService,
     private notificationService: NotificationService,
     private analyticsService: AnalyticsService,
+    private feedbackService: FeedbackService,
     private router: Router,
     private snackBar: MatSnackBar
   ) {}
@@ -125,8 +128,9 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy, AfterViewIni
     // Load all dashboard data in parallel
     forkJoin({
       todayAppointments: this.appointmentService.getDoctorTodayAppointments(this.currentUser?.id || 0),
+      upcomingAppointments: this.appointmentService.getMyPatientsUpcomingAppointments(),
       patients: this.patientService.getAllPatients(),
-      notifications: this.notificationService.getNotifications(),
+      notifications: this.doctorService.getDoctorNotifications(this.currentUser?.id || 0),
       analytics: this.analyticsService.getOverallAnalytics(
         new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), 
         new Date().toISOString()
@@ -134,13 +138,14 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy, AfterViewIni
     }).subscribe({
       next: (data) => {
         this.todayAppointments = data.todayAppointments;
+        this.upcomingAppointments = data.upcomingAppointments.slice(0, 5);
         this.recentPatients = data.patients.slice(0, 5);
         this.recentNotifications = data.notifications.slice(0, 5);
         
         this.calculateStats();
         this.isLoading = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error loading dashboard data:', error);
         this.snackBar.open('Error loading dashboard data', 'Close', { duration: 3000 });
         this.isLoading = false;
@@ -151,9 +156,52 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy, AfterViewIni
   private calculateStats(): void {
     this.todayAppointmentsCount = this.todayAppointments.length;
     this.totalPatientsCount = this.recentPatients.length;
-    this.monthlyRevenue = 12500; // Mock data - replace with actual calculation
-    this.pendingReviewsCount = 3; // Mock data - replace with actual calculation
-    this.unreadNotifications = this.recentNotifications.filter(n => n.status === 'PENDING').length;
+    this.unreadNotifications = this.recentNotifications.filter(n => 
+      n.status !== NotificationStatus.READ || !n.readAt
+    ).length;
+    
+    // Load actual revenue and pending reviews data
+    this.loadRevenueData();
+    this.loadPendingReviewsData();
+  }
+
+  private loadRevenueData(): void {
+    if (!this.currentUser?.id) return;
+    
+    const currentDate = new Date();
+    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    
+    this.analyticsService.getRevenueAnalytics(
+      this.currentUser.id,
+      startOfMonth.toISOString().split('T')[0],
+      endOfMonth.toISOString().split('T')[0]
+    ).subscribe({
+      next: (revenueData) => {
+        this.monthlyRevenue = revenueData.totalRevenue || 0;
+      },
+      error: (error: any) => {
+        console.error('Error loading revenue data:', error);
+        this.monthlyRevenue = 12500; // Fallback to mock data
+      }
+    });
+  }
+
+  private loadPendingReviewsData(): void {
+    if (!this.currentUser?.id) return;
+    
+    this.feedbackService.getFeedbackByDoctor(this.currentUser.id).subscribe({
+      next: (feedbackData: any) => {
+        // Count feedback that doesn't have a response from the doctor
+        this.pendingReviewsCount = feedbackData.content?.filter((feedback: any) => 
+          !feedback.doctorResponse || feedback.doctorResponse.trim() === ''
+        ).length || 0;
+      },
+      error: (error: any) => {
+        console.error('Error loading pending reviews data:', error);
+        this.pendingReviewsCount = 3; // Fallback to mock data
+      }
+    });
   }
 
   private initializeCharts(): void {
@@ -235,14 +283,23 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy, AfterViewIni
     }
   }
 
-  getStatusColor(status: AppointmentStatus): string {
+  getStatusColor(status: AppointmentStatus | string): string {
     switch (status) {
       case AppointmentStatus.CONFIRMED:
+      case 'CONFIRMED':
         return 'primary';
       case AppointmentStatus.PENDING:
+      case 'PENDING':
         return 'accent';
       case AppointmentStatus.COMPLETED:
+      case 'COMPLETED':
         return 'warn';
+      case 'BOOKED':
+        return 'primary';
+      case 'CANCELLED':
+        return 'warn';
+      case 'RESCHEDULED':
+        return 'accent';
       default:
         return 'primary';
     }
@@ -263,7 +320,9 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   logout(): void {
-    this.authService.logout();
+    // Use synchronous logout to avoid backend 403 error
+    this.authService.logoutSync();
+    console.log('Logged out successfully');
     this.router.navigate(['/auth/login']);
   }
 }

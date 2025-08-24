@@ -86,11 +86,13 @@ import { CommonModule } from '@angular/common';
               <span class="text-xs text-gray-500">{{ feedback.date }}</span>
             </div>
             
-            <div *ngIf="feedback.response" class="mt-3 pl-4 border-l-2 border-gray-200">
-              <p class="text-sm font-medium">Response:</p>
-              <p class="text-sm text-gray-600">{{ feedback.response }}</p>
-              <span class="text-xs text-gray-500">{{ feedback.responseDate }}</span>
-            </div>
+            @if (feedback.response) {
+              <div class="mt-3 pl-4 border-l-2 border-gray-200">
+                <p class="text-sm font-medium">Response:</p>
+                <p class="text-sm text-gray-600">{{ feedback.response }}</p>
+                <span class="text-xs text-gray-500">{{ feedback.responseDate }}</span>
+              </div>
+            }
           </div>
         </div>
       </div>

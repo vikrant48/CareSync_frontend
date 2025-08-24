@@ -46,61 +46,56 @@ export const PATIENT_ROUTES: Routes = [
       }
     ]
   },
-  // {
-  //   path: 'medical-history',
-  //   children: [
-  //     {
-  //       path: '',
-  //       loadComponent: () => import('./medical-history/patient-medical-history.component').then(m => m.PatientMedicalHistoryComponent),
-  //       title: 'Medical History - CareSync'
-  //     },
-  //     {
-  //       path: ':id',
-  //       loadComponent: () => import('./medical-history/medical-history-details/medical-history-details.component').then(m => m.MedicalHistoryDetailsComponent),
-  //       title: 'Medical History Details - CareSync'
-  //     }
-  //   ]
-  // },
-  // {
-  //   path: 'doctors',
-  //   children: [
-  //     {
-  //       path: '',
-  //       loadComponent: () => import('./doctors/patient-doctors.component').then(m => m.PatientDoctorsComponent),
-  //       title: 'Find Doctors - CareSync'
-  //     },
-  //     {
-  //       path: ':id',
-  //       loadComponent: () => import('./doctors/doctor-details/doctor-details.component').then(m => m.DoctorDetailsComponent),
-  //       title: 'Doctor Details - CareSync'
-  //     }
-  //   ]
-  // },
-  // {
-  //   path: 'feedback',
-  //   children: [
-  //     {
-  //       path: '',
-  //       loadComponent: () => import('./feedback/patient-feedback.component').then(m => m.PatientFeedbackComponent),
-  //       title: 'My Feedback - CareSync'
-  //     },
-  //     {
-  //       path: 'submit',
-  //       loadComponent: () => import('./feedback/submit-feedback/submit-feedback.component').then(m => m.SubmitFeedbackComponent),
-  //       title: 'Submit Feedback - CareSync'
-  //     }
-  //   ]
-  // },
-  // {
-  //   path: 'notifications',
-  //   loadComponent: () => import('./notifications/patient-notifications.component').then(m => m.PatientNotificationsComponent),
-  //   title: 'Notifications - CareSync'
-  // },
-  // {
-  //   path: 'settings',
-  //   loadComponent: () => import('./settings/patient-settings.component').then(m => m.PatientSettingsComponent),
-  //   title: 'Settings - CareSync'
-  // },
+  {
+    path: 'medical-history',
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./medical-history/patient-medical-history.component').then(m => m.PatientMedicalHistoryComponent),
+        title: 'Medical History - CareSync'
+      },
+      {
+        path: ':id',
+        loadComponent: () => import('./medical-history/medical-history-details/medical-history-details.component').then(m => m.MedicalHistoryDetailsComponent),
+        title: 'Medical History Details - CareSync'
+      }
+    ]
+  },
+  {
+    path: 'doctors',
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./doctors/patient-doctors.component').then(m => m.PatientDoctorsComponent),
+        title: 'Find Doctors - CareSync'
+      },
+      {
+        path: ':id',
+        loadComponent: () => import('./doctors/doctor-details/doctor-details.component').then(m => m.DoctorDetailsComponent),
+        title: 'Doctor Details - CareSync'
+      }
+    ]
+  },
+  {
+    path: 'feedback',
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./feedback/patient-feedback-list.component').then(m => m.PatientFeedbackListComponent),
+        title: 'My Feedback - CareSync'
+      },
+      {
+        path: 'submit/:appointmentId',
+        loadComponent: () => import('./feedback/patient-feedback-form.component').then(m => m.PatientFeedbackFormComponent),
+        title: 'Submit Feedback - CareSync'
+      }
+    ]
+  },
+  {
+    path: 'settings',
+    loadComponent: () => import('../shared/settings/shared-settings.component').then(m => m.SharedSettingsComponent),
+    title: 'Settings - CareSync'
+  }
   // {
   //   path: 'files',
   //   children: [

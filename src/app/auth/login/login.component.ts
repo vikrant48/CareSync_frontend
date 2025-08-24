@@ -1,6 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -31,25 +36,35 @@ import { LoginRequest } from '../../models/user.model';
     MatProgressSpinnerModule,
     MatCheckboxModule,
     MatDividerModule,
-    MatTooltipModule
+    MatTooltipModule,
   ],
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div
+      class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4"
+    >
       <div class="max-w-md w-full">
         <!-- Logo and Title -->
         <div class="text-center mb-8">
-          <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
+          <div
+            class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4"
+          >
             <mat-icon class="text-white text-2xl">medical_services</mat-icon>
           </div>
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">Welcome to CareSync</h1>
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">
+            Welcome to CareSync
+          </h1>
           <p class="text-gray-600">Sign in to your account</p>
         </div>
 
         <!-- Login Form -->
         <mat-card class="shadow-xl">
           <mat-card-content class="p-8">
-            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
-              <!-- Email Field -->
+            <form
+              [formGroup]="loginForm"
+              (ngSubmit)="onSubmit()"
+              class="space-y-6"
+            >
+              <!-- Email Field
               <mat-form-field appearance="outline" class="w-full">
                 <mat-label>Email</mat-label>
                 <input 
@@ -66,32 +81,56 @@ import { LoginRequest } from '../../models/user.model';
                 <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
                   Please enter a valid email
                 </mat-error>
+              </mat-form-field> -->
+
+              <!-- Username Field -->
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Username</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  formControlName="username"
+                  placeholder="Enter your username"
+                  autocomplete="username"
+                />
+                <mat-icon matSuffix>person</mat-icon>
+                <mat-error
+                  *ngIf="loginForm.get('username')?.hasError('required')"
+                >
+                  Username is required
+                </mat-error>
               </mat-form-field>
 
               <!-- Password Field -->
               <mat-form-field appearance="outline" class="w-full">
                 <mat-label>Password</mat-label>
-                <input 
-                  matInput 
-                  [type]="showPassword ? 'text' : 'password'" 
-                  formControlName="password" 
+                <input
+                  matInput
+                  [type]="showPassword ? 'text' : 'password'"
+                  formControlName="password"
                   placeholder="Enter your password"
                   autocomplete="current-password"
-                >
-                <button 
-                  mat-icon-button 
-                  matSuffix 
+                />
+                <button
+                  mat-icon-button
+                  matSuffix
                   type="button"
                   (click)="togglePasswordVisibility()"
                   [attr.aria-label]="'Hide password'"
                   [attr.aria-pressed]="showPassword"
                 >
-                  <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                  <mat-icon>{{
+                    showPassword ? 'visibility_off' : 'visibility'
+                  }}</mat-icon>
                 </button>
-                <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
+                <mat-error
+                  *ngIf="loginForm.get('password')?.hasError('required')"
+                >
                   Password is required
                 </mat-error>
-                <mat-error *ngIf="loginForm.get('password')?.hasError('minlength')">
+                <mat-error
+                  *ngIf="loginForm.get('password')?.hasError('minlength')"
+                >
                   Password must be at least 6 characters
                 </mat-error>
               </mat-form-field>
@@ -101,8 +140,8 @@ import { LoginRequest } from '../../models/user.model';
                 <mat-checkbox formControlName="rememberMe" color="primary">
                   Remember me
                 </mat-checkbox>
-                <a 
-                  routerLink="/auth/forgot-password" 
+                <a
+                  routerLink="/auth/forgot-password"
                   class="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
                 >
                   Forgot password?
@@ -110,16 +149,16 @@ import { LoginRequest } from '../../models/user.model';
               </div>
 
               <!-- Submit Button -->
-              <button 
-                mat-raised-button 
-                color="primary" 
-                type="submit" 
+              <button
+                mat-raised-button
+                color="primary"
+                type="submit"
                 class="w-full h-12 text-lg font-medium"
                 [disabled]="loginForm.invalid || isLoading"
               >
-                <mat-spinner 
-                  *ngIf="isLoading" 
-                  diameter="20" 
+                <mat-spinner
+                  *ngIf="isLoading"
+                  diameter="20"
                   class="mr-2"
                 ></mat-spinner>
                 {{ isLoading ? 'Signing in...' : 'Sign In' }}
@@ -131,15 +170,17 @@ import { LoginRequest } from '../../models/user.model';
                   <div class="w-full border-t border-gray-300"></div>
                 </div>
                 <div class="relative flex justify-center text-sm">
-                  <span class="px-2 bg-white text-gray-500">Or continue with</span>
+                  <span class="px-2 bg-white text-gray-500"
+                    >Or continue with</span
+                  >
                 </div>
               </div>
 
               <!-- Social Login Buttons -->
               <div class="grid grid-cols-2 gap-4">
-                <button 
-                  mat-outlined-button 
-                  type="button" 
+                <button
+                  mat-outlined-button
+                  type="button"
                   class="h-12"
                   (click)="socialLogin('google')"
                   [disabled]="isLoading"
@@ -147,9 +188,9 @@ import { LoginRequest } from '../../models/user.model';
                   <mat-icon>google</mat-icon>
                   Google
                 </button>
-                <button 
-                  mat-outlined-button 
-                  type="button" 
+                <button
+                  mat-outlined-button
+                  type="button"
                   class="h-12"
                   (click)="socialLogin('facebook')"
                   [disabled]="isLoading"
@@ -162,9 +203,9 @@ import { LoginRequest } from '../../models/user.model';
               <!-- Register Link -->
               <div class="text-center mt-6">
                 <p class="text-gray-600">
-                  Don't have an account? 
-                  <a 
-                    routerLink="/auth/register" 
+                  Don't have an account?
+                  <a
+                    routerLink="/auth/register"
                     class="text-blue-600 hover:text-blue-800 font-medium transition-colors"
                   >
                     Sign up
@@ -179,40 +220,48 @@ import { LoginRequest } from '../../models/user.model';
         <div class="text-center mt-8 text-sm text-gray-500">
           <p>&copy; 2024 CareSync. All rights reserved.</p>
           <div class="mt-2 space-x-4">
-            <a href="#" class="hover:text-gray-700 transition-colors">Privacy Policy</a>
-            <a href="#" class="hover:text-gray-700 transition-colors">Terms of Service</a>
-            <a href="#" class="hover:text-gray-700 transition-colors">Support</a>
+            <a href="#" class="hover:text-gray-700 transition-colors"
+              >Privacy Policy</a
+            >
+            <a href="#" class="hover:text-gray-700 transition-colors"
+              >Terms of Service</a
+            >
+            <a href="#" class="hover:text-gray-700 transition-colors"
+              >Support</a
+            >
           </div>
         </div>
       </div>
     </div>
   `,
-  styles: [`
-    :host {
-      display: block;
-      min-height: 100vh;
-    }
-    
-    mat-card {
-      border-radius: 16px;
-    }
-    
-    mat-form-field {
-      margin-bottom: 0;
-    }
-    
-    .mat-mdc-form-field {
-      width: 100%;
-    }
-    
-    .mat-mdc-raised-button {
-      border-radius: 8px;
-    }
-    
-    .mat-mdc-outlined-button {
-      border-radius: 8px;
-    }
-  `]
+  styles: [
+    `
+      :host {
+        display: block;
+        min-height: 100vh;
+      }
+
+      mat-card {
+        border-radius: 16px;
+      }
+
+      mat-form-field {
+        margin-bottom: 0;
+      }
+
+      .mat-mdc-form-field {
+        width: 100%;
+      }
+
+      .mat-mdc-raised-button {
+        border-radius: 8px;
+      }
+
+      .mat-mdc-outlined-button {
+        border-radius: 8px;
+      }
+    `,
+  ],
 })
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;
@@ -226,15 +275,16 @@ export class LoginComponent implements OnInit {
     private snackBar: MatSnackBar
   ) {
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      // email: ['', [Validators.required, Validators.email]],
+      username: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      rememberMe: [false]
+      rememberMe: [false],
     });
   }
 
   ngOnInit(): void {
     // Check if user is already logged in
-    this.authService.currentUser$.subscribe(user => {
+    this.authService.currentUser$.subscribe((user) => {
       if (user) {
         this.redirectBasedOnRole(user.role);
       }
@@ -252,16 +302,23 @@ export class LoginComponent implements OnInit {
           this.snackBar.open('Login successful!', 'Close', {
             duration: 3000,
             horizontalPosition: 'center',
-            verticalPosition: 'top'
+            verticalPosition: 'top',
           });
-          
+
           // Redirect based on user role
-          this.redirectBasedOnRole(response.user.role);
+          if (response.user && response.user.role) {
+            this.redirectBasedOnRole(response.user.role);
+          } else if (response.role) {
+            this.redirectBasedOnRole(response.role);
+          } else {
+            // Fallback to default route if no role information
+            this.router.navigate(['/auth/login']);
+          }
         },
         error: (error) => {
           this.isLoading = false;
           let errorMessage = 'Login failed. Please try again.';
-          
+
           if (error.error?.message) {
             errorMessage = error.error.message;
           } else if (error.status === 401) {
@@ -269,14 +326,14 @@ export class LoginComponent implements OnInit {
           } else if (error.status === 0) {
             errorMessage = 'Network error. Please check your connection.';
           }
-          
+
           this.snackBar.open(errorMessage, 'Close', {
             duration: 5000,
             horizontalPosition: 'center',
             verticalPosition: 'top',
-            panelClass: ['error-snackbar']
+            panelClass: ['error-snackbar'],
           });
-        }
+        },
       });
     } else {
       this.markFormGroupTouched();
@@ -291,7 +348,7 @@ export class LoginComponent implements OnInit {
     this.isLoading = true;
     // Implement social login logic here
     this.snackBar.open(`${provider} login coming soon!`, 'Close', {
-      duration: 3000
+      duration: 3000,
     });
     this.isLoading = false;
   }
@@ -313,7 +370,7 @@ export class LoginComponent implements OnInit {
   }
 
   private markFormGroupTouched(): void {
-    Object.keys(this.loginForm.controls).forEach(key => {
+    Object.keys(this.loginForm.controls).forEach((key) => {
       const control = this.loginForm.get(key);
       control?.markAsTouched();
     });

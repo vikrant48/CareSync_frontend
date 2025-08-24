@@ -49,6 +49,12 @@ export const routes: Routes = [
     loadChildren: () => import('./shared/shared.routes').then(m => m.SHARED_ROUTES)
   },
 
+  // Debug route (for development)
+  {
+    path: 'debug',
+    loadComponent: () => import('./debug-profile.component').then(m => m.DebugProfileComponent)
+  },
+
   // Error routes
   {
     path: 'error',

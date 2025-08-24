@@ -71,7 +71,7 @@ import { Appointment, AppointmentStatus } from '../../models/appointment.model';
                       <div class="appointment-details">
                         <div class="detail-row">
                           <mat-icon>schedule</mat-icon>
-                          <span>{{ appointment.appointmentDateTime | date:'MMM dd, yyyy - h:mm a' }}</span>
+                          <span>{{ getAppointmentDisplayDate(appointment) | date:'MMM dd, yyyy - h:mm a' }}</span>
                         </div>
                         <div class="detail-row">
                           <mat-icon>description</mat-icon>
@@ -79,9 +79,26 @@ import { Appointment, AppointmentStatus } from '../../models/appointment.model';
                         </div>
                       </div>
                       <div class="appointment-status">
-                        <mat-chip [color]="getStatusColor(appointment.status)" selected>
-                          {{ appointment.status }}
-                        </mat-chip>
+                        @switch (appointment.status) {
+                          @case (AppointmentStatus.SCHEDULED) {
+                            <mat-chip color="primary" selected>{{ appointment.status }}</mat-chip>
+                          }
+                          @case (AppointmentStatus.CONFIRMED) {
+                            <mat-chip color="accent" selected>{{ appointment.status }}</mat-chip>
+                          }
+                          @case (AppointmentStatus.COMPLETED) {
+                            <mat-chip color="primary" selected>{{ appointment.status }}</mat-chip>
+                          }
+                          @case (AppointmentStatus.CANCELLED) {
+                            <mat-chip color="warn" selected>{{ appointment.status }}</mat-chip>
+                          }
+                          @case (AppointmentStatus.RESCHEDULED) {
+                            <mat-chip color="accent" selected>{{ appointment.status }}</mat-chip>
+                          }
+                          @default {
+                            <mat-chip color="primary" selected>{{ appointment.status }}</mat-chip>
+                          }
+                        }
                       </div>
                     </mat-card-content>
                     <mat-card-actions>
@@ -131,7 +148,7 @@ import { Appointment, AppointmentStatus } from '../../models/appointment.model';
                       <div class="appointment-details">
                         <div class="detail-row">
                           <mat-icon>schedule</mat-icon>
-                          <span>{{ appointment.appointmentDateTime | date:'MMM dd, yyyy - h:mm a' }}</span>
+                          <span>{{ getAppointmentDisplayDate(appointment) | date:'MMM dd, yyyy - h:mm a' }}</span>
                         </div>
                         <div class="detail-row">
                           <mat-icon>description</mat-icon>
@@ -139,9 +156,26 @@ import { Appointment, AppointmentStatus } from '../../models/appointment.model';
                         </div>
                       </div>
                       <div class="appointment-status">
-                        <mat-chip [color]="getStatusColor(appointment.status)" selected>
-                          {{ appointment.status }}
-                        </mat-chip>
+                        @switch (appointment.status) {
+                          @case (AppointmentStatus.SCHEDULED) {
+                            <mat-chip color="primary" selected>{{ appointment.status }}</mat-chip>
+                          }
+                          @case (AppointmentStatus.CONFIRMED) {
+                            <mat-chip color="accent" selected>{{ appointment.status }}</mat-chip>
+                          }
+                          @case (AppointmentStatus.COMPLETED) {
+                            <mat-chip color="primary" selected>{{ appointment.status }}</mat-chip>
+                          }
+                          @case (AppointmentStatus.CANCELLED) {
+                            <mat-chip color="warn" selected>{{ appointment.status }}</mat-chip>
+                          }
+                          @case (AppointmentStatus.RESCHEDULED) {
+                            <mat-chip color="accent" selected>{{ appointment.status }}</mat-chip>
+                          }
+                          @default {
+                            <mat-chip color="primary" selected>{{ appointment.status }}</mat-chip>
+                          }
+                        }
                       </div>
                     </mat-card-content>
                     <mat-card-actions>
@@ -346,7 +380,7 @@ export class PatientAppointmentsComponent implements OnInit {
   loadAppointments(): void {
     this.isLoading = true;
     
-    // Load upcoming appointments
+    // Load upcoming appointments (unchanged)
     this.appointmentService.getPatientUpcomingAppointments().subscribe({
       next: (appointments) => {
         this.upcomingAppointments = appointments;
@@ -359,13 +393,33 @@ export class PatientAppointmentsComponent implements OnInit {
       }
     });
 
-    // Load all appointments to get past ones
+    // Load all appointments to get past ones (date-based filtering only)
     this.appointmentService.getPatientAppointments().subscribe({
       next: (appointments) => {
-        this.pastAppointments = appointments.filter(apt => 
-          apt.status === AppointmentStatus.COMPLETED || 
-          apt.status === AppointmentStatus.CANCELLED
-        );
+        console.log('All appointments received:', appointments);
+        const now = new Date();
+        console.log('Current date/time:', now);
+        
+        this.pastAppointments = appointments.filter((apt: any) => {
+          console.log('Processing appointment:', apt);
+          
+          // Handle the actual API response structure
+          let appointmentDateTime;
+          if (apt.appointmentDate && apt.appointmentTime) {
+            appointmentDateTime = `${apt.appointmentDate}T${apt.appointmentTime}`;
+          } else if (apt.appointmentDateTime) {
+            appointmentDateTime = apt.appointmentDateTime;
+          } else {
+            console.log('No valid date/time found for appointment:', apt);
+            return false;
+          }
+          
+          const appointmentDate = new Date(appointmentDateTime);
+          console.log(`Appointment ${apt.appointmentId || apt.id}: ${appointmentDateTime} -> ${appointmentDate} (is past: ${appointmentDate < now})`);
+          return appointmentDate < now;
+        });
+        
+        console.log('Filtered past appointments:', this.pastAppointments);
       },
       error: (error) => {
         console.error('Error loading appointments:', error);
@@ -377,22 +431,14 @@ export class PatientAppointmentsComponent implements OnInit {
     console.log('Tab changed to:', event.index);
   }
 
-  getStatusColor(status: AppointmentStatus): string {
-    switch (status) {
-      case AppointmentStatus.SCHEDULED:
-        return 'primary';
-      case AppointmentStatus.CONFIRMED:
-        return 'accent';
-      case AppointmentStatus.COMPLETED:
-        return 'primary';
-      case AppointmentStatus.CANCELLED:
-        return 'warn';
-      case AppointmentStatus.RESCHEDULED:
-        return 'accent';
-      default:
-        return 'primary';
+  getAppointmentDisplayDate(appointment: any): string {
+    if (appointment.appointmentDate && appointment.appointmentTime) {
+      return `${appointment.appointmentDate}T${appointment.appointmentTime}`;
     }
+    return appointment.appointmentDateTime || '';
   }
+
+  // Method removed in favor of @switch directive in the template
 
   viewAppointment(appointment: Appointment): void {
     this.router.navigate([`/patient/appointments/${appointment.id}`]);

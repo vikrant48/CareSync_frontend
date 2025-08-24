@@ -49,15 +49,15 @@
         </div>
       </div>
     </div>
-  </div>
 
   <!-- Main Content -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div *ngIf="isLoading" class="flex justify-center items-center h-64">
-      <mat-spinner diameter="50"></mat-spinner>
-    </div>
-
-    <div *ngIf="!isLoading" class="space-y-8">
+    @if (isLoading) {
+      <div class="flex justify-center items-center h-64">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
+    } @else {
+      <div class="space-y-8">
       <!-- Quick Stats -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <mat-card class="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
@@ -123,12 +123,15 @@
               <mat-card-subtitle>Your appointments for today</mat-card-subtitle>
             </mat-card-header>
             <mat-card-content class="p-0">
-              <div *ngIf="todayAppointments.length === 0" class="p-6 text-center text-gray-500">
-                <mat-icon class="text-4xl mb-4">event_busy</mat-icon>
-                <p>No appointments scheduled for today</p>
-              </div>
-              <mat-list *ngIf="todayAppointments.length > 0">
-                <mat-list-item *ngFor="let appointment of todayAppointments" class="border-b">
+              @if (todayAppointments.length === 0) {
+                <div class="p-6 text-center text-gray-500">
+                  <mat-icon class="text-4xl mb-4">event_busy</mat-icon>
+                  <p>No appointments scheduled for today</p>
+                </div>
+              } @else {
+                <mat-list>
+                @for (appointment of todayAppointments; track appointment.id) {
+                   <mat-list-item class="border-b">
                   <div class="flex items-center justify-between w-full py-4">
                     <div class="flex items-center space-x-4">
                       <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
@@ -163,8 +166,11 @@
                       </mat-menu>
                     </div>
                   </div>
-                </mat-list-item>
-              </mat-list>
+                    </mat-list-item>
+                   }
+                </mat-list>
+              }
+              
             </mat-card-content>
             <mat-card-actions class="p-4">
               <button mat-button routerLink="/doctor/appointments">View All Appointments</button>
@@ -173,25 +179,25 @@
           </mat-card>
 
           <!-- Performance Analytics -->
-          <mat-card>
-            <mat-card-header>
-              <mat-card-title class="flex items-center space-x-2">
-                <mat-icon>analytics</mat-icon>
-                <span>Performance Analytics</span>
-              </mat-card-title>
-              <mat-card-subtitle>Your performance metrics and insights</mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-content>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="h-64">
-                  <canvas #patientSatisfactionChart></canvas>
+          @defer (on viewport) {
+            <mat-card>
+              <mat-card-header>
+                <mat-card-title>Performance Analytics</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="chart-container">
+                  <canvas id="performanceChart"></canvas>
                 </div>
-                <div class="h-64">
-                  <canvas #revenueChart></canvas>
-                </div>
-              </div>
-            </mat-card-content>
-          </mat-card>
+              </mat-card-content>
+            </mat-card>
+          }
+          @placeholder {            
+             <div class="h-64 flex items-center justify-center bg-gray-50 rounded-lg border border-gray-200">
+               <p>Loading analytics...</p>
+             </div>
+           }
+          <!-- Quick Actions -->
+            
         </div>
 
         <!-- Right Column -->
@@ -211,9 +217,9 @@
                   <mat-icon>people</mat-icon>
                   View Patients
                 </button>
-                <button mat-outlined-button routerLink="/doctor/medical-records/create" class="w-full">
+                <button mat-outlined-button routerLink="/doctor/medical-records" class="w-full">
                   <mat-icon>medical_services</mat-icon>
-                  Create Medical Record
+                  Medical Records
                 </button>
                 <button mat-outlined-button routerLink="/doctor/analytics" class="w-full">
                   <mat-icon>insights</mat-icon>
@@ -224,68 +230,140 @@
           </mat-card>
 
           <!-- Recent Patients -->
-          <mat-card>
-            <mat-card-header>
-              <mat-card-title>Recent Patients</mat-card-title>
-            </mat-card-header>
-            <mat-card-content class="p-0">
-              <div *ngIf="recentPatients.length === 0" class="p-6 text-center text-gray-500">
-                <mat-icon class="text-4xl mb-4">people</mat-icon>
-                <p>No recent patients</p>
-              </div>
-              <mat-list *ngIf="recentPatients.length > 0">
-                <mat-list-item *ngFor="let patient of recentPatients" class="border-b">
-                  <div class="w-full py-2">
-                    <div class="flex items-center justify-between">
-                      <div>
-                        <h4 class="font-medium">{{ patient.firstName }} {{ patient.lastName }}</h4>
-                        <p class="text-sm text-gray-600">{{ patient.email }}</p>
-                        <p class="text-sm text-gray-500">Last visit: {{ patient.lastVisit | date:'shortDate' }}</p>
+          @defer (on viewport) {
+            <mat-card>
+              <mat-card-header>
+                <mat-card-title>Recent Patients</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <mat-list>
+                  @for (patient of recentPatients; track patient.id) {
+                    <mat-list-item>
+                      <img matListItemAvatar [src]="patient.avatar" [alt]="patient.name">
+                      <div matListItemTitle>{{patient.name}}</div>
+                      <div matListItemLine>{{patient.lastVisit | date:'medium'}}</div>
+                      <div matListItemMeta>
+                        <button mat-icon-button color="primary" [routerLink]="['/doctor/patients', patient.id]">
+                          <mat-icon>visibility</mat-icon>
+                        </button>
                       </div>
-                      <button mat-icon-button [routerLink]="['/doctor/patients', patient.id]">
-                        <mat-icon>visibility</mat-icon>
-                      </button>
-                    </div>
+                    </mat-list-item>
+                  } @empty {
+                    <mat-list-item>
+                      <div>No recent patients found.</div>
+                    </mat-list-item>
+                  }
+                </mat-list>
+              </mat-card-content>
+              <mat-card-actions align="end">
+                <button mat-button color="primary" routerLink="/doctor/patients">View All</button>
+              </mat-card-actions>
+            </mat-card>
+          }
+          @placeholder {
+              <div class="h-64 flex items-center justify-center bg-gray-50 rounded-lg border border-gray-200">
+                <p>Loading recent patients...</p>
+              </div>
+            }
+          <!-- Upcoming Appointments -->
+          @defer (on viewport) {
+            <mat-card>
+              <mat-card-header>
+                <mat-card-title class="flex items-center space-x-2">
+                  <mat-icon>upcoming</mat-icon>
+                  <span>Upcoming Appointments</span>
+                </mat-card-title>
+                <mat-card-subtitle>Next appointments with patients</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content class="p-0">
+                @if (upcomingAppointments.length === 0) {
+                  <div class="p-6 text-center text-gray-500">
+                    <mat-icon class="text-4xl mb-4">event_available</mat-icon>
+                    <p>No upcoming appointments</p>
                   </div>
-                </mat-list-item>
-              </mat-list>
-            </mat-card-content>
-            <mat-card-actions class="p-4">
-              <button mat-button routerLink="/doctor/patients">View All Patients</button>
-            </mat-card-actions>
-          </mat-card>
+                } @else {
+                  <mat-list>
+                    @for (appointment of upcomingAppointments; track appointment.appointmentId) {
+                      <mat-list-item class="border-b">
+                        <div class="flex items-center justify-between w-full py-4">
+                          <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                              <mat-icon class="text-blue-600">person</mat-icon>
+                            </div>
+                            <div>
+                              <h3 class="font-medium">{{ appointment.patientName }}</h3>
+                              <p class="text-sm text-gray-600">{{ appointment.reason }}</p>
+                              <p class="text-xs text-gray-500">{{ appointment.appointmentDate | date:'MMM d, y' }} at {{ appointment.appointmentTime }}</p>
+                            </div>
+                          </div>
+                          <div class="flex items-center space-x-2">
+                            <mat-chip [color]="getStatusColor(appointment.status)">{{ appointment.status }}</mat-chip>
+                            <button mat-icon-button color="primary" [routerLink]="['/doctor/appointments', appointment.appointmentId]">
+                              <mat-icon>visibility</mat-icon>
+                            </button>
+                          </div>
+                        </div>
+                      </mat-list-item>
+                    }
+                  </mat-list>
+                }
+              </mat-card-content>
+              <mat-card-actions class="p-4">
+                <button mat-button routerLink="/doctor/appointments">View All Appointments</button>
+              </mat-card-actions>
+            </mat-card>
+          }
+          @placeholder {
+            <div class="h-64 flex items-center justify-center bg-gray-50 rounded-lg border border-gray-200">
+              <p>Loading upcoming appointments...</p>
+            </div>
+          }
 
           <!-- Recent Notifications -->
-          <mat-card>
-            <mat-card-header>
-              <mat-card-title>Recent Notifications</mat-card-title>
-            </mat-card-header>
-            <mat-card-content class="p-0">
-              <div *ngIf="recentNotifications.length === 0" class="p-6 text-center text-gray-500">
-                <mat-icon class="text-4xl mb-4">notifications_none</mat-icon>
-                <p>No notifications</p>
-              </div>
-              <mat-list *ngIf="recentNotifications.length > 0">
-                <mat-list-item *ngFor="let notification of recentNotifications" class="border-b">
-                  <div class="w-full py-2">
-                    <div class="flex items-start space-x-3">
-                      <mat-icon class="text-blue-600 mt-1">info</mat-icon>
-                      <div class="flex-1">
-                        <h4 class="font-medium text-sm">{{ notification.title }}</h4>
-                        <p class="text-xs text-gray-600">{{ notification.message }}</p>
-                        <p class="text-xs text-gray-500">{{ notification.createdAt | date:'short' }}</p>
+          @defer (on viewport) {
+            <mat-card>
+              <mat-card-header>
+                <mat-card-title>Recent Notifications</mat-card-title>
+              </mat-card-header>
+              <mat-card-content class="p-0">
+                @if (recentNotifications.length === 0) {
+                  <div class="p-6 text-center text-gray-500">
+                    <mat-icon class="text-4xl mb-4">notifications_none</mat-icon>
+                    <p>No notifications</p>
+                  </div>
+                } @else {
+                  <mat-list>
+                  @for (notification of recentNotifications; track notification.id) {
+                     <mat-list-item class="border-b">
+                    <div class="w-full py-2">
+                      <div class="flex items-start space-x-3">
+                        <mat-icon class="text-blue-600 mt-1">info</mat-icon>
+                        <div class="flex-1">
+                          <h4 class="font-medium text-sm">{{ notification.title }}</h4>
+                          <p class="text-xs text-gray-600">{{ notification.message }}</p>
+                          <p class="text-xs text-gray-500">{{ notification.createdAt | date:'short' }}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </mat-list-item>
-              </mat-list>
-            </mat-card-content>
-            <mat-card-actions class="p-4">
-              <button mat-button routerLink="/doctor/notifications">View All Notifications</button>
-            </mat-card-actions>
-          </mat-card>
+                  </mat-list-item>
+                  }
+                </mat-list>
+                }
+              </mat-card-content>
+              <mat-card-actions class="p-4">
+                <button mat-button routerLink="/doctor/notifications">View All Notifications</button>
+              </mat-card-actions>
+            </mat-card>
+          } @placeholder {
+            <div class="h-64 flex items-center justify-center bg-gray-50 rounded-lg border border-gray-200">
+              <p>Loading notifications...</p>
+            </div>
+          } @loading {
+            <div class="h-64 flex items-center justify-center bg-gray-50 rounded-lg border border-gray-200">
+              <mat-spinner diameter="40"></mat-spinner>
+            </div>
+          }
         </div>
       </div>
     </div>
-  </div>
-</div>
+  }

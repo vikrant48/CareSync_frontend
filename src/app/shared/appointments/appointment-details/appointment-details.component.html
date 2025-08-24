@@ -14,17 +14,17 @@
       <div class="bg-white rounded-lg shadow p-6 mb-6">
         <div class="flex justify-between items-start mb-4">
           <div>
-            <h3 class="text-xl font-semibold">{{ appointment.type }}</h3>
-            <p class="text-gray-600">{{ appointment.provider }} - {{ appointment.specialty }}</p>
+            <h3 class="text-xl font-semibold">{{ appointment?.reason }}</h3>
+        <p class="text-gray-600">{{ appointment?.doctor?.firstName }} {{ appointment?.doctor?.lastName }} - {{ appointment?.doctor?.specialization }}</p>
           </div>
           <span class="px-3 py-1 text-sm font-semibold rounded-full" 
                 [ngClass]="{
-                  'bg-green-100 text-green-800': appointment.status === 'Confirmed',
-                  'bg-yellow-100 text-yellow-800': appointment.status === 'Pending',
-                  'bg-red-100 text-red-800': appointment.status === 'Cancelled',
-                  'bg-blue-100 text-blue-800': appointment.status === 'Completed'
-                }">
-            {{ appointment.status }}
+                  'bg-green-100 text-green-800': appointment?.status === 'CONFIRMED',
+        'bg-yellow-100 text-yellow-800': appointment?.status === 'PENDING',
+        'bg-red-100 text-red-800': appointment?.status === 'CANCELLED',
+        'bg-blue-100 text-blue-800': appointment?.status === 'COMPLETED'
+      }">
+        {{ appointment?.status }}
           </span>
         </div>
         
@@ -32,20 +32,20 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <h4 class="text-sm font-medium text-gray-500">Date & Time</h4>
-              <p class="mt-1">{{ appointment.date }} at {{ appointment.time }}</p>
+              <p class="mt-1">{{ appointment?.appointmentDateTime | date:'short' }}</p>
             </div>
             <div>
-              <h4 class="text-sm font-medium text-gray-500">Duration</h4>
-              <p class="mt-1">{{ appointment.duration }}</p>
-            </div>
+                <h4 class="text-sm font-medium text-gray-500">Patient</h4>
+                <p class="mt-1">{{ appointment?.patient?.firstName }} {{ appointment?.patient?.lastName }}</p>
+              </div>
             <div>
-              <h4 class="text-sm font-medium text-gray-500">Location</h4>
-              <p class="mt-1">{{ appointment.location }}</p>
-            </div>
-            <div>
-              <h4 class="text-sm font-medium text-gray-500">Room</h4>
-              <p class="mt-1">{{ appointment.room }}</p>
-            </div>
+                <h4 class="text-sm font-medium text-gray-500">Created</h4>
+                <p class="mt-1">{{ appointment?.createdAt | date:'short' }}</p>
+              </div>
+              <div>
+                <h4 class="text-sm font-medium text-gray-500">Updated</h4>
+                <p class="mt-1">{{ appointment?.updatedAt | date:'short' }}</p>
+              </div>
           </div>
         </div>
       </div>
@@ -53,20 +53,31 @@
       <!-- Appointment Notes -->
       <div class="bg-white rounded-lg shadow p-6 mb-6">
         <h3 class="text-lg font-semibold mb-4">Appointment Notes</h3>
-        <p *ngIf="appointment.notes" class="text-gray-700">{{ appointment.notes }}</p>
-        <p *ngIf="!appointment.notes" class="text-gray-500 italic">No notes available for this appointment.</p>
+        <p *ngIf="appointment?.notes" class="text-gray-700">{{ appointment?.notes }}</p>
+      <p *ngIf="!appointment?.notes" class="text-gray-500 italic">No notes available for this appointment.</p>
       </div>
       
       <!-- Preparation Instructions -->
       <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-semibold mb-4">Preparation Instructions</h3>
-        <div *ngIf="appointment.preparationInstructions && appointment.preparationInstructions.length > 0">
-          <ul class="list-disc pl-5 space-y-2">
-            <li *ngFor="let instruction of appointment.preparationInstructions" class="text-gray-700">{{ instruction }}</li>
-          </ul>
+          <h3 class="text-lg font-semibold mb-4">Patient Information</h3>
+          <div *ngIf="appointment?.patient">
+            <div class="space-y-2">
+              <div class="flex">
+                <span class="text-gray-500 w-20">Name:</span>
+                <span>{{ appointment?.patient?.firstName }} {{ appointment?.patient?.lastName }}</span>
+              </div>
+              <div class="flex">
+                <span class="text-gray-500 w-20">Email:</span>
+                <span>{{ appointment?.patient?.email }}</span>
+              </div>
+              <div class="flex">
+                <span class="text-gray-500 w-20">Phone:</span>
+                <span>{{ appointment?.patient?.phoneNumber }}</span>
+              </div>
+            </div>
+          </div>
+          <p *ngIf="!appointment?.patient" class="text-gray-500 italic">Patient information not available.</p>
         </div>
-        <p *ngIf="!appointment.preparationInstructions || appointment.preparationInstructions.length === 0" class="text-gray-500 italic">No special preparation required for this appointment.</p>
-      </div>
     </div>
     
     <!-- Sidebar -->
@@ -86,7 +97,7 @@
             </svg>
             Add Notes
           </button>
-          <button *ngIf="appointment.status !== 'Cancelled'" class="w-full px-4 py-2 border border-red-300 text-red-700 rounded-md hover:bg-red-50 flex items-center justify-center">
+          <button *ngIf="appointment?.status !== 'CANCELLED'" class="w-full px-4 py-2 border border-red-300 text-red-700 rounded-md hover:bg-red-50 flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -105,18 +116,18 @@
             </svg>
           </div>
           <div>
-            <h4 class="font-medium">{{ appointment.provider }}</h4>
-            <p class="text-sm text-gray-600">{{ appointment.specialty }}</p>
+            <h4 class="font-medium">{{ appointment?.doctor?.firstName }} {{ appointment?.doctor?.lastName }}</h4>
+        <p class="text-sm text-gray-600">{{ appointment?.doctor?.specialization }}</p>
           </div>
         </div>
         <div class="space-y-2">
           <div class="flex">
             <span class="text-gray-500 w-20">Phone:</span>
-            <span>{{ appointment.providerPhone }}</span>
+            <span>{{ appointment?.doctor?.phoneNumber }}</span>
           </div>
           <div class="flex">
             <span class="text-gray-500 w-20">Email:</span>
-            <span>{{ appointment.providerEmail }}</span>
+            <span>{{ appointment?.doctor?.email }}</span>
           </div>
         </div>
       </div>
@@ -127,19 +138,19 @@
         <div class="space-y-2">
           <div class="flex">
             <span class="text-gray-500 w-24">Provider:</span>
-            <span>{{ appointment.insurance.provider }}</span>
+            <span>{{ appointment?.insurance?.provider || 'N/A' }}</span>
           </div>
           <div class="flex">
             <span class="text-gray-500 w-24">Policy #:</span>
-            <span>{{ appointment.insurance.policyNumber }}</span>
+            <span>{{ appointment?.insurance?.policyNumber || 'N/A' }}</span>
           </div>
           <div class="flex">
             <span class="text-gray-500 w-24">Group #:</span>
-            <span>{{ appointment.insurance.groupNumber }}</span>
+            <span>{{ appointment?.insurance?.groupNumber || 'N/A' }}</span>
           </div>
           <div class="flex">
             <span class="text-gray-500 w-24">Copay:</span>
-            <span>${{ appointment.insurance.copay }}</span>
+            <span>${{ appointment?.insurance?.copay || 0 }}</span>
           </div>
         </div>
       </div>

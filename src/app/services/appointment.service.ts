@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+import { of, throwError, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   Appointment,
@@ -10,7 +11,8 @@ import {
   AppointmentStatus,
   AvailableSlot,
   AppointmentStatistics,
-  DoctorSchedule
+  DoctorSchedule,
+  DoctorAppointment
 } from '../models/appointment.model';
 
 @Injectable({
@@ -23,7 +25,52 @@ export class AppointmentService {
 
   // Patient Appointment Management
   bookAppointment(appointment: AppointmentCreate): Observable<Appointment> {
-    return this.http.post<Appointment>(`${this.baseUrl}/patient/book`, appointment);
+    // Validate appointment data before sending
+    if (!appointment.doctorId || !appointment.appointmentDateTime || !appointment.reason) {
+      console.error('Invalid appointment data:', appointment);
+      return throwError(() => new Error('Missing required appointment data'));
+    }
+    
+    // Ensure the date format is correct
+    try {
+      const dateObj = new Date(appointment.appointmentDateTime);
+      if (isNaN(dateObj.getTime())) {
+        return throwError(() => new Error('Invalid appointment date format'));
+      }
+      
+      // Format the date in ISO format without milliseconds
+      appointment = {
+        ...appointment,
+        appointmentDateTime: dateObj.toISOString().split('.')[0]
+      };
+    } catch (error) {
+      console.error('Date parsing error:', error);
+      return throwError(() => new Error('Invalid appointment date'));
+    }
+    
+    console.log('📤 Sending appointment data to API:', appointment);
+    console.log('🔗 API URL:', `${this.baseUrl}/patient/book`);
+    
+    return this.http.post<Appointment>(`${this.baseUrl}/patient/book`, appointment)
+      .pipe(
+        catchError(error => {
+          console.error('❌ API error response:', {
+            status: error.status,
+            statusText: error.statusText,
+            error: error.error,
+            headers: error.headers,
+            url: error.url
+          });
+          if (error.status === 400) {
+            return throwError(() => new Error('Invalid appointment data: ' + (error.error?.message || 'Please check your inputs')));
+          } else if (error.status === 409) {
+            return throwError(() => new Error('This time slot is no longer available'));
+          } else if (error.status === 403) {
+            return throwError(() => new Error('Authentication error. Please log in again'));
+          }
+          return throwError(() => error);
+        })
+      );
   }
 
   getPatientAppointments(filter?: AppointmentFilter): Observable<Appointment[]> {
@@ -40,7 +87,7 @@ export class AppointmentService {
   }
 
   getPatientUpcomingAppointments(): Observable<Appointment[]> {
-    return this.http.get<Appointment[]>(`${this.baseUrl}/patient/upcoming`);
+    return this.http.get<Appointment[]>(`${this.baseUrl}/patient/my-appointments/upcoming`);
   }
 
   updatePatientAppointment(id: number, appointment: AppointmentUpdate): Observable<Appointment> {
@@ -100,12 +147,12 @@ export class AppointmentService {
   }
 
   // Doctor's My Patients Appointments
-  getMyPatientsAppointments(): Observable<Appointment[]> {
-    return this.http.get<Appointment[]>(`${this.baseUrl}/doctor/my-patients`);
+  getMyPatientsAppointments(): Observable<DoctorAppointment[]> {
+    return this.http.get<DoctorAppointment[]>(`${this.baseUrl}/doctor/my-patients`);
   }
 
-  getMyPatientsUpcomingAppointments(): Observable<Appointment[]> {
-    return this.http.get<Appointment[]>(`${this.baseUrl}/doctor/my-patients/upcoming`);
+  getMyPatientsUpcomingAppointments(): Observable<DoctorAppointment[]> {
+    return this.http.get<DoctorAppointment[]>(`${this.baseUrl}/doctor/my-patients/upcoming`);
   }
 
   getMyPatientsTodayAppointments(): Observable<Appointment[]> {
@@ -132,9 +179,22 @@ export class AppointmentService {
 
   // Available Slots
   getAvailableSlots(doctorId: number, date: string): Observable<AvailableSlot> {
-    return this.http.get<AvailableSlot>(`${this.baseUrl}/available-slots/${doctorId}`, {
+    return this.http.get<string[]>(`${this.baseUrl}/available-slots/${doctorId}`, {
       params: { date }
-    });
+    }).pipe(
+      map((timeSlots: string[]) => {
+        // Transform the array of strings into the AvailableSlot format
+        return {
+          date: date,
+          timeSlots: timeSlots || [],
+          doctorId: doctorId
+        };
+      }),
+      catchError(error => {
+        console.error('Error fetching available slots:', error);
+        return of({ date: date, timeSlots: [], doctorId: doctorId });
+      })
+    );
   }
 
   // Doctor Schedule

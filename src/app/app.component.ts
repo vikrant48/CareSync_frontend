@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -221,26 +221,24 @@ import { User, UserRole } from './models/user.model';
   `]
 })
 export class AppComponent implements OnInit {
-  currentUser: User | null = null;
   UserRole = UserRole;
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit(): void {
-    this.authService.currentUser$.subscribe(user => {
-      this.currentUser = user;
-    });
+    // No need to subscribe with signals
+  }
+  
+  // Use computed getter to access the current user
+  get currentUser(): User | null {
+    return this.authService.currentUser();
   }
 
   logout(): void {
-    this.authService.logout().subscribe({
-      next: () => {
-        console.log('Logged out successfully');
-      },
-      error: (error) => {
-        console.error('Logout error:', error);
-      }
-    });
+    // Use synchronous logout to avoid backend 403 error
+    this.authService.logoutSync();
+    console.log('Logged out successfully');
+    this.router.navigate(['/auth/login']);
   }
 
   getUserRole(): string {

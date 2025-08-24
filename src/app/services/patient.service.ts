@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { tap, catchError, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { Patient, PatientProfileUpdate } from '../models/user.model';
 import { MedicalHistory, MedicalHistoryCreate, MedicalHistoryUpdate, MedicalHistoryFilter, MedicalHistorySummary } from '../models/user.model';
@@ -27,7 +28,39 @@ export class PatientService {
   }
 
   getMyProfile(username: string): Observable<Patient> {
-    return this.http.get<Patient>(`${this.baseUrl}/profile/${username}`);
+    const url = `${this.baseUrl}/profile/${username}`;
+    console.log('Making request to:', url);
+    
+    // Get raw text response to handle malformed JSON
+    return this.http.get(url, { responseType: 'text' }).pipe(
+      tap(rawResponse => {
+        console.log('Raw response text:', rawResponse);
+      }),
+      map(rawResponse => {
+        try {
+          // Clean up malformed JSON by removing extra closing brackets
+          let cleanedResponse = rawResponse;
+          
+          // Remove multiple consecutive closing brackets at the end
+          cleanedResponse = cleanedResponse.replace(/\]\}\}\]\}\}\]\}\}\]"?$/, ']}');
+          cleanedResponse = cleanedResponse.replace(/\}\}\]\}\}\]\}\}\]"?$/, '}');
+          
+          console.log('Cleaned response:', cleanedResponse);
+          
+          const parsed = JSON.parse(cleanedResponse);
+          console.log('Parsed patient data:', parsed);
+          return parsed as Patient;
+        } catch (parseError) {
+          console.error('JSON parsing error:', parseError);
+          console.error('Raw response that failed to parse:', rawResponse);
+          throw new Error(`Failed to parse patient profile response: ${parseError}`);
+        }
+      }),
+      catchError(error => {
+        console.error('HTTP error in getMyProfile:', error);
+        throw error;
+      })
+    );
   }
 
   updatePatientProfile(id: number, profileData: PatientProfileUpdate): Observable<Patient> {

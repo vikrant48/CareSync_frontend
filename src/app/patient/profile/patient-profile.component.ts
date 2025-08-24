@@ -12,6 +12,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatChipsModule } from '@angular/material/chips';
 import { PatientService } from '../../services/patient.service';
+import { AuthService } from '../../services/auth.service';
 import { Patient } from '../../models/user.model';
 
 @Component({
@@ -355,6 +356,7 @@ export class PatientProfileComponent implements OnInit {
 
   constructor(
     private patientService: PatientService,
+    private authService: AuthService,
     private fb: FormBuilder,
     private snackBar: MatSnackBar
   ) {
@@ -375,8 +377,27 @@ export class PatientProfileComponent implements OnInit {
 
   loadPatientProfile(): void {
     this.isLoading = true;
-    this.patientService.getMyProfile('').subscribe({
+    const currentUser = this.authService.getCurrentUser();
+    
+    if (!currentUser || !currentUser.username) {
+      this.isLoading = false;
+      this.showErrorMessage('User not authenticated or username not found.');
+      return;
+    }
+
+    this.patientService.getMyProfile(currentUser.username).subscribe({
       next: (patient) => {
+        console.log('Backend response:', patient);
+        console.log('Response type:', typeof patient);
+        console.log('Is patient null/undefined?', patient == null);
+        
+        if (!patient) {
+          console.error('Received empty or null patient data from backend');
+          this.isLoading = false;
+          this.showErrorMessage('No profile data found. Please contact support.');
+          return;
+        }
+        
         this.patient = patient;
         this.populateForm(patient);
         this.isLoading = false;
@@ -402,11 +423,11 @@ export class PatientProfileComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.profileForm.valid) {
+    if (this.profileForm.valid && this.patient) {
       this.isSubmitting = true;
       const updateData = this.profileForm.value;
 
-      this.patientService.updatePatientProfile(0, updateData).subscribe({
+      this.patientService.updatePatientProfile(this.patient.id, updateData).subscribe({
         next: (updatedPatient) => {
           this.patient = updatedPatient;
           this.isSubmitting = false;
@@ -417,6 +438,8 @@ export class PatientProfileComponent implements OnInit {
           this.showErrorMessage(error.error?.message || 'Failed to update profile.');
         }
       });
+    } else if (!this.patient) {
+      this.showErrorMessage('Patient information not loaded. Please refresh the page.');
     }
   }
 

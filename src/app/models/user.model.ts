@@ -16,7 +16,8 @@ export interface User {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  profileImageUrl?: string;
+  emailVerified?: boolean;
+  bio?: string;
 }
 
 export interface Doctor extends User {
@@ -49,7 +50,7 @@ export interface Patient extends User {
   contactInfo?: string;
   emergencyContactName?: string;
   emergencyContactRelationship?: string;
-  medicalHistory?: MedicalHistory[];
+  medicalHistories?: MedicalHistory[];
   healthSummary?: HealthSummary;
 }
 
@@ -135,6 +136,8 @@ export interface Certificate {
   issueDate?: string;
   expiryDate?: string;
   issuingOrganization?: string;
+  credentialId?: string;
+  credentialUrl?: string;
 }
 
 export interface DoctorAvailability {
@@ -164,10 +167,14 @@ export interface HealthSummary {
 }
 
 export interface AuthResponse {
-  token: string;
-  user: User;
+  accessToken: string;
+  refreshToken: string;
+  tokenType: string;
+  username: string;
+  role: string;
   message: string;
-  refreshToken?: string;
+  user?: User;
+  token?: string;
   expiresIn?: number;
 }
 

@@ -47,24 +47,32 @@ import { AuthService } from '../../services/auth.service';
                 <button mat-icon-button matSuffix (click)="togglePasswordVisibility()" type="button">
                   <mat-icon>{{ hidePassword ? 'visibility' : 'visibility_off' }}</mat-icon>
                 </button>
-                <mat-error *ngIf="resetPasswordForm.get('newPassword')?.hasError('required')">
-                  New password is required
-                </mat-error>
-                <mat-error *ngIf="resetPasswordForm.get('newPassword')?.hasError('minlength')">
-                  Password must be at least 6 characters
-                </mat-error>
+                @if (resetPasswordForm.get('newPassword')?.hasError('required')) {
+                  <mat-error>
+                    New password is required
+                  </mat-error>
+                }
+                @if (resetPasswordForm.get('newPassword')?.hasError('minlength')) {
+                  <mat-error>
+                    Password must be at least 6 characters
+                  </mat-error>
+                }
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Confirm Password</mat-label>
                 <input matInput type="password" formControlName="confirmPassword" placeholder="Confirm your new password">
                 <mat-icon matSuffix>lock</mat-icon>
-                <mat-error *ngIf="resetPasswordForm.get('confirmPassword')?.hasError('required')">
-                  Confirm password is required
-                </mat-error>
-                <mat-error *ngIf="resetPasswordForm.hasError('passwordMismatch')">
-                  Passwords do not match
-                </mat-error>
+                @if (resetPasswordForm.get('confirmPassword')?.hasError('required')) {
+                  <mat-error>
+                    Confirm password is required
+                  </mat-error>
+                }
+                @if (resetPasswordForm.hasError('passwordMismatch')) {
+                  <mat-error>
+                    Passwords do not match
+                  </mat-error>
+                }
               </mat-form-field>
 
               <button 
@@ -74,8 +82,11 @@ import { AuthService } from '../../services/auth.service';
                 class="submit-button"
                 [disabled]="resetPasswordForm.invalid || isLoading"
               >
-                <mat-spinner diameter="20" *ngIf="isLoading"></mat-spinner>
-                <span *ngIf="!isLoading">Reset Password</span>
+                @if (isLoading) {
+                  <mat-spinner diameter="20"></mat-spinner>
+                } @else {
+                  <span>Reset Password</span>
+                }
               </button>
             </form>
           </mat-card-content>

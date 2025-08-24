@@ -1,0 +1,244 @@
+<div class="settings-container">
+  <div class="settings-header">
+    <h2>Account Settings</h2>
+    <p>Manage your account preferences and security settings</p>
+  </div>
+
+  <mat-tab-group class="settings-tabs" animationDuration="300ms">
+    <!-- Profile Information Tab -->
+    <mat-tab label="Profile Information">
+      <div class="tab-content">
+        <form [formGroup]="profileForm" (ngSubmit)="onUpdateProfile()" class="profile-form">
+          <div class="form-section">
+            <h3>Personal Information</h3>
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>First Name</mat-label>
+                <input matInput formControlName="firstName" placeholder="Enter first name">
+                <mat-icon matSuffix>person</mat-icon>
+                <mat-error *ngIf="profileForm.get('firstName')?.hasError('required')">
+                  First name is required
+                </mat-error>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Last Name</mat-label>
+                <input matInput formControlName="lastName" placeholder="Enter last name">
+                <mat-icon matSuffix>person</mat-icon>
+                <mat-error *ngIf="profileForm.get('lastName')?.hasError('required')">
+                  Last name is required
+                </mat-error>
+              </mat-form-field>
+            </div>
+            
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Email</mat-label>
+                <input matInput type="email" formControlName="email" placeholder="Enter email">
+                <mat-icon matSuffix>email</mat-icon>
+                <mat-error *ngIf="profileForm.get('email')?.hasError('required')">
+                  Email is required
+                </mat-error>
+                <mat-error *ngIf="profileForm.get('email')?.hasError('email')">
+                  Please enter a valid email
+                </mat-error>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Phone Number</mat-label>
+                <input matInput formControlName="phoneNumber" placeholder="Enter phone number">
+                <mat-icon matSuffix>phone</mat-icon>
+              </mat-form-field>
+            </div>
+            
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Address</mat-label>
+              <textarea matInput formControlName="address" placeholder="Enter address" rows="3"></textarea>
+              <mat-icon matSuffix>location_on</mat-icon>
+            </mat-form-field>
+          </div>
+          
+          <div class="form-actions">
+            <button 
+              mat-raised-button 
+              color="primary" 
+              type="submit"
+              [disabled]="profileForm.invalid || isUpdatingProfile"
+              class="save-button">
+              <mat-icon *ngIf="isUpdatingProfile">hourglass_empty</mat-icon>
+              <mat-icon *ngIf="!isUpdatingProfile">save</mat-icon>
+              {{ isUpdatingProfile ? 'Updating...' : 'Save Changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </mat-tab>
+
+    <!-- Security Tab -->
+    <mat-tab label="Security">
+      <div class="tab-content">
+        <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()" class="password-form">
+          <div class="form-section">
+            <h3>Change Password</h3>
+            <p class="section-description">Update your password to keep your account secure</p>
+            
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Current Password</mat-label>
+              <input matInput type="password" formControlName="currentPassword" placeholder="Enter current password">
+              <mat-icon matSuffix>lock</mat-icon>
+              <mat-error *ngIf="passwordForm.get('currentPassword')?.hasError('required')">
+                Current password is required
+              </mat-error>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>New Password</mat-label>
+              <input matInput type="password" formControlName="newPassword" placeholder="Enter new password">
+              <mat-icon matSuffix>lock_outline</mat-icon>
+              <mat-error *ngIf="passwordForm.get('newPassword')?.hasError('required')">
+                New password is required
+              </mat-error>
+              <mat-error *ngIf="passwordForm.get('newPassword')?.hasError('minlength')">
+                Password must be at least 6 characters
+              </mat-error>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Confirm New Password</mat-label>
+              <input matInput type="password" formControlName="confirmPassword" placeholder="Confirm new password">
+              <mat-icon matSuffix>lock_outline</mat-icon>
+              <mat-error *ngIf="passwordForm.get('confirmPassword')?.hasError('required')">
+                Please confirm your new password
+              </mat-error>
+              <mat-error *ngIf="passwordForm.hasError('passwordMismatch') && passwordForm.get('confirmPassword')?.touched">
+                Passwords do not match
+              </mat-error>
+            </mat-form-field>
+          </div>
+          
+          <div class="form-actions">
+            <button 
+              mat-raised-button 
+              color="primary" 
+              type="submit"
+              [disabled]="passwordForm.invalid || isChangingPassword"
+              class="save-button">
+              <mat-icon *ngIf="isChangingPassword">hourglass_empty</mat-icon>
+              <mat-icon *ngIf="!isChangingPassword">security</mat-icon>
+              {{ isChangingPassword ? 'Updating...' : 'Change Password' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </mat-tab>
+
+    <!-- Notifications Tab -->
+    <mat-tab label="Notifications">
+      <div class="tab-content">
+        <form [formGroup]="notificationForm" class="notification-settings">
+          <h3>Notification Preferences</h3>
+          
+          <div class="notification-group">
+            <h4>Email Notifications</h4>
+            <mat-checkbox formControlName="emailNotifications">General Updates</mat-checkbox>
+            <mat-checkbox formControlName="appointmentReminders">Appointment Reminders</mat-checkbox>
+            <mat-checkbox formControlName="marketingEmails">Marketing Communications</mat-checkbox>
+          </div>
+
+          <div class="notification-group">
+            <h4>Push Notifications</h4>
+            <mat-checkbox formControlName="smsNotifications">SMS Notifications</mat-checkbox>
+          </div>
+          
+          <div class="form-actions">
+            <button 
+              type="button"
+              mat-raised-button 
+              color="primary" 
+              (click)="onUpdateNotifications()"
+              [disabled]="isUpdatingNotifications"
+              class="save-button">
+              <mat-icon *ngIf="isUpdatingNotifications">hourglass_empty</mat-icon>
+              <span>{{ isUpdatingNotifications ? 'Saving...' : 'Save Preferences' }}</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </mat-tab>
+
+    <!-- Appearance Tab -->
+    <mat-tab label="Appearance">
+      <div class="tab-content">
+        <div class="form-section">
+          <h3>Theme Settings</h3>
+          <p class="section-description">Customize the appearance of your dashboard</p>
+          
+          <div class="theme-options">
+            <div class="theme-option">
+              <mat-slide-toggle 
+                [(ngModel)]="isDarkMode"
+                (change)="onToggleDarkMode()"
+                color="primary">
+                Dark Mode
+              </mat-slide-toggle>
+              <p class="option-description">Switch between light and dark themes</p>
+            </div>
+            
+            <div class="theme-option">
+              <label class="theme-label">Color Theme</label>
+              <mat-select [(ngModel)]="selectedColorTheme" (selectionChange)="onSelectColorTheme($event.value)">
+                <mat-option value="blue">Blue</mat-option>
+                <mat-option value="green">Green</mat-option>
+                <mat-option value="purple">Purple</mat-option>
+                <mat-option value="orange">Orange</mat-option>
+              </mat-select>
+              <p class="option-description">Choose your preferred color scheme</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- Account Management Tab -->
+    <mat-tab label="Account">
+      <div class="tab-content">
+        <div class="form-section danger-section">
+          <h3>Danger Zone</h3>
+          <p class="section-description danger-text">
+            These actions are permanent and cannot be undone. Please proceed with caution.
+          </p>
+          
+          <div class="danger-actions">
+            <div class="danger-action">
+              <div class="action-info">
+                <h4>Delete Account</h4>
+                <p>Permanently delete your account and all associated data</p>
+              </div>
+              <button 
+                mat-raised-button 
+                color="warn" 
+                (click)="onDeleteAccount()"
+                class="danger-button">
+                <mat-icon>delete_forever</mat-icon>
+                Delete Account
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
+
+<!-- Success/Error Messages -->
+<div class="message-container" *ngIf="successMessage || errorMessage">
+  <mat-card class="message-card success" *ngIf="successMessage">
+    <mat-icon>check_circle</mat-icon>
+    <span>{{ successMessage }}</span>
+  </mat-card>
+  
+  <mat-card class="message-card error" *ngIf="errorMessage">
+    <mat-icon>error</mat-icon>
+    <span>{{ errorMessage }}</span>
+  </mat-card>
+</div>

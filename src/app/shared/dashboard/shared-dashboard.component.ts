@@ -187,13 +187,8 @@ export class SharedDashboardComponent implements OnInit {
   }
 
   logout(): void {
-    this.authService.logout().subscribe({
-      next: () => {
-        this.router.navigate(['/auth/login']);
-      },
-      error: () => {
-        this.router.navigate(['/auth/login']);
-      }
-    });
+    // Use synchronous logout to avoid backend 403 error
+    this.authService.logoutSync();
+    this.router.navigate(['/auth/login']);
   }
 }

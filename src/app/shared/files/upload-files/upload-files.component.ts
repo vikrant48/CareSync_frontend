@@ -432,20 +432,26 @@ export class UploadFilesComponent implements OnInit, OnDestroy {
   }
 
   private loadRecentUploads(): void {
-    // Mock data - replace with actual service call
-    this.recentUploads = [
-      {
-        id: 1,
-        fileName: 'medical_report.pdf',
-        fileType: 'MEDICAL_DOCUMENT',
-        uploadedAt: new Date(Date.now() - 1000 * 60 * 30)
-      },
-      {
-        id: 2,
-        fileName: 'certificate.jpg',
-        fileType: 'CERTIFICATE',
-        uploadedAt: new Date(Date.now() - 1000 * 60 * 60)
-      }
-    ];
+    // Get recent uploads from the service
+    this.fileUploadService.getFiles()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+        next: (files) => {
+          this.recentUploads = files.map(file => ({
+            id: file.id,
+            fileName: file.fileName || file.originalName,
+            fileType: file.fileType,
+            uploadedAt: new Date(file.createdAt)
+          }));
+        },
+        error: (error) => {
+          console.error('Error loading recent uploads:', error);
+          // Fallback to empty array or show error message
+          this.recentUploads = [];
+          this.snackBar.open('Failed to load recent uploads', 'Close', {
+            duration: 3000
+          });
+        }
+      });
   }
 }

@@ -26,10 +26,12 @@ import { PatientService } from '../../services/patient.service';
 import { MedicalHistoryService } from '../../services/medical-history.service';
 import { NotificationService } from '../../services/notification.service';
 import { AnalyticsService } from '../../services/analytics.service';
+import { FeedbackService } from '../../services/feedback.service';
 import { User, UserRole } from '../../models/user.model';
 import { Appointment, AppointmentStatus } from '../../models/appointment.model';
 import { MedicalHistory } from '../../models/user.model';
 import { Notification } from '../../models/notification.model';
+import { Feedback } from '../../models/feedback.model';
 
 Chart.register(...registerables);
 
@@ -117,7 +119,8 @@ Chart.register(...registerables);
         <div *ngIf="!isLoading" class="space-y-8">
           <!-- Quick Stats -->
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <mat-card class="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+            <mat-card class="bg-gradient-to-r from-blue-500 to-blue-600 text-white cursor-pointer hover:shadow-lg transition-shadow" 
+                      (click)="navigateToAppointments()">
               <mat-card-content class="p-6">
                 <div class="flex items-center justify-between">
                   <div>
@@ -129,7 +132,8 @@ Chart.register(...registerables);
               </mat-card-content>
             </mat-card>
 
-            <mat-card class="bg-gradient-to-r from-green-500 to-green-600 text-white">
+            <mat-card class="bg-gradient-to-r from-green-500 to-green-600 text-white cursor-pointer hover:shadow-lg transition-shadow" 
+                      (click)="navigateToMedicalHistory()">
               <mat-card-content class="p-6">
                 <div class="flex items-center justify-between">
                   <div>
@@ -141,7 +145,8 @@ Chart.register(...registerables);
               </mat-card-content>
             </mat-card>
 
-            <mat-card class="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+            <mat-card class="bg-gradient-to-r from-purple-500 to-purple-600 text-white cursor-pointer hover:shadow-lg transition-shadow" 
+                      (click)="navigateToMedicalHistory()">
               <mat-card-content class="p-6">
                 <div class="flex items-center justify-between">
                   <div>
@@ -153,7 +158,8 @@ Chart.register(...registerables);
               </mat-card-content>
             </mat-card>
 
-            <mat-card class="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+            <mat-card class="bg-gradient-to-r from-orange-500 to-orange-600 text-white cursor-pointer hover:shadow-lg transition-shadow" 
+                      (click)="navigateToFeedback()">
               <mat-card-content class="p-6">
                 <div class="flex items-center justify-between">
                   <div>
@@ -233,20 +239,30 @@ Chart.register(...registerables);
               </mat-card>
 
               <!-- Health Analytics -->
-              <mat-card>
-                <mat-card-header>
-                  <mat-card-title class="flex items-center space-x-2">
-                    <mat-icon>analytics</mat-icon>
-                    <span>Health Analytics</span>
-                  </mat-card-title>
-                  <mat-card-subtitle>Your health trends and insights</mat-card-subtitle>
-                </mat-card-header>
-                <mat-card-content>
-                  <div class="h-64">
-                    <canvas #healthChart></canvas>
-                  </div>
-                </mat-card-content>
-              </mat-card>
+              @defer (on viewport) {
+                <mat-card>
+                  <mat-card-header>
+                    <mat-card-title class="flex items-center space-x-2">
+                      <mat-icon>analytics</mat-icon>
+                      <span>Health Analytics</span>
+                    </mat-card-title>
+                    <mat-card-subtitle>Your health trends and insights</mat-card-subtitle>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <div class="h-64">
+                      <canvas #healthChart></canvas>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+              } @placeholder {
+                <div class="placeholder-card p-4 border border-dashed border-gray-300 rounded-lg flex items-center justify-center h-64">
+                  <span class="text-gray-500">Health analytics will load when visible</span>
+                </div>
+              } @loading {
+                <div class="h-64 flex items-center justify-center bg-gray-50 rounded-lg border border-gray-200">
+                  <mat-spinner diameter="40"></mat-spinner>
+                </div>
+              }
             </div>
 
             <!-- Right Column -->
@@ -270,75 +286,96 @@ Chart.register(...registerables);
                       <mat-icon>search</mat-icon>
                       Find Doctors
                     </button>
-                    <button mat-outlined-button routerLink="/patient/feedback/submit" class="w-full">
+                    <button mat-outlined-button routerLink="/patient/feedback" class="w-full">
                       <mat-icon>rate_review</mat-icon>
-                      Submit Feedback
+                      View Feedback
                     </button>
                   </div>
                 </mat-card-content>
               </mat-card>
 
               <!-- Recent Medical Records -->
-              <mat-card>
-                <mat-card-header>
-                  <mat-card-title>Recent Medical Records</mat-card-title>
-                </mat-card-header>
-                <mat-card-content class="p-0">
-                  <div *ngIf="recentMedicalHistory.length === 0" class="p-6 text-center text-gray-500">
-                    <mat-icon class="text-4xl mb-4">medical_services</mat-icon>
-                    <p>No medical records found</p>
-                  </div>
-                  <mat-list *ngIf="recentMedicalHistory.length > 0">
-                    <mat-list-item *ngFor="let record of recentMedicalHistory" class="border-b">
-                      <div class="w-full py-2">
-                        <div class="flex items-center justify-between">
-                          <div>
-                            <h4 class="font-medium">{{ record.diagnosis }}</h4>
-                            <p class="text-sm text-gray-600">{{ record.visitDate | date:'shortDate' }}</p>
-                            <p class="text-sm text-gray-500">{{ record.treatment }}</p>
+              @defer (on viewport) {
+                <mat-card>
+                  <mat-card-header>
+                    <mat-card-title>Recent Medical Records</mat-card-title>
+                  </mat-card-header>
+                  <mat-card-content class="p-0">
+
+                    <div *ngIf="recentMedicalHistory.length === 0" class="p-6 text-center text-gray-500">
+                      <mat-icon class="text-4xl mb-4">medical_services</mat-icon>
+                      <p>No medical records found</p>
+                    </div>
+                    <mat-list *ngIf="recentMedicalHistory.length > 0">
+                      <mat-list-item *ngFor="let record of recentMedicalHistory" class="border-b">
+                        <div class="w-full py-2">
+                          <div class="flex items-center justify-between">
+                            <div>
+                              <h4 class="font-medium">{{ record.diagnosis }}</h4>
+                              <p class="text-sm text-gray-600">{{ record.visitDate | date:'shortDate' }}</p>
+                              <p class="text-sm text-gray-500">{{ record.treatment }}</p>
+                            </div>
+                            <button mat-icon-button [routerLink]="['/patient/medical-history', record.id]">
+                              <mat-icon>visibility</mat-icon>
+                            </button>
                           </div>
-                          <button mat-icon-button [routerLink]="['/patient/medical-history', record.id]">
-                            <mat-icon>visibility</mat-icon>
-                          </button>
                         </div>
-                      </div>
-                    </mat-list-item>
-                  </mat-list>
-                </mat-card-content>
-                <mat-card-actions class="p-4">
-                  <button mat-button routerLink="/patient/medical-history">View All Records</button>
-                </mat-card-actions>
-              </mat-card>
+                      </mat-list-item>
+                    </mat-list>
+                  </mat-card-content>
+                  <mat-card-actions class="p-4">
+                    <button mat-button routerLink="/patient/medical-history">View All Records</button>
+                  </mat-card-actions>
+                </mat-card>
+              } @placeholder {
+                <div class="placeholder-card p-4 border border-dashed border-gray-300 rounded-lg flex items-center justify-center h-64">
+                  <span class="text-gray-500">Medical records will load when visible</span>
+                </div>
+              } @loading {
+                <div class="h-64 flex items-center justify-center bg-gray-50 rounded-lg border border-gray-200">
+                  <mat-spinner diameter="40"></mat-spinner>
+                </div>
+              }
 
               <!-- Notifications -->
-              <mat-card>
-                <mat-card-header>
-                  <mat-card-title>Recent Notifications</mat-card-title>
-                </mat-card-header>
-                <mat-card-content class="p-0">
-                  <div *ngIf="recentNotifications.length === 0" class="p-6 text-center text-gray-500">
-                    <mat-icon class="text-4xl mb-4">notifications_none</mat-icon>
-                    <p>No notifications</p>
-                  </div>
-                  <mat-list *ngIf="recentNotifications.length > 0">
-                    <mat-list-item *ngFor="let notification of recentNotifications" class="border-b">
-                      <div class="w-full py-2">
-                        <div class="flex items-start space-x-3">
-                          <mat-icon class="text-blue-600 mt-1">info</mat-icon>
-                          <div class="flex-1">
-                            <h4 class="font-medium text-sm">{{ notification.title }}</h4>
-                            <p class="text-xs text-gray-600">{{ notification.message }}</p>
-                            <p class="text-xs text-gray-500">{{ notification.createdAt | date:'short' }}</p>
+              @defer (on viewport) {
+                <mat-card>
+                  <mat-card-header>
+                    <mat-card-title>Recent Notifications</mat-card-title>
+                  </mat-card-header>
+                  <mat-card-content class="p-0">
+                    <div *ngIf="recentNotifications.length === 0" class="p-6 text-center text-gray-500">
+                      <mat-icon class="text-4xl mb-4">notifications_none</mat-icon>
+                      <p>No notifications</p>
+                    </div>
+                    <mat-list *ngIf="recentNotifications.length > 0">
+                      <mat-list-item *ngFor="let notification of recentNotifications" class="border-b">
+                        <div class="w-full py-2">
+                          <div class="flex items-start space-x-3">
+                            <mat-icon class="text-blue-600 mt-1">info</mat-icon>
+                            <div class="flex-1">
+                              <h4 class="font-medium text-sm">{{ notification.title }}</h4>
+                              <p class="text-xs text-gray-600">{{ notification.message }}</p>
+                              <p class="text-xs text-gray-500">{{ notification.createdAt | date:'short' }}</p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </mat-list-item>
-                  </mat-list>
-                </mat-card-content>
-                <mat-card-actions class="p-4">
-                  <button mat-button routerLink="/patient/notifications">View All Notifications</button>
-                </mat-card-actions>
-              </mat-card>
+                      </mat-list-item>
+                    </mat-list>
+                  </mat-card-content>
+                  <mat-card-actions class="p-4">
+                    <button mat-button routerLink="/patient/notifications">View All Notifications</button>
+                  </mat-card-actions>
+                </mat-card>
+              } @placeholder {
+                <div class="placeholder-card p-4 border border-dashed border-gray-300 rounded-lg flex items-center justify-center h-64">
+                  <span class="text-gray-500">Notifications will load when visible</span>
+                </div>
+              } @loading {
+                <div class="h-64 flex items-center justify-center bg-gray-50 rounded-lg border border-gray-200">
+                  <mat-spinner diameter="40"></mat-spinner>
+                </div>
+              }
             </div>
           </div>
         </div>
@@ -377,6 +414,7 @@ export class PatientDashboardComponent implements OnInit, OnDestroy, AfterViewIn
   upcomingAppointments: Appointment[] = [];
   recentMedicalHistory: MedicalHistory[] = [];
   recentNotifications: Notification[] = [];
+  patientFeedback: Feedback[] = [];
   
   // Stats
   upcomingAppointmentsCount = 0;
@@ -396,12 +434,12 @@ export class PatientDashboardComponent implements OnInit, OnDestroy, AfterViewIn
     private medicalHistoryService: MedicalHistoryService,
     private notificationService: NotificationService,
     private analyticsService: AnalyticsService,
+    private feedbackService: FeedbackService,
     private router: Router,
     private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
-    this.loadDashboardData();
     this.setupUserSubscription();
   }
 
@@ -425,6 +463,9 @@ export class PatientDashboardComponent implements OnInit, OnDestroy, AfterViewIn
       .pipe(takeUntil(this.destroy$))
       .subscribe(user => {
         this.currentUser = user;
+        if (user) {
+          this.loadDashboardData();
+        }
       });
   }
 
@@ -433,21 +474,41 @@ export class PatientDashboardComponent implements OnInit, OnDestroy, AfterViewIn
     
     // Load all dashboard data in parallel
     forkJoin({
+      profile: this.patientService.getMyProfile(this.currentUser?.username || ''),
       appointments: this.appointmentService.getPatientAppointments(),
       medicalHistory: this.medicalHistoryService.getRecentMedicalHistory(this.currentUser?.id || 0, 5),
       notifications: this.notificationService.getNotifications(),
+      feedback: this.feedbackService.getFeedbackByPatient(this.currentUser?.id || 0),
       analytics: this.analyticsService.getPatientAnalytics(this.currentUser?.id || 0, 
         new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), 
         new Date().toISOString())
     }).subscribe({
       next: (data) => {
-        this.upcomingAppointments = data.appointments.filter(apt => 
-          apt.status === AppointmentStatus.PENDING || apt.status === AppointmentStatus.CONFIRMED
-        );
+        console.log('Patient profile data:', data.profile);
+        console.log('All appointments:', data.appointments);
+        
+        // Update current user with fresh profile data
+        if (data.profile) {
+          this.currentUser = { ...this.currentUser, ...data.profile };
+        }
+        
+        // Filter upcoming appointments (PENDING, CONFIRMED, and future dates)
+        const now = new Date();
+        this.upcomingAppointments = data.appointments.filter(apt => {
+          const appointmentDate = new Date(apt.appointmentDateTime);
+          const isUpcoming = appointmentDate >= now;
+          const isValidStatus = apt.status === AppointmentStatus.PENDING || apt.status === AppointmentStatus.CONFIRMED;
+          console.log(`Appointment ${apt.id}: Date=${appointmentDate}, Status=${apt.status}, IsUpcoming=${isUpcoming}, IsValidStatus=${isValidStatus}`);
+          return isUpcoming && isValidStatus;
+        });
+        
+        console.log('Filtered upcoming appointments:', this.upcomingAppointments);
+        
         this.recentMedicalHistory = data.medicalHistory;
         this.recentNotifications = data.notifications.slice(0, 5);
+        this.patientFeedback = data.feedback;
         
-        this.calculateStats();
+        this.calculateStats(data.appointments);
         this.isLoading = false;
       },
       error: (error) => {
@@ -458,11 +519,17 @@ export class PatientDashboardComponent implements OnInit, OnDestroy, AfterViewIn
     });
   }
 
-  private calculateStats(): void {
+  private calculateStats(allAppointments: Appointment[]): void {
     this.upcomingAppointmentsCount = this.upcomingAppointments.length;
     this.completedVisitsCount = this.recentMedicalHistory.length;
-    this.medicalRecordsCount = this.recentMedicalHistory.length;
-    this.pendingFeedbackCount = 0; // Calculate based on completed appointments without feedback
+    
+    // Calculate pending feedback count (completed appointments without feedback)
+    const completedAppointments = allAppointments.filter(apt => apt.status === AppointmentStatus.COMPLETED);
+    const appointmentsWithFeedback = this.patientFeedback?.map(f => f.appointmentId) || [];
+    this.pendingFeedbackCount = completedAppointments.filter(apt => 
+       !appointmentsWithFeedback.includes(apt.id)
+     ).length;
+     this.medicalRecordsCount = this.recentMedicalHistory.length;
     this.unreadNotifications = this.recentNotifications.filter(n => n.status === 'PENDING').length;
   }
 
@@ -528,7 +595,22 @@ export class PatientDashboardComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   logout(): void {
-    this.authService.logout();
+    // Use synchronous logout to avoid backend 403 error
+    this.authService.logoutSync();
+    console.log('Logged out successfully');
     this.router.navigate(['/auth/login']);
+  }
+
+  // Navigation methods for stat cards
+  navigateToAppointments(): void {
+    this.router.navigate(['/patient/appointments']);
+  }
+
+  navigateToMedicalHistory(): void {
+    this.router.navigate(['/patient/medical-history']);
+  }
+
+  navigateToFeedback(): void {
+    this.router.navigate(['/patient/feedback']);
   }
 }

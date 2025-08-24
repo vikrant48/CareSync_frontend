@@ -1,25 +1,112 @@
-import { ApplicationConfig, importProvidersFrom } from '@angular/core';
-import { provideRouter } from '@angular/router';
-import { HttpInterceptorFn, provideHttpClient, withInterceptors, withFetch } from '@angular/common/http';
+import { ApplicationConfig, APP_INITIALIZER, importProvidersFrom, inject, signal } from '@angular/core';
+import { provideRouter, Router } from '@angular/router';
+import { HttpInterceptorFn, provideHttpClient, withInterceptors, withFetch, HttpRequest, HttpHandlerFn, HttpEvent, HttpErrorResponse } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideClientHydration } from '@angular/platform-browser';
+import { Observable, throwError, BehaviorSubject } from 'rxjs';
+import { catchError, filter, take, switchMap } from 'rxjs/operators';
 
 import { routes } from './app.routes';
-import { AuthInterceptor } from './interceptors/auth.interceptor'; // Assuming this is a class
-
-// Convert the class-based interceptor to a function-based interceptor
-import { HttpRequest, HttpHandlerFn, HttpEvent } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { AuthService } from './services/auth.service';
+import { IdleDetectionService } from './services/idle-detection.service';
 
 // Function-based interceptor
 export const authInterceptorFn: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> => {
-  // We need to use dependency injection for AuthInterceptor
-  // For now, let's just pass the request to the next handler
-  return next(req);
+  // Get the injector to manually inject services
+  const authService = inject(AuthService);
+  const router = inject(Router);
+  
+  // Log all HTTP requests for debugging
+  console.log('🌐 HTTP Request:', req.method, req.url);
+  
+  // Add auth token to request if available
+  const token = authService.getToken();
+  console.log('🔐 Interceptor - Request:', {
+    url: req.url,
+    method: req.method,
+    hasToken: !!token,
+    token: token ? token.substring(0, 20) + '...' : 'none',
+    headers: req.headers.keys()
+  });
+  
+  if (token) {
+    req = addToken(req, token);
+    console.log('✅ Token added to request');
+  } else {
+    console.log('❌ No token available for request');
+  }
+
+  return next(req).pipe(
+    catchError((error: HttpErrorResponse) => {
+      console.log('🚨 HTTP Error in interceptor:', {
+        status: error.status,
+        statusText: error.statusText,
+        url: error.url,
+        message: error.message,
+        error: error.error
+      });
+      
+      if ((error.status === 401 || error.status === 403) && !req.url.includes('auth/refresh-token')) {
+        console.log('🔄 Attempting to handle auth error (401/403)');
+        return handle401Error(req, next, authService, router);
+      }
+      return throwError(() => error);
+    })
+  );
 };
+
+// Helper functions for the interceptor
+const isRefreshing = signal(false);
+const refreshTokenSubject = new BehaviorSubject<string | null>(null);
+
+function addToken(request: HttpRequest<any>, token: string): HttpRequest<any> {
+  return request.clone({
+    setHeaders: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+}
+
+function handle401Error(
+  request: HttpRequest<any>, 
+  next: HttpHandlerFn,
+  authService: AuthService,
+  router: Router
+): Observable<HttpEvent<any>> {
+  console.log('🔄 handle401Error called for request:', request.url);
+  
+  if (!isRefreshing()) {
+    console.log('🔄 Starting token refresh process');
+    isRefreshing.set(true);
+    refreshTokenSubject.next(null);
+
+    return authService.refreshToken().pipe(
+      switchMap((response: any) => {
+        console.log('✅ Token refresh successful, retrying request');
+        isRefreshing.set(false);
+        refreshTokenSubject.next(response.accessToken);
+        return next(addToken(request, response.accessToken));
+      }),
+      catchError((error) => {
+        console.log('❌ Token refresh failed, logging out user:', error);
+        isRefreshing.set(false);
+        authService.logout();
+        router.navigate(['/auth/login']);
+        return throwError(() => error);
+      })
+    );
+  } else {
+    return refreshTokenSubject.pipe(
+      filter(token => token !== null),
+      take(1),
+      switchMap(token => next(addToken(request, token as string)))
+    );
+  }
+};
+
 
 // Material Design imports
 import { MatNativeDateModule } from '@angular/material/core';
@@ -49,6 +136,14 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { MatStepperModule } from '@angular/material/stepper';
 
+function initializeIdleDetection(idleService: IdleDetectionService) {
+  return () => {
+    idleService.init();
+    return Promise.resolve();
+  };
+}
+
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
@@ -58,6 +153,13 @@ export const appConfig: ApplicationConfig = {
     ),
     provideAnimations(),
     provideClientHydration(),
+    IdleDetectionService,
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (idleService: IdleDetectionService) => initializeIdleDetection(idleService),
+      deps: [IdleDetectionService],
+      multi: true
+    },
     importProvidersFrom([
       MatNativeDateModule,
       MatDatepickerModule,

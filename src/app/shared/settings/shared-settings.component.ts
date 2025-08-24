@@ -1,145 +1,302 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSelectModule } from '@angular/material/select';
+import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../services/auth.service';
+import { User } from '../../models/user.model';
+import { DeleteAccountDialogComponent } from './delete-account-dialog.component';
 
 @Component({
   selector: 'app-shared-settings',
-  template: `
-    <div class="settings-container p-4">
-      <h2 class="text-2xl font-bold mb-6">Account Settings</h2>
-      
-      <div class="settings-sections grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Profile Section -->
-        <div class="col-span-2">
-          <div class="bg-white rounded-lg shadow p-6 mb-6">
-            <h3 class="text-lg font-semibold mb-4">Profile Information</h3>
-            
-            <form class="space-y-4">
-              <div class="flex flex-col md:flex-row gap-4">
-                <div class="flex-1">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                  <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md" value="John">
-                </div>
-                <div class="flex-1">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                  <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md" value="Doe">
-                </div>
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                <input type="email" class="w-full px-3 py-2 border border-gray-300 rounded-md" value="john.doe@example.com">
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                <input type="tel" class="w-full px-3 py-2 border border-gray-300 rounded-md" value="(555) 123-4567">
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                <textarea class="w-full px-3 py-2 border border-gray-300 rounded-md" rows="3">123 Main St, Anytown, CA 12345</textarea>
-              </div>
-              
-              <div class="pt-2">
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save Changes</button>
-              </div>
-            </form>
-          </div>
-          
-          <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold mb-4">Password</h3>
-            
-            <form class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
-                <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
-                <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-              </div>
-              
-              <div class="pt-2">
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Update Password</button>
-              </div>
-            </form>
-          </div>
-        </div>
-        
-        <!-- Preferences Section -->
-        <div class="col-span-1">
-          <div class="bg-white rounded-lg shadow p-6 mb-6">
-            <h3 class="text-lg font-semibold mb-4">Notification Preferences</h3>
-            
-            <div class="space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="text-sm">Email Notifications</span>
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" checked class="sr-only peer">
-                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                </label>
-              </div>
-              
-              <div class="flex items-center justify-between">
-                <span class="text-sm">SMS Notifications</span>
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" class="sr-only peer">
-                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                </label>
-              </div>
-              
-              <div class="flex items-center justify-between">
-                <span class="text-sm">Appointment Reminders</span>
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" checked class="sr-only peer">
-                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                </label>
-              </div>
-            </div>
-          </div>
-          
-          <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold mb-4">Theme</h3>
-            
-            <div class="space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="text-sm">Dark Mode</span>
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" class="sr-only peer">
-                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                </label>
-              </div>
-              
-              <div class="mt-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Color Theme</label>
-                <div class="flex space-x-2">
-                  <button class="w-8 h-8 rounded-full bg-blue-600 ring-2 ring-offset-2 ring-blue-600"></button>
-                  <button class="w-8 h-8 rounded-full bg-green-600"></button>
-                  <button class="w-8 h-8 rounded-full bg-purple-600"></button>
-                  <button class="w-8 h-8 rounded-full bg-red-600"></button>
-                  <button class="w-8 h-8 rounded-full bg-gray-600"></button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="mt-8 border-t pt-6">
-        <div class="flex justify-between items-center">
-          <button class="px-4 py-2 text-red-600 border border-red-600 rounded-md hover:bg-red-50">Delete Account</button>
-          <button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save All Changes</button>
-        </div>
-      </div>
-    </div>
-  `,
-  styles: []
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+    MatSlideToggleModule,
+    MatProgressSpinnerModule,
+    MatSnackBarModule,
+    MatDialogModule,
+    MatDividerModule,
+    MatTabsModule,
+    MatCheckboxModule,
+    MatSlideToggleModule,
+    MatSelectModule,
+    FormsModule
+  ],
+  templateUrl: './shared-settings.component.html',
+  styleUrls: ['./shared-settings.component.css']
 })
-export class SharedSettingsComponent {
-  // Component logic would go here
+export class SharedSettingsComponent implements OnInit {
+  profileForm!: FormGroup;
+  passwordForm!: FormGroup;
+  notificationForm!: FormGroup;
+  currentUser: User | null = null;
+  
+  isUpdatingProfile = false;
+  isChangingPassword = false;
+  isUpdatingNotifications = false;
+
+  isDarkMode = false;
+  selectedColorTheme = 'blue';
+  
+  successMessage = '';
+  errorMessage = '';
+  
+  colorThemes = [
+    { name: 'Blue', value: 'blue', color: '#3b82f6' },
+    { name: 'Green', value: 'green', color: '#10b981' },
+    { name: 'Purple', value: 'purple', color: '#8b5cf6' },
+    { name: 'Red', value: 'red', color: '#ef4444' },
+    { name: 'Gray', value: 'gray', color: '#6b7280' }
+  ];
+
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
+  ) {
+    this.initializeForms();
+  }
+
+  ngOnInit(): void {
+    this.loadUserData();
+    this.loadUserPreferences();
+  }
+
+  private initializeForms(): void {
+    this.profileForm = this.fb.group({
+      firstName: ['', [Validators.required]],
+      lastName: ['', [Validators.required]],
+      email: [{ value: '', disabled: true }],
+      phoneNumber: [''],
+      address: [''],
+      dateOfBirth: [''],
+      specialization: ['']
+    });
+
+    this.passwordForm = this.fb.group({
+      currentPassword: ['', [Validators.required]],
+      newPassword: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', [Validators.required]]
+    }, { validators: this.passwordMatchValidator });
+
+    this.notificationForm = this.fb.group({
+      emailNotifications: [true],
+      smsNotifications: [false],
+      appointmentReminders: [true],
+      marketingEmails: [false]
+    });
+  }
+
+  private passwordMatchValidator(form: FormGroup) {
+    const newPassword = form.get('newPassword');
+    const confirmPassword = form.get('confirmPassword');
+    
+    if (newPassword && confirmPassword && newPassword.value !== confirmPassword.value) {
+      return { passwordMismatch: true };
+    }
+    return null;
+  }
+
+  private loadUserData(): void {
+    this.currentUser = this.authService.getCurrentUser();
+    
+    if (this.currentUser) {
+      this.profileForm.patchValue({
+        firstName: this.currentUser.firstName,
+        lastName: this.currentUser.lastName,
+        email: this.currentUser.email,
+        phoneNumber: this.currentUser.phoneNumber || '',
+        address: this.currentUser.address || '',
+        dateOfBirth: this.isPatient() && 'dateOfBirth' in this.currentUser ? this.currentUser.dateOfBirth : '',
+        specialization: this.isDoctor() && 'specialization' in this.currentUser ? this.currentUser.specialization : ''
+      });
+    }
+  }
+
+  private loadUserPreferences(): void {
+    // Load preferences from localStorage or user service
+    const preferences = localStorage.getItem('userPreferences');
+    if (preferences) {
+      const parsed = JSON.parse(preferences);
+      this.notificationForm.patchValue(parsed.notifications || {});
+      this.isDarkMode = parsed.theme?.darkMode || false;
+      this.selectedColorTheme = parsed.theme?.colorTheme || 'blue';
+    }
+  }
+
+  isPatient(): boolean {
+    return this.currentUser?.role === 'PATIENT';
+  }
+
+  isDoctor(): boolean {
+    return this.currentUser?.role === 'DOCTOR';
+  }
+
+  onUpdateProfile(): void {
+    if (this.profileForm.invalid || !this.profileForm.dirty) {
+      return;
+    }
+
+    this.isUpdatingProfile = true;
+    const profileData = this.profileForm.value;
+
+    this.authService.updateProfile(profileData).subscribe({
+      next: (updatedUser) => {
+        this.isUpdatingProfile = false;
+        this.currentUser = updatedUser;
+        this.profileForm.markAsPristine();
+        this.snackBar.open('Profile updated successfully', 'Close', {
+          duration: 5000,
+          panelClass: ['success-snackbar']
+        });
+      },
+      error: (error) => {
+        this.isUpdatingProfile = false;
+        this.snackBar.open(
+          error.error?.message || 'Failed to update profile. Please try again.',
+          'Close',
+          {
+            duration: 5000,
+            panelClass: ['error-snackbar']
+          }
+        );
+      }
+    });
+  }
+
+  onChangePassword(): void {
+    if (this.passwordForm.invalid) {
+      return;
+    }
+
+    this.isChangingPassword = true;
+    const { currentPassword, newPassword, confirmPassword } = this.passwordForm.value;
+
+    this.authService.changePassword({ currentPassword, newPassword, confirmPassword }).subscribe({
+      next: () => {
+        this.isChangingPassword = false;
+        this.passwordForm.reset();
+        this.snackBar.open('Password updated successfully', 'Close', {
+          duration: 5000,
+          panelClass: ['success-snackbar']
+        });
+      },
+      error: (error) => {
+        this.isChangingPassword = false;
+        this.snackBar.open(
+          error.error?.message || 'Failed to update password. Please try again.',
+          'Close',
+          {
+            duration: 5000,
+            panelClass: ['error-snackbar']
+          }
+        );
+      }
+    });
+  }
+
+  onUpdateNotifications(): void {
+    if (!this.notificationForm.dirty) {
+      return;
+    }
+
+    this.isUpdatingNotifications = true;
+    const preferences = this.getStoredPreferences();
+    preferences.notifications = this.notificationForm.value;
+    
+    localStorage.setItem('userPreferences', JSON.stringify(preferences));
+    this.notificationForm.markAsPristine();
+    
+    setTimeout(() => {
+      this.isUpdatingNotifications = false;
+      this.snackBar.open('Notification preferences saved', 'Close', {
+        duration: 3000,
+        panelClass: ['success-snackbar']
+      });
+    }, 500);
+  }
+
+  onToggleDarkMode(): void {
+    const preferences = this.getStoredPreferences();
+    preferences.theme = preferences.theme || {};
+    preferences.theme.darkMode = this.isDarkMode;
+    
+    localStorage.setItem('userPreferences', JSON.stringify(preferences));
+    
+    this.snackBar.open(
+      `${this.isDarkMode ? 'Dark' : 'Light'} mode enabled`,
+      'Close',
+      { duration: 2000 }
+    );
+  }
+
+  onSelectColorTheme(theme: string): void {
+    this.selectedColorTheme = theme;
+    
+    const preferences = this.getStoredPreferences();
+    preferences.theme = preferences.theme || {};
+    preferences.theme.colorTheme = theme;
+    
+    localStorage.setItem('userPreferences', JSON.stringify(preferences));
+    
+    this.snackBar.open(`${theme.charAt(0).toUpperCase() + theme.slice(1)} theme selected`, 'Close', {
+      duration: 2000
+    });
+  }
+
+  onDeleteAccount(): void {
+    const dialogRef = this.dialog.open(DeleteAccountDialogComponent, {
+      width: '400px',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.authService.deleteAccount(result.password).subscribe({
+          next: () => {
+            this.snackBar.open('Account deleted successfully', 'Close', {
+              duration: 5000,
+              panelClass: ['success-snackbar']
+            });
+            this.authService.logout();
+          },
+          error: (error) => {
+            this.snackBar.open(
+              error.error?.message || 'Failed to delete account. Please try again.',
+              'Close',
+              {
+                duration: 5000,
+                panelClass: ['error-snackbar']
+              }
+            );
+          }
+        });
+      }
+    });
+  }
+
+  private getStoredPreferences(): any {
+    const stored = localStorage.getItem('userPreferences');
+    return stored ? JSON.parse(stored) : {};
+  }
 }

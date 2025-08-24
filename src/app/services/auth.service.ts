@@ -1,31 +1,48 @@
-import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import {
+  Injectable,
+  Inject,
+  PLATFORM_ID,
+  signal,
+  computed,
+  effect,
+  inject,
+} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap, timer, switchMap } from 'rxjs';
+import { Router } from '@angular/router';
+import { Observable, tap, timer, switchMap, of, catchError } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { environment } from '../../environments/environment';
-import { 
-  AuthResponse, 
-  LoginRequest, 
-  RegisterRequest, 
-  User, 
+import {
+  AuthResponse,
+  LoginRequest,
+  RegisterRequest,
+  User,
   UserRole,
   ChangePasswordRequest,
   ForgotPasswordRequest,
-  ResetPasswordRequest
+  ResetPasswordRequest,
 } from '../models/user.model';
+// DoctorService and PatientService imports removed - now using unified /current-user endpoint
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
-  public currentUser$ = this.currentUserSubject.asObservable();
+  // Use signals for state management
+  private currentUserSignal = signal<User | null>(null);
+  public currentUser = computed(() => this.currentUserSignal());
+
+  // For backward compatibility with code still using observables
+  public currentUser$ = toObservable(this.currentUserSignal);
+
   private baseUrl = `${environment.apiUrl}/api/auth`;
   private refreshTokenTimer: any;
 
   constructor(
     private http: HttpClient,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private router: Router
   ) {
     this.loadUserFromStorage();
     this.setupTokenRefresh();
@@ -35,55 +52,88 @@ export class AuthService {
     if (isPlatformBrowser(this.platformId)) {
       const user = localStorage.getItem('currentUser');
       const token = localStorage.getItem('token');
-      if (user && token) {
-        this.currentUserSubject.next(JSON.parse(user));
+
+      if (user && user !== 'undefined' && token) {
+        try {
+          this.currentUserSignal.set(JSON.parse(user));
+        } catch (e) {
+          console.error('Invalid user JSON in localStorage', e);
+          this.currentUserSignal.set(null);
+        }
+      } else {
+        this.currentUserSignal.set(null);
       }
     }
   }
 
   private setupTokenRefresh(): void {
     if (isPlatformBrowser(this.platformId)) {
-      // Refresh token every 14 minutes (assuming 15-minute token expiry)
-      this.refreshTokenTimer = timer(0, 14 * 60 * 1000).pipe(
-        switchMap(() => this.refreshToken())
-      ).subscribe();
+      // Only setup refresh timer if we have a refresh token
+      const refreshToken = this.getRefreshToken();
+      if (refreshToken) {
+        // Refresh token every 58 minutes (assuming 60-minute token expiry)
+        this.refreshTokenTimer = timer(58 * 60 * 1000, 58 * 60 * 1000)
+          .pipe(
+            switchMap(() => this.refreshToken()),
+            catchError(error => {
+              console.warn('Token refresh failed:', error);
+              return of(null);
+            })
+          )
+          .subscribe();
+      }
     }
   }
 
   // Register User
   register(userData: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.baseUrl}/register`, userData)
+    return this.http
+      .post<AuthResponse>(`${this.baseUrl}/register`, userData)
       .pipe(
-        tap(response => {
+        tap((response) => {
           this.handleAuthResponse(response);
+          // Fetch complete user profile after successful registration
+          this.fetchUserProfile(response.username, response.role as UserRole);
         })
       );
   }
 
   // Login User
   login(credentials: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.baseUrl}/login`, credentials)
+    return this.http
+      .post<AuthResponse>(`${this.baseUrl}/login`, credentials)
       .pipe(
-        tap(response => {
+        tap((response) => {
           this.handleAuthResponse(response);
+          // Fetch complete user profile after successful login
+          this.fetchUserProfile(response.username, response.role as UserRole);
         })
       );
+  }
+
+  // Get current user (signal-based API)
+  getCurrentUser(): User | null {
+    return this.currentUser();
   }
 
   // Refresh Token
   refreshToken(): Observable<AuthResponse> {
     const refreshToken = this.getRefreshToken();
     if (!refreshToken) {
-      return new Observable(subscriber => subscriber.error('No refresh token'));
+      return new Observable((subscriber) =>
+        subscriber.error('No refresh token')
+      );
     }
 
-    return this.http.post<AuthResponse>(`${this.baseUrl}/refresh-token`, { 
-      refreshToken 
-    }).pipe(
-      tap(response => {
-        this.handleAuthResponse(response);
+    return this.http
+      .post<AuthResponse>(`${this.baseUrl}/refresh-token`, {
+        refreshToken,
       })
-    );
+      .pipe(
+        tap((response) => {
+          this.handleAuthResponse(response);
+        })
+      );
   }
 
   // Logout User
@@ -93,6 +143,11 @@ export class AuthService {
         this.clearAuthData();
       })
     );
+  }
+
+  // Synchronous logout (for immediate UI updates)
+  logoutSync(): void {
+    this.clearAuthData();
   }
 
   // Change Password
@@ -110,58 +165,110 @@ export class AuthService {
     return this.http.post(`${this.baseUrl}/reset-password`, request);
   }
 
-  // Verify Email (if implemented)
-  verifyEmail(token: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/verify-email`, { token });
+  // Verify Email
+  verifyEmail(token: string, email: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/verify-email`, { token, email });
   }
 
   // Resend Email Verification
-  resendEmailVerification(email: string): Observable<any> {
+  resendVerificationEmail(email: string): Observable<any> {
     return this.http.post(`${this.baseUrl}/resend-verification`, { email });
   }
 
   // Update Profile
   updateProfile(profileData: Partial<User>): Observable<User> {
-    return this.http.put<User>(`${this.baseUrl}/profile`, profileData)
-      .pipe(
-        tap(user => {
-          this.updateCurrentUser(user);
-        })
-      );
+    return this.http.put<User>(`${this.baseUrl}/profile`, profileData).pipe(
+      tap((user) => {
+        this.updateCurrentUser(user);
+      })
+    );
   }
 
-  // Get Current User Profile
+  // Get Current User Profile using the new backend endpoint
   getCurrentUserProfile(): Observable<User> {
-    return this.http.get<User>(`${this.baseUrl}/profile`)
-      .pipe(
-        tap(user => {
-          this.updateCurrentUser(user);
-        })
-      );
+    return this.http.get<User>(`${this.baseUrl}/current-user`).pipe(
+      tap((user) => {
+        this.updateCurrentUser(user);
+      })
+    );
   }
 
   // Delete Account
   deleteAccount(password: string): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/account`, { 
-      body: { password } 
-    }).pipe(
-      tap(() => {
-        this.clearAuthData();
+    return this.http
+      .delete(`${this.baseUrl}/account`, {
+        body: { password },
       })
-    );
+      .pipe(
+        tap(() => {
+          this.clearAuthData();
+        })
+      );
+  }
+
+  // Fetch complete user profile after login using the new backend endpoint
+  private fetchUserProfile(username: string, role: UserRole): void {
+    if (!username || !role) {
+      console.warn('Username or role not provided for profile fetch');
+      return;
+    }
+
+    // Use the new /current-user endpoint that extracts username from JWT token
+    this.getCurrentUserProfile().subscribe({
+      next: (user: User) => {
+        console.log('Fetched complete user profile:', user);
+        if (user && user.id && user.id !== 0) {
+          // Update localStorage and signal with complete user data
+          if (isPlatformBrowser(this.platformId)) {
+            localStorage.setItem('currentUser', JSON.stringify(user));
+          }
+          this.currentUserSignal.set(user);
+        }
+      },
+      error: (error) => {
+        console.error('Failed to fetch user profile:', error);
+        // Keep the basic user data from login response if profile fetch fails
+      }
+    });
   }
 
   // Session Management
   private handleAuthResponse(response: AuthResponse): void {
     if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('token', response.token);
+      // Handle both token formats (token or accessToken)
+      const token = response.accessToken || response.token || '';
+      localStorage.setItem('token', token);
+      
       if (response.refreshToken) {
         localStorage.setItem('refreshToken', response.refreshToken);
       }
-      localStorage.setItem('currentUser', JSON.stringify(response.user));
-      localStorage.setItem('tokenExpiry', Date.now().toString());
+      
+      // Create user object if not present in response
+      let user = response.user;
+      if (!user && response.username && response.role) {
+        user = {
+          username: response.username,
+          role: response.role as UserRole,
+          email: '',
+          firstName: '',
+          lastName: '',
+          id: 0,
+          phoneNumber: '',
+          address: '',
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+      }
+      
+      if (user) {
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        this.currentUserSignal.set(user);
+      }
+
+      const expiryTime = Date.now() + 60 * 60 * 1000; // 60 minutes session timeout
+      localStorage.setItem('tokenExpiry', expiryTime.toString());
     }
-    this.currentUserSubject.next(response.user);
   }
 
   private clearAuthData(): void {
@@ -171,14 +278,14 @@ export class AuthService {
       localStorage.removeItem('currentUser');
       localStorage.removeItem('tokenExpiry');
     }
-    this.currentUserSubject.next(null);
+    this.currentUserSignal.set(null);
   }
 
   private updateCurrentUser(user: User): void {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem('currentUser', JSON.stringify(user));
     }
-    this.currentUserSubject.next(user);
+    this.currentUserSignal.set(user);
   }
 
   // Token Management
@@ -196,61 +303,93 @@ export class AuthService {
     return null;
   }
 
-  getCurrentUser(): User | null {
-    return this.currentUserSubject.value;
+  // This method is now redundant as we have a signal-based API
+  // Keeping for backward compatibility
+  getCurrentUserFromSubject(): User | null {
+    return this.currentUser();
   }
 
-  isAuthenticated(): boolean {
+  // Authentication status as a computed signal
+  isAuthenticated = computed(() => {
     const token = this.getToken();
     if (!token) return false;
 
     // Check if token is expired
-    const expiry = localStorage.getItem('tokenExpiry');
-    if (expiry && Date.now() > parseInt(expiry)) {
-      this.clearAuthData();
-      return false;
+    if (isPlatformBrowser(this.platformId)) {
+      const expiry = localStorage.getItem('tokenExpiry');
+      if (expiry && Date.now() > parseInt(expiry)) {
+        this.clearAuthData();
+        return false;
+      }
     }
 
     return true;
+  });
+
+  // For backward compatibility
+  isAuthenticatedValue(): boolean {
+    return this.isAuthenticated();
   }
 
-  getUserRole(): UserRole | null {
-    const user = this.getCurrentUser();
+  // User role as a computed signal
+  userRole = computed(() => {
+    const user = this.currentUser();
     return user ? user.role : null;
+  });
+
+  // For backward compatibility
+  getUserRole(): UserRole | null {
+    return this.userRole();
   }
 
-  isDoctor(): boolean {
-    return this.getUserRole() === UserRole.DOCTOR;
+  // Role checks as computed signals
+  isDoctor = computed(() => this.userRole() === UserRole.DOCTOR);
+  isPatient = computed(() => this.userRole() === UserRole.PATIENT);
+  isAdmin = computed(() => this.userRole() === UserRole.ADMIN);
+
+  // For backward compatibility
+  isDoctorValue(): boolean {
+    return this.isDoctor();
   }
 
-  isPatient(): boolean {
-    return this.getUserRole() === UserRole.PATIENT;
+  isPatientValue(): boolean {
+    return this.isPatient();
   }
 
-  isAdmin(): boolean {
-    return this.getUserRole() === UserRole.ADMIN;
+  isAdminValue(): boolean {
+    return this.isAdmin();
   }
 
+  // Role checking methods
   hasRole(role: UserRole): boolean {
-    return this.getUserRole() === role;
+    return this.userRole() === role;
   }
 
   hasAnyRole(roles: UserRole[]): boolean {
-    const userRole = this.getUserRole();
+    const userRole = this.userRole();
     return userRole ? roles.includes(userRole) : false;
   }
 
-  // Session timeout handling
-  getSessionTimeout(): number {
-    const expiry = localStorage.getItem('tokenExpiry');
-    if (expiry) {
-      return parseInt(expiry) - Date.now();
+  // Session timeout handling as signals
+  sessionTimeout = computed(() => {
+    if (isPlatformBrowser(this.platformId)) {
+      const expiry = localStorage.getItem('tokenExpiry');
+      if (expiry) {
+        return parseInt(expiry) - Date.now();
+      }
     }
     return 0;
+  });
+
+  isSessionExpired = computed(() => this.sessionTimeout() <= 0);
+
+  // For backward compatibility
+  getSessionTimeout(): number {
+    return this.sessionTimeout();
   }
 
-  isSessionExpired(): boolean {
-    return this.getSessionTimeout() <= 0;
+  isSessionExpiredValue(): boolean {
+    return this.isSessionExpired();
   }
 
   // Auto logout on session expiry
@@ -258,7 +397,21 @@ export class AuthService {
     if (this.isSessionExpired()) {
       this.clearAuthData();
       // Redirect to login page
-      window.location.href = '/auth/login';
+      if (isPlatformBrowser(this.platformId)) {
+        window.location.href = '/auth/login';
+      }
+    }
+  }
+
+  // Setup session expiry effect
+  setupSessionExpiryEffect(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      effect(() => {
+        if (this.isSessionExpired()) {
+          this.logoutSync();
+          this.router.navigate(['/auth/login']);
+        }
+      });
     }
   }
 

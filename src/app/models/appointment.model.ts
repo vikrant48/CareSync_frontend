@@ -7,6 +7,13 @@ export enum AppointmentStatus {
   RESCHEDULED = 'RESCHEDULED'
 }
 
+export interface Insurance {
+  provider: string;
+  policyNumber: string;
+  groupNumber: string;
+  copay: number;
+}
+
 export interface Appointment {
   id: number;
   patientId: number;
@@ -17,6 +24,7 @@ export interface Appointment {
   notes?: string;
   createdAt: string;
   updatedAt: string;
+  insurance?: Insurance;
   patient?: {
     id: number;
     firstName: string;
@@ -83,4 +91,29 @@ export interface DoctorSchedule {
   totalAppointments: number;
   completedAppointments: number;
   pendingAppointments: number;
+}
+
+export interface MedicalHistory {
+  id: number;
+  visitDate: string;
+  symptoms: string;
+  diagnosis: string;
+  treatment: string;
+}
+
+export interface DoctorAppointment {
+  appointmentId: number;
+  patientName: string;
+  patientEmail: string;
+  patientContactInfo: string;
+  patientIllnessDetails: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  status: 'PENDING' | 'SCHEDULED' | 'BOOKED' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'RESCHEDULED';
+  reason: string;
+  createdAt: string;
+  updatedAt: string;
+  statusChangedAt: string;
+  statusChangedBy: string;
+  medicalHistory: MedicalHistory[];
 }

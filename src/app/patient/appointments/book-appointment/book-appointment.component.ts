@@ -18,6 +18,7 @@ import { AppointmentService } from '../../../services/appointment.service';
 import { DoctorService } from '../../../services/doctor.service';
 import { AppointmentCreate, AvailableSlot as ApiAvailableSlot } from '../../../models/appointment.model';
 import { Doctor } from '../../../models/user.model';
+import { AuthService } from '../../../services/auth.service';
 
 // Local interface for time slots that matches the component usage
 interface AvailableSlot {
@@ -519,7 +520,8 @@ export class BookAppointmentComponent implements OnInit {
     private doctorService: DoctorService,
     private router: Router,
     private route: ActivatedRoute,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private authService: AuthService
   ) {
     this.doctorForm = this.fb.group({});
     this.datetimeForm = this.fb.group({
@@ -529,9 +531,26 @@ export class BookAppointmentComponent implements OnInit {
       reason: ['', [Validators.required]],
       notes: ['']
     });
+    
+    // Make this component available globally for debugging
+    (window as any).bookingComponent = this;
   }
 
   ngOnInit(): void {
+    // Check if user is authenticated
+    console.log('🚀 Component initialized - Auth check:', {
+      isAuthenticated: this.authService.isAuthenticated(),
+      token: this.authService.getToken(),
+      currentUser: this.authService.getCurrentUser()
+    });
+    
+    if (!this.authService.isAuthenticated()) {
+      console.error('❌ User is not authenticated on init');
+      this.showErrorMessage('You must be logged in to book an appointment.');
+      this.router.navigate(['/auth/login'], { queryParams: { returnUrl: this.router.url } });
+      return;
+    }
+    
     this.loadDoctors();
     
     // Check if doctor is pre-selected from query params
@@ -563,7 +582,29 @@ export class BookAppointmentComponent implements OnInit {
   }
 
   onDateChange(event: any): void {
-    this.selectedDate = event.value;
+    const selectedDate = event.value;
+    
+    // Validate the selected date
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const selectedDateOnly = new Date(selectedDate);
+    selectedDateOnly.setHours(0, 0, 0, 0);
+    
+    const maxDate = new Date();
+    maxDate.setMonth(maxDate.getMonth() + 3); // Allow booking up to 3 months in advance
+    
+    if (selectedDateOnly < today) {
+      this.showErrorMessage('Cannot book appointments for past dates.');
+      return;
+    }
+    
+    if (selectedDate > maxDate) {
+      this.showErrorMessage('Cannot book appointments more than 3 months in advance.');
+      return;
+    }
+    
+    this.selectedDate = selectedDate;
     this.selectedSlot = null;
     
     if (this.selectedDate && this.selectedDoctor) {
@@ -573,58 +614,168 @@ export class BookAppointmentComponent implements OnInit {
 
   loadAvailableSlots(): void {
     if (!this.selectedDoctor || !this.selectedDate) return;
-    const dateString = this.selectedDate.toISOString().split('T')[0];
+    // Format date as YYYY-MM-DD in local timezone to avoid timezone conversion issues
+    const year = this.selectedDate.getFullYear();
+    const month = (this.selectedDate.getMonth() + 1).toString().padStart(2, '0');
+    const day = this.selectedDate.getDate().toString().padStart(2, '0');
+    const dateString = `${year}-${month}-${day}`;
+    console.log(`Fetching available slots for doctor ${this.selectedDoctor.id} on date ${dateString}`);
+    
     this.appointmentService.getAvailableSlots(this.selectedDoctor.id, dateString).subscribe({
       next: (response: ApiAvailableSlot) => {
+        console.log('Raw API response:', response);
+        
         // Transform the API response to match our local interface
-        if (response && response.timeSlots) {
+        if (response && response.timeSlots && response.timeSlots.length > 0) {
+          console.log(`Found ${response.timeSlots.length} time slots for date ${response.date}`);
+          
           this.availableSlots = response.timeSlots.map(timeSlot => {
-            // Parse the time slot string (assuming format like "09:00-10:00")
-            const [startTime, endTime] = timeSlot.split('-');
+            // Try to parse the time slot string (could be "09:00-10:00" or just "09:00")
+            let startTime = timeSlot;
+            let endTime = '';
+            
+            // Check if the timeSlot contains a hyphen (indicating a range)
+            if (timeSlot.includes('-')) {
+              const parts = timeSlot.split('-');
+              startTime = parts[0].trim();
+              endTime = parts[1].trim();
+            } else {
+              // If no hyphen, assume it's just a start time and calculate end time (1 hour later)
+              startTime = timeSlot.trim();
+              // Try to calculate an end time by adding 1 hour
+              try {
+                const [hours, minutes] = startTime.split(':').map(Number);
+                const endHour = (hours + 1) % 24;
+                endTime = `${endHour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+              } catch (e) {
+                // If parsing fails, just use the start time
+                endTime = startTime;
+                console.error('Error parsing time slot:', e);
+              }
+            }
+            
             return {
-              startTime: startTime.trim(),
-              endTime: endTime.trim(),
+              startTime: startTime,
+              endTime: endTime,
               isAvailable: true
             };
           });
+          console.log('Transformed available slots:', this.availableSlots);
         } else {
           this.availableSlots = [];
+          console.warn('No available slots returned from API or invalid response format:', response);
         }
       },
       error: (error) => {
         console.error('Error loading available slots:', error);
         this.showErrorMessage('Failed to load available time slots.');
+        this.availableSlots = [];
       }
     });
   }
 
   selectTimeSlot(slot: AvailableSlot): void {
     this.selectedSlot = slot;
+    console.log('Selected time slot:', slot);
   }
 
   bookAppointment(): void {
+    // Check if user is authenticated
+    console.log('🔐 Authentication check:', {
+      isAuthenticated: this.authService.isAuthenticated(),
+      token: this.authService.getToken(),
+      currentUser: this.authService.getCurrentUser(),
+      tokenExpiry: localStorage.getItem('tokenExpiry'),
+      currentTime: Date.now(),
+      tokenExpired: localStorage.getItem('tokenExpiry') ? Date.now() > parseInt(localStorage.getItem('tokenExpiry')!) : 'no expiry found'
+    });
+    
+    if (!this.authService.isAuthenticated()) {
+      console.error('❌ User is not authenticated');
+      this.showErrorMessage('You must be logged in to book an appointment.');
+      this.router.navigate(['/auth/login'], { queryParams: { returnUrl: this.router.url } });
+      return;
+    }
+    
     if (!this.selectedDoctor || !this.selectedSlot || this.detailsForm.invalid) {
+      console.error('Cannot book appointment: missing required data', {
+        hasDoctor: !!this.selectedDoctor,
+        hasSlot: !!this.selectedSlot,
+        formValid: !this.detailsForm.invalid
+      });
+      this.showErrorMessage('Please complete all required fields before booking.');
       return;
     }
 
     this.isBooking = true;
     
+    // Format the appointment date and time correctly
+    if (!this.selectedDate) {
+      console.error('Selected date is missing');
+      this.showErrorMessage('Please select a valid date.');
+      this.isBooking = false;
+      return;
+    }
+    
+    // Create a new Date object with the selected date and time
+    const [hours, minutes] = this.selectedSlot.startTime.split(':').map(Number);
+    const appointmentDateObj = new Date(this.selectedDate);
+    appointmentDateObj.setHours(hours, minutes, 0, 0);
+    
+    // Format as local datetime string to avoid timezone conversion issues
+    const year = appointmentDateObj.getFullYear();
+    const month = String(appointmentDateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(appointmentDateObj.getDate()).padStart(2, '0');
+    const hour = String(appointmentDateObj.getHours()).padStart(2, '0');
+    const minute = String(appointmentDateObj.getMinutes()).padStart(2, '0');
+    const second = String(appointmentDateObj.getSeconds()).padStart(2, '0');
+    
+    const appointmentDateTime = `${year}-${month}-${day}T${hour}:${minute}:${second}`;
+    
+    console.log('Original selected date:', this.selectedDate);
+    console.log('Selected time slot:', this.selectedSlot.startTime);
+    console.log('Created date object:', appointmentDateObj);
+    
+    console.log('Booking appointment with datetime:', appointmentDateTime);
+    
     const appointmentData: AppointmentCreate = {
       doctorId: this.selectedDoctor.id,
-      appointmentDateTime: this.selectedSlot.startTime,
+      appointmentDateTime: appointmentDateTime,
       reason: this.detailsForm.get('reason')?.value,
       notes: this.detailsForm.get('notes')?.value || ''
     };
 
+    console.log('Appointment data being sent:', appointmentData);
+
     this.appointmentService.bookAppointment(appointmentData).subscribe({
       next: (appointment) => {
         this.isBooking = false;
+        console.log('Appointment booked successfully:', appointment);
         this.showSuccessMessage('Appointment booked successfully!');
         this.router.navigate(['/patient/appointments']);
       },
       error: (error) => {
         this.isBooking = false;
-        this.showErrorMessage(error.error?.message || 'Failed to book appointment.');
+        console.error('Error booking appointment:', error);
+        console.error('Error details:', {
+          status: error.status,
+          statusText: error.statusText,
+          error: error.error,
+          message: error.message,
+          url: error.url
+        });
+        // Show a more detailed error message to the user
+        let errorMessage = 'Failed to book appointment.';
+        if (error.error?.message) {
+          errorMessage = `Error: ${error.error.message}`;
+        } else if (error.status === 403) {
+          errorMessage = 'Authentication error. Please log in again.';
+        } else if (error.status === 400) {
+          errorMessage = 'Invalid appointment data. Please check your selections.';
+        } else if (error.status === 409) {
+          errorMessage = 'This time slot is no longer available. Please select another time.';
+        }
+        this.showErrorMessage(errorMessage);
       }
     });
   }
@@ -645,5 +796,30 @@ export class BookAppointmentComponent implements OnInit {
       verticalPosition: 'top',
       panelClass: ['error-snackbar']
     });
+  }
+
+  // Debug method for testing authentication
+  testAuth(): void {
+    console.log('🧪 Testing authentication status:');
+    console.log('isAuthenticated:', this.authService.isAuthenticated());
+    console.log('token:', this.authService.getToken());
+    console.log('currentUser:', this.authService.getCurrentUser());
+    console.log('tokenExpiry:', localStorage.getItem('tokenExpiry'));
+    console.log('currentTime:', Date.now());
+    
+    if (this.authService.getToken()) {
+      console.log('✅ Token exists, testing API call...');
+      // Test a simple API call to see if token works
+      this.appointmentService.getPatientAppointments().subscribe({
+        next: (appointments) => {
+          console.log('✅ API call successful:', appointments);
+        },
+        error: (error) => {
+          console.log('❌ API call failed:', error);
+        }
+      });
+    } else {
+      console.log('❌ No token found');
+    }
   }
 }

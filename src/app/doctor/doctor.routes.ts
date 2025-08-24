@@ -10,13 +10,6 @@ export const DOCTOR_ROUTES: Routes = [
     path: 'dashboard',
     loadComponent: () => import('./dashboard/doctor-dashboard.component').then(m => m.DoctorDashboardComponent),
     title: 'Doctor Dashboard - CareSync'
-  }
-  // TODO: Uncomment and implement these components as they are created
-  /*
-  {
-    path: 'profile',
-    loadComponent: () => import('./profile/doctor-profile.component').then(m => m.DoctorProfileComponent),
-    title: 'Doctor Profile - CareSync'
   },
   {
     path: 'appointments',
@@ -25,6 +18,16 @@ export const DOCTOR_ROUTES: Routes = [
         path: '',
         loadComponent: () => import('./appointments/doctor-appointments.component').then(m => m.DoctorAppointmentsComponent),
         title: 'My Appointments - CareSync'
+      },
+      {
+        path: 'upcoming',
+        loadComponent: () => import('./appointments/upcoming-appointments/upcoming-appointments.component').then(m => m.UpcomingAppointmentsComponent),
+        title: 'Upcoming Appointments - CareSync'
+      },
+      {
+        path: 'past',
+        loadComponent: () => import('./appointments/past-appointments/past-appointments.component').then(m => m.PastAppointmentsComponent),
+        title: 'Past Appointments - CareSync'
       },
       {
         path: 'schedule',
@@ -37,6 +40,11 @@ export const DOCTOR_ROUTES: Routes = [
         title: 'Appointment Details - CareSync'
       }
     ]
+  },
+  {
+    path: 'schedule',
+    loadComponent: () => import('./appointments/schedule/doctor-schedule.component').then(m => m.DoctorScheduleComponent),
+    title: 'My Schedule - CareSync'
   },
   {
     path: 'patients',
@@ -59,12 +67,32 @@ export const DOCTOR_ROUTES: Routes = [
     ]
   },
   {
+    path: 'medical-records',
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./medical-records/doctor-medical-records.component').then(m => m.DoctorMedicalRecordsComponent),
+        title: 'Medical Records - CareSync'
+      },
+      {
+        path: 'view/:id',
+        loadComponent: () => import('./medical-history/medical-history-details/medical-history-details.component').then(m => m.MedicalHistoryDetailsComponent),
+        title: 'Medical Record Details - CareSync'
+      },
+      {
+        path: 'edit/:id',
+        loadComponent: () => import('./medical-history/edit-medical-history/edit-medical-history.component').then(m => m.EditMedicalHistoryComponent),
+        title: 'Edit Medical Record - CareSync'
+      }
+    ]
+  },
+  {
     path: 'medical-history',
     children: [
       {
         path: '',
         loadComponent: () => import('./medical-history/doctor-medical-history.component').then(m => m.DoctorMedicalHistoryComponent),
-        title: 'Medical Records - CareSync'
+        title: 'Medical History - CareSync'
       },
       {
         path: 'create',
@@ -104,50 +132,37 @@ export const DOCTOR_ROUTES: Routes = [
     ]
   },
   {
-    path: 'feedback',
-    children: [
-      {
-        path: '',
-        loadComponent: () => import('./feedback/doctor-feedback.component').then(m => m.DoctorFeedbackComponent),
-        title: 'Patient Feedback - CareSync'
-      },
-      {
-        path: 'responses',
-        loadComponent: () => import('./feedback/feedback-responses/feedback-responses.component').then(m => m.FeedbackResponsesComponent),
-        title: 'Feedback Responses - CareSync'
-      }
-    ]
-  },
-  {
     path: 'notifications',
     loadComponent: () => import('./notifications/doctor-notifications.component').then(m => m.DoctorNotificationsComponent),
     title: 'Notifications - CareSync'
   },
   {
-    path: 'settings',
-    loadComponent: () => import('./settings/doctor-settings.component').then(m => m.DoctorSettingsComponent),
-    title: 'Settings - CareSync'
+    path: 'notifications/preferences',
+    loadComponent: () => import('./notifications/notification-preferences.component').then(m => m.NotificationPreferencesComponent),
+    title: 'Notification Preferences - CareSync'
   },
   {
-    path: 'files',
+    path: 'profile',
     children: [
       {
         path: '',
-        loadComponent: () => import('./files/doctor-files.component').then(m => m.DoctorFilesComponent),
-        title: 'My Files - CareSync'
+        loadComponent: () => import('./profile/doctor-profile.component').then(m => m.DoctorProfileComponent),
+        title: 'My Profile - CareSync'
       },
       {
-        path: 'upload',
-        loadComponent: () => import('./files/upload-files/upload-files.component').then(m => m.UploadFilesComponent),
-        title: 'Upload Files - CareSync'
-      },
-      {
-        path: 'certificates',
-        loadComponent: () => import('./files/certificates/certificates.component').then(m => m.CertificatesComponent),
-        title: 'Certificates - CareSync'
+        path: ':username',
+        loadComponent: () => import('./profile/doctor-profile.component').then(m => m.DoctorProfileComponent),
+        title: 'Doctor Profile - CareSync'
       }
     ]
   },
+  {
+    path: 'settings',
+    loadComponent: () => import('../shared/settings/shared-settings.component').then(m => m.SharedSettingsComponent),
+    title: 'Settings - CareSync'
+  }
+  // TODO: Uncomment additional routes as components are created
+  /*
   {
     path: 'reports',
     children: [

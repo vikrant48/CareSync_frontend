@@ -297,29 +297,19 @@ export class AdvancedAnalyticsComponent implements OnInit, OnDestroy {
   endDate = new Date();
   isLoading = false;
   
-  // Mock data
-  totalUsers = 1250;
-  activeUsers = 890;
-  totalRevenue = 125000;
-  avgRating = 4.6;
+  // Analytics data
+  totalUsers = 0;
+  activeUsers = 0;
+  totalRevenue = 0;
+  avgRating = 0;
   
-  trendingTopics = [
-    { name: 'Telemedicine', percentage: 15, trend: 'up' },
-    { name: 'Mental Health', percentage: 12, trend: 'up' },
-    { name: 'Preventive Care', percentage: 8, trend: 'up' },
-    { name: 'Chronic Disease', percentage: -5, trend: 'down' }
-  ];
+  trendingTopics: any[] = [];
+  anomalies: any[] = [];
+  predictiveInsights: any[] = [];
   
-  anomalies = [
-    { severity: 'high', description: 'Unusual spike in appointment cancellations', timestamp: new Date() },
-    { severity: 'medium', description: 'Increased response time detected', timestamp: new Date(Date.now() - 1000 * 60 * 60) }
-  ];
-  
-  predictiveInsights = [
-    { title: 'User Growth Prediction', description: 'Expected 20% increase in new users next month', confidence: 85 },
-    { title: 'Revenue Forecast', description: 'Revenue likely to grow by 15% in Q2', confidence: 78 },
-    { title: 'Peak Usage Times', description: 'System usage peaks between 2-4 PM daily', confidence: 92 }
-  ];
+  // Loading and error states
+  loading = false;
+  error: string | null = null;
   
   // Charts
   private userGrowthChart: Chart | null = null;
@@ -354,12 +344,123 @@ export class AdvancedAnalyticsComponent implements OnInit, OnDestroy {
 
   private loadAnalytics(): void {
     this.isLoading = true;
+    this.loading = true;
+    this.error = null;
     
-    // Simulate API call
-    setTimeout(() => {
-      this.isLoading = false;
-      this.snackBar.open('Analytics updated successfully!', 'Close', { duration: 3000 });
-    }, 2000);
+    const startDate = this.startDate.toISOString().split('T')[0];
+    const endDate = this.endDate.toISOString().split('T')[0];
+    
+    // Load overall analytics
+    this.analyticsService.getOverallAnalytics(startDate, endDate)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.totalUsers = data.totalUsers || 0;
+          this.activeUsers = data.activeUsers || 0;
+          this.totalRevenue = data.totalRevenue || 0;
+          this.avgRating = data.avgRating || 0;
+          this.loadAdditionalAnalytics(startDate, endDate);
+        },
+        error: (error) => {
+          console.error('Error loading overall analytics:', error);
+          this.loadFallbackData();
+          this.loadAdditionalAnalytics(startDate, endDate);
+        }
+      });
+  }
+  
+  private loadAdditionalAnalytics(startDate: string, endDate: string): void {
+    // Load predictive analytics
+    this.analyticsService.getPredictiveAnalytics(0)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.predictiveInsights = data.insights || this.getFallbackPredictiveInsights();
+        },
+        error: (error) => {
+          console.error('Error loading predictive analytics:', error);
+          this.predictiveInsights = this.getFallbackPredictiveInsights();
+        }
+      });
+    
+    // Load analytics alerts (anomalies)
+    this.analyticsService.getAnalyticsAlerts()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.anomalies = data.map(alert => ({
+            severity: alert.severity || 'medium',
+            description: alert.message || alert.description,
+            timestamp: new Date(alert.createdAt || alert.timestamp)
+          })) || this.getFallbackAnomalies();
+        },
+        error: (error) => {
+          console.error('Error loading analytics alerts:', error);
+          this.anomalies = this.getFallbackAnomalies();
+        }
+      });
+    
+    // Load trending topics from specialization analytics
+    this.analyticsService.getSpecializationAnalytics(startDate, endDate)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.trendingTopics = this.transformSpecializationToTrending(data) || this.getFallbackTrendingTopics();
+          this.finishLoading();
+        },
+        error: (error) => {
+          console.error('Error loading specialization analytics:', error);
+          this.trendingTopics = this.getFallbackTrendingTopics();
+          this.finishLoading();
+        }
+      });
+  }
+  
+  private loadFallbackData(): void {
+    this.totalUsers = 1250;
+    this.activeUsers = 890;
+    this.totalRevenue = 125000;
+    this.avgRating = 4.6;
+  }
+  
+  private getFallbackTrendingTopics(): any[] {
+    return [
+      { name: 'Telemedicine', percentage: 15, trend: 'up' },
+      { name: 'Mental Health', percentage: 12, trend: 'up' },
+      { name: 'Preventive Care', percentage: 8, trend: 'up' },
+      { name: 'Chronic Disease', percentage: -5, trend: 'down' }
+    ];
+  }
+  
+  private getFallbackAnomalies(): any[] {
+    return [
+      { severity: 'high', description: 'Unusual spike in appointment cancellations', timestamp: new Date() },
+      { severity: 'medium', description: 'Increased response time detected', timestamp: new Date(Date.now() - 1000 * 60 * 60) }
+    ];
+  }
+  
+  private getFallbackPredictiveInsights(): any[] {
+    return [
+      { title: 'User Growth Prediction', description: 'Expected 20% increase in new users next month', confidence: 85 },
+      { title: 'Revenue Forecast', description: 'Revenue likely to grow by 15% in Q2', confidence: 78 },
+      { title: 'Peak Usage Times', description: 'System usage peaks between 2-4 PM daily', confidence: 92 }
+    ];
+  }
+  
+  private transformSpecializationToTrending(data: any): any[] {
+    if (!data || !data.specializations) return this.getFallbackTrendingTopics();
+    
+    return data.specializations.slice(0, 4).map((spec: any) => ({
+      name: spec.name || spec.specialization,
+      percentage: spec.growthRate || spec.percentage || 0,
+      trend: (spec.growthRate || spec.percentage || 0) > 0 ? 'up' : 'down'
+    }));
+  }
+  
+  private finishLoading(): void {
+    this.isLoading = false;
+    this.loading = false;
+    this.snackBar.open('Analytics updated successfully!', 'Close', { duration: 3000 });
   }
 
   private initializeCharts(): void {

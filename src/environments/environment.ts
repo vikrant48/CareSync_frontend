@@ -29,6 +29,6 @@ export const environment = {
   },
   security: {
     tokenExpiryWarning: 5 * 60 * 1000, // 5 minutes
-    refreshTokenInterval: 4 * 60 * 1000 // 4 minutes
+    refreshTokenInterval: 58 * 60 * 1000 // 58 minutes
   }
 };

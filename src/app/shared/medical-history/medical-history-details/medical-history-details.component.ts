@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { MedicalHistoryService } from '../../../services/medical-history.service';
 
 @Component({
   standalone: true,
@@ -8,6 +9,27 @@ import { CommonModule } from '@angular/common';
   selector: 'app-medical-history-details',
   template: `
     <div class="medical-history-details-container p-4">
+      <!-- Loading State -->
+      <div *ngIf="loading" class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <span class="ml-3 text-gray-600">Loading medical history details...</span>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+        <div class="flex">
+          <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          </svg>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800">Error Loading Medical History</h3>
+            <p class="mt-1 text-sm text-red-700">{{ error }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div *ngIf="!loading && !error">
       <div class="flex items-center mb-6">
         <button routerLink="/shared/medical-history" class="mr-4 text-gray-600 hover:text-gray-900">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -291,25 +313,173 @@ import { CommonModule } from '@angular/common';
           </div>
         </div>
       </div>
+      </div>
     </div>
   `,
   styles: []
 })
 export class MedicalHistoryDetailsComponent implements OnInit {
   recordId: number = 0;
-  
-  constructor(private route: ActivatedRoute) {}
-  
+  loading = true;
+  error: string | null = null;
+
+  constructor(
+    private route: ActivatedRoute,
+    private medicalHistoryService: MedicalHistoryService
+  ) {}
+
   ngOnInit() {
     this.route.params.subscribe(params => {
       this.recordId = +params['id'];
-      // In a real app, you would fetch the record details using this ID
+      this.loadMedicalHistoryDetails();
     });
+  }
+
+  private loadMedicalHistoryDetails() {
+    this.loading = true;
+    this.error = null;
+
+    // Load main record
+    this.medicalHistoryService.getMedicalHistoryById(this.recordId).subscribe({
+      next: (record: any) => {
+        this.record = this.transformRecord(record);
+        this.loadRelatedData();
+      },
+      error: (error: any) => {
+        console.error('Error loading medical history record:', error);
+        this.error = 'Failed to load medical history record';
+        this.loading = false;
+        // Keep mock data as fallback
+      }
+    });
+  }
+
+  private loadRelatedData() {
+    // Load attachments/documents
+    this.medicalHistoryService.getMedicalHistoryAttachments(this.recordId).subscribe({
+      next: (attachments: any) => {
+        this.documents = attachments.map((att: any) => ({
+          name: att.fileName,
+          type: this.getFileType(att.fileName),
+          date: new Date(att.uploadDate).toLocaleDateString()
+        }));
+      },
+      error: (error: any) => {
+        console.error('Error loading attachments:', error);
+        // Keep mock documents as fallback
+      }
+    });
+
+    // Load notes
+    this.medicalHistoryService.getMedicalHistoryNotes(this.recordId).subscribe({
+      next: (notes: any) => {
+        if (notes && notes.length > 0) {
+          this.record.notes = notes.map((note: any) => ({
+            author: note.authorName || 'Unknown',
+            date: new Date(note.createdAt).toLocaleDateString(),
+            content: note.content
+          }));
+        }
+      },
+      error: (error: any) => {
+        console.error('Error loading notes:', error);
+        // Keep mock notes as fallback
+      }
+    });
+
+    // Load timeline
+    this.medicalHistoryService.getMedicalHistoryTimeline(this.recordId).subscribe({
+      next: (timelineData: any) => {
+        this.timeline = timelineData.map((event: any) => ({
+          type: this.mapEventType(event.eventType),
+          title: event.title,
+          description: event.description,
+          date: new Date(event.eventDate).toLocaleDateString(),
+          user: event.userName || 'System'
+        }));
+        this.loading = false;
+      },
+      error: (error: any) => {
+        console.error('Error loading timeline:', error);
+        this.loading = false;
+        // Keep mock timeline as fallback
+      }
+    });
+
+    // Load related records (using patient medical history)
+    if (this.record && this.record.patientId) {
+      this.medicalHistoryService.getPatientMedicalHistory(this.record.patientId).subscribe({
+        next: (records: any) => {
+          this.relatedRecords = records
+            .filter((r: any) => r.id !== this.recordId)
+            .slice(0, 3)
+            .map((r: any) => ({
+              id: r.id,
+              category: r.category || 'General',
+              description: r.diagnosis || r.description || 'Medical Record',
+              date: new Date(r.visitDate || r.date).toLocaleDateString()
+            }));
+        },
+        error: (error: any) => {
+          console.error('Error loading related records:', error);
+          // Keep mock related records as fallback
+        }
+      });
+    }
+  }
+
+  private transformRecord(apiRecord: any): any {
+    return {
+      id: apiRecord.id,
+      category: apiRecord.category || 'General',
+      description: apiRecord.description,
+      details: apiRecord.details || apiRecord.notes,
+      date: new Date(apiRecord.date).toLocaleDateString(),
+      provider: apiRecord.providerName || apiRecord.doctorName || 'Unknown Provider',
+      facility: apiRecord.facility || 'CareSync Medical Center',
+      diagnosisDate: apiRecord.diagnosisDate ? new Date(apiRecord.diagnosisDate).toLocaleDateString() : null,
+      status: apiRecord.status || 'Active',
+      treatmentPlan: apiRecord.treatmentPlan,
+      vaccine: apiRecord.vaccine,
+      doseNumber: apiRecord.doseNumber,
+      dosage: apiRecord.dosage,
+      frequency: apiRecord.frequency,
+      startDate: apiRecord.startDate ? new Date(apiRecord.startDate).toLocaleDateString() : null,
+      instructions: apiRecord.instructions,
+      reaction: apiRecord.reaction,
+      severity: apiRecord.severity,
+      procedureDate: apiRecord.procedureDate ? new Date(apiRecord.procedureDate).toLocaleDateString() : null,
+      reason: apiRecord.reason,
+      outcome: apiRecord.outcome,
+      patientId: apiRecord.patientId,
+      notes: apiRecord.notes || []
+    };
+  }
+
+  private getFileType(fileName: string): string {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    switch (extension) {
+      case 'pdf': return 'pdf';
+      case 'doc': case 'docx': return 'doc';
+      case 'jpg': case 'jpeg': case 'png': case 'gif': return 'image';
+      default: return 'doc';
+    }
+  }
+
+  private mapEventType(eventType: string): string {
+    switch (eventType?.toLowerCase()) {
+      case 'create': case 'created': return 'created';
+      case 'update': case 'updated': case 'modify': case 'modified': return 'updated';
+      case 'note': case 'note_added': return 'note';
+      case 'document': case 'attachment': case 'file_upload': return 'document';
+      default: return 'updated';
+    }
   }
   
   // Mock record data
   record = {
     id: 1,
+    patientId: 1,
     category: 'Condition',
     description: 'Hypertension',
     details: 'Stage 1 hypertension, prescribed medication',

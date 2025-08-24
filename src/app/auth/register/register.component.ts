@@ -15,6 +15,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatStepperModule, MatStepper } from '@angular/material/stepper';
 
+import { PasswordStrengthComponent } from '../components/password-strength/password-strength.component';
+
 import { AuthService } from '../../services/auth.service';
 import { UserRole } from '../../models/user.model';
 
@@ -35,7 +37,8 @@ import { UserRole } from '../../models/user.model';
     MatCheckboxModule,
     MatDividerModule,
     MatTooltipModule,
-    MatStepperModule
+    MatStepperModule,
+    PasswordStrengthComponent
   ],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css']
@@ -146,12 +149,22 @@ export class RegisterComponent implements OnInit {
       this.authService.register(registrationData).subscribe({
         next: (response) => {
           this.isLoading = false;
-          this.snackBar.open('Registration successful! Please check your email to verify your account.', 'Close', {
+          this.snackBar.open('Registration successful!', 'Close', {
             duration: 5000,
             horizontalPosition: 'center',
             verticalPosition: 'top'
           });
-          this.router.navigate(['/auth/verify-email']);
+          
+          // Redirect based on user role instead of going to verify-email
+          if (response.user && response.user.role) {
+            this.redirectBasedOnRole(response.user.role);
+          } else if (response.role) {
+            // Use role directly from response if user object is not present
+            this.redirectBasedOnRole(response.role);
+          } else {
+            // Fallback to verification page if role information is not available
+            this.router.navigate(['/auth/verify-email']);
+          }
         },
         error: (error) => {
           this.isLoading = false;
@@ -179,5 +192,21 @@ export class RegisterComponent implements OnInit {
            this.accountForm.valid && 
            this.roleForm.valid && 
            this.additionalForm.valid;
+  }
+
+  private redirectBasedOnRole(role: string): void {
+    switch (role) {
+      case 'PATIENT':
+        this.router.navigate(['/patient/dashboard']);
+        break;
+      case 'DOCTOR':
+        this.router.navigate(['/doctor/dashboard']);
+        break;
+      case 'ADMIN':
+        this.router.navigate(['/admin/dashboard']);
+        break;
+      default:
+        this.router.navigate(['/shared/dashboard']);
+    }
   }
 }

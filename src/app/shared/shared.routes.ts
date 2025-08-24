@@ -13,7 +13,7 @@ export const SHARED_ROUTES: Routes = [
   },
   {
     path: 'profile',
-    loadComponent: () => import('./profile/shared-profile.component').then(m => m.SharedProfileComponent),
+    loadComponent: () => import('./profile/profile.component').then(m => m.ProfileComponent),
     title: 'My Profile - CareSync'
   },
   {
