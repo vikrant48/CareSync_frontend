@@ -1,0 +1,173 @@
+<app-doctor-layout>
+<section class="space-y-8" *ngIf="!loading()">
+  <h2 class="text-xl font-semibold">Doctor Profile</h2>
+
+  <!-- Profile Info -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="space-y-3 p-4 border rounded">
+      <h3 class="font-semibold">Basic Information</h3>
+      <label class="block">
+        <span class="text-sm">First Name</span>
+        <input class="input" [(ngModel)]="profileForm.firstName" />
+      </label>
+      <label class="block">
+        <span class="text-sm">Last Name</span>
+        <input class="input" [(ngModel)]="profileForm.lastName" />
+      </label>
+      <label class="block">
+        <span class="text-sm">Specialization</span>
+        <input class="input" [(ngModel)]="profileForm.specialization" />
+      </label>
+      <label class="block">
+        <span class="text-sm">Contact Info</span>
+        <input class="input" [(ngModel)]="profileForm.contactInfo" />
+      </label>
+      <label class="block">
+        <span class="text-sm">Email</span>
+        <input type="email" class="input" [(ngModel)]="profileForm.email" />
+      </label>
+      <button class="btn-primary" (click)="saveProfile()">Save Profile</button>
+    </div>
+
+    <!-- Profile Image -->
+    <div class="space-y-3 p-4 border rounded">
+      <h3 class="font-semibold">Profile Image</h3>
+      <div class="flex items-center gap-4">
+        <img *ngIf="profile?.profileImageUrl" [src]="profile.profileImageUrl" alt="Profile" class="w-24 h-24 rounded object-cover border" />
+        <div>
+          <input type="file" (change)="onProfileImageSelected($event)" accept="image/*" />
+          <p class="text-xs text-gray-400 mt-2">Uploading updates the image immediately.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Education -->
+  <div class="p-4 border rounded space-y-3">
+    <h3 class="font-semibold">Education</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <label class="block">
+        <span class="text-sm">Degree</span>
+        <input class="input" [(ngModel)]="newEducation.degree" />
+      </label>
+      <label class="block">
+        <span class="text-sm">Institution</span>
+        <input class="input" [(ngModel)]="newEducation.institution" />
+      </label>
+      <label class="block">
+        <span class="text-sm">Year</span>
+        <input type="number" class="input" [(ngModel)]="newEducation.yearOfCompletion" />
+      </label>
+    </div>
+    <label class="block">
+      <span class="text-sm">Details</span>
+      <textarea class="input" [(ngModel)]="newEducation.details"></textarea>
+    </label>
+    <button class="btn-secondary" (click)="addEducation()">Add Education</button>
+    <ul class="divide-y">
+      <li *ngFor="let e of educations" class="py-3 flex items-center gap-3">
+        <input class="input w-32" [(ngModel)]="e.degree" />
+        <input class="input flex-1" [(ngModel)]="e.institution" />
+        <input type="number" class="input w-28" [(ngModel)]="e.yearOfCompletion" />
+        <input class="input flex-1" [(ngModel)]="e.details" />
+        <button class="btn-primary" (click)="updateEducation(e)">Save</button>
+        <button class="btn-danger" (click)="deleteEducation(e)">Delete</button>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Experience -->
+  <div class="p-4 border rounded space-y-3">
+    <h3 class="font-semibold">Experience</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <label class="block">
+        <span class="text-sm">Hospital</span>
+        <input class="input" [(ngModel)]="newExperience.hospitalName" />
+      </label>
+      <label class="block">
+        <span class="text-sm">Position</span>
+        <input class="input" [(ngModel)]="newExperience.position" />
+      </label>
+      <label class="block">
+        <span class="text-sm">Years</span>
+        <input type="number" class="input" [(ngModel)]="newExperience.yearsOfService" />
+      </label>
+    </div>
+    <label class="block">
+      <span class="text-sm">Details</span>
+      <textarea class="input" [(ngModel)]="newExperience.details"></textarea>
+    </label>
+    <button class="btn-secondary" (click)="addExperience()">Add Experience</button>
+    <ul class="divide-y">
+      <li *ngFor="let x of experiences" class="py-3 flex items-center gap-3">
+        <input class="input w-36" [(ngModel)]="x.hospitalName" />
+        <input class="input w-36" [(ngModel)]="x.position" />
+        <input type="number" class="input w-24" [(ngModel)]="x.yearsOfService" />
+        <input class="input flex-1" [(ngModel)]="x.details" />
+        <button class="btn-primary" (click)="updateExperience(x)">Save</button>
+        <button class="btn-danger" (click)="deleteExperience(x)">Delete</button>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Certificates -->
+  <div class="p-4 border rounded space-y-3">
+    <h3 class="font-semibold">Certificates</h3>
+    <div class="flex items-center gap-3">
+      <input type="file" (change)="onCertFileSelected($event)" accept="application/pdf,image/*" />
+      <input class="input flex-1" placeholder="Description (optional)" [(ngModel)]="certDescription" />
+      <button class="btn-secondary" (click)="uploadCertificate()" [disabled]="!certFile">Upload & Create</button>
+    </div>
+    <ul class="divide-y">
+      <li *ngFor="let c of certificates" class="py-3 space-y-2">
+        <div class="flex items-center gap-3">
+          <strong>{{ c.name || c.originalFilename || 'Certificate' }}</strong>
+          <a *ngIf="c.url" [href]="c.url" target="_blank" class="link">View</a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <input class="input" placeholder="Name" [(ngModel)]="certEdit[c.id].name" />
+          <input class="input" placeholder="Issuing Organization" [(ngModel)]="certEdit[c.id].issuingOrganization" />
+          <input class="input" placeholder="Issue Date (YYYY-MM-DD)" [(ngModel)]="certEdit[c.id].issueDate" />
+          <input class="input" placeholder="Expiry Date (YYYY-MM-DD)" [(ngModel)]="certEdit[c.id].expiryDate" />
+          <input class="input" placeholder="Credential ID" [(ngModel)]="certEdit[c.id].credentialId" />
+          <input class="input" placeholder="Credential URL" [(ngModel)]="certEdit[c.id].credentialUrl" />
+          <textarea class="input md:col-span-2" placeholder="Details" [(ngModel)]="certEdit[c.id].details"></textarea>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="btn-primary" (click)="saveCertificateMeta(c)">Save Metadata</button>
+          <label class="btn-secondary cursor-pointer">
+            Replace File
+            <input type="file" class="hidden" (change)="replaceCertificateFile(c, $event)" accept="application/pdf,image/*" />
+          </label>
+          <button class="btn-danger" (click)="deleteCertificate(c)">Delete</button>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Documents -->
+  <div class="p-4 border rounded space-y-3">
+    <h3 class="font-semibold">Documents</h3>
+    <div class="grid md:grid-cols-2 gap-3">
+      <div *ngFor="let d of documents" class="border p-3 rounded">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="font-medium">{{ d.originalFilename }}</p>
+            <p class="text-xs text-gray-400">Type: {{ d.documentType }} | {{ d.contentType }}</p>
+          </div>
+          <a [href]="d.filePath" target="_blank" class="link">Open</a>
+        </div>
+        <label class="block mt-2">
+          <span class="text-xs">Description</span>
+          <input class="input" [(ngModel)]="d.description" (blur)="updateDocDescription(d)" />
+        </label>
+        <button class="btn-danger mt-2" (click)="deleteDocument(d)">Delete</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div *ngIf="loading()" class="p-6 text-center text-gray-400">Loading profile…</div>
+<div *ngIf="error()" class="p-6 text-center text-red-500">{{ error() }}</div>
+
+</app-doctor-layout>
