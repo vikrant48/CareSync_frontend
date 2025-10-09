@@ -12,10 +12,16 @@ import { PatientBookAppointmentComponent } from './features/patient/patient-book
 import { MyAppointmentsComponent } from './features/patient/my-appointments.component';
 import { PatientFeedbackComponent } from './features/patient/patient-feedback.component';
 import { DoctorAppointmentsComponent } from './features/doctor/doctor-appointments.component';
+import { DoctorChangePasswordComponent } from './features/doctor/doctor-change-password.component';
+import { PatientChangePasswordComponent } from './features/patient/patient-change-password.component';
+import { ResetPasswordComponent } from './features/auth/reset-password.component';
+import { DoctorReportsComponent } from './features/doctor/doctor-reports.component';
+import { PatientReportsComponent } from './features/patient/patient-reports.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
+  { path: 'reset-password', component: ResetPasswordComponent },
   { path: 'register', component: RegisterComponent },
   {
     path: 'doctor',
@@ -36,6 +42,18 @@ export const routes: Routes = [
     data: { roles: ['DOCTOR'] }
   },
   {
+    path: 'doctor/change-password',
+    component: DoctorChangePasswordComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['DOCTOR'] }
+  },
+  {
+    path: 'doctor/reports',
+    component: DoctorReportsComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['DOCTOR'] }
+  },
+  {
     path: 'patient',
     component: PatientDashboardComponent,
     canActivate: [authGuard, roleGuard],
@@ -48,6 +66,12 @@ export const routes: Routes = [
     data: { roles: ['PATIENT'] }
   },
   {
+    path: 'patient/change-password',
+    component: PatientChangePasswordComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['PATIENT'] }
+  },
+  {
     path: 'patient/book-appointment',
     component: PatientBookAppointmentComponent,
     canActivate: [authGuard, roleGuard],
@@ -56,6 +80,12 @@ export const routes: Routes = [
   {
     path: 'patient/appointments',
     component: MyAppointmentsComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['PATIENT'] }
+  },
+  {
+    path: 'patient/reports',
+    component: PatientReportsComponent,
     canActivate: [authGuard, roleGuard],
     data: { roles: ['PATIENT'] }
   },

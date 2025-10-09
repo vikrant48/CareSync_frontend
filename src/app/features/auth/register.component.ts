@@ -10,17 +10,18 @@ import { RegisterRequest, Role } from '../../core/models/auth.models';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
-    <div class="panel max-w-2xl mx-auto p-6">
-      <h2 class="text-xl font-semibold mb-6">Create Account</h2>
-      <form (ngSubmit)="onSubmit()" #f="ngForm" class="space-y-6">
-        <!-- Role selection -->
-        <div>
-          <label class="block mb-1">Role</label>
-          <select class="input" name="role" [(ngModel)]="model.role" required>
-            <option value="DOCTOR">Doctor</option>
-            <option value="PATIENT">Patient</option>
-          </select>
-        </div>
+    <div class="min-h-screen bg-gray-950 text-gray-100 p-6">
+      <div class="panel max-w-2xl w-full mx-auto p-6 space-y-6 max-h-[85vh] overflow-y-auto">
+        <h2 class="text-xl font-semibold">Create Account</h2>
+        <form (ngSubmit)="onSubmit()" #f="ngForm" class="space-y-6">
+          <!-- Role selection -->
+          <div>
+            <label class="block mb-1">Role</label>
+            <select class="input" name="role" [(ngModel)]="model.role" required>
+              <option value="DOCTOR">Doctor</option>
+              <option value="PATIENT">Patient</option>
+            </select>
+          </div>
 
         <!-- Common details -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -76,10 +77,11 @@ import { RegisterRequest, Role } from '../../core/models/auth.models';
           <textarea class="input" rows="3" name="illnessDetails" [(ngModel)]="model.illnessDetails"></textarea>
         </div>
 
-        <button class="btn-primary w-full" [disabled]="loading">Register</button>
-        <p *ngIf="error" class="text-red-400 mt-2">{{ error }}</p>
-        <p class="text-sm text-gray-400">Already have an account? <a routerLink="/login" class="text-emerald-400">Login</a></p>
-      </form>
+          <button class="btn-primary w-full" [disabled]="loading">Register</button>
+          <p *ngIf="error" class="text-red-400">{{ error }}</p>
+          <p class="text-sm text-gray-400">Already have an account? <a routerLink="/login" class="text-emerald-400">Login</a></p>
+        </form>
+      </div>
     </div>
   `,
 })

@@ -26,17 +26,31 @@
         <span class="text-sm">Email</span>
         <input type="email" class="input" [(ngModel)]="profileForm.email" />
       </label>
-      <button class="btn-primary" (click)="saveProfile()">Save Profile</button>
+      <button class="btn-primary" (click)="saveProfile()">Update Profile</button>
     </div>
 
     <!-- Profile Image -->
     <div class="space-y-3 p-4 border rounded">
       <h3 class="font-semibold">Profile Image</h3>
       <div class="flex items-center gap-4">
-        <img *ngIf="profile?.profileImageUrl" [src]="profile.profileImageUrl" alt="Profile" class="w-24 h-24 rounded object-cover border" />
-        <div>
+        <!-- Show current image when no preview is selected -->
+        <img *ngIf="!profileImagePreviewUrl && profile?.profileImageUrl" [src]="profile.profileImageUrl" alt="Profile" class="w-24 h-24 rounded object-cover border" />
+
+        <!-- Show preview when a new file is selected -->
+        <div *ngIf="profileImagePreviewUrl" class="space-y-1">
+          <img [src]="profileImagePreviewUrl" alt="Preview" class="w-24 h-24 rounded object-cover border" />
+          <p class="text-xs text-gray-400">Preview (not yet uploaded)</p>
+        </div>
+
+        <div class="space-y-2">
           <input type="file" (change)="onProfileImageSelected($event)" accept="image/*" />
-          <p class="text-xs text-gray-400 mt-2">Uploading updates the image immediately.</p>
+          <div class="flex items-center gap-2">
+            <button class="btn-primary" (click)="uploadSelectedProfileImage()" [disabled]="!selectedProfileImage || uploadingProfileImage">
+              {{ uploadingProfileImage ? 'Uploading…' : 'Upload Image' }}
+            </button>
+            <button class="btn-secondary" (click)="clearProfileImageSelection()" [disabled]="!selectedProfileImage">Cancel</button>
+          </div>
+          <p class="text-xs text-gray-400">Select an image to preview, then click Upload.</p>
         </div>
       </div>
     </div>
@@ -63,17 +77,39 @@
       <span class="text-sm">Details</span>
       <textarea class="input" [(ngModel)]="newEducation.details"></textarea>
     </label>
-    <button class="btn-secondary" (click)="addEducation()">Add Education</button>
-    <ul class="divide-y">
-      <li *ngFor="let e of educations" class="py-3 flex items-center gap-3">
-        <input class="input w-32" [(ngModel)]="e.degree" />
-        <input class="input flex-1" [(ngModel)]="e.institution" />
-        <input type="number" class="input w-28" [(ngModel)]="e.yearOfCompletion" />
-        <input class="input flex-1" [(ngModel)]="e.details" />
-        <button class="btn-primary" (click)="updateEducation(e)">Save</button>
-        <button class="btn-danger" (click)="deleteEducation(e)">Delete</button>
-      </li>
-    </ul>
+    <div class="flex items-center gap-2">
+      <button class="btn-primary" (click)="submitEducation()">{{ editingEducationId ? 'Update Education' : 'Add Education' }}</button>
+      <button class="btn-secondary" *ngIf="editingEducationId" (click)="cancelEditEducation()">Cancel</button>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm border-separate border-spacing-y-2">
+        <thead>
+          <tr class="text-gray-400">
+            <th class="text-left w-16">Sr No</th>
+            <th class="text-left">Degree</th>
+            <th class="text-left">Institution</th>
+            <th class="text-left w-36">Year of Completion</th>
+            <th class="text-left">Details</th>
+            <th class="text-left w-40">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let e of educations; index as i" class="border-t">
+            <td>{{ i + 1 }}</td>
+            <td>{{ e.degree || '—' }}</td>
+            <td>{{ e.institution || '—' }}</td>
+            <td>{{ e.yearOfCompletion || '—' }}</td>
+            <td>{{ e.details || '—' }}</td>
+            <td>
+              <div class="flex gap-2">
+                <button class="btn-secondary" (click)="startEditEducation(e)">Edit</button>
+                <button class="btn-danger" (click)="deleteEducation(e)">Delete</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <!-- Experience -->
@@ -97,17 +133,39 @@
       <span class="text-sm">Details</span>
       <textarea class="input" [(ngModel)]="newExperience.details"></textarea>
     </label>
-    <button class="btn-secondary" (click)="addExperience()">Add Experience</button>
-    <ul class="divide-y">
-      <li *ngFor="let x of experiences" class="py-3 flex items-center gap-3">
-        <input class="input w-36" [(ngModel)]="x.hospitalName" />
-        <input class="input w-36" [(ngModel)]="x.position" />
-        <input type="number" class="input w-24" [(ngModel)]="x.yearsOfService" />
-        <input class="input flex-1" [(ngModel)]="x.details" />
-        <button class="btn-primary" (click)="updateExperience(x)">Save</button>
-        <button class="btn-danger" (click)="deleteExperience(x)">Delete</button>
-      </li>
-    </ul>
+    <div class="flex items-center gap-2">
+      <button class="btn-primary" (click)="submitExperience()">{{ editingExperienceId ? 'Update Experience' : 'Add Experience' }}</button>
+      <button class="btn-secondary" *ngIf="editingExperienceId" (click)="cancelEditExperience()">Cancel</button>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm border-separate border-spacing-y-2">
+        <thead>
+          <tr class="text-gray-400">
+            <th class="text-left w-16">Sr No</th>
+            <th class="text-left">Hospital</th>
+            <th class="text-left">Position</th>
+            <th class="text-left w-28">Years</th>
+            <th class="text-left">Details</th>
+            <th class="text-left w-40">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let x of experiences; index as i" class="border-t">
+            <td>{{ i + 1 }}</td>
+            <td>{{ x.hospitalName || '—' }}</td>
+            <td>{{ x.position || '—' }}</td>
+            <td>{{ x.yearsOfService || '—' }}</td>
+            <td>{{ x.details || '—' }}</td>
+            <td>
+              <div class="flex gap-2">
+                <button class="btn-secondary" (click)="startEditExperience(x)">Edit</button>
+                <button class="btn-danger" (click)="deleteExperience(x)">Delete</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <!-- Certificates -->

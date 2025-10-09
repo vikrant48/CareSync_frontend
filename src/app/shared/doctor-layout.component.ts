@@ -25,6 +25,10 @@ import { RouterModule } from '@angular/router';
             <i class="fa-solid fa-calendar-check mr-2"></i>
             <span>Appointments</span>
           </a>
+          <a class="nav-item" routerLink="/doctor/reports" routerLinkActive="active">
+            <i class="fa-solid fa-chart-line mr-2"></i>
+            <span>Reports</span>
+          </a>
           <a class="nav-item" routerLink="/doctor/profile" routerLinkActive="active">
             <i class="fa-solid fa-user-doctor mr-2"></i>
             <span>Profile</span>
@@ -32,6 +36,10 @@ import { RouterModule } from '@angular/router';
           <a class="nav-item" routerLink="/login">
             <i class="fa-solid fa-right-from-bracket mr-2"></i>
             <span>Logout</span>
+          </a>
+          <a class="nav-item" routerLink="/doctor/change-password" routerLinkActive="active">
+            <i class="fa-solid fa-key mr-2"></i>
+            <span>Change Password</span>
           </a>
         </nav>
       </aside>

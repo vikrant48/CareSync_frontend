@@ -22,9 +22,12 @@ import { LoginRequest } from '../../core/models/auth.models';
           <input class="input" type="password" name="password" [(ngModel)]="model.password" required />
         </div>
         <button class="btn-primary w-full" [disabled]="loading">Login</button>
-        <p class="text-sm text-gray-400 mt-2">
-          Don’t have an account? <a routerLink="/register" class="text-emerald-400">Register</a>
-        </p>
+        <div class="flex items-center justify-between text-sm text-gray-400 mt-2">
+          <span>
+            Don’t have an account? <a routerLink="/register" class="text-emerald-400">Register</a>
+          </span>
+          <a routerLink="/reset-password" class="text-emerald-400">Forgot Password?</a>
+        </div>
       </form>
       <p *ngIf="error" class="text-red-400 mt-3">{{ error }}</p>
     </div>

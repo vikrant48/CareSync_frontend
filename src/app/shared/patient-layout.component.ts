@@ -31,6 +31,10 @@ import { AuthService } from '../core/services/auth.service';
             <i class="fas fa-calendar-check"></i>
             <span>My Appointments</span>
           </a>
+          <a routerLink="/patient/reports" routerLinkActive="!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-700">
+            <i class="fas fa-chart-line"></i>
+            <span>Reports</span>
+          </a>
           <a routerLink="/patient/feedback" routerLinkActive="!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-700">
             <i class="fas fa-star"></i>
             <span>Feedback</span>
@@ -43,6 +47,10 @@ import { AuthService } from '../core/services/auth.service';
             <i class="fas fa-sign-out-alt"></i>
             <span>Logout</span>
           </button>
+          <a routerLink="/patient/change-password" routerLinkActive="!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-700">
+            <i class="fas fa-key"></i>
+            <span>Change Password</span>
+          </a>
         </nav>
         <div class="px-4 py-3 border-t border-gray-700 text-xs text-gray-400">Dark mode enabled</div>
       </aside>

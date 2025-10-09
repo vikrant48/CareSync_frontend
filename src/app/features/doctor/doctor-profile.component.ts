@@ -37,10 +37,12 @@ export class DoctorProfileComponent implements OnInit {
   // Education
   educations: any[] = [];
   newEducation: CreateEducationRequest = { degree: '', institution: '', yearOfCompletion: new Date().getFullYear(), details: '' };
+  editingEducationId: number | null = null;
 
   // Experience
   experiences: any[] = [];
   newExperience: CreateExperienceRequest = { hospitalName: '', position: '', yearsOfService: 1, details: '' };
+  editingExperienceId: number | null = null;
 
   // Certificates
   certificates: any[] = [];
@@ -50,6 +52,11 @@ export class DoctorProfileComponent implements OnInit {
 
   // Documents
   documents: any[] = [];
+
+  // Profile image selection & preview
+  selectedProfileImage?: File;
+  profileImagePreviewUrl: string | null = null;
+  uploadingProfileImage = false;
 
   ngOnInit(): void {
     this.username = this.auth.username();
@@ -111,10 +118,37 @@ export class DoctorProfileComponent implements OnInit {
   onProfileImageSelected(ev: Event) {
     const input = ev.target as HTMLInputElement;
     const file = input.files?.[0];
-    if (!file || this.doctorId == null) return;
+    if (!file) return;
+    this.selectedProfileImage = file;
+    // Create a local preview URL for the selected image
+    if (this.profileImagePreviewUrl) {
+      URL.revokeObjectURL(this.profileImagePreviewUrl);
+    }
+    this.profileImagePreviewUrl = URL.createObjectURL(file);
+  }
+
+  uploadSelectedProfileImage() {
+    if (!this.selectedProfileImage || this.doctorId == null) return;
+    this.uploadingProfileImage = true;
+    const file = this.selectedProfileImage;
     this.svc.uploadProfileImage(file, this.doctorId, 'Profile image').subscribe({
-      next: () => this.loadAll(),
+      next: () => {
+        this.clearProfileImageSelection();
+        this.loadAll();
+        this.uploadingProfileImage = false;
+      },
+      error: () => {
+        this.uploadingProfileImage = false;
+      },
     });
+  }
+
+  clearProfileImageSelection() {
+    if (this.profileImagePreviewUrl) {
+      URL.revokeObjectURL(this.profileImagePreviewUrl);
+    }
+    this.profileImagePreviewUrl = null;
+    this.selectedProfileImage = undefined;
   }
 
   // Education CRUD
@@ -128,14 +162,42 @@ export class DoctorProfileComponent implements OnInit {
     });
   }
 
-  updateEducation(item: any) {
+  startEditEducation(item: any) {
+    this.editingEducationId = item?.id ?? null;
+    this.newEducation = {
+      degree: item?.degree || '',
+      institution: item?.institution || '',
+      yearOfCompletion: item?.yearOfCompletion || new Date().getFullYear(),
+      details: item?.details || '',
+    };
+  }
+
+  cancelEditEducation() {
+    this.editingEducationId = null;
+    this.newEducation = { degree: '', institution: '', yearOfCompletion: new Date().getFullYear(), details: '' };
+  }
+
+  submitEducation() {
     if (!this.username) return;
-    this.svc.updateEducation(this.username, item.id, {
-      degree: item.degree,
-      institution: item.institution,
-      yearOfCompletion: item.yearOfCompletion,
-      details: item.details,
-    }).subscribe();
+    // Add new when not editing
+    if (this.editingEducationId == null) {
+      this.addEducation();
+      return;
+    }
+    // Update existing
+    const id = this.editingEducationId;
+    this.svc.updateEducation(this.username, id!, {
+      degree: this.newEducation.degree,
+      institution: this.newEducation.institution,
+      yearOfCompletion: this.newEducation.yearOfCompletion,
+      details: this.newEducation.details,
+    }).subscribe({
+      next: () => {
+        this.editingEducationId = null;
+        this.newEducation = { degree: '', institution: '', yearOfCompletion: new Date().getFullYear(), details: '' };
+        this.svc.getEducations(this.username!).subscribe({ next: (list) => (this.educations = list || []) });
+      },
+    });
   }
 
   deleteEducation(item: any) {
@@ -156,14 +218,40 @@ export class DoctorProfileComponent implements OnInit {
     });
   }
 
-  updateExperience(item: any) {
+  startEditExperience(item: any) {
+    this.editingExperienceId = item?.id ?? null;
+    this.newExperience = {
+      hospitalName: item?.hospitalName || '',
+      position: item?.position || '',
+      yearsOfService: item?.yearsOfService || 1,
+      details: item?.details || '',
+    };
+  }
+
+  cancelEditExperience() {
+    this.editingExperienceId = null;
+    this.newExperience = { hospitalName: '', position: '', yearsOfService: 1, details: '' };
+  }
+
+  submitExperience() {
     if (!this.username) return;
-    this.svc.updateExperience(this.username, item.id, {
-      hospitalName: item.hospitalName,
-      position: item.position,
-      yearsOfService: item.yearsOfService,
-      details: item.details,
-    }).subscribe();
+    if (this.editingExperienceId == null) {
+      this.addExperience();
+      return;
+    }
+    const id = this.editingExperienceId;
+    this.svc.updateExperience(this.username, id!, {
+      hospitalName: this.newExperience.hospitalName,
+      position: this.newExperience.position,
+      yearsOfService: this.newExperience.yearsOfService,
+      details: this.newExperience.details,
+    }).subscribe({
+      next: () => {
+        this.editingExperienceId = null;
+        this.newExperience = { hospitalName: '', position: '', yearsOfService: 1, details: '' };
+        this.svc.getExperiences(this.username!).subscribe({ next: (list) => (this.experiences = list || []) });
+      },
+    });
   }
 
   deleteExperience(item: any) {

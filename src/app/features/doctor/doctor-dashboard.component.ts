@@ -1,12 +1,12 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { DoctorAppointmentCardComponent } from '../../shared/doctor-appointment-card.component';
 import { PatientDetailsModalComponent } from '../../shared/patient-details-modal.component';
 import { MedicalHistoryDetailModalComponent } from '../../shared/medical-history-detail-modal.component';
 import { MedicalHistoryFormModalComponent } from '../../shared/medical-history-form-modal.component';
-import { ChartWidgetComponent } from '../../shared/chart-widget.component';
 import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
+import { DoctorNotificationComponent } from './doctor-notification.component';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { DoctorProfileService } from '../../core/services/doctor-profile.service';
@@ -17,55 +17,38 @@ import { PatientProfileService, PatientDto, MedicalHistoryItem, MedicalHistoryWi
 import { AnalyticsApiService, OverallAnalytics } from '../../core/services/analytics.service';
 import { ReportsApiService } from '../../core/services/reports.service';
 import { forkJoin } from 'rxjs';
-import { NotificationService, NotificationStatus, NotificationItem } from '../../core/services/notification.service';
+// Removed NotificationService imports; logic moved to dedicated component
 
 @Component({
   selector: 'app-doctor-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, DoctorAppointmentCardComponent, PatientDetailsModalComponent, MedicalHistoryDetailModalComponent, MedicalHistoryFormModalComponent, ChartWidgetComponent, DoctorLayoutComponent],
+  imports: [CommonModule, RouterModule, FormsModule, DoctorAppointmentCardComponent, PatientDetailsModalComponent, MedicalHistoryDetailModalComponent, MedicalHistoryFormModalComponent, DoctorLayoutComponent, DoctorNotificationComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-doctor-layout>
       <div class="panel p-6 space-y-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <h2 class="text-xl font-semibold">Doctor Dashboard</h2>
-          <p class="text-gray-400" *ngIf="profile">
-            Welcome, {{ profile.firstName }} {{ profile.lastName }}
-            <span *ngIf="profile.specialization"> — {{ profile.specialization }}</span>
-          </p>
-          <p class="text-gray-400" *ngIf="!profile">Welcome, {{ username || 'Doctor' }}</p>
+      <!-- Header with profile picture (like patient dashboard) -->
+      <div class="flex flex-wrap items-center gap-4 justify-between">
+        <div class="flex items-center gap-4">
+          <img
+            *ngIf="profile?.profileImageUrl; else docAvatar"
+            [src]="profile?.profileImageUrl"
+            alt="Profile"
+            class="w-16 h-16 rounded-full ring-2 ring-blue-600/40 object-cover"
+          />
+          <ng-template #docAvatar>
+            <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-xl font-semibold text-blue-700">
+              {{ (doctorName || 'D')?.charAt(0) }}
+            </div>
+          </ng-template>
+          <div>
+            <div class="text-lg">Welcome back,</div>
+            <div class="text-2xl font-semibold">{{ doctorName || 'Doctor' }}</div>
+            <div class="text-gray-400" *ngIf="profile?.specialization"> {{ profile.specialization }}</div>
+          </div>
         </div>
         <div class="flex gap-2 items-center">
-          <div class="relative">
-            <button class="btn-secondary relative" (click)="toggleNotif()" title="Notifications" aria-label="Notifications">
-              <span class="mr-1 text-lg">🔔</span>
-              <span class="text-sm">Notifications</span>
-              <span *ngIf="unreadCount > 0" class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full px-1">{{ unreadCount }}</span>
-            </button>
-            <div *ngIf="notifOpen" class="absolute right-0 mt-2 w-96 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50">
-              <div class="p-2 text-sm font-semibold">Notifications</div>
-              <div class="max-h-96 overflow-auto">
-                <div class="px-3 py-2 text-xs text-gray-400">Service: {{ notifStatus?.service || 'Notification Service' }} • Status: {{ notifStatus?.status || 'Unknown' }}</div>
-                <div *ngIf="feed.length === 0" class="px-3 py-3 text-sm text-gray-300">No notifications.</div>
-                <ng-container *ngFor="let g of groupedFeed()">
-                  <div class="px-3 pt-2 text-xs font-semibold text-gray-400">{{ g.label }}</div>
-                  <button
-                    *ngFor="let n of g.items"
-                    class="w-full text-left px-3 py-2 border-t border-gray-700 hover:bg-gray-700/50"
-                    (click)="onNotificationClick(n)"
-                  >
-                    <div class="flex items-start justify-between">
-                      <div>
-                        <div class="text-sm font-medium" [class.text-white]="!n.read" [class.text-gray-200]="n.read">{{ n.title }}</div>
-                        <div class="text-xs text-gray-300">{{ n.message }}</div>
-                      </div>
-                      <div class="text-xs text-gray-400 whitespace-nowrap ml-2">{{ n.timestamp | date:'short' }}</div>
-                    </div>
-                  </button>
-                </ng-container>
-              </div>
-            </div>
-          </div>
+          <app-doctor-notification></app-doctor-notification>
           <a class="btn-primary" routerLink="/doctor/profile">View Profile</a>
           <a class="btn-secondary" routerLink="/doctor">Refresh</a>
         </div>
@@ -141,158 +124,11 @@ import { NotificationService, NotificationStatus, NotificationItem } from '../..
       </section>
 
       <!-- See All Appointments Button -->
-      <div class="mt-3">
+      <!-- <div class="mt-3">
         <button class="btn-secondary" [routerLink]="['/doctor/appointments']">See All Appointments</button>
-      </div>
+      </div> -->
 
-      <!-- Insights & Analytics -->
-      <section class="p-4 border rounded">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="font-semibold">Insights</h3>
-          <div class="text-xs text-gray-400" *ngIf="analyticsRangeText">{{ analyticsRangeText }}</div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="p-4 border rounded">
-            <div class="text-sm text-gray-400">Overall (last 30d)</div>
-            <div class="mt-2 text-sm">
-              <div>Total Appointments: {{ overall?.totalAppointments ?? '�' }}</div>
-              <div>Average Rating: {{ overall?.avgRating ?? '�' }}</div>
-              <div>Total Revenue: {{ overall?.totalRevenue ?? '�' }}</div>
-            </div>
-          </div>
-          <div class="p-4 border rounded">
-            <div class="text-sm text-gray-400">Peak Hours</div>
-            <div class="mt-2 text-sm">
-              <div>Peak Hour: {{ peakHours?.peakHour ?? '�' }}</div>
-              <div>Total Appointments: {{ peakHours?.totalAppointments ?? '�' }}</div>
-            </div>
-            <app-chart-widget
-              *ngIf="peakHours?.hourlyDistribution"
-              title="Hourly Distribution"
-              [type]="'bar'"
-              [labels]="peakHoursLabels"
-              [data]="peakHoursData"
-            ></app-chart-widget>
-          </div>
-          <div class="p-4 border rounded">
-            <div class="text-sm text-gray-400">Patient Retention</div>
-            <div class="mt-2 text-sm">
-              <div>New: {{ retention?.newPatients ?? '�' }}</div>
-              <div>Returning: {{ retention?.returningPatients ?? '�' }}</div>
-              <div>Retention Rate: {{ retention?.retentionRate ?? '�' }}%</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-          <div class="p-4 border rounded">
-            <div class="text-sm text-gray-400">Day of Week</div>
-            <div class="mt-2 text-sm">
-              <div>Busiest Day: {{ dayOfWeek?.busiestDay ?? '�' }}</div>
-            </div>
-            <app-chart-widget
-              *ngIf="dayOfWeek?.dayDistribution"
-              title="Day Distribution"
-              [type]="'bar'"
-              [labels]="dayOfWeekLabels"
-              [data]="dayOfWeekData"
-            ></app-chart-widget>
-          </div>
-          <div class="p-4 border rounded">
-            <div class="text-sm text-gray-400">Feedback Sentiment</div>
-            <div class="mt-2 text-sm">
-              <div>Positive: {{ feedbackSentiment?.positivePercentage ?? '�' }}%</div>
-              <div>Neutral: {{ feedbackSentiment?.neutralPercentage ?? '�' }}%</div>
-              <div>Negative: {{ feedbackSentiment?.negativePercentage ?? '�' }}%</div>
-            </div>
-            <app-chart-widget
-              *ngIf="feedbackSentiment"
-              title="Sentiment"
-              [type]="'pie'"
-              [labels]="feedbackLabels"
-              [data]="feedbackData"
-            ></app-chart-widget>
-          </div>
-          <div class="p-4 border rounded">
-            <div class="text-sm text-gray-400">Performance</div>
-            <div class="mt-2 text-sm">
-              <div>Completed: {{ performance?.completedAppointments ?? '�' }}</div>
-              <div>Cancellation Rate: {{ performance?.cancellationRate ?? '�' }}%</div>
-              <div>Avg Rating: {{ performance?.averageRating ?? '�' }}</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- More Insights -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-          <div class="p-4 border rounded">
-            <div class="text-sm text-gray-400">Appointment Duration</div>
-            <div class="mt-2 text-sm">
-              <div>Average Gap: {{ appointmentDuration?.averageGapMinutes ?? '�' }}m</div>
-              <div>Min Gap: {{ appointmentDuration?.minGapMinutes ?? '�' }}m</div>
-              <div>Max Gap: {{ appointmentDuration?.maxGapMinutes ?? '�' }}m</div>
-            </div>
-          </div>
-          <div class="p-4 border rounded">
-            <div class="text-sm text-gray-400">Cancellation Patterns</div>
-            <div class="mt-2 text-sm">
-              <div>Total: {{ cancellationPatterns?.totalCancellations ?? '�' }}</div>
-              <div>Rate: {{ cancellationPatterns?.cancellationRate ?? '�' }}%</div>
-              <div>Common Timing: {{ cancellationPatterns?.commonTiming ?? '�' }}</div>
-            </div>
-          </div>
-          <div class="p-4 border rounded">
-            <div class="text-sm text-gray-400">Patient Demographics</div>
-            <div class="mt-2 text-sm">
-              <div *ngFor="let kv of (patientDemographics?.ageDistribution | keyvalue)">{{ kv.key }}: {{ kv.value }}</div>
-            </div>
-            <app-chart-widget
-              *ngIf="patientDemographics?.ageDistribution"
-              title="Age Distribution"
-              [type]="'bar'"
-              [labels]="demographicsLabels"
-              [data]="demographicsData"
-            ></app-chart-widget>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-          <div class="p-4 border rounded">
-            <div class="text-sm text-gray-400">Seasonal Trends ({{ seasonalTrends?.year || currentYear }})</div>
-            <div class="mt-2 text-sm">
-              <div>Busiest Season: {{ seasonalTrends?.busiestSeason ?? '�' }}</div>
-              <div *ngFor="let kv of (seasonalTrends?.monthlyDistribution | keyvalue)">{{ kv.key }}: {{ kv.value }}</div>
-            </div>
-            <app-chart-widget
-              *ngIf="seasonalTrends?.monthlyDistribution"
-              title="Monthly Distribution"
-              [type]="'line'"
-              [labels]="seasonalLabels"
-              [data]="seasonalData"
-            ></app-chart-widget>
-          </div>
-          <div class="p-4 border rounded">
-            <div class="text-sm text-gray-400">Appointment Trends (30d)</div>
-            <div class="mt-2 text-sm">
-              <div *ngFor="let kv of (appointmentTrendsDaily?.daily | keyvalue)">{{ kv.key }}: {{ kv.value }}</div>
-            </div>
-            <app-chart-widget
-              *ngIf="appointmentTrendsDaily?.daily"
-              title="Daily Appointments"
-              [type]="'line'"
-              [labels]="dailyTrendLabels"
-              [data]="dailyTrendData"
-            ></app-chart-widget>
-          </div>
-          <div class="p-4 border rounded">
-            <div class="text-sm text-gray-400">Revenue</div>
-            <div class="mt-2 text-sm">
-              <div>Total: {{ revenueAnalysis?.totalRevenue ?? '�' }}</div>
-              <div>Average per Appointment: {{ revenueAnalysis?.averageRevenue ?? '�' }}</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      
 
       <app-patient-details-modal
         [open]="patientModalOpen"
@@ -334,8 +170,10 @@ export class DoctorDashboardComponent implements OnInit {
   
   private analyticsApi = inject(AnalyticsApiService);
   private reportsApi = inject(ReportsApiService);
+  private cdr = inject(ChangeDetectorRef);
   username: string | null = null;
   doctorId: number | null = null;
+  doctorName: string | null = null;
   profile: any = null;
   documents: any[] = [];
 
@@ -400,19 +238,21 @@ export class DoctorDashboardComponent implements OnInit {
     this.doctorId = idStr ? Number(idStr) : null;
 
     if (this.username) {
-      this.svc.getProfile(this.username).subscribe({ next: (p) => (this.profile = p) });
+      this.svc.getProfile(this.username).subscribe({
+        next: (p) => {
+          this.profile = p;
+          const name = [p?.firstName, p?.lastName].filter(Boolean).join(' ').trim();
+          this.doctorName = name || p?.username || this.username || 'Doctor';
+          this.cdr.markForCheck();
+        },
+      });
     }
     if (this.doctorId != null) {
       this.svc.getDocumentsByDoctor(this.doctorId).subscribe({
         next: (docs) => (this.documents = (docs || []).slice(0, 6)),
       });
       this.refreshToday();
-      
-      this.loadAnalytics();
-    }
-    // Notifications: fetch feed and unread count every 30s
-    this.fetchNotifications();
-    this.notifPollHandle = setInterval(() => this.fetchNotifications(), 300000);
+  }
   }
 
   refreshToday() {
@@ -519,60 +359,9 @@ export class DoctorDashboardComponent implements OnInit {
   // getEpochMs moved to shared doctor-appointment-utils
 
   // Notifications state and logic
-  notifOpen = false;
-  unreadCount = 0;
-  private notifPollHandle: any;
-  feed: NotificationItem[] = [];
+  // Notification logic removed; handled by DoctorNotificationComponent
 
-  private notifApi = inject(NotificationService);
-  private router = inject(Router);
-
-  toggleNotif() {
-    this.notifOpen = !this.notifOpen;
-  }
-
-  notifStatus: NotificationStatus | null = null;
-
-  fetchNotifications() {
-    // Always update service status (debug info)
-    this.notifApi.getStatus().subscribe({ next: (s) => (this.notifStatus = s) });
-    if (this.doctorId == null) {
-      this.feed = [];
-      this.unreadCount = 0;
-      return;
-    }
-    this.notifApi.getDoctorFeed(this.doctorId).subscribe({ next: (items) => (this.feed = items || []) });
-    this.notifApi.getDoctorUnreadCount(this.doctorId).subscribe({ next: (n) => (this.unreadCount = n || 0) });
-  }
-
-  groupedFeed(): { label: 'Today' | 'Yesterday' | 'Earlier'; items: NotificationItem[] }[] {
-    const groups: Record<string, NotificationItem[]> = { Today: [], Yesterday: [], Earlier: [] };
-    for (const n of this.feed) {
-      const label = this.notifApi.getGroupLabel(n.timestamp);
-      (groups[label] ||= []).push(n);
-    }
-    return Object.entries(groups)
-      .filter(([, items]) => items.length > 0)
-      .map(([label, items]) => ({ label: label as 'Today' | 'Yesterday' | 'Earlier', items }));
-  }
-
-  onNotificationClick(n: NotificationItem) {
-    if (!n.read && n.id != null) {
-      this.notifApi.markRead(Number(n.id)).subscribe({
-        next: () => {
-          n.read = true;
-          this.unreadCount = Math.max(0, (this.unreadCount || 0) - 1);
-        },
-      });
-    }
-    if (n.link) {
-      this.router.navigateByUrl(n.link);
-    }
-  }
-
-  ngOnDestroy(): void {
-    if (this.notifPollHandle) clearInterval(this.notifPollHandle);
-  }
+  // ngOnDestroy not needed for notifications; no local polling
 
   openPatient(a: DoctorAppointmentItem) {
     this.selectedAppointment = a;

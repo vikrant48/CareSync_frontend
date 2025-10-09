@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -7,19 +7,21 @@ import { AppointmentService, PatientAppointmentItem } from '../../core/services/
 import { FeedbackService } from '../../core/services/feedback.service';
 import { PatientProfileService, PatientDto, MedicalHistoryItem, PatientDocumentItem } from '../../core/services/patient-profile.service';
 import { AuthService } from '../../core/services/auth.service';
-import { NotificationService, NotificationStatus, NotificationItem } from '../../core/services/notification.service';
+// Removed NotificationService imports; logic moved to dedicated component
 
 import { ReportsApiService } from '../../core/services/reports.service';
 import { RescheduleAppointmentModalComponent } from '../../shared/reschedule-appointment-modal.component';
 import { PatientAppointmentCardComponent } from '../../shared/patient-appointment-card.component';
 import { getAppointmentEpochMs } from '../../shared/appointment-utils';
-import { ChartWidgetComponent } from '../../shared/chart-widget.component';
+// ChartWidget moved into PatientReportsComponent
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
+import { PatientNotificationComponent } from './patient-notification.component';
 
 @Component({
   selector: 'app-patient-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, PatientAppointmentCardComponent, RescheduleAppointmentModalComponent, ChartWidgetComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, PatientAppointmentCardComponent, RescheduleAppointmentModalComponent, PatientNotificationComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-patient-layout>
     <div class="p-6 space-y-8">
@@ -42,35 +44,7 @@ import { PatientLayoutComponent } from '../../shared/patient-layout.component';
             <div class="text-2xl font-semibold">{{ patientName || 'Patient' }}!</div>
           </div>
           <div class="flex items-center gap-2">
-            <div class="relative">
-              <button class="btn-secondary relative" (click)="toggleNotif()" title="Notifications" aria-label="Notifications">
-                <span class="mr-1 text-lg">🔔</span>
-                <span class="text-sm">Notifications</span>
-                <span *ngIf="unreadCount > 0" class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full px-1">{{ unreadCount }}</span>
-              </button>
-              <div *ngIf="notifOpen" class="absolute right-0 mt-2 w-80 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50">
-                <div class="p-2 text-sm font-semibold">Notifications</div>
-                <div class="max-h-80 overflow-auto">
-                  <div class="px-3 py-2 text-sm text-gray-200">Service: {{ notifStatus?.service || 'Notification Service' }}</div>
-                  <div class="px-3 py-1 text-xs text-gray-300">Status: {{ notifStatus?.status || 'Unknown' }}</div>
-                  <div class="px-3 py-1 text-xs text-gray-400">Last check: {{ notifStatus?.timestamp ? (notifStatus?.timestamp | date:'short') : '—' }}</div>
-                  <div *ngIf="feed.length === 0" class="px-3 py-3 text-sm text-gray-300">No notifications.</div>
-                  <button
-                    *ngFor="let n of feed"
-                    class="w-full text-left px-3 py-2 border-t border-gray-700 hover:bg-gray-700/50"
-                    (click)="onNotificationClick(n)"
-                  >
-                    <div class="flex items-start justify-between">
-                      <div>
-                        <div class="text-sm font-medium" [class.text-white]="!n.read" [class.text-gray-200]="n.read">{{ n.title }}</div>
-                        <div class="text-xs text-gray-300">{{ n.message }}</div>
-                      </div>
-                      <div class="text-xs text-gray-400 whitespace-nowrap ml-2">{{ n.timestamp | date:'short' }}</div>
-                    </div>
-                  </button>
-                </div>
-              </div>
-            </div>
+            <app-patient-notification></app-patient-notification>
             <button class="btn-primary bg-white text-blue-700 hover:bg-white/90" (click)="goToBookAppointment()">Book Appointment</button>
             <button class="btn-primary bg-white text-blue-700 hover:bg-white/90" (click)="goToMyAppointments()">My Appointments</button>
           </div>
@@ -143,33 +117,7 @@ import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 
       <!-- Removed: separate My Appointments section; merged into cards row above -->
 
-      <!-- My Analytics -->
-      <section class="mt-6">
-        <h3 class="text-lg font-semibold mb-3">My Analytics</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="panel p-4">
-            <div class="text-sm text-gray-400">Overview</div>
-            <div class="mt-2 text-sm">
-              <div>Total Appointments: {{ patientAnalytics?.totalAppointments ?? '�' }}</div>
-              <div>Avg Visits/Month: {{ patientAnalytics?.averageVisitsPerMonth ?? '�' }}</div>
-            </div>
-          </div>
-          <app-chart-widget
-            *ngIf="doctorVisitLabels.length > 0"
-            title="Visits by Doctor"
-            [type]="'bar'"
-            [labels]="doctorVisitLabels"
-            [data]="doctorVisitData"
-          ></app-chart-widget>
-          <app-chart-widget
-            *ngIf="appointmentStatusData.length > 0"
-            title="Appointment Status"
-            [type]="'pie'"
-            [labels]="appointmentStatusLabels"
-            [data]="appointmentStatusData"
-          ></app-chart-widget>
-        </div>
-      </section>
+      
 
       <!-- My Health -->
       <section class="mt-6">
@@ -235,10 +183,14 @@ export class PatientDashboardComponent {
   appointmentStatusLabels: string[] = ['Completed', 'Cancelled'];
   appointmentStatusData: number[] = [];
 
+  // Patient id used across analytics/health and notification component wiring
+  patientId: number | null = null;
+
   // Services via inject to avoid undefined DI
   private auth = inject(AuthService);
   private reportsApi = inject(ReportsApiService);
   private feedbackApi = inject(FeedbackService);
+  private cdr = inject(ChangeDetectorRef);
 
   // Reschedule state
   rescheduleTarget: PatientAppointmentItem | null = null;
@@ -254,54 +206,22 @@ export class PatientDashboardComponent {
     private patientApi: PatientProfileService
   ) {}
 
-  // Notifications state and logic (status only)
-  notifOpen = false;
-  unreadCount = 0;
-  private notifPollHandle: any;
-  private notifApi = inject(NotificationService);
-  patientId: number | null = null;
-  feed: NotificationItem[] = [];
+  // Notification logic removed; handled by PatientNotificationComponent
 
   ngOnInit(): void {
     const idStr = this.auth.userId();
     this.patientId = idStr ? Number(idStr) : null;
-    this.fetchNotifications();
     // Initial data loads
     this.refreshDoctors();
     this.refreshAppointments();
     this.loadPatientWelcome();
     this.refreshPendingFeedback();
 
-    this.loadPatientAnalytics();
+    // Analytics handled by PatientReportsComponent
     this.loadPatientHealthData();
   }
 
-  ngOnDestroy(): void {
-    if (this.notifPollHandle) clearInterval(this.notifPollHandle);
-  }
-
-  toggleNotif() {
-    this.notifOpen = !this.notifOpen;
-  }
-
-  notifStatus: NotificationStatus | null = null;
-
-  fetchNotifications() {
-    this.notifApi.getStatus().subscribe({ next: (s) => (this.notifStatus = s) });
-    if (this.patientId == null) {
-      this.feed = [];
-      this.unreadCount = 0;
-      return;
-    }
-    this.notifApi.getPatientFeed(this.patientId).subscribe({ next: (items) => (this.feed = items || []) });
-    this.notifApi.getPatientUnreadCount(this.patientId).subscribe({ next: (n) => (this.unreadCount = n || 0) });
-  }
-
-  onNotificationClick(n: NotificationItem) {
-    const idNum = typeof n.id === 'string' ? Number(n.id) : (n.id as number | undefined);
-    if (idNum) this.notifApi.markRead(idNum).subscribe({ next: () => this.fetchNotifications() });
-    if (n.link) this.router.navigateByUrl(n.link);
-  }
+  // ngOnDestroy not needed for notifications; no local polling
 
   refreshDoctors() {
     this.loadingDoctors = true;
@@ -312,8 +232,12 @@ export class PatientDashboardComponent {
         this.loadingDoctors = false;
         // Load ratings for each doctor
         this.doctors.forEach((d) => this.loadRating(d));
+        this.cdr.markForCheck();
       },
-      error: () => (this.loadingDoctors = false),
+      error: () => {
+        this.loadingDoctors = false;
+        this.cdr.markForCheck();
+      },
     });
   }
 
@@ -340,6 +264,7 @@ export class PatientDashboardComponent {
           next: (dist) => {
             const count = Object.values(dist || {}).reduce((acc, n) => acc + (n || 0), 0);
             this.ratings[d.id] = { avg: avgResp?.averageRating ?? 0, count };
+            this.cdr.markForCheck();
           },
         });
       },
@@ -368,8 +293,12 @@ export class PatientDashboardComponent {
       next: (res) => {
         this.appointments = res || [];
         this.loadingAppointments = false;
+        this.cdr.markForCheck();
       },
-      error: () => (this.loadingAppointments = false),
+      error: () => {
+        this.loadingAppointments = false;
+        this.cdr.markForCheck();
+      },
     });
   }
 
@@ -380,8 +309,12 @@ export class PatientDashboardComponent {
         const list = res || [];
         this.pendingFeedbackCount = list.length;
         this.loadingPending = false;
+        this.cdr.markForCheck();
       },
-      error: () => (this.loadingPending = false),
+      error: () => {
+        this.loadingPending = false;
+        this.cdr.markForCheck();
+      },
     });
   }
 
@@ -393,6 +326,7 @@ export class PatientDashboardComponent {
         const name = [p?.firstName, p?.lastName].filter(Boolean).join(' ').trim();
         this.patientName = name || p?.username || 'Patient';
         this.profileImageUrl = p?.profileImageUrl || null;
+        this.cdr.markForCheck();
       },
     });
   }
@@ -517,18 +451,28 @@ export class PatientDashboardComponent {
         const cancelled = Number(this.patientAnalytics?.cancelledAppointments || 0);
         const completed = Math.max(total - cancelled, 0);
         this.appointmentStatusData = [completed, cancelled];
+        this.cdr.markForCheck();
       },
-      error: () => (this.patientAnalytics = null),
+      error: () => {
+        this.patientAnalytics = null;
+        this.cdr.markForCheck();
+      },
     });
   }
 
   loadPatientHealthData() {
     if (this.patientId == null) return;
     this.patientApi.getMedicalHistory(this.patientId).subscribe({
-      next: (list) => (this.medicalHistoryRecent = (list || []).slice(0, 5)),
+      next: (list) => {
+        this.medicalHistoryRecent = (list || []).slice(0, 5);
+        this.cdr.markForCheck();
+      },
     });
     this.patientApi.getDocumentsByPatient(this.patientId).subscribe({
-      next: (docs) => (this.patientDocumentsRecent = (docs || []).slice(0, 6)),
+      next: (docs) => {
+        this.patientDocumentsRecent = (docs || []).slice(0, 6);
+        this.cdr.markForCheck();
+      },
     });
   }
 }
