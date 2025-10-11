@@ -10,16 +10,21 @@ import { LoginRequest } from '../../core/models/auth.models';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
-    <div class="panel max-w-md mx-auto p-6">
+    <div class="panel max-w-md mx-auto p-6 mt-8">
       <h2 class="text-xl font-semibold mb-4">Login</h2>
       <form (ngSubmit)="onSubmit()" #f="ngForm" class="space-y-4">
         <div>
-          <label class="block mb-1">Username</label>
+          <label class="block mb-1 flex items-center gap-2"><i class="fa-solid fa-user text-gray-400"></i> <span>Username</span></label>
           <input class="input" name="username" [(ngModel)]="model.username" required />
         </div>
         <div>
-          <label class="block mb-1">Password</label>
-          <input class="input" type="password" name="password" [(ngModel)]="model.password" required />
+          <label class="block mb-1 flex items-center gap-2"><i class="fa-solid fa-lock text-gray-400"></i> <span>Password</span></label>
+          <div class="relative">
+            <input class="input pr-10" [type]="showPassword ? 'text' : 'password'" name="password" [(ngModel)]="model.password" required />
+            <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200" (click)="togglePassword()" aria-label="Toggle password visibility">
+              <i [class]="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+            </button>
+          </div>
         </div>
         <button class="btn-primary w-full" [disabled]="loading">Login</button>
         <div class="flex items-center justify-between text-sm text-gray-400 mt-2">
@@ -37,6 +42,7 @@ export class LoginComponent {
   private auth = inject(AuthService);
   loading = false;
   error = '';
+  showPassword = false;
 
   model: LoginRequest = { username: '', password: '' };
 
@@ -53,5 +59,9 @@ export class LoginComponent {
         this.loading = false;
       },
     });
+  }
+
+  togglePassword() {
+    this.showPassword = !this.showPassword;
   }
 }

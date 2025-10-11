@@ -1,3 +1,5 @@
+@import url("@fortawesome/fontawesome-free/css/all.min.css");
+
 /* Tailwind base layers */
 @tailwind base;
 @tailwind components;

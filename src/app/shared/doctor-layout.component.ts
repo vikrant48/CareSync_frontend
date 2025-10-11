@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '../core/services/auth.service';
 
 @Component({
   selector: 'app-doctor-layout',
@@ -37,10 +38,10 @@ import { RouterModule } from '@angular/router';
             <i class="fa-solid fa-user-doctor mr-2"></i>
             <span>Profile</span>
           </a>
-          <a class="nav-item" routerLink="/login">
+          <button class="nav-item w-full text-left" (click)="onLogout()">
             <i class="fa-solid fa-right-from-bracket mr-2"></i>
             <span>Logout</span>
-          </a>
+          </button>
           <a class="nav-item" routerLink="/doctor/change-password" routerLinkActive="active">
             <i class="fa-solid fa-key mr-2"></i>
             <span>Change Password</span>
@@ -60,4 +61,9 @@ import { RouterModule } from '@angular/router';
     `,
   ],
 })
-export class DoctorLayoutComponent {}
+export class DoctorLayoutComponent {
+  private auth = inject(AuthService);
+  onLogout() {
+    this.auth.logout();
+  }
+}
