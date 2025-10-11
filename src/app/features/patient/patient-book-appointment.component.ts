@@ -30,6 +30,21 @@ import { PatientLayoutComponent } from '../../shared/patient-layout.component';
           placeholder="Search by doctor name"
           [(ngModel)]="nameFilter"
         />
+        <select
+          class="input flex-1"
+          [(ngModel)]="genderFilter"
+        >
+          <option value="">All genders</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+        </select>
+        <input
+          type="text"
+          class="input flex-1"
+          placeholder="Filter by address/location"
+          [(ngModel)]="addressFilter"
+        />
       </div>
 
       <div *ngIf="loadingDoctors" class="text-gray-400">Loading doctors...</div>
@@ -39,21 +54,32 @@ import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div
-          class="panel p-4 hover:shadow cursor-pointer"
+          class="panel p-4 hover:shadow cursor-pointer relative"
           *ngFor="let d of filteredDoctors()"
           (click)="openDoctor(d)"
         >
+          <div class="absolute top-2 right-2 text-sm bg-gray-800/70 rounded px-2 py-1 flex items-center gap-1" *ngIf="ratings[d.id] as r" (click)="$event.stopPropagation()">
+            <span>{{ r.avg.toFixed(1) }}</span>
+            <span class="text-yellow-400">★</span>
+            <span>({{ r.count }})</span>
+          </div>
           <div class="flex items-center gap-3 mb-2">
-            <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white">
-              {{ (d.name || (d.firstName + ' ' + d.lastName))?.charAt(0) }}
+            <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center text-white">
+              <img *ngIf="d.profileImageUrl" [src]="d.profileImageUrl" class="w-full h-full object-cover" (error)="d.profileImageUrl = ''" />
+              <span *ngIf="!d.profileImageUrl">{{ doctorInitial(d) }}</span>
             </div>
             <div>
-              <div class="font-semibold">{{ d.name || (d.firstName + ' ' + d.lastName) }}</div>
+              <div class="font-semibold">{{ formatDoctorName(d) }}</div>
               <div class="text-sm text-gray-400">{{ d.specialization || 'General' }}</div>
+              <div class="text-xs text-gray-400" *ngIf="d.gender">Gender: {{ d.gender }}</div>
             </div>
           </div>
-          <div class="text-sm" *ngIf="ratings[d.id] as r">
-            {{ r.avg.toFixed(1) }} ★ based on {{ r.count }} patients
+          <div class="text-sm text-gray-300" *ngIf="d.consultationFees !== undefined && d.consultationFees !== null">
+            Consultation Fee: {{ d.consultationFees }}
+          </div>
+          <div class="text-sm text-gray-300" *ngIf="d.address">Address: {{ d.address }}</div>
+          <div class="mt-3">
+            <button class="btn-primary" (click)="goToDoctorAndBook(d); $event.stopPropagation()">Book Appointment</button>
           </div>
         </div>
       </div>
@@ -64,12 +90,18 @@ import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 export class PatientBookAppointmentComponent {
   specializationFilter = '';
   nameFilter = '';
+  genderFilter = '';
+  addressFilter = '';
   loadingDoctors = false;
 
   doctors: Doctor[] = [];
   ratings: Record<number, { avg: number; count: number }> = {};
 
-  constructor(private doctorApi: DoctorService, private router: Router) {
+
+  constructor(
+    private doctorApi: DoctorService,
+    private router: Router,
+  ) {
     this.refreshDoctors();
   }
 
@@ -89,10 +121,14 @@ export class PatientBookAppointmentComponent {
   filteredDoctors() {
     const spec = (this.specializationFilter || '').toLowerCase().trim();
     const name = (this.nameFilter || '').toLowerCase().trim();
+    const gender = (this.genderFilter || '').trim();
+    const addr = (this.addressFilter || '').toLowerCase().trim();
     return this.doctors.filter((d) => {
       const dName = (d.name || `${d.firstName || ''} ${d.lastName || ''}`).toLowerCase();
       const dSpec = (d.specialization || '').toLowerCase();
-      return dSpec.includes(spec) && dName.includes(name);
+      const dGenderMatch = !gender || (d.gender || '').toLowerCase() === gender.toLowerCase();
+      const dAddr = (d.address || '').toLowerCase();
+      return dSpec.includes(spec) && dName.includes(name) && dGenderMatch && dAddr.includes(addr);
     });
   }
 
@@ -112,4 +148,21 @@ export class PatientBookAppointmentComponent {
   openDoctor(d: Doctor) {
     this.router.navigate(['/patient/doctor', d.username]);
   }
+
+  formatDoctorName(d: Doctor) {
+    const base = (d.name || `${d.firstName || ''} ${d.lastName || ''}`).trim();
+    const hasPrefix = /^dr\.?\s/i.test(base);
+    return hasPrefix ? base : `Dr ${base}`;
+  }
+
+  doctorInitial(d: Doctor) {
+    const base = (d.name || `${d.firstName || ''} ${d.lastName || ''}`).trim();
+    const stripped = base.replace(/^dr\.?\s+/i, '');
+    return stripped.charAt(0) || '?';
+  }
+
+  goToDoctorAndBook(d: Doctor) {
+    this.router.navigate(['/patient/doctor', d.username], { queryParams: { book: '1' } });
+  }
+
 }

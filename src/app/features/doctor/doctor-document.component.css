@@ -1,0 +1,5 @@
+.btn-danger { @apply bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded; }
+.link { @apply text-blue-400 hover:text-blue-300 underline; }
+.btn-secondary { @apply bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded; }
+.upload-btn { @apply bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded; }
+.upload-btn:disabled { @apply opacity-50 cursor-not-allowed hover:bg-green-600; }

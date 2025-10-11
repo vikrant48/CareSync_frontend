@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DoctorProfileService, UpdateDoctorRequest, CreateEducationRequest, CreateExperienceRequest, CreateCertificateRequest } from '../../core/services/doctor-profile.service';
@@ -32,7 +32,13 @@ export class DoctorProfileComponent implements OnInit {
     contactInfo: '',
     email: '',
     isActive: true,
+    gender: undefined,
+    consultationFees: undefined,
+    address: '',
+    languages: [],
   };
+
+  languageOptions: string[] = ['Hindi', 'English', 'Others'];
 
   // Education
   educations: any[] = [];
@@ -49,14 +55,18 @@ export class DoctorProfileComponent implements OnInit {
   certFile?: File;
   certDescription: string = '';
   certEdit: Record<number, Partial<CreateCertificateRequest>> = {};
+  editingCertId: number | null = null;
+  lastUploadedCertId: number | null = null;
+  @ViewChild('certFileInput') certFileInputRef?: ElementRef<HTMLInputElement>;
 
-  // Documents
-  documents: any[] = [];
 
   // Profile image selection & preview
   selectedProfileImage?: File;
   profileImagePreviewUrl: string | null = null;
   uploadingProfileImage = false;
+  uploadingCertificate = false;
+  certUploadMessage: string | null = null;
+  certUploadDetails: { cloudinaryUrl?: string; downloadUrl?: string; filename?: string } | null = null;
 
   ngOnInit(): void {
     this.username = this.auth.username();
@@ -76,16 +86,13 @@ export class DoctorProfileComponent implements OnInit {
     const u = this.username!;
     const id = this.doctorId;
 
-    const docs$ = id != null ? this.svc.getDocumentsByDoctor(id) : of([]);
-
     forkJoin({
       profile: this.svc.getProfile(u),
       educations: this.svc.getEducations(u),
       experiences: this.svc.getExperiences(u),
       certificates: this.svc.getCertificates(u),
-      documents: docs$,
     }).subscribe({
-      next: ({ profile, educations, experiences, certificates, documents }) => {
+      next: ({ profile, educations, experiences, certificates }) => {
         this.profile = profile;
         this.profileForm = {
           firstName: profile?.firstName ?? '',
@@ -94,11 +101,16 @@ export class DoctorProfileComponent implements OnInit {
           contactInfo: profile?.contactInfo ?? '',
           email: profile?.email ?? '',
           isActive: profile?.isActive ?? true,
+          gender: profile?.gender ?? undefined,
+          consultationFees: profile?.consultationFees ?? undefined,
+          address: profile?.address ?? '',
+          languages: this.normalizeLanguages(profile?.languages),
         };
         this.educations = educations || [];
         this.experiences = experiences || [];
         this.certificates = certificates || [];
-        this.documents = documents || [];
+        // Initialize certificate edit state to ensure ngModel writes work
+        this.initCertEdit();
         this.loading.set(false);
       },
       error: (e) => {
@@ -108,10 +120,47 @@ export class DoctorProfileComponent implements OnInit {
     });
   }
 
+  // Initialize edit buffer for certificates
+  private initCertEdit() {
+    this.certEdit = {};
+    for (const c of this.certificates) {
+      // Prepopulate with existing values to allow editing
+      this.certEdit[c.id] = {
+        name: c.name,
+        url: c.url,
+        details: c.details,
+        issuingOrganization: c.issuingOrganization,
+        issueDate: c.issueDate,
+        expiryDate: c.expiryDate,
+        credentialId: c.credentialId,
+        credentialUrl: c.credentialUrl,
+      };
+    }
+  }
+
   // Profile update
   saveProfile() {
     if (!this.username) return;
     this.svc.updateProfile(this.username, this.profileForm).subscribe({ next: (resp) => (this.profile = resp) });
+  }
+
+  // Helpers for languages normalization and toggling
+  normalizeLanguages(value: any): string[] {
+    if (!value) return [];
+    if (Array.isArray(value)) return value.filter((x) => !!x);
+    if (typeof value === 'string') return value.split(',').map((s) => s.trim()).filter((s) => !!s);
+    return [];
+  }
+
+  toggleLanguage(lang: string, ev: Event) {
+    const checked = (ev.target as HTMLInputElement).checked;
+    const set = new Set(this.profileForm.languages || []);
+    if (checked) {
+      set.add(lang);
+    } else {
+      set.delete(lang);
+    }
+    this.profileForm.languages = Array.from(set);
   }
 
   // Profile image upload
@@ -269,11 +318,21 @@ export class DoctorProfileComponent implements OnInit {
 
   uploadCertificate() {
     if (!this.certFile || this.doctorId == null) return;
+    this.uploadingCertificate = true;
+    this.certUploadMessage = null;
+    this.certUploadDetails = null;
     this.svc.uploadCertificateFile(this.certFile, this.doctorId, this.certDescription).subscribe({
       next: (resp) => {
         // Create metadata update payload using returned cloudinary URL
         const certificateId = resp?.certificateId;
         const cloudinaryUrl = resp?.cloudinaryUrl;
+        // Show success message from backend
+        this.certUploadMessage = resp?.message || 'Uploaded successfully';
+        this.certUploadDetails = {
+          cloudinaryUrl: resp?.cloudinaryUrl,
+          downloadUrl: resp?.downloadUrl || resp?.url,
+          filename: resp?.filename,
+        };
         if (this.username && certificateId && cloudinaryUrl) {
           const payload: CreateCertificateRequest = {
             name: resp?.filename || 'Certificate',
@@ -281,11 +340,28 @@ export class DoctorProfileComponent implements OnInit {
             details: this.certDescription,
           };
           this.svc.updateCertificate(this.username, certificateId, payload).subscribe({
-            next: () => this.svc.getCertificates(this.username!).subscribe({ next: (list) => (this.certificates = list || []) }),
+            next: () => this.svc.getCertificates(this.username!).subscribe({
+              next: (list) => {
+                this.certificates = list || [];
+                this.initCertEdit();
+                // Show post-upload metadata form below the upload area
+                this.lastUploadedCertId = certificateId;
+                this.editingCertId = null;
+              },
+            }),
           });
         }
         this.certFile = undefined;
         this.certDescription = '';
+        // Clear the <input type="file"> element to show "No file chosen"
+        if (this.certFileInputRef?.nativeElement) {
+          this.certFileInputRef.nativeElement.value = '';
+        }
+        this.uploadingCertificate = false;
+      },
+      error: (e) => {
+        this.uploadingCertificate = false;
+        this.certUploadMessage = e?.error?.message || 'Upload failed';
       },
     });
   }
@@ -309,7 +385,12 @@ export class DoctorProfileComponent implements OnInit {
             credentialUrl: item.credentialUrl,
           };
           this.svc.updateCertificate(this.username, item.id, payload).subscribe({
-            next: () => this.svc.getCertificates(this.username!).subscribe({ next: (list) => (this.certificates = list || []) }),
+            next: () => this.svc.getCertificates(this.username!).subscribe({
+              next: (list) => {
+                this.certificates = list || [];
+                this.initCertEdit();
+              },
+            }),
           });
         }
       },
@@ -320,12 +401,12 @@ export class DoctorProfileComponent implements OnInit {
     if (!this.username) return;
     const edited = this.certEdit[item.id] || {};
     const payload: CreateCertificateRequest = {
-      name: edited.name ?? item.name,
-      url: edited.url ?? item.url,
+      name: (edited.name ?? item.name),
+      url: (edited.url ?? item.url)?.trim?.() ?? (item.url ?? ''),
       details: edited.details ?? item.details,
       issuingOrganization: edited.issuingOrganization ?? item.issuingOrganization,
-      issueDate: edited.issueDate ?? item.issueDate,
-      expiryDate: edited.expiryDate ?? item.expiryDate,
+      issueDate: (edited.issueDate ?? item.issueDate),
+      expiryDate: (edited.expiryDate ?? item.expiryDate),
       credentialId: edited.credentialId ?? item.credentialId,
       credentialUrl: edited.credentialUrl ?? item.credentialUrl,
     };
@@ -333,8 +414,57 @@ export class DoctorProfileComponent implements OnInit {
       next: (updated) => {
         const idx = this.certificates.findIndex((c) => c.id === item.id);
         if (idx >= 0) this.certificates[idx] = updated;
+        // Refresh edit buffer for this item
+        this.certEdit[item.id] = {
+          name: updated.name,
+          url: updated.url,
+          details: updated.details,
+          issuingOrganization: updated.issuingOrganization,
+          issueDate: updated.issueDate,
+          expiryDate: updated.expiryDate,
+          credentialId: updated.credentialId,
+          credentialUrl: updated.credentialUrl,
+        };
+        // Close any open edit panel
+        if (this.editingCertId === item.id) {
+          this.editingCertId = null;
+        }
+        // Close post-upload form if it was for this certificate
+        if (this.lastUploadedCertId === item.id) {
+          this.lastUploadedCertId = null;
+        }
       },
     });
+  }
+
+  startEditCert(item: any) {
+    this.editingCertId = item?.id ?? null;
+    if (item && !this.certEdit[item.id]) {
+      this.certEdit[item.id] = {
+        name: item.name,
+        url: item.url,
+        details: item.details,
+        issuingOrganization: item.issuingOrganization,
+        issueDate: item.issueDate,
+        expiryDate: item.expiryDate,
+        credentialId: item.credentialId,
+        credentialUrl: item.credentialUrl,
+      };
+    }
+  }
+
+  cancelEditCert() {
+    this.editingCertId = null;
+  }
+
+  // Helper: find certificate by id for templates
+  findCert(id: number) {
+    return this.certificates.find((c) => c.id === id);
+  }
+
+  // Cancel the post-upload metadata form
+  cancelNewCertMeta() {
+    this.lastUploadedCertId = null;
   }
 
   deleteCertificate(item: any) {
@@ -344,14 +474,5 @@ export class DoctorProfileComponent implements OnInit {
     });
   }
 
-  // Documents
-  deleteDocument(doc: any) {
-    this.svc.deleteDocument(doc.id).subscribe({
-      next: () => (this.documents = this.documents.filter((d) => d.id !== doc.id)),
-    });
-  }
-
-  updateDocDescription(doc: any) {
-    this.svc.updateDocumentDescription(doc.id, doc.description || '').subscribe();
-  }
+  
 }

@@ -6,17 +6,23 @@
       title="Home"
     >CareSync</a>
     <nav class="flex gap-4 items-center">
-      <span *ngIf="!auth.isAuthenticated()">
-        <a routerLink="/login" class="link">Login</a>
-        <a routerLink="/register" class="link">Register</a>
+      <span *ngIf="!auth.isAuthenticated()" class="flex items-center gap-2">
+        <a routerLink="/login" class="btn-secondary" aria-label="Login">Login</a>
+        <a routerLink="/register" class="btn-primary" aria-label="Register">Register</a>
       </span>
-      <span *ngIf="auth.isAuthenticated()" class="flex gap-4 items-center">
-        <a *ngIf="auth.role() === 'DOCTOR'" routerLink="/doctor" class="btn-primary py-1 px-3">Dashboard</a>
-        <a *ngIf="auth.role() === 'PATIENT'" routerLink="/patient" class="btn-primary py-1 px-3">Dashboard</a>
-        <a *ngIf="auth.role() === 'DOCTOR'" routerLink="/doctor/profile" class="link">Profile</a>
-        <a *ngIf="auth.role() === 'PATIENT'" routerLink="/patient/profile" class="link">Profile</a>
-        <span class="text-sm text-gray-300">{{ auth.username() }}</span>
-        <button class="btn-secondary py-1 px-3" (click)="onLogout()">Logout</button>
+      <span *ngIf="auth.isAuthenticated()" class="relative">
+        <button class="flex items-center gap-2" (click)="toggleMenu()" title="Account">
+          <img *ngIf="profileImageUrl; else avatarTpl" [src]="profileImageUrl" alt="Profile" class="w-8 h-8 rounded-md object-cover border border-gray-700" (error)="profileImageUrl = ''" />
+          <ng-template #avatarTpl>
+            <div class="w-8 h-8 rounded-md bg-gray-700 text-white flex items-center justify-center text-sm">{{ avatarInitial }}</div>
+          </ng-template>
+        </button>
+        <div *ngIf="menuOpen" class="absolute right-0 mt-2 w-40 panel p-2 space-y-1 z-50">
+          <a *ngIf="auth.role() === 'DOCTOR'" routerLink="/doctor/profile" class="block w-full text-left px-3 py-2 rounded hover:bg-gray-700/50">Profile</a>
+          <a *ngIf="auth.role() === 'PATIENT'" routerLink="/patient/profile" class="block w-full text-left px-3 py-2 rounded hover:bg-gray-700/50">Profile</a>
+          <a routerLink="/settings" class="block w-full text-left px-3 py-2 rounded hover:bg-gray-700/50">Settings</a>
+          <button class="block w-full text-left px-3 py-2 rounded hover:bg-gray-700/50 text-red-300" (click)="onLogout()">Logout</button>
+        </div>
       </span>
     </nav>
   </div>

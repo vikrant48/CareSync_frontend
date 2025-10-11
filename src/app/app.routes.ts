@@ -17,6 +17,7 @@ import { PatientChangePasswordComponent } from './features/patient/patient-chang
 import { ResetPasswordComponent } from './features/auth/reset-password.component';
 import { DoctorReportsComponent } from './features/doctor/doctor-reports.component';
 import { PatientReportsComponent } from './features/patient/patient-reports.component';
+import { DoctorDocumentsComponent } from './features/doctor/doctor-document.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -50,6 +51,12 @@ export const routes: Routes = [
   {
     path: 'doctor/reports',
     component: DoctorReportsComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['DOCTOR'] }
+  },
+  {
+    path: 'doctor/documents',
+    component: DoctorDocumentsComponent,
     canActivate: [authGuard, roleGuard],
     data: { roles: ['DOCTOR'] }
   },

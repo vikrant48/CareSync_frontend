@@ -1,0 +1,99 @@
+<app-doctor-layout>
+  <section class="space-y-6" *ngIf="!loading()">
+    <h2 class="text-xl font-semibold">My Documents</h2>
+
+    <!-- Upload form -->
+    <div class="border rounded p-4 space-y-3">
+      <h3 class="font-semibold">Upload Document</h3>
+      <div class="grid md:grid-cols-2 gap-3">
+        <label class="block">
+          <input type="file" #fileInput (change)="onFileSelected($event)" />
+        </label>
+        <label class="block">
+          <span class="text-xs">Document Type</span>
+          <select class="input" [(ngModel)]="uploadType">
+            <option *ngFor="let t of documentTypes" [value]="t">{{ t }}</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-xs">Category</span>
+          <select class="input" [(ngModel)]="uploadCategory">
+            <option value="Education">Education</option>
+            <option value="Experience">Experience</option>
+            <option value="Other">Others</option>
+          </select>
+        </label>
+        <label class="block" *ngIf="uploadCategory === 'Education'">
+          <span class="text-xs">Education Subtype</span>
+          <select class="input" [(ngModel)]="uploadEducationSubtype">
+            <option value="">Select</option>
+            <option *ngFor="let s of educationSubtypes" [value]="s">{{ s }}</option>
+          </select>
+        </label>
+        <label class="block md:col-span-2">
+          <span class="text-xs">Description</span>
+          <input class="input" [(ngModel)]="uploadDescription" placeholder="Optional note" />
+        </label>
+      </div>
+      <button class="btn upload-btn mt-2" [disabled]="!selectedFile || uploading" (click)="uploadDocument()">{{ uploading ? 'Uploading…' : 'Upload' }}</button>
+      <div *ngIf="successMessage" class="text-green-600 text-sm mt-2">{{ successMessage }}</div>
+    </div>
+
+    <!-- Filters + List in one container -->
+    <div class="border rounded p-4 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-semibold">Filters</h3>
+        <button class="btn" (click)="clearFilters()">Clear</button>
+      </div>
+      <div class="grid md:grid-cols-3 gap-3">
+        <label class="block">
+          <span class="text-xs">Document Type</span>
+          <select class="input" [(ngModel)]="filterType" (change)="onFilterChanged()">
+            <option value="ALL">All</option>
+            <option *ngFor="let t of documentTypes" [value]="t">{{ t }}</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-xs">Category</span>
+          <select class="input" [(ngModel)]="filterCategory" (change)="onFilterChanged()">
+            <option value="ALL">All</option>
+            <option value="Education">Education</option>
+            <option value="Experience">Experience</option>
+            <option value="Other">Others</option>
+          </select>
+        </label>
+        <label class="block" *ngIf="filterCategory === 'Education'">
+          <span class="text-xs">Education Subtype</span>
+          <select class="input" [(ngModel)]="filterEducationSubtype" (change)="onFilterChanged()">
+            <option value="ALL">All</option>
+            <option *ngFor="let s of educationSubtypes" [value]="s">{{ s }}</option>
+          </select>
+        </label>
+      </div>
+
+      <div *ngIf="(documents?.length || 0) === 0" class="text-gray-400">No documents available.</div>
+      <div *ngIf="(documents?.length || 0) > 0 && (displayedDocs?.length || 0) === 0" class="text-gray-400">No matching documents for current filters.</div>
+      <div class="grid md:grid-cols-2 gap-3" *ngIf="(displayedDocs?.length || 0) > 0">
+        <div *ngFor="let d of displayedDocs" class="border p-3 rounded">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-medium">{{ d.originalFilename }}</p>
+              <p class="text-xs text-gray-400">Type: {{ d.documentType }} | {{ d.contentType }}</p>
+            </div>
+            <a [href]="d.filePath" target="_blank" class="link">Open</a>
+          </div>
+          <label class="block mt-2">
+            <span class="text-xs">Description</span>
+            <input class="input" [(ngModel)]="d.description" (blur)="updateDocDescription(d)" />
+          </label>
+          <button class="btn-danger mt-2" (click)="deleteDocument(d)">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Duplicate list removed; cards are rendered above within the filters container -->
+  </section>
+
+  <div *ngIf="loading()" class="p-6 text-center text-gray-400">Loading documents…</div>
+  <div *ngIf="error()" class="p-6 text-center text-red-500">{{ error() }}</div>
+</app-doctor-layout>

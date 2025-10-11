@@ -14,6 +14,9 @@ export interface Doctor {
   isActive?: boolean;
   profileImageUrl?: string;
   dateOfBirth?: string;
+  gender?: string;
+  address?: string;
+  consultationFees?: number;
 }
 
 @Injectable({ providedIn: 'root' })

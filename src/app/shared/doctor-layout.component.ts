@@ -25,6 +25,10 @@ import { RouterModule } from '@angular/router';
             <i class="fa-solid fa-calendar-check mr-2"></i>
             <span>Appointments</span>
           </a>
+          <a class="nav-item" routerLink="/doctor/documents" routerLinkActive="active">
+            <i class="fa-solid fa-folder-open mr-2"></i>
+            <span>My Documents</span>
+          </a>
           <a class="nav-item" routerLink="/doctor/reports" routerLinkActive="active">
             <i class="fa-solid fa-chart-line mr-2"></i>
             <span>Reports</span>
@@ -43,7 +47,7 @@ import { RouterModule } from '@angular/router';
           </a>
         </nav>
       </aside>
-      <main class="flex-1 h-screen overflow-y-auto overflow-x-hidden min-w-0 p-6">
+      <main class="flex-1 h-screen overflow-y-auto overflow-x-hidden min-w-0 p-6 pb-16">
         <ng-content></ng-content>
       </main>
     </div>

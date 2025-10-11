@@ -11,6 +11,10 @@ export interface UpdateDoctorRequest {
   profileImageUrl?: string;
   email?: string;
   isActive?: boolean;
+  gender?: string;
+  consultationFees?: number;
+  address?: string;
+  languages?: string[];
 }
 
 export interface CreateExperienceRequest {
@@ -132,6 +136,15 @@ export class DoctorProfileService {
   // Documents
   getDocumentsByDoctor(doctorId: number | string) {
     return this.http.get<DocumentItem[]>(`${this.baseUrl}/api/files/doctor/${doctorId}`);
+  }
+
+  uploadDoctorDocument(file: File, doctorId: number | string, documentType: string, description?: string) {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('doctorId', String(doctorId));
+    if (documentType) fd.append('documentType', documentType);
+    if (description) fd.append('description', description);
+    return this.http.post<any>(`${this.baseUrl}/api/files/upload/doctor-document`, fd);
   }
 
   deleteDocument(documentId: number) {

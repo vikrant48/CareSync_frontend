@@ -56,7 +56,7 @@ import { AuthService } from '../core/services/auth.service';
       </aside>
 
       <!-- Content Area -->
-      <main class="flex-1 h-screen overflow-y-auto overflow-x-hidden min-w-0">
+      <main class="flex-1 h-screen overflow-y-auto overflow-x-hidden min-w-0 pb-16">
         <div class="p-4">
           <ng-content></ng-content>
         </div>

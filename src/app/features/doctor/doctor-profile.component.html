@@ -26,6 +26,34 @@
         <span class="text-sm">Email</span>
         <input type="email" class="input" [(ngModel)]="profileForm.email" />
       </label>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <label class="block">
+          <span class="text-sm">Gender</span>
+          <select class="input" [(ngModel)]="profileForm.gender">
+            <option [ngValue]="undefined">Select gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-sm">Consultation Fees</span>
+          <input type="number" class="input" [(ngModel)]="profileForm.consultationFees" />
+        </label>
+      </div>
+      <label class="block">
+        <span class="text-sm">Address</span>
+        <input class="input" [(ngModel)]="profileForm.address" />
+      </label>
+      <div class="block">
+        <span class="text-sm">Languages</span>
+        <div class="flex flex-wrap gap-3 mt-1">
+          <label *ngFor="let lang of languageOptions" class="inline-flex items-center gap-2">
+            <input type="checkbox" [checked]="profileForm.languages?.includes(lang)" (change)="toggleLanguage(lang, $event)" />
+            <span>{{ lang }}</span>
+          </label>
+        </div>
+      </div>
       <button class="btn-primary" (click)="saveProfile()">Update Profile</button>
     </div>
 
@@ -172,57 +200,95 @@
   <div class="p-4 border rounded space-y-3">
     <h3 class="font-semibold">Certificates</h3>
     <div class="flex items-center gap-3">
-      <input type="file" (change)="onCertFileSelected($event)" accept="application/pdf,image/*" />
+      <input type="file" #certFileInput (change)="onCertFileSelected($event)" accept="application/pdf,image/*" />
       <input class="input flex-1" placeholder="Description (optional)" [(ngModel)]="certDescription" />
-      <button class="btn-secondary" (click)="uploadCertificate()" [disabled]="!certFile">Upload & Create</button>
+      <button class="btn-secondary" (click)="uploadCertificate()" [disabled]="uploadingCertificate || !certFile">
+        {{ uploadingCertificate ? 'Uploading…' : 'Upload & Create' }}
+      </button>
     </div>
-    <ul class="divide-y">
-      <li *ngFor="let c of certificates" class="py-3 space-y-2">
-        <div class="flex items-center gap-3">
-          <strong>{{ c.name || c.originalFilename || 'Certificate' }}</strong>
-          <a *ngIf="c.url" [href]="c.url" target="_blank" class="link">View</a>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <input class="input" placeholder="Name" [(ngModel)]="certEdit[c.id].name" />
-          <input class="input" placeholder="Issuing Organization" [(ngModel)]="certEdit[c.id].issuingOrganization" />
-          <input class="input" placeholder="Issue Date (YYYY-MM-DD)" [(ngModel)]="certEdit[c.id].issueDate" />
-          <input class="input" placeholder="Expiry Date (YYYY-MM-DD)" [(ngModel)]="certEdit[c.id].expiryDate" />
-          <input class="input" placeholder="Credential ID" [(ngModel)]="certEdit[c.id].credentialId" />
-          <input class="input" placeholder="Credential URL" [(ngModel)]="certEdit[c.id].credentialUrl" />
-          <textarea class="input md:col-span-2" placeholder="Details" [(ngModel)]="certEdit[c.id].details"></textarea>
-        </div>
-        <div class="flex items-center gap-3">
-          <button class="btn-primary" (click)="saveCertificateMeta(c)">Save Metadata</button>
-          <label class="btn-secondary cursor-pointer">
-            Replace File
-            <input type="file" class="hidden" (change)="replaceCertificateFile(c, $event)" accept="application/pdf,image/*" />
-          </label>
-          <button class="btn-danger" (click)="deleteCertificate(c)">Delete</button>
-        </div>
-      </li>
-    </ul>
-  </div>
-
-  <!-- Documents -->
-  <div class="p-4 border rounded space-y-3">
-    <h3 class="font-semibold">Documents</h3>
-    <div class="grid md:grid-cols-2 gap-3">
-      <div *ngFor="let d of documents" class="border p-3 rounded">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="font-medium">{{ d.originalFilename }}</p>
-            <p class="text-xs text-gray-400">Type: {{ d.documentType }} | {{ d.contentType }}</p>
-          </div>
-          <a [href]="d.filePath" target="_blank" class="link">Open</a>
-        </div>
-        <label class="block mt-2">
-          <span class="text-xs">Description</span>
-          <input class="input" [(ngModel)]="d.description" (blur)="updateDocDescription(d)" />
-        </label>
-        <button class="btn-danger mt-2" (click)="deleteDocument(d)">Delete</button>
+    <!-- Upload success banner -->
+    <div *ngIf="certUploadMessage" class="p-3 rounded border border-green-700 bg-green-900/40 text-green-100 text-sm space-y-1">
+      <div>{{ certUploadMessage }}</div>
+      <div class="flex gap-3">
+        <a *ngIf="certUploadDetails?.cloudinaryUrl" [href]="certUploadDetails?.cloudinaryUrl" target="_blank" class="link">Open Cloudinary</a>
+        <a *ngIf="certUploadDetails?.downloadUrl" [href]="certUploadDetails?.downloadUrl" target="_blank" class="link">Download</a>
+        <span *ngIf="certUploadDetails?.filename">File: {{ certUploadDetails?.filename }}</span>
       </div>
     </div>
+    <!-- Post-upload metadata form (shown below upload when file created successfully) -->
+    <div *ngIf="lastUploadedCertId as nid" class="p-3 rounded border border-gray-700 bg-gray-900/40 space-y-2">
+      <div class="font-medium">Complete certificate details</div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2" *ngIf="findCert(nid) as newCert">
+        <input class="input" placeholder="Name" [(ngModel)]="certEdit[nid].name" />
+        <input class="input" placeholder="Issuing Organization" [(ngModel)]="certEdit[nid].issuingOrganization" />
+        <input class="input" type="date" placeholder="Issue Date" [(ngModel)]="certEdit[nid].issueDate" />
+        <input class="input" type="date" placeholder="Expiry Date" [(ngModel)]="certEdit[nid].expiryDate" />
+        <input class="input" placeholder="Credential ID" [(ngModel)]="certEdit[nid].credentialId" />
+        <input class="input" placeholder="Credential URL" [(ngModel)]="certEdit[nid].credentialUrl" />
+        <textarea class="input md:col-span-2" placeholder="Details" [(ngModel)]="certEdit[nid].details"></textarea>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="btn-primary" (click)="saveCertificateMeta(findCert(nid))">Save</button>
+        <button class="btn-secondary" (click)="cancelNewCertMeta()">Cancel</button>
+      </div>
+    </div>
+    <div *ngIf="(certificates?.length || 0) === 0" class="text-gray-400">No certificates available.</div>
+    <!-- Above-table edit form (opens when clicking Edit on a row) -->
+    <div *ngIf="editingCertId as eid" class="p-3 rounded border border-gray-700 bg-gray-900/40 space-y-2">
+      <div class="font-medium">Edit certificate details</div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2" *ngIf="findCert(eid) as editCert">
+        <input class="input" placeholder="Name" [(ngModel)]="certEdit[eid].name" />
+        <input class="input" placeholder="Issuing Organization" [(ngModel)]="certEdit[eid].issuingOrganization" />
+        <input class="input" type="date" placeholder="Issue Date" [(ngModel)]="certEdit[eid].issueDate" />
+        <input class="input" type="date" placeholder="Expiry Date" [(ngModel)]="certEdit[eid].expiryDate" />
+        <input class="input" placeholder="Credential ID" [(ngModel)]="certEdit[eid].credentialId" />
+        <input class="input" placeholder="Credential URL" [(ngModel)]="certEdit[eid].credentialUrl" />
+        <textarea class="input md:col-span-2" placeholder="Details" [(ngModel)]="certEdit[eid].details"></textarea>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="btn-primary" (click)="saveCertificateMeta(findCert(eid))">Save</button>
+        <button class="btn-secondary" (click)="cancelEditCert()">Cancel</button>
+      </div>
+    </div>
+
+    <div *ngIf="(certificates?.length || 0) > 0" class="overflow-x-auto">
+      <table class="w-full text-sm border-separate border-spacing-y-2">
+        <thead>
+          <tr class="text-gray-400">
+            <th class="text-left">Name</th>
+            <th class="text-left w-28">Cloudinary</th>
+            <th class="text-left w-28">Credential</th>
+            <th class="text-left w-52">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of certificates" class="border-t">
+            <td>
+              <div>{{ c.name || c.originalFilename || 'Certificate' }}</div>
+            </td>
+            <td>
+              <a *ngIf="c.url" class="link" [href]="c.url" target="_blank">View</a>
+            </td>
+            <td>
+              <a *ngIf="c.credentialUrl" class="link" [href]="c.credentialUrl" target="_blank">Verify</a>
+            </td>
+            <td>
+              <div class="flex gap-2">
+                <button class="btn-secondary" (click)="startEditCert(c)">Edit</button>
+                <button class="btn-danger" (click)="deleteCertificate(c)">Delete</button>
+                <label class="btn-secondary cursor-pointer">
+                  Replace
+                  <input type="file" class="hidden" (change)="replaceCertificateFile(c, $event)" accept="application/pdf,image/*" />
+                </label>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
+
+  
 </section>
 
 <div *ngIf="loading()" class="p-6 text-center text-gray-400">Loading profile…</div>
