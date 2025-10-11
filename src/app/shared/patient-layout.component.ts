@@ -43,6 +43,10 @@ import { AuthService } from '../core/services/auth.service';
             <i class="fas fa-id-badge"></i>
             <span>Profile</span>
           </a>
+          <a routerLink="/settings" routerLinkActive="!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-700">
+            <i class="fas fa-cog"></i>
+            <span>Settings</span>
+          </a>
           <button type="button" (click)="logout()" class="w-full text-left flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-700">
             <i class="fas fa-sign-out-alt"></i>
             <span>Logout</span>

@@ -1,9 +1,11 @@
-import { Component, inject, effect } from '@angular/core';
+import { Component, inject, effect, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { RouterOutlet, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './core/services/auth.service';
 import { DoctorProfileService } from './core/services/doctor-profile.service';
 import { PatientProfileService } from './core/services/patient-profile.service';
+import { ThemeService } from './core/services/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -17,6 +19,8 @@ export class AppComponent {
   auth = inject(AuthService);
   private doctorProfiles = inject(DoctorProfileService);
   private patientProfiles = inject(PatientProfileService);
+  private theme = inject(ThemeService);
+  private platformId = inject(PLATFORM_ID);
 
   // Navbar avatar & dropdown state
   profileImageUrl: string = '';
@@ -56,5 +60,13 @@ export class AppComponent {
 
   toggleMenu() {
     this.menuOpen = !this.menuOpen;
+  }
+
+  constructor() {}
+
+  ngOnInit() {
+    if (isPlatformBrowser(this.platformId)) {
+      this.theme.init();
+    }
   }
 }

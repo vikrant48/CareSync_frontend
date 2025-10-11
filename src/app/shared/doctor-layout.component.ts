@@ -38,6 +38,10 @@ import { AuthService } from '../core/services/auth.service';
             <i class="fa-solid fa-user-doctor mr-2"></i>
             <span>Profile</span>
           </a>
+          <a class="nav-item" routerLink="/settings" routerLinkActive="active">
+            <i class="fa-solid fa-gear mr-2"></i>
+            <span>Settings</span>
+          </a>
           <button class="nav-item w-full text-left" (click)="onLogout()">
             <i class="fa-solid fa-right-from-bracket mr-2"></i>
             <span>Logout</span>

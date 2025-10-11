@@ -18,12 +18,14 @@ import { ResetPasswordComponent } from './features/auth/reset-password.component
 import { DoctorReportsComponent } from './features/doctor/doctor-reports.component';
 import { PatientReportsComponent } from './features/patient/patient-reports.component';
 import { DoctorDocumentsComponent } from './features/doctor/doctor-document.component';
+import { SettingsComponent } from './features/settings/settings.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
   { path: 'register', component: RegisterComponent },
+  { path: 'settings', component: SettingsComponent, canActivate: [authGuard] },
   {
     path: 'doctor',
     component: DoctorDashboardComponent,
