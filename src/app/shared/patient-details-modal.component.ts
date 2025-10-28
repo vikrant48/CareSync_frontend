@@ -17,7 +17,7 @@ import { PatientDto, MedicalHistoryWithDoctorItem } from '../core/services/patie
           <div>
             <h4 class="font-medium mb-2">Basic Info</h4>
             <ul class="text-sm text-gray-300 space-y-1">
-              <li>Name: {{ patient?.firstName }} {{ patient?.lastName }}</li>
+              <li>Name: {{ patient.firstName }} {{ patient.lastName }}</li>
               <li>Email: {{ patient?.email || '—' }}</li>
               <li>Contact: {{ patient?.contactInfo || '—' }}</li>
               <li>Age: {{ ageFromDob(patient?.dateOfBirth) }}</li>

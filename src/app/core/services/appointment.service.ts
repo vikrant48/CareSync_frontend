@@ -108,6 +108,11 @@ export class AppointmentService {
     return this.http.get<DoctorAppointmentItem[]>(`${this.baseUrl}/api/appointments/doctor/my-patients/cancelled`);
   }
 
+  // Get unique patients from doctor's appointments for lab test booking
+  getDoctorUniquePatients() {
+    return this.http.get<any[]>(`${this.baseUrl}/api/appointments/doctor/unique-patients`);
+  }
+
   // Generic status update for doctor appointments
   updateAppointmentStatus(id: number, status: string) {
     const url = `${this.baseUrl}/api/appointments/doctor/${id}/status`;

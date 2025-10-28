@@ -34,6 +34,14 @@ import { AuthService } from '../core/services/auth.service';
             <i class="fa-solid fa-chart-line mr-2"></i>
             <span>Reports</span>
           </a>
+          <a class="nav-item" routerLink="/lab-tests" routerLinkActive="active">
+            <i class="fa-solid fa-flask mr-2"></i>
+            <span>Lab Tests</span>
+          </a>
+          <a class="nav-item" routerLink="/doctor/lab-test-management" routerLinkActive="active">
+            <i class="fa-solid fa-flask-vial mr-2"></i>
+            <span>Manage Lab Tests</span>
+          </a>
           <a class="nav-item" routerLink="/doctor/profile" routerLinkActive="active">
             <i class="fa-solid fa-user-doctor mr-2"></i>
             <span>Profile</span>

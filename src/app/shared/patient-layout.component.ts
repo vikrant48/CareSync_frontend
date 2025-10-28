@@ -35,6 +35,14 @@ import { AuthService } from '../core/services/auth.service';
             <i class="fas fa-chart-line"></i>
             <span>Reports</span>
           </a>
+          <a routerLink="/lab-tests" routerLinkActive="!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-700">
+            <i class="fas fa-flask"></i>
+            <span>Lab Tests</span>
+          </a>
+          <a routerLink="/patient/lab-bookings" routerLinkActive="!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-700">
+            <i class="fas fa-vial"></i>
+            <span>My Lab Bookings</span>
+          </a>
           <a routerLink="/patient/feedback" routerLinkActive="!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-700">
             <i class="fas fa-star"></i>
             <span>Feedback</span>

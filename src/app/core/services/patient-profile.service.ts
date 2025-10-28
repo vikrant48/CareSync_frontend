@@ -65,6 +65,11 @@ export class PatientProfileService {
   private baseUrl = environment.apiBaseUrl;
   private http = inject(HttpClient);
 
+  /** Get all patients (for doctors only) */
+  getAllPatients() {
+    return this.http.get<PatientDto[]>(`${this.baseUrl}/api/patients`);
+  }
+
   getProfile(username: string) {
     return this.http.get<PatientDto>(`${this.baseUrl}/api/patients/profile/${username}`);
   }

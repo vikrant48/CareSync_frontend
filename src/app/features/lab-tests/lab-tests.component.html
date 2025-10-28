@@ -1,0 +1,292 @@
+<!-- Doctor Layout for DOCTOR role -->
+<app-doctor-layout *ngIf="currentRole() === 'DOCTOR'">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="mb-8 text-center">
+      <h1 class="text-4xl font-bold text-gray-100 mb-2 flex items-center justify-center">
+        <i class="fas fa-flask mr-3"></i>
+        Lab Tests Booking
+      </h1>
+      <p class="text-lg text-gray-400">Select tests and create bookings for patients</p>
+    </div>
+
+    <!-- Content goes here -->
+    <ng-container *ngTemplateOutlet="labTestsContent"></ng-container>
+  </div>
+</app-doctor-layout>
+
+<!-- Patient Layout for PATIENT role -->
+<app-patient-layout *ngIf="currentRole() === 'PATIENT'">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="mb-8 text-center">
+      <div class="flex justify-between items-center mb-4">
+        <h1 class="text-4xl font-bold text-gray-100 flex items-center">
+          <i class="fas fa-flask mr-3"></i>
+          Lab Tests Booking
+        </h1>
+        <button 
+          (click)="navigateToBooking()"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center">
+          <i class="fas fa-vial mr-2"></i>
+          View My Bookings
+        </button>
+      </div>
+      <p class="text-lg text-gray-400">Select and book your lab tests</p>
+    </div>
+
+    <!-- Content goes here -->
+    <ng-container *ngTemplateOutlet="labTestsContent"></ng-container>
+  </div>
+</app-patient-layout>
+
+<!-- Lab Tests Content Template -->
+<ng-template #labTestsContent>
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="flex flex-col items-center justify-center py-16 text-center">
+    <div class="text-blue-400 mb-4">
+      <i class="fas fa-spinner fa-spin text-3xl"></i>
+    </div>
+    <p class="text-lg text-gray-300">Loading lab tests...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage()" class="flex items-center justify-between p-4 mb-6 bg-red-900/50 border border-red-700 text-red-300 rounded-lg">
+    <div class="flex items-center">
+      <i class="fas fa-exclamation-triangle mr-2"></i>
+      {{ errorMessage() }}
+    </div>
+    <button (click)="clearMessages()" class="p-1 hover:bg-red-800/50 rounded">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <!-- Success Message -->
+  <div *ngIf="successMessage()" class="flex items-center justify-between p-4 mb-6 bg-green-900/50 border border-green-700 text-green-300 rounded-lg">
+    <div class="flex items-center">
+      <i class="fas fa-check-circle mr-2"></i>
+      {{ successMessage() }}
+    </div>
+    <button (click)="clearMessages()" class="p-1 hover:bg-green-800/50 rounded">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <!-- Patient Selection for Doctors -->
+  <div *ngIf="currentRole() === 'DOCTOR' && !isLoading()" class="mb-6 p-4 bg-gray-800 border border-gray-700 rounded-xl">
+    <h3 class="text-lg font-semibold text-gray-100 mb-3 flex items-center">
+      <i class="fas fa-user-injured mr-2"></i>
+      Select Patient for Booking
+    </h3>
+    
+    <!-- Loading Patients -->
+    <div *ngIf="isLoadingPatients()" class="flex items-center justify-center py-6">
+      <div class="text-blue-400 mr-3">
+        <i class="fas fa-spinner fa-spin"></i>
+      </div>
+      <span class="text-gray-300">Loading patients...</span>
+    </div>
+    
+    <!-- Patient Selection Grid -->
+    <div *ngIf="!isLoadingPatients() && patients().length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div 
+        *ngFor="let patient of patients()" 
+        class="p-3 bg-gray-700 border-2 border-gray-600 rounded-lg cursor-pointer transition-all duration-200 hover:border-blue-400 hover:shadow-md"
+        [class.border-blue-500]="selectedPatientId() === patient.id"
+        [class.bg-gray-600]="selectedPatientId() === patient.id"
+        (click)="selectPatient(patient.id)">
+        
+        <div class="flex items-center justify-between">
+          <div class="flex-1">
+            <h4 class="font-semibold text-gray-100">{{ patient.firstName }} {{ patient.lastName }}</h4>
+            <p class="text-sm text-gray-300" *ngIf="patient.email">{{ patient.email }}</p>
+            <p class="text-sm text-gray-300" *ngIf="patient.contactInfo">{{ patient.contactInfo }}</p>
+          </div>
+          
+          <div class="ml-3">
+            <div class="w-5 h-5 border-2 border-gray-400 rounded-full transition-all duration-200"
+                 [class.bg-blue-500]="selectedPatientId() === patient.id"
+                 [class.border-blue-500]="selectedPatientId() === patient.id">
+              <i class="fas fa-check text-white text-xs absolute top-0.5 left-0.5" 
+                 [class.opacity-100]="selectedPatientId() === patient.id"
+                 [class.opacity-0]="selectedPatientId() !== patient.id"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- No Patients Available -->
+    <div *ngIf="!isLoadingPatients() && patients().length === 0" class="text-center py-6 text-gray-400">
+      <i class="fas fa-user-slash text-2xl mb-2 opacity-50"></i>
+      <p class="text-base">No patients available</p>
+      <button (click)="loadPatients()" class="mt-2 inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200">
+        <i class="fas fa-refresh mr-2"></i>
+        Refresh
+      </button>
+    </div>
+    
+    <!-- Selected Patient Display -->
+    <div *ngIf="selectedPatientId() && getSelectedPatientName()" class="mt-3 p-2 bg-green-900/50 border border-green-700 rounded-lg">
+      <div class="flex items-center">
+        <i class="fas fa-check-circle text-green-400 mr-2"></i>
+        <span class="text-green-300 font-medium">Selected Patient: {{ getSelectedPatientName() }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading()" class="mb-32">
+    <!-- Control Panel -->
+    <div class="flex flex-wrap items-center justify-between gap-4 p-4 bg-gray-800 border border-gray-700 rounded-xl mb-6">
+      <div class="flex gap-3">
+        <button 
+          (click)="selectAllTests()" 
+          class="inline-flex items-center justify-center px-6 py-3 bg-gray-700 border-2 border-gray-600 text-gray-200 font-semibold rounded-lg hover:bg-gray-600 hover:border-gray-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          [disabled]="labTests().length === 0">
+          <i class="fas fa-check-double mr-2"></i>
+          Select All
+        </button>
+        
+        <button 
+          (click)="unselectAllTests()" 
+          class="inline-flex items-center justify-center px-6 py-3 bg-gray-700 border-2 border-gray-600 text-gray-200 font-semibold rounded-lg hover:bg-gray-600 hover:border-gray-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          [disabled]="selectedCount() === 0">
+          <i class="fas fa-times mr-2"></i>
+          Unselect All
+        </button>
+      </div>
+
+      <!-- Full Body Checkup Toggle -->
+      <div class="flex items-center">
+        <label class="flex items-center cursor-pointer select-none">
+          <input 
+            type="checkbox" 
+            [checked]="isFullBodyCheckup()"
+            (change)="toggleFullBodyCheckup()"
+            class="sr-only">
+          <div class="relative">
+            <div class="w-5 h-5 border-2 border-gray-500 rounded mr-3 transition-all duration-200"
+                 [class.bg-blue-500]="isFullBodyCheckup()"
+                 [class.border-blue-500]="isFullBodyCheckup()">
+              <i class="fas fa-check text-white text-xs absolute top-0.5 left-0.5" 
+                 [class.opacity-100]="isFullBodyCheckup()"
+                 [class.opacity-0]="!isFullBodyCheckup()"></i>
+            </div>
+          </div>
+          <span class="font-medium text-gray-200">
+            <i class="fas fa-user-md mr-2"></i>
+            Full Body Checkup
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Lab Tests List -->
+    <div class="space-y-3" *ngIf="labTests().length > 0">
+      <div 
+        *ngFor="let test of labTests(); trackBy: trackByTestId" 
+        class="bg-gray-800 border border-gray-700 rounded-lg p-4 transition-all duration-200 cursor-pointer hover:border-blue-400 hover:shadow-md"
+        [class.border-blue-500]="isTestSelected(test.id)"
+        [class.bg-gray-700]="isTestSelected(test.id)"
+        [class.shadow-sm]="isTestSelected(test.id)">
+        
+        <div class="flex items-center justify-between">
+          <!-- Left side: Checkbox and Name -->
+          <div class="flex items-center gap-3 flex-1">
+            <label class="flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                [checked]="isTestSelected(test.id)"
+                (change)="toggleTestSelection(test.id)"
+                class="sr-only">
+              <div class="w-5 h-5 border-2 border-gray-500 rounded transition-all duration-200"
+                   [class.bg-blue-500]="isTestSelected(test.id)"
+                   [class.border-blue-500]="isTestSelected(test.id)">
+                <i class="fas fa-check text-white text-xs flex items-center justify-center h-full" 
+                   [class.opacity-100]="isTestSelected(test.id)"
+                   [class.opacity-0]="!isTestSelected(test.id)"></i>
+              </div>
+            </label>
+            
+            <h3 class="text-lg font-semibold text-gray-100">{{ test.testName }}</h3>
+          </div>
+          
+          <!-- Right side: Description and Price -->
+          <div class="flex items-center gap-6 flex-shrink-0">
+            <p class="text-sm text-gray-300 max-w-md" *ngIf="test.description">
+              {{ test.description }}
+            </p>
+            <div class="text-right">
+              <div class="text-lg font-bold text-green-400">{{ formatPrice(test.price) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="labTests().length === 0 && !isLoading()" class="text-center py-16 text-gray-400">
+      <i class="fas fa-flask text-5xl mb-6 opacity-50"></i>
+      <h3 class="text-2xl font-semibold mb-2 text-gray-200">No Lab Tests Available</h3>
+      <p class="text-lg mb-8">There are currently no active lab tests available for booking.</p>
+      <button (click)="loadLabTests()" class="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200">
+        <i class="fas fa-refresh mr-2"></i>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Fixed Summary Section -->
+  <div class="fixed bottom-0 left-64 right-0 bg-gray-800 border-t-2 border-gray-700 p-6 shadow-lg z-50" *ngIf="!isLoading() && labTests().length > 0">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-8">
+      <div class="flex items-center gap-8 flex-wrap">
+        <div class="flex flex-col items-start">
+          <span class="text-xs text-gray-400 uppercase tracking-wide mb-1">Selected Tests:</span>
+          <span class="text-lg font-semibold text-gray-100">{{ selectedCount() }}</span>
+        </div>
+        
+        <div class="flex flex-col items-start">
+          <span class="text-xs text-gray-400 uppercase tracking-wide mb-1">Total Price:</span>
+          <span class="text-2xl font-bold text-green-400">{{ formatPrice(totalPrice()) }}</span>
+        </div>
+        
+        <div class="flex flex-col items-start" *ngIf="currentRole() === 'DOCTOR'">
+          <span class="text-xs text-gray-400 uppercase tracking-wide mb-1">Prescribed By:</span>
+          <span class="text-lg font-semibold text-gray-100">{{ getPrescriberName() }}</span>
+        </div>
+      </div>
+      
+      <div class="flex gap-4 flex-shrink-0">
+        <button 
+          (click)="clearSelections()" 
+          class="inline-flex items-center justify-center px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          [disabled]="selectedCount() === 0 || isBooking()">
+          <i class="fas fa-eraser mr-2"></i>
+          Clear
+        </button>
+        
+        <button 
+          (click)="bookTests()" 
+          class="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          [disabled]="selectedCount() === 0 || isBooking()">
+          <i class="fas fa-calendar-plus mr-2" *ngIf="!isBooking()"></i>
+          <i class="fas fa-spinner fa-spin mr-2" *ngIf="isBooking()"></i>
+          {{ isBooking() ? 'Booking...' : (currentRole() === 'PATIENT' ? 'Proceed to Payment' : 'Book Tests') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<!-- Payment Popup -->
+<app-payment-popup
+  *ngIf="showPaymentPopup()"
+  [isVisible]="showPaymentPopup()"
+  [amount]="totalPrice()"
+  [title]="'Lab Test Booking - ' + selectedCount() + ' test(s)'"
+  [patientId]="getPatientIdForPayment()"
+  [selectedTests]="selectedTests()"
+  [prescribedBy]="currentUsername() || undefined"
+  [isExistingBooking]="false"
+  (paymentSuccess)="onPaymentSuccess($event)"
+  (paymentCancel)="onPaymentCancel()">
+</app-payment-popup>

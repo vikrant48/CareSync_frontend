@@ -1,0 +1,154 @@
+<div class="panel p-6 space-y-6">
+  <div class="flex items-center justify-between">
+    <h2 class="text-xl font-semibold">Lab Test Management</h2>
+    <button 
+      class="btn-primary"
+      (click)="showAddForm = true; resetForm()"
+      [disabled]="loading()">
+      <i class="fa-solid fa-plus mr-2"></i>
+      Add New Test
+    </button>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div *ngIf="successMessage()" class="bg-green-900/50 border border-green-700 text-green-300 px-4 py-3 rounded">
+    {{ successMessage() }}
+  </div>
+  <div *ngIf="errorMessage()" class="bg-red-900/50 border border-red-700 text-red-300 px-4 py-3 rounded">
+    {{ errorMessage() }}
+  </div>
+
+  <!-- Add/Edit Form -->
+  <div *ngIf="showAddForm" class="panel p-4 border border-gray-700">
+    <h3 class="text-lg font-semibold mb-4">{{ editingTest ? 'Edit' : 'Add New' }} Lab Test</h3>
+    <form [formGroup]="labTestForm" (ngSubmit)="onSubmit()" class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-2">Test Name *</label>
+          <input 
+            type="text" 
+            formControlName="testName"
+            class="input w-full"
+            placeholder="Enter test name">
+          <div *ngIf="labTestForm.get('testName')?.invalid && labTestForm.get('testName')?.touched" 
+               class="text-red-400 text-sm mt-1">
+            Test name is required
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">Price *</label>
+          <input 
+            type="number" 
+            formControlName="price"
+            class="input w-full"
+            placeholder="Enter price"
+            min="0"
+            step="0.01">
+          <div *ngIf="labTestForm.get('price')?.invalid && labTestForm.get('price')?.touched" 
+               class="text-red-400 text-sm mt-1">
+            Valid price is required
+          </div>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-2">Description</label>
+        <textarea 
+          formControlName="description"
+          class="input w-full"
+          rows="3"
+          placeholder="Enter test description"></textarea>
+      </div>
+      <div class="flex items-center">
+        <input 
+          type="checkbox" 
+          formControlName="isActive"
+          id="isActive"
+          class="mr-2">
+        <label for="isActive" class="text-sm">Active (visible to patients)</label>
+      </div>
+      <div class="flex gap-3">
+        <button 
+          type="submit" 
+          class="btn-primary"
+          [disabled]="labTestForm.invalid || loading()">
+          <i class="fa-solid fa-save mr-2"></i>
+          {{ editingTest ? 'Update' : 'Create' }} Test
+        </button>
+        <button 
+          type="button" 
+          class="btn-secondary"
+          (click)="cancelForm()">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Lab Tests List -->
+  <div class="space-y-4">
+    <div class="flex items-center justify-between">
+      <h3 class="text-lg font-semibold">Existing Lab Tests</h3>
+      <div class="flex gap-2">
+        <button 
+          class="btn-secondary text-sm"
+          (click)="showInactive = !showInactive">
+          {{ showInactive ? 'Hide' : 'Show' }} Inactive Tests
+        </button>
+        <button 
+          class="btn-secondary text-sm"
+          (click)="loadLabTests()"
+          [disabled]="loading()">
+          <i class="fa-solid fa-refresh mr-1"></i>
+          Refresh
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="loading()" class="text-center py-8 text-gray-400">
+      <i class="fa-solid fa-spinner fa-spin mr-2"></i>
+      Loading lab tests...
+    </div>
+
+    <div *ngIf="!loading() && filteredLabTests().length === 0" class="text-center py-8 text-gray-400">
+      No lab tests found. Create your first lab test to get started.
+    </div>
+
+    <div *ngIf="!loading() && filteredLabTests().length > 0" class="grid gap-4">
+      <div *ngFor="let test of filteredLabTests()" 
+           class="panel p-4 border border-gray-700 hover:border-gray-600 transition-colors">
+        <div class="flex items-start justify-between">
+          <div class="flex-1">
+            <div class="flex items-center gap-3 mb-2">
+              <h4 class="text-lg font-semibold">{{ test.testName }}</h4>
+              <span class="px-2 py-1 rounded text-xs font-medium"
+                    [class]="test.isActive ? 'bg-green-900/50 text-green-300 border border-green-700' : 'bg-red-900/50 text-red-300 border border-red-700'">
+                {{ test.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+            <p class="text-gray-300 mb-2" *ngIf="test.description">{{ test.description }}</p>
+            <div class="text-sm text-gray-400">
+              <span class="font-medium text-blue-400">₹{{ test.price }}</span>
+            </div>
+          </div>
+          <div class="flex gap-2 ml-4">
+            <button 
+              class="btn-secondary text-sm"
+              (click)="editTest(test)"
+              [disabled]="loading()">
+              <i class="fa-solid fa-edit mr-1"></i>
+              Edit
+            </button>
+            <button 
+              class="text-sm px-3 py-1 rounded border transition-colors"
+              [class]="test.isActive ? 'border-red-600 text-red-400 hover:bg-red-900/20' : 'border-green-600 text-green-400 hover:bg-green-900/20'"
+              (click)="toggleTestStatus(test)"
+              [disabled]="loading()">
+              <i class="fa-solid mr-1" [class]="test.isActive ? 'fa-eye-slash' : 'fa-eye'"></i>
+              {{ test.isActive ? 'Deactivate' : 'Activate' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

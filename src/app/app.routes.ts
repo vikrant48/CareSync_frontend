@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './features/auth/login.component';
 import { RegisterComponent } from './features/auth/register.component';
+import { TokenRefreshComponent } from './features/auth/token-refresh.component';
+import { SessionExpiredComponent } from './features/auth/session-expired.component';
 import { DoctorDashboardComponent } from './features/doctor/doctor-dashboard.component';
 import { PatientDashboardComponent } from './features/patient/patient-dashboard.component';
 import { authGuard } from './core/guards/auth.guard';
@@ -19,13 +21,24 @@ import { DoctorReportsComponent } from './features/doctor/doctor-reports.compone
 import { PatientReportsComponent } from './features/patient/patient-reports.component';
 import { DoctorDocumentsComponent } from './features/doctor/doctor-document.component';
 import { SettingsComponent } from './features/settings/settings.component';
+import { LabTestsComponent } from './features/lab-tests/lab-tests.component';
+import { LabTestManagementComponent } from './features/doctor/lab-test-management.component';
+import { PatientLabBookingsComponent } from './features/patient/patient-lab-bookings.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
   { path: 'register', component: RegisterComponent },
+  { path: 'auth/token-refresh', component: TokenRefreshComponent },
+  { path: 'auth/session-expired', component: SessionExpiredComponent },
   { path: 'settings', component: SettingsComponent, canActivate: [authGuard] },
+  {
+    path: 'lab-tests',
+    component: LabTestsComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['DOCTOR', 'PATIENT'] }
+  },
   {
     path: 'doctor',
     component: DoctorDashboardComponent,
@@ -63,6 +76,12 @@ export const routes: Routes = [
     data: { roles: ['DOCTOR'] }
   },
   {
+    path: 'doctor/lab-test-management',
+    component: LabTestManagementComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['DOCTOR'] }
+  },
+  {
     path: 'patient',
     component: PatientDashboardComponent,
     canActivate: [authGuard, roleGuard],
@@ -95,6 +114,12 @@ export const routes: Routes = [
   {
     path: 'patient/reports',
     component: PatientReportsComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['PATIENT'] }
+  },
+  {
+    path: 'patient/lab-bookings',
+    component: PatientLabBookingsComponent,
     canActivate: [authGuard, roleGuard],
     data: { roles: ['PATIENT'] }
   },

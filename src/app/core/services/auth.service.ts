@@ -43,6 +43,77 @@ export class AuthService {
     return this.http.get<any>(`${this.baseUrl}/api/auth/current-user`);
   }
 
+  // Check if token is expired or will expire soon (within 5 minutes)
+  isTokenExpired(): boolean {
+    const token = this.accessToken();
+    if (!token) return true;
+    
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const exp = payload.exp * 1000; // Convert to milliseconds
+      const now = Date.now();
+      const fiveMinutes = 5 * 60 * 1000; // 5 minutes in milliseconds
+      
+      return exp <= (now + fiveMinutes); // Return true if expired or expires within 5 minutes
+    } catch (error) {
+      return true; // If we can't parse the token, consider it expired
+    }
+  }
+
+  // Check if token is actually expired (not just about to expire)
+  isTokenActuallyExpired(): boolean {
+    const token = this.accessToken();
+    if (!token) return true;
+    
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const exp = payload.exp * 1000; // Convert to milliseconds
+      const now = Date.now();
+      
+      return exp <= now; // Return true if actually expired
+    } catch (error) {
+      return true; // If we can't parse the token, consider it expired
+    }
+  }
+
+  // Check if token has been expired for a long time (more than 1 hour)
+  isTokenLongExpired(): boolean {
+    const token = this.accessToken();
+    if (!token) return true;
+    
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const exp = payload.exp * 1000; // Convert to milliseconds
+      const now = Date.now();
+      const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
+      
+      return exp <= (now - oneHour); // Return true if expired for more than 1 hour
+    } catch (error) {
+      return true; // If we can't parse the token, consider it long expired
+    }
+  }
+
+  // Get token expiration type for routing decisions
+  getTokenExpirationStatus(): 'valid' | 'short_expired' | 'long_expired' {
+    if (!this.isTokenActuallyExpired()) {
+      return 'valid';
+    }
+    
+    if (this.isTokenLongExpired()) {
+      return 'long_expired';
+    }
+    
+    return 'short_expired';
+  }
+
+  // Proactively refresh token if it's about to expire
+  checkAndRefreshToken() {
+    if (this.isTokenExpired() && this.refreshToken()) {
+      return this.refresh();
+    }
+    return null;
+  }
+
   storeAuth(resp: AuthenticationResponse) {
     this.setStored('accessToken', resp.accessToken);
     this.setStored('refreshToken', resp.refreshToken);
