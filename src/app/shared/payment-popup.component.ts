@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { environment } from '../../environments/environment';
 import { PaymentService, PaymentRequest } from '../core/services/payment.service';
 import { PaymentSuccessModalComponent } from './payment-success-modal.component';
-import { LabTest, LabTestService } from '../core/services/lab-test.service';
 
 export interface PaymentDetails {
   method: 'upi' | 'card' | 'qr';
@@ -233,10 +232,9 @@ export class PaymentPopupComponent {
   @Input() amount = 0;
   @Input() title = 'Payment';
   @Input() patientId?: number; // Required for backend API
-  @Input() bookingId?: number; // Optional booking reference
-  @Input() selectedTests: LabTest[] = []; // Selected tests for dynamic PDF generation
-  @Input() prescribedBy?: string; // Doctor who prescribed the tests
-  @Input() isExistingBooking = false; // Flag to differentiate between new booking and existing booking payment
+  @Input() bookingId?: number; // Required for booking payments
+  @Input() paymentType?: 'APPOINTMENT' | 'CONSULTATION' | 'LAB_TEST'; // Payment types matching backend enum
+  @Input() additionalInfo?: string; // Additional context for payment description
   
   @Output() paymentSuccess = new EventEmitter<PaymentDetails>();
   @Output() paymentCancel = new EventEmitter<void>();
@@ -244,7 +242,6 @@ export class PaymentPopupComponent {
 
   // Inject services
   private paymentService = inject(PaymentService);
-  private labTestService = inject(LabTestService);
 
   // Signals for reactive state management
   selectedMethod = signal<'upi' | 'card' | 'qr' | null>(null);
@@ -302,11 +299,17 @@ export class PaymentPopupComponent {
 
     const paymentRequest: PaymentRequest = {
       amount: this.amount,
-      description: this.title || 'Lab Test Payment',
       paymentMethod: this.selectedMethod()!.toUpperCase() as 'UPI' | 'CARD' | 'QR_CODE',
       patientId: this.patientId!,
-      currency: 'INR'
+      currency: 'INR',
+      paymentType: this.paymentType || 'APPOINTMENT',
+      additionalInfo: this.additionalInfo
     };
+
+    // Only set description if title is provided, otherwise let backend auto-generate
+    if (this.title && this.title !== 'Payment') {
+      paymentRequest.description = this.title;
+    }
 
     // Add UPI ID for UPI payments
     if (this.selectedMethod() === 'upi' && this.upiId) {
@@ -324,9 +327,9 @@ export class PaymentPopupComponent {
       };
     }
 
-    // Handle existing booking payment vs new booking creation
+    // Use payForBooking if bookingId is provided, otherwise use initiatePayment
     if (this.bookingId) {
-      // Existing booking - just process payment
+      // Payment for existing booking
       this.paymentService.payForBooking(this.bookingId, paymentRequest).subscribe({
         next: (response) => {
           this.handlePaymentSuccess(response);
@@ -336,40 +339,16 @@ export class PaymentPopupComponent {
         }
       });
     } else {
-      // New booking - create booking with integrated payment
-      this.createBookingWithPayment(paymentRequest);
+      // New payment initiation
+      this.paymentService.initiatePayment(paymentRequest).subscribe({
+        next: (response) => {
+          this.handlePaymentSuccess(response);
+        },
+        error: (error) => {
+          this.handlePaymentError(error);
+        }
+      });
     }
-  }
-
-  private createBookingWithPayment(paymentRequest: PaymentRequest) {
-    const bookingRequest = {
-      patientId: this.patientId,
-      selectedTestIds: this.selectedTests?.map(test => test.id) || [],
-      isFullBodyCheckup: false,
-      bookingDate: new Date().toISOString(),
-      notes: `Prescribed by: ${this.prescribedBy || 'Self'}`
-    };
-
-    const request = {
-      bookingRequest,
-      paymentRequest
-    };
-
-    this.labTestService.createPatientBookingWithPayment(request).subscribe({
-      next: (response) => {
-        this.handlePaymentSuccess({
-          transactionId: response.paymentTransactionId || 'N/A',
-          amount: response.totalPrice,
-          paymentMethod: paymentRequest.paymentMethod,
-          status: response.paymentStatus || 'SUCCESS',
-          patientName: response.patientName,
-          success: true
-        });
-      },
-      error: (error) => {
-        this.handlePaymentError(error);
-      }
-    });
   }
 
   private handlePaymentSuccess(response: any) {
@@ -380,8 +359,7 @@ export class PaymentPopupComponent {
         method: this.selectedMethod()!,
         amount: this.amount,
         transactionId: response.transactionId,
-        patientId: this.patientId,
-        bookingId: this.bookingId
+        patientId: this.patientId
       };
 
       // Add method-specific details to payment details

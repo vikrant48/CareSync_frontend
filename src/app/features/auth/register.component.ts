@@ -42,51 +42,124 @@ import { RegisterRequest } from '../../core/models/auth.models';
         <section *ngIf="currentStep === 1" [formGroup]="basicForm" class="space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block mb-1 flex items-center gap-2"><i class="fa-solid fa-id-card text-gray-400"></i> <span>First Name</span></label>
-              <input class="input" formControlName="firstName" />
+              <label class="block mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-id-card text-gray-400"></i> 
+                <span>First Name <span class="text-red-400">*</span></span>
+              </label>
+              <input class="input" 
+                     formControlName="firstName" 
+                     [class.border-red-500]="isFieldInvalid('firstName', basicForm)" />
+              <div *ngIf="isFieldInvalid('firstName', basicForm)" class="text-red-400 text-sm mt-1">
+                First Name is required
+              </div>
             </div>
             <div>
-              <label class="block mb-1 flex items-center gap-2"><i class="fa-solid fa-id-card text-gray-400"></i> <span>Last Name</span></label>
-              <input class="input" formControlName="lastName" />
+              <label class="block mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-id-card text-gray-400"></i> 
+                <span>Last Name <span class="text-red-400">*</span></span>
+              </label>
+              <input class="input" 
+                     formControlName="lastName" 
+                     [class.border-red-500]="isFieldInvalid('lastName', basicForm)" />
+              <div *ngIf="isFieldInvalid('lastName', basicForm)" class="text-red-400 text-sm mt-1">
+                Last Name is required
+              </div>
             </div>
             <div>
-              <label class="block mb-1 flex items-center gap-2"><i class="fa-solid fa-envelope text-gray-400"></i> <span>Email</span></label>
-              <input class="input" type="email" formControlName="email" />
+              <label class="block mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-envelope text-gray-400"></i> 
+                <span>Email <span class="text-red-400">*</span></span>
+              </label>
+              <input class="input" 
+                     type="email" 
+                     formControlName="email" 
+                     [class.border-red-500]="isFieldInvalid('email', basicForm)" />
+              <div *ngIf="isFieldInvalid('email', basicForm)" class="text-red-400 text-sm mt-1">
+                <span *ngIf="basicForm.get('email')?.errors?.['required']">Email is required</span>
+                <span *ngIf="basicForm.get('email')?.errors?.['email']">Please enter a valid email address</span>
+              </div>
             </div>
             <div>
-              <label class="block mb-1 flex items-center gap-2"><i class="fa-solid fa-phone text-gray-400"></i> <span>Phone</span></label>
-              <input class="input" formControlName="contactInfo" />
+              <label class="block mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-phone text-gray-400"></i> 
+                <span>Phone</span>
+              </label>
+              <input class="input" 
+                     formControlName="contactInfo" 
+                     (input)="onPhoneInput($event)" 
+                     placeholder="+91 " />
             </div>
             <div>
-              <label class="block mb-1 flex items-center gap-2"><i class="fa-solid fa-calendar-day text-gray-400"></i> <span>Date of Birth</span></label>
+              <label class="block mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-calendar-day text-gray-400"></i> 
+                <span>Date of Birth</span>
+              </label>
               <input class="input" type="date" formControlName="dateOfBirth" />
+            </div>
+            <div>
+              <label class="block mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-venus-mars text-gray-400"></i> 
+                <span>Gender <span class="text-red-400">*</span></span>
+              </label>
+              <select class="input" 
+                      formControlName="gender" 
+                      [class.border-red-500]="isFieldInvalid('gender', basicForm)">
+                <option value="">Select</option>
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+                <option value="OTHER">Other</option>
+              </select>
+              <div *ngIf="isFieldInvalid('gender', basicForm)" class="text-red-400 text-sm mt-1">
+                Gender is required
+              </div>
             </div>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block mb-1 flex items-center gap-2"><i class="fa-solid fa-user text-gray-400"></i> <span>Username</span></label>
-              <input class="input" formControlName="username" />
+              <label class="block mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-user text-gray-400"></i> 
+                <span>Username <span class="text-red-400">*</span></span>
+              </label>
+              <input class="input" 
+                     formControlName="username" 
+                     [class.border-red-500]="isFieldInvalid('username', basicForm)" />
+              <div *ngIf="isFieldInvalid('username', basicForm)" class="text-red-400 text-sm mt-1">
+                Username is required
+              </div>
             </div>
             <div>
-              <label class="block mb-1 flex items-center gap-2"><i class="fa-solid fa-lock text-gray-400"></i> <span>Password</span></label>
+              <label class="block mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-lock text-gray-400"></i> 
+                <span>Password <span class="text-red-400">*</span></span>
+              </label>
               <div class="relative">
-                <input class="input pr-10" [type]="showPassword ? 'text' : 'password'" formControlName="password" />
+                <input class="input pr-10" 
+                       [type]="showPassword ? 'text' : 'password'" 
+                       formControlName="password" 
+                       [class.border-red-500]="isFieldInvalid('password', basicForm)" />
                 <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200" (click)="togglePassword()" aria-label="Toggle password visibility">
                   <i [class]="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
                 </button>
+              </div>
+              <div *ngIf="isFieldInvalid('password', basicForm)" class="text-red-400 text-sm mt-1">
+                <span *ngIf="basicForm.get('password')?.errors?.['required']">Password is required</span>
+                <span *ngIf="basicForm.get('password')?.errors?.['minlength']">Password must be at least 6 characters long</span>
               </div>
             </div>
           </div>
 
           <div class="flex items-center justify-end gap-3">
-            <button class="btn-primary" (click)="next()" [disabled]="!basicForm.valid">Next</button>
+            <button class="btn-primary" (click)="next()">Next</button>
           </div>
         </section>
 
         <!-- Stage 2: Role Selection -->
         <section *ngIf="currentStep === 2" [formGroup]="roleForm" class="space-y-4">
-          <label class="block mb-1 flex items-center gap-2"><i class="fa-solid fa-user-tag text-gray-400"></i> <span>Select Role</span></label>
+          <label class="block mb-1 flex items-center gap-2">
+            <i class="fa-solid fa-user-tag text-gray-400"></i> 
+            <span>Select Role <span class="text-red-400">*</span></span>
+          </label>
           <div class="grid grid-cols-2 gap-4">
             <label class="panel p-4 flex items-center gap-3 cursor-pointer">
               <input type="radio" class="accent-emerald-500" formControlName="role" value="DOCTOR" />
@@ -99,10 +172,13 @@ import { RegisterRequest } from '../../core/models/auth.models';
               <span>Patient</span>
             </label>
           </div>
+          <div *ngIf="isFieldInvalid('role', roleForm)" class="text-red-400 text-sm mt-1">
+            Please select a role
+          </div>
 
           <div class="flex items-center justify-between gap-3">
             <button class="btn-secondary" (click)="prev()">Back</button>
-            <button class="btn-primary" (click)="next()" [disabled]="!roleForm.valid">Next</button>
+            <button class="btn-primary" (click)="next()">Next</button>
           </div>
         </section>
 
@@ -111,35 +187,28 @@ import { RegisterRequest } from '../../core/models/auth.models';
           <!-- Doctor fields -->
           <div *ngIf="roleForm.value.role === 'DOCTOR'" [formGroup]="doctorForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block mb-1">Specialization</label>
-              <input class="input" formControlName="specialization" />
+              <label class="block mb-1">Specialization <span class="text-red-400">*</span></label>
+              <input class="input" 
+                     formControlName="specialization" 
+                     [class.border-red-500]="isFieldInvalid('specialization', doctorForm)" />
+              <div *ngIf="isFieldInvalid('specialization', doctorForm)" class="text-red-400 text-sm mt-1">
+                Specialization is required
+              </div>
             </div>
             <div>
               <label class="block mb-1">Experience (years)</label>
-              <input class="input" type="number" formControlName="experience" />
-            </div>
-            <div class="md:col-span-2">
-              <label class="block mb-1">Gender</label>
-              <select class="input" formControlName="gender">
-                <option value="">Select</option>
-                <option value="MALE">Male</option>
-                <option value="FEMALE">Female</option>
-                <option value="OTHER">Other</option>
-              </select>
+              <input class="input" 
+                     type="number" 
+                     formControlName="experience" 
+                     [class.border-red-500]="isFieldInvalid('experience', doctorForm)" />
+              <div *ngIf="isFieldInvalid('experience', doctorForm)" class="text-red-400 text-sm mt-1">
+                Please enter a valid experience value
+              </div>
             </div>
           </div>
 
           <!-- Patient fields -->
           <div *ngIf="roleForm.value.role === 'PATIENT'" [formGroup]="patientForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block mb-1">Gender</label>
-              <select class="input" formControlName="gender">
-                <option value="">Select</option>
-                <option value="MALE">Male</option>
-                <option value="FEMALE">Female</option>
-                <option value="OTHER">Other</option>
-              </select>
-            </div>
             <div>
               <label class="block mb-1">Blood Group</label>
               <select class="input" formControlName="bloodGroup">
@@ -151,7 +220,7 @@ import { RegisterRequest } from '../../core/models/auth.models';
 
           <div class="flex items-center justify-between gap-3">
             <button class="btn-secondary" (click)="prev()">Back</button>
-            <button class="btn-primary" (click)="complete()" [disabled]="!stage3Valid() || loading">Complete Registration</button>
+            <button class="btn-primary" (click)="complete()" [disabled]="loading">Complete Registration</button>
           </div>
           <p *ngIf="error" class="text-red-400">{{ error }}</p>
         </section>
@@ -169,8 +238,9 @@ export class RegisterComponent {
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      contactInfo: [''],
+      contactInfo: ['+91 '],
       dateOfBirth: [''],
+      gender: ['', Validators.required],
       username: ['', Validators.required],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
@@ -182,11 +252,9 @@ export class RegisterComponent {
     this.doctorForm = this.fb.group({
       specialization: ['', Validators.required],
       experience: [null, [Validators.min(0)]],
-      gender: ['', Validators.required],
     });
 
     this.patientForm = this.fb.group({
-      gender: ['', Validators.required],
       bloodGroup: [''],
     });
   }
@@ -205,17 +273,49 @@ export class RegisterComponent {
 
   bloodGroups = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
 
+  // Helper method to check if a field is invalid and should show error
+  isFieldInvalid(fieldName: string, form: FormGroup): boolean {
+    const field = form.get(fieldName);
+    return !!(field && field.invalid && (field.dirty || field.touched || this.showValidationErrors));
+  }
+
+  // Flag to show validation errors when user tries to navigate
+  showValidationErrors = false;
+
   // Navigation
   next() {
-    if (this.currentStep === 1 && this.basicForm.valid) {
-      this.currentStep = 2;
-    } else if (this.currentStep === 2 && this.roleForm.valid) {
-      this.currentStep = 3;
+    if (this.currentStep === 1) {
+      if (this.basicForm.valid) {
+        this.currentStep = 2;
+        this.showValidationErrors = false;
+      } else {
+        this.showValidationErrors = true;
+        this.markFormGroupTouched(this.basicForm);
+      }
+    } else if (this.currentStep === 2) {
+      if (this.roleForm.valid) {
+        this.currentStep = 3;
+        this.showValidationErrors = false;
+      } else {
+        this.showValidationErrors = true;
+        this.markFormGroupTouched(this.roleForm);
+      }
     }
   }
 
   prev() {
-    if (this.currentStep > 1) this.currentStep -= 1;
+    if (this.currentStep > 1) {
+      this.currentStep -= 1;
+      this.showValidationErrors = false;
+    }
+  }
+
+  // Helper method to mark all fields in a form group as touched
+  markFormGroupTouched(formGroup: FormGroup) {
+    Object.keys(formGroup.controls).forEach(key => {
+      const control = formGroup.get(key);
+      control?.markAsTouched();
+    });
   }
 
   stage3Valid(): boolean {
@@ -229,8 +329,44 @@ export class RegisterComponent {
     this.showPassword = !this.showPassword;
   }
 
+  onPhoneInput(event: any) {
+    let value = event.target.value;
+    
+    // Remove all non-digit characters except +
+    value = value.replace(/[^\d+]/g, '');
+    
+    // Ensure it starts with +91
+    if (!value.startsWith('+91')) {
+      if (value.startsWith('91')) {
+        value = '+' + value;
+      } else if (value.startsWith('+')) {
+        value = '+91' + value.substring(1);
+      } else {
+        value = '+91' + value;
+      }
+    }
+    
+    // Format as +91 followed by space and digits
+    if (value.length > 3) {
+      value = value.substring(0, 3) + ' ' + value.substring(3);
+    }
+    
+    // Update the form control
+    this.basicForm.get('contactInfo')?.setValue(value);
+  }
+
   complete() {
-    if (!this.basicForm.valid || !this.roleForm.valid || !this.stage3Valid()) return;
+    // Validate all forms before proceeding
+    const currentForm = this.roleForm.value.role === 'DOCTOR' ? this.doctorForm : this.patientForm;
+    
+    if (!this.basicForm.valid || !this.roleForm.valid || !this.stage3Valid()) {
+      this.showValidationErrors = true;
+      this.markFormGroupTouched(this.basicForm);
+      this.markFormGroupTouched(this.roleForm);
+      this.markFormGroupTouched(currentForm);
+      return;
+    }
+
     this.loading = true;
     this.error = '';
 
@@ -244,19 +380,19 @@ export class RegisterComponent {
       email: base.email!,
       firstName: base.firstName!,
       lastName: base.lastName!,
-      contactInfo: base.contactInfo || undefined,
+      gender: base.gender || undefined,
+      contactInfo: base.contactInfo && base.contactInfo.trim() !== '+91 ' ? base.contactInfo : undefined,
       dateOfBirth: base.dateOfBirth || undefined,
     } as RegisterRequest & any;
 
     if (role === 'DOCTOR') {
       const d = this.doctorForm.value;
       payload.specialization = d.specialization || undefined;
-      // 'gender' and 'experience' are not part of backend RegisterRequest
-      // so we do not include them here to avoid JSON parse errors
+      // 'experience' is not part of backend RegisterRequest
+      // so we do not include it here to avoid JSON parse errors
     } else {
-      const p = this.patientForm.value;
-      // 'gender' and 'bloodGroup' are not part of backend RegisterRequest
-      // so we do not include them here to avoid JSON parse errors
+      // 'bloodGroup' is not part of backend RegisterRequest
+      // so we do not include it here to avoid JSON parse errors
     }
 
     this.auth.register(payload).subscribe({

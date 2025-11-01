@@ -284,9 +284,7 @@
   [amount]="totalPrice()"
   [title]="'Lab Test Booking - ' + selectedCount() + ' test(s)'"
   [patientId]="getPatientIdForPayment()"
-  [selectedTests]="selectedTests()"
-  [prescribedBy]="currentUsername() || undefined"
-  [isExistingBooking]="false"
+  [paymentType]="'LAB_TEST'"
   (paymentSuccess)="onPaymentSuccess($event)"
   (paymentCancel)="onPaymentCancel()">
 </app-payment-popup>

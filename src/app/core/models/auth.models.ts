@@ -26,6 +26,7 @@ export interface RegisterRequest {
   contactInfo?: string; // phone or contact info
   illnessDetails?: string; // patient-only
   specialization?: string; // doctor-only
+  gender?: string; // gender field for both doctor and patient
 }
 
 export interface RefreshTokenRequest {

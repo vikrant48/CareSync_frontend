@@ -10,6 +10,7 @@ export interface UpdatePatientRequest {
   illnessDetails?: string;
   email?: string;
   isActive?: boolean;
+  gender?: string;
 }
 
 export interface PatientDto {
@@ -23,6 +24,7 @@ export interface PatientDto {
   isActive?: boolean;
   username?: string;
   profileImageUrl?: string;
+  gender?: string;
 }
 
 export interface MedicalHistoryItem {

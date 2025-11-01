@@ -227,22 +227,25 @@ export class LabTestsComponent implements OnInit {
   onPaymentSuccess(paymentDetails: PaymentDetails) {
     console.log('Payment successful for lab test booking:', paymentDetails);
     
-    // Payment has already been processed by the payment popup component
-    // We only need to handle the UI updates
-    this.successMessage.set('Booking created successfully with payment!');
-    this.clearSelections();
+    // Get the pending booking request
+    const bookingRequest = this.pendingBookingRequest();
     
-    // Auto-hide success message after 3 seconds
-    setTimeout(() => {
-      this.successMessage.set('');
-    }, 3000);
+    if (!bookingRequest) {
+      this.errorMessage.set('No pending booking request found.');
+      return;
+    }
     
-    // The payment popup component will handle showing the success modal
-    // and closing itself after the user acknowledges the success
+    // Create the booking after successful payment
+    this.createPatientBookingWithPayment(bookingRequest, paymentDetails);
+    
+    // // Close the payment popup after a delay to allow success modal to show
+    // setTimeout(() => {
+    //   this.closePaymentPopup();
+    // }, 3000); // Give time for user to see the success modal
   }
 
   /**
-   * Handle payment cancellation
+   * Handle payment cancellation or popup closure
    */
   onPaymentCancel() {
     this.closePaymentPopup();
@@ -267,6 +270,7 @@ export class LabTestsComponent implements OnInit {
       amount: this.totalPrice(),
       description: `Lab tests booking - ${this.selectedTests().map(t => t.testName).join(', ')}`,
       paymentMethod: paymentDetails.method.toUpperCase() as 'UPI' | 'CARD' | 'QR_CODE',
+      paymentType: 'LAB_TEST', // Required field for payment type
       patientId: parseInt(this.authService.userId() || '0'),
       currency: 'INR'
     };

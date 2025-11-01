@@ -77,6 +77,17 @@ import { PatientLayoutComponent } from '../../shared/patient-layout.component';
               <input class="input" [(ngModel)]="editable().dateOfBirth" name="dateOfBirth" type="date" />
             </label>
             <label class="grid gap-1">
+              <span class="text-sm text-gray-300">Gender</span>
+              <select class="input" [(ngModel)]="editable().gender" name="gender">
+                <option value="">Select Gender</option>
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </label>
+          </div>
+          <div class="grid gap-4">
+            <label class="grid gap-1">
               <span class="text-sm text-gray-300">Illness Details</span>
               <textarea class="input" [(ngModel)]="editable().illnessDetails" name="illnessDetails"></textarea>
             </label>

@@ -238,10 +238,8 @@ import { PaymentPopupComponent, PaymentDetails } from '../../shared/payment-popu
         [amount]="paymentBooking()?.totalPrice || 0"
         [title]="'Payment for Booking #' + (paymentBooking()?.id || 0)"
         [patientId]="getPatientIdForPayment()"
-        [bookingId]="paymentBooking()?.id || 0"
-        [selectedTests]="paymentBooking()?.selectedTests || []"
-        [prescribedBy]="paymentBooking()?.prescribedBy"
-        [isExistingBooking]="true"
+        [bookingId]="paymentBooking()?.id"
+        [paymentType]="'LAB_TEST'"
         (paymentSuccess)="onPaymentSuccess($event)"
         (paymentCancel)="onPaymentCancelled()"
       ></app-payment-popup>

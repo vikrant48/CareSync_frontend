@@ -4,17 +4,26 @@ import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DoctorService, Doctor } from '../../core/services/doctor.service';
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
+import { EmergencyAppointmentModalComponent } from '../../shared/emergency-appointment-modal.component';
 
 @Component({
   selector: 'app-patient-book-appointment',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, EmergencyAppointmentModalComponent],
   template: `
     <app-patient-layout>
     <div class="panel p-6 space-y-6">
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-semibold">Book Appointment</h2>
-        <button class="btn-secondary" (click)="refreshDoctors()">Refresh</button>
+        <div class="flex gap-3">
+          <button 
+            class="btn-primary bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg flex items-center gap-2"
+            (click)="openEmergencyModal()"
+          >
+            🚨 Emergency Appointment
+          </button>
+          <button class="btn-secondary" (click)="refreshDoctors()">Refresh</button>
+        </div>
       </div>
 
       <div class="flex gap-3">
@@ -84,6 +93,14 @@ import { PatientLayoutComponent } from '../../shared/patient-layout.component';
         </div>
       </div>
     </div>
+    
+    <!-- Emergency Appointment Modal -->
+    <app-emergency-appointment-modal
+      [isOpen]="showEmergencyModal"
+      [availableDoctors]="doctors"
+      (closeModal)="closeEmergencyModal()"
+      (appointmentBooked)="onEmergencyAppointmentBooked($event)"
+    ></app-emergency-appointment-modal>
     </app-patient-layout>
   `,
 })
@@ -93,6 +110,7 @@ export class PatientBookAppointmentComponent {
   genderFilter = '';
   addressFilter = '';
   loadingDoctors = false;
+  showEmergencyModal = false;
 
   doctors: Doctor[] = [];
   ratings: Record<number, { avg: number; count: number }> = {};
@@ -162,7 +180,21 @@ export class PatientBookAppointmentComponent {
   }
 
   goToDoctorAndBook(d: Doctor) {
-    this.router.navigate(['/patient/doctor', d.username], { queryParams: { book: '1' } });
+    this.router.navigate(['/patient/doctor', d.username], { queryParams: { book: 'true' } });
   }
 
+  openEmergencyModal() {
+    this.showEmergencyModal = true;
+  }
+
+  closeEmergencyModal() {
+    this.showEmergencyModal = false;
+  }
+
+  onEmergencyAppointmentBooked(appointment: any) {
+    console.log('Emergency appointment booked:', appointment);
+    
+    // Navigate to appointments page to show the newly booked appointment
+    this.router.navigate(['/patient/appointments']);
+  }
 }

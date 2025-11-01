@@ -5,7 +5,9 @@ import { environment } from '../../../environments/environment';
 
 export interface PaymentRequest {
   amount: number;
-  description: string;
+  description?: string; // Optional - will be auto-generated if not provided
+  paymentType: 'LAB_TEST' | 'APPOINTMENT' | 'CONSULTATION' | 'MEDICINE' | 'HEALTH_CHECKUP' | 'SUBSCRIPTION' | 'OTHER';
+  additionalInfo?: string; // Optional additional info for auto-generating descriptions
   paymentMethod: 'UPI' | 'CARD' | 'QR_CODE';
   patientId: number; // Required field as per backend
   bookingId?: number;
