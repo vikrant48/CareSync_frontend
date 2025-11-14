@@ -4,6 +4,7 @@ import { ChartWidgetComponent } from '../../shared/chart-widget.component';
 import { AuthService } from '../../core/services/auth.service';
 import { ReportsApiService } from '../../core/services/reports.service';
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
+import { DoctorService, Doctor } from '../../core/services/doctor.service';
 
 @Component({
   selector: 'app-patient-reports',
@@ -19,13 +20,20 @@ import { PatientLayoutComponent } from '../../shared/patient-layout.component';
         <!-- My Analytics -->
         <section class="mt-2">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="panel p-4">
+            <!-- <div class="panel p-4">
               <div class="text-sm text-gray-400">Overview</div>
               <div class="mt-2 text-sm">
                 <div>Total Appointments: {{ patientAnalytics?.totalAppointments ?? '�' }}</div>
                 <div>Avg Visits/Month: {{ patientAnalytics?.averageVisitsPerMonth ?? '�' }}</div>
               </div>
-            </div>
+            </div> -->
+            <app-chart-widget
+              *ngIf="overviewData.length > 0"
+              title="Overview"
+              [type]="'bar'"
+              [labels]="overviewLabels"
+              [data]="overviewData"
+            ></app-chart-widget>
             <app-chart-widget
               *ngIf="doctorVisitLabels.length > 0"
               title="Visits by Doctor"
@@ -52,6 +60,7 @@ export class PatientReportsComponent implements OnInit {
   private auth = inject(AuthService);
   private reportsApi = inject(ReportsApiService);
   private cdr = inject(ChangeDetectorRef);
+  private doctorApi = inject(DoctorService);
 
   patientAnalytics: any = null;
 
@@ -60,6 +69,12 @@ export class PatientReportsComponent implements OnInit {
   doctorVisitData: number[] = [];
   appointmentStatusLabels: string[] = ['Completed', 'Cancelled'];
   appointmentStatusData: number[] = [];
+  overviewLabels: string[] = [];
+  overviewData: number[] = [];
+
+  // Doctors mapping for label resolution
+  doctors: Doctor[] = [];
+  doctorNameById: Record<number, string> = {};
 
   ngOnInit(): void {
     if (this.patientId == null) {
@@ -67,6 +82,7 @@ export class PatientReportsComponent implements OnInit {
       this.patientId = idStr ? Number(idStr) : null;
     }
     this.loadPatientAnalytics();
+    this.loadDoctors();
   }
 
   loadPatientAnalytics() {
@@ -74,15 +90,19 @@ export class PatientReportsComponent implements OnInit {
     this.reportsApi.getPatientAnalytics(this.patientId).subscribe({
       next: (res) => {
         this.patientAnalytics = res || null;
-        const visits = (this.patientAnalytics?.doctorVisitCount) || {};
-        const labels = Object.keys(visits);
-        this.doctorVisitLabels = labels;
-        this.doctorVisitData = labels.map((k) => Number(visits[k] || 0));
+        // Update doctor visits chart with resolved doctor names
+        this.updateDoctorVisitsChart();
 
-        const total = Number(this.patientAnalytics?.totalAppointments || 0);
+        // Correct appointment status chart using completed = totalVisits
+        const completed = Number(this.patientAnalytics?.totalVisits || 0);
         const cancelled = Number(this.patientAnalytics?.cancelledAppointments || 0);
-        const completed = Math.max(total - cancelled, 0);
         this.appointmentStatusData = [completed, cancelled];
+
+        // Overview chart
+        const total = Number(this.patientAnalytics?.totalAppointments || 0);
+        const avgPerMonth = Number(this.patientAnalytics?.averageVisitsPerMonth || 0);
+        this.overviewLabels = ['Total Appointments', 'Avg Visits/Month'];
+        this.overviewData = [total, avgPerMonth];
         this.cdr.markForCheck();
       },
       error: () => {
@@ -90,5 +110,36 @@ export class PatientReportsComponent implements OnInit {
         this.cdr.markForCheck();
       },
     });
+  }
+
+  private loadDoctors() {
+    this.doctorApi.getAllForPatients().subscribe({
+      next: (list) => {
+        this.doctors = list || [];
+        this.doctorNameById = {};
+        for (const d of this.doctors) {
+          this.doctorNameById[d.id] = this.formatDoctorName(d);
+        }
+        // Recompute chart labels now that we have names
+        this.updateDoctorVisitsChart();
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  private updateDoctorVisitsChart() {
+    const visits: Record<string, number> = (this.patientAnalytics?.doctorVisitCount) || {};
+    const ids = Object.keys(visits);
+    this.doctorVisitLabels = ids.map((idStr) => {
+      const id = Number(idStr);
+      return this.doctorNameById[id] || `Doctor ${id}`;
+    });
+    this.doctorVisitData = ids.map((k) => Number(visits[k] || 0));
+  }
+
+  private formatDoctorName(d: Doctor): string {
+    const base = (d.name || `${d.firstName || ''} ${d.lastName || ''}`).trim();
+    const hasPrefix = /^dr\.?\s/i.test(base);
+    return hasPrefix ? base : `Dr ${base}`;
   }
 }

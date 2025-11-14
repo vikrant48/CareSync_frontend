@@ -2,11 +2,12 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
+import { ToastContainerComponent } from './toast-container.component';
 
 @Component({
   selector: 'app-doctor-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ToastContainerComponent],
   template: `
     <div class="h-screen w-screen overflow-hidden flex bg-gray-950 text-gray-100">
       <aside class="w-64 bg-gray-900 border-r border-gray-800 p-4 space-y-3 sticky top-0 h-screen overflow-hidden">
@@ -63,6 +64,7 @@ import { AuthService } from '../core/services/auth.service';
       <main class="flex-1 h-screen overflow-y-auto overflow-x-hidden min-w-0 p-6 pb-16">
         <ng-content></ng-content>
       </main>
+      <app-toast-container></app-toast-container>
     </div>
   `,
   styles: [

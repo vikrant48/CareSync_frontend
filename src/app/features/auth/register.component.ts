@@ -4,11 +4,12 @@ import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { RegisterRequest } from '../../core/models/auth.models';
+import { SpecializationAutocompleteComponent } from '../../shared/specialization-autocomplete.component';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, SpecializationAutocompleteComponent],
   template: `
     <div class="min-h-screen bg-gray-950 text-gray-100 p-6">
       <div class="panel max-w-3xl w-full mx-auto p-6 space-y-6 max-h-[85vh] overflow-y-auto">
@@ -187,10 +188,18 @@ import { RegisterRequest } from '../../core/models/auth.models';
           <!-- Doctor fields -->
           <div *ngIf="roleForm.value.role === 'DOCTOR'" [formGroup]="doctorForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block mb-1">Specialization <span class="text-red-400">*</span></label>
-              <input class="input" 
-                     formControlName="specialization" 
-                     [class.border-red-500]="isFieldInvalid('specialization', doctorForm)" />
+              <label class="block mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-stethoscope text-gray-400"></i>
+                <span>Specialization <span class="text-red-400">*</span></span>
+              </label>
+              <app-specialization-autocomplete
+                formControlName="specialization"
+                placeholder="Enter or select specialization"
+                inputClass="input"
+                [class.border-red-500]="isFieldInvalid('specialization', doctorForm)"
+                [allowAddNew]="true"
+                [required]="true">
+              </app-specialization-autocomplete>
               <div *ngIf="isFieldInvalid('specialization', doctorForm)" class="text-red-400 text-sm mt-1">
                 Specialization is required
               </div>

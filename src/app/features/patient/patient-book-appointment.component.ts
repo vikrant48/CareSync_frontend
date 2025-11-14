@@ -5,11 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { DoctorService, Doctor } from '../../core/services/doctor.service';
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { EmergencyAppointmentModalComponent } from '../../shared/emergency-appointment-modal.component';
+import { SpecializationAutocompleteComponent } from '../../shared/specialization-autocomplete.component';
 
 @Component({
   selector: 'app-patient-book-appointment',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, EmergencyAppointmentModalComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent],
   template: `
     <app-patient-layout>
     <div class="panel p-6 space-y-6">
@@ -27,12 +28,13 @@ import { EmergencyAppointmentModalComponent } from '../../shared/emergency-appoi
       </div>
 
       <div class="flex gap-3">
-        <input
-          type="text"
-          class="input flex-1"
-          placeholder="Filter by specialization (e.g., Cardiology)"
+        <app-specialization-autocomplete
+          class="flex-1"
           [(ngModel)]="specializationFilter"
-        />
+          placeholder="Filter by specialization (e.g., Cardiology)"
+          inputClass="input"
+          [allowAddNew]="false">
+        </app-specialization-autocomplete>
         <input
           type="text"
           class="input flex-1"

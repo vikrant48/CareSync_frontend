@@ -3,24 +3,28 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DoctorService, Doctor } from '../../core/services/doctor.service';
+import { LabTestService } from '../../core/services/lab-test.service';
 import { AppointmentService, PatientAppointmentItem } from '../../core/services/appointment.service';
 import { FeedbackService } from '../../core/services/feedback.service';
-import { PatientProfileService, PatientDto, MedicalHistoryItem, PatientDocumentItem } from '../../core/services/patient-profile.service';
+import { PatientProfileService, PatientDto, MedicalHistoryItem, PatientDocumentItem, MedicalHistoryWithDoctorItem } from '../../core/services/patient-profile.service';
 import { AuthService } from '../../core/services/auth.service';
 // Removed NotificationService imports; logic moved to dedicated component
 
 import { ReportsApiService } from '../../core/services/reports.service';
 import { RescheduleAppointmentModalComponent } from '../../shared/reschedule-appointment-modal.component';
+import { MedicalHistoryDetailModalComponent } from '../../shared/medical-history-detail-modal.component';
 import { PatientAppointmentCardComponent } from '../../shared/patient-appointment-card.component';
-import { getAppointmentEpochMs } from '../../shared/appointment-utils';
+import { getAppointmentEpochMs, isAppointmentToday } from '../../shared/appointment-utils';
 // ChartWidget moved into PatientReportsComponent
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { PatientNotificationComponent } from './patient-notification.component';
+import { PatientDashboardMetricsCardsComponent } from './patient-dashboard-metrics-cards.component';
+import { PatientMyHealthComponent } from './patient-my-health.component';
 
 @Component({
   selector: 'app-patient-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, PatientAppointmentCardComponent, RescheduleAppointmentModalComponent, PatientNotificationComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, PatientAppointmentCardComponent, RescheduleAppointmentModalComponent, PatientNotificationComponent, MedicalHistoryDetailModalComponent, PatientDashboardMetricsCardsComponent, PatientMyHealthComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-patient-layout>
@@ -36,7 +40,7 @@ import { PatientNotificationComponent } from './patient-notification.component';
           />
           <ng-template #avatar>
             <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-xl font-semibold">
-              {{ (patientName || 'P')?.charAt(0) }}
+              {{ (patientName || 'P').charAt(0) }}
             </div>
           </ng-template>
           <div class="flex-1">
@@ -52,9 +56,7 @@ import { PatientNotificationComponent } from './patient-notification.component';
         </section>
 
       <!-- Cards Row moved below Upcoming Appointments -->
-
-      <!-- Upcoming Appointments (cards) -->
-      <section>
+       <section>
         <div class="flex items-center justify-between mb-3">
           <h3 class="text-lg font-semibold">Upcoming Appointments</h3>
           <button class="btn-secondary" (click)="refreshAppointments()">Refresh</button>
@@ -72,86 +74,43 @@ import { PatientNotificationComponent } from './patient-notification.component';
         </div>
       </section>
 
-      <!-- Cards Row: Pending Feedback & My Appointments (below Upcoming) -->
-      <section class="mt-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <!-- Pending Feedback Card -->
-          <div class="panel rounded-none p-6 w-full min-h-[280px] flex flex-col items-center justify-start">
-            <div class="w-full flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="font-bold text-base">Pending Feedback</span>
-                <span *ngIf="loadingPending" class="text-gray-400 text-sm">Loading…</span>
-                <span *ngIf="!loadingPending" class="px-2.5 py-1.5 text-sm font-semibold rounded-full bg-blue-700 text-white">{{ pendingFeedbackCount }}</span>
-              </div>
-              <button class="btn-primary" (click)="goToFeedbackPage()">View All</button>
-            </div>
-            <div class="text-5xl mt-6">📝</div>
-          </div>
+      <!-- Cards Row: extracted into presentational component -->
+      <app-patient-dashboard-metrics-cards
+        [loadingPending]="loadingPending"
+        [pendingFeedbackCount]="pendingFeedbackCount"
+        [loadingAppointments]="loadingAppointments"
+        [appointments]="appointments"
+        [todayAppointmentsCount]="todayAppointmentsCount"
+        [loadingLabTests]="loadingLabTests"
+        [labTestCount]="labTestCount"
+        (openFeedback)="goToFeedbackPage()"
+        (openMyAppointments)="goToMyAppointments()"
+        (openTodayAppointments)="goToTodayAppointments()"
+        (openLabTests)="goToLabTests()"
+      ></app-patient-dashboard-metrics-cards>
 
-          <!-- My Appointments Card -->
-          <div class="panel rounded-none p-6 w-full min-h-[280px] flex flex-col items-center justify-start">
-            <div class="w-full flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="font-bold text-base">My Appointments</span>
-                <span *ngIf="loadingAppointments" class="text-gray-400 text-sm">Loading…</span>
-                <span *ngIf="!loadingAppointments" class="px-2.5 py-1.5 text-sm font-semibold rounded-full bg-blue-700 text-white">{{ (appointments?.length || 0) }}</span>
-              </div>
-              <button class="btn-primary" (click)="goToMyAppointments()">View All</button>
-            </div>
-            <div class="text-5xl mt-6">📅</div>
-          </div>
-
-          <!-- Future Card Placeholder (keeps 3-column row layout) -->
-          <div class="panel rounded-none p-6 w-full min-h-[280px] flex flex-col items-center justify-start">
-            <div class="w-full flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="font-bold text-base">Coming Soon</span>
-                <span class="px-2.5 py-1.5 text-sm font-semibold rounded-full bg-gray-700 text-white">0</span>
-              </div>
-              <button class="btn-secondary" disabled>View All</button>
-            </div>
-            <div class="text-5xl mt-6 text-gray-400">⭐</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Removed: separate My Appointments section; merged into cards row above -->
-
-      
-
-      <!-- My Health -->
-      <section class="mt-6">
-        <h3 class="text-lg font-semibold mb-3">My Health</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="panel p-4">
-            <div class="text-sm text-gray-400 mb-2">Recent Medical History</div>
-            <ul class="text-sm space-y-2">
-              <li *ngFor="let item of medicalHistoryRecent">
-                <div class="font-medium">{{ item.diagnosis || item.symptoms || item.treatment }}</div>
-                <div class="text-gray-500">{{ item.visitDate }}</div>
-              </li>
-              <li *ngIf="medicalHistoryRecent.length === 0" class="text-gray-500">No recent history.</li>
-            </ul>
-          </div>
-          <div class="panel p-4">
-            <div class="text-sm text-gray-400 mb-2">Test Results</div>
-            <div class="grid grid-cols-2 gap-2">
-              <div *ngFor="let d of patientDocumentsRecent" class="border rounded p-2 text-sm">
-                <div class="font-medium truncate">{{ d.originalFilename }}</div>
-                <div class="text-gray-500">{{ d.uploadDate | date:'mediumDate' }}</div>
-              </div>
-              <div *ngIf="patientDocumentsRecent.length === 0" class="text-gray-500">No documents uploaded.</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <!-- My Health extracted into reusable component -->
+      <app-patient-my-health
+        [medicalHistoryRecent]="medicalHistoryRecent"
+        [patientLabReports]="patientLabReports"
+        (openHistoryDetail)="openHistoryDetail($event)"
+        (openDocument)="openDocument($event)"
+      ></app-patient-my-health>
 
       <reschedule-appointment-modal
         [appointment]="rescheduleTarget"
         [doctors]="doctors"
         (close)="closeReschedule()"
-        (confirmed)="onRescheduleConfirmed($event)"
+      (confirmed)="onRescheduleConfirmed($event)"
       ></reschedule-appointment-modal>
+
+      <!-- History Detail Modal (Shared) -->
+      <app-medical-history-detail-modal
+        [open]="historyDetailModalOpen"
+        [detail]="selectedHistoryDetail"
+        [doctorInfo]="selectedHistoryDoctorInfo"
+        (close)="closeHistoryDetail()"
+      ></app-medical-history-detail-modal>
     </div>
     </app-patient-layout>
   `,
@@ -171,6 +130,13 @@ export class PatientDashboardComponent {
   // Pending feedback state
   loadingPending = false;
   pendingFeedbackCount = 0;
+  
+  // Lab tests state
+  loadingLabTests = false;
+  labTestCount = 0;
+  
+  // Today appointments count
+  todayAppointmentsCount = 0;
   
 
   patientAnalytics: any = null;
@@ -203,7 +169,8 @@ export class PatientDashboardComponent {
     private doctorApi: DoctorService,
     private apptApi: AppointmentService,
     private router: Router,
-    private patientApi: PatientProfileService
+    private patientApi: PatientProfileService,
+    private labTestApi: LabTestService
   ) {}
 
   // Notification logic removed; handled by PatientNotificationComponent
@@ -216,6 +183,7 @@ export class PatientDashboardComponent {
     this.refreshAppointments();
     this.loadPatientWelcome();
     this.refreshPendingFeedback();
+    this.refreshLabTestsCount();
 
     // Analytics handled by PatientReportsComponent
     this.loadPatientHealthData();
@@ -239,6 +207,27 @@ export class PatientDashboardComponent {
         this.cdr.markForCheck();
       },
     });
+  }
+
+  // Lab tests
+  refreshLabTestsCount() {
+    this.loadingLabTests = true;
+    this.labTestApi.getAllLabTests().subscribe({
+      next: (tests) => {
+        // API returns only active lab tests; count directly
+        this.labTestCount = (tests || []).length;
+        this.loadingLabTests = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.loadingLabTests = false;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  goToLabTests() {
+    this.router.navigate(['/lab-tests']);
   }
 
   filteredDoctors() {
@@ -287,11 +276,16 @@ export class PatientDashboardComponent {
     this.router.navigate(['/patient/feedback']);
   }
 
+  goToTodayAppointments() {
+    this.router.navigate(['/patient/appointments'], { queryParams: { status: 'ALL', range: 'TODAY' } });
+  }
+
   refreshAppointments() {
     this.loadingAppointments = true;
     this.apptApi.getMyAppointments().subscribe({
       next: (res) => {
         this.appointments = res || [];
+        this.todayAppointmentsCount = (this.appointments || []).filter((a) => isAppointmentToday(a)).length;
         this.loadingAppointments = false;
         this.cdr.markForCheck();
       },
@@ -468,11 +462,64 @@ export class PatientDashboardComponent {
         this.cdr.markForCheck();
       },
     });
-    this.patientApi.getDocumentsByPatient(this.patientId).subscribe({
-      next: (docs) => {
-        this.patientDocumentsRecent = (docs || []).slice(0, 6);
+    // Preload medical history with doctor info for detail modal
+    this.patientApi.getMedicalHistoryWithDoctor(this.patientId).subscribe({
+      next: (list) => {
+        this.medicalHistoryWithDoctor = list || [];
         this.cdr.markForCheck();
       },
     });
+    this.patientApi.getDocumentsByPatient(this.patientId).subscribe({
+      next: (docs) => {
+        const allDocs = docs || [];
+        this.patientLabReports = allDocs
+          .filter((d) => (d.documentType || '').toUpperCase() === 'LAB_REPORT')
+          .slice(0, 6);
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  // History modal state and actions
+  historyDetailModalOpen = false;
+  selectedHistoryDetail: Partial<MedicalHistoryItem> | null = null;
+  selectedHistoryDoctorInfo: { doctorName: string; doctorSpecialization?: string; doctorContactInfo?: string } | null = null;
+  medicalHistoryWithDoctor: MedicalHistoryWithDoctorItem[] = [];
+
+  openHistoryDetail(historyId: number) {
+    const info = this.medicalHistoryWithDoctor.find((h) => h.id === historyId);
+    this.selectedHistoryDoctorInfo = info
+      ? {
+          doctorName: info.doctorName,
+          doctorSpecialization: info.doctorSpecialization,
+          doctorContactInfo: info.doctorContactInfo,
+        }
+      : { doctorName: 'Unknown', doctorSpecialization: '', doctorContactInfo: '' };
+    this.selectedHistoryDetail = null;
+    this.historyDetailModalOpen = true;
+    this.patientApi.getMedicalHistoryDetail(historyId).subscribe({
+      next: (detail) => {
+        this.selectedHistoryDetail = detail;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.selectedHistoryDetail = { id: historyId } as any;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  closeHistoryDetail() {
+    this.historyDetailModalOpen = false;
+    this.selectedHistoryDetail = null;
+    this.selectedHistoryDoctorInfo = null;
+  }
+
+  // Lab reports handling
+  patientLabReports: PatientDocumentItem[] = [];
+  openDocument(d: PatientDocumentItem) {
+    try {
+      window.open(d.filePath, '_blank');
+    } catch {}
   }
 }

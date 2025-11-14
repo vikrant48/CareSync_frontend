@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { AppointmentService, PatientAppointmentItem } from '../../core/services/appointment.service';
 import { DoctorService, Doctor } from '../../core/services/doctor.service';
 import { PatientAppointmentCardComponent } from '../../shared/patient-appointment-card.component';
@@ -58,7 +58,7 @@ import { PatientLayoutComponent } from '../../shared/patient-layout.component';
       <!-- List -->
       <div *ngIf="loading" class="text-gray-400">Loading appointments...</div>
       <div *ngIf="!loading && filtered().length === 0" class="text-gray-400">No appointments match your filters.</div>
-      <div class="space-y-3" *ngIf="!loading">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="!loading">
         <patient-appointment-card
           *ngFor="let a of filtered()"
           [appointment]="a"
@@ -96,8 +96,25 @@ export class MyAppointmentsComponent {
   availableSlots: string[] = [];
   rescheduleError: string | null = null;
 
-  constructor(private apptApi: AppointmentService, private router: Router, private doctorApi: DoctorService) {
+  constructor(private apptApi: AppointmentService, private router: Router, private doctorApi: DoctorService, private route: ActivatedRoute) {
     this.refresh();
+    // Apply default filters from query params if provided
+    const qp = this.route.snapshot.queryParamMap;
+    const statusParam = (qp.get('status') || '').toUpperCase();
+    const rangeParam = (qp.get('range') || '').toUpperCase();
+
+    // Status: 'ALL' means no filter; otherwise map to specific status
+    if (statusParam && statusParam !== 'ALL') {
+      this.statusFilter = statusParam;
+    } else {
+      this.statusFilter = '';
+    }
+
+    // Range: map to component's lowercase values; 'ALL' means no filter
+    if (rangeParam === 'TODAY') this.rangeFilter = 'today';
+    else if (rangeParam === 'UPCOMING') this.rangeFilter = 'upcoming';
+    else if (rangeParam === 'PAST') this.rangeFilter = 'past';
+    else this.rangeFilter = '';
     // Preload doctors list to enable navigation to doctor profile from appointments
     this.doctorApi.getAllForPatients().subscribe({
       next: (res) => (this.doctors = res || []),

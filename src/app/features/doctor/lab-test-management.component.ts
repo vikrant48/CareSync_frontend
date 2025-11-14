@@ -1,8 +1,9 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 import { LabTestService, LabTest } from '../../core/services/lab-test.service';
+import { ToastService } from '../../core/services/toast.service';
 
 interface CreateLabTestRequest {
   testName: string;
@@ -26,26 +27,6 @@ interface CreateLabTestRequest {
           <p class="text-lg text-gray-400">Create and manage lab tests for all patients</p>
         </div>
 
-        <!-- Success/Error Messages -->
-        <div *ngIf="successMessage()" class="flex items-center justify-between p-4 mb-6 bg-green-50 border border-green-200 text-green-700 rounded-lg">
-          <div class="flex items-center">
-            <i class="fas fa-check-circle mr-2"></i>
-            {{ successMessage() }}
-          </div>
-          <button (click)="clearMessages()" class="p-1 hover:bg-green-100 rounded">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-
-        <div *ngIf="errorMessage()" class="flex items-center justify-between p-4 mb-6 bg-red-50 border border-red-200 text-red-700 rounded-lg">
-          <div class="flex items-center">
-            <i class="fas fa-exclamation-triangle mr-2"></i>
-            {{ errorMessage() }}
-          </div>
-          <button (click)="clearMessages()" class="p-1 hover:bg-red-100 rounded">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
 
         <!-- Add New Test Form -->
         <div class="bg-gray-800 rounded-xl p-6 mb-8 border border-gray-700">
@@ -237,13 +218,12 @@ interface CreateLabTestRequest {
 export class LabTestManagementComponent implements OnInit {
   private labTestService = inject(LabTestService);
   private fb = inject(FormBuilder);
+  private toast = inject(ToastService);
 
   // Signals for reactive state management
   labTests = signal<LabTest[]>([]);
   isLoading = signal<boolean>(false);
   isSubmitting = signal<boolean>(false);
-  errorMessage = signal<string>('');
-  successMessage = signal<string>('');
   editingTest = signal<LabTest | null>(null);
 
   // Form
@@ -271,7 +251,7 @@ export class LabTestManagementComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading lab tests:', error);
-        this.errorMessage.set('Failed to load lab tests. Please try again.');
+        this.toast.showError('Failed to load lab tests. Please try again.');
         this.isLoading.set(false);
       }
     });
@@ -291,7 +271,7 @@ export class LabTestManagementComponent implements OnInit {
           const message = this.editingTest() 
             ? 'Lab test updated successfully!' 
             : 'Lab test created successfully!';
-          this.successMessage.set(message);
+          this.toast.showSuccess(message);
           this.labTestForm.reset({ isActive: true });
           this.editingTest.set(null);
           this.loadAllLabTests();
@@ -300,7 +280,7 @@ export class LabTestManagementComponent implements OnInit {
         error: (error) => {
           console.error('Error saving lab test:', error);
           const errorMsg = error.error?.error || 'Failed to save lab test. Please try again.';
-          this.errorMessage.set(errorMsg);
+          this.toast.showError(errorMsg);
           this.isSubmitting.set(false);
         }
       });
@@ -335,19 +315,18 @@ export class LabTestManagementComponent implements OnInit {
     this.labTestService.updateLabTest(test.id, updatedTest).subscribe({
       next: () => {
         const status = updatedTest.isActive ? 'activated' : 'deactivated';
-        this.successMessage.set(`Lab test ${status} successfully!`);
+        this.toast.showSuccess(`Lab test ${status} successfully!`);
         this.loadAllLabTests();
       },
       error: (error) => {
         console.error('Error updating test status:', error);
-        this.errorMessage.set('Failed to update test status. Please try again.');
+        this.toast.showError('Failed to update test status. Please try again.');
       }
     });
   }
 
   clearMessages() {
-    this.errorMessage.set('');
-    this.successMessage.set('');
+    this.toast.clearAll();
   }
 
   trackByTestId(index: number, test: LabTest): number {

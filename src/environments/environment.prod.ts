@@ -1,5 +1,5 @@
 export const environment = {
-  apiBaseUrl: 'https://your-production-api.com',
+  apiBaseUrl: 'https://caresync-backend-aq8e.onrender.com',
   // QR Code Configuration (non-sensitive)
   qrCodeBaseUrl: 'upi://pay?pa=caresync@paytm&pn=CareSync&cu=INR',
 };

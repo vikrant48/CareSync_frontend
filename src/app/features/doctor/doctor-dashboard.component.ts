@@ -38,12 +38,12 @@ import { forkJoin } from 'rxjs';
           />
           <ng-template #docAvatar>
             <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-xl font-semibold text-blue-700">
-              {{ (doctorName || 'D')?.charAt(0) }}
+              {{ (doctorName || 'D').charAt(0) }}
             </div>
           </ng-template>
           <div>
             <div class="text-lg">Welcome back,</div>
-            <div class="text-2xl font-semibold">{{ doctorName || 'Doctor' }}</div>
+            <div class="text-2xl font-semibold">{{ (doctorName ? 'Dr. ' + doctorName : 'Doctor') }}</div>
             <div class="text-gray-400" *ngIf="profile?.specialization"> {{ profile.specialization }}</div>
           </div>
         </div>
@@ -66,18 +66,23 @@ import { forkJoin } from 'rxjs';
         </div>
 
         <div class="p-4 border rounded md:col-span-2">
-          <h3 class="font-semibold mb-2">Recent Documents</h3>
-          <div *ngIf="documents.length === 0" class="text-sm text-gray-400">No documents found.</div>
-          <div class="grid md:grid-cols-2 gap-3">
-            <div *ngFor="let d of documents" class="border p-3 rounded">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="font-medium">{{ d.originalFilename }}</p>
-                  <p class="text-xs text-gray-400">{{ d.documentType }} | {{ d.contentType }}</p>
-                </div>
-                <a [href]="d.filePath" target="_blank" class="link">Open</a>
-              </div>
-              <p class="text-xs text-gray-400 mt-2">Uploaded: {{ d.uploadDate | date:'medium' }}</p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div class="panel p-4">
+              <div class="text-sm text-gray-400">Today</div>
+              <div class="text-2xl font-semibold">{{ (todayAppointments || []).length }}</div>
+            </div>
+            <div class="panel p-4">
+              <div class="text-sm text-gray-400">Upcoming</div>
+              <div class="text-2xl font-semibold">{{ (upcomingAppointments || []).length }}</div>
+            </div>
+            <div class="panel p-4">
+              <div class="text-sm text-gray-400">Confirmed</div>
+              <div class="text-2xl font-semibold">{{ todayStats().CONFIRMED }}</div>
+            </div>
+            <div class="panel p-4">
+              <div class="text-sm text-gray-400">Completed</div>
+              <div class="text-2xl font-semibold">{{ todayStats().COMPLETED }}</div>
             </div>
           </div>
         </div>
@@ -150,11 +155,11 @@ import { forkJoin } from 'rxjs';
       <app-medical-history-form-modal
         [open]="historyFormModalOpen"
         [form]="mhForm"
-        [disabled]="selectedAppointment?.status !== 'CONFIRMED'"
+        [disabled]="selectedAppointment?.status !== 'IN_PROGRESS'"
         [saving]="savingHistory"
         [saved]="historySaved"
         [error]="historyError"
-        [infoText]="selectedAppointment?.status !== 'CONFIRMED' ? 'Form available only for confirmed appointments.' : null"
+        [infoText]="selectedAppointment?.status !== 'IN_PROGRESS' ? 'Form available only for in-progress appointments.' : null"
         (close)="closeHistoryForm()"
         (submit)="saveMedicalHistory()"
       ></app-medical-history-form-modal>
@@ -252,7 +257,8 @@ export class DoctorDashboardComponent implements OnInit {
         next: (docs) => (this.documents = (docs || []).slice(0, 6)),
       });
       this.refreshToday();
-  }
++     this.refreshUpcoming();
+   }
   }
 
   refreshToday() {
@@ -364,24 +370,42 @@ export class DoctorDashboardComponent implements OnInit {
   // ngOnDestroy not needed for notifications; no local polling
 
   openPatient(a: DoctorAppointmentItem) {
+    // Ensure other modals are closed
+    this.historyFormModalOpen = false;
+    this.historyDetailModalOpen = false;
+    
     this.selectedAppointment = a;
     this.patientModalOpen = true;
     this.selectedPatient = null;
     this.mhForm = { visitDate: this.todayISO() };
     this.patientApi.getCompleteData(a.patientId).subscribe({
-      next: (data) => (this.selectedPatient = data),
-      error: () => (this.selectedPatient = { patient: {} as any, medicalHistory: [], documents: [] }),
+      next: (data) => {
+        this.selectedPatient = data;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.selectedPatient = { patient: {} as any, medicalHistory: [], documents: [] };
+        this.cdr.detectChanges();
+      },
     });
     this.medicalHistoryWithDoctor = [];
     this.patientApi.getMedicalHistoryWithDoctor(a.patientId).subscribe({
-      next: (list) => (this.medicalHistoryWithDoctor = list || []),
+      next: (list) => {
+        this.medicalHistoryWithDoctor = list || [];
+        this.cdr.detectChanges();
+      },
     });
   }
 
   openHistoryForm(a: DoctorAppointmentItem) {
+    // Ensure other modals are closed
+    this.patientModalOpen = false;
+    this.historyDetailModalOpen = false;
+    
     this.selectedAppointment = a;
     this.mhForm = { visitDate: this.todayISO() };
     this.historyFormModalOpen = true;
+    this.cdr.detectChanges();
   }
 
   closePatientModal() {
@@ -395,8 +419,14 @@ export class DoctorDashboardComponent implements OnInit {
     this.selectedHistoryDetail = null;
     this.historyDetailModalOpen = true;
     this.patientApi.getMedicalHistoryDetail(item.id).subscribe({
-      next: (detail) => (this.selectedHistoryDetail = detail),
-      error: () => (this.selectedHistoryDetail = { id: item.id, visitDate: item.visitDate } as any),
+      next: (detail) => {
+        this.selectedHistoryDetail = detail;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.selectedHistoryDetail = { id: item.id, visitDate: item.visitDate } as any;
+        this.cdr.detectChanges();
+      },
     });
   }
 
@@ -411,33 +441,42 @@ export class DoctorDashboardComponent implements OnInit {
     this.mhForm = { visitDate: this.todayISO() };
     this.historyError = null;
     this.historySaved = false;
+    this.cdr.detectChanges();
   }
 
   saveMedicalHistory() {
     if (!this.selectedAppointment) return;
+    
+    if (this.savingHistory) {
+      return;
+    }
+    
     this.savingHistory = true;
     this.historySaved = false;
     this.historyError = null;
+    this.cdr.detectChanges();
+    
     if (this.doctorId == null) {
       this.savingHistory = false;
+      this.cdr.detectChanges();
       return;
     }
+    
     this.patientApi
       .addMedicalHistoryWithDoctor(this.selectedAppointment.patientId, this.doctorId, this.mhForm)
       .subscribe({
         next: () => {
           this.savingHistory = false;
           this.historySaved = true;
-          // Close form and refresh patient data to show the new history
+          this.cdr.detectChanges();
+          // Close form after successful save
           this.closeHistoryForm();
-          this.patientApi.getCompleteData(this.selectedAppointment!.patientId).subscribe({
-            next: (data) => (this.selectedPatient = data),
-          });
         },
         error: (e) => {
           console.error('Failed to save medical history', e);
           this.historyError = 'Failed to save medical history';
           this.savingHistory = false;
+          this.cdr.detectChanges();
         },
       });
   }

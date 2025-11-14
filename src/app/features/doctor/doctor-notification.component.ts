@@ -13,7 +13,7 @@ import { AuthService } from '../../core/services/auth.service';
       [role]="'doctor'"
       [grouped]="true"
       [widthClass]="'w-96'"
-      [buttonLabel]="'Notifications'"
+      [buttonLabel]="''"
       [showStatus]="true"
       [userId]="doctorId"
     ></app-notification-dropdown>

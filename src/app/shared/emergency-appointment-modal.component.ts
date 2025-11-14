@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AppointmentService } from '../core/services/appointment.service';
 import { Doctor } from '../core/services/doctor.service';
+import { ToastService } from '../core/services/toast.service';
 
 @Component({
   selector: 'app-emergency-appointment-modal',
@@ -70,7 +71,7 @@ import { Doctor } from '../core/services/doctor.service';
                      class="w-full h-full object-cover" 
                      (error)="selectedDoctor.profileImageUrl = ''" />
                 <span *ngIf="!selectedDoctor.profileImageUrl">
-                  {{ (selectedDoctor.firstName?.charAt(0) || 'D') }}
+                  {{ selectedDoctor.firstName ? selectedDoctor.firstName.charAt(0) : 'D' }}
                 </span>
               </div>
               <div>
@@ -107,9 +108,9 @@ import { Doctor } from '../core/services/doctor.service';
               class="input w-full h-24 resize-none" 
               [(ngModel)]="reason"
               placeholder="Please describe your emergency situation in detail..."
-              [class.border-red-500]="showValidation && !reason?.trim()"
+              [class.border-red-500]="showValidation && !reason.trim()"
             ></textarea>
-            <div *ngIf="showValidation && !reason?.trim()" class="text-red-400 text-xs">
+            <div *ngIf="showValidation && !reason.trim()" class="text-red-400 text-xs">
               Please provide a reason for the emergency appointment
             </div>
             <div class="text-xs text-gray-400">
@@ -130,15 +131,7 @@ import { Doctor } from '../core/services/doctor.service';
             </div>
           </div>
 
-          <!-- Error Message -->
-          <div *ngIf="error" class="bg-red-900/30 border border-red-500/50 rounded-lg p-3">
-            <div class="text-red-400 text-sm">{{ error }}</div>
-          </div>
 
-          <!-- Success Message -->
-          <div *ngIf="success" class="bg-green-900/30 border border-green-500/50 rounded-lg p-3">
-            <div class="text-green-400 text-sm">{{ success }}</div>
-          </div>
 
           <!-- Action Buttons -->
           <div class="flex gap-3 pt-4">
@@ -152,7 +145,7 @@ import { Doctor } from '../core/services/doctor.service';
             <button 
               class="btn-primary flex-1 bg-red-600 hover:bg-red-700" 
               (click)="bookEmergencyAppointment()"
-              [disabled]="booking || (!selectedDoctorId || !reason?.trim())"
+              [disabled]="booking || (!selectedDoctorId || !reason.trim())"
             >
               {{ booking ? 'Booking Emergency Appointment...' : 'Book Emergency Appointment' }}
             </button>
@@ -172,13 +165,13 @@ export class EmergencyAppointmentModalComponent {
   reason = '';
   booking = false;
   error: string | null = null;
-  success: string | null = null;
+
   showValidation = false;
 
   currentDate = new Date().toLocaleDateString();
   currentTime = new Date().toLocaleTimeString();
 
-  constructor(private appointmentService: AppointmentService) {}
+  constructor(private appointmentService: AppointmentService, private toast: ToastService) {}
 
   get selectedDoctor(): Doctor | null {
     if (!this.selectedDoctorId) return null;
@@ -195,18 +188,17 @@ export class EmergencyAppointmentModalComponent {
     this.reason = '';
     this.booking = false;
     this.error = null;
-    this.success = null;
     this.showValidation = false;
   }
 
   bookEmergencyAppointment() {
     this.showValidation = true;
     this.error = null;
-    this.success = null;
 
     // Validation
-    if (!this.selectedDoctorId || !this.reason?.trim()) {
+    if (!this.selectedDoctorId || !this.reason.trim()) {
       this.error = 'Please select a doctor and provide a reason for the emergency appointment.';
+      this.toast.showError(this.error);
       return;
     }
 
@@ -216,7 +208,7 @@ export class EmergencyAppointmentModalComponent {
       .subscribe({
         next: (response) => {
           this.booking = false;
-          this.success = 'Emergency appointment booked successfully! The doctor has been notified.';
+          this.toast.showSuccess('Emergency appointment booked successfully! The doctor has been notified.');
           this.appointmentBooked.emit(response);
           
           // Auto-close after 2 seconds
@@ -226,7 +218,9 @@ export class EmergencyAppointmentModalComponent {
         },
         error: (err) => {
           this.booking = false;
-          this.error = err.error?.error || 'Failed to book emergency appointment. Please try again.';
+          const msg = err.error?.error || 'Failed to book emergency appointment. Please try again.';
+          this.error = msg;
+          this.toast.showError(msg);
         }
       });
   }

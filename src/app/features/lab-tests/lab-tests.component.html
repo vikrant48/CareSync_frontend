@@ -48,27 +48,6 @@
     <p class="text-lg text-gray-300">Loading lab tests...</p>
   </div>
 
-  <!-- Error Message -->
-  <div *ngIf="errorMessage()" class="flex items-center justify-between p-4 mb-6 bg-red-900/50 border border-red-700 text-red-300 rounded-lg">
-    <div class="flex items-center">
-      <i class="fas fa-exclamation-triangle mr-2"></i>
-      {{ errorMessage() }}
-    </div>
-    <button (click)="clearMessages()" class="p-1 hover:bg-red-800/50 rounded">
-      <i class="fas fa-times"></i>
-    </button>
-  </div>
-
-  <!-- Success Message -->
-  <div *ngIf="successMessage()" class="flex items-center justify-between p-4 mb-6 bg-green-900/50 border border-green-700 text-green-300 rounded-lg">
-    <div class="flex items-center">
-      <i class="fas fa-check-circle mr-2"></i>
-      {{ successMessage() }}
-    </div>
-    <button (click)="clearMessages()" class="p-1 hover:bg-green-800/50 rounded">
-      <i class="fas fa-times"></i>
-    </button>
-  </div>
 
   <!-- Patient Selection for Doctors -->
   <div *ngIf="currentRole() === 'DOCTOR' && !isLoading()" class="mb-6 p-4 bg-gray-800 border border-gray-700 rounded-xl">

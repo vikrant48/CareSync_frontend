@@ -19,6 +19,14 @@
             "polyfills": [
               "zone.js"
             ],
+            "allowedCommonJsDependencies": [
+              "canvg",
+              "jspdf",
+              "@babel/runtime",
+              "core-js",
+              "raf",
+              "rgbcolor"
+            ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
               {
@@ -42,8 +50,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "1mb",
-                  "maximumError": "2mb"
+                  "maximumWarning": "2mb",
+                  "maximumError": "3mb"
                 },
                 {
                   "type": "anyComponentStyle",

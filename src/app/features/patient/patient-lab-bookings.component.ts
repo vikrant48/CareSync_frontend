@@ -7,6 +7,7 @@ import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { PdfService, PaymentReceiptData } from '../../core/services/pdf.service';
 import { PaymentService } from '../../core/services/payment.service';
 import { PaymentPopupComponent, PaymentDetails } from '../../shared/payment-popup.component';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-patient-lab-bookings',
@@ -17,11 +18,19 @@ import { PaymentPopupComponent, PaymentDetails } from '../../shared/payment-popu
       <div class="p-6">
         <div class="flex justify-between items-center mb-6">
           <h1 class="text-2xl font-bold text-gray-100">My Lab Test Bookings</h1>
-          <button 
-            (click)="navigateToBooking()"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-            Book New Tests
-          </button>
+          <div class="flex items-center gap-2">
+            <button 
+              (click)="loadBookings()"
+              class="btn-secondary flex items-center gap-2">
+              <i class="fas fa-rotate-right"></i>
+              <span>Refresh</span>
+            </button>
+            <button 
+              (click)="navigateToBooking()"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+              Book New Tests
+            </button>
+          </div>
         </div>
 
         <!-- Loading State -->
@@ -60,8 +69,8 @@ import { PaymentPopupComponent, PaymentDetails } from '../../shared/payment-popu
           </div>
         </div>
 
-        <!-- Bookings List -->
-        <div *ngIf="!isLoading() && !errorMessage() && bookings().length > 0" class="space-y-6">
+        <!-- Bookings Grid -->
+        <div *ngIf="!isLoading() && !errorMessage() && bookings().length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div *ngFor="let booking of bookings()" 
                class="bg-gray-800 rounded-lg shadow-lg border border-gray-700 overflow-hidden">
             
@@ -130,14 +139,7 @@ import { PaymentPopupComponent, PaymentDetails } from '../../shared/payment-popu
           </div>
         </div>
 
-        <!-- Refresh Button -->
-        <div *ngIf="!isLoading()" class="mt-8 text-center">
-          <button 
-            (click)="loadBookings()"
-            class="text-blue-400 hover:text-blue-300 text-sm font-medium">
-            Refresh Bookings
-          </button>
-        </div>
+        
 
         <!-- Booking Details Modal -->
         <div *ngIf="showDetailsModal()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -252,6 +254,7 @@ export class PatientLabBookingsComponent implements OnInit {
   private router = inject(Router);
   private pdfService = inject(PdfService);
   private paymentService = inject(PaymentService);
+  private toast = inject(ToastService);
 
   bookings = signal<BookingResponse[]>([]);
   isLoading = signal<boolean>(false);
@@ -293,6 +296,7 @@ export class PatientLabBookingsComponent implements OnInit {
         }
         
         this.errorMessage.set(errorMsg);
+        this.toast.showError(errorMsg);
         this.isLoading.set(false);
       }
     });
@@ -342,8 +346,8 @@ export class PatientLabBookingsComponent implements OnInit {
           this.bookings.set(updatedBookings);
           this.isLoading.set(false);
           
-          // Show success message
-          alert(`Booking #${booking.id} has been cancelled successfully.`);
+          // Show success message via toast
+          this.toast.showSuccess(`Booking #${booking.id} cancelled successfully.`);
         },
         error: (error) => {
           console.error('Error cancelling booking:', error);
@@ -359,6 +363,7 @@ export class PatientLabBookingsComponent implements OnInit {
           }
           
           this.errorMessage.set(errorMsg);
+          this.toast.showError(errorMsg);
           this.isLoading.set(false);
         }
       });

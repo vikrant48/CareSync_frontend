@@ -9,6 +9,7 @@ import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 import { DoctorProfileComponent } from './features/doctor/doctor-profile.component';
 import { PatientProfileComponent } from './features/patient/patient-profile.component';
+import { PatientEditPageComponent } from './shared/patient-edit-page.component';
 import { DoctorPublicProfileComponent } from './features/patient/doctor-public-profile.component';
 import { PatientBookAppointmentComponent } from './features/patient/patient-book-appointment.component';
 import { MyAppointmentsComponent } from './features/patient/my-appointments.component';
@@ -90,6 +91,12 @@ export const routes: Routes = [
   {
     path: 'patient/profile',
     component: PatientProfileComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['PATIENT'] }
+  },
+  {
+    path: 'patient/profile/edit',
+    component: PatientEditPageComponent,
     canActivate: [authGuard, roleGuard],
     data: { roles: ['PATIENT'] }
   },

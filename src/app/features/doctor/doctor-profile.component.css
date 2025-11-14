@@ -3,3 +3,13 @@
 .btn-secondary { @apply bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded; }
 .btn-danger { @apply bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded; }
 .link { @apply text-blue-400 hover:text-blue-300 underline; }
+
+/* Panel and Tabs styling (aligned with patient profile aesthetics) */
+.panel { @apply border border-gray-700 rounded bg-gray-900/40 shadow-sm; }
+.tab-btn { @apply px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-gray-800 rounded-t; }
+.tab-btn.active { @apply text-white border-b-2 border-blue-600; }
+
+/* Small stat pills in header */
+.stat-pill { @apply px-3 py-2 rounded bg-gray-800 border border-gray-700; }
+.stat-pill .label { @apply text-xs text-gray-400; }
+.stat-pill .value { @apply text-sm text-gray-100 font-medium; }

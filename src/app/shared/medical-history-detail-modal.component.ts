@@ -31,9 +31,9 @@ import { MedicalHistoryItem } from '../core/services/patient-profile.service';
           </div>
           <div class="mt-4">
             <h4 class="font-medium mb-2">Prescribing Doctor</h4>
-            <div class="text-sm">Name: {{ doctorInfo?.doctorName }}</div>
-            <div class="text-sm">Specialization: {{ doctorInfo?.doctorSpecialization || '—' }}</div>
-            <div class="text-sm">Mobile: {{ doctorInfo?.doctorContactInfo || '—' }}</div>
+            <div class="text-sm">Name: {{ doctorInfo.doctorName }}</div>
+            <div class="text-sm">Specialization: {{ doctorInfo.doctorSpecialization || '—' }}</div>
+            <div class="text-sm">Mobile: {{ doctorInfo.doctorContactInfo || '—' }}</div>
           </div>
         </div>
         <ng-template #loading>

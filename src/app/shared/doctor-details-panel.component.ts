@@ -11,14 +11,14 @@ import { Doctor } from '../core/services/doctor.service';
     <div class="panel p-6 space-y-6" *ngIf="doctor; else loadingTpl">
       <div class="flex items-center gap-4">
         <div class="w-14 h-14 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center text-white text-xl">
-          <img *ngIf="doctor?.profileImageUrl" [src]="doctor.profileImageUrl" class="w-full h-full object-cover" (error)="doctor!.profileImageUrl = ''" />
-          <span *ngIf="!doctor?.profileImageUrl">{{ doctorInitial() }}</span>
+          <img *ngIf="doctor.profileImageUrl" [src]="doctor.profileImageUrl" class="w-full h-full object-cover" (error)="doctor!.profileImageUrl = ''" />
+          <span *ngIf="!doctor.profileImageUrl">{{ doctorInitial() }}</span>
         </div>
         <div>
           <h2 class="text-xl font-semibold">{{ formatDoctorName() }}</h2>
           <div class="text-sm text-gray-400">{{ doctor.specialization || 'General' }}</div>
           <div class="flex gap-2 mt-1 text-sm flex-wrap">
-            <div *ngIf="avgRating !== null" class="px-2 py-0.5 rounded-full bg-gray-800 border border-gray-700">Rating: {{ avgRating?.toFixed(1) }} ★</div>
+            <div *ngIf="avgRating !== null" class="px-2 py-0.5 rounded-full bg-gray-800 border border-gray-700">Rating: {{ avgRating.toFixed(1) }} ★</div>
             <div *ngIf="age !== null" class="px-2 py-0.5 rounded-full bg-gray-800 border border-gray-700">Age: {{ age }}</div>
             <div *ngIf="doctor.consultationFees !== undefined && doctor.consultationFees !== null" class="px-2 py-0.5 rounded-full bg-gray-800 border border-gray-700">Fee: {{ doctor.consultationFees }}</div>
           </div>
@@ -43,8 +43,8 @@ import { Doctor } from '../core/services/doctor.service';
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <section class="space-y-3">
           <h3 class="text-lg font-semibold">Education</h3>
-          <div *ngIf="(educations?.length || 0) === 0" class="text-gray-400">No education details available.</div>
-          <div class="space-y-3" *ngIf="(educations?.length || 0) > 0">
+          <div *ngIf="educations.length === 0" class="text-gray-400">No education details available.</div>
+          <div class="space-y-3" *ngIf="educations.length > 0">
             <div class="card p-3" *ngFor="let ed of educations">
               <div class="font-medium">
                 {{ ed.degree }}
@@ -60,8 +60,8 @@ import { Doctor } from '../core/services/doctor.service';
 
         <section class="space-y-3">
           <h3 class="text-lg font-semibold">Experience</h3>
-          <div *ngIf="(experiences?.length || 0) === 0" class="text-gray-400">No experience records available.</div>
-          <div class="space-y-3" *ngIf="(experiences?.length || 0) > 0">
+          <div *ngIf="experiences.length === 0" class="text-gray-400">No experience records available.</div>
+          <div class="space-y-3" *ngIf="experiences.length > 0">
             <div class="card p-3" *ngFor="let ex of experiences">
               <div class="font-medium">
                 {{ ex.hospitalName }}
@@ -78,8 +78,8 @@ import { Doctor } from '../core/services/doctor.service';
 
       <section class="space-y-3 mt-6">
         <h3 class="text-lg font-semibold">Certificates</h3>
-        <div *ngIf="(certificates?.length || 0) === 0" class="text-gray-400">No certificates available.</div>
-        <div class="space-y-3" *ngIf="(certificates?.length || 0) > 0">
+        <div *ngIf="certificates.length === 0" class="text-gray-400">No certificates available.</div>
+        <div class="space-y-3" *ngIf="certificates.length > 0">
           <div class="card p-3" *ngFor="let c of certificates">
             <div class="font-medium">{{ c.name }}</div>
             <div class="text-sm">

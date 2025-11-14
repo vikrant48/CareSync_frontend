@@ -8,6 +8,7 @@ import { AppointmentService } from '../../core/services/appointment.service';
 import { DoctorDetailsPanelComponent } from '../../shared/doctor-details-panel.component';
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { PaymentPopupComponent, PaymentDetails } from '../../shared/payment-popup.component';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-doctor-public-profile',
@@ -50,7 +51,7 @@ import { PaymentPopupComponent, PaymentDetails } from '../../shared/payment-popu
            </label>
 
           <div *ngIf="loadingSlots" class="text-gray-400">Loading available slots…</div>
-          <div *ngIf="bookError" class="text-red-400">{{ bookError }}</div>
+
           <div *ngIf="!loadingSlots">
             <div class="text-sm mb-2">Available Slots</div>
             <div class="flex flex-wrap gap-2">
@@ -78,7 +79,7 @@ import { PaymentPopupComponent, PaymentDetails } from '../../shared/payment-popu
             >
               {{ booking ? 'Booking…' : 'Book Selected Slot' }}
             </button>
-            <span class="ml-3 text-green-500" *ngIf="bookSuccess">Appointment booked successfully.</span>
+
           </div>
         </div>
       </div>
@@ -120,7 +121,7 @@ export class DoctorPublicProfileComponent {
   reason = '';
   loadingSlots = false;
   booking = false;
-  bookSuccess = false;
+
   bookError: string | null = null;
   bookingOpen = false;
   experienceYears: number | null = null;
@@ -139,7 +140,8 @@ export class DoctorPublicProfileComponent {
     private route: ActivatedRoute,
     private doctors: DoctorService,
     private appts: AppointmentService,
-    private doctorProfiles: DoctorProfileService
+    private doctorProfiles: DoctorProfileService,
+    private toast: ToastService
   ) {
     this.username = this.route.snapshot.paramMap.get('username');
     this.autoBookOnLoad = this.route.snapshot.queryParamMap.get('book') === '1';
@@ -209,7 +211,6 @@ export class DoctorPublicProfileComponent {
     if (!this.doctor || !this.selectedDate) return;
     this.loadingSlots = true;
     this.selectedSlot = null;
-    this.bookSuccess = false;
     this.bookError = null;
     this.appts.getAvailableSlots(this.doctor.id, this.selectedDate).subscribe({
       next: (slots) => {
@@ -284,7 +285,6 @@ export class DoctorPublicProfileComponent {
     if (!this.selectedSlot || !this.doctor) return;
     
     this.booking = true;
-    this.bookSuccess = false;
     this.bookError = null;
     const payload = {
       doctorId: this.doctor.id,
@@ -294,20 +294,21 @@ export class DoctorPublicProfileComponent {
     this.appts.bookAppointment(payload).subscribe({
       next: () => {
         this.booking = false;
-        this.bookSuccess = true;
+        this.toast.showSuccess('Appointment booked successfully.');
         // Optionally close modal after success
         // this.bookingOpen = false;
       },
       error: (err) => {
         this.booking = false;
-        this.bookError = err?.error?.message || 'Booking failed. Please try another slot.';
+        const msg = err?.error?.message || 'Booking failed. Please try another slot.';
+        this.bookError = msg;
+        this.toast.showError(msg);
       },
     });
   }
 
   startBooking() {
     this.bookingOpen = true;
-    this.bookSuccess = false;
     this.bookError = null;
     this.selectedSlot = null;
     
@@ -342,7 +343,7 @@ export class DoctorPublicProfileComponent {
 
   onPaymentError(error: string) {
     console.error('Payment error:', error);
-    // You can show an error message to the user here
+    this.toast.showError(error || 'Payment failed. Please try again.');
   }
 
   getCurrentPatientId(): number {

@@ -10,6 +10,7 @@ import { PaymentService } from '../../core/services/payment.service';
 import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { PaymentPopupComponent, PaymentDetails } from '../../shared/payment-popup.component';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-lab-tests',
@@ -24,6 +25,7 @@ export class LabTestsComponent implements OnInit {
   private appointmentService = inject(AppointmentService);
   private paymentService = inject(PaymentService);
   private router = inject(Router);
+  private toast = inject(ToastService);
 
   // Signals for reactive state management
   labTests = signal<LabTest[]>([]);
@@ -31,8 +33,7 @@ export class LabTestsComponent implements OnInit {
   isFullBodyCheckup = signal<boolean>(false);
   isLoading = signal<boolean>(false);
   isBooking = signal<boolean>(false);
-  errorMessage = signal<string>('');
-  successMessage = signal<string>('');
+  // Page-level messages replaced by global toast notifications
 
   // Payment-related signals
   showPaymentPopup = signal<boolean>(false);
@@ -80,7 +81,7 @@ export class LabTestsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading doctor patients:', error);
-        this.errorMessage.set('Failed to load patients. Please try again.');
+        this.toast.showError('Failed to load patients. Please try again.');
         this.isLoadingPatients.set(false);
       }
     });
@@ -98,7 +99,7 @@ export class LabTestsComponent implements OnInit {
    */
   loadLabTests() {
     this.isLoading.set(true);
-    this.errorMessage.set('');
+    this.toast.clearAll();
 
     this.labTestService.getAllLabTests().subscribe({
       next: (tests) => {
@@ -107,7 +108,7 @@ export class LabTestsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading lab tests:', error);
-        this.errorMessage.set('Failed to load lab tests. Please try again.');
+        this.toast.showError('Failed to load lab tests. Please try again.');
         this.isLoading.set(false);
       }
     });
@@ -176,19 +177,18 @@ export class LabTestsComponent implements OnInit {
    */
   bookTests() {
     if (this.selectedTestIds().size === 0) {
-      this.errorMessage.set('Please select at least one test to book.');
+      this.toast.showError('Please select at least one test to book.');
       return;
     }
 
     // For doctors, ensure a patient is selected
     if (this.currentRole() === 'DOCTOR' && !this.selectedPatientId()) {
-      this.errorMessage.set('Please select a patient for the booking.');
+      this.toast.showError('Please select a patient for the booking.');
       return;
     }
 
     // Clear any previous messages
-    this.errorMessage.set('');
-    this.successMessage.set('');
+    this.toast.clearAll();
 
     // Create booking request
     const bookingRequest: BookingRequest = {
@@ -231,7 +231,7 @@ export class LabTestsComponent implements OnInit {
     const bookingRequest = this.pendingBookingRequest();
     
     if (!bookingRequest) {
-      this.errorMessage.set('No pending booking request found.');
+      this.toast.showError('No pending booking request found.');
       return;
     }
     
@@ -297,13 +297,13 @@ export class LabTestsComponent implements OnInit {
 
     this.labTestService.createPatientBookingWithPayment(patientBookingWithPayment).subscribe({
       next: (response) => {
-        this.successMessage.set('Booking created successfully with payment!');
+        this.toast.showSuccess('Booking created successfully with payment!');
         this.clearSelections();
         this.isBooking.set(false);
         
         // Auto-hide success message after 3 seconds
         setTimeout(() => {
-          this.successMessage.set('');
+          this.toast.clearAll();
         }, 3000);
       },
       error: (error) => {
@@ -319,7 +319,7 @@ export class LabTestsComponent implements OnInit {
           errorMsg = 'You do not have permission to book tests.';
         }
         
-        this.errorMessage.set(errorMsg);
+        this.toast.showError(errorMsg);
         this.isBooking.set(false);
       }
     });
@@ -333,13 +333,13 @@ export class LabTestsComponent implements OnInit {
 
     this.labTestService.createDoctorBooking(bookingRequest).subscribe({
       next: (response) => {
-        this.successMessage.set('Booking created successfully! Patient can pay later.');
+        this.toast.showSuccess('Booking created successfully! Patient can pay later.');
         this.clearSelections();
         this.isBooking.set(false);
         
         // Auto-hide success message after 3 seconds
         setTimeout(() => {
-          this.successMessage.set('');
+          this.toast.clearAll();
         }, 3000);
       },
       error: (error) => {
@@ -355,7 +355,7 @@ export class LabTestsComponent implements OnInit {
           errorMsg = 'You do not have permission to book tests.';
         }
         
-        this.errorMessage.set(errorMsg);
+        this.toast.showError(errorMsg);
         this.isBooking.set(false);
       }
     });
@@ -372,17 +372,17 @@ export class LabTestsComponent implements OnInit {
       this.isBooking.set(true);
       this.labTestService.createBooking(bookingRequest).subscribe({
         next: (response) => {
-          this.successMessage.set('Booking created successfully!');
+          this.toast.showSuccess('Booking created successfully!');
           this.clearSelections();
           this.isBooking.set(false);
           
           setTimeout(() => {
-            this.successMessage.set('');
+            this.toast.clearAll();
           }, 3000);
         },
         error: (error) => {
           console.error('Error creating booking:', error);
-          this.errorMessage.set('Failed to create booking. Please try again.');
+          this.toast.showError('Failed to create booking. Please try again.');
           this.isBooking.set(false);
         }
       });
@@ -418,8 +418,7 @@ export class LabTestsComponent implements OnInit {
    * Clear messages
    */
   clearMessages() {
-    this.errorMessage.set('');
-    this.successMessage.set('');
+    this.toast.clearAll();
   }
 
   /**

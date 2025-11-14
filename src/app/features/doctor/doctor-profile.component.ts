@@ -2,20 +2,23 @@ import { Component, OnInit, inject, signal, ViewChild, ElementRef } from '@angul
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DoctorProfileService, UpdateDoctorRequest, CreateEducationRequest, CreateExperienceRequest, CreateCertificateRequest } from '../../core/services/doctor-profile.service';
-import { forkJoin, of } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
+import { SpecializationAutocompleteComponent } from '../../shared/specialization-autocomplete.component';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-doctor-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, DoctorLayoutComponent],
+  imports: [CommonModule, FormsModule, DoctorLayoutComponent, SpecializationAutocompleteComponent],
   templateUrl: './doctor-profile.component.html',
-  styleUrl: './doctor-profile.component.css'
+  styleUrls: ['./doctor-profile.component.css']
 })
 export class DoctorProfileComponent implements OnInit {
   private svc = inject(DoctorProfileService);
   auth = inject(AuthService);
+  private toast = inject(ToastService);
 
   loading = signal<boolean>(true);
   error = signal<string | null>(null);
@@ -67,6 +70,23 @@ export class DoctorProfileComponent implements OnInit {
   uploadingCertificate = false;
   certUploadMessage: string | null = null;
   certUploadDetails: { cloudinaryUrl?: string; downloadUrl?: string; filename?: string } | null = null;
+
+  // UI state: active tab
+  activeTab: 'overview' | 'education' | 'experience' | 'certificates' = 'overview';
+  editingOverview = false;
+  editingEducationMode = false;
+  editingExperienceMode = false;
+  editingCertificatesMode = false;
+
+  // Toasts are used for messaging; container is mounted in DoctorLayout
+
+  // Computed display helpers
+  displayName(): string {
+    const first = this.profile?.firstName || '';
+    const last = this.profile?.lastName || '';
+    const full = `${first} ${last}`.trim();
+    return full || this.profile?.username || 'Doctor';
+  }
 
   ngOnInit(): void {
     this.username = this.auth.username();
@@ -141,7 +161,14 @@ export class DoctorProfileComponent implements OnInit {
   // Profile update
   saveProfile() {
     if (!this.username) return;
-    this.svc.updateProfile(this.username, this.profileForm).subscribe({ next: (resp) => (this.profile = resp) });
+    this.svc.updateProfile(this.username, this.profileForm).subscribe({
+      next: (resp) => {
+        this.profile = resp;
+        this.editingOverview = false;
+        this.toast.showSuccess('Profile updated successfully');
+      },
+      error: (e) => this.toast.showError(e?.error?.message || 'Failed to update profile'),
+    });
   }
 
   // Helpers for languages normalization and toggling
@@ -185,9 +212,12 @@ export class DoctorProfileComponent implements OnInit {
         this.clearProfileImageSelection();
         this.loadAll();
         this.uploadingProfileImage = false;
+        this.editingOverview = false;
+        this.toast.showSuccess('Profile image updated');
       },
       error: () => {
         this.uploadingProfileImage = false;
+        this.toast.showError('Failed to upload profile image');
       },
     });
   }
@@ -207,12 +237,16 @@ export class DoctorProfileComponent implements OnInit {
       next: (e) => {
         this.educations.push(e);
         this.newEducation = { degree: '', institution: '', yearOfCompletion: new Date().getFullYear(), details: '' };
+        this.editingEducationMode = false;
+        this.toast.showSuccess('Education added successfully');
       },
+      error: (err) => this.toast.showError(err?.error?.message || 'Failed to add education'),
     });
   }
 
   startEditEducation(item: any) {
     this.editingEducationId = item?.id ?? null;
+    this.editingEducationMode = true;
     this.newEducation = {
       degree: item?.degree || '',
       institution: item?.institution || '',
@@ -224,6 +258,7 @@ export class DoctorProfileComponent implements OnInit {
   cancelEditEducation() {
     this.editingEducationId = null;
     this.newEducation = { degree: '', institution: '', yearOfCompletion: new Date().getFullYear(), details: '' };
+    this.editingEducationMode = false;
   }
 
   submitEducation() {
@@ -245,7 +280,10 @@ export class DoctorProfileComponent implements OnInit {
         this.editingEducationId = null;
         this.newEducation = { degree: '', institution: '', yearOfCompletion: new Date().getFullYear(), details: '' };
         this.svc.getEducations(this.username!).subscribe({ next: (list) => (this.educations = list || []) });
+        this.editingEducationMode = false;
+        this.toast.showSuccess('Education updated successfully');
       },
+      error: (err) => this.toast.showError(err?.error?.message || 'Failed to update education'),
     });
   }
 
@@ -263,12 +301,16 @@ export class DoctorProfileComponent implements OnInit {
       next: (e) => {
         this.experiences.push(e);
         this.newExperience = { hospitalName: '', position: '', yearsOfService: 1, details: '' };
+        this.editingExperienceMode = false;
+        this.toast.showSuccess('Experience added successfully');
       },
+      error: (err) => this.toast.showError(err?.error?.message || 'Failed to add experience'),
     });
   }
 
   startEditExperience(item: any) {
     this.editingExperienceId = item?.id ?? null;
+    this.editingExperienceMode = true;
     this.newExperience = {
       hospitalName: item?.hospitalName || '',
       position: item?.position || '',
@@ -280,6 +322,7 @@ export class DoctorProfileComponent implements OnInit {
   cancelEditExperience() {
     this.editingExperienceId = null;
     this.newExperience = { hospitalName: '', position: '', yearsOfService: 1, details: '' };
+    this.editingExperienceMode = false;
   }
 
   submitExperience() {
@@ -299,7 +342,10 @@ export class DoctorProfileComponent implements OnInit {
         this.editingExperienceId = null;
         this.newExperience = { hospitalName: '', position: '', yearsOfService: 1, details: '' };
         this.svc.getExperiences(this.username!).subscribe({ next: (list) => (this.experiences = list || []) });
+        this.editingExperienceMode = false;
+        this.toast.showSuccess('Experience updated successfully');
       },
+      error: (err) => this.toast.showError(err?.error?.message || 'Failed to update experience'),
     });
   }
 
@@ -344,8 +390,7 @@ export class DoctorProfileComponent implements OnInit {
               next: (list) => {
                 this.certificates = list || [];
                 this.initCertEdit();
-                // Show post-upload metadata form below the upload area
-                this.lastUploadedCertId = certificateId;
+                this.lastUploadedCertId = null;
                 this.editingCertId = null;
               },
             }),
@@ -358,10 +403,13 @@ export class DoctorProfileComponent implements OnInit {
           this.certFileInputRef.nativeElement.value = '';
         }
         this.uploadingCertificate = false;
+        this.editingCertificatesMode = false;
+        this.toast.showSuccess('Certificate uploaded successfully');
       },
       error: (e) => {
         this.uploadingCertificate = false;
         this.certUploadMessage = e?.error?.message || 'Upload failed';
+        this.toast.showError(e?.error?.message || 'Failed to upload certificate');
       },
     });
   }
@@ -433,7 +481,9 @@ export class DoctorProfileComponent implements OnInit {
         if (this.lastUploadedCertId === item.id) {
           this.lastUploadedCertId = null;
         }
+        this.toast.showSuccess('Certificate details saved');
       },
+      error: (e) => this.toast.showError(e?.error?.message || 'Failed to save certificate'),
     });
   }
 
@@ -466,6 +516,13 @@ export class DoctorProfileComponent implements OnInit {
   cancelNewCertMeta() {
     this.lastUploadedCertId = null;
   }
+
+  // Convenience toggles for starting and canceling add/edit flows
+  startEditOverview() { this.editingOverview = true; }
+  startAddEducation() { this.editingEducationMode = true; this.editingEducationId = null; this.newEducation = { degree: '', institution: '', yearOfCompletion: new Date().getFullYear(), details: '' }; }
+  startAddExperience() { this.editingExperienceMode = true; this.editingExperienceId = null; this.newExperience = { hospitalName: '', position: '', yearsOfService: 1, details: '' }; }
+  startAddCertificate() { this.editingCertificatesMode = true; this.certFile = undefined; this.certDescription = ''; }
+  cancelAddCertificate() { this.editingCertificatesMode = false; this.certFile = undefined; this.certDescription = ''; if (this.certFileInputRef?.nativeElement) { this.certFileInputRef.nativeElement.value = ''; } }
 
   deleteCertificate(item: any) {
     if (!this.username) return;

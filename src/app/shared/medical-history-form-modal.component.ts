@@ -14,7 +14,7 @@ import { FormsModule } from '@angular/forms';
           <button class="btn-secondary" (click)="close.emit()">Close</button>
         </div>
         <div class="p-4">
-          <form class="space-y-2" (ngSubmit)="submit.emit()">
+          <form class="space-y-2" (ngSubmit)="onSubmit($event)">
             <input type="date" class="input w-full" [(ngModel)]="form.visitDate" name="visitDate" />
             <input type="text" class="input w-full" placeholder="Symptoms" [(ngModel)]="form.symptoms" name="symptoms" />
             <input type="text" class="input w-full" placeholder="Diagnosis" [(ngModel)]="form.diagnosis" name="diagnosis" />
@@ -50,4 +50,12 @@ export class MedicalHistoryFormModalComponent {
   @Input() infoText: string | null = null;
   @Output() close = new EventEmitter<void>();
   @Output() submit = new EventEmitter<void>();
+
+  onSubmit(event: Event) {
+    event.preventDefault();
+    if (this.disabled || this.saving) {
+      return;
+    }
+    this.submit.emit();
+  }
 }

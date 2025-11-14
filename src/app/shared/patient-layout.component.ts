@@ -2,11 +2,12 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
+import { ToastContainerComponent } from './toast-container.component';
 
 @Component({
   selector: 'app-patient-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ToastContainerComponent],
   template: `
     <div class="h-screen w-screen overflow-hidden flex bg-gray-900 text-gray-100">
       <!-- Sidebar -->
@@ -73,6 +74,7 @@ import { AuthService } from '../core/services/auth.service';
           <ng-content></ng-content>
         </div>
       </main>
+      <app-toast-container></app-toast-container>
     </div>
   `,
 })
