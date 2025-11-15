@@ -10,20 +10,6 @@
         <a routerLink="/login" class="btn-secondary" aria-label="Login">Login</a>
         <a routerLink="/register" class="btn-primary" aria-label="Register">Register</a>
       </span>
-      <span *ngIf="auth.isAuthenticated()" class="relative">
-        <button class="flex items-center gap-2" (click)="toggleMenu()" title="Account">
-          <img *ngIf="profileImageUrl; else avatarTpl" [src]="profileImageUrl" alt="Profile" class="w-8 h-8 rounded-md object-cover border border-gray-700" (error)="profileImageUrl = ''" />
-          <ng-template #avatarTpl>
-            <div class="w-8 h-8 rounded-md bg-gray-700 text-white flex items-center justify-center text-sm">{{ avatarInitial }}</div>
-          </ng-template>
-        </button>
-        <div *ngIf="menuOpen" class="absolute right-0 mt-2 w-40 panel p-2 space-y-1 z-50">
-          <a *ngIf="auth.role() === 'DOCTOR'" routerLink="/doctor/profile" class="block w-full text-left px-3 py-2 rounded hover:bg-gray-700/50">Profile</a>
-          <a *ngIf="auth.role() === 'PATIENT'" routerLink="/patient/profile" class="block w-full text-left px-3 py-2 rounded hover:bg-gray-700/50">Profile</a>
-          <a routerLink="/settings" class="block w-full text-left px-3 py-2 rounded hover:bg-gray-700/50">Settings</a>
-          <button class="block w-full text-left px-3 py-2 rounded hover:bg-gray-700/50 text-red-300" (click)="onLogout()">Logout</button>
-        </div>
-      </span>
     </nav>
   </div>
 </header>
