@@ -2,57 +2,32 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.7.
 
-## Development server
+## Features
 
-To start a local development server, run:
+- Authentication: login, multi-step register (Doctor/Patient), OTP-based reset password
+- Roles & Layouts: dedicated Doctor and Patient layouts with role-aware navigation
+- Appointments (Patient): browse/filter doctors; book regular/emergency; view/reschedule/cancel
+- Appointments (Doctor): today/upcoming/completed/cancelled views; confirm/complete/cancel statuses
+- Dashboards: doctor dashboard with stats and today’s appointments; patient dashboard overview
+- Medical History: patients view history; doctors add entries; recent health section on dashboard
+- Profiles: doctor profile manage experience/education/certificates; patient profile update and image upload
+- Documents: upload, retrieve, update description, and delete for both roles
+- Ratings: doctor average rating and distribution visible to patients
+- Lab Tests (Patient): discover/select tests, calculate total, full-body checkup group, book with payment
+- Lab Tests (Doctor/Admin): doctor-initiated bookings; create/update/toggle/soft-delete tests
+- Payments: UPI/QR/Card flows with validation, success modal, receipts via PDF
+- Notifications: dropdown with unread count, status, grouping (Today/Yesterday/Earlier), mark-as-read, deep links
+- Analytics: overall metrics (appointments, doctors, patients, revenue, ratings, trends)
+- Reports: doctor performance, clinic overview, appointment trends, specialization analysis, patient analytics
+- Patient Insights: charts for overview, visits by doctor, and appointment status
+- Theme & Preferences: dark/light theme with persistence; enable notifications; compact UI density
 
-```bash
-ng serve
-```
+## Database ERD
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Link to the database entity-relationship diagram:
+https://dbdiagram.io/d/6919c7fb6735e11170077862
 
-## Code scaffolding
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
 
 ## Additional Resources
 
