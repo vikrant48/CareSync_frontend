@@ -45,7 +45,15 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
           </ng-template>
           <div class="flex-1">
             <div class="text-lg">Welcome back,</div>
-            <div class="text-2xl font-semibold">{{ patientName || 'Patient' }}!</div>
+            <ng-container *ngIf="loadingWelcome; else nameReady">
+              <div class="flex items-center gap-2 text-white/80">
+                <span class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
+                Loading…
+              </div>
+            </ng-container>
+            <ng-template #nameReady>
+              <div class="text-2xl font-semibold">{{ patientName || 'Patient' }}!</div>
+            </ng-template>
           </div>
           <div class="flex items-center gap-2">
             <app-patient-notification></app-patient-notification>
@@ -57,22 +65,25 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
 
       <!-- Cards Row moved below Upcoming Appointments -->
        <section>
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-lg font-semibold">Upcoming Appointments</h3>
-          <button class="btn-secondary" (click)="refreshAppointments()">Refresh</button>
-        </div>
-        <div *ngIf="loadingAppointments" class="text-gray-400">Loading upcoming appointments...</div>
-        <div *ngIf="!loadingAppointments && upcomingAppointments().length === 0" class="text-gray-400">No upcoming appointments.</div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <patient-appointment-card
-            *ngFor="let a of upcomingAppointments()"
-            [appointment]="a"
-            (reschedule)="startReschedule($event)"
-            (cancel)="cancelAppointment($event)"
-            (viewDoctor)="viewDoctorFromAppointment($event)"
-          ></patient-appointment-card>
-        </div>
-      </section>
+         <div class="flex items-center justify-between mb-3">
+           <h3 class="text-lg font-semibold">Upcoming Appointments</h3>
+           <button class="btn-secondary" (click)="refreshAppointments()">Refresh</button>
+         </div>
+         <div *ngIf="loadingAppointments" class="flex items-center gap-2 text-gray-400">
+           <span class="animate-spin h-5 w-5 border-2 border-current border-t-transparent rounded-full"></span>
+           Loading upcoming appointments...
+         </div>
+         <div *ngIf="!loadingAppointments && upcomingAppointments().length === 0" class="text-gray-400">No upcoming appointments.</div>
+         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+           <patient-appointment-card
+             *ngFor="let a of upcomingAppointments()"
+             [appointment]="a"
+             (reschedule)="startReschedule($event)"
+             (cancel)="cancelAppointment($event)"
+             (viewDoctor)="viewDoctorFromAppointment($event)"
+           ></patient-appointment-card>
+         </div>
+       </section>
 
       <!-- Cards Row: extracted into presentational component -->
       <app-patient-dashboard-metrics-cards
@@ -119,6 +130,7 @@ export class PatientDashboardComponent {
   specializationFilter = '';
   loadingDoctors = false;
   loadingAppointments = false;
+  loadingWelcome = true;
   patientName: string | null = null;
   profileImageUrl: string | null = null;
 
@@ -320,6 +332,11 @@ export class PatientDashboardComponent {
         const name = [p?.firstName, p?.lastName].filter(Boolean).join(' ').trim();
         this.patientName = name || p?.username || 'Patient';
         this.profileImageUrl = p?.profileImageUrl || null;
+        this.loadingWelcome = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.loadingWelcome = false;
         this.cdr.markForCheck();
       },
     });

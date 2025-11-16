@@ -55,7 +55,12 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
       </div>
 
       <!-- List -->
-      <div *ngIf="loading" class="text-gray-400">Loading appointments...</div>
+      <div *ngIf="loading" class="text-gray-400">
+        <span class="inline-flex items-center gap-2">
+          <i class="fa-solid fa-spinner animate-spin"></i>
+          <span>Loading appointments…</span>
+        </span>
+      </div>
       <div *ngIf="!loading && filteredAppointments().length === 0" class="text-gray-400">No appointments found.</div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="!loading">

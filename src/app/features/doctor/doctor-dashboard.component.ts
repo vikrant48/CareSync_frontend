@@ -43,7 +43,14 @@ import { forkJoin } from 'rxjs';
           </ng-template>
           <div>
             <div class="text-lg">Welcome back,</div>
-            <div class="text-2xl font-semibold">{{ (doctorName ? 'Dr. ' + doctorName : 'Doctor') }}</div>
+            <div class="text-2xl font-semibold" *ngIf="doctorName; else loadingName">
+              {{ doctorName === 'Doctor' ? 'Doctor' : ('Dr. ' + doctorName) }}
+            </div>
+            <ng-template #loadingName>
+              <div class="text-2xl font-semibold inline-flex items-center gap-2 text-gray-300">
+                <i class="fa-solid fa-spinner animate-spin"></i>
+              </div>
+            </ng-template>
             <div class="text-gray-400" *ngIf="profile?.specialization"> {{ profile.specialization }}</div>
           </div>
         </div>
@@ -62,7 +69,12 @@ import { forkJoin } from 'rxjs';
             <li>Phone: {{ profile.contactInfo || '—' }}</li>
             <li>Active: {{ profile.isActive ? 'Yes' : 'No' }}</li>
           </ul>
-          <p class="text-sm text-gray-400" *ngIf="!profile">Loading profile…</p>
+          <div class="text-sm text-gray-400" *ngIf="!profile">
+            <span class="inline-flex items-center gap-2">
+              <i class="fa-solid fa-spinner animate-spin"></i>
+              <span>Loading profile…</span>
+            </span>
+          </div>
         </div>
 
         <div class="p-4 border rounded md:col-span-2">
@@ -71,18 +83,42 @@ import { forkJoin } from 'rxjs';
             <div class="panel p-4">
               <div class="text-sm text-gray-400">Today</div>
               <div class="text-2xl font-semibold">{{ (todayAppointments || []).length }}</div>
+              <div class="text-xs text-gray-500 mt-1" *ngIf="loadingUpcoming">
+                <span class="inline-flex items-center gap-1">
+                  <i class="fa-solid fa-spinner animate-spin"></i>
+                  <span>Loading today…</span>
+                </span>
+              </div>
             </div>
             <div class="panel p-4">
               <div class="text-sm text-gray-400">Upcoming</div>
               <div class="text-2xl font-semibold">{{ (upcomingAppointments || []).length }}</div>
+              <div class="text-xs text-gray-500 mt-1" *ngIf="loadingUpcoming">
+                <span class="inline-flex items-center gap-1">
+                  <i class="fa-solid fa-spinner animate-spin"></i>
+                  <span>Loading upcoming…</span>
+                </span>
+              </div>
             </div>
             <div class="panel p-4">
               <div class="text-sm text-gray-400">Confirmed</div>
               <div class="text-2xl font-semibold">{{ todayStats().CONFIRMED }}</div>
+              <div class="text-xs text-gray-500 mt-1" *ngIf="loadingUpcoming">
+                <span class="inline-flex items-center gap-1">
+                  <i class="fa-solid fa-spinner animate-spin"></i>
+                  <span>Loading…</span>
+                </span>
+              </div>
             </div>
             <div class="panel p-4">
               <div class="text-sm text-gray-400">Completed</div>
               <div class="text-2xl font-semibold">{{ todayStats().COMPLETED }}</div>
+              <div class="text-xs text-gray-500 mt-1" *ngIf="loadingUpcoming">
+                <span class="inline-flex items-center gap-1">
+                  <i class="fa-solid fa-spinner animate-spin"></i>
+                  <span>Loading…</span>
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -108,7 +144,12 @@ import { forkJoin } from 'rxjs';
         <div class="text-xs text-gray-400 mb-2" *ngIf="!loadingAppointments && todayAppointments.length > 0">
           Total: {{ todayAppointments.length }} • Scheduled: {{ todayStats().SCHEDULED }} • Confirmed: {{ todayStats().CONFIRMED }} • In Progress: {{ todayStats().IN_PROGRESS }} • Completed: {{ todayStats().COMPLETED }} • Cancelled: {{ todayStats().CANCELLED }}
         </div>
-        <div *ngIf="loadingAppointments" class="text-gray-400">Loading appointments…</div>
+        <div *ngIf="loadingAppointments" class="text-gray-400">
+          <span class="inline-flex items-center gap-2">
+            <i class="fa-solid fa-spinner animate-spin"></i>
+            <span>Loading appointments…</span>
+          </span>
+        </div>
         <div *ngIf="!loadingAppointments && todayAppointments.length === 0" class="text-gray-400">No appointments today.</div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="!loadingAppointments">

@@ -3,6 +3,16 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { PatientAppointmentItem } from './appointment.service';
 
+export interface PatientFeedbackItem {
+  id: number;
+  appointmentId: number;
+  doctorName?: string | null;
+  rating: number;
+  comment?: string | null;
+  anonymous?: boolean;
+  submittedAt?: string; // ISO date string
+}
+
 export interface CreateFeedbackRequest {
   appointmentId: number;
   doctorId?: number | null; // optional; derived on backend
@@ -24,5 +34,10 @@ export class FeedbackService {
 
   submitFeedback(payload: CreateFeedbackRequest) {
     return this.http.post(`${this.baseUrl}/api/feedback`, payload);
+  }
+
+  // Patient: fetch all previously submitted feedback
+  getGivenForPatient(patientId: number | string) {
+    return this.http.get<PatientFeedbackItem[]>(`${this.baseUrl}/api/feedback/patient/${patientId}`);
   }
 }

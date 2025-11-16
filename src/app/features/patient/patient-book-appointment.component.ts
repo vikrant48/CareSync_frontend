@@ -58,7 +58,13 @@ import { SpecializationAutocompleteComponent } from '../../shared/specialization
         />
       </div>
 
-      <div *ngIf="loadingDoctors" class="text-gray-400">Loading doctors...</div>
+      <!-- Loading State -->
+      <section *ngIf="loadingDoctors" class="mt-2">
+        <div class="flex items-center justify-center min-h-[180px] text-gray-500">
+          <i class="fa-solid fa-spinner fa-spin text-3xl mr-3"></i>
+          <span>Loading doctors...</span>
+        </div>
+      </section>
       <div *ngIf="!loadingDoctors && filteredDoctors().length === 0" class="text-gray-400">
         No doctors match your filters.
       </div>

@@ -26,6 +26,12 @@ import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="p-4 border rounded">
           <div class="text-sm text-gray-400">Overall (last 30d)</div>
+          <div class="text-xs text-gray-500 mt-1" *ngIf="loadingOverall">
+            <span class="inline-flex items-center gap-1">
+              <i class="fa-solid fa-spinner animate-spin"></i>
+              <span>Loading…</span>
+            </span>
+          </div>
           <div class="mt-2 text-sm">
             <div>Total Appointments: {{ overall?.totalAppointments ?? '�' }}</div>
             <div>Average Rating: {{ overall?.avgRating ?? '�' }}</div>
@@ -34,6 +40,12 @@ import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
         </div>
         <div class="p-4 border rounded">
           <div class="text-sm text-gray-400">Peak Hours</div>
+          <div class="text-xs text-gray-500 mt-1" *ngIf="loadingPeakHours">
+            <span class="inline-flex items-center gap-1">
+              <i class="fa-solid fa-spinner animate-spin"></i>
+              <span>Loading…</span>
+            </span>
+          </div>
           <div class="mt-2 text-sm">
             <div>Peak Hour: {{ peakHours?.peakHour ?? '�' }}</div>
             <div>Total Appointments: {{ peakHours?.totalAppointments ?? '�' }}</div>
@@ -48,6 +60,12 @@ import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
         </div>
         <div class="p-4 border rounded">
           <div class="text-sm text-gray-400">Patient Retention</div>
+          <div class="text-xs text-gray-500 mt-1" *ngIf="loadingRetention">
+            <span class="inline-flex items-center gap-1">
+              <i class="fa-solid fa-spinner animate-spin"></i>
+              <span>Loading…</span>
+            </span>
+          </div>
           <div class="mt-2 text-sm">
             <div>New: {{ retention?.newPatients ?? '�' }}</div>
             <div>Returning: {{ retention?.returningPatients ?? '�' }}</div>
@@ -58,7 +76,13 @@ import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 
        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
          <div class="p-4 border rounded">
-           <div class="text-sm text-gray-400">Day of Week</div>
+         <div class="text-sm text-gray-400">Day of Week</div>
+           <div class="text-xs text-gray-500 mt-1" *ngIf="loadingDayOfWeek">
+             <span class="inline-flex items-center gap-1">
+               <i class="fa-solid fa-spinner animate-spin"></i>
+               <span>Loading…</span>
+             </span>
+           </div>
            <div class="mt-2 text-sm">
              <div>Busiest Day: {{ dayOfWeek?.busiestDay ?? '�' }}</div>
            </div>
@@ -72,6 +96,12 @@ import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
          </div>
          <div class="p-4 border rounded">
            <div class="text-sm text-gray-400">Feedback Sentiment</div>
+           <div class="text-xs text-gray-500 mt-1" *ngIf="loadingFeedbackSentiment">
+             <span class="inline-flex items-center gap-1">
+               <i class="fa-solid fa-spinner animate-spin"></i>
+               <span>Loading…</span>
+             </span>
+           </div>
            <div class="mt-2 text-sm">
              <div>Positive: {{ feedbackSentiment?.positivePercentage ?? '�' }}%</div>
              <div>Neutral: {{ feedbackSentiment?.neutralPercentage ?? '�' }}%</div>
@@ -87,6 +117,12 @@ import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
          </div>
          <div class="p-4 border rounded">
            <div class="text-sm text-gray-400">Performance</div>
+           <div class="text-xs text-gray-500 mt-1" *ngIf="loadingPerformance">
+             <span class="inline-flex items-center gap-1">
+               <i class="fa-solid fa-spinner animate-spin"></i>
+               <span>Loading…</span>
+             </span>
+           </div>
            <div class="mt-2 text-sm">
              <div>Completed: {{ performance?.completedAppointments ?? '�' }}</div>
              <div>Cancellation Rate: {{ performance?.cancellationRate ?? '�' }}%</div>
@@ -99,6 +135,12 @@ import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
         <div class="p-4 border rounded">
           <div class="text-sm text-gray-400">Appointment Duration</div>
+          <div class="text-xs text-gray-500 mt-1" *ngIf="loadingAppointmentDuration">
+            <span class="inline-flex items-center gap-1">
+              <i class="fa-solid fa-spinner animate-spin"></i>
+              <span>Loading…</span>
+            </span>
+          </div>
           <div class="mt-2 text-sm">
             <div>Average Gap: {{ appointmentDuration?.averageGapMinutes ?? '�' }}m</div>
             <div>Min Gap: {{ appointmentDuration?.minGapMinutes ?? '�' }}m</div>
@@ -107,6 +149,12 @@ import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
         </div>
         <div class="p-4 border rounded">
           <div class="text-sm text-gray-400">Cancellation Patterns</div>
+          <div class="text-xs text-gray-500 mt-1" *ngIf="loadingCancellationPatterns">
+            <span class="inline-flex items-center gap-1">
+              <i class="fa-solid fa-spinner animate-spin"></i>
+              <span>Loading…</span>
+            </span>
+          </div>
           <div class="mt-2 text-sm">
             <div>Total: {{ cancellationPatterns?.totalCancellations ?? '�' }}</div>
             <div>Rate: {{ cancellationPatterns?.cancellationRate ?? '�' }}%</div>
@@ -115,6 +163,12 @@ import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
         </div>
         <div class="p-4 border rounded">
           <div class="text-sm text-gray-400">Patient Demographics</div>
+          <div class="text-xs text-gray-500 mt-1" *ngIf="loadingPatientDemographics">
+            <span class="inline-flex items-center gap-1">
+              <i class="fa-solid fa-spinner animate-spin"></i>
+              <span>Loading…</span>
+            </span>
+          </div>
           <div class="mt-2 text-sm">
             <div *ngFor="let kv of (patientDemographics?.ageDistribution | keyvalue)">{{ kv.key }}: {{ kv.value }}</div>
           </div>
@@ -131,6 +185,12 @@ import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
         <div class="p-4 border rounded">
           <div class="text-sm text-gray-400">Seasonal Trends ({{ seasonalTrends?.year || currentYear }})</div>
+          <div class="text-xs text-gray-500 mt-1" *ngIf="loadingSeasonalTrends">
+            <span class="inline-flex items-center gap-1">
+              <i class="fa-solid fa-spinner animate-spin"></i>
+              <span>Loading…</span>
+            </span>
+          </div>
           <div class="mt-2 text-sm">
             <div>Busiest Season: {{ seasonalTrends?.busiestSeason ?? '�' }}</div>
             <div *ngFor="let kv of (seasonalTrends?.monthlyDistribution | keyvalue)">{{ kv.key }}: {{ kv.value }}</div>
@@ -145,6 +205,12 @@ import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
         </div>
         <div class="p-4 border rounded">
           <div class="text-sm text-gray-400">Appointment Trends (30d)</div>
+          <div class="text-xs text-gray-500 mt-1" *ngIf="loadingAppointmentTrendsDaily">
+            <span class="inline-flex items-center gap-1">
+              <i class="fa-solid fa-spinner animate-spin"></i>
+              <span>Loading…</span>
+            </span>
+          </div>
           <div class="mt-2 text-sm">
             <div *ngFor="let kv of (appointmentTrendsDaily?.daily | keyvalue)">{{ kv.key }}: {{ kv.value }}</div>
           </div>
@@ -158,6 +224,12 @@ import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
         </div>
         <div class="p-4 border rounded">
           <div class="text-sm text-gray-400">Revenue</div>
+          <div class="text-xs text-gray-500 mt-1" *ngIf="loadingRevenueAnalysis">
+            <span class="inline-flex items-center gap-1">
+              <i class="fa-solid fa-spinner animate-spin"></i>
+              <span>Loading…</span>
+            </span>
+          </div>
           <div class="mt-2 text-sm">
             <div>Total: {{ revenueAnalysis?.totalRevenue ?? '�' }}</div>
             <div>Average per Appointment: {{ revenueAnalysis?.averageRevenue ?? '�' }}</div>
@@ -205,6 +277,20 @@ export class DoctorReportsComponent implements OnInit {
   dailyTrendLabels: string[] = [];
   dailyTrendData: number[] = [];
 
+  // Per-card loading flags
+  loadingOverall = true;
+  loadingPeakHours = true;
+  loadingDayOfWeek = true;
+  loadingRetention = true;
+  loadingFeedbackSentiment = true;
+  loadingPerformance = true;
+  loadingAppointmentDuration = true;
+  loadingCancellationPatterns = true;
+  loadingPatientDemographics = true;
+  loadingSeasonalTrends = true;
+  loadingAppointmentTrendsDaily = true;
+  loadingRevenueAnalysis = true;
+
   ngOnInit(): void {
     if (this.doctorId == null) {
       const idStr = this.auth.userId();
@@ -224,8 +310,24 @@ export class DoctorReportsComponent implements OnInit {
     const end = new Date().toISOString().slice(0, 10);
     const start = this.isoDaysAgo(30);
     this.analyticsRangeText = `${start}  ${end}`;
+    // Initialize all loading flags
+    this.loadingOverall = true;
+    this.loadingPeakHours = true;
+    this.loadingDayOfWeek = true;
+    this.loadingRetention = true;
+    this.loadingFeedbackSentiment = true;
+    this.loadingPerformance = true;
+    this.loadingAppointmentDuration = true;
+    this.loadingCancellationPatterns = true;
+    this.loadingPatientDemographics = true;
+    this.loadingSeasonalTrends = true;
+    this.loadingAppointmentTrendsDaily = true;
+    this.loadingRevenueAnalysis = true;
 
-    this.analyticsApi.getOverallAnalytics(start, end).subscribe({ next: (o) => { this.overall = o || null; this.cdr.markForCheck(); } });
+    this.analyticsApi.getOverallAnalytics(start, end).subscribe({
+      next: (o) => { this.overall = o || null; this.loadingOverall = false; this.cdr.markForCheck(); },
+      error: () => { this.overall = null; this.loadingOverall = false; this.cdr.markForCheck(); }
+    });
     this.analyticsApi.getPeakHours(this.doctorId, start, end).subscribe({
       next: (res) => {
         this.peakHours = res || null;
@@ -233,8 +335,10 @@ export class DoctorReportsComponent implements OnInit {
         const labels = Object.keys(dist).sort((a, b) => Number(a) - Number(b));
         this.peakHoursLabels = labels;
         this.peakHoursData = labels.map((k) => Number(dist[k] || 0));
+        this.loadingPeakHours = false;
         this.cdr.markForCheck();
       },
+      error: () => { this.peakHours = null; this.loadingPeakHours = false; this.cdr.markForCheck(); }
     });
     this.analyticsApi.getDayOfWeek(this.doctorId, start, end).subscribe({
       next: (res) => {
@@ -244,19 +348,29 @@ export class DoctorReportsComponent implements OnInit {
         const labels = order.filter((d) => (dist as any).hasOwnProperty(d));
         this.dayOfWeekLabels = labels;
         this.dayOfWeekData = labels.map((k) => Number(dist[k] || 0));
+        this.loadingDayOfWeek = false;
         this.cdr.markForCheck();
       },
+      error: () => { this.dayOfWeek = null; this.loadingDayOfWeek = false; this.cdr.markForCheck(); }
     });
-    this.analyticsApi.getPatientRetention(this.doctorId).subscribe({ next: (res) => { this.retention = res || null; this.cdr.markForCheck(); } });
+    this.analyticsApi.getPatientRetention(this.doctorId).subscribe({
+      next: (res) => { this.retention = res || null; this.loadingRetention = false; this.cdr.markForCheck(); },
+      error: () => { this.retention = null; this.loadingRetention = false; this.cdr.markForCheck(); }
+    });
     this.analyticsApi.getFeedbackSentiment(this.doctorId).subscribe({
       next: (res) => {
         this.feedbackSentiment = res || null;
         const s: any = this.feedbackSentiment || {};
         this.feedbackData = [Number(s.positivePercentage || 0), Number(s.neutralPercentage || 0), Number(s.negativePercentage || 0)];
+        this.loadingFeedbackSentiment = false;
         this.cdr.markForCheck();
       },
+      error: () => { this.feedbackSentiment = null; this.loadingFeedbackSentiment = false; this.cdr.markForCheck(); }
     });
-    this.analyticsApi.getAppointmentDuration(this.doctorId, start, end).subscribe({ next: (res) => { this.appointmentDuration = res || null; this.cdr.markForCheck(); } });
+    this.analyticsApi.getAppointmentDuration(this.doctorId, start, end).subscribe({
+      next: (res) => { this.appointmentDuration = res || null; this.loadingAppointmentDuration = false; this.cdr.markForCheck(); },
+      error: () => { this.appointmentDuration = null; this.loadingAppointmentDuration = false; this.cdr.markForCheck(); }
+    });
     this.analyticsApi.getSeasonalTrends(this.doctorId, new Date().getFullYear()).subscribe({
       next: (res) => {
         this.seasonalTrends = res || null;
@@ -265,10 +379,15 @@ export class DoctorReportsComponent implements OnInit {
         const labels = order.filter((m) => (dist as any).hasOwnProperty(m));
         this.seasonalLabels = labels;
         this.seasonalData = labels.map((k) => Number(dist[k] || 0));
+        this.loadingSeasonalTrends = false;
         this.cdr.markForCheck();
       },
+      error: () => { this.seasonalTrends = null; this.loadingSeasonalTrends = false; this.cdr.markForCheck(); }
     });
-    this.analyticsApi.getCancellationPatterns(this.doctorId, start, end).subscribe({ next: (res) => { this.cancellationPatterns = res || null; this.cdr.markForCheck(); } });
+    this.analyticsApi.getCancellationPatterns(this.doctorId, start, end).subscribe({
+      next: (res) => { this.cancellationPatterns = res || null; this.loadingCancellationPatterns = false; this.cdr.markForCheck(); },
+      error: () => { this.cancellationPatterns = null; this.loadingCancellationPatterns = false; this.cdr.markForCheck(); }
+    });
     this.analyticsApi.getPatientDemographicsByDoctor(this.doctorId).subscribe({
       next: (res) => {
         this.patientDemographics = res || null;
@@ -276,10 +395,15 @@ export class DoctorReportsComponent implements OnInit {
         const labels = Object.keys(dist);
         this.demographicsLabels = labels;
         this.demographicsData = labels.map((k) => Number(dist[k] || 0));
+        this.loadingPatientDemographics = false;
         this.cdr.markForCheck();
       },
+      error: () => { this.patientDemographics = null; this.loadingPatientDemographics = false; this.cdr.markForCheck(); }
     });
-    this.reportsApi.getDoctorPerformance(this.doctorId, start, end).subscribe({ next: (res) => { this.performance = res || null; this.cdr.markForCheck(); } });
+    this.reportsApi.getDoctorPerformance(this.doctorId, start, end).subscribe({
+      next: (res) => { this.performance = res || null; this.loadingPerformance = false; this.cdr.markForCheck(); },
+      error: () => { this.performance = null; this.loadingPerformance = false; this.cdr.markForCheck(); }
+    });
     this.reportsApi.getAppointmentTrends('daily', start, end).subscribe({
       next: (res) => {
         this.appointmentTrendsDaily = res || null;
@@ -287,9 +411,14 @@ export class DoctorReportsComponent implements OnInit {
         const labels = Object.keys(dist).sort((a, b) => a.localeCompare(b));
         this.dailyTrendLabels = labels;
         this.dailyTrendData = labels.map((k) => Number(dist[k] || 0));
+        this.loadingAppointmentTrendsDaily = false;
         this.cdr.markForCheck();
       },
+      error: () => { this.appointmentTrendsDaily = null; this.loadingAppointmentTrendsDaily = false; this.cdr.markForCheck(); }
     });
-    this.reportsApi.getRevenueAnalysis(start, end).subscribe({ next: (res) => { this.revenueAnalysis = res || null; this.cdr.markForCheck(); } });
+    this.reportsApi.getRevenueAnalysis(start, end).subscribe({
+      next: (res) => { this.revenueAnalysis = res || null; this.loadingRevenueAnalysis = false; this.cdr.markForCheck(); },
+      error: () => { this.revenueAnalysis = null; this.loadingRevenueAnalysis = false; this.cdr.markForCheck(); }
+    });
   }
 }

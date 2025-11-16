@@ -47,11 +47,40 @@ export class DoctorProfileComponent implements OnInit {
   educations: any[] = [];
   newEducation: CreateEducationRequest = { degree: '', institution: '', yearOfCompletion: new Date().getFullYear(), details: '' };
   editingEducationId: number | null = null;
+  // Dropdown options and custom entries for Education
+  degreeOptions: string[] = [
+    'MBBS', 'MD', 'MS', 'DM', 'MCh', 'DNB', 'BDS', 'MDS',
+    'BAMS', 'BHMS', 'BUMS', 'BNYS', 'BPT', 'MPT', 'PG Diploma',
+    'PhD (Medical)', 'MPH', 'MSc (Nursing)', 'Diploma in Clinical Medicine'
+  ];
+  institutionOptions: string[] = [
+    'AIIMS New Delhi', 'PGIMER Chandigarh', 'CMC Vellore', 'JIPMER Puducherry',
+    'KGMU Lucknow', 'IMS-BHU Varanasi', 'NIMHANS Bengaluru', 'AFMC Pune',
+    'MAMC New Delhi', 'Grant Medical College Mumbai', 'SMS Jaipur',
+    'Kasturba Medical College Manipal', 'GMC Chennai', 'GMCH Chandigarh',
+    'Seth GS Medical College Mumbai'
+  ];
+  customDegree: string = '';
+  customInstitution: string = '';
 
   // Experience
   experiences: any[] = [];
   newExperience: CreateExperienceRequest = { hospitalName: '', position: '', yearsOfService: 1, details: '' };
   editingExperienceId: number | null = null;
+  // Dropdown options and custom entries for Experience
+  hospitalOptions: string[] = [
+    'AIIMS New Delhi', 'PGIMER Chandigarh', 'CMC Vellore', 'JIPMER Puducherry',
+    'NIMHANS Bengaluru', 'KGMU Lucknow', 'IMS-BHU Varanasi', 'AFMC Pune',
+    'Apollo Hospitals', 'Fortis Healthcare', 'Max Healthcare', 'Manipal Hospitals',
+    'Tata Memorial Hospital', 'Sankara Nethralaya', 'Sir Ganga Ram Hospital'
+  ];
+  positionOptions: string[] = [
+    'Resident Doctor', 'Senior Resident', 'Consultant', 'Senior Consultant',
+    'Attending Physician', 'Registrar', 'Medical Officer', 'Surgeon',
+    'Professor', 'Assistant Professor', 'Associate Professor'
+  ];
+  customHospital: string = '';
+  customPosition: string = '';
 
   // Certificates
   certificates: any[] = [];
@@ -233,6 +262,15 @@ export class DoctorProfileComponent implements OnInit {
   // Education CRUD
   addEducation() {
     if (!this.username) return;
+    // Prevent saving sentinel values if user chose to add new but didn't confirm
+    if (this.newEducation.degree === '__other__') {
+      this.toast.showError('Please add a custom degree before saving');
+      return;
+    }
+    if (this.newEducation.institution === '__other__') {
+      this.toast.showError('Please add a custom institution before saving');
+      return;
+    }
     this.svc.addEducation(this.username, this.newEducation).subscribe({
       next: (e) => {
         this.educations.push(e);
@@ -253,6 +291,13 @@ export class DoctorProfileComponent implements OnInit {
       yearOfCompletion: item?.yearOfCompletion || new Date().getFullYear(),
       details: item?.details || '',
     };
+    // Ensure existing values appear in dropdowns
+    if (item?.degree && !this.degreeOptions.includes(item.degree)) {
+      this.degreeOptions.push(item.degree);
+    }
+    if (item?.institution && !this.institutionOptions.includes(item.institution)) {
+      this.institutionOptions.push(item.institution);
+    }
   }
 
   cancelEditEducation() {
@@ -269,6 +314,14 @@ export class DoctorProfileComponent implements OnInit {
       return;
     }
     // Update existing
+    if (this.newEducation.degree === '__other__') {
+      this.toast.showError('Please add a custom degree before updating');
+      return;
+    }
+    if (this.newEducation.institution === '__other__') {
+      this.toast.showError('Please add a custom institution before updating');
+      return;
+    }
     const id = this.editingEducationId;
     this.svc.updateEducation(this.username, id!, {
       degree: this.newEducation.degree,
@@ -287,6 +340,33 @@ export class DoctorProfileComponent implements OnInit {
     });
   }
 
+  // Helpers for adding custom Degree/Institution
+  addCustomDegree() {
+    const val = (this.customDegree || '').trim();
+    if (!val) {
+      this.toast.showError('Enter a degree name to add');
+      return;
+    }
+    if (!this.degreeOptions.includes(val)) {
+      this.degreeOptions.push(val);
+    }
+    this.newEducation.degree = val;
+    this.customDegree = '';
+  }
+
+  addCustomInstitution() {
+    const val = (this.customInstitution || '').trim();
+    if (!val) {
+      this.toast.showError('Enter an institution name to add');
+      return;
+    }
+    if (!this.institutionOptions.includes(val)) {
+      this.institutionOptions.push(val);
+    }
+    this.newEducation.institution = val;
+    this.customInstitution = '';
+  }
+
   deleteEducation(item: any) {
     if (!this.username) return;
     this.svc.deleteEducation(this.username, item.id).subscribe({
@@ -297,6 +377,15 @@ export class DoctorProfileComponent implements OnInit {
   // Experience CRUD
   addExperience() {
     if (!this.username) return;
+    // Prevent saving sentinel values if user chose to add new but didn't confirm
+    if (this.newExperience.hospitalName === '__other__') {
+      this.toast.showError('Please add a custom hospital before saving');
+      return;
+    }
+    if (this.newExperience.position === '__other__') {
+      this.toast.showError('Please add a custom position before saving');
+      return;
+    }
     this.svc.addExperience(this.username, this.newExperience).subscribe({
       next: (e) => {
         this.experiences.push(e);
@@ -317,6 +406,13 @@ export class DoctorProfileComponent implements OnInit {
       yearsOfService: item?.yearsOfService || 1,
       details: item?.details || '',
     };
+    // Ensure existing values appear in dropdowns
+    if (item?.hospitalName && !this.hospitalOptions.includes(item.hospitalName)) {
+      this.hospitalOptions.push(item.hospitalName);
+    }
+    if (item?.position && !this.positionOptions.includes(item.position)) {
+      this.positionOptions.push(item.position);
+    }
   }
 
   cancelEditExperience() {
@@ -329,6 +425,15 @@ export class DoctorProfileComponent implements OnInit {
     if (!this.username) return;
     if (this.editingExperienceId == null) {
       this.addExperience();
+      return;
+    }
+    // Validate sentinel values in update
+    if (this.newExperience.hospitalName === '__other__') {
+      this.toast.showError('Please add a custom hospital before updating');
+      return;
+    }
+    if (this.newExperience.position === '__other__') {
+      this.toast.showError('Please add a custom position before updating');
       return;
     }
     const id = this.editingExperienceId;
@@ -347,6 +452,33 @@ export class DoctorProfileComponent implements OnInit {
       },
       error: (err) => this.toast.showError(err?.error?.message || 'Failed to update experience'),
     });
+  }
+
+  // Helpers for adding custom Hospital/Position
+  addCustomHospital() {
+    const val = (this.customHospital || '').trim();
+    if (!val) {
+      this.toast.showError('Enter a hospital name to add');
+      return;
+    }
+    if (!this.hospitalOptions.includes(val)) {
+      this.hospitalOptions.push(val);
+    }
+    this.newExperience.hospitalName = val;
+    this.customHospital = '';
+  }
+
+  addCustomPosition() {
+    const val = (this.customPosition || '').trim();
+    if (!val) {
+      this.toast.showError('Enter a position to add');
+      return;
+    }
+    if (!this.positionOptions.includes(val)) {
+      this.positionOptions.push(val);
+    }
+    this.newExperience.position = val;
+    this.customPosition = '';
   }
 
   deleteExperience(item: any) {

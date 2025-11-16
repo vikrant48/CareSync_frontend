@@ -1,21 +1,23 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { ToastService } from '../../core/services/toast.service';
+import { ToastContainerComponent } from '../../shared/toast-container.component';
 
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, ToastContainerComponent],
   template: `
     <div class="min-h-screen bg-gray-950 text-gray-100 p-6">
       <div class="panel max-w-xl w-full mx-auto p-6 space-y-6 max-h-[85vh] overflow-y-auto">
         <h2 class="text-2xl font-semibold">Reset Password</h2>
 
         <!-- Request OTP -->
-        <section class="space-y-3">
+        <section class="space-y-3" *ngIf="!verified">
           <h3 class="text-lg font-semibold">Request OTP</h3>
           <p class="text-sm text-gray-400">Enter your email to receive a 6-digit OTP.</p>
           <div class="space-y-2">
@@ -24,15 +26,13 @@ import { environment } from '../../../environments/environment';
           </div>
           <div class="flex items-center gap-3">
             <button class="btn-primary" (click)="requestOtp()" [disabled]="forgotLoading">{{ forgotLoading ? 'Sending…' : 'Send OTP' }}</button>
-            <span *ngIf="forgotSuccess" class="text-green-500 text-sm">{{ forgotSuccess }}</span>
-            <span *ngIf="forgotError" class="text-red-500 text-sm">{{ forgotError }}</span>
           </div>
         </section>
 
         <hr class="border-gray-800" />
 
         <!-- Verify OTP -->
-        <section class="space-y-3" *ngIf="otpStage !== 'hidden'">
+        <section class="space-y-3" *ngIf="!verified && otpStage !== 'hidden'">
           <h3 class="text-lg font-semibold">Verify OTP</h3>
           <p class="text-sm text-gray-400">Enter the 6-digit OTP sent to your email.</p>
           <div class="space-y-2">
@@ -41,8 +41,9 @@ import { environment } from '../../../environments/environment';
           </div>
           <div class="flex items-center gap-3">
             <button class="btn-primary" (click)="verifyOtp()" [disabled]="verifyLoading || !forgotEmail">{{ verifyLoading ? 'Verifying…' : 'Verify OTP' }}</button>
-            <span *ngIf="verifySuccess" class="text-green-500 text-sm">{{ verifySuccess }}</span>
-            <span *ngIf="verifyError" class="text-red-500 text-sm">{{ verifyError }}</span>
+            <button class="btn-secondary" (click)="resendOtp()" [disabled]="resendCooldown > 0 || forgotLoading">
+              {{ resendCooldown > 0 ? ('Resend in ' + resendCooldown + 's') : 'Resend OTP' }}
+            </button>
           </div>
         </section>
 
@@ -54,24 +55,36 @@ import { environment } from '../../../environments/environment';
           <p class="text-sm text-gray-400">Your OTP is verified. Set a new password.</p>
           <div class="space-y-2">
             <label class="block text-sm">New Password</label>
-            <input type="password" class="input w-full" [(ngModel)]="resetForm.newPassword" />
+            <div class="relative">
+              <input [type]="showNewPassword ? 'text' : 'password'" class="input w-full pr-10" [(ngModel)]="resetForm.newPassword" />
+              <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                      (click)="showNewPassword = !showNewPassword" [attr.aria-label]="showNewPassword ? 'Hide password' : 'Show password'">
+                <i class="fa-solid" [ngClass]="showNewPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+              </button>
+            </div>
           </div>
           <div class="space-y-2">
             <label class="block text-sm">Confirm Password</label>
-            <input type="password" class="input w-full" [(ngModel)]="resetForm.confirmPassword" />
+            <div class="relative">
+              <input [type]="showConfirmPassword ? 'text' : 'password'" class="input w-full pr-10" [(ngModel)]="resetForm.confirmPassword" />
+              <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                      (click)="showConfirmPassword = !showConfirmPassword" [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'">
+                <i class="fa-solid" [ngClass]="showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+              </button>
+            </div>
           </div>
           <div class="flex items-center gap-3">
             <button class="btn-primary" (click)="resetWithOtp()" [disabled]="resetLoading">{{ resetLoading ? 'Resetting…' : 'Reset Password' }}</button>
-            <span *ngIf="resetSuccess" class="text-green-500 text-sm">{{ resetSuccess }}</span>
-            <span *ngIf="resetError" class="text-red-500 text-sm">{{ resetError }}</span>
           </div>
           <p class="text-sm text-gray-400">Remembered your password? <a routerLink="/login" class="text-emerald-400">Back to Login</a></p>
         </section>
       </div>
+      <!-- Global toast container for auth pages -->
+      <app-toast-container></app-toast-container>
     </div>
   `,
 })
-export class ResetPasswordComponent {
+export class ResetPasswordComponent implements OnDestroy {
   private baseUrl = environment.apiBaseUrl;
 
   // Forgot password state
@@ -88,18 +101,24 @@ export class ResetPasswordComponent {
   verifySuccess: string | null = null;
   verified = false;
 
+  // Resend cooldown
+  resendCooldown = 0;
+  private resendTimer: any = null;
+
   resetForm = { newPassword: '', confirmPassword: '' };
   resetLoading = false;
   resetError: string | null = null;
   resetSuccess: string | null = null;
 
-  constructor(private http: HttpClient) {}
+  // UI toggles for password visibility
+  showNewPassword = false;
+  showConfirmPassword = false;
+
+  constructor(private http: HttpClient, private toast: ToastService) {}
 
   requestOtp() {
-    this.forgotError = null;
-    this.forgotSuccess = null;
     if (!this.forgotEmail) {
-      this.forgotError = 'Email is required';
+      this.toast.showError('Email is required');
       return;
     }
     this.forgotLoading = true;
@@ -107,26 +126,27 @@ export class ResetPasswordComponent {
       .post(`${this.baseUrl}/api/auth/forgot-password-otp`, { email: this.forgotEmail })
       .subscribe({
         next: (resp: any) => {
-          this.forgotSuccess = resp?.message || 'OTP sent to your email';
+          const msg = resp?.message || 'OTP sent to your email';
+          this.toast.showSuccess(msg);
           this.otpStage = 'visible';
           this.forgotLoading = false;
+          this.startResendCooldown(60);
         },
         error: (err) => {
-          this.forgotError = err?.error?.error || 'Failed to request reset';
+          const msg = err?.error?.error || 'Failed to request reset';
+          this.toast.showError(msg);
           this.forgotLoading = false;
         },
       });
   }
 
   verifyOtp() {
-    this.verifyError = null;
-    this.verifySuccess = null;
     if (!this.forgotEmail) {
-      this.verifyError = 'Email is required';
+      this.toast.showError('Email is required');
       return;
     }
     if (!this.otp || this.otp.length !== 6) {
-      this.verifyError = 'Enter the 6-digit OTP';
+      this.toast.showError('Enter the 6-digit OTP');
       return;
     }
     this.verifyLoading = true;
@@ -134,31 +154,53 @@ export class ResetPasswordComponent {
       .post(`${this.baseUrl}/api/auth/verify-otp`, { email: this.forgotEmail, otp: this.otp })
       .subscribe({
         next: (resp: any) => {
-          this.verifySuccess = resp?.message || 'OTP verified';
+          const msg = resp?.message || 'OTP verified';
+          this.toast.showSuccess(msg);
           this.verified = true;
+          this.otpStage = 'hidden';
           this.verifyLoading = false;
         },
         error: (err) => {
-          this.verifyError = err?.error?.error || 'Invalid or expired OTP';
+          const msg = err?.error?.error || 'Invalid or expired OTP';
+          this.toast.showError(msg);
           this.verifyLoading = false;
         },
       });
   }
 
+  resendOtp() {
+    if (this.resendCooldown > 0 || this.forgotLoading) return;
+    this.requestOtp();
+  }
+
+  private startResendCooldown(seconds: number) {
+    this.clearResendCooldown();
+    this.resendCooldown = seconds;
+    this.resendTimer = setInterval(() => {
+      this.resendCooldown = Math.max(0, this.resendCooldown - 1);
+      if (this.resendCooldown === 0) this.clearResendCooldown();
+    }, 1000);
+  }
+
+  private clearResendCooldown() {
+    if (this.resendTimer) {
+      clearInterval(this.resendTimer);
+      this.resendTimer = null;
+    }
+  }
+
   resetWithOtp() {
-    this.resetError = null;
-    this.resetSuccess = null;
     const { newPassword, confirmPassword } = this.resetForm;
     if (!this.verified) {
-      this.resetError = 'Please verify OTP first';
+      this.toast.showError('Please verify OTP first');
       return;
     }
     if (!newPassword || newPassword.length < 6) {
-      this.resetError = 'New password must be at least 6 characters';
+      this.toast.showError('New password must be at least 6 characters');
       return;
     }
     if (newPassword !== confirmPassword) {
-      this.resetError = 'Passwords do not match';
+      this.toast.showError('Passwords do not match');
       return;
     }
     this.resetLoading = true;
@@ -171,13 +213,19 @@ export class ResetPasswordComponent {
       })
       .subscribe({
         next: (resp: any) => {
-          this.resetSuccess = resp?.message || 'Password reset successfully';
+          const msg = resp?.message || 'Password reset successfully';
+          this.toast.showSuccess(msg);
           this.resetLoading = false;
         },
         error: (err) => {
-          this.resetError = err?.error?.error || 'Failed to reset password';
+          const msg = err?.error?.error || 'Failed to reset password';
+          this.toast.showError(msg);
           this.resetLoading = false;
         },
       });
+  }
+
+  ngOnDestroy() {
+    this.clearResendCooldown();
   }
 }

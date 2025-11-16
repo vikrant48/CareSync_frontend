@@ -18,7 +18,7 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
           <h2 class="text-xl font-semibold">Insights / Reports</h2>
         </div>
         <!-- My Analytics -->
-        <section class="mt-2">
+        <section class="mt-2" *ngIf="!loadingReports; else loadingTpl">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- <div class="panel p-4">
               <div class="text-sm text-gray-400">Overview</div>
@@ -50,6 +50,14 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
             ></app-chart-widget>
           </div>
         </section>
+        <ng-template #loadingTpl>
+          <section class="mt-2">
+            <div class="flex items-center justify-center min-h-[180px] text-gray-500">
+              <i class="fa-solid fa-spinner fa-spin text-3xl mr-3"></i>
+              <span>Loading Reports...</span>
+            </div>
+          </section>
+        </ng-template>
       </div>
     </app-patient-layout>
   `,
@@ -76,12 +84,21 @@ export class PatientReportsComponent implements OnInit {
   doctors: Doctor[] = [];
   doctorNameById: Record<number, string> = {};
 
+  // Loading state for the whole reports page
+  loadingReports = true;
+  private pendingLoads = 0;
+
   ngOnInit(): void {
     if (this.patientId == null) {
       const idStr = this.auth.userId();
       this.patientId = idStr ? Number(idStr) : null;
     }
-    this.loadPatientAnalytics();
+    // Determine how many async loads we will wait for
+    this.pendingLoads = this.patientId == null ? 1 : 2;
+    this.loadingReports = true;
+    if (this.patientId != null) {
+      this.loadPatientAnalytics();
+    }
     this.loadDoctors();
   }
 
@@ -104,10 +121,12 @@ export class PatientReportsComponent implements OnInit {
         this.overviewLabels = ['Total Appointments', 'Avg Visits/Month'];
         this.overviewData = [total, avgPerMonth];
         this.cdr.markForCheck();
+        this.completeLoad();
       },
       error: () => {
         this.patientAnalytics = null;
         this.cdr.markForCheck();
+        this.completeLoad();
       },
     });
   }
@@ -123,6 +142,12 @@ export class PatientReportsComponent implements OnInit {
         // Recompute chart labels now that we have names
         this.updateDoctorVisitsChart();
         this.cdr.markForCheck();
+        this.completeLoad();
+      },
+      error: () => {
+        // Still complete the loading state even if doctors fail to load
+        this.cdr.markForCheck();
+        this.completeLoad();
       },
     });
   }
@@ -141,5 +166,13 @@ export class PatientReportsComponent implements OnInit {
     const base = (d.name || `${d.firstName || ''} ${d.lastName || ''}`).trim();
     const hasPrefix = /^dr\.?\s/i.test(base);
     return hasPrefix ? base : `Dr ${base}`;
+  }
+
+  private completeLoad() {
+    this.pendingLoads = Math.max(this.pendingLoads - 1, 0);
+    if (this.pendingLoads === 0) {
+      this.loadingReports = false;
+      this.cdr.markForCheck();
+    }
   }
 }

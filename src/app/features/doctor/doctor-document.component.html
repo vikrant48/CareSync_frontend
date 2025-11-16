@@ -94,6 +94,11 @@
     <!-- Duplicate list removed; cards are rendered above within the filters container -->
   </section>
 
-  <div *ngIf="loading()" class="p-6 text-center text-gray-400">Loading documents…</div>
+  <div *ngIf="loading()" class="p-6 text-center text-gray-400">
+    <span class="inline-flex items-center gap-2">
+      <i class="fa-solid fa-spinner animate-spin"></i>
+      <span>Loading documents…</span>
+    </span>
+  </div>
   <div *ngIf="error()" class="p-6 text-center text-red-500">{{ error() }}</div>
 </app-doctor-layout>

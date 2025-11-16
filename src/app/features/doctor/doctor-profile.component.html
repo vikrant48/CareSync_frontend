@@ -181,12 +181,28 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <label class="block">
               <span class="text-sm">Degree</span>
-              <input class="input" [(ngModel)]="newEducation.degree" />
+              <select class="input" [(ngModel)]="newEducation.degree">
+                <option [ngValue]="''">Select degree</option>
+                <option *ngFor="let d of degreeOptions" [value]="d">{{ d }}</option>
+                <option value="__other__">Add new degree…</option>
+              </select>
             </label>
+            <div *ngIf="newEducation.degree==='__other__'" class="mt-1 flex items-center gap-2 md:col-span-1">
+              <input class="input flex-1" [(ngModel)]="customDegree" placeholder="Enter new degree" />
+              <button class="btn-secondary" (click)="addCustomDegree()">Add</button>
+            </div>
             <label class="block">
               <span class="text-sm">Institution</span>
-              <input class="input" [(ngModel)]="newEducation.institution" />
+              <select class="input" [(ngModel)]="newEducation.institution">
+                <option [ngValue]="''">Select institution</option>
+                <option *ngFor="let i of institutionOptions" [value]="i">{{ i }}</option>
+                <option value="__other__">Add new institution…</option>
+              </select>
             </label>
+            <div *ngIf="newEducation.institution==='__other__'" class="mt-1 flex items-center gap-2 md:col-span-1">
+              <input class="input flex-1" [(ngModel)]="customInstitution" placeholder="Enter new institution" />
+              <button class="btn-secondary" (click)="addCustomInstitution()">Add</button>
+            </div>
             <label class="block">
               <span class="text-sm">Year</span>
               <input type="number" class="input" [(ngModel)]="newEducation.yearOfCompletion" />
@@ -243,12 +259,28 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <label class="block">
               <span class="text-sm">Hospital</span>
-              <input class="input" [(ngModel)]="newExperience.hospitalName" />
+              <select class="input" [(ngModel)]="newExperience.hospitalName">
+                <option [ngValue]="''">Select hospital</option>
+                <option *ngFor="let h of hospitalOptions" [value]="h">{{ h }}</option>
+                <option value="__other__">Add new hospital…</option>
+              </select>
             </label>
+            <div *ngIf="newExperience.hospitalName==='__other__'" class="mt-1 flex items-center gap-2 md:col-span-1">
+              <input class="input flex-1" [(ngModel)]="customHospital" placeholder="Enter new hospital" />
+              <button class="btn-secondary" (click)="addCustomHospital()">Add</button>
+            </div>
             <label class="block">
               <span class="text-sm">Position</span>
-              <input class="input" [(ngModel)]="newExperience.position" />
+              <select class="input" [(ngModel)]="newExperience.position">
+                <option [ngValue]="''">Select position</option>
+                <option *ngFor="let p of positionOptions" [value]="p">{{ p }}</option>
+                <option value="__other__">Add new position…</option>
+              </select>
             </label>
+            <div *ngIf="newExperience.position==='__other__'" class="mt-1 flex items-center gap-2 md:col-span-1">
+              <input class="input flex-1" [(ngModel)]="customPosition" placeholder="Enter new position" />
+              <button class="btn-secondary" (click)="addCustomPosition()">Add</button>
+            </div>
             <label class="block">
               <span class="text-sm">Years</span>
               <input type="number" class="input" [(ngModel)]="newExperience.yearsOfService" />

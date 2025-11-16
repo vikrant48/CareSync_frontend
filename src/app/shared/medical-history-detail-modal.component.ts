@@ -37,7 +37,12 @@ import { MedicalHistoryItem } from '../core/services/patient-profile.service';
           </div>
         </div>
         <ng-template #loading>
-          <div class="p-4 text-gray-400">Loading…</div>
+          <div class="p-4">
+            <div class="flex items-center gap-2 text-gray-400">
+              <span class="animate-spin h-5 w-5 border-2 border-current border-t-transparent rounded-full"></span>
+              Loading…
+            </div>
+          </div>
         </ng-template>
       </div>
     </div>

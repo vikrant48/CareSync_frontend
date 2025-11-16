@@ -55,8 +55,13 @@ import { PatientLayoutComponent } from '../../shared/patient-layout.component';
         </div>
       </div>
 
-      <!-- List -->
-      <div *ngIf="loading" class="text-gray-400">Loading appointments...</div>
+      <!-- Loading State -->
+      <section *ngIf="loading" class="mt-2">
+        <div class="flex items-center justify-center min-h-[180px] text-gray-500">
+          <i class="fa-solid fa-spinner fa-spin text-3xl mr-3"></i>
+          <span>Loading appointments...</span>
+        </div>
+      </section>
       <div *ngIf="!loading && filtered().length === 0" class="text-gray-400">No appointments match your filters.</div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="!loading">
         <patient-appointment-card

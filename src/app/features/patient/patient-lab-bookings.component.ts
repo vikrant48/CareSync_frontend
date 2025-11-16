@@ -34,9 +34,12 @@ import { ToastService } from '../../core/services/toast.service';
         </div>
 
         <!-- Loading State -->
-        <div *ngIf="isLoading()" class="flex justify-center items-center py-12">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400"></div>
-        </div>
+        <section *ngIf="isLoading()" class="mt-2">
+          <div class="flex items-center justify-center min-h-[180px] text-gray-500">
+            <i class="fa-solid fa-spinner fa-spin text-3xl mr-3"></i>
+            <span>Loading…</span>
+          </div>
+        </section>
 
         <!-- Error State -->
         <div *ngIf="errorMessage()" class="bg-red-900/50 border border-red-700 rounded-lg p-4 mb-6">
