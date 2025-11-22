@@ -28,6 +28,21 @@ export class AuthService {
     return this.http.post<AuthenticationResponse>(`${this.baseUrl}/api/auth/register`, payload);
   }
 
+  // Email verification APIs
+  startEmailVerification(payload: { name: string; email: string; mobileNumber?: string }) {
+    return this.http.post<{ message?: string }>(`${this.baseUrl}/api/auth/email-verification/start`, payload);
+  }
+
+  verifyEmailOtp(payload: { email: string; otp: string }) {
+    return this.http.post<{ verified: boolean; message?: string }>(`${this.baseUrl}/api/auth/email-verification/verify`, payload);
+  }
+
+  getEmailVerificationStatus(email: string) {
+    return this.http.get<{ verified: boolean }>(`${this.baseUrl}/api/auth/email-verification/status`, {
+      params: { email },
+    });
+  }
+
   login(payload: LoginRequest) {
     return this.http.post<AuthenticationResponse>(`${this.baseUrl}/api/auth/login`, payload);
   }

@@ -5,11 +5,13 @@ import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angula
 import { AuthService } from '../../core/services/auth.service';
 import { RegisterRequest } from '../../core/models/auth.models';
 import { SpecializationAutocompleteComponent } from '../../shared/specialization-autocomplete.component';
+import { ToastService } from '../../core/services/toast.service';
+import { ToastContainerComponent } from '../../shared/toast-container.component';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, SpecializationAutocompleteComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, SpecializationAutocompleteComponent, ToastContainerComponent],
   template: `
     <div class="min-h-screen bg-gray-950 text-gray-100 p-6">
       <div class="panel max-w-3xl w-full mx-auto p-6 space-y-6 max-h-[85vh] overflow-y-auto">
@@ -28,14 +30,21 @@ import { SpecializationAutocompleteComponent } from '../../shared/specialization
           <div class="flex items-center gap-2">
             <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm"
                  [ngClass]="currentStep >= 2 ? 'bg-emerald-500 text-white ring-2 ring-emerald-400' : 'bg-gray-700 text-gray-300'">2</div>
-            <div class="text-sm" [class.text-emerald-400]="currentStep === 2">Role Selection</div>
+            <div class="text-sm" [class.text-emerald-400]="currentStep === 2">Email Verification</div>
           </div>
           <div class="flex-1 h-px bg-gray-700"></div>
           <!-- Step 3 -->
           <div class="flex items-center gap-2">
             <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm"
                  [ngClass]="currentStep >= 3 ? 'bg-emerald-500 text-white ring-2 ring-emerald-400' : 'bg-gray-700 text-gray-300'">3</div>
-            <div class="text-sm" [class.text-emerald-400]="currentStep === 3">Additional Details</div>
+            <div class="text-sm" [class.text-emerald-400]="currentStep === 3">Role Selection</div>
+          </div>
+          <div class="flex-1 h-px bg-gray-700"></div>
+          <!-- Step 4 -->
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm"
+                 [ngClass]="currentStep >= 4 ? 'bg-emerald-500 text-white ring-2 ring-emerald-400' : 'bg-gray-700 text-gray-300'">4</div>
+            <div class="text-sm" [class.text-emerald-400]="currentStep === 4">Additional Details</div>
           </div>
         </div>
 
@@ -155,8 +164,46 @@ import { SpecializationAutocompleteComponent } from '../../shared/specialization
           </div>
         </section>
 
-        <!-- Stage 2: Role Selection -->
-        <section *ngIf="currentStep === 2" [formGroup]="roleForm" class="space-y-4">
+        <!-- Stage 2: Email Verification -->
+        <section *ngIf="currentStep === 2" [formGroup]="verificationForm" class="space-y-4">
+          <div class="space-y-4">
+            <div>
+              <label class="block mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-envelope text-gray-400"></i>
+                <span>Email to verify <span class="text-red-400">*</span></span>
+              </label>
+              <input class="input" type="email" formControlName="email" placeholder="you@example.com" [class.border-red-500]="isFieldInvalid('email', verificationForm)" (input)="resetVerificationState()" />
+              <div *ngIf="isFieldInvalid('email', verificationForm)" class="text-red-400 text-sm mt-1">
+                <span *ngIf="verificationForm.get('email')?.errors?.['required']">Email is required</span>
+                <span *ngIf="verificationForm.get('email')?.errors?.['email']">Enter a valid email address</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button class="btn-secondary" (click)="sendVerificationCode()" [disabled]="loading || isFieldInvalid('email', verificationForm)">Send Code</button>
+              <span class="text-xs text-gray-400">Change the email if needed, then send a new code.</span>
+            </div>
+          </div>
+          <div>
+            <label class="block mb-1 flex items-center gap-2">
+              <i class="fa-solid fa-shield-halved text-gray-400"></i>
+              <span>Enter OTP <span class="text-red-400">*</span></span>
+            </label>
+            <input class="input" formControlName="otp" placeholder="6-digit code" (input)="resetVerificationFlag()" />
+            <div *ngIf="isFieldInvalid('otp', verificationForm)" class="text-red-400 text-sm mt-1">
+              Please enter a valid 6-digit OTP
+            </div>
+          </div>
+          <div class="flex items-center justify-between gap-3">
+            <button class="btn-secondary" (click)="prev()">Back</button>
+            <div class="flex items-center gap-2">
+              <button class="btn-primary" (click)="verifyEmail()" [disabled]="loading">Verify Email</button>
+              <button class="btn-primary" (click)="next()" [disabled]="!isEmailVerified || loading">Next</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Stage 3: Role Selection -->
+        <section *ngIf="currentStep === 3" [formGroup]="roleForm" class="space-y-4">
           <label class="block mb-1 flex items-center gap-2">
             <i class="fa-solid fa-user-tag text-gray-400"></i> 
             <span>Select Role <span class="text-red-400">*</span></span>
@@ -183,8 +230,8 @@ import { SpecializationAutocompleteComponent } from '../../shared/specialization
           </div>
         </section>
 
-        <!-- Stage 3: Additional Details -->
-        <section *ngIf="currentStep === 3" class="space-y-6">
+        <!-- Stage 4: Additional Details -->
+        <section *ngIf="currentStep === 4" class="space-y-6">
           <!-- Doctor fields -->
           <div *ngIf="roleForm.value.role === 'DOCTOR'" [formGroup]="doctorForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -235,12 +282,14 @@ import { SpecializationAutocompleteComponent } from '../../shared/specialization
         </section>
 
         <p class="text-sm text-gray-400">Already have an account? <a routerLink="/login" class="text-emerald-400">Login</a></p>
+        <app-toast-container></app-toast-container>
       </div>
     </div>
   `,
 })
 export class RegisterComponent {
   private auth = inject(AuthService);
+  private toast = inject(ToastService);
   constructor(private fb: FormBuilder) {
     // Initialize reactive forms inside constructor to avoid using 'fb' before assignment
     this.basicForm = this.fb.group({
@@ -252,6 +301,11 @@ export class RegisterComponent {
       gender: ['', Validators.required],
       username: ['', Validators.required],
       password: ['', [Validators.required, Validators.minLength(6)]],
+    });
+
+    this.verificationForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      otp: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
     });
 
     this.roleForm = this.fb.group({
@@ -273,9 +327,13 @@ export class RegisterComponent {
   loading = false;
   error = '';
   showPassword = false;
+  isEmailVerified = false;
+  verificationMessage = '';
+  verificationError = '';
 
   // Reactive forms
   basicForm!: FormGroup;
+  verificationForm!: FormGroup;
   roleForm!: FormGroup;
   doctorForm!: FormGroup;
   patientForm!: FormGroup;
@@ -297,13 +355,32 @@ export class RegisterComponent {
       if (this.basicForm.valid) {
         this.currentStep = 2;
         this.showValidationErrors = false;
+        // Keep verification email in sync with basic form
+        this.verificationForm.patchValue({ email: this.basicForm.value.email || '' });
+        // Initiate email verification and send OTP
+        this.sendVerificationCode();
       } else {
         this.showValidationErrors = true;
         this.markFormGroupTouched(this.basicForm);
       }
     } else if (this.currentStep === 2) {
-      if (this.roleForm.valid) {
+      // Only proceed if email verified
+      if (this.isEmailVerified) {
+        // Sync the possibly edited email back to basic form
+        const verifiedEmail = this.verificationForm.value.email || this.basicForm.value.email;
+        if (verifiedEmail) {
+          this.basicForm.patchValue({ email: verifiedEmail });
+        }
         this.currentStep = 3;
+        this.showValidationErrors = false;
+      } else {
+        this.showValidationErrors = true;
+        this.markFormGroupTouched(this.verificationForm);
+        this.toast.showError('Please verify your email before continuing.');
+      }
+    } else if (this.currentStep === 3) {
+      if (this.roleForm.valid) {
+        this.currentStep = 4;
         this.showValidationErrors = false;
       } else {
         this.showValidationErrors = true;
@@ -327,7 +404,7 @@ export class RegisterComponent {
     });
   }
 
-  stage3Valid(): boolean {
+  stage4Valid(): boolean {
     if (this.roleForm.value.role === 'DOCTOR') {
       return this.doctorForm.valid;
     }
@@ -368,9 +445,10 @@ export class RegisterComponent {
     // Validate all forms before proceeding
     const currentForm = this.roleForm.value.role === 'DOCTOR' ? this.doctorForm : this.patientForm;
     
-    if (!this.basicForm.valid || !this.roleForm.valid || !this.stage3Valid()) {
+    if (!this.basicForm.valid || !this.isEmailVerified || !this.roleForm.valid || !this.stage4Valid()) {
       this.showValidationErrors = true;
       this.markFormGroupTouched(this.basicForm);
+      this.markFormGroupTouched(this.verificationForm);
       this.markFormGroupTouched(this.roleForm);
       this.markFormGroupTouched(currentForm);
       return;
@@ -407,12 +485,85 @@ export class RegisterComponent {
     this.auth.register(payload).subscribe({
       next: (resp) => {
         this.auth.storeAuth(resp);
+        this.toast.showSuccess('Registration successful. Redirecting...');
         this.auth.redirectToDashboard(resp.role);
       },
       error: (err) => {
         this.error = err?.error?.error || 'Registration failed';
+        this.toast.showError(this.error);
         this.loading = false;
       },
     });
+  }
+
+  sendVerificationCode() {
+    const base = this.basicForm.value;
+    const name = `${base.firstName ?? ''} ${base.lastName ?? ''}`.trim();
+    const email = this.verificationForm.value.email || base.email;
+    this.loading = true;
+    this.verificationMessage = '';
+    this.verificationError = '';
+    this.isEmailVerified = false;
+    this.auth.startEmailVerification({
+      name,
+      email: email!,
+      mobileNumber: base.contactInfo && base.contactInfo.trim() !== '+91 ' ? base.contactInfo : undefined,
+    }).subscribe({
+      next: (resp) => {
+        this.verificationMessage = resp?.message || 'Verification code sent.';
+        this.toast.showSuccess(this.verificationMessage);
+        this.loading = false;
+      },
+      error: (err) => {
+        this.verificationError = err?.error?.error || 'Failed to send verification code';
+        this.toast.showError(this.verificationError);
+        this.loading = false;
+      },
+    });
+  }
+
+  verifyEmail() {
+    if (!this.verificationForm.valid) {
+      this.showValidationErrors = true;
+      this.markFormGroupTouched(this.verificationForm);
+      return;
+    }
+
+    const base = this.basicForm.value;
+    const email = this.verificationForm.value.email || base.email!;
+    const otp = this.verificationForm.value.otp!;
+    this.loading = true;
+    this.verificationError = '';
+    this.auth.verifyEmailOtp({ email, otp }).subscribe({
+      next: (resp) => {
+        if (resp?.verified !== false) {
+          this.isEmailVerified = true;
+          this.verificationMessage = 'Email verified.';
+          this.toast.showSuccess(this.verificationMessage);
+          // Do not auto-advance; enable Next button instead
+          this.showValidationErrors = false;
+        } else {
+          this.verificationError = resp?.message || 'Verification failed';
+          this.toast.showError(this.verificationError);
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        this.verificationError = err?.error?.error || 'Invalid or expired OTP';
+        this.toast.showError(this.verificationError);
+        this.loading = false;
+      },
+    });
+  }
+
+  // Reset verification when email changes
+  resetVerificationState() {
+    this.isEmailVerified = false;
+    this.verificationForm.get('otp')?.setValue('');
+  }
+
+  // Reset only the verified flag when OTP changes
+  resetVerificationFlag() {
+    this.isEmailVerified = false;
   }
 }
