@@ -1,4 +1,4 @@
-import { Component, Input, inject, ChangeDetectionStrategy, ChangeDetectorRef, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, inject, ChangeDetectionStrategy, ChangeDetectorRef, OnInit, OnChanges, SimpleChanges, ElementRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
@@ -16,20 +16,15 @@ import { NotificationService, NotificationItem, NotificationStatus } from '../co
         <span class="text-sm">{{ buttonLabel }}</span>
         <span *ngIf="unreadCount > 0" class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full px-1">{{ unreadCount }}</span>
       </button>
-      <div *ngIf="notifOpen" class="absolute right-0 mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50" [ngClass]="widthClass">
+      <ng-template #dropdownContent>
         <div class="p-2 text-sm font-semibold">Notifications</div>
         <div class="max-h-96 overflow-auto">
           <div *ngIf="showStatus" class="px-3 py-2 text-xs text-gray-400">Service: {{ notifStatus?.service || 'Notification Service' }} • Status: {{ notifStatus?.status || 'Unknown' }}</div>
           <div *ngIf="feed.length === 0 && groupedFeedData.length === 0" class="px-3 py-3 text-sm text-gray-300">No notifications.</div>
-
           <ng-container *ngIf="grouped; else flatList">
             <ng-container *ngFor="let g of groupedFeedData; trackBy: trackGroup">
               <div class="px-3 pt-2 text-xs font-semibold text-gray-400">{{ g.label }}</div>
-              <button
-                *ngFor="let n of g.items; trackBy: trackNotif"
-                class="w-full text-left px-3 py-2 border-t border-gray-700 hover:bg-gray-700/50"
-                (click)="onNotificationClick(n)"
-              >
+              <button *ngFor="let n of g.items; trackBy: trackNotif" class="w-full text-left px-3 py-2 border-t border-gray-700 hover:bg-gray-700/50" (click)="onNotificationClick(n)">
                 <div class="flex items-start justify-between">
                   <div>
                     <div class="text-sm font-medium" [class.text-white]="!n.read" [class.text-gray-200]="n.read">{{ n.title }}</div>
@@ -40,13 +35,8 @@ import { NotificationService, NotificationItem, NotificationStatus } from '../co
               </button>
             </ng-container>
           </ng-container>
-
           <ng-template #flatList>
-            <button
-              *ngFor="let n of feed; trackBy: trackNotif"
-              class="w-full text-left px-3 py-2 border-t border-gray-700 hover:bg-gray-700/50"
-              (click)="onNotificationClick(n)"
-            >
+            <button *ngFor="let n of feed; trackBy: trackNotif" class="w-full text-left px-3 py-2 border-t border-gray-700 hover:bg-gray-700/50" (click)="onNotificationClick(n)">
               <div class="flex items-start justify-between">
                 <div>
                   <div class="text-sm font-medium" [class.text-white]="!n.read" [class.text-gray-200]="n.read">{{ n.title }}</div>
@@ -57,6 +47,18 @@ import { NotificationService, NotificationItem, NotificationStatus } from '../co
             </button>
           </ng-template>
         </div>
+      </ng-template>
+
+      <!-- Desktop outside-click overlay -->
+      <div *ngIf="notifOpen" class="hidden sm:block fixed inset-0 z-40" (click)="notifOpen=false"></div>
+      <div *ngIf="notifOpen" class="hidden sm:block absolute right-0 mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50" [ngClass]="widthClass">
+        <ng-container [ngTemplateOutlet]="dropdownContent"></ng-container>
+      </div>
+
+      <!-- Mobile outside-click overlay -->
+      <div *ngIf="notifOpen" class="sm:hidden fixed inset-0 z-40" (click)="notifOpen=false"></div>
+      <div *ngIf="notifOpen" class="sm:hidden fixed left-2 right-2 top-14 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50">
+        <ng-container [ngTemplateOutlet]="dropdownContent"></ng-container>
       </div>
     </div>
   `,
@@ -82,6 +84,7 @@ export class NotificationDropdownComponent implements OnInit, OnChanges {
   private notifApi = inject(NotificationService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  constructor(private el: ElementRef) {}
 
   ngOnInit(): void {
     const uid = this.userId ?? (this.auth.userId() ? Number(this.auth.userId()) : null);
@@ -100,6 +103,16 @@ export class NotificationDropdownComponent implements OnInit, OnChanges {
     if (this.notifOpen) {
       const uid = this.userId ?? (this.auth.userId() ? Number(this.auth.userId()) : null);
       this.fetchNotifications(uid);
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (!this.notifOpen) return;
+    const target = event.target as Node;
+    if (!this.el.nativeElement.contains(target)) {
+      this.notifOpen = false;
+      this.cdr.markForCheck();
     }
   }
 

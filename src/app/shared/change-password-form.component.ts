@@ -10,13 +10,13 @@ import { ToastService } from '../core/services/toast.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="panel p-6 space-y-4 max-w-xl">
-      <h2 class="text-xl font-semibold">Change Password</h2>
+    <div class="panel w-full max-w-xl mx-auto p-4 sm:p-6 space-y-5 rounded-xl">
+      <h2 class="text-lg sm:text-xl font-semibold">Change Password</h2>
 
       <div class="space-y-2">
-        <label class="block text-sm">Current Password</label>
+        <label class="block text-xs sm:text-sm mb-1">Current Password</label>
         <div class="relative">
-          <input class="input w-full pr-10" [type]="showCurrent ? 'text' : 'password'" [(ngModel)]="form.currentPassword" />
+          <input class="input w-full pr-10 text-sm sm:text-base" [type]="showCurrent ? 'text' : 'password'" [(ngModel)]="form.currentPassword" />
           <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200" (click)="toggleCurrent()" aria-label="Toggle password visibility">
             <i [class]="showCurrent ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
           </button>
@@ -24,9 +24,9 @@ import { ToastService } from '../core/services/toast.service';
       </div>
 
       <div class="space-y-2">
-        <label class="block text-sm">New Password</label>
+        <label class="block text-xs sm:text-sm mb-1">New Password</label>
         <div class="relative">
-          <input class="input w-full pr-10" [type]="showNew ? 'text' : 'password'" [(ngModel)]="form.newPassword" />
+          <input class="input w-full pr-10 text-sm sm:text-base" [type]="showNew ? 'text' : 'password'" [(ngModel)]="form.newPassword" />
           <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200" (click)="toggleNew()" aria-label="Toggle password visibility">
             <i [class]="showNew ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
           </button>
@@ -34,17 +34,17 @@ import { ToastService } from '../core/services/toast.service';
       </div>
 
       <div class="space-y-2">
-        <label class="block text-sm">Confirm New Password</label>
+        <label class="block text-xs sm:text-sm mb-1">Confirm New Password</label>
         <div class="relative">
-          <input class="input w-full pr-10" [type]="showConfirm ? 'text' : 'password'" [(ngModel)]="form.confirmPassword" />
+          <input class="input w-full pr-10 text-sm sm:text-base" [type]="showConfirm ? 'text' : 'password'" [(ngModel)]="form.confirmPassword" />
           <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200" (click)="toggleConfirm()" aria-label="Toggle password visibility">
             <i [class]="showConfirm ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
           </button>
         </div>
       </div>
 
-      <div class="flex items-center gap-3 mt-3">
-        <button class="btn-primary" (click)="submit()" [disabled]="loading">{{ loading ? 'Saving...' : 'Change Password' }}</button>
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mt-4">
+        <button class="btn-primary w-full sm:w-auto" (click)="submit()" [disabled]="loading">{{ loading ? 'Saving...' : 'Change Password' }}</button>
       </div>
     </div>
   `,

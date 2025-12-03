@@ -7,7 +7,7 @@ import { ToastService, Toast } from '../core/services/toast.service';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-xl space-y-2">
+    <div class="absolute bottom-4 right-4 z-50 w-full max-w-xl space-y-2">
       <div *ngFor="let t of toasts" class="px-4 py-3 rounded shadow border flex items-center justify-between"
            [ngClass]="t.type === 'success' ? 'bg-green-100 border-green-300 text-green-800' : 'bg-red-100 border-red-300 text-red-800'">
         <div class="flex items-center gap-2">

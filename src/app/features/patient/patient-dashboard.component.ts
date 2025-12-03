@@ -28,23 +28,40 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-patient-layout>
-    <div class="p-6 space-y-8">
+    <div class="p-4 sm:p-6 space-y-6 sm:space-y-8">
       <!-- Welcome Banner -->
-      <section class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl p-6 shadow">
-        <div class="flex flex-wrap items-center gap-4">
+      <section class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl p-4 sm:p-6 shadow">
+        <!-- Small screen top bar: avatar left, notification right -->
+        <div class="sm:hidden flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <img *ngIf="profileImageUrl; else avatarSm" [src]="profileImageUrl" alt="Profile" class="w-10 h-10 rounded-full ring-2 ring-white/60 object-cover" />
+            <ng-template #avatarSm>
+              <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-base font-semibold">
+                {{ (patientName || 'P').charAt(0) }}
+              </div>
+            </ng-template>
+            <div class="text-sm">
+              <div>Welcome back,</div>
+              <div class="text-lg font-semibold">{{ patientName || 'Patient' }}!</div>
+            </div>
+          </div>
+          <app-patient-notification></app-patient-notification>
+        </div>
+
+        <div class="flex flex-col sm:flex-row sm:flex-wrap items-center gap-4 sm:gap-6">
           <img
             *ngIf="profileImageUrl; else avatar"
             [src]="profileImageUrl"
             alt="Profile"
-            class="w-16 h-16 rounded-full ring-2 ring-white/60 object-cover"
+            class="hidden sm:block w-14 h-14 sm:w-16 sm:h-16 rounded-full ring-2 ring-white/60 object-cover"
           />
           <ng-template #avatar>
-            <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-xl font-semibold">
+            <div class="hidden sm:flex w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white/20 items-center justify-center text-lg sm:text-xl font-semibold">
               {{ (patientName || 'P').charAt(0) }}
             </div>
           </ng-template>
-          <div class="flex-1">
-            <div class="text-lg">Welcome back,</div>
+          <div class="flex-1 w-full sm:w-auto">
+            <div class="text-base sm:text-lg">Welcome back,</div>
             <ng-container *ngIf="loadingWelcome; else nameReady">
               <div class="flex items-center gap-2 text-white/80">
                 <span class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
@@ -52,20 +69,20 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
               </div>
             </ng-container>
             <ng-template #nameReady>
-              <div class="text-2xl font-semibold">{{ patientName || 'Patient' }}!</div>
+              <div class="text-xl sm:text-2xl font-semibold">{{ patientName || 'Patient' }}!</div>
             </ng-template>
           </div>
-          <div class="flex items-center gap-2">
-            <app-patient-notification></app-patient-notification>
-            <button class="btn-primary bg-white text-blue-700 hover:bg-white/90" (click)="goToBookAppointment()">Book Appointment</button>
-            <button class="btn-primary bg-white text-blue-700 hover:bg-white/90" (click)="goToMyAppointments()">My Appointments</button>
+          <div class="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-4 sm:mt-0">
+            <app-patient-notification class="hidden sm:block"></app-patient-notification>
+            <button class="btn-primary bg-white text-blue-700 hover:bg-white/90 w-full sm:w-auto" (click)="goToBookAppointment()">Book Appointment</button>
+            <button class="btn-primary bg-white text-blue-700 hover:bg-white/90 w-full sm:w-auto" (click)="goToMyAppointments()">My Appointments</button>
           </div>
           </div>
         </section>
 
       <!-- Cards Row moved below Upcoming Appointments -->
        <section>
-         <div class="flex items-center justify-between mb-3">
+         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-3">
            <h3 class="text-lg font-semibold">Upcoming Appointments</h3>
            <button class="btn-secondary" (click)="refreshAppointments()">Refresh</button>
          </div>

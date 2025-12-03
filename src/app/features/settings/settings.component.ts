@@ -31,6 +31,10 @@ import { isPlatformBrowser } from '@angular/common';
                 <input type="radio" name="theme" class="accent-emerald-500" [checked]="currentTheme === 'light'" (change)="setTheme('light')" />
                 <span>Light</span>
               </label>
+              <label class="flex items-center gap-2">
+                <input type="radio" name="theme" class="accent-emerald-500" [checked]="currentTheme === 'system'" (change)="setTheme('system')" />
+                <span>System</span>
+              </label>
             </div>
           </div>
 
@@ -73,6 +77,10 @@ import { isPlatformBrowser } from '@angular/common';
                 <label class="flex items-center gap-2">
                   <input type="radio" name="themeP" class="accent-emerald-500" [checked]="currentTheme === 'light'" (change)="setTheme('light')" />
                   <span>Light</span>
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="radio" name="themeP" class="accent-emerald-500" [checked]="currentTheme === 'system'" (change)="setTheme('system')" />
+                  <span>System</span>
                 </label>
               </div>
             </div>
@@ -117,6 +125,10 @@ import { isPlatformBrowser } from '@angular/common';
                 <input type="radio" name="theme2" class="accent-emerald-500" [checked]="currentTheme === 'light'" (change)="setTheme('light')" />
                 <span>Light</span>
               </label>
+              <label class="flex items-center gap-2">
+                <input type="radio" name="theme2" class="accent-emerald-500" [checked]="currentTheme === 'system'" (change)="setTheme('system')" />
+                <span>System</span>
+              </label>
             </div>
           </div>
 
@@ -147,7 +159,7 @@ export class SettingsComponent {
   private theme = inject(ThemeService);
   auth = inject(AuthService);
   private isBrowser: boolean;
-  currentTheme: 'dark' | 'light' = 'dark';
+  currentTheme: 'dark' | 'light' | 'system' = 'dark';
   notificationsEnabled: boolean = false;
   compactUI: boolean = false;
 
@@ -161,7 +173,7 @@ export class SettingsComponent {
     }
   }
 
-  setTheme(t: 'dark' | 'light') {
+  setTheme(t: 'dark' | 'light' | 'system') {
     this.currentTheme = t;
     this.theme.setTheme(t);
   }

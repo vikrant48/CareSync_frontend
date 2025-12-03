@@ -13,44 +13,44 @@ import { ToastContainerComponent } from '../../shared/toast-container.component'
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule, SpecializationAutocompleteComponent, ToastContainerComponent],
   template: `
-    <div class="min-h-screen bg-gray-950 text-gray-100 p-6">
-      <div class="panel max-w-3xl w-full mx-auto p-6 space-y-6 max-h-[85vh] overflow-y-auto">
-        <h2 class="text-2xl font-semibold">Create Account</h2>
+    <div class="min-h-screen bg-gray-950 text-gray-100 p-4 sm:p-6">
+      <div class="panel max-w-3xl w-full mx-auto p-4 sm:p-6 space-y-5 sm:space-y-6 max-h-[85vh] overflow-y-auto">
+        <h2 class="text-2xl sm:text-3xl font-semibold">Create Account</h2>
 
         <!-- Progress Stepper -->
-        <div class="flex items-center gap-3 select-none">
+        <div class="flex items-center gap-3 select-none overflow-x-auto -mx-4 px-4 py-2 scroll-smooth snap-x" role="progressbar" aria-valuemin="1" [attr.aria-valuenow]="currentStep" aria-valuemax="4">
           <!-- Step 1 -->
-          <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm"
+          <div class="flex items-center gap-2 flex-none snap-center">
+            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm"
                  [ngClass]="currentStep >= 1 ? 'bg-emerald-500 text-white ring-2 ring-emerald-400' : 'bg-gray-700 text-gray-300'">1</div>
-            <div class="text-sm" [class.text-emerald-400]="currentStep === 1">Basic Details</div>
+            <div class="text-xs sm:text-sm" [class.text-emerald-400]="currentStep === 1">Basic Details</div>
           </div>
-          <div class="flex-1 h-px bg-gray-700"></div>
+          <div class="h-px bg-gray-700 w-6 sm:flex-1 flex-none"></div>
           <!-- Step 2 -->
-          <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm"
+          <div class="flex items-center gap-2 flex-none snap-center">
+            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm"
                  [ngClass]="currentStep >= 2 ? 'bg-emerald-500 text-white ring-2 ring-emerald-400' : 'bg-gray-700 text-gray-300'">2</div>
-            <div class="text-sm" [class.text-emerald-400]="currentStep === 2">Email Verification</div>
+            <div class="text-xs sm:text-sm" [class.text-emerald-400]="currentStep === 2">Email Verification</div>
           </div>
-          <div class="flex-1 h-px bg-gray-700"></div>
+          <div class="h-px bg-gray-700 w-6 sm:flex-1 flex-none"></div>
           <!-- Step 3 -->
-          <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm"
+          <div class="flex items-center gap-2 flex-none snap-center">
+            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm"
                  [ngClass]="currentStep >= 3 ? 'bg-emerald-500 text-white ring-2 ring-emerald-400' : 'bg-gray-700 text-gray-300'">3</div>
-            <div class="text-sm" [class.text-emerald-400]="currentStep === 3">Role Selection</div>
+            <div class="text-xs sm:text-sm" [class.text-emerald-400]="currentStep === 3">Role Selection</div>
           </div>
-          <div class="flex-1 h-px bg-gray-700"></div>
+          <div class="h-px bg-gray-700 w-6 sm:flex-1 flex-none"></div>
           <!-- Step 4 -->
-          <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm"
+          <div class="flex items-center gap-2 flex-none snap-center">
+            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm"
                  [ngClass]="currentStep >= 4 ? 'bg-emerald-500 text-white ring-2 ring-emerald-400' : 'bg-gray-700 text-gray-300'">4</div>
-            <div class="text-sm" [class.text-emerald-400]="currentStep === 4">Additional Details</div>
+            <div class="text-xs sm:text-sm" [class.text-emerald-400]="currentStep === 4">Additional Details</div>
           </div>
         </div>
 
         <!-- Stage 1: Basic Details -->
-        <section *ngIf="currentStep === 1" [formGroup]="basicForm" class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <section *ngIf="currentStep === 1" [formGroup]="basicForm" class="space-y-5 sm:space-y-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label class="block mb-1 flex items-center gap-2">
                 <i class="fa-solid fa-id-card text-gray-400"></i> 
@@ -111,21 +111,21 @@ import { ToastContainerComponent } from '../../shared/toast-container.component'
                 <i class="fa-solid fa-venus-mars text-gray-400"></i> 
                 <span>Gender <span class="text-red-400">*</span></span>
               </label>
-              <select class="input" 
-                      formControlName="gender" 
-                      [class.border-red-500]="isFieldInvalid('gender', basicForm)">
-                <option value="">Select</option>
-                <option value="MALE">Male</option>
-                <option value="FEMALE">Female</option>
-                <option value="OTHER">Other</option>
-              </select>
+              <app-specialization-autocomplete
+                formControlName="gender"
+                [options]="['MALE','FEMALE','OTHER']"
+                [allowAddNew]="false"
+                inputClass="input"
+                placeholder="Select gender"
+                [class.border-red-500]="isFieldInvalid('gender', basicForm)">
+              </app-specialization-autocomplete>
               <div *ngIf="isFieldInvalid('gender', basicForm)" class="text-red-400 text-sm mt-1">
                 Gender is required
               </div>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label class="block mb-1 flex items-center gap-2">
                 <i class="fa-solid fa-user text-gray-400"></i> 
@@ -159,14 +159,14 @@ import { ToastContainerComponent } from '../../shared/toast-container.component'
             </div>
           </div>
 
-          <div class="flex items-center justify-end gap-3">
-            <button class="btn-primary" (click)="next()">Next</button>
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3">
+            <button class="btn-primary w-full sm:w-auto" (click)="next()">Next</button>
           </div>
         </section>
 
         <!-- Stage 2: Email Verification -->
-        <section *ngIf="currentStep === 2" [formGroup]="verificationForm" class="space-y-4">
-          <div class="space-y-4">
+        <section *ngIf="currentStep === 2" [formGroup]="verificationForm" class="space-y-4 sm:space-y-5">
+          <div class="space-y-3 sm:space-y-4">
             <div>
               <label class="block mb-1 flex items-center gap-2">
                 <i class="fa-solid fa-envelope text-gray-400"></i>
@@ -178,8 +178,8 @@ import { ToastContainerComponent } from '../../shared/toast-container.component'
                 <span *ngIf="verificationForm.get('email')?.errors?.['email']">Enter a valid email address</span>
               </div>
             </div>
-            <div class="flex items-center gap-2">
-              <button class="btn-secondary" (click)="sendVerificationCode()" [disabled]="loading || isFieldInvalid('email', verificationForm)">Send Code</button>
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+              <button class="btn-secondary w-full sm:w-auto" (click)="sendVerificationCode()" [disabled]="loading || isFieldInvalid('email', verificationForm)">Send Code</button>
               <span class="text-xs text-gray-400">Change the email if needed, then send a new code.</span>
             </div>
           </div>
@@ -193,11 +193,11 @@ import { ToastContainerComponent } from '../../shared/toast-container.component'
               Please enter a valid 6-digit OTP
             </div>
           </div>
-          <div class="flex items-center justify-between gap-3">
-            <button class="btn-secondary" (click)="prev()">Back</button>
-            <div class="flex items-center gap-2">
-              <button class="btn-primary" (click)="verifyEmail()" [disabled]="loading">Verify Email</button>
-              <button class="btn-primary" (click)="next()" [disabled]="!isEmailVerified || loading">Next</button>
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <button class="btn-secondary w-full sm:w-auto" (click)="prev()">Back</button>
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+              <button class="btn-primary w-full sm:w-auto" (click)="verifyEmail()" [disabled]="loading">Verify Email</button>
+              <button class="btn-primary w-full sm:w-auto" (click)="next()" [disabled]="!isEmailVerified || loading">Next</button>
             </div>
           </div>
         </section>
@@ -208,7 +208,7 @@ import { ToastContainerComponent } from '../../shared/toast-container.component'
             <i class="fa-solid fa-user-tag text-gray-400"></i> 
             <span>Select Role <span class="text-red-400">*</span></span>
           </label>
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <label class="panel p-4 flex items-center gap-3 cursor-pointer">
               <input type="radio" class="accent-emerald-500" formControlName="role" value="DOCTOR" />
               <i class="fa-solid fa-user-doctor"></i>
@@ -224,16 +224,16 @@ import { ToastContainerComponent } from '../../shared/toast-container.component'
             Please select a role
           </div>
 
-          <div class="flex items-center justify-between gap-3">
-            <button class="btn-secondary" (click)="prev()">Back</button>
-            <button class="btn-primary" (click)="next()">Next</button>
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <button class="btn-secondary w-full sm:w-auto" (click)="prev()">Back</button>
+            <button class="btn-primary w-full sm:w-auto" (click)="next()">Next</button>
           </div>
         </section>
 
         <!-- Stage 4: Additional Details -->
-        <section *ngIf="currentStep === 4" class="space-y-6">
+        <section *ngIf="currentStep === 4" class="space-y-5 sm:space-y-6">
           <!-- Doctor fields -->
-          <div *ngIf="roleForm.value.role === 'DOCTOR'" [formGroup]="doctorForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div *ngIf="roleForm.value.role === 'DOCTOR'" [formGroup]="doctorForm" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label class="block mb-1 flex items-center gap-2">
                 <i class="fa-solid fa-stethoscope text-gray-400"></i>
@@ -264,19 +264,22 @@ import { ToastContainerComponent } from '../../shared/toast-container.component'
           </div>
 
           <!-- Patient fields -->
-          <div *ngIf="roleForm.value.role === 'PATIENT'" [formGroup]="patientForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div *ngIf="roleForm.value.role === 'PATIENT'" [formGroup]="patientForm" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label class="block mb-1">Blood Group</label>
-              <select class="input" formControlName="bloodGroup">
-                <option value="">Select</option>
-                <option *ngFor="let bg of bloodGroups" [value]="bg">{{ bg }}</option>
-              </select>
+              <app-specialization-autocomplete
+                formControlName="bloodGroup"
+                [options]="bloodGroups"
+                [allowAddNew]="false"
+                inputClass="input"
+                placeholder="Select blood group">
+              </app-specialization-autocomplete>
             </div>
           </div>
 
-          <div class="flex items-center justify-between gap-3">
-            <button class="btn-secondary" (click)="prev()">Back</button>
-            <button class="btn-primary" (click)="complete()" [disabled]="loading">Complete Registration</button>
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <button class="btn-secondary w-full sm:w-auto" (click)="prev()">Back</button>
+            <button class="btn-primary w-full sm:w-auto" (click)="complete()" [disabled]="loading">Complete Registration</button>
           </div>
           <p *ngIf="error" class="text-red-400">{{ error }}</p>
         </section>

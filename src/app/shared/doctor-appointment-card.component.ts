@@ -9,22 +9,22 @@ import { DoctorAppointmentItem } from '../core/services/appointment.service';
   imports: [CommonModule, FormsModule],
   template: `
     <div
-      class="border border-gray-800 rounded-lg bg-gray-900/60 hover:bg-gray-900 transition p-4 shadow-sm"
+      class="border border-gray-800 rounded-xl bg-gray-900/60 hover:bg-gray-900 transition p-4 sm:p-5 shadow-sm"
       [class.opacity-70]="disabled"
     >
       <!-- Card Header -->
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-blue-900/40 flex items-center justify-center text-blue-300 font-semibold">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-blue-900/40 flex items-center justify-center text-blue-300 font-semibold shrink-0">
             {{ (appointment.patientName || 'P') | slice:0:1 }}
           </div>
-          <div>
-            <p class="font-medium leading-tight">{{ appointment.patientName }}</p>
+          <div class="min-w-0">
+            <p class="font-medium leading-tight truncate">{{ appointment.patientName }}</p>
             <p class="text-xs text-gray-400">{{ appointment.appointmentTime }}</p>
           </div>
         </div>
         <span
-          class="px-2 py-1 rounded text-xs font-medium"
+          class="px-2 py-1 rounded text-xs font-medium self-start sm:self-auto"
           [ngClass]="statusBadgeClass(appointment.status)"
         >
           {{ statusLabel(appointment) }}
@@ -33,28 +33,20 @@ import { DoctorAppointmentItem } from '../core/services/appointment.service';
 
       <!-- Card Body -->
       <div class="mt-3 space-y-2">
-        <div class="text-sm text-gray-300 truncate" *ngIf="appointment.reason" [title]="appointment.reason">
+        <div class="text-xs sm:text-sm text-gray-300 truncate" *ngIf="appointment.reason" [title]="appointment.reason">
           Reason: {{ appointment.reason }}
         </div>
-        <!-- <div class="flex items-center gap-3">
-          <div class="flex items-center gap-2" *ngIf="showStatusSelect">
-            <span class="text-xs text-gray-400">Status:</span>
-            <select class="input text-xs py-1" [ngModel]="appointment.status" (ngModelChange)="changeStatus(appointment, $event)" [disabled]="disabled">
-              <option *ngFor="let s of statusOptionsFor(appointment)" [value]="s">{{ s }}</option>
-            </select>
-          </div>
-        </div> -->
       </div>
 
       <!-- Card Actions -->
-      <div class="mt-3 flex flex-wrap gap-2">
-        <button class="btn-primary" (click)="onViewPatient()" [disabled]="disabled">View Patient Details</button>
-        <button class="btn-secondary" *ngIf="appointment.status === 'IN_PROGRESS'" (click)="onCreateMedicalDescription()" [disabled]="disabled">Create Medical Description</button>
-        <button class="btn-secondary" *ngIf="appointment.status === 'BOOKED'" (click)="onSchedule()" [disabled]="disabled">Schedule</button>
-        <button class="btn-secondary" *ngIf="appointment.status === 'SCHEDULED'" (click)="onConfirm()" [disabled]="disabled">Confirm</button>
-        <button class="btn-secondary" *ngIf="appointment.status === 'CONFIRMED'" (click)="onStart()" [disabled]="disabled">Start</button>
-        <button class="btn-secondary" *ngIf="appointment.status === 'IN_PROGRESS'" (click)="onComplete()" [disabled]="disabled">Complete</button>
-        <button class="btn-secondary" *ngIf="appointment.status === 'BOOKED' || appointment.status === 'SCHEDULED'" (click)="onCancel()" [disabled]="disabled">Cancel</button>
+      <div class="mt-3 flex flex-col sm:flex-row flex-wrap gap-2">
+        <button class="btn-primary w-full sm:w-auto" (click)="onViewPatient()" [disabled]="disabled">View Patient Details</button>
+        <button class="btn-secondary w-full sm:w-auto" *ngIf="appointment.status === 'IN_PROGRESS'" (click)="onCreateMedicalDescription()" [disabled]="disabled">Create Medical Description</button>
+        <button class="btn-secondary w-full sm:w-auto" *ngIf="appointment.status === 'BOOKED'" (click)="onSchedule()" [disabled]="disabled">Schedule</button>
+        <button class="btn-secondary w-full sm:w-auto" *ngIf="appointment.status === 'SCHEDULED'" (click)="onConfirm()" [disabled]="disabled">Confirm</button>
+        <button class="btn-secondary w-full sm:w-auto" *ngIf="appointment.status === 'CONFIRMED'" (click)="onStart()" [disabled]="disabled">Start</button>
+        <button class="btn-secondary w-full sm:w-auto" *ngIf="appointment.status === 'IN_PROGRESS'" (click)="onComplete()" [disabled]="disabled">Complete</button>
+        <button class="btn-secondary w-full sm:w-auto" *ngIf="appointment.status === 'BOOKED' || appointment.status === 'SCHEDULED'" (click)="onCancel()" [disabled]="disabled">Cancel</button>
       </div>
     </div>
   `,

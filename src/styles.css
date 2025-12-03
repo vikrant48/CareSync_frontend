@@ -31,11 +31,11 @@ body {
 }
 
 .btn-primary {
-  @apply inline-flex items-center justify-center rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-medium px-4 py-2 transition;
+  @apply inline-flex items-center justify-center rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-medium px-4 py-2 transition min-h-[44px];
 }
 
 .btn-secondary {
-  @apply inline-flex items-center justify-center rounded-lg bg-gray-700 hover:bg-gray-600 text-white font-medium px-4 py-2 transition;
+  @apply inline-flex items-center justify-center rounded-lg bg-gray-700 hover:bg-gray-600 text-white font-medium px-4 py-2 transition min-h-[44px];
 }
 
 .link {
@@ -43,20 +43,30 @@ body {
 }
 
 .input {
-  @apply w-full rounded-lg border border-gray-700 bg-gray-800/60 px-3 py-2 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500;
+  @apply w-full rounded-lg border border-gray-700 bg-gray-800/60 px-3 py-2 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[44px];
 }
 
 /* Light theme overrides */
-body.theme-light {
+body.theme-light,
+body.light {
   --bg: #f8fafc;
   --text: #111827;
 }
-body.theme-light .panel {
+body.theme-light .panel,
+body.light .panel {
   background: #ffffff;
   border-color: #e5e7eb;
 }
-body.theme-light .input {
+body.theme-light .input,
+body.light .input {
   background: #ffffff;
   color: #111827;
   border-color: #e5e7eb;
+}
+
+/* Dark theme hook */
+body.theme-dark,
+body.dark {
+  --bg: #0b1220;
+  --text: #e5e7eb;
 }

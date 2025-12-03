@@ -9,19 +9,19 @@ import { PatientAppointmentItem } from '../core/services/appointment.service';
   imports: [CommonModule],
   template: `
     <div class="panel rounded-xl p-4 hover:shadow-md transition" [class.opacity-70]="disabled">
-      <div class="flex items-start justify-between">
-        <div>
-          <div class="text-sm text-gray-300">{{ appointment.appointmentDate }} at {{ appointment.appointmentTime }}</div>
-          <div class="mt-1 font-semibold">{{ appointment.doctorName }}</div>
-          <div class="text-sm text-gray-300">{{ appointment.doctorSpecialization || 'General' }}</div>
-          <div class="text-sm mt-2 text-gray-300" *ngIf="appointment.reason">Notes: {{ appointment.reason }}</div>
+      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div class="min-w-0">
+          <div class="text-xs sm:text-sm text-gray-300">{{ appointment.appointmentDate }} at {{ appointment.appointmentTime }}</div>
+          <div class="mt-1 font-semibold truncate">{{ appointment.doctorName }}</div>
+          <div class="text-xs sm:text-sm text-gray-300 truncate">{{ appointment.doctorSpecialization || 'General' }}</div>
+          <div class="text-xs sm:text-sm mt-2 text-gray-300 break-words" *ngIf="appointment.reason">Notes: {{ appointment.reason }}</div>
         </div>
-        <span class="px-2 py-1 text-xs rounded-full" [ngClass]="statusClass(appointment.status)">{{ statusLabel(appointment) }}</span>
+        <span class="px-2 py-1 text-xs rounded-full sm:self-auto self-start sm:mt-0 mt-2" [ngClass]="statusClass(appointment.status)">{{ statusLabel(appointment) }}</span>
       </div>
-      <div class="mt-4 flex flex-wrap gap-2">
-        <button class="btn-secondary" (click)="onReschedule()" [disabled]="!canPatientReschedule(appointment) || disabled">Reschedule</button>
-        <button class="btn-danger" (click)="onCancel()" [disabled]="!canPatientCancel(appointment) || disabled">Cancel</button>
-        <button class="btn-primary" (click)="onViewDoctor()" [disabled]="disabled">View Doctor Details</button>
+      <div class="mt-4 flex flex-col sm:flex-row flex-wrap gap-2">
+        <button class="btn-secondary w-full sm:w-auto" (click)="onReschedule()" [disabled]="!canPatientReschedule(appointment) || disabled">Reschedule</button>
+        <button class="btn-danger w-full sm:w-auto" (click)="onCancel()" [disabled]="!canPatientCancel(appointment) || disabled">Cancel</button>
+        <button class="btn-primary w-full sm:w-auto" (click)="onViewDoctor()" [disabled]="disabled">View Doctor Details</button>
       </div>
     </div>
   `,

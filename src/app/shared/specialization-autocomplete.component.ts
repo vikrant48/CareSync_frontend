@@ -77,6 +77,7 @@ export class SpecializationAutocompleteComponent implements OnInit, OnDestroy, C
   @Input() disabled: boolean = false;
   @Input() allowAddNew: boolean = true;
   @Input() required: boolean = false;
+  @Input() options: string[] | null = null;
   
   @Output() specializationSelected = new EventEmitter<string>();
   @Output() specializationAdded = new EventEmitter<string>();
@@ -87,6 +88,7 @@ export class SpecializationAutocompleteComponent implements OnInit, OnDestroy, C
   showDropdown: boolean = false;
   filteredSpecializations: string[] = [];
   selectedIndex: number = -1;
+  private allSpecializations: string[] = [];
   
   private destroy$ = new Subject<void>();
   private searchSubject = new Subject<string>();
@@ -106,6 +108,12 @@ export class SpecializationAutocompleteComponent implements OnInit, OnDestroy, C
     ).subscribe(query => {
       this.filterSpecializations(query);
     });
+
+    this.specializationService.getAllSpecializations()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(list => {
+        this.allSpecializations = list || [];
+      });
   }
 
   ngOnDestroy(): void {
@@ -187,9 +195,11 @@ export class SpecializationAutocompleteComponent implements OnInit, OnDestroy, C
   }
 
   private filterSpecializations(query: string): void {
-    this.specializationService.filterSpecializations(query).subscribe(filtered => {
-      this.filteredSpecializations = filtered;
-    });
+    const source = (this.options && this.options.length > 0) ? this.options : this.allSpecializations;
+    const search = (query || '').toLowerCase().trim();
+    const base = source || [];
+    const filtered = search ? base.filter(spec => spec.toLowerCase().includes(search)) : base.slice();
+    this.filteredSpecializations = filtered;
   }
 
   selectSpecialization(specialization: string): void {
@@ -215,9 +225,7 @@ export class SpecializationAutocompleteComponent implements OnInit, OnDestroy, C
     }
     
     const query = this.inputValue.trim().toLowerCase();
-    const exactMatch = this.filteredSpecializations.some(spec => 
-      spec.toLowerCase() === query
-    );
+    const exactMatch = this.filteredSpecializations.some(spec => spec.toLowerCase() === query);
     
     return !exactMatch;
   }

@@ -6,7 +6,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
       <!-- Left: avatar + basics -->
       <div class="flex items-start gap-4">
-        <div class="w-16 h-16 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center text-white">
+        <div class="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-blue-100 text-blue-700 ring-2 ring-blue-600/40 dark:bg-gray-700 dark:text-white">
           <img *ngIf="profile?.profileImageUrl; else initials" [src]="profile?.profileImageUrl" class="w-full h-full object-cover" (error)="profile.profileImageUrl=''" />
           <ng-template #initials>
             <span class="text-xl font-semibold">{{ (profile?.firstName || profile?.username || 'D').charAt(0) }}</span>
@@ -41,7 +41,7 @@
 
   <!-- Tabs Bar -->
   <section class="panel p-0">
-    <div class="flex items-center gap-1 border-b border-gray-700 px-4">
+    <div class="flex items-center gap-1 border-b border-gray-200 dark:border-gray-700 px-4">
       <button class="tab-btn" [class.active]="activeTab==='overview'" (click)="activeTab='overview'">Overview</button>
       <button class="tab-btn" [class.active]="activeTab==='education'" (click)="activeTab='education'">Education</button>
       <button class="tab-btn" [class.active]="activeTab==='experience'" (click)="activeTab='experience'">Experience</button>
