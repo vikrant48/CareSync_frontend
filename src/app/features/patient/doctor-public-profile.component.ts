@@ -121,6 +121,7 @@ export class DoctorPublicProfileComponent {
   reason = '';
   loadingSlots = false;
   booking = false;
+  validating = false;
 
   bookError: string | null = null;
   bookingOpen = false;
@@ -275,9 +276,25 @@ export class DoctorPublicProfileComponent {
 
   book() {
     if (!this.selectedSlot || !this.doctor) return;
-    
-    // Show payment popup first
-    this.paymentModalOpen = true;
+    this.validating = true;
+    this.appts.getAvailableSlots(this.doctor.id, this.selectedDate).subscribe({
+      next: (slots) => {
+        const filtered = this.filterPastSlots(slots || []);
+        const stillAvailable = filtered.includes(this.selectedSlot!);
+        this.validating = false;
+        if (stillAvailable) {
+          this.paymentModalOpen = true;
+        } else {
+          this.toast.showError('Selected slot is no longer available. Please choose another.');
+          this.slots = filtered;
+          this.selectedSlot = null;
+        }
+      },
+      error: () => {
+        this.validating = false;
+        this.toast.showError('Unable to validate slot. Please try again.');
+      }
+    });
   }
 
   // This method will be called after successful payment
