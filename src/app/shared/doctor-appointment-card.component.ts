@@ -9,44 +9,59 @@ import { DoctorAppointmentItem } from '../core/services/appointment.service';
   imports: [CommonModule, FormsModule],
   template: `
     <div
-      class="border border-gray-800 rounded-xl bg-gray-900/60 hover:bg-gray-900 transition p-4 sm:p-5 shadow-sm"
+      class="border border-gray-800 rounded-2xl bg-gray-900/70 transition duration-200 p-4 sm:p-5 shadow-sm hover:shadow-md hover:ring-1 hover:ring-blue-600/30"
       [class.opacity-70]="disabled"
     >
-      <!-- Card Header -->
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
-          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-blue-900/40 flex items-center justify-center text-blue-300 font-semibold shrink-0">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-800 to-blue-600 text-white flex items-center justify-center font-semibold shrink-0">
             {{ (appointment.patientName || 'P') | slice:0:1 }}
           </div>
           <div class="min-w-0">
-            <p class="font-medium leading-tight truncate">{{ appointment.patientName }}</p>
-            <p class="text-xs text-gray-400">{{ appointment.appointmentTime }}</p>
+            <p class="font-semibold leading-tight truncate text-gray-100">{{ appointment.patientName }}</p>
+            <p class="text-xs text-gray-400 flex items-center gap-1">
+              <i class="fa-regular fa-clock"></i>
+              <span>{{ appointment.appointmentDate }} · {{ appointment.appointmentTime }}</span>
+            </p>
           </div>
         </div>
         <span
-          class="px-2 py-1 rounded text-xs font-medium self-start sm:self-auto"
+          class="px-2 py-1 rounded text-xs font-semibold tracking-wide"
           [ngClass]="statusBadgeClass(appointment.status)"
         >
           {{ statusLabel(appointment) }}
         </span>
       </div>
 
-      <!-- Card Body -->
       <div class="mt-3 space-y-2">
-        <div class="text-xs sm:text-sm text-gray-300 truncate" *ngIf="appointment.reason" [title]="appointment.reason">
-          Reason: {{ appointment.reason }}
+        <div class="text-xs sm:text-sm text-gray-300 truncate flex items-center gap-2" *ngIf="appointment.reason" [title]="appointment.reason">
+          <i class="fa-regular fa-note-sticky text-gray-400"></i>
+          <span>{{ appointment.reason }}</span>
         </div>
       </div>
 
-      <!-- Card Actions -->
       <div class="mt-3 flex flex-col sm:flex-row flex-wrap gap-2">
-        <button class="btn-primary w-full sm:w-auto" (click)="onViewPatient()" [disabled]="disabled">View Patient Details</button>
-        <button class="btn-secondary w-full sm:w-auto" *ngIf="appointment.status === 'IN_PROGRESS'" (click)="onCreateMedicalDescription()" [disabled]="disabled">Create Medical Description</button>
-        <button class="btn-secondary w-full sm:w-auto" *ngIf="appointment.status === 'BOOKED'" (click)="onSchedule()" [disabled]="disabled">Schedule</button>
-        <button class="btn-secondary w-full sm:w-auto" *ngIf="appointment.status === 'SCHEDULED'" (click)="onConfirm()" [disabled]="disabled">Confirm</button>
+        <button class="btn-primary w-full sm:w-auto" (click)="onViewPatient()" [disabled]="disabled">
+          <i class="fa-regular fa-id-card mr-2"></i>
+          View Patient Details
+        </button>
+
+        <div class="grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex sm:flex-row" *ngIf="appointment.status === 'IN_PROGRESS'">
+          <button class="btn-secondary w-full sm:w-auto" (click)="onCreateMedicalDescription()" [disabled]="disabled">Medical Notes</button>
+          <button class="btn-secondary w-full sm:w-auto" (click)="onComplete()" [disabled]="disabled">Complete</button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex sm:flex-row" *ngIf="appointment.status === 'BOOKED'">
+          <button class="btn-secondary w-full sm:w-auto" (click)="onSchedule()" [disabled]="disabled">Schedule</button>
+          <button class="btn-secondary w-full sm:w-auto" (click)="onCancel()" [disabled]="disabled">Cancel</button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex sm:flex-row" *ngIf="appointment.status === 'SCHEDULED'">
+          <button class="btn-secondary w-full sm:w-auto" (click)="onConfirm()" [disabled]="disabled">Confirm</button>
+          <button class="btn-secondary w-full sm:w-auto" (click)="onCancel()" [disabled]="disabled">Cancel</button>
+        </div>
+
         <button class="btn-secondary w-full sm:w-auto" *ngIf="appointment.status === 'CONFIRMED'" (click)="onStart()" [disabled]="disabled">Start</button>
-        <button class="btn-secondary w-full sm:w-auto" *ngIf="appointment.status === 'IN_PROGRESS'" (click)="onComplete()" [disabled]="disabled">Complete</button>
-        <button class="btn-secondary w-full sm:w-auto" *ngIf="appointment.status === 'BOOKED' || appointment.status === 'SCHEDULED'" (click)="onCancel()" [disabled]="disabled">Cancel</button>
       </div>
     </div>
   `,

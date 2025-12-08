@@ -8,12 +8,13 @@ import { AppointmentService } from '../../core/services/appointment.service';
 import { DoctorDetailsPanelComponent } from '../../shared/doctor-details-panel.component';
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { PaymentPopupComponent, PaymentDetails } from '../../shared/payment-popup.component';
+import { DoctorBookingModalComponent } from '../../shared/doctor-booking-modal.component';
 import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-doctor-public-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, DoctorDetailsPanelComponent, PaymentPopupComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, DoctorDetailsPanelComponent, PaymentPopupComponent, DoctorBookingModalComponent],
   template: `
     <app-patient-layout>
     <doctor-details-panel
@@ -28,62 +29,14 @@ import { ToastService } from '../../core/services/toast.service';
       (openBooking)="startBooking()"
     ></doctor-details-panel>
     
-    <!-- Booking Modal -->
-    <div *ngIf="bookingOpen" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-      <div class="panel p-6 w-full max-w-xl relative">
-        <button class="absolute top-2 right-2 btn-secondary" (click)="closeBooking()">Close</button>
-        <div class="flex items-center gap-3 mb-4" *ngIf="doctor as doc">
-          <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center text-white">
-            <img *ngIf="doc.profileImageUrl" [src]="doc.profileImageUrl" class="w-full h-full object-cover" (error)="doc.profileImageUrl = ''" />
-            <span *ngIf="!doc.profileImageUrl">{{ doctorInitial(doc) }}</span>
-          </div>
-          <div>
-            <div class="font-semibold">{{ formatDoctorName(doc) }}</div>
-            <div class="text-sm text-gray-400">{{ doc.specialization || 'General' }}</div>
-            <div class="text-sm" *ngIf="experienceYears !== null">Experience: {{ experienceYears }} years</div>
-          </div>
-        </div>
-
-        <div class="space-y-3">
-          <label class="block">
-             <span class="text-sm">Select Date</span>
-             <input type="date" class="input" [(ngModel)]="selectedDate" (change)="loadSlots()" [min]="minDate" />
-           </label>
-
-          <div *ngIf="loadingSlots" class="text-gray-400">Loading available slots…</div>
-
-          <div *ngIf="!loadingSlots">
-            <div class="text-sm mb-2">Available Slots</div>
-            <div class="flex flex-wrap gap-2">
-              <button
-                *ngFor="let s of slots"
-                [ngClass]="{ 'btn-primary': selectedSlot === s, 'btn-secondary': selectedSlot !== s }"
-                (click)="selectSlot(s)"
-              >
-                {{ s }}
-              </button>
-              <div *ngIf="(slots?.length || 0) === 0" class="text-gray-400">No slots available for selected date.</div>
-            </div>
-          </div>
-
-          <div class="mt-4">
-            <label class="block mb-1 text-sm">Reason for visit</label>
-            <textarea class="input w-full" rows="3" [(ngModel)]="reason" placeholder="e.g., persistent cough, follow-up, etc."></textarea>
-          </div>
-
-          <div class="mt-3">
-            <button 
-              class="btn-primary" 
-              [disabled]="!selectedSlot || booking" 
-              (click)="book()"
-            >
-              {{ booking ? 'Booking…' : 'Book Selected Slot' }}
-            </button>
-
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Booking Modal (Shared) -->
+    <app-doctor-booking-modal
+      [open]="bookingOpen"
+      [doctor]="doctor"
+      [experienceYears]="experienceYears"
+      (close)="closeBooking()"
+      (proceedToPayment)="onProceedToPayment($event)"
+    ></app-doctor-booking-modal>
     
     <!-- Payment Modal -->
     <app-payment-popup
@@ -393,5 +346,13 @@ export class DoctorPublicProfileComponent {
     const slot = this.selectedSlot || '';
     
     return `${doctorName} (${specialization}) - ${date} ${slot}`.trim();
+  }
+
+  onProceedToPayment(evt: { date: string; slot: string; reason: string }) {
+    this.selectedDate = evt.date;
+    this.selectedSlot = evt.slot;
+    this.reason = evt.reason || '';
+    this.bookingOpen = false;
+    this.paymentModalOpen = true;
   }
 }

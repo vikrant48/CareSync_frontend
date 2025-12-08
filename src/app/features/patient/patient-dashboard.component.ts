@@ -84,7 +84,7 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
        <section>
          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-3">
            <h3 class="text-lg font-semibold">Upcoming Appointments</h3>
-           <button class="btn-secondary" (click)="refreshAppointments()">Refresh</button>
+           <button class="text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 text-sm font-medium px-0 py-0" (click)="refreshAppointments()">Refresh</button>
          </div>
          <div *ngIf="loadingAppointments" class="flex items-center gap-2 text-gray-400">
            <span class="animate-spin h-5 w-5 border-2 border-current border-t-transparent rounded-full"></span>

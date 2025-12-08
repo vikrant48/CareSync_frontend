@@ -57,7 +57,7 @@ import { forkJoin } from 'rxjs';
         <div class="flex gap-2 items-center">
           <app-doctor-notification></app-doctor-notification>
           <a class="btn-primary" routerLink="/doctor/profile">View Profile</a>
-          <a class="btn-secondary" routerLink="/doctor">Refresh</a>
+          <a class="text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 text-sm font-medium px-0 py-0" routerLink="/doctor">Refresh</a>
         </div>
       </div>
 
@@ -138,7 +138,7 @@ import { forkJoin } from 'rxjs';
             <select class="input text-sm" [(ngModel)]="filterStatus">
               <option *ngFor="let s of statusFilterOptions" [value]="s">{{ s }}</option>
             </select>
-            <button class="btn-secondary" (click)="refreshToday()">Refresh</button>
+            <button class="text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 text-sm font-medium px-0 py-0" (click)="refreshToday()">Refresh</button>
           </div>
         </div>
         <div class="text-xs text-gray-400 mb-2" *ngIf="!loadingAppointments && todayAppointments.length > 0">

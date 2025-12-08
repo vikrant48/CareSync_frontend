@@ -22,7 +22,7 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
     <div class="p-6 space-y-6">
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-semibold">All Appointments</h2>
-        <button class="btn-secondary" (click)="refresh()">Refresh</button>
+        <button class="text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 text-sm font-medium px-0 py-0" (click)="refresh()">Refresh</button>
       </div>
 
       <!-- Filters -->

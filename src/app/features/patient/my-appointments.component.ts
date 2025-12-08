@@ -18,7 +18,7 @@ import { PatientLayoutComponent } from '../../shared/patient-layout.component';
     <div class="p-6 space-y-6">
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-semibold">My Appointments</h2>
-        <button class="btn-secondary" (click)="refresh()">Refresh</button>
+        <button class="text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 text-sm font-medium px-0 py-0" (click)="refresh()">Refresh</button>
       </div>
 
       <!-- Filters -->
@@ -51,7 +51,7 @@ import { PatientLayoutComponent } from '../../shared/patient-layout.component';
         </div>
         <div class="flex items-center justify-between">
           <div class="text-sm text-gray-400">Showing {{ filtered().length }} of {{ appointments.length }} appointments</div>
-          <button class="btn-secondary" (click)="clearFilters()">Clear filters</button>
+          <button class="text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 text-sm font-medium px-0 py-0" (click)="clearFilters()">Clear filters</button>
         </div>
       </div>
 

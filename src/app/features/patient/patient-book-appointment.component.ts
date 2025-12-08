@@ -13,23 +13,23 @@ import { SpecializationAutocompleteComponent } from '../../shared/specialization
   imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent],
   template: `
     <app-patient-layout>
-    <div class="panel p-6 space-y-6">
-      <div class="flex items-center justify-between">
-        <h2 class="text-xl font-semibold">Book Appointment</h2>
-        <div class="flex gap-3">
+    <div class="panel p-4 sm:p-6 space-y-4 sm:space-y-6">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <h2 class="text-lg sm:text-xl font-semibold">Book Appointment</h2>
+        <div class="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <button 
-            class="btn-primary bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg flex items-center gap-2"
+            class="btn-primary bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg flex items-center gap-2 w-full sm:w-auto"
             (click)="openEmergencyModal()"
           >
             🚨 Emergency Appointment
           </button>
-          <button class="btn-secondary" (click)="refreshDoctors()">Refresh</button>
+          <button class="text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 text-sm font-medium px-0 py-0" (click)="refreshDoctors()">Refresh</button>
         </div>
       </div>
 
-      <div class="flex gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         <app-specialization-autocomplete
-          class="flex-1"
+          class="w-full"
           [(ngModel)]="specializationFilter"
           placeholder="Filter by specialization (e.g., Cardiology)"
           inputClass="input"
@@ -37,12 +37,12 @@ import { SpecializationAutocompleteComponent } from '../../shared/specialization
         </app-specialization-autocomplete>
         <input
           type="text"
-          class="input flex-1"
+          class="input w-full"
           placeholder="Search by doctor name"
           [(ngModel)]="nameFilter"
         />
         <select
-          class="input flex-1"
+          class="input w-full"
           [(ngModel)]="genderFilter"
         >
           <option value="">All genders</option>
@@ -52,7 +52,7 @@ import { SpecializationAutocompleteComponent } from '../../shared/specialization
         </select>
         <input
           type="text"
-          class="input flex-1"
+          class="input w-full"
           placeholder="Filter by address/location"
           [(ngModel)]="addressFilter"
         />
@@ -96,7 +96,7 @@ import { SpecializationAutocompleteComponent } from '../../shared/specialization
           </div>
           <div class="text-sm text-gray-300" *ngIf="d.address">Address: {{ d.address }}</div>
           <div class="mt-3">
-            <button class="btn-primary" (click)="goToDoctorAndBook(d); $event.stopPropagation()">Book Appointment</button>
+            <button class="btn-primary w-full sm:w-auto" (click)="goToDoctorAndBook(d); $event.stopPropagation()">Book Appointment</button>
           </div>
         </div>
       </div>

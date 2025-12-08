@@ -10,15 +10,15 @@ import { ToastService } from '../core/services/toast.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div *ngIf="isOpen" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-      <div class="panel p-6 w-full max-w-2xl relative max-h-[90vh] overflow-y-auto">
+    <div *ngIf="isOpen" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+      <div class="panel p-4 sm:p-6 w-full max-w-2xl relative max-h-[85dvh] overflow-y-auto">
         <button class="absolute top-2 right-2 btn-secondary" (click)="close()">✕</button>
         
         <div class="space-y-6">
           <!-- Header -->
           <div class="text-center">
-            <div class="text-2xl font-bold text-red-500 mb-2">🚨 Emergency Appointment</div>
-            <p class="text-gray-300 text-sm">
+            <div class="text-xl sm:text-2xl font-bold text-red-500 mb-2 sm:mb-3">🚨 Emergency Appointment</div>
+            <p class="text-gray-300 text-xs sm:text-sm">
               Book an immediate appointment with an available doctor. 
               This will schedule an appointment for right now.
             </p>
@@ -65,7 +65,7 @@ import { ToastService } from '../core/services/toast.service';
           <!-- Selected Doctor Details -->
           <div *ngIf="selectedDoctor" class="bg-gray-800/50 rounded-lg p-4">
             <div class="flex items-center gap-3 mb-3">
-              <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center text-white">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center text-white">
                 <img *ngIf="selectedDoctor.profileImageUrl" 
                      [src]="selectedDoctor.profileImageUrl" 
                      class="w-full h-full object-cover" 
@@ -79,7 +79,7 @@ import { ToastService } from '../core/services/toast.service';
                 <div class="text-sm text-gray-400">{{ selectedDoctor.specialization || 'General Practice' }}</div>
               </div>
             </div>
-            <div class="grid grid-cols-2 gap-4 text-sm">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div *ngIf="selectedDoctor.consultationFees">
                 <span class="text-gray-400">Consultation Fee:</span>
                 <span class="ml-2 font-medium">₹{{ selectedDoctor.consultationFees }}</span>
@@ -88,11 +88,11 @@ import { ToastService } from '../core/services/toast.service';
                 <span class="text-gray-400">Contact:</span>
                 <span class="ml-2 font-medium">{{ selectedDoctor.contactInfo }}</span>
               </div>
-              <div *ngIf="selectedDoctor.address" class="col-span-2">
+              <div *ngIf="selectedDoctor.address" class="sm:col-span-2">
                 <span class="text-gray-400">Location:</span>
                 <span class="ml-2 font-medium">{{ selectedDoctor.address }}</span>
               </div>
-              <div *ngIf="selectedDoctor.email" class="col-span-2">
+              <div *ngIf="selectedDoctor.email" class="sm:col-span-2">
                 <span class="text-gray-400">Email:</span>
                 <span class="ml-2 font-medium">{{ selectedDoctor.email }}</span>
               </div>
@@ -134,18 +134,18 @@ import { ToastService } from '../core/services/toast.service';
 
 
           <!-- Action Buttons -->
-          <div class="flex gap-3 pt-4">
+          <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-3">
             <button 
-              class="btn-secondary flex-1" 
+              class="btn-secondary w-full sm:flex-1" 
               (click)="close()"
               [disabled]="booking"
             >
               Cancel
             </button>
             <button 
-              class="btn-primary flex-1 bg-red-600 hover:bg-red-700" 
+              class="btn-primary w-full sm:flex-1 bg-red-600 hover:bg-red-700" 
               (click)="bookEmergencyAppointment()"
-              [disabled]="booking || (!selectedDoctorId || !reason.trim())"
+              [disabled]="booking"
             >
               {{ booking ? 'Booking Emergency Appointment...' : 'Book Emergency Appointment' }}
             </button>
@@ -196,15 +196,25 @@ export class EmergencyAppointmentModalComponent {
     this.error = null;
 
     // Validation
-    if (!this.selectedDoctorId || !this.reason.trim()) {
-      this.error = 'Please select a doctor and provide a reason for the emergency appointment.';
-      this.toast.showError(this.error);
+    const missingDoctor = !this.selectedDoctorId;
+    const missingReason = !this.reason.trim();
+    if (missingDoctor || missingReason) {
+      let msg = '';
+      if (missingDoctor && missingReason) {
+        msg = 'Please first select a doctor and fill the reason.';
+      } else if (missingDoctor) {
+        msg = 'Please select a doctor for the emergency appointment.';
+      } else {
+        msg = 'Please provide a reason for the emergency appointment.';
+      }
+      this.error = msg;
+      this.toast.showError(msg);
       return;
     }
 
     this.booking = true;
 
-    this.appointmentService.bookEmergencyAppointment(this.selectedDoctorId, this.reason.trim())
+    this.appointmentService.bookEmergencyAppointment(this.selectedDoctorId!, this.reason.trim())
       .subscribe({
         next: (response) => {
           this.booking = false;
