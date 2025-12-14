@@ -407,8 +407,7 @@
               <button class="btn-secondary" (click)="cancelNewCertMeta()">Cancel</button>
             </div>
           </div>
-          <div
-            *ngIf="!editingCertificatesMode && !editingCertId && !lastUploadedCertId && (certificates?.length || 0) === 0"
+          <div *ngIf="!editingCertificatesMode && !editingCertId && !lastUploadedCertId && certificates.length === 0"
             class="text-gray-400">No certificates available.</div>
           <!-- Above-table edit form (opens when clicking Edit on a row) -->
           <div *ngIf="editingCertId as eid" class="p-3 rounded border border-gray-700 bg-gray-900/40 space-y-2">
@@ -429,8 +428,7 @@
             </div>
           </div>
 
-          <div
-            *ngIf="!editingCertificatesMode && !editingCertId && !lastUploadedCertId && (certificates?.length || 0) > 0"
+          <div *ngIf="!editingCertificatesMode && !editingCertId && !lastUploadedCertId && certificates.length > 0"
             class="overflow-x-auto">
             <table class="w-full text-sm border-separate border-spacing-y-2">
               <thead>

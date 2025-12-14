@@ -10,66 +10,87 @@ import { ToastService } from '../core/services/toast.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div *ngIf="open" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-      <div class="panel p-6 w-full max-w-xl relative">
-        <button class="absolute top-2 right-2 btn-secondary" (click)="close.emit()">Close</button>
-        <div class="flex items-center gap-3 mb-4" *ngIf="doctor as doc">
-          <div class="flex flex-col items-center gap-1">
-            <div class="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center text-white border-2" [ngClass]="{'border-blue-500': doc.isVerified, 'border-transparent': !doc.isVerified, 'bg-gray-700': !doc.profileImageUrl}">
-              <img *ngIf="doc.profileImageUrl" [src]="doc.profileImageUrl" class="w-full h-full object-cover" (error)="doc.profileImageUrl = ''" />
-              <span *ngIf="!doc.profileImageUrl">{{ doctorInitial(doc) }}</span>
-            </div>
-            <div *ngIf="doc.isVerified" class="px-1.5 py-0.5 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 text-[8px] font-bold uppercase tracking-wider rounded-full flex items-center gap-1">
-              <i class="fa-solid fa-check text-[8px]"></i> Verified
-            </div>
-          </div>
-          <div>
-            <div class="font-semibold flex items-center gap-1">
-              {{ formatDoctorName(doc) }}
-              <i *ngIf="doc.isVerified" class="fa-solid fa-circle-check text-blue-500 text-xs" title="Verified Doctor"></i>
-            </div>
-            <div class="text-sm text-gray-400">{{ doc.specialization || 'General' }}</div>
-            <div class="text-sm" *ngIf="experienceYears !== null">Experience: {{ experienceYears }} years</div>
+    <div *ngIf="open" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4 backdrop-blur-sm transition-opacity">
+      <div class="panel w-full max-w-xl relative flex flex-col max-h-[75vh] sm:max-h-[85vh] shadow-2xl rounded-2xl overflow-hidden animate-in zoom-in-95 duration-200 ring-1 ring-white/10">
+        
+        <!-- Header (Fixed) -->
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between shrink-0 bg-white dark:bg-gray-900">
+             <div class="flex items-center gap-3" *ngIf="doctor as doc">
+               <div class="flex flex-col items-center gap-1">
+                 <div class="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center text-white border-2" [ngClass]="{'border-emerald-500': doc.isVerified, 'border-transparent': !doc.isVerified, 'bg-gray-700': !doc.profileImageUrl}">
+                   <img *ngIf="doc.profileImageUrl" [src]="doc.profileImageUrl" class="w-full h-full object-cover" (error)="doc.profileImageUrl = ''" />
+                   <span *ngIf="!doc.profileImageUrl">{{ doctorInitial(doc) }}</span>
+                 </div>
+               </div>
+               <div>
+                 <div class="font-bold text-gray-900 dark:text-white flex items-center gap-1 text-sm sm:text-base">
+                   {{ formatDoctorName(doc) }}
+                   <i *ngIf="doc.isVerified" class="fa-solid fa-circle-check text-emerald-500 text-xs" title="Verified Doctor"></i>
+                 </div>
+                 <div class="text-xs text-emerald-600 dark:text-emerald-400 font-medium">{{ doc.specialization || 'General' }}</div>
+               </div>
+             </div>
+             
+             <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" (click)="close.emit()">
+                <i class="fa-solid fa-xmark text-xl"></i>
+             </button>
+        </div>
+
+        <!-- Scrollable Body -->
+        <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6 bg-white dark:bg-gray-900/95">
+           
+           <!-- Date Selection -->
+           <div class="space-y-2">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Select Date</label>
+              <div class="relative">
+                 <input type="date" class="input w-full" [(ngModel)]="selectedDate" (change)="loadSlots()" [min]="minDate" />
+              </div>
+           </div>
+
+           <!-- Slots -->
+           <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Available Slots</label>
+                 <span *ngIf="loadingSlots" class="text-xs text-emerald-500"><i class="fa-solid fa-circle-notch fa-spin mr-1"></i> Checking...</span>
+              </div>
+              
+              <div *ngIf="!loadingSlots" class="min-h-[100px]">
+                <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  <button
+                    *ngFor="let s of slots"
+                    class="py-2 px-1 text-sm rounded-lg border transition-all duration-200"
+                    [ngClass]="selectedSlot === s ? 'bg-emerald-500 text-white border-emerald-500 shadow-md ring-2 ring-emerald-500/20' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-emerald-500 hover:text-emerald-500'"
+                    (click)="selectSlot(s)"
+                  >
+                    {{ s }}
+                  </button>
+                </div>
+                <div *ngIf="slots.length === 0" class="flex flex-col items-center justify-center py-8 text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+                    <i class="fa-regular fa-calendar-xmark text-2xl mb-2"></i>
+                    <span class="text-sm">No slots available</span>
+                </div>
+              </div>
+           </div>
+
+           <!-- Reason -->
+           <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Note for Doctor</label>
+            <textarea class="input w-full min-h-[80px]" rows="3" [(ngModel)]="reason" placeholder="Briefly describe your problem..."></textarea>
           </div>
         </div>
 
-        <div class="space-y-3">
-          <label class="block">
-             <span class="text-sm">Select Date</span>
-             <input type="date" class="input" [(ngModel)]="selectedDate" (change)="loadSlots()" [min]="minDate" />
-           </label>
-
-          <div *ngIf="loadingSlots" class="text-gray-400">Loading available slots…</div>
-
-          <div *ngIf="!loadingSlots">
-            <div class="text-sm mb-2">Available Slots</div>
-            <div class="flex flex-wrap gap-2">
-              <button
-                *ngFor="let s of slots"
-                [ngClass]="{ 'btn-primary': selectedSlot === s, 'btn-secondary': selectedSlot !== s }"
-                (click)="selectSlot(s)"
-              >
-                {{ s }}
-              </button>
-              <div *ngIf="(slots?.length || 0) === 0" class="text-gray-400">No slots available for selected date.</div>
-            </div>
-          </div>
-
-          <div class="mt-4">
-            <label class="block mb-1 text-sm">Reason for visit</label>
-            <textarea class="input w-full" rows="3" [(ngModel)]="reason" placeholder="e.g., persistent cough, follow-up, etc."></textarea>
-          </div>
-
-          <div class="mt-3">
+        <!-- Sticky Footer -->
+        <div class="p-4 pb-8 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 shrink-0">
             <button 
-              class="btn-primary" 
-              [disabled]="validating" 
+              class="btn-primary w-full py-3 text-base shadow-lg shadow-emerald-500/20" 
+              [disabled]="validating || !selectedSlot" 
               (click)="book()"
             >
-              {{ validating ? 'Validating…' : 'Book Selected Slot' }}
+              <span *ngIf="!validating">Confirm Booking <i class="fa-solid fa-arrow-right ml-2 opacity-80"></i></span>
+              <span *ngIf="validating"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Processing...</span>
             </button>
-          </div>
         </div>
+
       </div>
     </div>
   `,
@@ -146,7 +167,7 @@ export class DoctorBookingModalComponent implements OnChanges {
 
   book() {
     if (!this.doctor) return;
-    if ((this.slots?.length || 0) === 0) {
+    if (this.slots.length === 0) {
       this.toast.showError('Please select a future date that has available slots.');
       return;
     }

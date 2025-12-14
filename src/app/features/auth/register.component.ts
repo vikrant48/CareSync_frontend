@@ -14,7 +14,7 @@ import { SpecializationService } from '../../core/services/specialization.servic
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule, SpecializationAutocompleteComponent, ToastContainerComponent],
   template: `
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col justify-center py-4 sm:px-6 lg:px-8 relative overflow-hidden transition-colors duration-300">
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col justify-center pt-8 pb-24 px-4 sm:px-6 lg:px-8 relative transition-colors duration-300">
       
       <!-- Background Elements -->
       <div class="absolute inset-0 overflow-hidden pointer-events-none">
@@ -30,7 +30,7 @@ import { SpecializationService } from '../../core/services/specialization.servic
           <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Join CareSync to manage your health journey</p>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 shadow-2xl shadow-gray-200/50 dark:shadow-gray-900/50 sm:rounded-3xl border border-gray-100 dark:border-gray-700 backdrop-blur-sm overflow-hidden flex flex-col max-h-[80vh]">
+        <div class="bg-white dark:bg-gray-800 shadow-2xl shadow-gray-200/50 dark:shadow-gray-900/50 rounded-2xl sm:rounded-3xl border border-gray-100 dark:border-gray-700 backdrop-blur-sm overflow-hidden flex flex-col h-[70vh] sm:h-auto sm:max-h-[80vh]">
           
           <!-- Progress Bar -->
           <div class="bg-gray-50 dark:bg-gray-700/30 px-6 py-4 border-b border-gray-100 dark:border-gray-700">

@@ -3,13 +3,13 @@ import { CommonModule } from '@angular/common';
 import { MedicalHistoryItem } from '../core/services/patient-profile.service';
 
 @Component({
-  selector: 'app-medical-history-detail-modal',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
-    <div *ngIf="open" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-      <div class="panel rounded-2xl shadow-2xl w-full max-w-xl border border-gray-700/50 flex flex-col max-h-[90vh]">
-        <div class="flex items-center justify-between p-5 border-b border-gray-700/50">
+   selector: 'app-medical-history-detail-modal',
+   standalone: true,
+   imports: [CommonModule],
+   template: `
+    <div *ngIf="open" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4 animate-fade-in transition-opacity">
+      <div class="panel rounded-2xl shadow-2xl w-full max-w-xl border border-gray-700/50 flex flex-col max-h-[80vh] overflow-hidden relative">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-700/50 bg-gray-900 shrink-0">
           <div class="flex items-center gap-3">
              <div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400">
                <i class="fa-solid fa-file-medical text-xl"></i>
@@ -21,7 +21,7 @@ import { MedicalHistoryItem } from '../core/services/patient-profile.service';
           </button>
         </div>
         
-        <div class="p-6 overflow-y-auto custom-scrollbar" *ngIf="detail && doctorInfo; else loading">
+        <div class="p-6 overflow-y-auto custom-scrollbar flex-1 bg-gray-900/95" *ngIf="detail && doctorInfo; else loading">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div class="space-y-6">
               <div>
@@ -93,8 +93,8 @@ import { MedicalHistoryItem } from '../core/services/patient-profile.service';
   `,
 })
 export class MedicalHistoryDetailModalComponent {
-  @Input() open = false;
-  @Input() detail: Partial<MedicalHistoryItem> | null = null;
-  @Input() doctorInfo: { doctorName: string; doctorSpecialization?: string; doctorContactInfo?: string } | null = null;
-  @Output() close = new EventEmitter<void>();
+   @Input() open = false;
+   @Input() detail: Partial<MedicalHistoryItem> | null = null;
+   @Input() doctorInfo: { doctorName: string; doctorSpecialization?: string; doctorContactInfo?: string } | null = null;
+   @Output() close = new EventEmitter<void>();
 }

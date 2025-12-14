@@ -35,7 +35,7 @@ import { ToastService } from '../../core/services/toast.service';
             <button (click)="navigateToBooking()" 
                     class="btn-primary !py-2.5 flex items-center gap-2 justify-center flex-1 md:flex-none shadow-lg shadow-blue-500/20">
               <i class="fas fa-plus"></i>
-              <span>Book New Test</span>
+              <span>New Test</span>
             </button>
           </div>
         </div>
@@ -153,7 +153,7 @@ import { ToastService } from '../../core/services/toast.service';
 
               <button *ngIf="booking.status === 'PENDING'" 
                       (click)="payForBooking(booking)"
-                      class="ml-auto px-4 py-1.5 bg-yellow-500/10 text-yellow-500 border border-yellow-500/50 rounded-lg text-sm font-medium hover:bg-yellow-500 text-white transition-all duration-300">
+                      class="ml-auto px-4 py-1.5 bg-yellow-500/10 text-yellow-500 border border-yellow-500/50 rounded-lg text-sm font-medium hover:bg-yellow-500 hover:text-white transition-all duration-300">
                  Pay Now
               </button>
             </div>
@@ -167,10 +167,10 @@ import { ToastService } from '../../core/services/toast.service';
         <div class="absolute inset-0 bg-black/80 backdrop-blur-sm animate-fade-in" (click)="closeDetailsModal()"></div>
         
         <!-- Modal Content -->
-        <div class="relative bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-scale-in">
+        <div class="relative bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col animate-scale-in">
           
           <!-- Modal Header -->
-          <div class="px-6 py-5 border-b border-gray-800 flex justify-between items-center bg-gray-800/50">
+          <div class="px-6 py-5 border-b border-gray-800 flex justify-between items-center bg-gray-800/50 shrink-0">
             <div>
                <h2 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">Booking Details</h2>
                <p class="text-xs text-gray-400 mt-1 font-mono">ID: #{{ selectedBooking()?.id }}</p>
@@ -182,7 +182,7 @@ import { ToastService } from '../../core/services/toast.service';
 
           <ng-container *ngIf="selectedBooking() as booking">
             <!-- Modal Body -->
-            <div class="p-6 overflow-y-auto custom-scrollbar space-y-6">
+            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6">
                
                <!-- Status Banner -->
                <div class="flex items-center justify-between p-4 rounded-xl bg-gray-800/50 border border-gray-700/50">
@@ -247,7 +247,7 @@ import { ToastService } from '../../core/services/toast.service';
             </div>
 
             <!-- Modal Footer -->
-            <div class="p-5 border-t border-gray-800 bg-gray-800/50 flex justify-end gap-3">
+            <div class="p-5 border-t border-gray-800 bg-gray-800/50 flex justify-end gap-3 shrink-0">
                <button (click)="closeDetailsModal()" class="px-5 py-2.5 rounded-xl border border-gray-600 text-gray-300 font-medium hover:bg-gray-700 transition-all">
                   Close
                </button>

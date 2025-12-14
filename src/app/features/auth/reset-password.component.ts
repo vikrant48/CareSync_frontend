@@ -12,7 +12,7 @@ import { ToastContainerComponent } from '../../shared/toast-container.component'
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, ToastContainerComponent],
   template: `
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden transition-colors duration-300">
+    <div class="h-screen bg-gray-50 dark:bg-gray-950 flex flex-col justify-center pt-12 pb-40 px-4 sm:px-6 lg:px-8 relative overflow-hidden transition-colors duration-300">
       
       <!-- Background Elements -->
       <div class="absolute inset-0 overflow-hidden pointer-events-none">
@@ -24,14 +24,11 @@ import { ToastContainerComponent } from '../../shared/toast-container.component'
         
         <!-- Header -->
         <div class="text-center mb-8">
-           <div class="inline-flex items-center justify-center p-3 bg-gradient-to-br from-purple-400 to-blue-500 rounded-2xl shadow-lg mb-4 transform rotate-3 hover:rotate-6 transition-transform">
-                <i class="fa-solid fa-key text-2xl text-white"></i>
-            </div>
           <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Reset Password</h2>
           <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Recover your account access securely</p>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 shadow-2xl shadow-gray-200/50 dark:shadow-gray-900/50 sm:rounded-3xl border border-gray-100 dark:border-gray-700 backdrop-blur-sm overflow-hidden flex flex-col">
+        <div class="bg-white dark:bg-gray-800 shadow-2xl shadow-gray-200/50 dark:shadow-gray-900/50 rounded-2xl sm:rounded-3xl border border-gray-100 dark:border-gray-700 backdrop-blur-sm overflow-hidden flex flex-col">
           
           <div class="p-8 space-y-6">
 
