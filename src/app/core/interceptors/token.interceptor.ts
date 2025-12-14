@@ -7,7 +7,16 @@ import { catchError, switchMap, throwError } from 'rxjs';
 export const tokenInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: HttpHandlerFn) => {
   const auth = inject(AuthService);
   const router = inject(Router);
-  
+
+  // Skip token logic for auth endpoints (login, register, refresh, etc.) EXCEPT logout, current-user, and change-password
+  if (req.url.includes('/api/auth/') &&
+    !req.url.includes('/api/auth/logout') &&
+    !req.url.includes('/api/auth/email-verification') &&
+    !req.url.includes('/api/auth/current-user') &&
+    !req.url.includes('/api/auth/change-password')) {
+    return next(req);
+  }
+
   // Check if token needs refresh before making the request
   const refreshObservable = auth.checkAndRefreshToken();
   if (refreshObservable) {
@@ -18,24 +27,19 @@ export const tokenInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next:
         localStorage.setItem('refreshToken', resp.refreshToken);
         auth.accessToken.set(resp.accessToken);
         auth.refreshToken.set(resp.refreshToken);
-        
+
         // Make the request with the new token
         const authReq = req.clone({ setHeaders: { Authorization: `Bearer ${resp.accessToken}` } });
         return next(authReq);
       }),
       catchError((refreshError) => {
-        // If refresh fails, route based on expiration type
-        const expirationStatus = auth.getTokenExpirationStatus();
-        if (expirationStatus === 'long_expired') {
-          router.navigate(['/auth/session-expired']);
-        } else {
-          router.navigate(['/auth/token-refresh']);
-        }
+        // If proactive refresh fails, clear everything and redirect
+        auth.logout();
         return throwError(() => refreshError);
       })
     );
   }
-  
+
   const token = auth.accessToken();
   const authReq = token
     ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
@@ -43,8 +47,17 @@ export const tokenInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next:
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      // Handle both 401 (Unauthorized) and 403 (Forbidden) for expired tokens
-      if ((error.status === 401 || error.status === 403) && auth.refreshToken()) {
+      // Handle 401 (Unauthorized) for expired tokens
+      // NOTE: We do not handle 403 (Forbidden) here anymore, as it indicates valid token but insufficient permissions.
+      // Auto-logout on 403 causes poor UX when it's just a permission error.
+      if (error.status === 401 && auth.refreshToken()) {
+
+        // Prevent infinite loops: If the failed request was already a refresh attempt, give up.
+        if (req.url.includes('/auth/refresh')) {
+          auth.logout();
+          return throwError(() => error);
+        }
+
         return auth.refresh().pipe(
           switchMap((resp) => {
             // Update tokens
@@ -56,13 +69,8 @@ export const tokenInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next:
             return next(retryReq);
           }),
           catchError((refreshError) => {
-            // If refresh fails, route based on expiration type
-            const expirationStatus = auth.getTokenExpirationStatus();
-            if (expirationStatus === 'long_expired') {
-              router.navigate(['/auth/session-expired']);
-            } else {
-              router.navigate(['/auth/token-refresh']);
-            }
+            // If refresh fails, clearly logout the user to scrub the invalid session
+            auth.logout();
             return throwError(() => refreshError);
           })
         );

@@ -20,6 +20,8 @@ export interface PatientAppointmentItem {
   reason?: string;
   statusChangedBy?: string;
   statusChangedAt?: string;
+  doctorIsVerified?: boolean;
+  doctorProfileImageUrl?: string;
 }
 
 export interface DoctorAppointmentItem {
@@ -34,13 +36,14 @@ export interface DoctorAppointmentItem {
   reason?: string;
   statusChangedBy?: string;
   statusChangedAt?: string;
+  patientProfileImageUrl?: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class AppointmentService {
   private baseUrl = environment.apiBaseUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getAvailableSlots(doctorId: number, dateISO: string) {
     return this.http.get<string[]>(
@@ -58,7 +61,7 @@ export class AppointmentService {
     if (reason) {
       params.append('reason', reason);
     }
-    
+
     return this.http.post<PatientAppointmentItem>(
       `${this.baseUrl}/api/appointments/patient/book-emergency?${params.toString()}`,
       {}

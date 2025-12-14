@@ -28,7 +28,7 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-patient-layout>
-    <div class="p-4 sm:p-6 space-y-6 sm:space-y-8">
+    <div class="max-w-6xl mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8">
       <!-- Welcome Banner -->
       <section class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl p-4 sm:p-6 shadow">
         <!-- Small screen top bar: avatar left, notification right -->
@@ -159,14 +159,14 @@ export class PatientDashboardComponent {
   // Pending feedback state
   loadingPending = false;
   pendingFeedbackCount = 0;
-  
+
   // Lab tests state
   loadingLabTests = false;
   labTestCount = 0;
-  
+
   // Today appointments count
   todayAppointmentsCount = 0;
-  
+
 
   patientAnalytics: any = null;
   medicalHistoryRecent: MedicalHistoryItem[] = [];
@@ -200,7 +200,7 @@ export class PatientDashboardComponent {
     private router: Router,
     private patientApi: PatientProfileService,
     private labTestApi: LabTestService
-  ) {}
+  ) { }
 
   // Notification logic removed; handled by PatientNotificationComponent
 
@@ -229,6 +229,7 @@ export class PatientDashboardComponent {
         this.loadingDoctors = false;
         // Load ratings for each doctor
         this.doctors.forEach((d) => this.loadRating(d));
+        this.enrichAppointments();
         this.cdr.markForCheck();
       },
       error: () => {
@@ -315,6 +316,7 @@ export class PatientDashboardComponent {
       next: (res) => {
         this.appointments = res || [];
         this.todayAppointmentsCount = (this.appointments || []).filter((a) => isAppointmentToday(a)).length;
+        this.enrichAppointments();
         this.loadingAppointments = false;
         this.cdr.markForCheck();
       },
@@ -322,6 +324,19 @@ export class PatientDashboardComponent {
         this.loadingAppointments = false;
         this.cdr.markForCheck();
       },
+    });
+  }
+
+  enrichAppointments() {
+    if (!this.appointments.length || !this.doctors.length) return;
+    this.appointments.forEach(a => {
+      const doc = this.doctors.find(d => {
+        const name = (d.name || `${d.firstName || ''} ${d.lastName || ''}`).trim();
+        return name === a.doctorName;
+      });
+      if (doc) {
+        a.doctorIsVerified = doc.isVerified;
+      }
     });
   }
 
@@ -411,7 +426,7 @@ export class PatientDashboardComponent {
   cancelAppointment(a: PatientAppointmentItem) {
     this.apptApi.cancelMyAppointment(a.appointmentId).subscribe({
       next: () => this.refreshAppointments(),
-      error: () => {},
+      error: () => { },
     });
   }
 
@@ -524,10 +539,10 @@ export class PatientDashboardComponent {
     const info = this.medicalHistoryWithDoctor.find((h) => h.id === historyId);
     this.selectedHistoryDoctorInfo = info
       ? {
-          doctorName: info.doctorName,
-          doctorSpecialization: info.doctorSpecialization,
-          doctorContactInfo: info.doctorContactInfo,
-        }
+        doctorName: info.doctorName,
+        doctorSpecialization: info.doctorSpecialization,
+        doctorContactInfo: info.doctorContactInfo,
+      }
       : { doctorName: 'Unknown', doctorSpecialization: '', doctorContactInfo: '' };
     this.selectedHistoryDetail = null;
     this.historyDetailModalOpen = true;
@@ -554,6 +569,6 @@ export class PatientDashboardComponent {
   openDocument(d: PatientDocumentItem) {
     try {
       window.open(d.filePath, '_blank');
-    } catch {}
+    } catch { }
   }
 }

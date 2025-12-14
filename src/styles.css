@@ -14,7 +14,8 @@
   --primary: #22c55e;
 }
 
-html, body {
+html,
+body {
   height: 100%;
 }
 
@@ -23,19 +24,40 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-  overflow: hidden; /* Disable outer page scrolling */
+  overflow: hidden;
+  /* Disable outer page scrolling */
 }
 
+/* Hide scrollbar for Chrome, Safari and Opera */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+html,
+body {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+/* Refined Panel for 'Clean' look */
 .panel {
-  @apply bg-gray-900/80 backdrop-blur rounded-xl border border-gray-800;
+  @apply bg-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-800 shadow-lg transition-transform duration-300 hover:scale-[1.01];
+}
+
+/* Soft card aesthetic */
+.soft-card {
+  @apply bg-gray-800/50 rounded-lg p-4 transition-all duration-300 hover:bg-gray-800 hover:shadow-md;
 }
 
 .btn-primary {
-  @apply inline-flex items-center justify-center rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-medium px-4 py-2 transition min-h-[44px];
+  @apply inline-flex items-center justify-center rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-medium px-4 py-2 transition min-h-[44px] active:scale-95 shadow-lg shadow-emerald-500/20;
 }
 
 .btn-secondary {
-  @apply inline-flex items-center justify-center rounded-lg bg-gray-700 hover:bg-gray-600 text-white font-medium px-4 py-2 transition min-h-[44px];
+  @apply inline-flex items-center justify-center rounded-lg bg-gray-700 hover:bg-gray-600 text-white font-medium px-4 py-2 transition min-h-[44px] active:scale-95 border border-gray-600;
 }
 
 .link {
@@ -43,7 +65,7 @@ body {
 }
 
 .input {
-  @apply w-full rounded-lg border border-gray-700 bg-gray-800/60 px-3 py-2 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[44px];
+  @apply w-full rounded-lg border border-gray-700 bg-gray-800/60 px-3 py-2 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[44px] transition-all focus:border-emerald-500;
 }
 
 /* Light theme overrides */
@@ -52,11 +74,13 @@ body.light {
   --bg: #f8fafc;
   --text: #111827;
 }
+
 body.theme-light .panel,
 body.light .panel {
   background: #ffffff;
   border-color: #e5e7eb;
 }
+
 body.theme-light .input,
 body.light .input {
   background: #ffffff;

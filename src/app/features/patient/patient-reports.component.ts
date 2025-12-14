@@ -13,50 +13,148 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-patient-layout>
-      <div class="panel p-6 space-y-6">
-        <div class="flex items-center justify-between">
-          <h2 class="text-xl font-semibold">Insights / Reports</h2>
-        </div>
-        <!-- My Analytics -->
-        <section class="mt-2" *ngIf="!loadingReports; else loadingTpl">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- <div class="panel p-4">
-              <div class="text-sm text-gray-400">Overview</div>
-              <div class="mt-2 text-sm">
-                <div>Total Appointments: {{ patientAnalytics?.totalAppointments ?? '�' }}</div>
-                <div>Avg Visits/Month: {{ patientAnalytics?.averageVisitsPerMonth ?? '�' }}</div>
-              </div>
-            </div> -->
-            <app-chart-widget
-              *ngIf="overviewData.length > 0"
-              title="Overview"
-              [type]="'bar'"
-              [labels]="overviewLabels"
-              [data]="overviewData"
-            ></app-chart-widget>
-            <app-chart-widget
-              *ngIf="doctorVisitLabels.length > 0"
-              title="Visits by Doctor"
-              [type]="'bar'"
-              [labels]="doctorVisitLabels"
-              [data]="doctorVisitData"
-            ></app-chart-widget>
-            <app-chart-widget
-              *ngIf="appointmentStatusData.length > 0"
-              title="Appointment Status"
-              [type]="'pie'"
-              [labels]="appointmentStatusLabels"
-              [data]="appointmentStatusData"
-            ></app-chart-widget>
+      <div class="space-y-8">
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Analytics & Insights</h2>
+            <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Track your health journey and appointment history.</p>
           </div>
-        </section>
-        <ng-template #loadingTpl>
-          <section class="mt-2">
-            <div class="flex items-center justify-center min-h-[180px] text-gray-500">
-              <i class="fa-solid fa-spinner fa-spin text-3xl mr-3"></i>
-              <span>Loading Reports...</span>
+          <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+            <i class="fa-regular fa-calendar"></i>
+            <span>Last 12 Months</span>
+          </div>
+        </div>
+
+        <!-- content -->
+        <div *ngIf="!loadingReports; else loadingTpl" class="space-y-8 animate-in fade-in duration-500">
+          
+          <!-- Summary Stats Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Total Appointments -->
+            <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
+              <div class="absolute right-0 top-0 w-24 h-24 bg-blue-50 dark:bg-blue-900/20 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+              <div class="relative z-10">
+                <div class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Total Appointments</div>
+                <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ patientAnalytics?.totalAppointments || 0 }}</div>
+                <div class="mt-2 text-xs text-blue-600 dark:text-blue-400 font-medium flex items-center gap-1">
+                  <i class="fa-solid fa-arrow-up"></i>
+                  <span>All time</span>
+                </div>
+              </div>
             </div>
-          </section>
+
+            <!-- Avg Visits -->
+            <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
+              <div class="absolute right-0 top-0 w-24 h-24 bg-emerald-50 dark:bg-emerald-900/20 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+              <div class="relative z-10">
+                <div class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Avg. Visits / Month</div>
+                <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ patientAnalytics?.averageVisitsPerMonth || 0 }}</div>
+                <div class="mt-2 text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                  <i class="fa-solid fa-chart-line"></i>
+                  <span>Activity Level</span>
+                </div>
+              </div>
+            </div>
+
+             <!-- Cancelled (Derived) -->
+            <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
+              <div class="absolute right-0 top-0 w-24 h-24 bg-rose-50 dark:bg-rose-900/20 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+              <div class="relative z-10">
+                <div class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Cancelled</div>
+                <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ patientAnalytics?.cancelledAppointments || 0 }}</div>
+                <div class="mt-2 text-xs text-rose-600 dark:text-rose-400 font-medium flex items-center gap-1">
+                  <i class="fa-solid fa-ban"></i>
+                  <span>Missed</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Completed (Derived) -->
+            <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
+              <div class="absolute right-0 top-0 w-24 h-24 bg-indigo-50 dark:bg-indigo-900/20 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+              <div class="relative z-10">
+                <div class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Completed</div>
+                <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ patientAnalytics?.totalVisits || 0 }}</div>
+                <div class="mt-2 text-xs text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-1">
+                  <i class="fa-solid fa-check-double"></i>
+                  <span>Successful</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Doctor Visits Chart -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">Visits by Doctor</h3>
+              <div class="flex-1 min-h-[300px]">
+                <app-chart-widget
+                  *ngIf="doctorVisitLabels.length > 0; else noDataDocs"
+                  [type]="'bar'"
+                  [labels]="doctorVisitLabels"
+                  [data]="doctorVisitData"
+                ></app-chart-widget>
+                <ng-template #noDataDocs>
+                  <div class="h-full flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
+                    <i class="fa-solid fa-user-doctor text-4xl mb-3 opacity-20"></i>
+                    <p>No doctor visit data available</p>
+                  </div>
+                </ng-template>
+              </div>
+            </div>
+
+            <!-- Appointment Status Chart -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">Appointment Status</h3>
+              <div class="flex-1 min-h-[300px]">
+                <app-chart-widget
+                  *ngIf="appointmentStatusData.length > 0 && hasData(appointmentStatusData); else noDataStatus"
+                  [type]="'pie'"
+                  [labels]="appointmentStatusLabels"
+                  [data]="appointmentStatusData"
+                ></app-chart-widget>
+                 <ng-template #noDataStatus>
+                  <div class="h-full flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
+                    <i class="fa-regular fa-calendar-xmark text-4xl mb-3 opacity-20"></i>
+                    <p>No appointment status data</p>
+                  </div>
+                </ng-template>
+              </div>
+            </div>
+
+             <!-- Overview Bar Chart (Full Width) -->
+            <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">Appointment Overview</h3>
+              <div class="flex-1 min-h-[300px]">
+                 <app-chart-widget
+                  *ngIf="overviewData.length > 0; else noDataOverview"
+                  [type]="'bar'"
+                  [labels]="overviewLabels"
+                  [data]="overviewData"
+                ></app-chart-widget>
+                <ng-template #noDataOverview>
+                   <div class="h-full flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
+                    <i class="fa-solid fa-chart-simple text-4xl mb-3 opacity-20"></i>
+                    <p>No overview data available</p>
+                  </div>
+                </ng-template>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <ng-template #loadingTpl>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
+             <div class="h-32 bg-gray-200 dark:bg-gray-700 rounded-2xl" *ngFor="let i of [1,2,3,4]"></div>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8 animate-pulse">
+             <div class="h-80 bg-gray-200 dark:bg-gray-700 rounded-2xl"></div>
+             <div class="h-80 bg-gray-200 dark:bg-gray-700 rounded-2xl"></div>
+             <div class="h-80 bg-gray-200 dark:bg-gray-700 rounded-2xl lg:col-span-2"></div>
+          </div>
         </ng-template>
       </div>
     </app-patient-layout>
@@ -100,6 +198,10 @@ export class PatientReportsComponent implements OnInit {
       this.loadPatientAnalytics();
     }
     this.loadDoctors();
+  }
+
+  hasData(data: number[]): boolean {
+    return data.some(v => v > 0);
   }
 
   loadPatientAnalytics() {

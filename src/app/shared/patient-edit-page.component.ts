@@ -13,98 +13,126 @@ import { AuthService } from '../core/services/auth.service';
   imports: [CommonModule, FormsModule, RouterModule, PatientLayoutComponent],
   template: `
     <app-patient-layout>
-      <section class="panel p-6 space-y-6">
-        <div class="flex items-center justify-between">
-          <h2 class="text-xl font-semibold">Edit Patient Details</h2>
-          <a class="btn-secondary" [routerLink]="backLink">Back to Profile</a>
+      <div class="max-w-6xl mx-auto space-y-6">
+        
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <h2 class="text-2xl font-bold text-gray-100 tracking-tight">Edit Profile</h2>
+          <a class="btn-secondary self-start sm:self-auto" [routerLink]="backLink">
+            <i class="fa-solid fa-arrow-left mr-2"></i> Back
+          </a>
         </div>
 
-        <!-- Basic info header -->
-        <div class="flex items-start gap-4">
-          <div class="w-16 h-16 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center text-white">
-            <img *ngIf="editableProfile?.profileImageUrl; else initials" [src]="editableProfile?.profileImageUrl" class="w-full h-full object-cover" (error)="onImageError()" />
-            <ng-template #initials>
-              <span class="text-xl font-semibold">{{ initialsFromName(editableProfile) }}</span>
-            </ng-template>
-          </div>
-          <div class="text-sm">
-            <div class="text-lg font-semibold">{{ fullName(editableProfile) }}</div>
-            <div class="text-gray-400">ID: {{ editableProfile?.id ?? '—' }}</div>
-            <div class="text-gray-400">Email: {{ editableProfile?.email || '—' }}</div>
-            <div class="text-gray-400">Mobile: {{ editableProfile?.contactInfo || '—' }}</div>
-          </div>
-        </div>
-
-        <!-- Edit form -->
-        <form class="grid gap-4" (ngSubmit)="save()">
-          <div class="grid md:grid-cols-2 gap-4">
-          <label class="grid gap-1">
-            <span class="text-sm text-gray-300">First Name</span>
-            <input class="input" [(ngModel)]="form.firstName" name="firstName" />
-          </label>
-          <label class="grid gap-1">
-            <span class="text-sm text-gray-300">Last Name</span>
-            <input class="input" [(ngModel)]="form.lastName" name="lastName" />
-          </label>
-          <label class="grid gap-1">
-            <span class="text-sm text-gray-300">Email</span>
-            <input class="input" [(ngModel)]="form.email" name="email" type="email" />
-          </label>
-          <label class="grid gap-1">
-            <span class="text-sm text-gray-300">Contact Info</span>
-            <input class="input" [(ngModel)]="form.contactInfo" name="contactInfo" />
-          </label>
-          <label class="grid gap-1">
-            <span class="text-sm text-gray-300">Date of Birth</span>
-            <input class="input" [(ngModel)]="form.dateOfBirth" name="dateOfBirth" type="date" />
-          </label>
-          <label class="grid gap-1">
-            <span class="text-sm text-gray-300">Gender</span>
-            <select class="input" [(ngModel)]="form.gender" name="gender">
-              <option value="">Select</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </select>
-          </label>
-          </div>
-          <label class="grid gap-1">
-            <span class="text-sm text-gray-300">Illness Details</span>
-            <textarea class="input" rows="3" [(ngModel)]="form.illnessDetails" name="illnessDetails"></textarea>
-          </label>
-
-        <!-- Image upload -->
-        <div class="border border-gray-700 rounded p-4">
-          <div class="font-medium mb-2">Profile Image</div>
-          <div class="flex items-center gap-4">
-            <input #profileFileInput type="file" (change)="onFileChange($event)" />
-            <button type="button" class="btn-upload" (click)="uploadImage()" [disabled]="uploading || !file">
-              {{ uploading ? 'Uploading…' : 'Upload' }}
-            </button>
-          </div>
-        </div>
-
-          <div class="flex items-center gap-2 justify-end">
-            <button type="button" class="btn-secondary" (click)="reset()" [disabled]="saving">Reset</button>
-            <button type="submit" class="btn-primary" [disabled]="saving">{{ saving ? 'Saving...' : 'Save Changes' }}</button>
+        <section class="panel p-6 sm:p-8 space-y-8 animate-fade-in">
+          
+          <!-- Identity Section -->
+          <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 pb-6 border-b border-gray-800">
+            <div class="relative group">
+              <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gray-800 overflow-hidden ring-4 ring-gray-800 shadow-xl flex items-center justify-center text-white text-3xl font-bold">
+                <img *ngIf="editableProfile?.profileImageUrl; else initials" [src]="editableProfile?.profileImageUrl" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" (error)="onImageError()" />
+                <ng-template #initials>
+                  <span>{{ initialsFromName(editableProfile) }}</span>
+                </ng-template>
+              </div>
+              <label class="absolute bottom-0 right-0 p-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full cursor-pointer shadow-lg transition-transform hover:scale-105" title="Change Photo">
+                <input #profileFileInput type="file" class="hidden" (change)="onFileChange($event)" />
+                <i class="fa-solid fa-camera text-sm"></i>
+              </label>
+            </div>
+            
+            <div class="text-center sm:text-left space-y-1 flex-1">
+              <h3 class="text-2xl font-bold text-white">{{ fullName(editableProfile) }}</h3>
+              <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-sm text-gray-400">
+                <span class="bg-gray-800 px-2 py-1 rounded">ID: {{ editableProfile?.id ?? '—' }}</span>
+                <span>{{ editableProfile?.email || '—' }}</span>
+              </div>
+              
+              <div class="pt-3" *ngIf="file">
+                 <button type="button" class="btn-primary text-sm py-1.5 px-3" (click)="uploadImage()" [disabled]="uploading">
+                   <i class="fa-solid fa-cloud-arrow-up mr-2"></i>
+                   {{ uploading ? 'Uploading...' : 'Confirm Upload' }}
+                 </button>
+              </div>
+            </div>
           </div>
 
-          <div *ngIf="error" class="text-red-400">{{ error }}</div>
-          <div *ngIf="success" class="text-green-400">Saved successfully</div>
-        </form>
-      </section>
+          <!-- Edit Form -->
+          <form class="space-y-6" (ngSubmit)="save()">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-400">First Name</label>
+                <input class="input" [(ngModel)]="form.firstName" name="firstName" placeholder="John" />
+              </div>
+
+              <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-400">Last Name</label>
+                <input class="input" [(ngModel)]="form.lastName" name="lastName" placeholder="Doe" />
+              </div>
+
+              <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-400">Email Address</label>
+                <input class="input" [(ngModel)]="form.email" name="email" type="email" placeholder="john@example.com" />
+              </div>
+
+              <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-400">Contact Number</label>
+                <input class="input" [(ngModel)]="form.contactInfo" name="contactInfo" placeholder="+1 (555) 000-0000" />
+              </div>
+
+              <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-400">Date of Birth</label>
+                <input class="input" [(ngModel)]="form.dateOfBirth" name="dateOfBirth" type="date" />
+              </div>
+
+              <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-400">Gender</label>
+                <div class="relative">
+                  <select class="input appearance-none" [(ngModel)]="form.gender" name="gender">
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-sm font-medium text-gray-400">Medical History / Illness Details</label>
+              <textarea class="input min-h-[100px]" rows="4" [(ngModel)]="form.illnessDetails" name="illnessDetails" placeholder="Any existing conditions..."></textarea>
+            </div>
+
+            <div class="pt-6 border-t border-gray-800 flex items-center justify-end gap-3">
+              <button type="button" class="btn-secondary" (click)="reset()" [disabled]="saving">Reset Changes</button>
+              <button type="submit" class="btn-primary min-w-[120px]" [disabled]="saving">
+                <i class="fa-solid fa-save mr-2" *ngIf="!saving"></i>
+                <i class="fa-solid fa-circle-notch animate-spin mr-2" *ngIf="saving"></i>
+                {{ saving ? 'Saving...' : 'Save Changes' }}
+              </button>
+            </div>
+
+            <!-- Status Messages -->
+            <div *ngIf="error" class="p-4 rounded-lg bg-red-900/20 border border-red-500/30 text-red-400 flex items-center gap-3 animate-fade-in">
+              <i class="fa-solid fa-circle-exclamation text-xl"></i>
+              <span>{{ error }}</span>
+            </div>
+            
+            <div *ngIf="success" class="p-4 rounded-lg bg-emerald-900/20 border border-emerald-500/30 text-emerald-400 flex items-center gap-3 animate-fade-in">
+              <i class="fa-solid fa-circle-check text-xl"></i>
+              <span>Profile updated successfully!</span>
+            </div>
+            
+          </form>
+        </section>
+      </div>
     </app-patient-layout>
   `,
-  styles: [
-    `
-    .panel { background-color: rgba(17,24,39,0.6); border: 1px solid #374151; border-radius: 0.75rem; }
-    .input { background:#111827; border:1px solid #374151; border-radius:.5rem; padding:.5rem .75rem; color:#fff; }
-    .btn-primary { background:#2563EB; color:#fff; padding:.5rem .75rem; border-radius:.5rem; }
-    .btn-secondary { background:#374151; color:#fff; padding:.5rem .75rem; border-radius:.5rem; }
-    .btn-upload { background:#10B981; color:#0b1b13; padding:.5rem .75rem; border-radius:.5rem; font-weight:600; }
-    .btn-upload[disabled] { opacity:0.6; cursor:not-allowed; }
-    `,
-  ],
+  styles: [],
 })
 export class PatientEditPageComponent implements OnInit {
   private svc = inject(PatientProfileService);
@@ -200,7 +228,7 @@ export class PatientEditPageComponent implements OnInit {
           if (uname) {
             this.svc.getProfile(uname).subscribe({
               next: (p) => (this.editableProfile = p),
-              error: () => {},
+              error: () => { },
             });
           }
           // Reset file input and selection

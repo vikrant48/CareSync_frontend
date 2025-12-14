@@ -9,62 +9,125 @@ import { DoctorAppointmentItem } from '../core/services/appointment.service';
   imports: [CommonModule, FormsModule],
   template: `
     <div
-      class="border border-gray-800 rounded-2xl bg-gray-900/70 transition duration-200 p-4 sm:p-5 shadow-sm hover:shadow-md hover:ring-1 hover:ring-blue-600/30"
-      [class.opacity-70]="disabled"
+      class="group relative bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-300 h-full flex flex-col"
+      [class.opacity-60]="disabled"
+      [class.pointer-events-none]="disabled"
     >
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <!-- Header: Patient Info & Status -->
+      <div class="flex items-start justify-between gap-3 mb-4">
         <div class="flex items-center gap-3 min-w-0">
-          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-800 to-blue-600 text-white flex items-center justify-center font-semibold shrink-0">
-            {{ (appointment.patientName || 'P') | slice:0:1 }}
+          <div class="relative w-12 h-12 shrink-0">
+             <img *ngIf="appointment.patientProfileImageUrl; else initials"
+                  [src]="appointment.patientProfileImageUrl"
+                  alt="{{appointment.patientName}}"
+                  class="w-full h-full rounded-full object-cover shadow-lg shadow-blue-500/20 ring-2 ring-white dark:ring-gray-700"
+             />
+             <ng-template #initials>
+                <div class="w-full h-full rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-blue-500/20">
+                  {{ (appointment.patientName || 'P') | slice:0:1 }}
+                </div>
+             </ng-template>
           </div>
           <div class="min-w-0">
-            <p class="font-semibold leading-tight truncate text-gray-100">{{ appointment.patientName }}</p>
-            <p class="text-xs text-gray-400 flex items-center gap-1">
-              <i class="fa-regular fa-clock"></i>
-              <span>{{ appointment.appointmentDate }} · {{ appointment.appointmentTime }}</span>
-            </p>
+            <h3 class="font-bold text-gray-900 dark:text-gray-100 truncate text-base leading-tight">{{ appointment.patientName }}</h3>
+            <div class="flex items-center gap-2 mt-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+               <span class="flex items-center gap-1 bg-gray-100 dark:bg-gray-700/50 px-2 py-0.5 rounded-md">
+                 <i class="fa-regular fa-calendar"></i>
+                 {{ appointment.appointmentDate }}
+               </span>
+               <span class="flex items-center gap-1 bg-gray-100 dark:bg-gray-700/50 px-2 py-0.5 rounded-md">
+                 <i class="fa-regular fa-clock"></i>
+                 {{ appointment.appointmentTime }}
+               </span>
+            </div>
           </div>
         </div>
         <span
-          class="px-2 py-1 rounded text-xs font-semibold tracking-wide"
+          class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border"
           [ngClass]="statusBadgeClass(appointment.status)"
         >
           {{ statusLabel(appointment) }}
         </span>
       </div>
 
-      <div class="mt-3 space-y-2">
-        <div class="text-xs sm:text-sm text-gray-300 truncate flex items-center gap-2" *ngIf="appointment.reason" [title]="appointment.reason">
-          <i class="fa-regular fa-note-sticky text-gray-400"></i>
-          <span>{{ appointment.reason }}</span>
-        </div>
+      <!-- Content: Reason -->
+      <div class="mb-4 flex-1">
+         <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-3 border border-gray-100 dark:border-gray-700/50">
+           <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Reason for Visit</label>
+           <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2" [title]="appointment.reason || 'No reason provided'">
+             {{ appointment.reason || 'No specific reason provided.' }}
+           </p>
+         </div>
       </div>
 
-      <div class="mt-3 flex flex-col sm:flex-row flex-wrap gap-2">
-        <button class="btn-primary w-full sm:w-auto" (click)="onViewPatient()" [disabled]="disabled">
-          <i class="fa-regular fa-id-card mr-2"></i>
-          View Patient Details
+      <!-- Actions Footer -->
+      <div class="pt-4 border-t border-gray-100 dark:border-gray-700 mt-auto grid grid-cols-1 gap-2">
+        <!-- Primary Actions based on Status -->
+         
+        <!-- BOOKED -->
+        <div class="grid grid-cols-2 gap-2" *ngIf="appointment.status === 'BOOKED'">
+          <button class="btn-action btn-check" (click)="onSchedule()" [disabled]="disabled">
+            <i class="fa-solid fa-calendar-check"></i> Accept
+          </button>
+          <button class="btn-action btn-danger" (click)="onCancel()" [disabled]="disabled">
+            <i class="fa-solid fa-xmark"></i> Decline
+          </button>
+        </div>
+
+        <!-- SCHEDULED -->
+        <div class="grid grid-cols-2 gap-2" *ngIf="appointment.status === 'SCHEDULED'">
+          <button class="btn-action btn-check" (click)="onConfirm()" [disabled]="disabled">
+             <i class="fa-solid fa-check-double"></i> Confirm
+          </button>
+          <button class="btn-action btn-danger" (click)="onCancel()" [disabled]="disabled">
+             <i class="fa-solid fa-ban"></i> Cancel
+          </button>
+        </div>
+
+        <!-- CONFIRMED -->
+        <div *ngIf="appointment.status === 'CONFIRMED'">
+          <button class="btn-action btn-primary w-full" (click)="onStart()" [disabled]="disabled">
+             <i class="fa-solid fa-stethoscope"></i> Start Consultation
+          </button>
+        </div>
+
+        <!-- IN_PROGRESS -->
+        <div class="grid grid-cols-2 gap-2" *ngIf="appointment.status === 'IN_PROGRESS'">
+          <button class="btn-action btn-secondary" (click)="onCreateMedicalDescription()" [disabled]="disabled">
+            <i class="fa-solid fa-notes-medical"></i> Notes
+          </button>
+          <button class="btn-action btn-success" (click)="onComplete()" [disabled]="disabled">
+             <i class="fa-solid fa-check"></i> Complete
+          </button>
+        </div>
+
+        <!-- COMPLETED/CANCELLED -> View Details Only -->
+        <button class="btn-action btn-secondary w-full" (click)="onViewPatient()" [disabled]="disabled">
+          <i class="fa-regular fa-id-card"></i> View Patient Details
         </button>
-
-        <div class="grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex sm:flex-row" *ngIf="appointment.status === 'IN_PROGRESS'">
-          <button class="btn-secondary w-full sm:w-auto" (click)="onCreateMedicalDescription()" [disabled]="disabled">Medical Notes</button>
-          <button class="btn-secondary w-full sm:w-auto" (click)="onComplete()" [disabled]="disabled">Complete</button>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex sm:flex-row" *ngIf="appointment.status === 'BOOKED'">
-          <button class="btn-secondary w-full sm:w-auto" (click)="onSchedule()" [disabled]="disabled">Schedule</button>
-          <button class="btn-secondary w-full sm:w-auto" (click)="onCancel()" [disabled]="disabled">Cancel</button>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex sm:flex-row" *ngIf="appointment.status === 'SCHEDULED'">
-          <button class="btn-secondary w-full sm:w-auto" (click)="onConfirm()" [disabled]="disabled">Confirm</button>
-          <button class="btn-secondary w-full sm:w-auto" (click)="onCancel()" [disabled]="disabled">Cancel</button>
-        </div>
-
-        <button class="btn-secondary w-full sm:w-auto" *ngIf="appointment.status === 'CONFIRMED'" (click)="onStart()" [disabled]="disabled">Start</button>
       </div>
     </div>
   `,
+  styles: [`
+    .btn-action {
+      @apply flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+    }
+    .btn-primary {
+      @apply bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40;
+    }
+    .btn-secondary {
+      @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300;
+    }
+    .btn-danger {
+      @apply bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/20;
+    }
+    .btn-check {
+      @apply bg-emerald-50 dark:bg-emerald-900/10 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/20;
+    }
+    .btn-success {
+      @apply bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-500/20;
+    }
+  `]
 })
 export class DoctorAppointmentCardComponent {
   @Input() appointment!: DoctorAppointmentItem;
@@ -91,20 +154,18 @@ export class DoctorAppointmentCardComponent {
 
   statusBadgeClass(status: string) {
     const s = (status || '').toUpperCase();
-    if (s === 'CONFIRMED') return 'bg-blue-900/40 text-blue-300';
-    if (s === 'COMPLETED') return 'bg-green-900/40 text-green-300';
-    if (s === 'CANCELLED') return 'bg-red-900/40 text-red-300';
-    if (s === 'IN_PROGRESS') return 'bg-yellow-900/40 text-yellow-300';
-    if (s === 'SCHEDULED') return 'bg-purple-900/40 text-purple-300';
-    return 'bg-gray-700 text-gray-300';
+    if (s === 'CONFIRMED') return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800';
+    if (s === 'COMPLETED') return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800';
+    if (s.startsWith('CANCELLED')) return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800';
+    if (s === 'IN_PROGRESS') return 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800';
+    if (s === 'SCHEDULED') return 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800';
+    return 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700';
   }
 
   statusLabel(a: DoctorAppointmentItem) {
-    if (a.status === 'CANCELLED') {
-      if (a.statusChangedBy === 'DOCTOR') return 'CANCELLED_BY_DOCTOR';
-      if (a.statusChangedBy === 'PATIENT') return 'CANCELLED_BY_PATIENT';
-      return 'CANCELLED';
-    }
+    if (a.status === 'CANCELLED_BY_DOCTOR') return 'Cancelled by Me';
+    if (a.status === 'CANCELLED_BY_PATIENT') return 'Cancelled by Patient';
+    if (a.status === 'CANCELLED') return 'Cancelled';
     return a.status;
   }
 

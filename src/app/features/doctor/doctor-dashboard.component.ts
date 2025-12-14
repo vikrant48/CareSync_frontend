@@ -26,194 +26,226 @@ import { forkJoin } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-doctor-layout>
-      <div class="panel p-6 space-y-6">
-      <!-- Header with profile picture (like patient dashboard) -->
-      <div class="flex flex-wrap items-center gap-4 justify-between">
-        <div class="flex items-center gap-4">
-          <img
-            *ngIf="profile?.profileImageUrl; else docAvatar"
-            [src]="profile?.profileImageUrl"
-            alt="Profile"
-            class="w-16 h-16 rounded-full ring-2 ring-blue-600/40 object-cover"
-          />
-          <ng-template #docAvatar>
-            <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-xl font-semibold text-blue-700">
-              {{ (doctorName || 'D').charAt(0) }}
-            </div>
-          </ng-template>
-          <div>
-            <div class="text-lg">Welcome back,</div>
-            <div class="text-2xl font-semibold" *ngIf="doctorName; else loadingName">
-              {{ doctorName === 'Doctor' ? 'Doctor' : ('Dr. ' + doctorName) }}
-            </div>
-            <ng-template #loadingName>
-              <div class="text-2xl font-semibold inline-flex items-center gap-2 text-gray-300">
-                <i class="fa-solid fa-spinner animate-spin"></i>
+      <div class="max-w-7xl mx-auto p-6 space-y-8">
+        <!-- Welcome Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
+          <div class="absolute inset-0 bg-white/10 opacity-30 pattern-dots"></div>
+          <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-6">
+              <div class="relative">
+                <div class="w-20 h-20 rounded-full border-4 border-white/30 shadow-lg overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center text-3xl font-bold">
+                  <img *ngIf="profile?.profileImageUrl" [src]="profile?.profileImageUrl" class="w-full h-full object-cover" />
+                  <span *ngIf="!profile?.profileImageUrl">{{ (doctorName || 'D').charAt(0) }}</span>
+                </div>
+                <div *ngIf="profile?.isVerified" class="absolute -bottom-1 -right-1 bg-green-400 text-white text-xs p-1.5 rounded-full border-2 border-indigo-700" title="Verified">
+                  <i class="fa-solid fa-check"></i>
+                </div>
               </div>
-            </ng-template>
-            <div class="text-gray-400" *ngIf="profile?.specialization"> {{ profile.specialization }}</div>
-          </div>
-        </div>
-        <div class="flex gap-2 items-center">
-          <app-doctor-notification></app-doctor-notification>
-          <a class="btn-primary" routerLink="/doctor/profile">View Profile</a>
-          <a class="text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 text-sm font-medium px-0 py-0" routerLink="/doctor">Refresh</a>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="p-4 border rounded">
-          <h3 class="font-semibold mb-2">Profile Summary</h3>
-          <ul class="text-sm text-gray-300 space-y-1" *ngIf="profile">
-            <li>Email: {{ profile.email || '—' }}</li>
-            <li>Phone: {{ profile.contactInfo || '—' }}</li>
-            <li>Active: {{ profile.isActive ? 'Yes' : 'No' }}</li>
-          </ul>
-          <div class="text-sm text-gray-400" *ngIf="!profile">
-            <span class="inline-flex items-center gap-2">
-              <i class="fa-solid fa-spinner animate-spin"></i>
-              <span>Loading profile…</span>
-            </span>
+              <div>
+                <h1 class="text-3xl font-bold mb-1">Welcome back, {{ doctorName === 'Doctor' ? 'Doctor' : 'Dr. ' + doctorName }}!</h1>
+                <p class="text-blue-100 text-lg flex items-center gap-2">
+                  <span>{{ profile?.specialization || 'General Practitioner' }}</span>
+                  <span class="w-1.5 h-1.5 rounded-full bg-blue-300"></span>
+                  <span class="opacity-90">{{ todayISO() | date:'fullDate' }}</span>
+                </p>
+              </div>
+            </div>
+            <div class="flex gap-3">
+               <app-doctor-notification></app-doctor-notification>
+               <a routerLink="/doctor/profile" class="bg-white/20 hover:bg-white/30 text-white backdrop-blur-md border border-white/40 px-5 py-2.5 rounded-xl font-medium transition-all active:scale-95 flex items-center gap-2">
+                 <i class="fa-regular fa-user"></i> Profile
+               </a>
+               <button (click)="refreshToday(); refreshUpcoming()" class="bg-white text-blue-700 hover:bg-blue-50 px-5 py-2.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 flex items-center gap-2">
+                 <i class="fa-solid fa-arrows-rotate" [class.animate-spin]="loadingAppointments || loadingUpcoming"></i>
+               </button>
+            </div>
           </div>
         </div>
 
-        <div class="p-4 border rounded md:col-span-2">
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <!-- Total Today -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xl">
+              <i class="fa-solid fa-calendar-day"></i>
+            </div>
+            <div>
+              <div class="text-sm text-gray-500 dark:text-gray-400 font-medium">Today's Appointments</div>
+              <div class="text-2xl font-bold text-gray-900 dark:text-white" *ngIf="!loadingAppointments">{{ (todayAppointments || []).length }}</div>
+              <div class="h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" *ngIf="loadingAppointments"></div>
+            </div>
+          </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <div class="panel p-4">
-              <div class="text-sm text-gray-400">Today</div>
-              <div class="text-2xl font-semibold">{{ (todayAppointments || []).length }}</div>
-              <div class="text-xs text-gray-500 mt-1" *ngIf="loadingUpcoming">
-                <span class="inline-flex items-center gap-1">
-                  <i class="fa-solid fa-spinner animate-spin"></i>
-                  <span>Loading today…</span>
-                </span>
-              </div>
+          <!-- Upcoming -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xl">
+              <i class="fa-solid fa-calendar-plus"></i>
             </div>
-            <div class="panel p-4">
-              <div class="text-sm text-gray-400">Upcoming</div>
-              <div class="text-2xl font-semibold">{{ (upcomingAppointments || []).length }}</div>
-              <div class="text-xs text-gray-500 mt-1" *ngIf="loadingUpcoming">
-                <span class="inline-flex items-center gap-1">
-                  <i class="fa-solid fa-spinner animate-spin"></i>
-                  <span>Loading upcoming…</span>
-                </span>
-              </div>
+            <div>
+              <div class="text-sm text-gray-500 dark:text-gray-400 font-medium">Upcoming</div>
+              <div class="text-2xl font-bold text-gray-900 dark:text-white" *ngIf="!loadingUpcoming">{{ (upcomingAppointments || []).length }}</div>
+              <div class="h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" *ngIf="loadingUpcoming"></div>
             </div>
-            <div class="panel p-4">
-              <div class="text-sm text-gray-400">Confirmed</div>
-              <div class="text-2xl font-semibold">{{ todayStats().CONFIRMED }}</div>
-              <div class="text-xs text-gray-500 mt-1" *ngIf="loadingUpcoming">
-                <span class="inline-flex items-center gap-1">
-                  <i class="fa-solid fa-spinner animate-spin"></i>
-                  <span>Loading…</span>
-                </span>
-              </div>
+          </div>
+
+          <!-- Confirmed Today -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 flex items-center justify-center text-xl">
+              <i class="fa-solid fa-check-circle"></i>
             </div>
-            <div class="panel p-4">
-              <div class="text-sm text-gray-400">Completed</div>
-              <div class="text-2xl font-semibold">{{ todayStats().COMPLETED }}</div>
-              <div class="text-xs text-gray-500 mt-1" *ngIf="loadingUpcoming">
-                <span class="inline-flex items-center gap-1">
-                  <i class="fa-solid fa-spinner animate-spin"></i>
-                  <span>Loading…</span>
-                </span>
-              </div>
+            <div>
+              <div class="text-sm text-gray-500 dark:text-gray-400 font-medium">Confirmed Today</div>
+              <div class="text-2xl font-bold text-gray-900 dark:text-white" *ngIf="!loadingAppointments">{{ todayStats().CONFIRMED }}</div>
+               <div class="h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" *ngIf="loadingAppointments"></div>
+            </div>
+          </div>
+
+          <!-- Pending (Scheduled) -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400 flex items-center justify-center text-xl">
+              <i class="fa-solid fa-clock"></i>
+            </div>
+            <div>
+              <div class="text-sm text-gray-500 dark:text-gray-400 font-medium">Pending Requests</div>
+              <div class="text-2xl font-bold text-gray-900 dark:text-white" *ngIf="!loadingAppointments">{{ todayStats().SCHEDULED }}</div>
+               <div class="h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" *ngIf="loadingAppointments"></div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Today's Appointments -->
-      <section class="p-4 border rounded">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="font-semibold">Today's Appointments</h3>
-          <div class="flex items-center gap-2">
-            <input
-              type="text"
-              class="input text-sm w-40"
-              placeholder="Search patient"
-              [(ngModel)]="searchTerm"
-            />
-            <select class="input text-sm" [(ngModel)]="filterStatus">
-              <option *ngFor="let s of statusFilterOptions" [value]="s">{{ s }}</option>
-            </select>
-            <button class="text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 text-sm font-medium px-0 py-0" (click)="refreshToday()">Refresh</button>
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          <!-- Today's Agenda (Left 2/3) -->
+          <div class="lg:col-span-2 space-y-6">
+            <div class="flex items-center justify-between">
+              <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <i class="fa-regular fa-calendar-check text-blue-500"></i> Today's Agenda
+              </h2>
+              <div class="flex gap-2">
+                 <select class="input-sm text-sm rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800" [(ngModel)]="filterStatus">
+                   <option *ngFor="let s of statusFilterOptions" [value]="s">{{ s === 'ALL' ? 'All Statuses' : s }}</option>
+                 </select>
+              </div>
+            </div>
+
+            <!-- Loading State -->
+            <div *ngIf="loadingAppointments" class="flex flex-col items-center justify-center py-12 text-gray-400">
+               <i class="fa-solid fa-spinner animate-spin text-3xl mb-3"></i>
+               <p>Loading your schedule...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="!loadingAppointments && filteredTodayAppointments().length === 0" class="bg-white dark:bg-gray-800 rounded-2xl p-10 text-center border border-dashed border-gray-200 dark:border-gray-700">
+               <div class="w-16 h-16 bg-gray-50 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400 text-2xl">
+                 <i class="fa-regular fa-calendar-xmark"></i>
+               </div>
+               <h3 class="text-lg font-semibold text-gray-900 dark:text-white">No appointments found</h3>
+               <p class="text-gray-500 dark:text-gray-400 mt-1 max-w-sm mx-auto">
+                 {{ filterStatus !== 'ALL' ? 'Try changing your status filter.' : 'You have no appointments scheduled for today yet.' }}
+               </p>
+               <button *ngIf="filterStatus !== 'ALL'" (click)="filterStatus='ALL'" class="mt-4 text-blue-600 font-medium hover:underline">Clear Filter</button>
+            </div>
+
+            <!-- Agenda Grid -->
+            <div class="grid gap-4" *ngIf="!loadingAppointments && filteredTodayAppointments().length > 0">
+              <doctor-appointment-card
+                *ngFor="let a of filteredTodayAppointments()"
+                [appointment]="a"
+                [showStatusSelect]="true"
+                (viewPatient)="openPatient($event)"
+                (openHistoryForm)="openHistoryForm($event)"
+                (schedule)="schedule($event)"
+                (confirm)="confirm($event)"
+                (start)="start($event)"
+                (complete)="complete($event)"
+                (cancel)="cancel($event)"
+                (statusChange)="changeStatus($event.appointment, $event.status)"
+              ></doctor-appointment-card>
+            </div>
+          </div>
+
+          <!-- Sidebar (Right 1/3) -->
+          <div class="space-y-6">
+            <!-- Profile Quick View -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+               <h3 class="font-bold text-gray-900 dark:text-white mb-4">Profile Details</h3>
+               <div class="space-y-3">
+                 <div class="flex items-center gap-3 text-sm">
+                   <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 flex items-center justify-center"><i class="fa-solid fa-envelope"></i></div>
+                   <div class="truncate flex-1 text-gray-600 dark:text-gray-300">{{ profile?.email || 'No email' }}</div>
+                 </div>
+                 <div class="flex items-center gap-3 text-sm">
+                   <div class="w-8 h-8 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 flex items-center justify-center"><i class="fa-solid fa-phone"></i></div>
+                   <div class="truncate flex-1 text-gray-600 dark:text-gray-300">{{ profile?.contactInfo || 'No phone' }}</div>
+                 </div>
+                  <div class="flex items-center gap-3 text-sm">
+                   <div class="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 flex items-center justify-center"><i class="fa-solid fa-user-tag"></i></div>
+                   <div class="truncate flex-1 text-gray-600 dark:text-gray-300">{{ profile?.isActive ? 'Active Status' : 'Inactive' }}</div>
+                 </div>
+               </div>
+               <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                  <a routerLink="/doctor/profile" class="text-blue-600 text-sm font-medium hover:underline flex items-center gap-1 justify-center">Manage Profile <i class="fa-solid fa-arrow-right"></i></a>
+               </div>
+            </div>
+
+             <!-- Quick Actions (Optional placeholder for future features) -->
+            <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-5 text-white shadow-lg">
+              <h3 class="font-bold mb-2">Need Help?</h3>
+              <p class="text-indigo-100 text-sm mb-4">Check out our guide for doctors to manage appointments effectively.</p>
+              <button class="bg-white text-indigo-700 text-sm font-bold py-2 px-4 rounded-lg w-full hover:bg-indigo-50 transition-colors">View Guide</button>
+            </div>
+          
           </div>
         </div>
-        <div class="text-xs text-gray-400 mb-2" *ngIf="!loadingAppointments && todayAppointments.length > 0">
-          Total: {{ todayAppointments.length }} • Scheduled: {{ todayStats().SCHEDULED }} • Confirmed: {{ todayStats().CONFIRMED }} • In Progress: {{ todayStats().IN_PROGRESS }} • Completed: {{ todayStats().COMPLETED }} • Cancelled: {{ todayStats().CANCELLED }}
-        </div>
-        <div *ngIf="loadingAppointments" class="text-gray-400">
-          <span class="inline-flex items-center gap-2">
-            <i class="fa-solid fa-spinner animate-spin"></i>
-            <span>Loading appointments…</span>
-          </span>
-        </div>
-        <div *ngIf="!loadingAppointments && todayAppointments.length === 0" class="text-gray-400">No appointments today.</div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="!loadingAppointments">
-          <doctor-appointment-card
-            *ngFor="let a of filteredTodayAppointments()"
-            [appointment]="a"
-            [showStatusSelect]="true"
-            (viewPatient)="openPatient($event)"
-            (openHistoryForm)="openHistoryForm($event)"
-            (schedule)="schedule($event)"
-            (confirm)="confirm($event)"
-            (start)="start($event)"
-            (complete)="complete($event)"
-            (cancel)="cancel($event)"
-            (statusChange)="changeStatus($event.appointment, $event.status)"
-          ></doctor-appointment-card>
-        </div>
-      </section>
+        <!-- Modals -->
+        <app-patient-details-modal
+          [open]="patientModalOpen"
+          [patient]="selectedPatient?.patient || null"
+          [history]="medicalHistoryWithDoctor"
+          (close)="closePatientModal()"
+          (historyClick)="viewHistoryDetail($event)"
+        ></app-patient-details-modal>
 
-      <!-- See All Appointments Button -->
-      <!-- <div class="mt-3">
-        <button class="btn-secondary" [routerLink]="['/doctor/appointments']">See All Appointments</button>
-      </div> -->
+        <app-medical-history-detail-modal
+          [open]="historyDetailModalOpen"
+          [detail]="selectedHistoryDetail"
+          [doctorInfo]="selectedHistoryDoctorInfo"
+          (close)="closeHistoryDetail()"
+        ></app-medical-history-detail-modal>
 
-      
-
-      <app-patient-details-modal
-        [open]="patientModalOpen"
-        [patient]="selectedPatient?.patient || null"
-        [history]="medicalHistoryWithDoctor"
-        (close)="closePatientModal()"
-        (historyClick)="viewHistoryDetail($event)"
-      ></app-patient-details-modal>
-
-      <!-- History Detail Modal (Shared) -->
-      <app-medical-history-detail-modal
-        [open]="historyDetailModalOpen"
-        [detail]="selectedHistoryDetail"
-        [doctorInfo]="selectedHistoryDoctorInfo"
-        (close)="closeHistoryDetail()"
-      ></app-medical-history-detail-modal>
-
-      <!-- Create Medical Description Modal (Shared) -->
-      <app-medical-history-form-modal
-        [open]="historyFormModalOpen"
-        [form]="mhForm"
-        [disabled]="selectedAppointment?.status !== 'IN_PROGRESS'"
-        [saving]="savingHistory"
-        [saved]="historySaved"
-        [error]="historyError"
-        [infoText]="selectedAppointment?.status !== 'IN_PROGRESS' ? 'Form available only for in-progress appointments.' : null"
-        (close)="closeHistoryForm()"
-        (submit)="saveMedicalHistory()"
-      ></app-medical-history-form-modal>
+        <app-medical-history-form-modal
+          [open]="historyFormModalOpen"
+          [form]="mhForm"
+          [disabled]="selectedAppointment?.status !== 'IN_PROGRESS'"
+          [saving]="savingHistory"
+          [saved]="historySaved"
+          [error]="historyError"
+          [infoText]="selectedAppointment?.status !== 'IN_PROGRESS' ? 'Form available only for in-progress appointments.' : null"
+          (close)="closeHistoryForm()"
+          (submit)="saveMedicalHistory()"
+        ></app-medical-history-form-modal>
       </div>
     </app-doctor-layout>
   `,
+  styles: [`
+    :host { display: block; }
+    .pattern-dots {
+      background-image: radial-gradient(white 1.5px, transparent 1.5px);
+      background-size: 24px 24px;
+    }
+    .input-sm {
+      @apply py-1.5 px-3 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow dark:bg-gray-900/50 dark:border-gray-700 dark:text-white;
+    }
+  `]
 })
 export class DoctorDashboardComponent implements OnInit {
   private auth = inject(AuthService);
   private svc = inject(DoctorProfileService);
   private apptApi = inject(AppointmentService);
   private patientApi = inject(PatientProfileService);
-  
+
   private analyticsApi = inject(AnalyticsApiService);
   private reportsApi = inject(ReportsApiService);
   private cdr = inject(ChangeDetectorRef);
@@ -247,7 +279,7 @@ export class DoctorDashboardComponent implements OnInit {
   selectedHistoryDoctorInfo: MedicalHistoryWithDoctorItem | null = null;
   historyFormModalOpen = false;
   currentYear: number = new Date().getFullYear();
-  
+
 
   // Analytics state
   overall: OverallAnalytics | null = null;
@@ -298,8 +330,8 @@ export class DoctorDashboardComponent implements OnInit {
         next: (docs) => (this.documents = (docs || []).slice(0, 6)),
       });
       this.refreshToday();
-+     this.refreshUpcoming();
-   }
+      +     this.refreshUpcoming();
+    }
   }
 
   refreshToday() {
@@ -372,28 +404,20 @@ export class DoctorDashboardComponent implements OnInit {
   todayStats(): Record<'SCHEDULED' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED', number> {
     const stats = { SCHEDULED: 0, CONFIRMED: 0, IN_PROGRESS: 0, COMPLETED: 0, CANCELLED: 0 } as Record<any, number>;
     for (const a of this.todayAppointments || []) {
-      if (stats[a.status] != null) stats[a.status]++;
+      if (a.status === 'CANCELLED_BY_PATIENT' || a.status === 'CANCELLED_BY_DOCTOR' || a.status === 'CANCELLED') {
+        stats['CANCELLED']++;
+      } else if (stats[a.status] != null) {
+        stats[a.status]++;
+      }
     }
     return stats as any;
   }
 
-  statusOptionsFor(a: DoctorAppointmentItem): string[] {
-    const s = (a.status || '').toUpperCase();
-    if (s === 'BOOKED') return ['SCHEDULED', 'CANCELLED'];
-    if (s === 'SCHEDULED') return ['CONFIRMED', 'CANCELLED'];
-    if (s === 'CONFIRMED') return ['IN_PROGRESS'];
-    if (s === 'IN_PROGRESS') return ['COMPLETED'];
-    return [s];
-  }
+  todayDate = new Date();
 
-  statusLabel(a: DoctorAppointmentItem) {
-    const s = (a.status || '').toUpperCase();
-    if (s === 'CANCELLED') {
-      const me = (this.username || '').toLowerCase();
-      const by = (a.statusChangedBy || '').toLowerCase();
-      return me && by && me === by ? 'CANCELLED_BY_DOCTOR' : 'CANCELLED_BY_PATIENT';
-    }
-    return s;
+  // Make helper public or just use property
+  public todayISO() {
+    return new Date().toISOString().slice(0, 10);
   }
 
   filteredUpcomingAppointments(): DoctorAppointmentItem[] {
@@ -414,7 +438,7 @@ export class DoctorDashboardComponent implements OnInit {
     // Ensure other modals are closed
     this.historyFormModalOpen = false;
     this.historyDetailModalOpen = false;
-    
+
     this.selectedAppointment = a;
     this.patientModalOpen = true;
     this.selectedPatient = null;
@@ -442,7 +466,7 @@ export class DoctorDashboardComponent implements OnInit {
     // Ensure other modals are closed
     this.patientModalOpen = false;
     this.historyDetailModalOpen = false;
-    
+
     this.selectedAppointment = a;
     this.mhForm = { visitDate: this.todayISO() };
     this.historyFormModalOpen = true;
@@ -487,22 +511,22 @@ export class DoctorDashboardComponent implements OnInit {
 
   saveMedicalHistory() {
     if (!this.selectedAppointment) return;
-    
+
     if (this.savingHistory) {
       return;
     }
-    
+
     this.savingHistory = true;
     this.historySaved = false;
     this.historyError = null;
     this.cdr.detectChanges();
-    
+
     if (this.doctorId == null) {
       this.savingHistory = false;
       this.cdr.detectChanges();
       return;
     }
-    
+
     this.patientApi
       .addMedicalHistoryWithDoctor(this.selectedAppointment.patientId, this.doctorId, this.mhForm)
       .subscribe({
@@ -522,25 +546,6 @@ export class DoctorDashboardComponent implements OnInit {
       });
   }
 
-  statusBadgeClass(status: string) {
-    switch (status) {
-      case 'SCHEDULED':
-        return 'bg-yellow-900/40 text-yellow-300 border border-yellow-800/50';
-      case 'CONFIRMED':
-        return 'bg-green-900/40 text-green-300 border border-green-800/50';
-      case 'IN_PROGRESS':
-        return 'bg-blue-900/40 text-blue-300 border border-blue-800/50';
-      case 'COMPLETED':
-        return 'bg-gray-800 text-gray-300 border border-gray-700';
-      case 'CANCELLED':
-        return 'bg-red-900/40 text-red-300 border border-red-800/50';
-      default:
-        return 'bg-gray-800 text-gray-300 border border-gray-700';
-    }
-  }
-  private todayISO() {
-    return new Date().toISOString().slice(0, 10);
-  }
   private isoDaysAgo(days: number) {
     const d = new Date();
     d.setDate(d.getDate() - days);
@@ -586,7 +591,7 @@ export class DoctorDashboardComponent implements OnInit {
       next: (res) => {
         this.seasonalTrends = res || null;
         const dist = this.seasonalTrends?.monthlyDistribution || {};
-        const order = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        const order = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         const labels = order.filter((m) => dist.hasOwnProperty(m));
         this.seasonalLabels = labels;
         this.seasonalData = labels.map((k) => Number(dist[k] || 0));

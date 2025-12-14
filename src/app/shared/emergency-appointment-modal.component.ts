@@ -10,146 +10,138 @@ import { ToastService } from '../core/services/toast.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div *ngIf="isOpen" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div class="panel p-4 sm:p-6 w-full max-w-2xl relative max-h-[85dvh] overflow-y-auto">
-        <button class="absolute top-2 right-2 btn-secondary" (click)="close()">✕</button>
+    <div *ngIf="isOpen" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+      <div class="panel p-0 w-full max-w-2xl relative max-h-[85dvh] overflow-hidden flex flex-col shadow-2xl shadow-red-900/40 border border-red-500/30 rounded-2xl">
         
-        <div class="space-y-6">
-          <!-- Header -->
-          <div class="text-center">
-            <div class="text-xl sm:text-2xl font-bold text-red-500 mb-2 sm:mb-3">🚨 Emergency Appointment</div>
-            <p class="text-gray-300 text-xs sm:text-sm">
-              Book an immediate appointment with an available doctor. 
-              This will schedule an appointment for right now.
-            </p>
-          </div>
-
-          <!-- Warning Notice -->
-          <div class="bg-red-900/30 border border-red-500/50 rounded-lg p-4">
-            <div class="flex items-start gap-3">
-              <div class="text-red-400 text-xl">⚠️</div>
-              <div class="text-sm">
-                <div class="font-semibold text-red-400 mb-1">Important Notice:</div>
-                <ul class="text-gray-300 space-y-1 text-xs">
-                  <li>• Emergency appointments are scheduled for immediate consultation</li>
-                  <li>• The appointment will be booked for the current time</li>
-                  <li>• Please ensure the doctor is available before booking</li>
-                  <li>• Additional emergency fees may apply</li>
-                </ul>
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-red-900/80 to-red-800/60 p-5 flex items-center justify-between border-b border-red-500/30">
+           <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-red-200 animate-pulse">
+                <span class="text-xl">🚨</span>
               </div>
-            </div>
+              <div>
+                <h2 class="text-xl font-bold text-white tracking-tight">Emergency Booking</h2>
+                 <p class="text-red-200 text-xs">Immediate consultation scheduling</p>
+              </div>
+           </div>
+           <button class="text-red-200 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-lg p-2" (click)="close()">
+              <i class="fa-solid fa-xmark"></i>
+           </button>
+        </div>
+
+        <div class="overflow-y-auto p-6 space-y-6 custom-scrollbar">
+          <!-- Warning Notice -->
+          <div class="bg-red-950/40 border border-red-500/20 rounded-xl p-4 flex gap-4">
+             <i class="fa-solid fa-triangle-exclamation text-red-500 text-xl mt-0.5"></i>
+             <div class="space-y-2">
+                <h4 class="font-semibold text-red-200 text-sm">Vital Information</h4>
+                <ul class="text-xs text-red-200/70 space-y-1 ml-4 list-disc">
+                  <li>Consultations are scheduled for <strong>immediate attention</strong>.</li>
+                  <li>Emergency fees may apply based on the doctor's policy.</li>
+                  <li>Please ensure your medical situation strictly requires urgent care.</li>
+                </ul>
+             </div>
           </div>
 
           <!-- Doctor Selection -->
           <div class="space-y-3">
-            <label class="block text-sm font-medium">
-              Select Doctor <span class="text-red-400">*</span>
+            <label class="block text-sm font-medium text-gray-300 ml-1">
+              Select Specialist <span class="text-red-400">*</span>
             </label>
-            <select 
-              class="input w-full" 
-              [(ngModel)]="selectedDoctorId"
-              [class.border-red-500]="showValidation && !selectedDoctorId"
-            >
-              <option value="">Choose a doctor for emergency consultation</option>
-              <option *ngFor="let doctor of availableDoctors" [value]="doctor.id">
-                Dr. {{ doctor.firstName }} {{ doctor.lastName }} 
-                <span *ngIf="doctor.specialization"> - {{ doctor.specialization }}</span>
-                <span *ngIf="doctor.consultationFees"> (₹{{ doctor.consultationFees }})</span>
-              </option>
-            </select>
-            <div *ngIf="showValidation && !selectedDoctorId" class="text-red-400 text-xs">
-              Please select a doctor for the emergency appointment
+            <div class="relative">
+               <i class="fa-solid fa-user-doctor absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+               <select 
+                 class="input w-full pl-10 bg-gray-900/50" 
+                 [(ngModel)]="selectedDoctorId"
+                 [class.border-red-500]="showValidation && !selectedDoctorId"
+               >
+                 <option [ngValue]="null">-- Select a doctor --</option>
+                 <option *ngFor="let doctor of availableDoctors" [value]="doctor.id">
+                   Dr. {{ doctor.firstName }} {{ doctor.lastName }} 
+                   {{ doctor.specialization ? '(' + doctor.specialization + ')' : '' }}
+                 </option>
+               </select>
+               <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 pointer-events-none"></i>
             </div>
+            <p *ngIf="showValidation && !selectedDoctorId" class="text-red-400 text-xs ml-1 animate-pulse">
+               Please select a doctor to proceed.
+            </p>
           </div>
 
           <!-- Selected Doctor Details -->
-          <div *ngIf="selectedDoctor" class="bg-gray-800/50 rounded-lg p-4">
-            <div class="flex items-center gap-3 mb-3">
-              <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center text-white">
-                <img *ngIf="selectedDoctor.profileImageUrl" 
-                     [src]="selectedDoctor.profileImageUrl" 
-                     class="w-full h-full object-cover" 
-                     (error)="selectedDoctor.profileImageUrl = ''" />
-                <span *ngIf="!selectedDoctor.profileImageUrl">
-                  {{ selectedDoctor.firstName ? selectedDoctor.firstName.charAt(0) : 'D' }}
-                </span>
-              </div>
-              <div>
-                <div class="font-semibold">Dr. {{ selectedDoctor.firstName }} {{ selectedDoctor.lastName }}</div>
-                <div class="text-sm text-gray-400">{{ selectedDoctor.specialization || 'General Practice' }}</div>
-              </div>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-              <div *ngIf="selectedDoctor.consultationFees">
-                <span class="text-gray-400">Consultation Fee:</span>
-                <span class="ml-2 font-medium">₹{{ selectedDoctor.consultationFees }}</span>
-              </div>
-              <div *ngIf="selectedDoctor.contactInfo">
-                <span class="text-gray-400">Contact:</span>
-                <span class="ml-2 font-medium">{{ selectedDoctor.contactInfo }}</span>
-              </div>
-              <div *ngIf="selectedDoctor.address" class="sm:col-span-2">
-                <span class="text-gray-400">Location:</span>
-                <span class="ml-2 font-medium">{{ selectedDoctor.address }}</span>
-              </div>
-              <div *ngIf="selectedDoctor.email" class="sm:col-span-2">
-                <span class="text-gray-400">Email:</span>
-                <span class="ml-2 font-medium">{{ selectedDoctor.email }}</span>
-              </div>
+          <div *ngIf="selectedDoctor" class="bg-gray-800/40 rounded-xl p-4 border border-gray-700/50 animate-fade-in">
+            <div class="flex items-start gap-4">
+               <div class="w-14 h-14 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden border-2 border-gray-600 shrink-0">
+                  <img *ngIf="selectedDoctor.profileImageUrl" [src]="selectedDoctor.profileImageUrl" class="w-full h-full object-cover" />
+                  <span *ngIf="!selectedDoctor.profileImageUrl" class="text-xl font-bold text-gray-400">{{ selectedDoctor.firstName?.charAt(0) }}</span>
+               </div>
+               <div class="flex-1 min-w-0">
+                  <h4 class="font-bold text-gray-100">Dr. {{ selectedDoctor.firstName }} {{ selectedDoctor.lastName }}</h4>
+                  <p class="text-blue-400 text-sm mb-2">{{ selectedDoctor.specialization || 'General Physician' }}</p>
+                  
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-400">
+                     <div class="flex items-center gap-2" *ngIf="selectedDoctor.consultationFees">
+                        <i class="fa-solid fa-money-bill-wave text-green-500/70 w-4"></i>
+                        <span>Fee: ₹{{ selectedDoctor.consultationFees }}</span>
+                     </div>
+                     <div class="flex items-center gap-2" *ngIf="selectedDoctor.contactInfo">
+                        <i class="fa-solid fa-phone text-blue-500/70 w-4"></i>
+                        <span>{{ selectedDoctor.contactInfo }}</span>
+                     </div>
+                     <div class="flex items-center gap-2 col-span-full line-clamp-1" *ngIf="selectedDoctor.address">
+                        <i class="fa-solid fa-location-dot text-red-400/70 w-4"></i>
+                        <span class="truncate">{{ selectedDoctor.address }}</span>
+                     </div>
+                  </div>
+               </div>
             </div>
           </div>
 
           <!-- Reason for Emergency -->
           <div class="space-y-3">
-            <label class="block text-sm font-medium">
-              Reason for Emergency <span class="text-red-400">*</span>
+            <label class="block text-sm font-medium text-gray-300 ml-1">
+              Emergency Details <span class="text-red-400">*</span>
             </label>
             <textarea 
-              class="input w-full h-24 resize-none" 
+              class="input w-full min-h-[100px] resize-none bg-gray-900/50" 
               [(ngModel)]="reason"
-              placeholder="Please describe your emergency situation in detail..."
+              placeholder="Describe symptoms, severity, and duration..."
               [class.border-red-500]="showValidation && !reason.trim()"
             ></textarea>
-            <div *ngIf="showValidation && !reason.trim()" class="text-red-400 text-xs">
-              Please provide a reason for the emergency appointment
-            </div>
-            <div class="text-xs text-gray-400">
-              This information will help the doctor prepare for your consultation
-            </div>
+            <p *ngIf="showValidation && !reason.trim()" class="text-red-400 text-xs ml-1 animate-pulse">
+               Brief emergency details are required.
+            </p>
           </div>
 
-          <!-- Appointment Details -->
-          <div class="bg-blue-900/30 border border-blue-500/50 rounded-lg p-4">
-            <div class="text-sm">
-              <div class="font-semibold text-blue-400 mb-2">Appointment Details:</div>
-              <div class="space-y-1 text-gray-300">
-                <div><strong>Date:</strong> {{ currentDate }}</div>
-                <div><strong>Time:</strong> {{ currentTime }}</div>
-                <div><strong>Type:</strong> Emergency Consultation</div>
-                <div><strong>Status:</strong> Will be marked as "BOOKED" immediately</div>
+          <!-- Appointment Preview -->
+          <div class="bg-blue-950/20 border border-blue-500/10 rounded-xl p-4 flex items-center justify-between">
+              <div>
+                 <div class="text-xs text-gray-500 uppercase tracking-wider mb-1">Schedule For</div>
+                 <div class="text-lg font-bold text-blue-100">{{ currentTime }}</div>
+                 <div class="text-xs text-blue-300">{{ currentDate }} (Today)</div>
               </div>
-            </div>
+              <div class="text-right">
+                 <div class="px-3 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/20 text-xs font-bold uppercase tracking-wider animate-pulse">
+                    Urgent
+                 </div>
+              </div>
           </div>
+        </div>
 
-
-
-          <!-- Action Buttons -->
-          <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-3">
-            <button 
-              class="btn-secondary w-full sm:flex-1" 
-              (click)="close()"
-              [disabled]="booking"
-            >
-              Cancel
-            </button>
-            <button 
-              class="btn-primary w-full sm:flex-1 bg-red-600 hover:bg-red-700" 
-              (click)="bookEmergencyAppointment()"
-              [disabled]="booking"
-            >
-              {{ booking ? 'Booking Emergency Appointment...' : 'Book Emergency Appointment' }}
-            </button>
-          </div>
+        <!-- Footer -->
+        <div class="p-5 border-t border-gray-800 bg-gray-900/50 flex flex-col sm:flex-row gap-3">
+             <button class="btn-secondary flex-1" (click)="close()" [disabled]="booking">Cancel Request</button>
+             <button class="btn-primary bg-red-600 hover:bg-red-500 border-none flex-[2] relative overflow-hidden" (click)="bookEmergencyAppointment()" [disabled]="booking">
+                <span class="relative z-10 flex items-center justify-center gap-2">
+                   <i *ngIf="booking" class="fa-solid fa-circle-notch fa-spin"></i>
+                   <i *ngIf="!booking" class="fa-solid fa-bell"></i>
+                   {{ booking ? 'Processing Emergency Request...' : 'Confirm Emergency Booking' }}
+                </span>
+             </button>
+             
+             <div *ngIf="error" class="w-full text-center text-red-400 text-sm mt-2 sm:hidden animate-fade-in">
+                {{ error }}
+             </div>
         </div>
       </div>
     </div>
@@ -171,7 +163,7 @@ export class EmergencyAppointmentModalComponent {
   currentDate = new Date().toLocaleDateString();
   currentTime = new Date().toLocaleTimeString();
 
-  constructor(private appointmentService: AppointmentService, private toast: ToastService) {}
+  constructor(private appointmentService: AppointmentService, private toast: ToastService) { }
 
   get selectedDoctor(): Doctor | null {
     if (!this.selectedDoctorId) return null;
@@ -220,7 +212,7 @@ export class EmergencyAppointmentModalComponent {
           this.booking = false;
           this.toast.showSuccess('Emergency appointment booked successfully! The doctor has been notified.');
           this.appointmentBooked.emit(response);
-          
+
           // Auto-close after 2 seconds
           setTimeout(() => {
             this.close();

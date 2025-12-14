@@ -8,34 +8,56 @@ import { PatientAppointmentItem } from '../core/services/appointment.service';
   selector: 'patient-appointment-card',
   imports: [CommonModule],
   template: `
-    <div class="panel rounded-2xl p-4 sm:p-5 transition hover:shadow-md hover:ring-1 hover:ring-blue-600/30" [class.opacity-70]="disabled">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div class="flex items-center gap-3 min-w-0">
-          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-800 to-blue-600 text-white flex items-center justify-center font-semibold shrink-0">
-            {{ (appointment.doctorName || 'D') | slice:0:1 }}
+    <div class="panel rounded-xl p-4 sm:p-5 transition hover:shadow-lg border border-gray-800 hover:border-blue-500/30 group">
+      <div class="flex flex-col gap-4">
+        <!-- Header -->
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+             <div class="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center font-bold text-blue-400 text-lg ring-2 ring-gray-700/50 group-hover:ring-blue-500/50 transition-all overflow-hidden relative">
+               <img *ngIf="appointment.doctorProfileImageUrl" [src]="appointment.doctorProfileImageUrl" class="w-full h-full object-cover" alt="Doctor Profile">
+               <span *ngIf="!appointment.doctorProfileImageUrl">{{ (appointment.doctorName || 'D') | slice:0:1 }}</span>
+            </div>
+            <div class="min-w-0">
+              <h4 class="font-bold text-gray-100 truncate text-base leading-tight">
+                {{ appointment.doctorName }}
+                <i *ngIf="appointment.doctorIsVerified" class="fa-solid fa-circle-check text-blue-500 text-xs ml-1" title="Verified"></i>
+              </h4>
+              <p class="text-sm text-gray-400 truncate">{{ appointment.doctorSpecialization }}</p>
+            </div>
           </div>
-          <div class="min-w-0">
-            <p class="font-semibold leading-tight truncate text-gray-100">{{ appointment.doctorName }}</p>
-            <p class="text-xs text-gray-400 flex items-center gap-1">
-              <i class="fa-regular fa-clock"></i>
-              <span>{{ appointment.appointmentDate }} · {{ appointment.appointmentTime }}</span>
-            </p>
-            <p class="text-xs sm:text-sm text-gray-300 truncate" *ngIf="appointment.doctorSpecialization">{{ appointment.doctorSpecialization }}</p>
-            <p class="text-xs sm:text-sm mt-2 text-gray-300 break-words" *ngIf="appointment.reason">Notes: {{ appointment.reason }}</p>
-          </div>
+          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border" [ngClass]="statusClass(appointment.status)">
+            {{ statusLabel(appointment) }}
+          </span>
         </div>
-        <span class="px-2 py-1 rounded text-xs font-semibold tracking-wide" [ngClass]="statusClass(appointment.status)">{{ statusLabel(appointment) }}</span>
-      </div>
 
-      <div class="mt-4 flex flex-col sm:flex-row flex-wrap gap-2">
-        <div class="grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex sm:flex-row" *ngIf="canPatientReschedule(appointment)">
-          <button class="btn-secondary w-full sm:w-auto" (click)="onReschedule()" [disabled]="disabled">Reschedule</button>
-          <button class="btn-danger w-full sm:w-auto" (click)="onCancel()" [disabled]="!canPatientCancel(appointment) || disabled">Cancel</button>
+        <!-- Details -->
+        <div class="bg-gray-900/50 rounded-lg p-3 space-y-2 border border-gray-800/50">
+           <div class="flex items-center gap-2 text-sm text-gray-300">
+             <i class="fa-regular fa-calendar text-blue-400 w-4"></i>
+             <span>{{ appointment.appointmentDate | date:'mediumDate' }}</span>
+           </div>
+           <div class="flex items-center gap-2 text-sm text-gray-300">
+             <i class="fa-regular fa-clock text-blue-400 w-4"></i>
+             <span>{{ appointment.appointmentTime }}</span>
+           </div>
+           <div class="flex items-start gap-2 text-sm text-gray-300" *ngIf="appointment.reason">
+             <i class="fa-regular fa-note-sticky text-gray-500 w-4 mt-0.5"></i>
+             <span class="italic text-gray-400 text-xs">{{ appointment.reason }}</span>
+           </div>
         </div>
-        <button class="btn-primary w-full sm:w-auto" (click)="onViewDoctor()" [disabled]="disabled">
-          <i class="fa-regular fa-user-doctor mr-2"></i>
-          View Doctor Details
-        </button>
+
+        <!-- Actions -->
+        <div class="flex flex-wrap gap-2 pt-2 border-t border-gray-800">
+           <button class="btn-primary flex-1 text-sm py-2" (click)="onViewDoctor()" [disabled]="disabled">
+             Profile
+           </button>
+           <ng-container *ngIf="canPatientReschedule(appointment)">
+             <button class="btn-secondary flex-1 text-sm py-2" (click)="onReschedule()" [disabled]="disabled">Reschedule</button>
+             <button class="px-3 py-2 rounded-lg border border-red-900/30 text-red-400 hover:bg-red-900/20 text-sm transition-colors" (click)="onCancel()" [disabled]="!canPatientCancel(appointment) || disabled" title="Cancel">
+               <i class="fa-solid fa-ban"></i>
+             </button>
+           </ng-container>
+        </div>
       </div>
     </div>
   `,
@@ -55,22 +77,21 @@ export class PatientAppointmentCardComponent {
   statusClass(status: string) {
     const s = (status || '').toUpperCase();
     return {
-      'bg-blue-900/40 text-blue-300': s === 'CONFIRMED',
-      'bg-green-900/40 text-green-300': s === 'COMPLETED',
-      'bg-red-900/40 text-red-300': s === 'CANCELLED',
-      'bg-yellow-900/40 text-yellow-300': s === 'BOOKED',
-      'bg-purple-900/40 text-purple-300': s === 'SCHEDULED',
-      'bg-orange-900/40 text-orange-300': s === 'RESCHEDULED',
+      'bg-blue-500/10 text-blue-400 border-blue-500/20': s === 'CONFIRMED',
+      'bg-green-500/10 text-green-400 border-green-500/20': s === 'COMPLETED',
+      'bg-red-500/10 text-red-400 border-red-500/20': s.startsWith('CANCELLED'),
+      'bg-yellow-500/10 text-yellow-400 border-yellow-500/20': s === 'BOOKED',
+      'bg-purple-500/10 text-purple-400 border-purple-500/20': s === 'SCHEDULED',
+      'bg-orange-500/10 text-orange-400 border-orange-500/20': s === 'RESCHEDULED',
       'bg-gray-700 text-gray-300': !s,
     } as any;
   }
 
   statusLabel(a: PatientAppointmentItem) {
     const s = (a.status || '').toUpperCase();
-    if (s === 'CANCELLED') {
-      const by = (a.statusChangedBy || '').toLowerCase();
-      return by === 'patient' ? 'CANCELLED_BY_PATIENT' : (by ? 'CANCELLED_BY_DOCTOR' : 'CANCELLED');
-    }
+    if (s === 'CANCELLED_BY_PATIENT') return 'Cancelled by Me';
+    if (s === 'CANCELLED_BY_DOCTOR') return 'Cancelled by Doctor';
+    if (s === 'CANCELLED') return 'Cancelled';
     return s;
   }
 

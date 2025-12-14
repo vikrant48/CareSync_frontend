@@ -1,126 +1,114 @@
-import { Component, EventEmitter, Input, Output, ElementRef, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ElementRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PaymentDetails } from './payment-popup.component';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { ToastService } from '../core/services/toast.service';
 
 @Component({
   selector: 'app-payment-success-modal',
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div *ngIf="isVisible" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div #modalContent class="bg-gray-900 rounded-xl shadow-2xl w-full mx-auto sm:max-w-sm md:max-w-md lg:max-w-lg max-h-[80dvh] overflow-y-auto ring-1 ring-gray-800">
-        <!-- Header -->
-        <div class="px-4 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white flex justify-between items-center sticky top-0">
-          <div class="flex items-center">
-            <i class="fas fa-check-circle text-white/90 text-xl mr-3"></i>
-            <h2 class="text-lg sm:text-xl font-semibold">Payment Successful</h2>
-          </div>
-          <div class="flex items-center space-x-2">
-            <!-- Download Button -->
-            <button 
-              (click)="downloadPDF()"
-              class="text-white/80 hover:text-white transition p-2 rounded-lg hover:bg-white/10"
-              title="Download Receipt">
-              <i class="fas fa-download text-base"></i>
-            </button>
-            <!-- Share Button (disabled for now) -->
-            <button 
-              class="text-white/60 cursor-not-allowed p-2 rounded-lg"
-              title="Share (Coming Soon)"
-              disabled>
-              <i class="fas fa-share-alt text-base"></i>
-            </button>
-            <!-- Close Button -->
-            <button 
-              (click)="closeModal()"
-              class="text-white/80 hover:text-white transition p-2 rounded-lg hover:bg-white/10">
-              <i class="fas fa-times text-base"></i>
-            </button>
+    <div *ngIf="isVisible" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+      <!-- Backdrop -->
+      <div class="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity animate-in fade-in duration-300" (click)="closeModal()"></div>
+
+      <!-- Modal Card -->
+      <div #modalContent class="relative w-full max-w-md bg-white text-gray-900 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-5 duration-300 flex flex-col max-h-[90vh]">
+        
+        <!-- Decorative Header -->
+        <div class="relative h-32 bg-emerald-500 overflow-hidden shrink-0">
+          <div class="absolute inset-0 bg-gradient-to-br from-emerald-600 to-teal-500"></div>
+          <!-- Abstract Circles -->
+          <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+          <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-black/5 rounded-full blur-xl"></div>
+          
+          <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/20 to-transparent"></div>
+
+          <!-- Icon Badge -->
+          <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 w-20 h-20 bg-white rounded-full p-2 shadow-xl ring-4 ring-emerald-500/20 z-10 flex items-center justify-center">
+             <div class="w-full h-full bg-emerald-100 rounded-full flex items-center justify-center group">
+               <!-- SVG Checkmark -->
+               <svg class="w-10 h-10 text-emerald-600 drop-shadow-sm transform transition-all duration-700 ease-out group-hover:scale-110" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24">
+                 <path stroke-linecap="round" 
+                       stroke-linejoin="round" 
+                       stroke-width="3" 
+                       d="M5 13l4 4L19 7"
+                       class="animate-[draw_0.6s_ease-out_forwards]"
+                       style="stroke-dasharray: 24; stroke-dashoffset: 24; animation-delay: 200ms;">
+                 </path>
+               </svg>
+             </div>
           </div>
         </div>
 
         <!-- Content -->
-        <div class="p-4 sm:p-6">
-          <!-- Success Message -->
-          <div class="text-center mb-4 sm:mb-6">
-            <div class="w-12 h-12 sm:w-14 sm:h-14 bg-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3">
-              <i class="fas fa-check text-white text-xl"></i>
-            </div>
-            <h3 class="text-base sm:text-lg font-semibold text-gray-100 mb-1">Payment Completed Successfully!</h3>
-            <p class="text-gray-400 text-xs sm:text-sm">Your payment has been processed and confirmed.</p>
+        <div class="pt-12 pb-8 px-6 sm:px-8 text-center flex-1 overflow-y-auto">
+          <h2 class="text-2xl font-bold text-gray-900 mb-1">Payment Successful!</h2>
+          <p class="text-gray-500 text-sm mb-8">Your transaction has been processed securely.</p>
+
+          <!-- Receipt Card -->
+          <div class="bg-gray-50 border border-gray-200 rounded-2xl p-5 mb-8 text-left space-y-4 relative">
+             <!-- Ticket/Receipt cutouts -->
+             <div class="absolute top-1/2 -left-2.5 w-5 h-5 bg-white rounded-full border-r border-gray-200"></div>
+             <div class="absolute top-1/2 -right-2.5 w-5 h-5 bg-white rounded-full border-l border-gray-200"></div>
+
+             <div class="flex justify-between items-center text-sm">
+                <span class="text-gray-500">Amount Paid</span>
+                <span class="text-xl font-bold text-gray-900">₹{{ paymentDetails?.amount | number:'1.2-2' }}</span>
+             </div>
+             
+             <div class="h-px bg-gray-200 border-t border-dashed border-gray-300 my-2"></div>
+
+             <div class="space-y-3">
+               <div class="flex justify-between items-center text-sm">
+                  <span class="text-gray-500">Transaction ID</span>
+                  <div class="flex items-center gap-2">
+                    <span class="text-gray-900 font-mono text-xs">{{ paymentDetails?.transactionId }}</span>
+                    <button (click)="copyTransactionId()" class="text-emerald-600 hover:text-emerald-700 p-1 rounded hover:bg-emerald-50" title="Copy ID">
+                       <i class="fas fa-copy"></i>
+                    </button>
+                  </div>
+               </div>
+               <div class="flex justify-between items-center text-sm">
+                  <span class="text-gray-500">Date</span>
+                  <span class="text-gray-900 font-medium">{{ getCurrentDateTime() }}</span>
+               </div>
+               <div class="flex justify-between items-center text-sm">
+                  <span class="text-gray-500">Payment Method</span>
+                  <span class="text-gray-900 font-medium">{{ getPaymentMethodDisplay() }}</span>
+               </div>
+               <div class="flex justify-between items-center text-sm">
+                  <span class="text-gray-500">Paid to</span>
+                  <span class="text-gray-900 font-medium truncate max-w-[150px]" [title]="recipientUpiId">{{ recipientUpiId }}</span>
+               </div>
+             </div>
           </div>
 
-          <!-- Transaction Details -->
-          <div class="bg-gray-800 rounded-lg p-4 mb-4 sm:mb-6">
-            <h4 class="text-gray-200 font-medium mb-3">Transaction Details</h4>
-            
-            <!-- Transaction ID -->
-            <div class="flex justify-between items-center mb-2 pb-2 border-b border-gray-700">
-              <span class="text-gray-400 text-xs sm:text-sm">Transaction ID:</span>
-              <div class="flex items-center">
-                <span class="text-gray-200 font-mono text-xs sm:text-sm mr-2">{{ paymentDetails?.transactionId }}</span>
-                <button 
-                  (click)="copyTransactionId()"
-                  class="text-indigo-400 hover:text-indigo-300 transition">
-                  <i class="fas fa-copy text-[10px]"></i>
-                </button>
-              </div>
-            </div>
-
-            <!-- Amount -->
-            <div class="flex justify-between items-center mb-2 pb-2 border-b border-gray-700">
-              <span class="text-gray-400 text-xs sm:text-sm">Amount Paid:</span>
-              <span class="text-emerald-400 font-semibold">₹{{ paymentDetails?.amount }}</span>
-            </div>
-
-            <!-- Payment Method -->
-            <div class="flex justify-between items-center mb-2 pb-2 border-b border-gray-700">
-              <span class="text-gray-400 text-xs sm:text-sm">Payment Method:</span>
-              <span class="text-gray-200 text-xs sm:text-sm capitalize">{{ getPaymentMethodDisplay() }}</span>
-            </div>
-
-            <!-- Recipient -->
-            <div class="flex justify-between items-center mb-2 pb-2 border-b border-gray-700">
-              <span class="text-gray-400 text-xs sm:text-sm">Paid To:</span>
-              <span class="text-gray-200 text-xs sm:text-sm">{{ recipientUpiId }}</span>
-            </div>
-
-            <!-- Date & Time -->
-            <div class="flex justify-between items-center mb-2 pb-2 border-b border-gray-700">
-              <span class="text-gray-400 text-xs sm:text-sm">Date & Time:</span>
-              <span class="text-gray-200 text-xs sm:text-sm">{{ getCurrentDateTime() }}</span>
-            </div>
-
-            <!-- Status -->
-            <div class="flex justify-between items-center">
-              <span class="text-gray-400 text-xs sm:text-sm">Status:</span>
-              <span class="text-emerald-400 font-medium flex items-center">
-                <i class="fas fa-check-circle mr-1"></i>
-                Completed
-              </span>
-            </div>
-          </div>
-
-          <!-- Additional Info -->
-          <!-- <div class="bg-blue-900 border border-blue-700 rounded-lg p-3 mb-4 sm:mb-6">
-            <p class="text-blue-300 text-xs sm:text-sm">
-              <i class="fas fa-info-circle mr-2"></i>
-              A confirmation email has been sent to your registered email address. 
-              Please save this transaction ID for your records.
-            </p>
-          </div> -->
-
-          <!-- Action Buttons -->
-          <div class="flex flex-col sm:flex-row sm:justify-center gap-3">
+          <!-- Actions -->
+          <div class="grid grid-cols-2 gap-3">
+            <button 
+              (click)="downloadPDF()"
+              class="flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300">
+              <i class="fas fa-download"></i> Receipt
+            </button>
             <button 
               (click)="closeModal()"
-              class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition">
-              Close
+              class="flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-500/30 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+              Done
             </button>
           </div>
+
         </div>
+
+        <!-- Footer Decor -->
+        <!-- <div class="bg-gray-50 p-3 text-center text-xs text-gray-400 border-t border-gray-100">
+           CareSync Secure Payments
+        </div> -->
       </div>
     </div>
   `
@@ -128,46 +116,40 @@ import html2canvas from 'html2canvas';
 export class PaymentSuccessModalComponent {
   @Input() isVisible = false;
   @Input() paymentDetails: PaymentDetails | null = null;
-  @Input() recipientUpiId = 'vikrantchauhan9794@okicici';
-  
+  @Input() recipientUpiId = '';
+
   @Output() modalClose = new EventEmitter<void>();
-  
+
   @ViewChild('modalContent', { static: false }) modalContent!: ElementRef;
+
+  private toast = inject(ToastService);
 
   getPaymentMethodDisplay(): string {
     if (!this.paymentDetails) return '';
-    
+
     switch (this.paymentDetails.method) {
       case 'upi':
-        return 'UPI Payment';
+        return 'UPI';
       case 'card':
-        return 'Credit/Debit Card';
+        return 'Card';
       case 'qr':
-        return 'QR Code';
+        return 'QR Scan';
       default:
         return this.paymentDetails.method;
     }
   }
 
   getCurrentDateTime(): string {
-    const now = new Date();
-    return now.toLocaleString('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
+    return new Date().toLocaleString('en-IN', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: true
     });
   }
 
   copyTransactionId() {
     if (this.paymentDetails?.transactionId) {
       navigator.clipboard.writeText(this.paymentDetails.transactionId).then(() => {
-        console.log('Transaction ID copied to clipboard');
-        // Could show a toast notification here
-      }).catch(err => {
-        console.error('Failed to copy transaction ID: ', err);
+        this.toast.showSuccess('Transaction ID copied!');
       });
     }
   }
@@ -177,58 +159,29 @@ export class PaymentSuccessModalComponent {
   }
 
   async downloadPDF() {
-    try {
-      if (!this.modalContent) {
-        console.error('Modal content not found');
-        return;
-      }
+    if (!this.modalContent) return;
 
-      // Get the modal content element
+    try {
       const element = this.modalContent.nativeElement;
-      
-      // Create canvas from the modal content
       const canvas = await html2canvas(element, {
-        backgroundColor: '#111827',
-        scale: 2, // Higher quality
-        useCORS: true,
-        allowTaint: true,
-        logging: false
+        backgroundColor: '#ffffff', // Capture as white background
+        scale: 2,
+        logging: false,
+        useCORS: true
       });
 
-      // Calculate dimensions for PDF
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 295; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-
-      // Create PDF
       const pdf = new jsPDF('p', 'mm', 'a4');
-      let position = 0;
+      const imgWidth = 210;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-      // Add the image to PDF
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
 
-      // Add new pages if content is longer than one page
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      // Generate filename with transaction ID and date
-      const transactionId = this.paymentDetails?.transactionId || 'unknown';
-      const date = new Date().toISOString().split('T')[0];
-      const filename = `payment-receipt-${transactionId}-${date}.pdf`;
-
-      // Save the PDF
+      const filename = `Receipt-${this.paymentDetails?.transactionId || 'Txn'}.pdf`;
       pdf.save(filename);
-      
-      console.log('PDF downloaded successfully');
+      this.toast.showSuccess('Receipt downloaded successfully');
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      alert('Failed to download PDF. Please try again.');
+      console.error('PDF Generation Error', error);
+      this.toast.showError('Failed to download receipt');
     }
   }
 }

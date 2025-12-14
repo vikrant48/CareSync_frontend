@@ -52,7 +52,12 @@ import { ToastService } from '../../core/services/toast.service';
     ></app-payment-popup>
     
     <ng-template #loadingTpl>
-      <div class="p-6 text-center text-gray-400">Loading doctor profile…</div>
+      <div class="flex flex-col items-center justify-center min-h-[50vh] space-y-4 animate-pulse">
+        <div class="w-32 h-32 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+        <div class="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+        <div class="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+        <div class="sr-only">Loading doctor profile...</div>
+      </div>
     </ng-template>
     </app-patient-layout>
   `,
@@ -80,11 +85,11 @@ export class DoctorPublicProfileComponent {
   bookingOpen = false;
   experienceYears: number | null = null;
   autoBookOnLoad = false;
-  
+
   // Add properties for date validation and slot filtering
   minDate = '';
   currentTime = '';
-  
+
   // Payment related properties
   paymentModalOpen = false;
   paymentCompleted = false;
@@ -127,7 +132,7 @@ export class DoctorPublicProfileComponent {
     this.loadingDetails = true;
     this.doctorProfiles.getEducations(username).subscribe({
       next: (eds) => (this.educations = eds || []),
-      error: () => {},
+      error: () => { },
     });
     this.doctorProfiles.getExperiences(username).subscribe({
       next: (exps) => {
@@ -137,7 +142,7 @@ export class DoctorPublicProfileComponent {
           this.experienceYears = (this.experiences || []).reduce((acc: number, ex: any) => acc + (ex?.yearsOfService || 0), 0);
         }
       },
-      error: () => {},
+      error: () => { },
     });
     this.doctorProfiles.getCertificates(username).subscribe({
       next: (certs) => {
@@ -181,28 +186,28 @@ export class DoctorPublicProfileComponent {
   filterPastSlots(slots: string[]): string[] {
     const today = new Date();
     const selectedDateObj = new Date(this.selectedDate + 'T00:00:00');
-    
+
     // Only filter if the selected date is today
     if (selectedDateObj.toDateString() === today.toDateString()) {
       const currentHour = today.getHours();
       const currentMinute = today.getMinutes();
-      
+
       return slots.filter(slot => {
         // Parse slot time (assuming format like "09:00 AM" or "14:30")
         const timeMatch = slot.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
         if (!timeMatch) return true; // Keep slot if we can't parse it
-        
+
         let hour = parseInt(timeMatch[1]);
         const minute = parseInt(timeMatch[2]);
         const ampm = timeMatch[3]?.toUpperCase();
-        
+
         // Convert to 24-hour format if needed
         if (ampm === 'PM' && hour !== 12) {
           hour += 12;
         } else if (ampm === 'AM' && hour === 12) {
           hour = 0;
         }
-        
+
         // Compare with current time
         if (hour > currentHour) {
           return true; // Future hour
@@ -213,7 +218,7 @@ export class DoctorPublicProfileComponent {
         }
       });
     }
-    
+
     return slots; // Return all slots for future dates
   }
 
@@ -253,7 +258,7 @@ export class DoctorPublicProfileComponent {
   // This method will be called after successful payment
   proceedWithBooking() {
     if (!this.selectedSlot || !this.doctor) return;
-    
+
     this.booking = true;
     this.bookError = null;
     const payload = {
@@ -281,18 +286,18 @@ export class DoctorPublicProfileComponent {
     this.bookingOpen = true;
     this.bookError = null;
     this.selectedSlot = null;
-    
+
     // Set minimum date to today to prevent past date selection
     const today = new Date();
     this.minDate = today.toISOString().slice(0, 10);
-    
+
     // Set default date to today with proper timezone handling
     const localToday = new Date(today.getTime() - (today.getTimezoneOffset() * 60000));
     this.selectedDate = localToday.toISOString().slice(0, 10);
-    
+
     // Store current time for slot filtering
     this.currentTime = today.toTimeString().slice(0, 5); // HH:MM format
-    
+
     // Precompute experience years from loaded experiences
     this.experienceYears = (this.experiences || []).reduce((acc: number, ex: any) => acc + (ex?.yearsOfService || 0), 0);
     this.loadSlots();
@@ -306,7 +311,7 @@ export class DoctorPublicProfileComponent {
     this.paymentDetails = paymentDetails;
     this.paymentCompleted = true;
     this.paymentModalOpen = false;
-    
+
     // Automatically proceed with booking after successful payment
     this.proceedWithBooking();
   }
@@ -344,7 +349,7 @@ export class DoctorPublicProfileComponent {
     const specialization = this.doctor.specialization || 'General';
     const date = this.selectedDate ? new Date(this.selectedDate).toLocaleDateString() : '';
     const slot = this.selectedSlot || '';
-    
+
     return `${doctorName} (${specialization}) - ${date} ${slot}`.trim();
   }
 

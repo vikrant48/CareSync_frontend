@@ -8,57 +8,62 @@ import { AuthService } from '../../core/services/auth.service';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
-        <div class="mb-6">
-          <div class="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-              </path>
-            </svg>
-          </div>
-          <h2 class="text-2xl font-bold text-gray-900 mb-2">Refreshing Session</h2>
-          <p class="text-gray-600">
-            Your session is being refreshed. Please wait a moment...
-          </p>
-        </div>
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden transition-colors duration-300">
+      
+      <!-- Background Elements -->
+      <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl opacity-50 dark:opacity-20 animate-pulse-slow"></div>
+        <div class="absolute top-1/2 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl opacity-50 dark:opacity-20 translate-x-1/2"></div>
+      </div>
 
-        <div *ngIf="isRefreshing" class="mb-6">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p class="text-sm text-gray-500 mt-2">{{ refreshMessage }}</p>
-        </div>
-
-        <div *ngIf="refreshError" class="mb-6">
-          <div class="bg-red-50 border border-red-200 rounded-md p-4">
-            <div class="flex">
-              <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                </svg>
-              </div>
-              <div class="ml-3">
-                <h3 class="text-sm font-medium text-red-800">Refresh Failed</h3>
-                <p class="text-sm text-red-700 mt-1">{{ refreshError }}</p>
-              </div>
+      <div class="sm:mx-auto sm:w-full sm:max-w-md relative z-10 px-4">
+        
+        <div class="bg-white dark:bg-gray-800 shadow-2xl shadow-gray-200/50 dark:shadow-gray-900/50 rounded-3xl border border-gray-100 dark:border-gray-700 backdrop-blur-sm overflow-hidden flex flex-col p-8 text-center animate-in fade-in zoom-in duration-300">
+          
+          <div class="mb-6">
+            <div class="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-6 text-blue-500">
+               <i class="fa-solid fa-arrows-rotate text-3xl" [class.fa-spin]="isRefreshing"></i>
             </div>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Refreshing Session</h2>
+            <p class="text-gray-600 dark:text-gray-400">
+               Your session is being refreshed. Please wait a moment...
+            </p>
           </div>
-          
-          <button 
-            (click)="retryRefresh()"
-            class="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
-            Try Again
-          </button>
-          
-          <button 
-            (click)="goToLogin()"
-            class="mt-2 w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 transition-colors">
-            Go to Login
-          </button>
-        </div>
 
-        <div *ngIf="!isRefreshing && !refreshError" class="text-sm text-gray-500">
-          <p>If this takes too long, you may need to log in again.</p>
+          <!-- Loading State -->
+          <div *ngIf="isRefreshing" class="px-4 py-3 bg-blue-50 dark:bg-blue-900/10 rounded-xl mb-4">
+             <div class="flex items-center justify-center space-x-2 text-blue-600 dark:text-blue-400 font-medium">
+               <span class="animate-pulse">{{ refreshMessage }}</span>
+             </div>
+          </div>
+
+          <!-- Error State -->
+          <div *ngIf="refreshError" class="mb-6 space-y-4 animate-in fade-in slide-in-from-top-2">
+            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 flex items-start text-left gap-3">
+               <i class="fa-solid fa-circle-exclamation text-red-500 mt-1"></i>
+               <div>
+                 <h3 class="text-sm font-semibold text-red-800 dark:text-red-200">Refresh Failed</h3>
+                 <p class="text-sm text-red-700 dark:text-red-300 mt-1">{{ refreshError }}</p>
+               </div>
+            </div>
+            
+            <button 
+              (click)="retryRefresh()"
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-xl font-medium transition-colors shadow-lg shadow-blue-500/20">
+              <i class="fa-solid fa-arrow-rotate-right mr-2"></i> Try Again
+            </button>
+            
+            <button 
+              (click)="goToLogin()"
+              class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 py-3 px-4 rounded-xl font-medium transition-colors">
+              Go to Login
+            </button>
+          </div>
+
+          <div *ngIf="!isRefreshing && !refreshError" class="text-sm text-gray-400 dark:text-gray-500 mt-4">
+             <i class="fa-regular fa-clock mr-1"></i> If this takes too long, you may need to log in again.
+          </div>
+
         </div>
       </div>
     </div>
@@ -82,7 +87,7 @@ export class TokenRefreshComponent implements OnInit {
     this.refreshMessage = 'Refreshing your session...';
 
     const refreshObservable = this.authService.refresh();
-    
+
     if (refreshObservable) {
       refreshObservable.subscribe({
         next: (response) => {
@@ -91,9 +96,9 @@ export class TokenRefreshComponent implements OnInit {
           localStorage.setItem('refreshToken', response.refreshToken);
           this.authService.accessToken.set(response.accessToken);
           this.authService.refreshToken.set(response.refreshToken);
-          
+
           this.refreshMessage = 'Session refreshed successfully! Redirecting...';
-          
+
           // Redirect back to the appropriate dashboard
           setTimeout(() => {
             this.authService.redirectToDashboard(this.authService.role());

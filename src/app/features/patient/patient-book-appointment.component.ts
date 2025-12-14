@@ -13,90 +13,128 @@ import { SpecializationAutocompleteComponent } from '../../shared/specialization
   imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent],
   template: `
     <app-patient-layout>
-    <div class="panel p-4 sm:p-6 space-y-4 sm:space-y-6">
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-        <h2 class="text-lg sm:text-xl font-semibold">Book Appointment</h2>
-        <div class="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-          <button 
-            class="btn-primary bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg flex items-center gap-2 w-full sm:w-auto"
-            (click)="openEmergencyModal()"
-          >
-            🚨 Emergency Appointment
-          </button>
-          <button class="text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 text-sm font-medium px-0 py-0" (click)="refreshDoctors()">Refresh</button>
+    <div class="max-w-6xl mx-auto space-y-6">
+      <!-- Header Section -->
+      <section class="panel p-4 sm:p-6 flex flex-col items-center justify-between gap-4 md:flex-row shadow-lg">
+        <div class="flex flex-col gap-1 w-full md:w-auto text-center md:text-left">
+          <h2 class="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
+             Find & Book Appointments
+          </h2>
+          <p class="text-sm text-gray-400">Search for specialized doctors and book your slot.</p>
         </div>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        <app-specialization-autocomplete
-          class="w-full"
-          [(ngModel)]="specializationFilter"
-          placeholder="Filter by specialization (e.g., Cardiology)"
-          inputClass="input"
-          [allowAddNew]="false">
-        </app-specialization-autocomplete>
-        <input
-          type="text"
-          class="input w-full"
-          placeholder="Search by doctor name"
-          [(ngModel)]="nameFilter"
-        />
-        <select
-          class="input w-full"
-          [(ngModel)]="genderFilter"
-        >
-          <option value="">All genders</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-          <option value="Other">Other</option>
-        </select>
-        <input
-          type="text"
-          class="input w-full"
-          placeholder="Filter by address/location"
-          [(ngModel)]="addressFilter"
-        />
-      </div>
-
-      <!-- Loading State -->
-      <section *ngIf="loadingDoctors" class="mt-2">
-        <div class="flex items-center justify-center min-h-[180px] text-gray-500">
-          <i class="fa-solid fa-spinner fa-spin text-3xl mr-3"></i>
-          <span>Loading doctors...</span>
+        
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+           <button class="btn-primary bg-red-600/90 hover:bg-red-600 border-none shadow-lg shadow-red-900/40 text-white font-medium px-5 py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95" (click)="openEmergencyModal()">
+             <div class="w-2 h-2 rounded-full bg-white animate-pulse"></div> Emergency Booking
+           </button>
+           <button class="text-blue-400 hover:text-white transition-colors text-sm font-medium px-3 py-2 flex items-center justify-center gap-2 hover:bg-white/5 rounded-lg border border-transparent hover:border-white/10" (click)="refreshDoctors()">
+             <i class="fa-solid fa-rotate-right" [class.animate-spin]="loadingDoctors"></i> Refresh
+           </button>
         </div>
       </section>
-      <div *ngIf="!loadingDoctors && filteredDoctors().length === 0" class="text-gray-400">
-        No doctors match your filters.
+
+      <!-- Filters Section -->
+      <section class="panel p-4 sm:p-6 space-y-4 shadow-lg relative z-30">
+        <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="flex items-center gap-2">
+               <i class="fa-solid fa-filter text-blue-500"></i>
+               <span class="font-semibold text-gray-200">Filters</span>
+            </div>
+            <button *ngIf="specializationFilter || nameFilter || genderFilter || addressFilter" 
+                    (click)="resetFilters()" 
+                    class="text-xs text-red-400 hover:text-red-300 hover:underline flex items-center gap-1 transition-colors">
+               <i class="fa-solid fa-xmark"></i> Clear Filters
+            </button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <app-specialization-autocomplete
+            class="w-full relative z-40"
+            [(ngModel)]="specializationFilter"
+            placeholder="Specialization..."
+            inputClass="input w-full bg-gray-900/50"
+            [allowAddNew]="false">
+          </app-specialization-autocomplete>
+          
+          <div class="relative z-10">
+             <input type="text" class="input w-full bg-gray-900/50" placeholder="Doctor name..." [(ngModel)]="nameFilter" />
+          </div>
+
+          <div class="relative z-10">
+            <select class="input w-full appearance-none bg-gray-900/50" [(ngModel)]="genderFilter">
+              <option value="">All Genders</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+              <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
+            </div>
+         </div>
+
+         <div class="relative z-10">
+             <input type="text" class="input w-full bg-gray-900/50" placeholder="Location..." [(ngModel)]="addressFilter" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Loading & Empty States -->
+      <div *ngIf="loadingDoctors" class="flex flex-col items-center justify-center min-h-[300px] text-blue-400 animate-fade-in">
+        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-3"></i>
+        <span class="text-sm tracking-wider uppercase font-semibold">Loading doctors...</span>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div
-          class="panel p-4 hover:shadow cursor-pointer relative"
-          *ngFor="let d of filteredDoctors()"
-          (click)="openDoctor(d)"
-        >
-          <div class="absolute top-2 right-2 text-sm bg-gray-800/70 rounded px-2 py-1 flex items-center gap-1" *ngIf="ratings[d.id] as r" (click)="$event.stopPropagation()">
-            <span>{{ r.avg.toFixed(1) }}</span>
-            <span class="text-yellow-400">★</span>
-            <span>({{ r.count }})</span>
+      <div *ngIf="!loadingDoctors && filteredDoctors().length === 0" class="flex flex-col items-center justify-center min-h-[300px] text-gray-500 animate-fade-in">
+         <i class="fa-regular fa-face-frown text-4xl mb-3 opacity-50"></i>
+         <p>No doctors found matching your criteria.</p>
+         <button class="mt-4 text-blue-400 hover:text-blue-300 text-sm hover:underline" (click)="resetFilters()">Clear Filters</button>
+      </div>
+
+      <!-- Doctors Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in" *ngIf="!loadingDoctors && filteredDoctors().length > 0">
+        <div class="panel p-5 cursor-pointer relative group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10 border border-gray-800 hover:border-blue-500/30 flex flex-col"
+          *ngFor="let d of filteredDoctors()" (click)="openDoctor(d)">
+          
+          <!-- Rating Badge -->
+          <div class="absolute top-3 right-3 text-xs font-bold bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1 border border-white/10 shadow-sm z-10" *ngIf="ratings[d.id] as r">
+             <i class="fa-solid fa-star text-yellow-400 text-[10px]"></i>
+             <span class="text-gray-200">{{ r.avg.toFixed(1) }}</span>
+             <span class="text-gray-500 text-[10px]">({{ r.count }})</span>
           </div>
-          <div class="flex items-center gap-3 mb-2">
-            <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center text-white">
-              <img *ngIf="d.profileImageUrl" [src]="d.profileImageUrl" class="w-full h-full object-cover" (error)="d.profileImageUrl = ''" />
-              <span *ngIf="!d.profileImageUrl">{{ doctorInitial(d) }}</span>
-            </div>
-            <div>
-              <div class="font-semibold">{{ formatDoctorName(d) }}</div>
-              <div class="text-sm text-gray-400">{{ d.specialization || 'General' }}</div>
-              <div class="text-xs text-gray-400" *ngIf="d.gender">Gender: {{ d.gender }}</div>
-            </div>
+
+          <div class="flex items-start gap-4 mb-4">
+             <div class="relative shrink-0">
+                <div class="w-16 h-16 rounded-full overflow-hidden ring-2 ring-gray-700 group-hover:ring-blue-500 transition-colors bg-gray-800 flex items-center justify-center">
+                  <img *ngIf="d.profileImageUrl" [src]="d.profileImageUrl" class="w-full h-full object-cover" (error)="d.profileImageUrl = ''" />
+                  <span *ngIf="!d.profileImageUrl" class="text-xl font-bold text-gray-400">{{ doctorInitial(d) }}</span>
+                </div>
+                <div class="absolute -bottom-1 -right-1 bg-blue-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-gray-900" *ngIf="d.isVerified" title="Verified">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+             </div>
+             
+             <div class="min-w-0 flex-1 pt-1">
+                <h3 class="font-bold text-lg text-gray-100 truncate group-hover:text-blue-400 transition-colors">{{ formatDoctorName(d) }}</h3>
+                <div class="text-sm text-blue-400 font-medium truncate mb-0.5">{{ d.specialization || 'General Practitioner' }}</div>
+                <div class="text-xs text-gray-500 truncate" *ngIf="d.gender"><span class="capitalize">{{ d.gender }}</span> Doctor</div>
+             </div>
           </div>
-          <div class="text-sm text-gray-300" *ngIf="d.consultationFees !== undefined && d.consultationFees !== null">
-            Consultation Fee: {{ d.consultationFees }}
+
+          <!-- Info Rows -->
+          <div class="space-y-2 mb-5 flex-1">
+             <div class="flex items-center gap-2 text-sm text-gray-400" *ngIf="d.consultationFees">
+                <div class="w-6 flex justify-center"><i class="fa-solid fa-money-bill-wave text-green-500/70"></i></div>
+                <span>Rs. {{ d.consultationFees }} / Visit</span>
+             </div>
+             <div class="flex items-center gap-2 text-sm text-gray-400" *ngIf="d.address">
+                <div class="w-6 flex justify-center"><i class="fa-solid fa-location-dot text-red-400/70"></i></div>
+                <span class="truncate">{{ d.address }}</span>
+             </div>
           </div>
-          <div class="text-sm text-gray-300" *ngIf="d.address">Address: {{ d.address }}</div>
-          <div class="mt-3">
-            <button class="btn-primary w-full sm:w-auto" (click)="goToDoctorAndBook(d); $event.stopPropagation()">Book Appointment</button>
+
+          <div class="mt-auto pt-4 border-t border-gray-800">
+             <button class="btn-primary w-full shadow-lg shadow-blue-900/20 group-hover:shadow-blue-500/20 transition-all" (click)="goToDoctorAndBook(d); $event.stopPropagation()">
+                Book Appointment
+             </button>
           </div>
         </div>
       </div>
@@ -199,9 +237,16 @@ export class PatientBookAppointmentComponent {
     this.showEmergencyModal = false;
   }
 
+  resetFilters() {
+    this.specializationFilter = '';
+    this.nameFilter = '';
+    this.genderFilter = '';
+    this.addressFilter = '';
+  }
+
   onEmergencyAppointmentBooked(appointment: any) {
     console.log('Emergency appointment booked:', appointment);
-    
+
     // Navigate to appointments page to show the newly booked appointment
     this.router.navigate(['/patient/appointments']);
   }

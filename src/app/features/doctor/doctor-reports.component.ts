@@ -13,233 +13,267 @@ import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-doctor-layout>
-    <div class="panel p-6 space-y-6">
-      <div class="flex items-center justify-between">
-        <h2 class="text-xl font-semibold">Insights / Reports</h2>
-      </div>
-      <!-- Insights & Analytics -->
-      <section class="p-4 border rounded">
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="font-semibold">Insights</h3>
-        <div class="text-xs text-gray-400" *ngIf="analyticsRangeText">{{ analyticsRangeText }}</div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="p-4 border rounded">
-          <div class="text-sm text-gray-400">Overall (last 30d)</div>
-          <div class="text-xs text-gray-500 mt-1" *ngIf="loadingOverall">
-            <span class="inline-flex items-center gap-1">
-              <i class="fa-solid fa-spinner animate-spin"></i>
-              <span>Loading…</span>
-            </span>
+      <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Analytics & Insights</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">Track your performance and patient engagement metrics.</p>
           </div>
-          <div class="mt-2 text-sm">
-            <div>Total Appointments: {{ overall?.totalAppointments ?? '�' }}</div>
-            <div>Average Rating: {{ overall?.avgRating ?? '�' }}</div>
-            <div>Total Revenue: {{ overall?.totalRevenue ?? '�' }}</div>
+          <div class="flex items-center gap-3 bg-white dark:bg-gray-800 px-4 py-2 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+             <i class="fa-regular fa-calendar text-blue-500"></i>
+             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ analyticsRangeText || 'Last 30 Days' }}</span>
           </div>
         </div>
-        <div class="p-4 border rounded">
-          <div class="text-sm text-gray-400">Peak Hours</div>
-          <div class="text-xs text-gray-500 mt-1" *ngIf="loadingPeakHours">
-            <span class="inline-flex items-center gap-1">
-              <i class="fa-solid fa-spinner animate-spin"></i>
-              <span>Loading…</span>
-            </span>
-          </div>
-          <div class="mt-2 text-sm">
-            <div>Peak Hour: {{ peakHours?.peakHour ?? '�' }}</div>
-            <div>Total Appointments: {{ peakHours?.totalAppointments ?? '�' }}</div>
-          </div>
-          <app-chart-widget
-            *ngIf="peakHours?.hourlyDistribution"
-            title="Hourly Distribution"
-            [type]="'bar'"
-            [labels]="peakHoursLabels"
-            [data]="peakHoursData"
-          ></app-chart-widget>
-        </div>
-        <div class="p-4 border rounded">
-          <div class="text-sm text-gray-400">Patient Retention</div>
-          <div class="text-xs text-gray-500 mt-1" *ngIf="loadingRetention">
-            <span class="inline-flex items-center gap-1">
-              <i class="fa-solid fa-spinner animate-spin"></i>
-              <span>Loading…</span>
-            </span>
-          </div>
-          <div class="mt-2 text-sm">
-            <div>New: {{ retention?.newPatients ?? '�' }}</div>
-            <div>Returning: {{ retention?.returningPatients ?? '�' }}</div>
-            <div>Retention Rate: {{ retention?.retentionRate ?? '�' }}%</div>
-          </div>
-        </div>
-      </div>
 
-       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-         <div class="p-4 border rounded">
-         <div class="text-sm text-gray-400">Day of Week</div>
-           <div class="text-xs text-gray-500 mt-1" *ngIf="loadingDayOfWeek">
-             <span class="inline-flex items-center gap-1">
-               <i class="fa-solid fa-spinner animate-spin"></i>
-               <span>Loading…</span>
-             </span>
-           </div>
-           <div class="mt-2 text-sm">
-             <div>Busiest Day: {{ dayOfWeek?.busiestDay ?? '�' }}</div>
-           </div>
-           <app-chart-widget
-             *ngIf="dayOfWeek?.dayDistribution"
-             title="Day Distribution"
-             [type]="'bar'"
-             [labels]="dayOfWeekLabels"
-             [data]="dayOfWeekData"
-           ></app-chart-widget>
-         </div>
-         <div class="p-4 border rounded">
-           <div class="text-sm text-gray-400">Feedback Sentiment</div>
-           <div class="text-xs text-gray-500 mt-1" *ngIf="loadingFeedbackSentiment">
-             <span class="inline-flex items-center gap-1">
-               <i class="fa-solid fa-spinner animate-spin"></i>
-               <span>Loading…</span>
-             </span>
-           </div>
-           <div class="mt-2 text-sm">
-             <div>Positive: {{ feedbackSentiment?.positivePercentage ?? '�' }}%</div>
-             <div>Neutral: {{ feedbackSentiment?.neutralPercentage ?? '�' }}%</div>
-             <div>Negative: {{ feedbackSentiment?.negativePercentage ?? '�' }}%</div>
-           </div>
-           <app-chart-widget
-             *ngIf="feedbackSentiment"
-             title="Sentiment"
-             [type]="'pie'"
-             [labels]="feedbackLabels"
-             [data]="feedbackData"
-           ></app-chart-widget>
-         </div>
-         <div class="p-4 border rounded">
-           <div class="text-sm text-gray-400">Performance</div>
-           <div class="text-xs text-gray-500 mt-1" *ngIf="loadingPerformance">
-             <span class="inline-flex items-center gap-1">
-               <i class="fa-solid fa-spinner animate-spin"></i>
-               <span>Loading…</span>
-             </span>
-           </div>
-           <div class="mt-2 text-sm">
-             <div>Completed: {{ performance?.completedAppointments ?? '�' }}</div>
-             <div>Cancellation Rate: {{ performance?.cancellationRate ?? '�' }}%</div>
-             <div>Avg Rating: {{ performance?.averageRating ?? '�' }}</div>
-           </div>
-         </div>
-       </div>
+        <!-- Key Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Total Appointments -->
+            <div class="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-5 text-white shadow-lg relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i class="fa-solid fa-calendar-check text-5xl"></i>
+                </div>
+                <p class="text-blue-100 text-sm font-medium mb-1">Total Appointments</p>
+                <div class="flex items-end gap-2">
+                    <h3 class="text-3xl font-bold">{{ overall?.totalAppointments ?? '-' }}</h3>
+                    <span *ngIf="loadingOverall" class="text-xs animate-pulse">Loading...</span>
+                </div>
+                <div class="mt-2 text-xs text-blue-100/80 bg-white/10 inline-block px-2 py-0.5 rounded-lg backdrop-blur-sm">
+                   Last 30 days
+                </div>
+            </div>
 
-      <!-- More Insights -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-        <div class="p-4 border rounded">
-          <div class="text-sm text-gray-400">Appointment Duration</div>
-          <div class="text-xs text-gray-500 mt-1" *ngIf="loadingAppointmentDuration">
-            <span class="inline-flex items-center gap-1">
-              <i class="fa-solid fa-spinner animate-spin"></i>
-              <span>Loading…</span>
-            </span>
-          </div>
-          <div class="mt-2 text-sm">
-            <div>Average Gap: {{ appointmentDuration?.averageGapMinutes ?? '�' }}m</div>
-            <div>Min Gap: {{ appointmentDuration?.minGapMinutes ?? '�' }}m</div>
-            <div>Max Gap: {{ appointmentDuration?.maxGapMinutes ?? '�' }}m</div>
-          </div>
-        </div>
-        <div class="p-4 border rounded">
-          <div class="text-sm text-gray-400">Cancellation Patterns</div>
-          <div class="text-xs text-gray-500 mt-1" *ngIf="loadingCancellationPatterns">
-            <span class="inline-flex items-center gap-1">
-              <i class="fa-solid fa-spinner animate-spin"></i>
-              <span>Loading…</span>
-            </span>
-          </div>
-          <div class="mt-2 text-sm">
-            <div>Total: {{ cancellationPatterns?.totalCancellations ?? '�' }}</div>
-            <div>Rate: {{ cancellationPatterns?.cancellationRate ?? '�' }}%</div>
-            <div>Common Timing: {{ cancellationPatterns?.commonTiming ?? '�' }}</div>
-          </div>
-        </div>
-        <div class="p-4 border rounded">
-          <div class="text-sm text-gray-400">Patient Demographics</div>
-          <div class="text-xs text-gray-500 mt-1" *ngIf="loadingPatientDemographics">
-            <span class="inline-flex items-center gap-1">
-              <i class="fa-solid fa-spinner animate-spin"></i>
-              <span>Loading…</span>
-            </span>
-          </div>
-          <div class="mt-2 text-sm">
-            <div *ngFor="let kv of (patientDemographics?.ageDistribution | keyvalue)">{{ kv.key }}: {{ kv.value }}</div>
-          </div>
-          <app-chart-widget
-            *ngIf="patientDemographics?.ageDistribution"
-            title="Age Distribution"
-            [type]="'bar'"
-            [labels]="demographicsLabels"
-            [data]="demographicsData"
-          ></app-chart-widget>
-        </div>
-      </div>
+            <!-- Revenue -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group hover:border-blue-200 dark:hover:border-blue-800 transition-colors">
+                 <div class="absolute top-0 right-0 p-4 text-gray-100 dark:text-gray-700 group-hover:text-green-500/10 transition-colors">
+                    <i class="fa-solid fa-sack-dollar text-5xl"></i>
+                </div>
+                <p class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Total Revenue</p>
+                <div class="flex items-end gap-2">
+                     <h3 class="text-3xl font-bold text-gray-900 dark:text-white">{{ overall?.totalRevenue ?? '-' }}</h3>
+                     <span *ngIf="loadingOverall" class="text-xs text-gray-400 animate-pulse">Loading...</span>
+                </div>
+                <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-2 font-medium flex items-center gap-1">
+                   <i class="fa-solid fa-arrow-trend-up"></i>
+                   <span class="text-gray-500 dark:text-gray-400 font-normal">Gross income</span>
+                </p>
+            </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-        <div class="p-4 border rounded">
-          <div class="text-sm text-gray-400">Seasonal Trends ({{ seasonalTrends?.year || currentYear }})</div>
-          <div class="text-xs text-gray-500 mt-1" *ngIf="loadingSeasonalTrends">
-            <span class="inline-flex items-center gap-1">
-              <i class="fa-solid fa-spinner animate-spin"></i>
-              <span>Loading…</span>
-            </span>
-          </div>
-          <div class="mt-2 text-sm">
-            <div>Busiest Season: {{ seasonalTrends?.busiestSeason ?? '�' }}</div>
-            <div *ngFor="let kv of (seasonalTrends?.monthlyDistribution | keyvalue)">{{ kv.key }}: {{ kv.value }}</div>
-          </div>
-          <app-chart-widget
-            *ngIf="seasonalTrends?.monthlyDistribution"
-            title="Monthly Distribution"
-            [type]="'line'"
-            [labels]="seasonalLabels"
-            [data]="seasonalData"
-          ></app-chart-widget>
-        </div>
-        <div class="p-4 border rounded">
-          <div class="text-sm text-gray-400">Appointment Trends (30d)</div>
-          <div class="text-xs text-gray-500 mt-1" *ngIf="loadingAppointmentTrendsDaily">
-            <span class="inline-flex items-center gap-1">
-              <i class="fa-solid fa-spinner animate-spin"></i>
-              <span>Loading…</span>
-            </span>
-          </div>
-          <div class="mt-2 text-sm">
-            <div *ngFor="let kv of (appointmentTrendsDaily?.daily | keyvalue)">{{ kv.key }}: {{ kv.value }}</div>
-          </div>
-          <app-chart-widget
-            *ngIf="appointmentTrendsDaily?.daily"
-            title="Daily Appointments"
-            [type]="'line'"
-            [labels]="dailyTrendLabels"
-            [data]="dailyTrendData"
-          ></app-chart-widget>
-        </div>
-        <div class="p-4 border rounded">
-          <div class="text-sm text-gray-400">Revenue</div>
-          <div class="text-xs text-gray-500 mt-1" *ngIf="loadingRevenueAnalysis">
-            <span class="inline-flex items-center gap-1">
-              <i class="fa-solid fa-spinner animate-spin"></i>
-              <span>Loading…</span>
-            </span>
-          </div>
-          <div class="mt-2 text-sm">
-            <div>Total: {{ revenueAnalysis?.totalRevenue ?? '�' }}</div>
-            <div>Average per Appointment: {{ revenueAnalysis?.averageRevenue ?? '�' }}</div>
+             <!-- Avg Rating -->
+             <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group hover:border-yellow-200 dark:hover:border-yellow-800 transition-colors">
+                <div class="absolute top-0 right-0 p-4 text-gray-100 dark:text-gray-700 group-hover:text-yellow-500/10 transition-colors">
+                   <i class="fa-solid fa-star text-5xl"></i>
+               </div>
+               <p class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Average Rating</p>
+               <div class="flex items-end gap-2">
+                    <h3 class="text-3xl font-bold text-gray-900 dark:text-white">{{ overall?.avgRating ?? '-' }}</h3>
+                    <i class="fa-solid fa-star text-yellow-400 text-xl mb-1"></i>
+                    <span *ngIf="loadingOverall" class="text-xs text-gray-400 animate-pulse">Loading...</span>
+               </div>
+                <p class="text-xs text-gray-400 mt-2">Based on patient feedback</p>
+           </div>
+           
+           <!-- Completion Rate -->
+           <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group hover:border-purple-200 dark:hover:border-purple-800 transition-colors">
+               <div class="absolute top-0 right-0 p-4 text-gray-100 dark:text-gray-700 group-hover:text-purple-500/10 transition-colors">
+                  <i class="fa-solid fa-clipboard-check text-5xl"></i>
+              </div>
+              <p class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Completion Rate</p>
+              <div class="flex items-end gap-2">
+                   <h3 class="text-3xl font-bold text-gray-900 dark:text-white">{{ retention?.retentionRate ?? '-' }}%</h3>
+                   <span *ngIf="loadingRetention" class="text-xs text-gray-400 animate-pulse">Loading...</span>
+              </div>
+               <p class="text-xs text-purple-600 dark:text-purple-400 mt-2 font-medium flex items-center gap-1">
+                   New vs Returning Ratio
+               </p>
           </div>
         </div>
+
+        <!-- Charts Grid 1 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Peak Hours -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h3 class="font-bold text-gray-900 dark:text-white">Hourly Distribution</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Peak hour: <span class="font-semibold text-blue-600 dark:text-blue-400">{{ peakHours?.peakHour ?? '-' }}</span></p>
+                    </div>
+                    <div *ngIf="loadingPeakHours" class="text-blue-600 animate-spin"><i class="fa-solid fa-circle-notch"></i></div>
+                </div>
+                <div class="h-64 w-full">
+                     <app-chart-widget
+                        *ngIf="peakHours?.hourlyDistribution"
+                        [type]="'bar'"
+                        [labels]="peakHoursLabels"
+                        [data]="peakHoursData"
+                      ></app-chart-widget>
+                </div>
+            </div>
+
+            <!-- Day of Week -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h3 class="font-bold text-gray-900 dark:text-white">Weekly Activity</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Busiest day: <span class="font-semibold text-purple-600 dark:text-purple-400">{{ dayOfWeek?.busiestDay ?? '-' }}</span></p>
+                    </div>
+                     <div *ngIf="loadingDayOfWeek" class="text-purple-600 animate-spin"><i class="fa-solid fa-circle-notch"></i></div>
+                </div>
+                 <div class="h-64 w-full">
+                    <app-chart-widget
+                      *ngIf="dayOfWeek?.dayDistribution"
+                      [type]="'bar'"
+                      [labels]="dayOfWeekLabels"
+                      [data]="dayOfWeekData"
+                    ></app-chart-widget>
+                 </div>
+            </div>
+        </div>
+
+        <!-- Feedback & Demographics -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Feedback Sentiment -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 lg:col-span-1">
+                 <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-bold text-gray-900 dark:text-white">Patient Sentiment</h3>
+                    <div *ngIf="loadingFeedbackSentiment" class="text-gray-400 animate-spin"><i class="fa-solid fa-circle-notch"></i></div>
+                </div>
+                 <div class="h-64 w-full relative">
+                    <app-chart-widget
+                      *ngIf="feedbackSentiment"
+                      [type]="'pie'"
+                      [labels]="feedbackLabels"
+                      [data]="feedbackData"
+                    ></app-chart-widget>
+                 </div>
+                 <div class="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
+                     <div class="p-2 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300">
+                         <div class="font-bold text-lg">{{ feedbackSentiment?.positivePercentage ?? 0 }}%</div>
+                         <div>Positive</div>
+                     </div>
+                      <div class="p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-300">
+                         <div class="font-bold text-lg">{{ feedbackSentiment?.neutralPercentage ?? 0 }}%</div>
+                         <div>Neutral</div>
+                     </div>
+                      <div class="p-2 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300">
+                         <div class="font-bold text-lg">{{ feedbackSentiment?.negativePercentage ?? 0 }}%</div>
+                         <div>Negative</div>
+                     </div>
+                 </div>
+            </div>
+
+            <!-- Patient Demographics -->
+             <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 lg:col-span-2">
+                 <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-bold text-gray-900 dark:text-white">Patient Demographics</h3>
+                    <div *ngIf="loadingPatientDemographics" class="text-gray-400 animate-spin"><i class="fa-solid fa-circle-notch"></i></div>
+                </div>
+                 <div class="h-64 w-full">
+                   <app-chart-widget
+                    *ngIf="patientDemographics?.ageDistribution"
+                    [type]="'bar'"
+                    [labels]="demographicsLabels"
+                    [data]="demographicsData"
+                  ></app-chart-widget>
+                 </div>
+            </div>
+        </div>
+
+        <!-- Appointment Trends -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+             <div class="flex items-center justify-between mb-6">
+                <div>
+                     <h3 class="font-bold text-gray-900 dark:text-white">Daily Appointment Trends</h3>
+                     <p class="text-sm text-gray-500 dark:text-gray-400">Last 30 days activity</p>
+                </div>
+                <div *ngIf="loadingAppointmentTrendsDaily" class="text-indigo-600 animate-spin"><i class="fa-solid fa-circle-notch"></i></div>
+            </div>
+             <div class="h-72 w-full flex items-center justify-center">
+               <app-chart-widget
+                *ngIf="!loadingAppointmentTrendsDaily && dailyTrendLabels.length > 0; else noTrendData"
+                class="w-full h-full"
+                [type]="'line'"
+                [labels]="dailyTrendLabels"
+                [data]="dailyTrendData"
+              ></app-chart-widget>
+              <ng-template #noTrendData>
+                  <div *ngIf="!loadingAppointmentTrendsDaily" class="text-center text-gray-400">
+                      <i class="fa-solid fa-chart-line text-4xl mb-2 opacity-50"></i>
+                      <p>No appointment data for this period</p>
+                  </div>
+              </ng-template>
+             </div>
+        </div>
+
+        <!-- Seasonal & Cancellation -->
+         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Seasonal Trends -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                 <div class="flex items-center justify-between mb-6">
+                    <div>
+                         <h3 class="font-bold text-gray-900 dark:text-white">Seasonal Trends</h3>
+                         <p class="text-sm text-gray-500 dark:text-gray-400">Year: {{ seasonalTrends?.year || currentYear }} | Peak: {{ seasonalTrends?.busiestSeason ?? '-' }}</p>
+                    </div>
+                    <div *ngIf="loadingSeasonalTrends" class="text-teal-600 animate-spin"><i class="fa-solid fa-circle-notch"></i></div>
+                </div>
+                <div class="h-64 w-full">
+                   <app-chart-widget
+                    *ngIf="seasonalTrends?.monthlyDistribution"
+                    [type]="'line'"
+                    [labels]="seasonalLabels"
+                    [data]="seasonalData"
+                  ></app-chart-widget>
+                </div>
+            </div>
+
+            <!-- Cancellation Stats -->
+             <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                 <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-bold text-gray-900 dark:text-white">Cancellation Insights</h3>
+                    <div *ngIf="loadingCancellationPatterns" class="text-red-500 animate-spin"><i class="fa-solid fa-circle-notch"></i></div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold tracking-wider">Cancellation Rate</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ cancellationPatterns?.cancellationRate ?? '0' }}%</p>
+                    </div>
+                     <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold tracking-wider">Most Common Time</p>
+                        <p class="text-lg font-bold text-gray-900 dark:text-white mt-1 truncate" [title]="cancellationPatterns?.commonTiming">
+                            {{ cancellationPatterns?.commonTiming ?? 'N/A' }}
+                        </p>
+                    </div>
+                </div>
+                 <div class="space-y-3">
+                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Average Duration Gaps</h4>
+                    <div class="flex items-center justify-between text-sm py-2 border-b border-gray-100 dark:border-gray-700">
+                        <span class="text-gray-600 dark:text-gray-400">Average</span>
+                        <span class="font-medium text-gray-900 dark:text-white">{{ appointmentDuration?.averageGapMinutes ?? 0 }}m</span>
+                    </div>
+                     <div class="flex items-center justify-between text-sm py-2 border-b border-gray-100 dark:border-gray-700">
+                        <span class="text-gray-600 dark:text-gray-400">Minimum</span>
+                        <span class="font-medium text-gray-900 dark:text-white">{{ appointmentDuration?.minGapMinutes ?? 0 }}m</span>
+                    </div>
+                     <div class="flex items-center justify-between text-sm py-2">
+                        <span class="text-gray-600 dark:text-gray-400">Maximum</span>
+                        <span class="font-medium text-gray-900 dark:text-white">{{ appointmentDuration?.maxGapMinutes ?? 0 }}m</span>
+                    </div>
+                 </div>
+            </div>
+         </div>
       </div>
-     </section>
-    </div>
     </app-doctor-layout>
   `,
+  styles: [`
+    :host { display: block; }
+    .pattern-dots {
+      background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
+      background-size: 24px 24px;
+    }
+    :host-context(.dark) .pattern-dots {
+      background-image: radial-gradient(#374151 1.5px, transparent 1.5px);
+    }
+  `]
 })
 export class DoctorReportsComponent implements OnInit {
   @Input() doctorId: number | null = null;
@@ -375,7 +409,7 @@ export class DoctorReportsComponent implements OnInit {
       next: (res) => {
         this.seasonalTrends = res || null;
         const dist = this.seasonalTrends?.monthlyDistribution || {};
-        const order = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        const order = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         const labels = order.filter((m) => (dist as any).hasOwnProperty(m));
         this.seasonalLabels = labels;
         this.seasonalData = labels.map((k) => Number(dist[k] || 0));

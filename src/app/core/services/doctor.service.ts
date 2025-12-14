@@ -17,13 +17,14 @@ export interface Doctor {
   gender?: string;
   address?: string;
   consultationFees?: number;
+  isVerified?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
 export class DoctorService {
   private baseUrl = environment.apiBaseUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getAllForPatients() {
     return this.http.get<Doctor[]>(`${this.baseUrl}/api/doctors/for-patients`);

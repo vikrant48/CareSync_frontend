@@ -7,9 +7,9 @@ import { Chart, ChartType } from 'chart.js/auto';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="p-4 border rounded">
-      <div class="text-sm text-gray-400 mb-2">{{ title }}</div>
-      <div style="height: 220px;">
+    <div class="h-full w-full relative">
+       <!-- Title is now handled by parent card for consistent styling -->
+      <div class="!h-full w-full">
         <canvas #canvas></canvas>
       </div>
     </div>
@@ -87,7 +87,7 @@ export class ChartWidgetComponent implements AfterViewInit, OnDestroy, OnChanges
   }
 
   private generateColors(n: number): string[] {
-    const palette = ['#60A5FA','#34D399','#F59E0B','#F472B6','#A78BFA','#10B981','#EF4444','#93C5FD','#FCD34D','#C4B5FD'];
+    const palette = ['#60A5FA', '#34D399', '#F59E0B', '#F472B6', '#A78BFA', '#10B981', '#EF4444', '#93C5FD', '#FCD34D', '#C4B5FD'];
     const colors: string[] = [];
     for (let i = 0; i < n; i++) colors.push(palette[i % palette.length]);
     return colors;

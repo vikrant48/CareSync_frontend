@@ -1,437 +1,480 @@
 <app-doctor-layout>
-<section class="space-y-8" *ngIf="!loading()">
+  <section class="space-y-8" *ngIf="!loading()">
 
-  <!-- Header Panel -->
-  <section class="panel p-6">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-      <!-- Left: avatar + basics -->
-      <div class="flex items-start gap-4">
-        <div class="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-blue-100 text-blue-700 ring-2 ring-blue-600/40 dark:bg-gray-700 dark:text-white">
-          <img *ngIf="profile?.profileImageUrl; else initials" [src]="profile?.profileImageUrl" class="w-full h-full object-cover" (error)="profile.profileImageUrl=''" />
-          <ng-template #initials>
-            <span class="text-xl font-semibold">{{ (profile?.firstName || profile?.username || 'D').charAt(0) }}</span>
-          </ng-template>
-        </div>
-        <div class="text-sm">
-          <div class="text-lg font-semibold">{{ displayName() }}</div>
-          <div class="text-gray-400" *ngIf="profile?.specialization">{{ profile?.specialization }}</div>
-          <div class="text-gray-400">ID: {{ profile?.id ?? '—' }}</div>
-          <div class="text-gray-400">Email: {{ profile?.email || '—' }}</div>
-          <div class="text-gray-400">Mobile: {{ profile?.contactInfo || '—' }}</div>
-        </div>
-      </div>
-
-      <!-- Right: quick facts -->
-      <div class="flex flex-wrap gap-3 justify-start md:justify-end items-center">
-        <div class="stat-pill">
-          <div class="label">Active</div>
-          <div class="value">{{ profile?.isActive ? 'Yes' : 'No' }}</div>
-        </div>
-        <div class="stat-pill">
-          <div class="label">Fees</div>
-          <div class="value">{{ profile?.consultationFees ?? 0 }}</div>
-        </div>
-        <div class="stat-pill">
-          <div class="label">Gender</div>
-          <div class="value">{{ profile?.gender || '—' }}</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Tabs Bar -->
-  <section class="panel p-0">
-    <div class="flex items-center gap-1 border-b border-gray-200 dark:border-gray-700 px-4">
-      <button class="tab-btn" [class.active]="activeTab==='overview'" (click)="activeTab='overview'">Overview</button>
-      <button class="tab-btn" [class.active]="activeTab==='education'" (click)="activeTab='education'">Education</button>
-      <button class="tab-btn" [class.active]="activeTab==='experience'" (click)="activeTab='experience'">Experience</button>
-      <button class="tab-btn" [class.active]="activeTab==='certificates'" (click)="activeTab='certificates'">Certificates</button>
-    </div>
-
-    <!-- Tab Content -->
-    <div class="p-6 space-y-6">
-
-      <!-- Overview: basic form + profile image -->
-      <div *ngIf="activeTab==='overview'" class="space-y-4">
-        <div class="flex items-center justify-between">
-          <h3 class="font-semibold">Overview</h3>
-          <button class="btn-secondary" *ngIf="!editingOverview" (click)="startEditOverview()">Edit</button>
-        </div>
-        <!-- View mode -->
-        <div *ngIf="!editingOverview" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="space-y-2 text-sm">
-            <div><span class="text-gray-400">First Name:</span> <span class="ml-2">{{ profile?.firstName || '—' }}</span></div>
-            <div><span class="text-gray-400">Last Name:</span> <span class="ml-2">{{ profile?.lastName || '—' }}</span></div>
-            <div><span class="text-gray-400">Specialization:</span> <span class="ml-2">{{ profile?.specialization || '—' }}</span></div>
-            <div><span class="text-gray-400">Contact Info:</span> <span class="ml-2">{{ profile?.contactInfo || '—' }}</span></div>
-            <div><span class="text-gray-400">Email:</span> <span class="ml-2">{{ profile?.email || '—' }}</span></div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div><span class="text-gray-400">Gender:</span> <span class="ml-2">{{ profile?.gender || '—' }}</span></div>
-              <div><span class="text-gray-400">Consultation Fees:</span> <span class="ml-2">{{ profile?.consultationFees ?? '—' }}</span></div>
+    <!-- Header Panel -->
+    <section class="panel p-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+        <!-- Left: avatar + basics -->
+        <div class="flex items-start gap-4">
+          <div class="flex flex-col items-center gap-1">
+            <div
+              class="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-blue-100 text-blue-700 ring-2 ring-blue-600/40 dark:bg-gray-700 dark:text-white border-2"
+              [ngClass]="{'border-blue-500': profile?.isVerified, 'border-transparent': !profile?.isVerified}">
+              <img *ngIf="profile?.profileImageUrl; else initials" [src]="profile?.profileImageUrl"
+                class="w-full h-full object-cover" (error)="profile.profileImageUrl=''" />
+              <ng-template #initials>
+                <span class="text-xl font-semibold">{{ (profile?.firstName || profile?.username || 'D').charAt(0)
+                  }}</span>
+              </ng-template>
             </div>
-            <div><span class="text-gray-400">Address:</span> <span class="ml-2">{{ profile?.address || '—' }}</span></div>
-            <div><span class="text-gray-400">Languages:</span> <span class="ml-2">{{ (profileForm.languages?.length ? profileForm.languages?.join(', ') : '—') }}</span></div>
+            <div *ngIf="profile?.isVerified"
+              class="px-2 py-0.5 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 text-[10px] font-bold uppercase tracking-wider rounded-full flex items-center gap-1">
+              <i class="fa-solid fa-check text-[10px]"></i> Verified
+            </div>
           </div>
-          <div class="space-y-3">
-            <h4 class="font-medium">Profile Image</h4>
-            <div class="flex items-center gap-4">
-              <img *ngIf="profile?.profileImageUrl" [src]="profile.profileImageUrl" alt="Profile" class="w-24 h-24 rounded object-cover border" />
-              <div *ngIf="!profile?.profileImageUrl" class="text-gray-400">No image uploaded.</div>
+          <div class="text-sm">
+            <div class="text-lg font-semibold flex items-center gap-2">
+              {{ displayName() }}
+              <i *ngIf="profile?.isVerified" class="fa-solid fa-circle-check text-blue-500" title="Verified Doctor"></i>
             </div>
+            <div class="text-gray-400" *ngIf="profile?.specialization">{{ profile?.specialization }}</div>
+            <div class="text-gray-400">ID: {{ profile?.id ?? '—' }}</div>
+            <div class="text-gray-400">Email: {{ profile?.email || '—' }}</div>
+            <div class="text-gray-400">Mobile: {{ profile?.contactInfo || '—' }}</div>
           </div>
         </div>
 
-        <!-- Edit mode -->
-        <div *ngIf="editingOverview" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="space-y-3">
-            <h3 class="font-semibold">Basic Information</h3>
-            <label class="block">
-              <span class="text-sm">First Name</span>
-              <input class="input" [(ngModel)]="profileForm.firstName" />
-            </label>
-            <label class="block">
-              <span class="text-sm">Last Name</span>
-              <input class="input" [(ngModel)]="profileForm.lastName" />
-            </label>
-            <label class="block">
-              <span class="text-sm flex items-center gap-2">
-                <i class="fa-solid fa-stethoscope text-gray-400"></i>
-                Specialization
-              </span>
-              <app-specialization-autocomplete
-                [(ngModel)]="profileForm.specialization"
-                placeholder="Enter or select specialization"
-                inputClass="input"
-                [allowAddNew]="true">
-              </app-specialization-autocomplete>
-            </label>
-            <label class="block">
-              <span class="text-sm">Contact Info</span>
-              <input class="input" [(ngModel)]="profileForm.contactInfo" />
-            </label>
-            <label class="block">
-              <span class="text-sm">Email</span>
-              <input type="email" class="input" [(ngModel)]="profileForm.email" />
-            </label>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <label class="block">
-                <span class="text-sm">Gender</span>
-                <select class="input" [(ngModel)]="profileForm.gender">
-                  <option [ngValue]="undefined">Select gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-              </label>
-              <label class="block">
-                <span class="text-sm">Consultation Fees</span>
-                <input type="number" class="input" [(ngModel)]="profileForm.consultationFees" />
-              </label>
+        <!-- Right: quick facts -->
+        <div class="flex flex-wrap gap-3 justify-start md:justify-end items-center">
+          <div class="stat-pill">
+            <div class="label">Active</div>
+            <div class="value">{{ profile?.isActive ? 'Yes' : 'No' }}</div>
+          </div>
+          <div class="stat-pill">
+            <div class="label">Fees</div>
+            <div class="value">{{ profile?.consultationFees ?? 0 }}</div>
+          </div>
+          <div class="stat-pill">
+            <div class="label">Gender</div>
+            <div class="value">{{ profile?.gender || '—' }}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tabs Bar -->
+    <section class="panel p-0">
+      <div class="flex items-center gap-1 border-b border-gray-200 dark:border-gray-700 px-4">
+        <button class="tab-btn" [class.active]="activeTab==='overview'" (click)="activeTab='overview'">Overview</button>
+        <button class="tab-btn" [class.active]="activeTab==='education'"
+          (click)="activeTab='education'">Education</button>
+        <button class="tab-btn" [class.active]="activeTab==='experience'"
+          (click)="activeTab='experience'">Experience</button>
+        <button class="tab-btn" [class.active]="activeTab==='certificates'"
+          (click)="activeTab='certificates'">Certificates</button>
+      </div>
+
+      <!-- Tab Content -->
+      <div class="p-6 space-y-6">
+
+        <!-- Overview: basic form + profile image -->
+        <div *ngIf="activeTab==='overview'" class="space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold">Overview</h3>
+            <button class="btn-secondary" *ngIf="!editingOverview" (click)="startEditOverview()">Edit</button>
+          </div>
+          <!-- View mode -->
+          <div *ngIf="!editingOverview" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-2 text-sm">
+              <div><span class="text-gray-400">First Name:</span> <span class="ml-2">{{ profile?.firstName || '—'
+                  }}</span></div>
+              <div><span class="text-gray-400">Last Name:</span> <span class="ml-2">{{ profile?.lastName || '—'
+                  }}</span></div>
+              <div><span class="text-gray-400">Specialization:</span> <span class="ml-2">{{ profile?.specialization ||
+                  '—' }}</span></div>
+              <div><span class="text-gray-400">Contact Info:</span> <span class="ml-2">{{ profile?.contactInfo || '—'
+                  }}</span></div>
+              <div><span class="text-gray-400">Email:</span> <span class="ml-2">{{ profile?.email || '—' }}</span></div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div><span class="text-gray-400">Gender:</span> <span class="ml-2">{{ profile?.gender || '—' }}</span>
+                </div>
+                <div><span class="text-gray-400">Consultation Fees:</span> <span class="ml-2">{{
+                    profile?.consultationFees ?? '—' }}</span></div>
+              </div>
+              <div><span class="text-gray-400">Address:</span> <span class="ml-2">{{ profile?.address || '—' }}</span>
+              </div>
+              <div><span class="text-gray-400">Languages:</span> <span class="ml-2">{{ (profileForm.languages?.length ?
+                  profileForm.languages?.join(', ') : '—') }}</span></div>
             </div>
-            <label class="block">
-              <span class="text-sm">Address</span>
-              <input class="input" [(ngModel)]="profileForm.address" />
-            </label>
-            <div class="block">
-              <span class="text-sm">Languages</span>
-              <div class="flex flex-wrap gap-3 mt-1">
-                <label *ngFor="let lang of languageOptions" class="inline-flex items-center gap-2">
-                  <input type="checkbox" [checked]="profileForm.languages?.includes(lang)" (change)="toggleLanguage(lang, $event)" />
-                  <span>{{ lang }}</span>
+            <div class="space-y-3">
+              <h4 class="font-medium">Profile Image</h4>
+              <div class="flex items-center gap-4">
+                <img *ngIf="profile?.profileImageUrl" [src]="profile.profileImageUrl" alt="Profile"
+                  class="w-24 h-24 rounded object-cover border" />
+                <div *ngIf="!profile?.profileImageUrl" class="text-gray-400">No image uploaded.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit mode -->
+          <div *ngIf="editingOverview" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-3">
+              <h3 class="font-semibold">Basic Information</h3>
+              <label class="block">
+                <span class="text-sm">First Name</span>
+                <input class="input" [(ngModel)]="profileForm.firstName" />
+              </label>
+              <label class="block">
+                <span class="text-sm">Last Name</span>
+                <input class="input" [(ngModel)]="profileForm.lastName" />
+              </label>
+              <label class="block">
+                <span class="text-sm flex items-center gap-2">
+                  <i class="fa-solid fa-stethoscope text-gray-400"></i>
+                  Specialization
+                </span>
+                <app-specialization-autocomplete [(ngModel)]="profileForm.specialization"
+                  placeholder="Enter or select specialization" inputClass="input" [allowAddNew]="true">
+                </app-specialization-autocomplete>
+              </label>
+              <label class="block">
+                <span class="text-sm">Contact Info</span>
+                <input class="input" [(ngModel)]="profileForm.contactInfo" />
+              </label>
+              <label class="block">
+                <span class="text-sm">Email</span>
+                <input type="email" class="input" [(ngModel)]="profileForm.email" />
+              </label>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <label class="block">
+                  <span class="text-sm">Gender</span>
+                  <select class="input" [(ngModel)]="profileForm.gender">
+                    <option [ngValue]="undefined">Select gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </label>
+                <label class="block">
+                  <span class="text-sm">Consultation Fees</span>
+                  <input type="number" class="input" [(ngModel)]="profileForm.consultationFees" />
                 </label>
               </div>
+              <label class="block">
+                <span class="text-sm">Address</span>
+                <input class="input" [(ngModel)]="profileForm.address" />
+              </label>
+              <div class="block">
+                <span class="text-sm">Languages</span>
+                <div class="flex flex-wrap gap-3 mt-1">
+                  <label *ngFor="let lang of languageOptions" class="inline-flex items-center gap-2">
+                    <input type="checkbox" [checked]="profileForm.languages?.includes(lang)"
+                      (change)="toggleLanguage(lang, $event)" />
+                    <span>{{ lang }}</span>
+                  </label>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button class="btn-primary" (click)="saveProfile()">Save</button>
+                <button class="btn-secondary" (click)="editingOverview=false">Cancel</button>
+              </div>
+            </div>
+
+            <div class="space-y-3">
+              <h3 class="font-semibold">Profile Image</h3>
+              <div class="flex items-center gap-4">
+                <img *ngIf="!profileImagePreviewUrl && profile?.profileImageUrl" [src]="profile.profileImageUrl"
+                  alt="Profile" class="w-24 h-24 rounded object-cover border" />
+                <div *ngIf="profileImagePreviewUrl" class="space-y-1">
+                  <img [src]="profileImagePreviewUrl" alt="Preview" class="w-24 h-24 rounded object-cover border" />
+                  <p class="text-xs text-gray-400">Preview (not yet uploaded)</p>
+                </div>
+                <div class="space-y-2">
+                  <input type="file" (change)="onProfileImageSelected($event)" accept="image/*" />
+                  <div class="flex items-center gap-2">
+                    <button class="btn-primary" (click)="uploadSelectedProfileImage()"
+                      [disabled]="!selectedProfileImage || uploadingProfileImage">
+                      {{ uploadingProfileImage ? 'Uploading…' : 'Upload Image' }}
+                    </button>
+                    <button class="btn-secondary" (click)="clearProfileImageSelection()"
+                      [disabled]="!selectedProfileImage">Cancel</button>
+                  </div>
+                  <p class="text-xs text-gray-400">Select an image to preview, then click Upload.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Education Tab -->
+        <div *ngIf="activeTab==='education'" class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold">Education</h3>
+            <button class="btn-secondary" *ngIf="!editingEducationMode" (click)="startAddEducation()">Add</button>
+          </div>
+          <!-- Edit/Add form only in edit mode -->
+          <div *ngIf="editingEducationMode" class="space-y-3">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <label class="block">
+                <span class="text-sm">Degree</span>
+                <select class="input" [(ngModel)]="newEducation.degree">
+                  <option [ngValue]="''">Select degree</option>
+                  <option *ngFor="let d of degreeOptions" [value]="d">{{ d }}</option>
+                  <option value="__other__">Add new degree…</option>
+                </select>
+              </label>
+              <div *ngIf="newEducation.degree==='__other__'" class="mt-1 flex items-center gap-2 md:col-span-1">
+                <input class="input flex-1" [(ngModel)]="customDegree" placeholder="Enter new degree" />
+                <button class="btn-secondary" (click)="addCustomDegree()">Add</button>
+              </div>
+              <label class="block">
+                <span class="text-sm">Institution</span>
+                <select class="input" [(ngModel)]="newEducation.institution">
+                  <option [ngValue]="''">Select institution</option>
+                  <option *ngFor="let i of institutionOptions" [value]="i">{{ i }}</option>
+                  <option value="__other__">Add new institution…</option>
+                </select>
+              </label>
+              <div *ngIf="newEducation.institution==='__other__'" class="mt-1 flex items-center gap-2 md:col-span-1">
+                <input class="input flex-1" [(ngModel)]="customInstitution" placeholder="Enter new institution" />
+                <button class="btn-secondary" (click)="addCustomInstitution()">Add</button>
+              </div>
+              <label class="block">
+                <span class="text-sm">Year</span>
+                <input type="number" class="input" [(ngModel)]="newEducation.yearOfCompletion" />
+              </label>
+            </div>
+            <label class="block">
+              <span class="text-sm">Details</span>
+              <textarea class="input" [(ngModel)]="newEducation.details"></textarea>
+            </label>
+            <div class="flex items-center gap-2">
+              <button class="btn-primary" (click)="submitEducation()">{{ editingEducationId ? 'Update Education' : 'Add
+                Education' }}</button>
+              <button class="btn-secondary" (click)="cancelEditEducation()">Cancel</button>
+            </div>
+          </div>
+          <div class="overflow-x-auto" *ngIf="!editingEducationMode">
+            <table class="w-full text-sm border-separate border-spacing-y-2">
+              <thead>
+                <tr class="text-gray-400">
+                  <th class="text-left w-16">Sr No</th>
+                  <th class="text-left">Degree</th>
+                  <th class="text-left">Institution</th>
+                  <th class="text-left w-36">Year of Completion</th>
+                  <th class="text-left">Details</th>
+                  <th class="text-left w-40">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let e of educations; index as i" class="border-t">
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ e.degree || '—' }}</td>
+                  <td>{{ e.institution || '—' }}</td>
+                  <td>{{ e.yearOfCompletion || '—' }}</td>
+                  <td>{{ e.details || '—' }}</td>
+                  <td>
+                    <div class="flex gap-2">
+                      <button class="btn-secondary" (click)="startEditEducation(e)">Edit</button>
+                      <button class="btn-danger" (click)="deleteEducation(e)">Delete</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Experience Tab -->
+        <div *ngIf="activeTab==='experience'" class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold">Experience</h3>
+            <button class="btn-secondary" *ngIf="!editingExperienceMode" (click)="startAddExperience()">Add</button>
+          </div>
+          <!-- Edit/Add form only in edit mode -->
+          <div *ngIf="editingExperienceMode" class="space-y-3">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <label class="block">
+                <span class="text-sm">Hospital</span>
+                <select class="input" [(ngModel)]="newExperience.hospitalName">
+                  <option [ngValue]="''">Select hospital</option>
+                  <option *ngFor="let h of hospitalOptions" [value]="h">{{ h }}</option>
+                  <option value="__other__">Add new hospital…</option>
+                </select>
+              </label>
+              <div *ngIf="newExperience.hospitalName==='__other__'" class="mt-1 flex items-center gap-2 md:col-span-1">
+                <input class="input flex-1" [(ngModel)]="customHospital" placeholder="Enter new hospital" />
+                <button class="btn-secondary" (click)="addCustomHospital()">Add</button>
+              </div>
+              <label class="block">
+                <span class="text-sm">Position</span>
+                <select class="input" [(ngModel)]="newExperience.position">
+                  <option [ngValue]="''">Select position</option>
+                  <option *ngFor="let p of positionOptions" [value]="p">{{ p }}</option>
+                  <option value="__other__">Add new position…</option>
+                </select>
+              </label>
+              <div *ngIf="newExperience.position==='__other__'" class="mt-1 flex items-center gap-2 md:col-span-1">
+                <input class="input flex-1" [(ngModel)]="customPosition" placeholder="Enter new position" />
+                <button class="btn-secondary" (click)="addCustomPosition()">Add</button>
+              </div>
+              <label class="block">
+                <span class="text-sm">Years</span>
+                <input type="number" class="input" [(ngModel)]="newExperience.yearsOfService" />
+              </label>
+            </div>
+            <label class="block">
+              <span class="text-sm">Details</span>
+              <textarea class="input" [(ngModel)]="newExperience.details"></textarea>
+            </label>
+            <div class="flex items-center gap-2">
+              <button class="btn-primary" (click)="submitExperience()">{{ editingExperienceId ? 'Update Experience' :
+                'Add Experience' }}</button>
+              <button class="btn-secondary" (click)="cancelEditExperience()">Cancel</button>
+            </div>
+          </div>
+          <div class="overflow-x-auto" *ngIf="!editingExperienceMode">
+            <table class="w-full text-sm border-separate border-spacing-y-2">
+              <thead>
+                <tr class="text-gray-400">
+                  <th class="text-left w-16">Sr No</th>
+                  <th class="text-left">Hospital</th>
+                  <th class="text-left">Position</th>
+                  <th class="text-left w-28">Years</th>
+                  <th class="text-left">Details</th>
+                  <th class="text-left w-40">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let x of experiences; index as i" class="border-t">
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ x.hospitalName || '—' }}</td>
+                  <td>{{ x.position || '—' }}</td>
+                  <td>{{ x.yearsOfService || '—' }}</td>
+                  <td>{{ x.details || '—' }}</td>
+                  <td>
+                    <div class="flex gap-2">
+                      <button class="btn-secondary" (click)="startEditExperience(x)">Edit</button>
+                      <button class="btn-danger" (click)="deleteExperience(x)">Delete</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Certificates Tab -->
+        <div *ngIf="activeTab==='certificates'" class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold">Certificates</h3>
+            <div class="flex items-center gap-2">
+              <button class="btn-secondary" *ngIf="!editingCertificatesMode"
+                (click)="startAddCertificate()">Add</button>
+              <button class="btn-secondary" *ngIf="editingCertificatesMode"
+                (click)="cancelAddCertificate()">Cancel</button>
+            </div>
+          </div>
+          <div *ngIf="editingCertificatesMode" class="space-y-3">
+            <div class="flex items-center gap-3">
+              <input type="file" #certFileInput (change)="onCertFileSelected($event)"
+                accept="application/pdf,image/*" />
+              <input class="input flex-1" placeholder="Description (optional)" [(ngModel)]="certDescription" />
+              <button class="btn-secondary" (click)="uploadCertificate()"
+                [disabled]="uploadingCertificate || !certFile">
+                {{ uploadingCertificate ? 'Uploading…' : 'Upload & Create' }}
+              </button>
+            </div>
+          </div>
+          <!-- Upload success banner -->
+          <div *ngIf="editingCertificatesMode && certUploadMessage"
+            class="p-3 rounded border border-green-700 bg-green-900/40 text-green-100 text-sm space-y-1">
+            <div>{{ certUploadMessage }}</div>
+            <div class="flex gap-3">
+              <a *ngIf="certUploadDetails?.cloudinaryUrl" [href]="certUploadDetails?.cloudinaryUrl" target="_blank"
+                class="link">Open Cloudinary</a>
+              <a *ngIf="certUploadDetails?.downloadUrl" [href]="certUploadDetails?.downloadUrl" target="_blank"
+                class="link">Download</a>
+              <span *ngIf="certUploadDetails?.filename">File: {{ certUploadDetails?.filename }}</span>
+            </div>
+          </div>
+          <!-- Post-upload metadata form (shown below upload when file created successfully) -->
+          <div *ngIf="editingCertificatesMode && lastUploadedCertId as nid"
+            class="p-3 rounded border border-gray-700 bg-gray-900/40 space-y-2">
+            <div class="font-medium">Complete certificate details</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2" *ngIf="findCert(nid) as newCert">
+              <input class="input" placeholder="Name" [(ngModel)]="certEdit[nid].name" />
+              <input class="input" placeholder="Issuing Organization" [(ngModel)]="certEdit[nid].issuingOrganization" />
+              <input class="input" type="date" placeholder="Issue Date" [(ngModel)]="certEdit[nid].issueDate" />
+              <input class="input" type="date" placeholder="Expiry Date" [(ngModel)]="certEdit[nid].expiryDate" />
+              <input class="input" placeholder="Credential ID" [(ngModel)]="certEdit[nid].credentialId" />
+              <input class="input" placeholder="Credential URL" [(ngModel)]="certEdit[nid].credentialUrl" />
+              <textarea class="input md:col-span-2" placeholder="Details"
+                [(ngModel)]="certEdit[nid].details"></textarea>
             </div>
             <div class="flex items-center gap-2">
-              <button class="btn-primary" (click)="saveProfile()">Save</button>
-              <button class="btn-secondary" (click)="editingOverview=false">Cancel</button>
+              <button class="btn-primary" (click)="saveCertificateMeta(findCert(nid))">Save</button>
+              <button class="btn-secondary" (click)="cancelNewCertMeta()">Cancel</button>
+            </div>
+          </div>
+          <div
+            *ngIf="!editingCertificatesMode && !editingCertId && !lastUploadedCertId && (certificates?.length || 0) === 0"
+            class="text-gray-400">No certificates available.</div>
+          <!-- Above-table edit form (opens when clicking Edit on a row) -->
+          <div *ngIf="editingCertId as eid" class="p-3 rounded border border-gray-700 bg-gray-900/40 space-y-2">
+            <div class="font-medium">Edit certificate details</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2" *ngIf="findCert(eid) as editCert">
+              <input class="input" placeholder="Name" [(ngModel)]="certEdit[eid].name" />
+              <input class="input" placeholder="Issuing Organization" [(ngModel)]="certEdit[eid].issuingOrganization" />
+              <input class="input" type="date" placeholder="Issue Date" [(ngModel)]="certEdit[eid].issueDate" />
+              <input class="input" type="date" placeholder="Expiry Date" [(ngModel)]="certEdit[eid].expiryDate" />
+              <input class="input" placeholder="Credential ID" [(ngModel)]="certEdit[eid].credentialId" />
+              <input class="input" placeholder="Credential URL" [(ngModel)]="certEdit[eid].credentialUrl" />
+              <textarea class="input md:col-span-2" placeholder="Details"
+                [(ngModel)]="certEdit[eid].details"></textarea>
+            </div>
+            <div class="flex items-center gap-2">
+              <button class="btn-primary" (click)="saveCertificateMeta(findCert(eid))">Save</button>
+              <button class="btn-secondary" (click)="cancelEditCert()">Cancel</button>
             </div>
           </div>
 
-          <div class="space-y-3">
-            <h3 class="font-semibold">Profile Image</h3>
-            <div class="flex items-center gap-4">
-              <img *ngIf="!profileImagePreviewUrl && profile?.profileImageUrl" [src]="profile.profileImageUrl" alt="Profile" class="w-24 h-24 rounded object-cover border" />
-              <div *ngIf="profileImagePreviewUrl" class="space-y-1">
-                <img [src]="profileImagePreviewUrl" alt="Preview" class="w-24 h-24 rounded object-cover border" />
-                <p class="text-xs text-gray-400">Preview (not yet uploaded)</p>
-              </div>
-              <div class="space-y-2">
-                <input type="file" (change)="onProfileImageSelected($event)" accept="image/*" />
-                <div class="flex items-center gap-2">
-                  <button class="btn-primary" (click)="uploadSelectedProfileImage()" [disabled]="!selectedProfileImage || uploadingProfileImage">
-                    {{ uploadingProfileImage ? 'Uploading…' : 'Upload Image' }}
-                  </button>
-                  <button class="btn-secondary" (click)="clearProfileImageSelection()" [disabled]="!selectedProfileImage">Cancel</button>
-                </div>
-                <p class="text-xs text-gray-400">Select an image to preview, then click Upload.</p>
-              </div>
-            </div>
+          <div
+            *ngIf="!editingCertificatesMode && !editingCertId && !lastUploadedCertId && (certificates?.length || 0) > 0"
+            class="overflow-x-auto">
+            <table class="w-full text-sm border-separate border-spacing-y-2">
+              <thead>
+                <tr class="text-gray-400">
+                  <th class="text-left">Name</th>
+                  <th class="text-left w-28">Cloudinary</th>
+                  <th class="text-left w-28">Credential</th>
+                  <th class="text-left w-52">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let c of certificates" class="border-t">
+                  <td>
+                    <div>{{ c.name || c.originalFilename || 'Certificate' }}</div>
+                  </td>
+                  <td>
+                    <a *ngIf="c.url" class="link" [href]="c.url" target="_blank">View</a>
+                  </td>
+                  <td>
+                    <a *ngIf="c.credentialUrl" class="link" [href]="c.credentialUrl" target="_blank">Verify</a>
+                  </td>
+                  <td>
+                    <div class="flex gap-2">
+                      <button class="btn-secondary" (click)="startEditCert(c)">Edit</button>
+                      <button class="btn-danger" (click)="deleteCertificate(c)">Delete</button>
+                      <label class="btn-secondary cursor-pointer">
+                        Replace
+                        <input type="file" class="hidden" (change)="replaceCertificateFile(c, $event)"
+                          accept="application/pdf,image/*" />
+                      </label>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
+    </section>
 
-      <!-- Education Tab -->
-      <div *ngIf="activeTab==='education'" class="space-y-3">
-        <div class="flex items-center justify-between">
-          <h3 class="font-semibold">Education</h3>
-          <button class="btn-secondary" *ngIf="!editingEducationMode" (click)="startAddEducation()">Add</button>
-        </div>
-        <!-- Edit/Add form only in edit mode -->
-        <div *ngIf="editingEducationMode" class="space-y-3">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <label class="block">
-              <span class="text-sm">Degree</span>
-              <select class="input" [(ngModel)]="newEducation.degree">
-                <option [ngValue]="''">Select degree</option>
-                <option *ngFor="let d of degreeOptions" [value]="d">{{ d }}</option>
-                <option value="__other__">Add new degree…</option>
-              </select>
-            </label>
-            <div *ngIf="newEducation.degree==='__other__'" class="mt-1 flex items-center gap-2 md:col-span-1">
-              <input class="input flex-1" [(ngModel)]="customDegree" placeholder="Enter new degree" />
-              <button class="btn-secondary" (click)="addCustomDegree()">Add</button>
-            </div>
-            <label class="block">
-              <span class="text-sm">Institution</span>
-              <select class="input" [(ngModel)]="newEducation.institution">
-                <option [ngValue]="''">Select institution</option>
-                <option *ngFor="let i of institutionOptions" [value]="i">{{ i }}</option>
-                <option value="__other__">Add new institution…</option>
-              </select>
-            </label>
-            <div *ngIf="newEducation.institution==='__other__'" class="mt-1 flex items-center gap-2 md:col-span-1">
-              <input class="input flex-1" [(ngModel)]="customInstitution" placeholder="Enter new institution" />
-              <button class="btn-secondary" (click)="addCustomInstitution()">Add</button>
-            </div>
-            <label class="block">
-              <span class="text-sm">Year</span>
-              <input type="number" class="input" [(ngModel)]="newEducation.yearOfCompletion" />
-            </label>
-          </div>
-          <label class="block">
-            <span class="text-sm">Details</span>
-            <textarea class="input" [(ngModel)]="newEducation.details"></textarea>
-          </label>
-          <div class="flex items-center gap-2">
-            <button class="btn-primary" (click)="submitEducation()">{{ editingEducationId ? 'Update Education' : 'Add Education' }}</button>
-            <button class="btn-secondary" (click)="cancelEditEducation()">Cancel</button>
-          </div>
-        </div>
-        <div class="overflow-x-auto" *ngIf="!editingEducationMode">
-          <table class="w-full text-sm border-separate border-spacing-y-2">
-            <thead>
-              <tr class="text-gray-400">
-                <th class="text-left w-16">Sr No</th>
-                <th class="text-left">Degree</th>
-                <th class="text-left">Institution</th>
-                <th class="text-left w-36">Year of Completion</th>
-                <th class="text-left">Details</th>
-                <th class="text-left w-40">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let e of educations; index as i" class="border-t">
-                <td>{{ i + 1 }}</td>
-                <td>{{ e.degree || '—' }}</td>
-                <td>{{ e.institution || '—' }}</td>
-                <td>{{ e.yearOfCompletion || '—' }}</td>
-                <td>{{ e.details || '—' }}</td>
-                <td>
-                  <div class="flex gap-2">
-                    <button class="btn-secondary" (click)="startEditEducation(e)">Edit</button>
-                    <button class="btn-danger" (click)="deleteEducation(e)">Delete</button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
 
-      <!-- Experience Tab -->
-      <div *ngIf="activeTab==='experience'" class="space-y-3">
-        <div class="flex items-center justify-between">
-          <h3 class="font-semibold">Experience</h3>
-          <button class="btn-secondary" *ngIf="!editingExperienceMode" (click)="startAddExperience()">Add</button>
-        </div>
-        <!-- Edit/Add form only in edit mode -->
-        <div *ngIf="editingExperienceMode" class="space-y-3">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <label class="block">
-              <span class="text-sm">Hospital</span>
-              <select class="input" [(ngModel)]="newExperience.hospitalName">
-                <option [ngValue]="''">Select hospital</option>
-                <option *ngFor="let h of hospitalOptions" [value]="h">{{ h }}</option>
-                <option value="__other__">Add new hospital…</option>
-              </select>
-            </label>
-            <div *ngIf="newExperience.hospitalName==='__other__'" class="mt-1 flex items-center gap-2 md:col-span-1">
-              <input class="input flex-1" [(ngModel)]="customHospital" placeholder="Enter new hospital" />
-              <button class="btn-secondary" (click)="addCustomHospital()">Add</button>
-            </div>
-            <label class="block">
-              <span class="text-sm">Position</span>
-              <select class="input" [(ngModel)]="newExperience.position">
-                <option [ngValue]="''">Select position</option>
-                <option *ngFor="let p of positionOptions" [value]="p">{{ p }}</option>
-                <option value="__other__">Add new position…</option>
-              </select>
-            </label>
-            <div *ngIf="newExperience.position==='__other__'" class="mt-1 flex items-center gap-2 md:col-span-1">
-              <input class="input flex-1" [(ngModel)]="customPosition" placeholder="Enter new position" />
-              <button class="btn-secondary" (click)="addCustomPosition()">Add</button>
-            </div>
-            <label class="block">
-              <span class="text-sm">Years</span>
-              <input type="number" class="input" [(ngModel)]="newExperience.yearsOfService" />
-            </label>
-          </div>
-          <label class="block">
-            <span class="text-sm">Details</span>
-            <textarea class="input" [(ngModel)]="newExperience.details"></textarea>
-          </label>
-          <div class="flex items-center gap-2">
-            <button class="btn-primary" (click)="submitExperience()">{{ editingExperienceId ? 'Update Experience' : 'Add Experience' }}</button>
-            <button class="btn-secondary" (click)="cancelEditExperience()">Cancel</button>
-          </div>
-        </div>
-        <div class="overflow-x-auto" *ngIf="!editingExperienceMode">
-          <table class="w-full text-sm border-separate border-spacing-y-2">
-            <thead>
-              <tr class="text-gray-400">
-                <th class="text-left w-16">Sr No</th>
-                <th class="text-left">Hospital</th>
-                <th class="text-left">Position</th>
-                <th class="text-left w-28">Years</th>
-                <th class="text-left">Details</th>
-                <th class="text-left w-40">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let x of experiences; index as i" class="border-t">
-                <td>{{ i + 1 }}</td>
-                <td>{{ x.hospitalName || '—' }}</td>
-                <td>{{ x.position || '—' }}</td>
-                <td>{{ x.yearsOfService || '—' }}</td>
-                <td>{{ x.details || '—' }}</td>
-                <td>
-                  <div class="flex gap-2">
-                    <button class="btn-secondary" (click)="startEditExperience(x)">Edit</button>
-                    <button class="btn-danger" (click)="deleteExperience(x)">Delete</button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Certificates Tab -->
-      <div *ngIf="activeTab==='certificates'" class="space-y-3">
-        <div class="flex items-center justify-between">
-          <h3 class="font-semibold">Certificates</h3>
-          <div class="flex items-center gap-2">
-            <button class="btn-secondary" *ngIf="!editingCertificatesMode" (click)="startAddCertificate()">Add</button>
-            <button class="btn-secondary" *ngIf="editingCertificatesMode" (click)="cancelAddCertificate()">Cancel</button>
-          </div>
-        </div>
-        <div *ngIf="editingCertificatesMode" class="space-y-3">
-          <div class="flex items-center gap-3">
-            <input type="file" #certFileInput (change)="onCertFileSelected($event)" accept="application/pdf,image/*" />
-            <input class="input flex-1" placeholder="Description (optional)" [(ngModel)]="certDescription" />
-            <button class="btn-secondary" (click)="uploadCertificate()" [disabled]="uploadingCertificate || !certFile">
-              {{ uploadingCertificate ? 'Uploading…' : 'Upload & Create' }}
-            </button>
-          </div>
-        </div>
-        <!-- Upload success banner -->
-        <div *ngIf="editingCertificatesMode && certUploadMessage" class="p-3 rounded border border-green-700 bg-green-900/40 text-green-100 text-sm space-y-1">
-          <div>{{ certUploadMessage }}</div>
-          <div class="flex gap-3">
-            <a *ngIf="certUploadDetails?.cloudinaryUrl" [href]="certUploadDetails?.cloudinaryUrl" target="_blank" class="link">Open Cloudinary</a>
-            <a *ngIf="certUploadDetails?.downloadUrl" [href]="certUploadDetails?.downloadUrl" target="_blank" class="link">Download</a>
-            <span *ngIf="certUploadDetails?.filename">File: {{ certUploadDetails?.filename }}</span>
-          </div>
-        </div>
-        <!-- Post-upload metadata form (shown below upload when file created successfully) -->
-        <div *ngIf="editingCertificatesMode && lastUploadedCertId as nid" class="p-3 rounded border border-gray-700 bg-gray-900/40 space-y-2">
-          <div class="font-medium">Complete certificate details</div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-2" *ngIf="findCert(nid) as newCert">
-            <input class="input" placeholder="Name" [(ngModel)]="certEdit[nid].name" />
-            <input class="input" placeholder="Issuing Organization" [(ngModel)]="certEdit[nid].issuingOrganization" />
-            <input class="input" type="date" placeholder="Issue Date" [(ngModel)]="certEdit[nid].issueDate" />
-            <input class="input" type="date" placeholder="Expiry Date" [(ngModel)]="certEdit[nid].expiryDate" />
-            <input class="input" placeholder="Credential ID" [(ngModel)]="certEdit[nid].credentialId" />
-            <input class="input" placeholder="Credential URL" [(ngModel)]="certEdit[nid].credentialUrl" />
-            <textarea class="input md:col-span-2" placeholder="Details" [(ngModel)]="certEdit[nid].details"></textarea>
-          </div>
-          <div class="flex items-center gap-2">
-            <button class="btn-primary" (click)="saveCertificateMeta(findCert(nid))">Save</button>
-            <button class="btn-secondary" (click)="cancelNewCertMeta()">Cancel</button>
-          </div>
-        </div>
-        <div *ngIf="!editingCertificatesMode && !editingCertId && !lastUploadedCertId && (certificates?.length || 0) === 0" class="text-gray-400">No certificates available.</div>
-        <!-- Above-table edit form (opens when clicking Edit on a row) -->
-        <div *ngIf="editingCertId as eid" class="p-3 rounded border border-gray-700 bg-gray-900/40 space-y-2">
-          <div class="font-medium">Edit certificate details</div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-2" *ngIf="findCert(eid) as editCert">
-            <input class="input" placeholder="Name" [(ngModel)]="certEdit[eid].name" />
-            <input class="input" placeholder="Issuing Organization" [(ngModel)]="certEdit[eid].issuingOrganization" />
-            <input class="input" type="date" placeholder="Issue Date" [(ngModel)]="certEdit[eid].issueDate" />
-            <input class="input" type="date" placeholder="Expiry Date" [(ngModel)]="certEdit[eid].expiryDate" />
-            <input class="input" placeholder="Credential ID" [(ngModel)]="certEdit[eid].credentialId" />
-            <input class="input" placeholder="Credential URL" [(ngModel)]="certEdit[eid].credentialUrl" />
-            <textarea class="input md:col-span-2" placeholder="Details" [(ngModel)]="certEdit[eid].details"></textarea>
-          </div>
-          <div class="flex items-center gap-2">
-            <button class="btn-primary" (click)="saveCertificateMeta(findCert(eid))">Save</button>
-            <button class="btn-secondary" (click)="cancelEditCert()">Cancel</button>
-          </div>
-        </div>
-
-        <div *ngIf="!editingCertificatesMode && !editingCertId && !lastUploadedCertId && (certificates?.length || 0) > 0" class="overflow-x-auto">
-          <table class="w-full text-sm border-separate border-spacing-y-2">
-            <thead>
-              <tr class="text-gray-400">
-                <th class="text-left">Name</th>
-                <th class="text-left w-28">Cloudinary</th>
-                <th class="text-left w-28">Credential</th>
-                <th class="text-left w-52">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let c of certificates" class="border-t">
-                <td>
-                  <div>{{ c.name || c.originalFilename || 'Certificate' }}</div>
-                </td>
-                <td>
-                  <a *ngIf="c.url" class="link" [href]="c.url" target="_blank">View</a>
-                </td>
-                <td>
-                  <a *ngIf="c.credentialUrl" class="link" [href]="c.credentialUrl" target="_blank">Verify</a>
-                </td>
-                <td>
-                  <div class="flex gap-2">
-                    <button class="btn-secondary" (click)="startEditCert(c)">Edit</button>
-                    <button class="btn-danger" (click)="deleteCertificate(c)">Delete</button>
-                    <label class="btn-secondary cursor-pointer">
-                      Replace
-                      <input type="file" class="hidden" (change)="replaceCertificateFile(c, $event)" accept="application/pdf,image/*" />
-                    </label>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
   </section>
 
-  
-</section>
-
-<div *ngIf="loading()" class="p-6 text-center text-gray-400">Loading profile…</div>
-<div *ngIf="error()" class="p-6 text-center text-red-500">{{ error() }}</div>
+  <div *ngIf="loading()" class="p-6 text-center text-gray-400">Loading profile…</div>
+  <div *ngIf="error()" class="p-6 text-center text-red-500">{{ error() }}</div>
 
 </app-doctor-layout>

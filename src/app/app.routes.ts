@@ -26,6 +26,8 @@ import { LabTestsComponent } from './features/lab-tests/lab-tests.component';
 import { LabTestManagementComponent } from './features/doctor/lab-test-management.component';
 import { PatientLabBookingsComponent } from './features/patient/patient-lab-bookings.component';
 
+import { NotFoundComponent } from './shared/not-found.component';
+
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
@@ -142,5 +144,5 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard],
     data: { roles: ['PATIENT'] }
   },
-  { path: '**', redirectTo: 'login' }
+  { path: '**', component: NotFoundComponent }
 ];

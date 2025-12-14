@@ -16,53 +16,66 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
     }
   ],
   template: `
-    <div class="relative">
-      <input
-        #inputRef
-        type="text"
-        [class]="inputClass"
-        [placeholder]="placeholder"
-        [(ngModel)]="inputValue"
-        (input)="onInput($event)"
-        (focus)="onFocus()"
-        (blur)="onBlur()"
-        (keydown)="onKeyDown($event)"
-        [disabled]="disabled"
-        autocomplete="off"
-      />
+    <div class="relative group" (clickOutside)="showDropdown = false">
+      <div class="relative">
+        <input
+          #inputRef
+          type="text"
+          [class]="inputClass"
+          [placeholder]="placeholder"
+          [(ngModel)]="inputValue"
+          (input)="onInput($event)"
+          (focus)="onFocus()"
+          (blur)="onBlur()"
+          (keydown)="onKeyDown($event)"
+          [disabled]="disabled"
+          autocomplete="off"
+        />
+        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+           <i class="fa-solid fa-chevron-down text-xs text-gray-600 transition-transform duration-300" [class.rotate-180]="showDropdown"></i>
+        </div>
+      </div>
       
       <!-- Dropdown -->
       <div 
         *ngIf="showDropdown && (filteredSpecializations.length > 0 || canAddNew)"
-        class="absolute z-50 w-full mt-1 bg-gray-800 border border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+        class="absolute z-50 w-full mt-2 bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-xl shadow-2xl overflow-hidden animate-fade-in"
       >
-        <!-- Existing specializations -->
-        <div
-          *ngFor="let spec of filteredSpecializations; let i = index"
-          class="px-3 py-2 cursor-pointer hover:bg-gray-700 text-gray-100"
-          [class.bg-gray-700]="selectedIndex === i"
-          (mousedown)="selectSpecialization(spec)"
-          (mouseenter)="selectedIndex = i"
-        >
-          {{ spec }}
-        </div>
-        
-        <!-- Add new option -->
-        <div
-          *ngIf="canAddNew && inputValue.trim()"
-          class="px-3 py-2 cursor-pointer hover:bg-gray-700 text-emerald-400 border-t border-gray-600"
-          [class.bg-gray-700]="selectedIndex === filteredSpecializations.length"
-          (mousedown)="addNewSpecialization()"
-          (mouseenter)="selectedIndex = filteredSpecializations.length"
-        >
-          <i class="fa-solid fa-plus mr-2"></i>
-          Add "{{ inputValue.trim() }}"
+        <div class="max-h-60 overflow-y-auto custom-scrollbar p-1">
+          <!-- Existing specializations -->
+          <div
+            *ngFor="let spec of filteredSpecializations; let i = index"
+            class="px-3 py-2 cursor-pointer flex items-center justify-between rounded-lg transition-colors group/item"
+            [class.bg-blue-600]="selectedIndex === i"
+            [class.text-white]="selectedIndex === i"
+            [class.hover:bg-gray-800]="selectedIndex !== i"
+            [class.text-gray-200]="selectedIndex !== i"
+            (mousedown)="selectSpecialization(spec)"
+            (mouseenter)="selectedIndex = i"
+          >
+            <span>{{ spec }}</span>
+            <i class="fa-solid fa-check text-sm opacity-0 group-hover/item:opacity-100 transition-opacity" [class.opacity-100]="selectedIndex === i" *ngIf="selectedIndex === i"></i>
+          </div>
+          
+          <!-- Add new option -->
+          <div
+            *ngIf="canAddNew && inputValue.trim()"
+            class="px-3 py-2 cursor-pointer mt-1 border-t border-gray-700/50 text-emerald-400 rounded-lg hover:bg-gray-800/50 transition-colors flex items-center gap-2"
+            [class.bg-gray-800]="selectedIndex === filteredSpecializations.length"
+            (mousedown)="addNewSpecialization()"
+            (mouseenter)="selectedIndex = filteredSpecializations.length"
+          >
+            <div class="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center text-xs">
+               <i class="fa-solid fa-plus"></i>
+            </div>
+            <span>Add "<span class="font-bold border-b border-emerald-500/30">{{ inputValue.trim() }}</span>"</span>
+          </div>
         </div>
         
         <!-- No results -->
         <div
           *ngIf="filteredSpecializations.length === 0 && !canAddNew"
-          class="px-3 py-2 text-gray-400 text-sm"
+          class="px-4 py-3 text-gray-500 text-sm text-center italic border-t border-gray-800"
         >
           No specializations found
         </div>
@@ -78,10 +91,10 @@ export class SpecializationAutocompleteComponent implements OnInit, OnDestroy, C
   @Input() allowAddNew: boolean = true;
   @Input() required: boolean = false;
   @Input() options: string[] | null = null;
-  
+
   @Output() specializationSelected = new EventEmitter<string>();
   @Output() specializationAdded = new EventEmitter<string>();
-  
+
   @ViewChild('inputRef') inputRef!: ElementRef<HTMLInputElement>;
 
   inputValue: string = '';
@@ -89,15 +102,15 @@ export class SpecializationAutocompleteComponent implements OnInit, OnDestroy, C
   filteredSpecializations: string[] = [];
   selectedIndex: number = -1;
   private allSpecializations: string[] = [];
-  
+
   private destroy$ = new Subject<void>();
   private searchSubject = new Subject<string>();
-  
-  // ControlValueAccessor implementation
-  private onChange = (value: string) => {};
-  private onTouched = () => {};
 
-  constructor(private specializationService: SpecializationService) {}
+  // ControlValueAccessor implementation
+  private onChange = (value: string) => { };
+  private onTouched = () => { };
+
+  constructor(private specializationService: SpecializationService) { }
 
   ngOnInit(): void {
     // Setup debounced search
@@ -170,12 +183,12 @@ export class SpecializationAutocompleteComponent implements OnInit, OnDestroy, C
         event.preventDefault();
         this.selectedIndex = Math.min(this.selectedIndex + 1, totalItems - 1);
         break;
-      
+
       case 'ArrowUp':
         event.preventDefault();
         this.selectedIndex = Math.max(this.selectedIndex - 1, -1);
         break;
-      
+
       case 'Enter':
         event.preventDefault();
         if (this.selectedIndex >= 0) {
@@ -186,7 +199,7 @@ export class SpecializationAutocompleteComponent implements OnInit, OnDestroy, C
           }
         }
         break;
-      
+
       case 'Escape':
         this.showDropdown = false;
         this.selectedIndex = -1;
@@ -223,10 +236,10 @@ export class SpecializationAutocompleteComponent implements OnInit, OnDestroy, C
     if (!this.allowAddNew || !this.inputValue.trim()) {
       return false;
     }
-    
+
     const query = this.inputValue.trim().toLowerCase();
     const exactMatch = this.filteredSpecializations.some(spec => spec.toLowerCase() === query);
-    
+
     return !exactMatch;
   }
 }

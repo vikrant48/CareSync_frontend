@@ -32,6 +32,7 @@ export interface BookingResponse {
   notes?: string;
   createdAt: string;
   updatedAt: string;
+  labReports?: any[];
   paymentTransactionId?: string;
   paymentStatus?: string;
 }
@@ -153,5 +154,12 @@ export class LabTestService {
    */
   deleteLabTest(id: number): Observable<any> {
     return this.http.delete(`${this.baseUrl}/api/lab-tests/${id}`);
+  }
+
+  /**
+   * Upload lab report for a booking
+   */
+  uploadLabReport(formData: FormData): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/files/upload/lab-report`, formData);
   }
 }

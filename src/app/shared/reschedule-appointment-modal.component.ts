@@ -9,28 +9,52 @@ import { Doctor } from '../core/services/doctor.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div *ngIf="appointment" class="fixed inset-0 bg-black/40 flex items-center justify-center">
-      <div class="panel rounded-xl shadow-xl w-full max-w-md p-6">
-        <div class="flex items-center justify-between mb-4">
-          <div class="text-lg font-semibold">Reschedule Appointment</div>
-          <button class="text-gray-300 hover:text-gray-200" (click)="onClose()">✕</button>
+    <div *ngIf="appointment" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+      <div class="panel rounded-2xl shadow-2xl w-full max-w-md p-6 border border-gray-700/50">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-3">
+             <div class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400">
+               <i class="fa-regular fa-calendar-check text-xl"></i>
+             </div>
+             <div class="text-lg font-bold text-gray-100">Reschedule Appointment</div>
+          </div>
+          <button class="text-gray-400 hover:text-white transition-colors p-1" (click)="onClose()">
+             <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
         </div>
-        <div class="space-y-3">
-          <div class="text-sm">Doctor: <span class="font-medium">{{ appointment!.doctorName }}</span></div>
-          <label class="block text-sm">Select date
-            <input type="date" class="input w-full" [(ngModel)]="rescheduleDateISO" (change)="loadSlotsForDate()" />
+        
+        <div class="space-y-4">
+          <div class="bg-gray-800/50 rounded-lg p-3 text-sm flex items-start gap-3 border border-gray-700/50">
+             <i class="fa-solid fa-user-doctor text-blue-400 mt-0.5"></i>
+             <div>
+                <span class="text-gray-400 block text-xs uppercase tracking-wider">With Doctor</span>
+                <span class="font-semibold text-gray-200">{{ appointment!.doctorName }}</span>
+             </div>
+          </div>
+
+          <label class="block space-y-1.5">
+            <span class="text-sm font-medium text-gray-300 ml-1">Select New Date</span>
+            <input type="date" class="input w-full bg-gray-900/50" [(ngModel)]="rescheduleDateISO" (change)="loadSlotsForDate()" />
           </label>
-          <label class="block text-sm">Available slots
-            <select class="input w-full" [(ngModel)]="rescheduleTimeSlot">
+          
+          <label class="block space-y-1.5">
+            <span class="text-sm font-medium text-gray-300 ml-1">Available Slots</span>
+            <select class="input w-full bg-gray-900/50" [(ngModel)]="rescheduleTimeSlot" [disabled]="!rescheduleDateISO">
               <option [ngValue]="null">-- Select time --</option>
               <option *ngFor="let s of availableSlots" [value]="s">{{ s }}</option>
             </select>
           </label>
-          <div class="flex items-center gap-2">
-            <button class="btn-primary" [disabled]="!rescheduleDateISO || !rescheduleTimeSlot" (click)="onConfirm()">Confirm</button>
-            <button class="btn-secondary" (click)="onClose()">Cancel</button>
+
+          <div class="pt-4 flex items-center gap-3">
+            <button class="btn-secondary flex-1" (click)="onClose()">Cancel</button>
+            <button class="btn-primary flex-1" [disabled]="!rescheduleDateISO || !rescheduleTimeSlot" (click)="onConfirm()">
+               Confirm Change
+            </button>
           </div>
-          <div *ngIf="error" class="text-red-600 text-sm">{{ error }}</div>
+          
+          <div *ngIf="error" class="p-3 rounded bg-red-900/20 border border-red-500/30 text-red-400 text-sm flex items-center gap-2">
+             <i class="fa-solid fa-circle-exclamation"></i> {{ error }}
+          </div>
         </div>
       </div>
     </div>
@@ -48,7 +72,7 @@ export class RescheduleAppointmentModalComponent {
   availableSlots: string[] = [];
   error: string | null = null;
 
-  constructor(private apptApi: AppointmentService) {}
+  constructor(private apptApi: AppointmentService) { }
 
   onClose() {
     this.reset();

@@ -14,12 +14,20 @@ import { ToastService } from '../core/services/toast.service';
       <div class="panel p-6 w-full max-w-xl relative">
         <button class="absolute top-2 right-2 btn-secondary" (click)="close.emit()">Close</button>
         <div class="flex items-center gap-3 mb-4" *ngIf="doctor as doc">
-          <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center text-white">
-            <img *ngIf="doc.profileImageUrl" [src]="doc.profileImageUrl" class="w-full h-full object-cover" (error)="doc.profileImageUrl = ''" />
-            <span *ngIf="!doc.profileImageUrl">{{ doctorInitial(doc) }}</span>
+          <div class="flex flex-col items-center gap-1">
+            <div class="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center text-white border-2" [ngClass]="{'border-blue-500': doc.isVerified, 'border-transparent': !doc.isVerified, 'bg-gray-700': !doc.profileImageUrl}">
+              <img *ngIf="doc.profileImageUrl" [src]="doc.profileImageUrl" class="w-full h-full object-cover" (error)="doc.profileImageUrl = ''" />
+              <span *ngIf="!doc.profileImageUrl">{{ doctorInitial(doc) }}</span>
+            </div>
+            <div *ngIf="doc.isVerified" class="px-1.5 py-0.5 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 text-[8px] font-bold uppercase tracking-wider rounded-full flex items-center gap-1">
+              <i class="fa-solid fa-check text-[8px]"></i> Verified
+            </div>
           </div>
           <div>
-            <div class="font-semibold">{{ formatDoctorName(doc) }}</div>
+            <div class="font-semibold flex items-center gap-1">
+              {{ formatDoctorName(doc) }}
+              <i *ngIf="doc.isVerified" class="fa-solid fa-circle-check text-blue-500 text-xs" title="Verified Doctor"></i>
+            </div>
             <div class="text-sm text-gray-400">{{ doc.specialization || 'General' }}</div>
             <div class="text-sm" *ngIf="experienceYears !== null">Experience: {{ experienceYears }} years</div>
           </div>

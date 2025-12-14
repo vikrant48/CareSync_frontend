@@ -19,53 +19,91 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
   imports: [CommonModule, FormsModule, RouterModule, DoctorAppointmentCardComponent, PatientDetailsModalComponent, MedicalHistoryDetailModalComponent, DoctorLayoutComponent],
   template: `
     <app-doctor-layout>
-    <div class="p-6 space-y-6">
-      <div class="flex items-center justify-between">
-        <h2 class="text-xl font-semibold">All Appointments</h2>
-        <button class="text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 text-sm font-medium px-0 py-0" (click)="refresh()">Refresh</button>
+    <div class="p-6 space-y-6 max-w-7xl mx-auto">
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Appointments</h2>
+          <p class="text-gray-500 dark:text-gray-400 text-sm">Manage your patient appointments and schedules</p>
+        </div>
+        <button class="btn-secondary flex items-center gap-2" (click)="refresh()" [disabled]="loading">
+          <i class="fa-solid fa-arrows-rotate" [class.animate-spin]="loading"></i>
+          <span>Refresh</span>
+        </button>
       </div>
 
       <!-- Filters -->
-      <div class="panel p-4 space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <label class="block text-sm">
-            <span class="block mb-1">Status</span>
-            <select class="input w-full" [(ngModel)]="statusFilter" (change)="onFilterChange()">
-              <option value="ALL">All</option>
-              <option value="PENDING">Pending</option>
-              <option value="CONFIRMED">Confirmed</option>
-              <option value="COMPLETED">Completed</option>
-              <option value="CANCELLED">Cancelled</option>
-            </select>
-          </label>
-          <label class="block text-sm">
-            <span class="block mb-1">Search (Patient Name or ID)</span>
-            <input type="text" class="input w-full" [(ngModel)]="searchTerm" (input)="onFilterChange()" placeholder="e.g., John or 123" />
-          </label>
-          <div class="block text-sm">
-            <span class="block mb-1">Time Range</span>
-            <div class="flex gap-2">
-              <button class="btn-secondary" [ngClass]="{ 'btn-primary': range==='TODAY' }" (click)="setRange('TODAY')">Today</button>
-              <button class="btn-secondary" [ngClass]="{ 'btn-primary': range==='UPCOMING' }" (click)="setRange('UPCOMING')">Upcoming</button>
-              <button class="btn-secondary" [ngClass]="{ 'btn-primary': range==='PAST' }" (click)="setRange('PAST')">Past</button>
-              <button class="btn-secondary" [ngClass]="{ 'btn-primary': range==='ALL' }" (click)="setRange('ALL')">All</button>
+      <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm space-y-5">
+        <div class="flex items-center justify-between mb-2">
+           <div class="flex items-center gap-2">
+             <i class="fa-solid fa-filter text-blue-600 dark:text-blue-400"></i>
+             <h3 class="font-semibold text-gray-900 dark:text-white">Filters</h3>
+           </div>
+           <button *ngIf="statusFilter !== 'ALL' || searchTerm || range !== 'ALL'" 
+                   (click)="statusFilter='ALL'; range='ALL'; searchTerm=''; refresh()" 
+                   class="text-sm text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium hover:underline transition-all animate-in fade-in">
+             Clear All
+           </button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <!-- Status Filter -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><i class="fa-solid fa-circle-check"></i></span>
+              <select class="input-modern pl-10" [(ngModel)]="statusFilter" (change)="onFilterChange()">
+                <option value="ALL">All Statuses</option>
+                <option value="PENDING">Pending</option>
+                <option value="CONFIRMED">Confirmed</option>
+                <option value="COMPLETED">Completed</option>
+                <option value="CANCELLED">Cancelled (Any)</option>
+                <option value="CANCELLED_BY_PATIENT">Cancelled by Patient</option>
+                <option value="CANCELLED_BY_DOCTOR">Cancelled by Me</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Search Filter -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Search</label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><i class="fa-solid fa-magnifying-glass"></i></span>
+              <input type="text" class="input-modern pl-10" [(ngModel)]="searchTerm" (input)="onFilterChange()" placeholder="Search patient name or ID..." />
+            </div>
+          </div>
+
+          <!-- Time Range Filter -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Time Range</label>
+            <div class="flex bg-gray-100 dark:bg-gray-700/50 p-1 rounded-xl">
+              <button class="btn-tab flex-1" [class.active]="range==='TODAY'" (click)="setRange('TODAY')">Today</button>
+              <button class="btn-tab flex-1" [class.active]="range==='UPCOMING'" (click)="setRange('UPCOMING')">Upcoming</button>
+              <button class="btn-tab flex-1" [class.active]="range==='PAST'" (click)="setRange('PAST')">Past</button>
+              <button class="btn-tab flex-1" [class.active]="range==='ALL'" (click)="setRange('ALL')">All</button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- List -->
-      <div *ngIf="loading" class="text-gray-400">
-        <span class="inline-flex items-center gap-2">
-          <i class="fa-solid fa-spinner animate-spin"></i>
-          <span>Loading appointments…</span>
-        </span>
+      <!-- List Content -->
+      <div *ngIf="loading" class="flex flex-col items-center justify-center py-20 text-gray-400 animate-in fade-in">
+        <div class="w-16 h-16 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin mb-4"></div>
+        <span class="font-medium">Loading appointments...</span>
       </div>
-      <div *ngIf="!loading && filteredAppointments().length === 0" class="text-gray-400">No appointments found.</div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="!loading">
+      <div *ngIf="!loading && filteredAppointments().length === 0" class="flex flex-col items-center justify-center py-20 text-center animate-in fade-in zoom-in duration-300">
+         <div class="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-400 mb-4">
+           <i class="fa-regular fa-calendar-xmark text-4xl"></i>
+         </div>
+         <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">No appointments found</h3>
+         <p class="text-gray-500 dark:text-gray-400 max-w-xs">Try adjusting your filters or search terms to find what you're looking for.</p>
+         <button class="btn-secondary mt-4" (click)="statusFilter='ALL'; range='ALL'; searchTerm=''; refresh()">Clear Filters</button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4" *ngIf="!loading && filteredAppointments().length > 0">
         <doctor-appointment-card
           *ngFor="let a of filteredAppointments()"
+          class="h-full"
           [appointment]="a"
           [showStatusSelect]="true"
           (viewPatient)="openDetails($event)"
@@ -99,16 +137,33 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
     </app-doctor-layout>
   `,
   styles: [`
-    .panel { border: 1px solid #1f2937; border-radius: 0.5rem; background: rgba(17,24,39,0.6); }
-    .badge { padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; }
-    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
-    .modal-content { background: #111827; border: 1px solid #1f2937; border-radius: 0.5rem; width: 90%; max-width: 800px; }
+    :host { display: block; }
+    /* Modern Input */
+    .input-modern {
+      @apply block w-full rounded-xl border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-blue-500 hover:bg-white dark:hover:bg-gray-700 transition-all duration-200 text-sm py-2.5;
+    }
+    
+    /* Buttons */
+    .btn-primary {
+      @apply px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl shadow-lg shadow-blue-500/20 transition-all duration-200 active:scale-95;
+    }
+    .btn-secondary {
+      @apply px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 active:scale-95 shadow-sm;
+    }
+
+    /* Range Tabs */
+    .btn-tab {
+      @apply px-3 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 rounded-lg transition-all duration-200 hover:text-gray-700 dark:hover:text-gray-200;
+    }
+    .btn-tab.active {
+      @apply bg-white dark:bg-gray-600 text-blue-600 dark:text-white shadow-sm;
+    }
   `]
 })
 export class DoctorAppointmentsComponent {
   loading = false;
   appointments: DoctorAppointmentItem[] = [];
-  statusFilter: 'ALL' | 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' = 'ALL';
+  statusFilter: 'ALL' | 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'CANCELLED_BY_PATIENT' | 'CANCELLED_BY_DOCTOR' = 'ALL';
   range: TimeRange = 'UPCOMING';
   searchTerm = '';
 
