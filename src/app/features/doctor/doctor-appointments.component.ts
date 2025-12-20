@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { DoctorAppointmentCardComponent } from '../../shared/doctor-appointment-card.component';
 import { getDoctorAppointmentEpochMs } from '../../shared/doctor-appointment-utils';
 import { PatientDetailsModalComponent } from '../../shared/patient-details-modal.component';
@@ -9,7 +9,7 @@ import { MedicalHistoryDetailModalComponent } from '../../shared/medical-history
 import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 import { AppointmentService, DoctorAppointmentItem } from '../../core/services/appointment.service';
 import { PatientProfileService, PatientDto, MedicalHistoryWithDoctorItem } from '../../core/services/patient-profile.service';
-import { firstValueFrom } from 'rxjs';
+import { forkJoin, map, firstValueFrom } from 'rxjs';
 
 type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
 
@@ -110,9 +110,10 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
           (openHistoryForm)="openDetails($event)"
           (schedule)="changeStatus($event, 'SCHEDULED')"
           (confirm)="changeStatus($event, 'CONFIRMED')"
-          (start)="changeStatus($event, 'IN_PROGRESS')"
+          (start)="startConsultation($event)"
           (complete)="changeStatus($event, 'COMPLETED')"
           (cancel)="changeStatus($event, 'CANCELLED')"
+          (joinVideo)="joinConsultation($event)"
           (statusChange)="changeStatus($event.appointment, $event.status)"
         ></doctor-appointment-card>
       </div>
@@ -163,7 +164,7 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
 export class DoctorAppointmentsComponent {
   loading = false;
   appointments: DoctorAppointmentItem[] = [];
-  statusFilter: 'ALL' | 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'CANCELLED_BY_PATIENT' | 'CANCELLED_BY_DOCTOR' = 'ALL';
+  statusFilter: 'ALL' | 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'CANCELLED_BY_PATIENT' | 'CANCELLED_BY_DOCTOR' = 'ALL';
   range: TimeRange = 'UPCOMING';
   searchTerm = '';
 
@@ -178,7 +179,7 @@ export class DoctorAppointmentsComponent {
   selectedHistoryDetail: any | null = null;
   selectedHistoryDoctorInfo: { doctorName: string; doctorSpecialization?: string; doctorContactInfo?: string } | null = null;
 
-  constructor(private appts: AppointmentService, private patients: PatientProfileService) {
+  constructor(private appts: AppointmentService, private patients: PatientProfileService, private router: Router) {
     this.refresh();
   }
 
@@ -225,7 +226,10 @@ export class DoctorAppointmentsComponent {
         obs = this.appts.getDoctorTodayAppointments();
         break;
       case 'UPCOMING':
-        obs = this.appts.getDoctorUpcomingAppointments();
+        obs = forkJoin([
+          this.appts.getDoctorUpcomingAppointments(),
+          this.appts.getDoctorAppointmentsByStatus('IN_PROGRESS')
+        ]).pipe(map(([up, ip]: [DoctorAppointmentItem[], DoctorAppointmentItem[]]) => [...up, ...ip]));
         break;
       case 'PAST':
         obs = this.appts.getDoctorAllAppointments();
@@ -237,8 +241,8 @@ export class DoctorAppointmentsComponent {
     }
 
     obs.subscribe({
-      next: (items) => {
-        const list = this.range === 'PAST' ? items.filter((a) => getDoctorAppointmentEpochMs(a) < now) : items;
+      next: (items: DoctorAppointmentItem[]) => {
+        const list = this.range === 'PAST' ? items.filter((a: DoctorAppointmentItem) => getDoctorAppointmentEpochMs(a) < now) : items;
         this.appointments = this.sortByNearestUpcoming(list);
         this.loading = false;
       },
@@ -274,6 +278,20 @@ export class DoctorAppointmentsComponent {
     this.appts.updateAppointmentStatus(a.appointmentId, status).subscribe({
       next: () => this.refresh(),
     });
+  }
+
+  startConsultation(a: DoctorAppointmentItem) {
+    this.appts.updateAppointmentStatus(a.appointmentId, 'IN_PROGRESS').subscribe({
+      next: (updated) => {
+        this.refresh();
+        this.joinConsultation(updated);
+      },
+      error: (err: any) => console.error('Error starting consultation:', err)
+    });
+  }
+
+  joinConsultation(a: DoctorAppointmentItem) {
+    this.router.navigate(['/doctor/consultation', a.appointmentId]);
   }
 
   openDetails(a: DoctorAppointmentItem) {

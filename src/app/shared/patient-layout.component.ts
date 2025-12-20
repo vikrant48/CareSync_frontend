@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
 import { ToastContainerComponent } from './toast-container.component';
+import { AiAssistantWidgetComponent } from './ai-assistant-widget.component';
 
 @Component({
   selector: 'app-patient-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, ToastContainerComponent],
+  imports: [CommonModule, RouterModule, ToastContainerComponent, AiAssistantWidgetComponent],
   template: `
     <div class="h-full w-full md:grid md:grid-cols-[16rem_1fr] md:h-[calc(100dvh-3.5rem)] md:min-h-0 md:items-stretch bg-[var(--bg)] text-[var(--text)]">
       <!-- Sidebar (hidden on small screens) -->
@@ -75,6 +76,9 @@ import { ToastContainerComponent } from './toast-container.component';
         </div>
         <app-toast-container></app-toast-container>
       </main>
+
+      <!-- AI Health Assistant -->
+      <app-ai-assistant-widget></app-ai-assistant-widget>
 
       <!-- Bottom Nav (mobile) -->
       <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 h-16">
@@ -158,7 +162,7 @@ import { ToastContainerComponent } from './toast-container.component';
 })
 export class PatientLayoutComponent {
   menuOpen = false;
-  constructor(private auth: AuthService) {}
+  constructor(private auth: AuthService) { }
   logout() {
     this.auth.logout();
   }

@@ -74,4 +74,10 @@ export class AnalyticsApiService {
       `${this.baseUrl}/api/analytics/doctor/${doctorId}/cancellation-patterns?startDate=${encodeURIComponent(startDateISO)}&endDate=${encodeURIComponent(endDateISO)}`
     );
   }
+
+  getPatientFinancialStats(patientId: number | string) {
+    return this.http.get<{ totalAppointmentSpend: number, totalLabTestSpend: number, totalSpend: number }>(
+      `${this.baseUrl}/api/analytics/patient/${patientId}/financial`
+    );
+  }
 }

@@ -10,7 +10,7 @@ import { DoctorAppointmentItem } from '../core/services/appointment.service';
   template: `
     <div
       class="group relative bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-300 h-full flex flex-col"
-      [class.opacity-60]="disabled"
+      [class.opacity-60]="disabled || appointment.isActive === false"
       [class.pointer-events-none]="disabled"
     >
       <!-- Header: Patient Info & Status -->
@@ -91,13 +91,21 @@ import { DoctorAppointmentItem } from '../core/services/appointment.service';
           </button>
         </div>
 
-        <!-- IN_PROGRESS -->
-        <div class="grid grid-cols-2 gap-2" *ngIf="appointment.status === 'IN_PROGRESS'">
-          <button class="btn-action btn-secondary" (click)="onCreateMedicalDescription()" [disabled]="disabled">
-            <i class="fa-solid fa-notes-medical"></i> Notes
+         <div class="space-y-2" *ngIf="appointment.status === 'IN_PROGRESS'">
+          <button class="btn-action btn-primary w-full py-3 shadow-indigo-500/20" (click)="onCreateMedicalDescription()" [disabled]="disabled || appointment.isActive === false">
+            <i class="fa-solid fa-file-signature text-lg"></i>
+            <span class="text-base font-bold">Add Medical Record</span>
           </button>
-          <button class="btn-action btn-success" (click)="onComplete()" [disabled]="disabled">
-             <i class="fa-solid fa-check"></i> Complete
+          <div class="grid grid-cols-2 gap-2">
+            <button class="btn-action bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20" (click)="onJoinVideo()" [disabled]="disabled || appointment.isActive === false">
+               <i class="fa-solid fa-video"></i> Join Video
+            </button>
+            <button class="btn-action btn-success" (click)="onComplete()" [disabled]="disabled || appointment.isActive === false">
+               <i class="fa-solid fa-check-circle"></i> Complete
+            </button>
+          </div>
+          <button class="btn-action btn-secondary w-full" (click)="onViewPatient()" [disabled]="disabled" title="View Patient Details">
+               <i class="fa-solid fa-user-info"></i> Patient Details
           </button>
         </div>
 
@@ -141,6 +149,7 @@ export class DoctorAppointmentCardComponent {
   @Output() start = new EventEmitter<DoctorAppointmentItem>();
   @Output() complete = new EventEmitter<DoctorAppointmentItem>();
   @Output() cancel = new EventEmitter<DoctorAppointmentItem>();
+  @Output() joinVideo = new EventEmitter<DoctorAppointmentItem>();
   @Output() statusChange = new EventEmitter<{ appointment: DoctorAppointmentItem; status: string }>();
 
   onViewPatient() { this.viewPatient.emit(this.appointment); }
@@ -150,6 +159,7 @@ export class DoctorAppointmentCardComponent {
   onStart() { this.start.emit(this.appointment); }
   onComplete() { this.complete.emit(this.appointment); }
   onCancel() { this.cancel.emit(this.appointment); }
+  onJoinVideo() { this.joinVideo.emit(this.appointment); }
   changeStatus(appointment: DoctorAppointmentItem, status: string) { this.statusChange.emit({ appointment, status }); }
 
   statusBadgeClass(status: string) {

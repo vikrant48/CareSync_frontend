@@ -4,7 +4,6 @@ import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { RegisterRequest } from '../../core/models/auth.models';
-import { SpecializationAutocompleteComponent } from '../../shared/specialization-autocomplete.component';
 import { ToastService } from '../../core/services/toast.service';
 import { ToastContainerComponent } from '../../shared/toast-container.component';
 import { SpecializationService } from '../../core/services/specialization.service';
@@ -12,7 +11,7 @@ import { SpecializationService } from '../../core/services/specialization.servic
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, SpecializationAutocompleteComponent, ToastContainerComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, ToastContainerComponent],
   template: `
     <div class="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col justify-center pt-8 pb-24 px-4 sm:px-6 lg:px-8 relative transition-colors duration-300">
       

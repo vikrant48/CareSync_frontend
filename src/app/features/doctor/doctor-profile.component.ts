@@ -90,6 +90,7 @@ export class DoctorProfileComponent implements OnInit {
   editingCertId: number | null = null;
   lastUploadedCertId: number | null = null;
   @ViewChild('certFileInput') certFileInputRef?: ElementRef<HTMLInputElement>;
+  @ViewChild('profileImageInput') profileImageInputRef?: ElementRef<HTMLInputElement>;
 
 
   // Profile image selection & preview
@@ -257,6 +258,13 @@ export class DoctorProfileComponent implements OnInit {
     }
     this.profileImagePreviewUrl = null;
     this.selectedProfileImage = undefined;
+    if (this.profileImageInputRef?.nativeElement) {
+      this.profileImageInputRef.nativeElement.value = '';
+    }
+  }
+
+  triggerProfileImageUpload() {
+    this.profileImageInputRef?.nativeElement.click();
   }
 
   // Education CRUD
@@ -663,5 +671,5 @@ export class DoctorProfileComponent implements OnInit {
     });
   }
 
-  
+
 }

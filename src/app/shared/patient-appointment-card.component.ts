@@ -8,7 +8,7 @@ import { PatientAppointmentItem } from '../core/services/appointment.service';
   selector: 'patient-appointment-card',
   imports: [CommonModule],
   template: `
-    <div class="panel rounded-xl p-4 sm:p-5 transition hover:shadow-lg border border-gray-800 hover:border-blue-500/30 group">
+    <div class="panel rounded-xl p-4 sm:p-5 transition hover:shadow-lg border border-gray-800 hover:border-blue-500/30 group" [class.opacity-60]="appointment.isActive === false">
       <div class="flex flex-col gap-4">
         <!-- Header -->
         <div class="flex items-start justify-between gap-3">
@@ -48,12 +48,17 @@ import { PatientAppointmentItem } from '../core/services/appointment.service';
 
         <!-- Actions -->
         <div class="flex flex-wrap gap-2 pt-2 border-t border-gray-800">
+            <div class="flex flex-col gap-2 w-full" *ngIf="canJoinVideo(appointment)">
+               <button class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl shadow-lg shadow-indigo-500/20 text-sm transition-all active:scale-95 flex items-center justify-center gap-2" (click)="onJoinVideo()" [disabled]="disabled || appointment.isActive === false">
+                  <i class="fa-solid fa-video animate-pulse"></i> Join Video Call
+               </button>
+            </div>
            <button class="btn-primary flex-1 text-sm py-2" (click)="onViewDoctor()" [disabled]="disabled">
              Profile
            </button>
            <ng-container *ngIf="canPatientReschedule(appointment)">
-             <button class="btn-secondary flex-1 text-sm py-2" (click)="onReschedule()" [disabled]="disabled">Reschedule</button>
-             <button class="px-3 py-2 rounded-lg border border-red-900/30 text-red-400 hover:bg-red-900/20 text-sm transition-colors" (click)="onCancel()" [disabled]="!canPatientCancel(appointment) || disabled" title="Cancel">
+             <button class="btn-secondary flex-1 text-sm py-2" (click)="onReschedule()" [disabled]="disabled || appointment.isActive === false">Reschedule</button>
+             <button class="px-3 py-2 rounded-lg border border-red-900/30 text-red-400 hover:bg-red-900/20 text-sm transition-colors" (click)="onCancel()" [disabled]="!canPatientCancel(appointment) || disabled || appointment.isActive === false" title="Cancel">
                <i class="fa-solid fa-ban"></i>
              </button>
            </ng-container>
@@ -69,10 +74,12 @@ export class PatientAppointmentCardComponent {
   @Output() reschedule = new EventEmitter<PatientAppointmentItem>();
   @Output() cancel = new EventEmitter<PatientAppointmentItem>();
   @Output() viewDoctor = new EventEmitter<PatientAppointmentItem>();
+  @Output() joinVideo = new EventEmitter<PatientAppointmentItem>();
 
   onReschedule() { this.reschedule.emit(this.appointment); }
   onCancel() { this.cancel.emit(this.appointment); }
   onViewDoctor() { this.viewDoctor.emit(this.appointment); }
+  onJoinVideo() { this.joinVideo.emit(this.appointment); }
 
   statusClass(status: string) {
     const s = (status || '').toUpperCase();
@@ -102,5 +109,10 @@ export class PatientAppointmentCardComponent {
   canPatientCancel(a: PatientAppointmentItem) {
     const s = (a.status || '').toUpperCase();
     return s === 'BOOKED' || s === 'CONFIRMED';
+  }
+
+  canJoinVideo(a: PatientAppointmentItem) {
+    const s = (a.status || '').toUpperCase();
+    return s === 'CONFIRMED' || s === 'IN_PROGRESS';
   }
 }

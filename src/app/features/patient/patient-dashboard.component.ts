@@ -11,6 +11,7 @@ import { AuthService } from '../../core/services/auth.service';
 // Removed NotificationService imports; logic moved to dedicated component
 
 import { ReportsApiService } from '../../core/services/reports.service';
+import { AnalyticsApiService } from '../../core/services/analytics.service';
 import { RescheduleAppointmentModalComponent } from '../../shared/reschedule-appointment-modal.component';
 import { MedicalHistoryDetailModalComponent } from '../../shared/medical-history-detail-modal.component';
 import { PatientAppointmentCardComponent } from '../../shared/patient-appointment-card.component';
@@ -80,26 +81,46 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
           </div>
         </section>
 
+      <!-- Financial Overview -->
+      <section *ngIf="financialStats" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white p-4 rounded-xl shadow border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+          <div class="text-sm text-gray-500 dark:text-gray-400">Total Spent</div>
+          <div class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">₹{{ financialStats.totalSpend | number:'1.2-2' }}</div>
+          <div class="text-xs text-green-600 mt-1 font-medium">Lifetime</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+          <div class="text-sm text-gray-500 dark:text-gray-400">Appointments</div>
+          <div class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">₹{{ financialStats.totalAppointmentSpend | number:'1.2-2' }}</div>
+          <div class="text-xs text-blue-600 mt-1 font-medium">Consultation Fees</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+          <div class="text-sm text-gray-500 dark:text-gray-400">Lab Tests</div>
+          <div class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">₹{{ financialStats.totalLabTestSpend | number:'1.2-2' }}</div>
+          <div class="text-xs text-purple-600 mt-1 font-medium">Lab Bookings</div>
+        </div>
+      </section>
+
       <!-- Cards Row moved below Upcoming Appointments -->
        <section>
          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-3">
-           <h3 class="text-lg font-semibold">Upcoming Appointments</h3>
+           <h3 class="text-lg font-semibold">Today's Appointments</h3>
            <button class="text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 text-sm font-medium px-0 py-0" (click)="refreshAppointments()">Refresh</button>
          </div>
-         <div *ngIf="loadingAppointments" class="flex items-center gap-2 text-gray-400">
-           <span class="animate-spin h-5 w-5 border-2 border-current border-t-transparent rounded-full"></span>
-           Loading upcoming appointments...
-         </div>
-         <div *ngIf="!loadingAppointments && upcomingAppointments().length === 0" class="text-gray-400">No upcoming appointments.</div>
-         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-           <patient-appointment-card
-             *ngFor="let a of upcomingAppointments()"
-             [appointment]="a"
-             (reschedule)="startReschedule($event)"
-             (cancel)="cancelAppointment($event)"
-             (viewDoctor)="viewDoctorFromAppointment($event)"
-           ></patient-appointment-card>
-         </div>
+          <div *ngIf="loadingAppointments" class="flex items-center gap-2 text-gray-400">
+            <span class="animate-spin h-5 w-5 border-2 border-current border-t-transparent rounded-full"></span>
+            Loading today's appointments...
+          </div>
+          <div *ngIf="!loadingAppointments && todayAppointments().length === 0" class="text-gray-400">No appointments for today.</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <patient-appointment-card
+              *ngFor="let a of todayAppointments()"
+              [appointment]="a"
+              (reschedule)="startReschedule($event)"
+              (cancel)="cancelAppointment($event)"
+              (viewDoctor)="viewDoctorFromAppointment($event)"
+              (joinVideo)="joinConsultation($event)"
+            ></patient-appointment-card>
+          </div>
        </section>
 
       <!-- Cards Row: extracted into presentational component -->
@@ -169,6 +190,7 @@ export class PatientDashboardComponent {
 
 
   patientAnalytics: any = null;
+  financialStats: { totalAppointmentSpend: number, totalLabTestSpend: number, totalSpend: number } | null = null;
   medicalHistoryRecent: MedicalHistoryItem[] = [];
   patientDocumentsRecent: PatientDocumentItem[] = [];
 
@@ -184,6 +206,7 @@ export class PatientDashboardComponent {
   // Services via inject to avoid undefined DI
   private auth = inject(AuthService);
   private reportsApi = inject(ReportsApiService);
+  private analyticsApi = inject(AnalyticsApiService);
   private feedbackApi = inject(FeedbackService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -216,6 +239,7 @@ export class PatientDashboardComponent {
 
     // Analytics handled by PatientReportsComponent
     this.loadPatientHealthData();
+    this.loadFinancialStats();
   }
 
   // ngOnDestroy not needed for notifications; no local polling
@@ -267,13 +291,9 @@ export class PatientDashboardComponent {
 
   // Date helper moved to shared utils
 
-  upcomingAppointments() {
-    const now = Date.now();
-    const allowed = new Set(['BOOKED', 'SCHEDULED', 'CONFIRMED']);
-    return (this.appointments || [])
-      .filter((a) => allowed.has((a.status || '').trim().toUpperCase()) && getAppointmentEpochMs(a) >= now)
-      .sort((x, y) => getAppointmentEpochMs(x) - getAppointmentEpochMs(y))
-      .slice(0, 6);
+  todayAppointments() {
+    const s = (this.appointments || []).filter((a) => isAppointmentToday(a));
+    return s.sort((x, y) => getAppointmentEpochMs(x) - getAppointmentEpochMs(y));
   }
 
   loadRating(d: Doctor) {
@@ -480,6 +500,17 @@ export class PatientDashboardComponent {
     return s === 'BOOKED' || s === 'CONFIRMED';
   }
 
+  loadFinancialStats() {
+    if (this.patientId == null) return;
+    this.analyticsApi.getPatientFinancialStats(this.patientId).subscribe({
+      next: (res) => {
+        this.financialStats = res;
+        this.cdr.markForCheck();
+      },
+      error: () => { }
+    });
+  }
+
   loadPatientAnalytics() {
     if (this.patientId == null) return;
     this.reportsApi.getPatientAnalytics(this.patientId).subscribe({
@@ -570,5 +601,9 @@ export class PatientDashboardComponent {
     try {
       window.open(d.filePath, '_blank');
     } catch { }
+  }
+
+  joinConsultation(a: PatientAppointmentItem) {
+    this.router.navigate(['/patient/consultation', a.appointmentId]);
   }
 }

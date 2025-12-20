@@ -9,12 +9,12 @@ import { ToastContainerComponent } from './toast-container.component';
   standalone: true,
   imports: [CommonModule, RouterModule, ToastContainerComponent],
   template: `
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-950 flex transition-colors duration-300">
+    <div class="h-full w-full md:grid md:grid-cols-[16rem_1fr] md:h-[calc(100dvh-3.5rem)] md:min-h-0 md:items-stretch bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
       
       <!-- Sidebar (Desktop) -->
-      <aside class="hidden md:flex flex-col w-64 fixed inset-y-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-r border-gray-200 dark:border-gray-800 shadow-xl transition-all duration-300">
+      <aside class="hidden md:flex flex-col md:h-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-r border-gray-200 dark:border-gray-800 shadow-xl transition-all duration-300 overflow-hidden">
         <!-- Sidebar Header -->
-        <div class="h-16 flex items-center gap-3 px-6 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900">
+        <div class="h-16 flex items-center gap-3 px-6 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 flex-shrink-0">
           <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
             <i class="fa-solid fa-user-doctor text-lg"></i>
           </div>
@@ -86,7 +86,7 @@ import { ToastContainerComponent } from './toast-container.component';
         </nav>
 
         <!-- Sidebar Footer -->
-        <div class="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50">
+        <div class="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 flex-shrink-0">
           <button (click)="onLogout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all group">
             <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
               <i class="fa-solid fa-right-from-bracket text-sm"></i>
@@ -100,16 +100,15 @@ import { ToastContainerComponent } from './toast-container.component';
       </aside>
 
       <!-- Main Content Area -->
-      <main class="flex-1 md:ml-64 relative flex flex-col h-screen overflow-y-auto bg-gray-50 dark:bg-gray-950">
-        <div class="flex-1 p-4 sm:p-6 lg:p-8 pb-24 md:pb-8">
-            <!-- Breadcrumb or Top Info (Optional placeholder) -->
+      <main class="relative min-h-0 md:h-full h-[calc(100dvh-3.5rem-4rem)] overflow-y-auto overflow-x-hidden min-w-0 bg-gray-50 dark:bg-gray-950">
+        <div class="p-4 sm:p-6 lg:p-8 pb-32 md:pb-8">
              <ng-content></ng-content>
         </div>
         <app-toast-container></app-toast-container>
       </main>
 
-       <!-- Mobile Bottom Navigation -->
-      <nav class="md:hidden fixed bottom-4 left-4 right-4 z-50 bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl shadow-gray-200/50 dark:shadow-black/50 overflow-hidden">
+       <!-- Mobile Bottom Navigation - Standard Fixed Bar -->
+      <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] overflow-hidden">
         <div class="grid grid-cols-4 items-center h-16">
           <a routerLink="/doctor" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20" [routerLinkActiveOptions]="{ exact: true }" class="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
             <i class="fa-solid fa-house text-lg mb-1"></i>

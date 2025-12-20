@@ -25,6 +25,7 @@ import { SettingsComponent } from './features/settings/settings.component';
 import { LabTestsComponent } from './features/lab-tests/lab-tests.component';
 import { LabTestManagementComponent } from './features/doctor/lab-test-management.component';
 import { PatientLabBookingsComponent } from './features/patient/patient-lab-bookings.component';
+import { VideoConsultationComponent } from './shared/video-consultation.component';
 
 import { NotFoundComponent } from './shared/not-found.component';
 
@@ -85,6 +86,12 @@ export const routes: Routes = [
     data: { roles: ['DOCTOR'] }
   },
   {
+    path: 'doctor/consultation/:id',
+    component: VideoConsultationComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['DOCTOR'] }
+  },
+  {
     path: 'patient',
     component: PatientDashboardComponent,
     canActivate: [authGuard, roleGuard],
@@ -141,6 +148,12 @@ export const routes: Routes = [
   {
     path: 'patient/doctor/:username',
     component: DoctorPublicProfileComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['PATIENT'] }
+  },
+  {
+    path: 'patient/consultation/:id',
+    component: VideoConsultationComponent,
     canActivate: [authGuard, roleGuard],
     data: { roles: ['PATIENT'] }
   },

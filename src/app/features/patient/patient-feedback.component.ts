@@ -69,7 +69,7 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
                 <div class="flex items-start justify-between mb-4 relative z-10">
                   <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-lg font-bold shadow-lg">
-                      {{ (a.doctorName?.charAt(0) || 'D') | uppercase }}
+                      {{ (a.doctorName[0] || 'D') | uppercase }}
                     </div>
                     <div>
                       <h3 class="font-bold text-lg text-gray-100 leading-tight">{{ a.doctorName }}</h3>
@@ -210,7 +210,7 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
                         <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-200">
                           <div class="flex items-center gap-2">
                              <div class="w-6 h-6 rounded-full bg-gray-800 flex items-center justify-center text-[10px] text-gray-400">
-                                {{ (f.doctorName?.charAt(0) || 'D') | uppercase }}
+                                {{ (f.doctorName?.[0] || 'D') | uppercase }}
                              </div>
                              {{ f.doctorName || 'Unknown Doctor' }}
                           </div>

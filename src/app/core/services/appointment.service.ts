@@ -22,6 +22,8 @@ export interface PatientAppointmentItem {
   statusChangedAt?: string;
   doctorIsVerified?: boolean;
   doctorProfileImageUrl?: string;
+  videoRoomId?: string;
+  isActive?: boolean;
 }
 
 export interface DoctorAppointmentItem {
@@ -37,6 +39,8 @@ export interface DoctorAppointmentItem {
   statusChangedBy?: string;
   statusChangedAt?: string;
   patientProfileImageUrl?: string;
+  videoRoomId?: string;
+  isActive?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })

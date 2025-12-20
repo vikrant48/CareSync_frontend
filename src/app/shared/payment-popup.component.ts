@@ -26,7 +26,7 @@ export interface PaymentDetails {
   standalone: true,
   imports: [CommonModule, FormsModule, PaymentSuccessModalComponent],
   template: `
-    <div *ngIf="isVisible" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div *ngIf="isVisible" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <!-- Backdrop -->
       <div class="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity" (click)="closePayment()"></div>
 

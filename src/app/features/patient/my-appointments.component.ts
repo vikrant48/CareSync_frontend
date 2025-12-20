@@ -124,6 +124,7 @@ import { ToastService } from '../../core/services/toast.service';
           (reschedule)="startReschedule($event)"
           (cancel)="cancelAppointment($event)"
           (viewDoctor)="viewDoctorFromAppointment($event)"
+          (joinVideo)="joinConsultation($event)"
           class="h-full"
         ></patient-appointment-card>
       </div>
@@ -326,5 +327,9 @@ export class MyAppointmentsComponent {
     const target = this.cancellationTarget;
     this.closeCancellation();
     this.startReschedule(target);
+  }
+
+  joinConsultation(a: PatientAppointmentItem) {
+    this.router.navigate(['/patient/consultation', a.appointmentId]);
   }
 }

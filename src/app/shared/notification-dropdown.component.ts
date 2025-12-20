@@ -149,7 +149,7 @@ import { NotificationService, NotificationItem, NotificationStatus } from '../co
       <!-- Panel Container (Desktop) -->
       <div 
         *ngIf="notifOpen" 
-        class="hidden sm:block absolute right-0 mt-3 bg-[#111827] border border-gray-700/50 rounded-xl shadow-2xl z-50 origin-top-right animate-in fade-in slide-in-from-top-2 duration-200 ring-1 ring-black/5" 
+        class="hidden sm:block absolute right-0 mt-3 bg-[#111827] border border-gray-700/50 rounded-xl shadow-2xl z-[100] origin-top-right animate-in fade-in slide-in-from-top-2 duration-200 ring-1 ring-black/5" 
         [ngClass]="widthClass"
       >
         <ng-container [ngTemplateOutlet]="dropdownContent"></ng-container>

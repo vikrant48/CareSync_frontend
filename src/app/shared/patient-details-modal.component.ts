@@ -2,11 +2,12 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PatientDto, MedicalHistoryWithDoctorItem } from '../core/services/patient-profile.service';
+import { MedicalSummaryComponent } from './medical-summary.component';
 
 @Component({
   selector: 'app-patient-details-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MedicalSummaryComponent],
   template: `
     <div *ngIf="open" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
       
@@ -39,15 +40,18 @@ import { PatientDto, MedicalHistoryWithDoctorItem } from '../core/services/patie
           </div>
 
           <!-- Body -->
-          <div class="flex flex-col h-[60vh] sm:h-auto">
+          <div class="flex flex-col h-[70vh] sm:h-auto">
             
             <!-- Tabs -->
-            <div class="px-6 pt-2 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
-              <div class="flex gap-6">
-                <button class="tab-btn group" [class.active]="activeTab === 'overview'" (click)="activeTab='overview'">
+            <div class="px-6 pt-2 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm z-10">
+              <div class="flex gap-6 overflow-x-auto no-scrollbar">
+                <button class="tab-btn group whitespace-nowrap" [class.active]="activeTab === 'overview'" (click)="activeTab='overview'">
                    <i class="fa-solid fa-circle-info mr-2 group-hover:scale-110 transition-transform"></i> Overview
                 </button>
-                <button class="tab-btn group" [class.active]="activeTab === 'history'" (click)="activeTab='history'">
+                <button class="tab-btn group whitespace-nowrap" [class.active]="activeTab === 'summary'" (click)="activeTab='summary'">
+                   <i class="fa-solid fa-magic mr-2 group-hover:scale-110 transition-transform"></i> AI Summary
+                </button>
+                <button class="tab-btn group whitespace-nowrap" [class.active]="activeTab === 'history'" (click)="activeTab='history'">
                    <i class="fa-solid fa-file-medical mr-2 group-hover:scale-110 transition-transform"></i> Medical History
                 </button>
               </div>
@@ -81,6 +85,11 @@ import { PatientDto, MedicalHistoryWithDoctorItem } from '../core/services/patie
                     </div>
                  </div>
 
+              </div>
+
+              <!-- Summary Tab -->
+              <div *ngIf="activeTab === 'summary'" class="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <app-medical-summary [patientId]="patient.id"></app-medical-summary>
               </div>
 
               <!-- Medical History Tab -->
@@ -180,7 +189,7 @@ export class PatientDetailsModalComponent {
   @Output() close = new EventEmitter<void>();
   @Output() historyClick = new EventEmitter<MedicalHistoryWithDoctorItem>();
 
-  activeTab: 'overview' | 'history' = 'overview';
+  activeTab: 'overview' | 'summary' | 'history' = 'overview';
 
   sortedHistory(): MedicalHistoryWithDoctorItem[] {
     const base = this.history || [];

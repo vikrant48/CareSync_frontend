@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -10,6 +10,7 @@ import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { PaymentPopupComponent, PaymentDetails } from '../../shared/payment-popup.component';
 import { DoctorBookingModalComponent } from '../../shared/doctor-booking-modal.component';
 import { ToastService } from '../../core/services/toast.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-doctor-public-profile',
@@ -95,6 +96,8 @@ export class DoctorPublicProfileComponent {
   paymentCompleted = false;
   paymentDetails: PaymentDetails | null = null;
 
+  private authService = inject(AuthService);
+
   constructor(
     private route: ActivatedRoute,
     private doctors: DoctorService,
@@ -173,54 +176,13 @@ export class DoctorPublicProfileComponent {
     this.bookError = null;
     this.appts.getAvailableSlots(this.doctor.id, this.selectedDate).subscribe({
       next: (slots) => {
-        // Filter out past time slots if the selected date is today
-        const filteredSlots = this.filterPastSlots(slots || []);
-        this.slots = filteredSlots;
+        this.slots = slots || [];
         this.loadingSlots = false;
       },
       error: () => (this.loadingSlots = false),
     });
   }
 
-  // New method to filter past time slots for current day
-  filterPastSlots(slots: string[]): string[] {
-    const today = new Date();
-    const selectedDateObj = new Date(this.selectedDate + 'T00:00:00');
-
-    // Only filter if the selected date is today
-    if (selectedDateObj.toDateString() === today.toDateString()) {
-      const currentHour = today.getHours();
-      const currentMinute = today.getMinutes();
-
-      return slots.filter(slot => {
-        // Parse slot time (assuming format like "09:00 AM" or "14:30")
-        const timeMatch = slot.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
-        if (!timeMatch) return true; // Keep slot if we can't parse it
-
-        let hour = parseInt(timeMatch[1]);
-        const minute = parseInt(timeMatch[2]);
-        const ampm = timeMatch[3]?.toUpperCase();
-
-        // Convert to 24-hour format if needed
-        if (ampm === 'PM' && hour !== 12) {
-          hour += 12;
-        } else if (ampm === 'AM' && hour === 12) {
-          hour = 0;
-        }
-
-        // Compare with current time
-        if (hour > currentHour) {
-          return true; // Future hour
-        } else if (hour === currentHour) {
-          return minute > currentMinute; // Same hour, but future minute
-        } else {
-          return false; // Past hour
-        }
-      });
-    }
-
-    return slots; // Return all slots for future dates
-  }
 
   selectSlot(slot: string) {
     this.selectedSlot = slot;
@@ -237,14 +199,13 @@ export class DoctorPublicProfileComponent {
     this.validating = true;
     this.appts.getAvailableSlots(this.doctor.id, this.selectedDate).subscribe({
       next: (slots) => {
-        const filtered = this.filterPastSlots(slots || []);
-        const stillAvailable = filtered.includes(this.selectedSlot!);
+        const stillAvailable = (slots || []).includes(this.selectedSlot!);
         this.validating = false;
         if (stillAvailable) {
           this.paymentModalOpen = true;
         } else {
           this.toast.showError('Selected slot is no longer available. Please choose another.');
-          this.slots = filtered;
+          this.slots = slots || [];
           this.selectedSlot = null;
         }
       },
@@ -322,9 +283,8 @@ export class DoctorPublicProfileComponent {
   }
 
   getCurrentPatientId(): number {
-    // This should return the current logged-in patient's ID
-    // You might need to get this from AuthService or similar
-    return 1; // Placeholder - replace with actual patient ID logic
+    const userId = this.authService.userId();
+    return userId ? parseInt(userId) : 0;
   }
 
   closeBooking() {

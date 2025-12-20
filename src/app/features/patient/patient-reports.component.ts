@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ChartWidgetComponent } from '../../shared/chart-widget.component';
 import { AuthService } from '../../core/services/auth.service';
 import { ReportsApiService } from '../../core/services/reports.service';
+import { AnalyticsApiService } from '../../core/services/analytics.service';
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { DoctorService, Doctor } from '../../core/services/doctor.service';
 
@@ -84,6 +85,48 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
             </div>
           </div>
 
+          <!-- Financial Stats Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- Total Spend -->
+            <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
+              <div class="absolute right-0 top-0 w-24 h-24 bg-amber-50 dark:bg-amber-900/20 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+              <div class="relative z-10">
+                <div class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Total Spend</div>
+                <div class="text-3xl font-bold text-gray-900 dark:text-white">₹{{ financialStats?.totalSpend || 0 }}</div>
+                <div class="mt-2 text-xs text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
+                  <i class="fa-solid fa-wallet"></i>
+                  <span>Lifetime</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Appointment Spend -->
+            <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
+              <div class="absolute right-0 top-0 w-24 h-24 bg-cyan-50 dark:bg-cyan-900/20 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+              <div class="relative z-10">
+                <div class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Appointment Spend</div>
+                <div class="text-3xl font-bold text-gray-900 dark:text-white">₹{{ financialStats?.totalAppointmentSpend || 0 }}</div>
+                <div class="mt-2 text-xs text-cyan-600 dark:text-cyan-400 font-medium flex items-center gap-1">
+                  <i class="fa-solid fa-user-doctor"></i>
+                  <span>Consultations</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lab Test Spend -->
+            <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
+              <div class="absolute right-0 top-0 w-24 h-24 bg-purple-50 dark:bg-purple-900/20 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+              <div class="relative z-10">
+                <div class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Lab Test Spend</div>
+                <div class="text-3xl font-bold text-gray-900 dark:text-white">₹{{ financialStats?.totalLabTestSpend || 0 }}</div>
+                <div class="mt-2 text-xs text-purple-600 dark:text-purple-400 font-medium flex items-center gap-1">
+                  <i class="fa-solid fa-flask"></i>
+                  <span>Tests & Diagnostics</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Charts Grid -->
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Doctor Visits Chart -->
@@ -150,6 +193,9 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
              <div class="h-32 bg-gray-200 dark:bg-gray-700 rounded-2xl" *ngFor="let i of [1,2,3,4]"></div>
           </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 animate-pulse">
+             <div class="h-32 bg-gray-200 dark:bg-gray-700 rounded-2xl" *ngFor="let i of [1,2,3]"></div>
+          </div>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8 animate-pulse">
              <div class="h-80 bg-gray-200 dark:bg-gray-700 rounded-2xl"></div>
              <div class="h-80 bg-gray-200 dark:bg-gray-700 rounded-2xl"></div>
@@ -165,10 +211,12 @@ export class PatientReportsComponent implements OnInit {
 
   private auth = inject(AuthService);
   private reportsApi = inject(ReportsApiService);
+  private analyticsApi = inject(AnalyticsApiService);
   private cdr = inject(ChangeDetectorRef);
   private doctorApi = inject(DoctorService);
 
   patientAnalytics: any = null;
+  financialStats: any = null;
 
   // Chart data holders
   doctorVisitLabels: string[] = [];
@@ -192,10 +240,11 @@ export class PatientReportsComponent implements OnInit {
       this.patientId = idStr ? Number(idStr) : null;
     }
     // Determine how many async loads we will wait for
-    this.pendingLoads = this.patientId == null ? 1 : 2;
+    this.pendingLoads = this.patientId == null ? 1 : 3;
     this.loadingReports = true;
     if (this.patientId != null) {
       this.loadPatientAnalytics();
+      this.loadFinancialStats();
     }
     this.loadDoctors();
   }
@@ -230,6 +279,22 @@ export class PatientReportsComponent implements OnInit {
         this.cdr.markForCheck();
         this.completeLoad();
       },
+    });
+  }
+
+  loadFinancialStats() {
+    if (this.patientId == null) return;
+    this.analyticsApi.getPatientFinancialStats(this.patientId).subscribe({
+      next: (res) => {
+        this.financialStats = res || null;
+        this.cdr.markForCheck();
+        this.completeLoad();
+      },
+      error: () => {
+        this.financialStats = null;
+        this.cdr.markForCheck();
+        this.completeLoad();
+      }
     });
   }
 
