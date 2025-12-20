@@ -296,26 +296,7 @@ import { SpecializationService } from '../../core/services/specialization.servic
       <app-toast-container></app-toast-container>
     </div>
   `,
-  styles: [`
-    .input-modern {
-      @apply block w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all placeholder-gray-400;
-    }
-    .input-modern.error {
-      @apply border-red-500 focus:ring-red-500 focus:border-red-500;
-    }
-    .error-msg {
-      @apply text-red-500 text-xs mt-1 ml-1;
-    }
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      @apply bg-transparent;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      @apply bg-gray-300 dark:bg-gray-600 rounded-full;
-    }
-  `]
+  styles: []
 })
 export class RegisterComponent implements OnInit {
   private auth = inject(AuthService);

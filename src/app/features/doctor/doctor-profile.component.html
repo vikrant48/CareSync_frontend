@@ -216,23 +216,23 @@
                   <div class="space-y-1.5">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">First
                       Name</label>
-                    <input class="input" [(ngModel)]="profileForm.firstName" placeholder="John" />
+                    <input class="input-modern" [(ngModel)]="profileForm.firstName" placeholder="John" />
                   </div>
                   <div class="space-y-1.5">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Last Name</label>
-                    <input class="input" [(ngModel)]="profileForm.lastName" placeholder="Doe" />
+                    <input class="input-modern" [(ngModel)]="profileForm.lastName" placeholder="Doe" />
                   </div>
                 </div>
                 <div class="space-y-1.5">
                   <label
                     class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Specialization</label>
                   <app-specialization-autocomplete [(ngModel)]="profileForm.specialization"
-                    placeholder="e.g. Cardiologist" inputClass="input"></app-specialization-autocomplete>
+                    placeholder="e.g. Cardiologist" inputClass="input-modern"></app-specialization-autocomplete>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                   <div class="space-y-1.5">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Gender</label>
-                    <select class="input" [(ngModel)]="profileForm.gender">
+                    <select class="input-modern" [(ngModel)]="profileForm.gender">
                       <option [ngValue]="undefined">Select</option>
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
@@ -241,7 +241,7 @@
                   </div>
                   <div class="space-y-1.5">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Fees (₹)</label>
-                    <input type="number" class="input" [(ngModel)]="profileForm.consultationFees" />
+                    <input type="number" class="input-modern" [(ngModel)]="profileForm.consultationFees" />
                   </div>
                 </div>
               </div>
@@ -253,17 +253,17 @@
                 <div class="space-y-1.5">
                   <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Email
                     Address</label>
-                  <input type="email" class="input" [(ngModel)]="profileForm.email" />
+                  <input type="email" class="input-modern" [(ngModel)]="profileForm.email" />
                 </div>
                 <div class="space-y-1.5">
                   <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Contact
                     Number</label>
-                  <input class="input" [(ngModel)]="profileForm.contactInfo" />
+                  <input class="input-modern" [(ngModel)]="profileForm.contactInfo" />
                 </div>
                 <div class="space-y-1.5">
                   <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Clinic
                     Address</label>
-                  <input class="input" [(ngModel)]="profileForm.address" />
+                  <input class="input-modern" [(ngModel)]="profileForm.address" />
                 </div>
                 <div class="space-y-2">
                   <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Languages
@@ -305,7 +305,7 @@
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Degree /
                   Qualification</label>
-                <select class="input" [(ngModel)]="newEducation.degree">
+                <select class="input-modern" [(ngModel)]="newEducation.degree">
                   <option [ngValue]="''">Select degree</option>
                   <option *ngFor="let d of degreeOptions" [value]="d">{{ d }}</option>
                   <option value="__other__">Add new degree…</option>
@@ -319,7 +319,7 @@
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Institution /
                   University</label>
-                <select class="input" [(ngModel)]="newEducation.institution">
+                <select class="input-modern" [(ngModel)]="newEducation.institution">
                   <option [ngValue]="''">Select institution</option>
                   <option *ngFor="let i of institutionOptions" [value]="i">{{ i }}</option>
                   <option value="__other__">Add new institution…</option>
@@ -333,12 +333,12 @@
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Year of
                   Completion</label>
-                <input type="number" class="input" [(ngModel)]="newEducation.yearOfCompletion" />
+                <input type="number" class="input-modern" [(ngModel)]="newEducation.yearOfCompletion" />
               </div>
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Additional
                   Details</label>
-                <input class="input" [(ngModel)]="newEducation.details"
+                <input class="input-modern" [(ngModel)]="newEducation.details"
                   placeholder="e.g. Gold Medalist, Specialization details" />
               </div>
             </div>
@@ -413,7 +413,7 @@
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Hospital / Clinic
                   Name</label>
-                <select class="input" [(ngModel)]="newExperience.hospitalName">
+                <select class="input-modern" [(ngModel)]="newExperience.hospitalName">
                   <option [ngValue]="''">Select hospital</option>
                   <option *ngFor="let h of hospitalOptions" [value]="h">{{ h }}</option>
                   <option value="__other__">Add new hospital…</option>
@@ -427,7 +427,7 @@
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Designation /
                   Role</label>
-                <select class="input" [(ngModel)]="newExperience.position">
+                <select class="input-modern" [(ngModel)]="newExperience.position">
                   <option [ngValue]="''">Select position</option>
                   <option *ngFor="let p of positionOptions" [value]="p">{{ p }}</option>
                   <option value="__other__">Add new position…</option>
@@ -441,12 +441,12 @@
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Years of
                   Service</label>
-                <input type="number" class="input" [(ngModel)]="newExperience.yearsOfService" />
+                <input type="number" class="input-modern" [(ngModel)]="newExperience.yearsOfService" />
               </div>
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Role
                   Description</label>
-                <input class="input" [(ngModel)]="newExperience.details"
+                <input class="input-modern" [(ngModel)]="newExperience.details"
                   placeholder="e.g. Senior Consultant in Ophthalmology" />
               </div>
             </div>
@@ -549,7 +549,7 @@
                 <i class="fa-solid fa-circle-notch animate-spin" *ngIf="uploadingCertificate"></i>
                 {{ uploadingCertificate ? 'Uploading…' : 'Start Upload' }}
               </button>
-              <button class="btn-secondary" (click)="cancelAddCertificate()">Cancel</button>
+              <button class="btn-modern-secondary" (click)="cancelAddCertificate()">Cancel</button>
             </div>
           </div>
 
@@ -614,30 +614,30 @@
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Certificate
                   Name</label>
-                <input class="input" [(ngModel)]="certEdit[eid].name" placeholder="Name" />
+                <input class="input-modern" [(ngModel)]="certEdit[eid].name" placeholder="Name" />
               </div>
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Issuing
                   Organization</label>
-                <input class="input" [(ngModel)]="certEdit[eid].issuingOrganization" placeholder="Institution" />
+                <input class="input-modern" [(ngModel)]="certEdit[eid].issuingOrganization" placeholder="Institution" />
               </div>
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Issue Date</label>
-                <input class="input" type="date" [(ngModel)]="certEdit[eid].issueDate" />
+                <input class="input-modern" type="date" [(ngModel)]="certEdit[eid].issueDate" />
               </div>
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Expiry Date</label>
-                <input class="input" type="date" [(ngModel)]="certEdit[eid].expiryDate" />
+                <input class="input-modern" type="date" [(ngModel)]="certEdit[eid].expiryDate" />
               </div>
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Credential ID
                   (Optional)</label>
-                <input class="input" [(ngModel)]="certEdit[eid].credentialId" placeholder="ID" />
+                <input class="input-modern" [(ngModel)]="certEdit[eid].credentialId" placeholder="ID" />
               </div>
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Verification URL
                   (Optional)</label>
-                <input class="input" [(ngModel)]="certEdit[eid].credentialUrl" placeholder="https://..." />
+                <input class="input-modern" [(ngModel)]="certEdit[eid].credentialUrl" placeholder="https://..." />
               </div>
               <div class="space-y-1.5 md:col-span-2">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Additional
