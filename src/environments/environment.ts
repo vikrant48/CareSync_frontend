@@ -4,5 +4,7 @@ export const environment = {
   // QR Code Configuration (non-sensitive)
   qrCodeBaseUrl: 'upi://pay?pa=vikrantchauhan9794@okicici&pn=CareSync&cu=INR',
   // Merchant UPI ID for payments
-  merchantUpiId: 'vikrantchauhan9794@okicici'
+  merchantUpiId: 'vikrantchauhan9794@okicici',
+  // Jitsi Domain (Public: meet.jit.si, JaaS: 8x8.vc, or your-own-domain.com)
+  jitsiDomain: 'meet.jit.si'
 };

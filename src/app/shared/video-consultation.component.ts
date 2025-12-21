@@ -1,16 +1,17 @@
 import { Component, OnInit, OnDestroy, inject, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { environment } from '../../environments/environment';
 import { AuthService } from '../core/services/auth.service';
 import { AppointmentService } from '../core/services/appointment.service';
 
 declare var JitsiMeetExternalAPI: any;
 
 @Component({
-    standalone: true,
-    selector: 'app-video-consultation',
-    imports: [CommonModule],
-    template: `
+  standalone: true,
+  selector: 'app-video-consultation',
+  imports: [CommonModule],
+  template: `
     <div class="h-full w-full flex flex-col bg-gray-900 border-l border-gray-800 animate-in fade-in duration-500 overflow-hidden relative">
       <!-- Session Header -->
       <div class="absolute top-0 left-0 right-0 z-20 px-6 py-4 bg-gradient-to-b from-black/80 to-transparent flex items-center justify-between pointer-events-none">
@@ -31,6 +32,24 @@ declare var JitsiMeetExternalAPI: any;
         </button>
       </div>
 
+      <!-- Moderator Information Banner -->
+      <div *ngIf="!loading && !bannerDismissed" class="absolute top-24 right-6 z-20 w-80">
+        <div class="bg-blue-600/95 backdrop-blur-md text-white px-4 py-3 rounded-xl shadow-2xl flex items-start gap-3 border border-blue-400/30 animate-in slide-in-from-right duration-500">
+          <i class="fa-solid fa-circle-info mt-1 text-blue-200"></i>
+          <div class="flex-1">
+            <p class="text-[11px] font-semibold leading-relaxed" *ngIf="auth.role() === 'DOCTOR'">
+              <strong>Doctor:</strong> As the moderator, you may need to click <span class="bg-white/20 px-1 rounded mx-0.5">Log-in</span> on the screen below to start the meeting using your Google or social account.
+            </p>
+            <p class="text-[11px] font-semibold leading-relaxed" *ngIf="auth.role() === 'PATIENT'">
+              <strong>Patient:</strong> Please wait for the doctor to join and start the session. If it says "not yet started", the doctor is on their way.
+            </p>
+          </div>
+          <button (click)="bannerDismissed = true" class="text-white/60 hover:text-white transition-colors">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
       <!-- Jitsi Container -->
       <div #jitsiContainer class="flex-1 w-full bg-black"></div>
 
@@ -42,113 +61,133 @@ declare var JitsiMeetExternalAPI: any;
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     :host { display: block; height: 100%; width: 100%; }
   `]
 })
 export class VideoConsultationComponent implements OnInit, AfterViewInit, OnDestroy {
-    @ViewChild('jitsiContainer') jitsiContainer!: ElementRef;
+  @ViewChild('jitsiContainer') jitsiContainer!: ElementRef;
 
-    private route = inject(ActivatedRoute);
-    private router = inject(Router);
-    private auth = inject(AuthService);
-    private apptApi = inject(AppointmentService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  auth = inject(AuthService);
+  private apptApi = inject(AppointmentService);
 
-    appointmentId: string | null = null;
-    loading = true;
-    api: any;
+  appointmentId: string | null = null;
+  loading = true;
+  bannerDismissed = false;
+  api: any;
 
-    private viewReady = false;
-    private secureRoomId: string | null = null;
+  private viewReady = false;
+  private secureRoomId: string | null = null;
+  private conferenceJoined = false;
 
-    ngOnInit() {
-        this.appointmentId = this.route.snapshot.paramMap.get('id');
-        this.loadAppointmentDetails();
-    }
+  ngOnInit() {
+    this.appointmentId = this.route.snapshot.paramMap.get('id');
+    this.loadAppointmentDetails();
+  }
 
-    loadAppointmentDetails() {
-        if (!this.appointmentId) return;
+  loadAppointmentDetails() {
+    if (!this.appointmentId) return;
 
-        const isDoctor = this.auth.role() === 'DOCTOR';
-        const obs: import('rxjs').Observable<any[]> = isDoctor ? this.apptApi.getDoctorAllAppointments() : this.apptApi.getMyAppointments();
+    const isDoctor = this.auth.role() === 'DOCTOR';
+    const obs: import('rxjs').Observable<any[]> = isDoctor ? this.apptApi.getDoctorAllAppointments() : this.apptApi.getMyAppointments();
 
-        obs.subscribe({
-            next: (list: any[]) => {
-                const appt = list.find(a => a.appointmentId === Number(this.appointmentId));
-                this.secureRoomId = appt?.videoRoomId || `CareSync_Room_${this.appointmentId}`;
-                this.attemptInit();
-            },
-            error: (err: any) => {
-                console.error('Error loading appointment details', err);
-                this.goBack();
-            }
-        });
-    }
-
-    ngAfterViewInit() {
-        this.viewReady = true;
+    obs.subscribe({
+      next: (list: any[]) => {
+        const appt = list.find(a => a.appointmentId === Number(this.appointmentId));
+        this.secureRoomId = appt?.videoRoomId || `CareSync_Room_${this.appointmentId}`;
         this.attemptInit();
+      },
+      error: (err: any) => {
+        console.error('Error loading appointment details', err);
+        this.goBack();
+      }
+    });
+  }
+
+  ngAfterViewInit() {
+    this.viewReady = true;
+    this.attemptInit();
+  }
+
+  private attemptInit() {
+    if (this.viewReady && this.secureRoomId) {
+      this.initJitsi(this.secureRoomId);
+    }
+  }
+
+  initJitsi(roomNameOverride?: string) {
+    if (!this.appointmentId || !this.jitsiContainer) {
+      return;
     }
 
-    private attemptInit() {
-        if (this.viewReady && this.secureRoomId) {
-            this.initJitsi(this.secureRoomId);
+    const roomName = roomNameOverride || this.secureRoomId || `CareSync_Consultation_${this.appointmentId}`;
+    const userRole = this.auth.role() === 'DOCTOR' ? 'Doctor' : 'Patient';
+    const userName = `${userRole}: ${this.auth.username() || 'User'}`;
+
+    const options = {
+      roomName: roomName,
+      width: '100%',
+      height: '100%',
+      parentNode: this.jitsiContainer.nativeElement,
+      userInfo: {
+        displayName: userName,
+        email: this.auth.user()?.email || undefined
+      },
+      configOverwrite: {
+        startWithAudioMuted: false,
+        disableDeepLinking: true,
+        enableWelcomePage: false,
+        prejoinPageEnabled: false,
+        serviceUrl: "wss://meet.jit.si/xmpp-websocket",
+        websocket: "wss://meet.jit.si/xmpp-websocket"
+      },
+      interfaceConfigOverwrite: {
+        TOOLBAR_BUTTONS: [
+          'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
+          'fodeviceselection', 'hangup', 'profile', 'info', 'chat', 'recording',
+          'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
+          'videoquality', 'filmstrip', 'invite', 'feedback', 'stats', 'shortcuts',
+          'tileview', 'videobackgroundblur', 'download', 'help', 'mute-everyone',
+          'security'
+        ],
+      }
+    };
+
+    if (typeof JitsiMeetExternalAPI !== 'undefined') {
+      this.api = new JitsiMeetExternalAPI(environment.jitsiDomain, options);
+      this.loading = false;
+
+      this.api.addEventListeners({
+        videoConferenceJoined: () => {
+          this.conferenceJoined = true;
+        },
+        videoConferenceLeft: () => {
+          // Only redirect if the conference was actually joined.
+          // This prevents premature redirection during the login/moderator-check phase.
+          if (this.conferenceJoined) {
+            this.goBack();
+          }
+        },
+        readyToClose: () => {
+          this.goBack();
         }
+      });
+    } else {
+      console.error('Jitsi Meet API not loaded, retrying...');
+      setTimeout(() => this.initJitsi(roomName), 2000);
     }
+  }
 
-    initJitsi(roomNameOverride?: string) {
-        if (!this.appointmentId || !this.jitsiContainer) {
-            return;
-        }
+  goBack() {
+    const role = this.auth.role()?.toLowerCase();
+    this.router.navigate([role === 'doctor' ? '/doctor' : '/patient']);
+  }
 
-        const roomName = roomNameOverride || this.secureRoomId || `CareSync_Consultation_${this.appointmentId}`;
-        const userName = this.auth.username() || (this.auth.role() === 'DOCTOR' ? 'Doctor' : 'Patient');
-
-        const options = {
-            roomName: roomName,
-            width: '100%',
-            height: '100%',
-            parentNode: this.jitsiContainer.nativeElement,
-            userInfo: { displayName: userName },
-            configOverwrite: {
-                startWithAudioMuted: false,
-                disableDeepLinking: true,
-                enableWelcomePage: false,
-                prejoinPageEnabled: false
-            },
-            interfaceConfigOverwrite: {
-                TOOLBAR_BUTTONS: [
-                    'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
-                    'fodeviceselection', 'hangup', 'profile', 'info', 'chat', 'recording',
-                    'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
-                    'videoquality', 'filmstrip', 'invite', 'feedback', 'stats', 'shortcuts',
-                    'tileview', 'videobackgroundblur', 'download', 'help', 'mute-everyone',
-                    'security'
-                ],
-            }
-        };
-
-        if (typeof JitsiMeetExternalAPI !== 'undefined') {
-            this.api = new JitsiMeetExternalAPI("meet.jit.si", options);
-            this.loading = false;
-            this.api.addEventListeners({
-                readyToClose: () => this.goBack(),
-                videoConferenceLeft: () => this.goBack()
-            });
-        } else {
-            console.error('Jitsi Meet API not loaded, retrying...');
-            setTimeout(() => this.initJitsi(roomName), 2000);
-        }
+  ngOnDestroy() {
+    if (this.api) {
+      this.api.dispose();
     }
-
-    goBack() {
-        const role = this.auth.role()?.toLowerCase();
-        this.router.navigate([role === 'doctor' ? '/doctor' : '/patient']);
-    }
-
-    ngOnDestroy() {
-        if (this.api) {
-            this.api.dispose();
-        }
-    }
+  }
 }
