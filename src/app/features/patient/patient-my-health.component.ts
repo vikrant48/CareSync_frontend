@@ -47,7 +47,7 @@ import { MedicalHistoryItem, PatientDocumentItem } from '../../core/services/pat
                   <i class="fa-regular fa-file-pdf"></i>
                 </div>
                 <div class="min-w-0">
-                  <div class="font-medium text-sm text-gray-300 truncate group-hover:text-purple-400 transition-colors">{{ d.originalFilename }}</div>
+                  <div class="font-medium text-sm text-gray-300 truncate group-hover:text-purple-400 transition-colors">{{ d.filename }}</div>
                   <div class="text-[10px] text-gray-500">{{ d.uploadDate | date:'mediumDate' }}</div>
                 </div>
               </div>

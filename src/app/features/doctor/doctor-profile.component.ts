@@ -245,9 +245,10 @@ export class DoctorProfileComponent implements OnInit {
         this.editingOverview = false;
         this.toast.showSuccess('Profile image updated');
       },
-      error: () => {
+      error: (e) => {
         this.uploadingProfileImage = false;
-        this.toast.showError('Failed to upload profile image');
+        const msg = typeof e?.error === 'string' ? e.error : (e?.error?.message || 'Failed to upload profile image');
+        this.toast.showError(msg);
       },
     });
   }
@@ -548,8 +549,9 @@ export class DoctorProfileComponent implements OnInit {
       },
       error: (e) => {
         this.uploadingCertificate = false;
-        this.certUploadMessage = e?.error?.message || 'Upload failed';
-        this.toast.showError(e?.error?.message || 'Failed to upload certificate');
+        const msg = typeof e?.error === 'string' ? e.error : (e?.error?.message || 'Upload failed');
+        this.certUploadMessage = msg;
+        this.toast.showError(msg);
       },
     });
   }

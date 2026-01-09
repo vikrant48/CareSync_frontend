@@ -205,12 +205,13 @@ import { forkJoin } from 'rxjs';
 
         <!-- Modals -->
         <app-patient-details-modal
-          [open]="patientModalOpen"
-          [patient]="selectedPatient?.patient || null"
-          [history]="medicalHistoryWithDoctor"
-          (close)="closePatientModal()"
-          (historyClick)="viewHistoryDetail($event)"
-        ></app-patient-details-modal>
+        [open]="showPatientModal"
+        [patient]="selectedPatient"
+        [history]="selectedPatientHistory"
+        [documents]="selectedPatientDocuments"
+        (close)="showPatientModal = false"
+        (historyClick)="openHistory($event)"
+      ></app-patient-details-modal>
 
         <app-medical-history-detail-modal
           [open]="historyDetailModalOpen"
@@ -445,10 +446,11 @@ export class DoctorDashboardComponent implements OnInit {
   searchTerm: string = '';
 
   // Patient modal
-  patientModalOpen = false;
+  showPatientModal = false; // Renamed from patientModalOpen
   selectedAppointment: DoctorAppointmentItem | null = null;
-  selectedPatient: { patient: PatientDto; medicalHistory: MedicalHistoryItem[]; documents: any[] } | null = null;
-  medicalHistoryWithDoctor: MedicalHistoryWithDoctorItem[] = [];
+  selectedPatient: PatientDto | null = null; // Changed type
+  selectedPatientHistory: MedicalHistoryWithDoctorItem[] = []; // New field
+  selectedPatientDocuments: any[] = []; // New field
   mhForm: Partial<MedicalHistoryItem> = { visitDate: this.todayISO() };
   savingHistory = false;
   historySaved = false;
@@ -645,23 +647,22 @@ export class DoctorDashboardComponent implements OnInit {
     this.historyDetailModalOpen = false;
 
     this.selectedAppointment = a;
-    this.patientModalOpen = true;
+    this.showPatientModal = true;
     this.selectedPatient = null;
+    this.selectedPatientHistory = [];
+    this.selectedPatientDocuments = [];
     this.mhForm = { visitDate: this.todayISO() };
     this.patientApi.getCompleteData(a.patientId).subscribe({
       next: (data) => {
-        this.selectedPatient = data;
+        this.selectedPatient = data.patient;
+        this.selectedPatientHistory = data.medicalHistory;
+        this.selectedPatientDocuments = data.documents || [];
         this.cdr.detectChanges();
       },
       error: () => {
-        this.selectedPatient = { patient: {} as any, medicalHistory: [], documents: [] };
-        this.cdr.detectChanges();
-      },
-    });
-    this.medicalHistoryWithDoctor = [];
-    this.patientApi.getMedicalHistoryWithDoctor(a.patientId).subscribe({
-      next: (list) => {
-        this.medicalHistoryWithDoctor = list || [];
+        this.selectedPatient = null;
+        this.selectedPatientHistory = [];
+        this.selectedPatientDocuments = [];
         this.cdr.detectChanges();
       },
     });
@@ -669,7 +670,7 @@ export class DoctorDashboardComponent implements OnInit {
 
   openHistoryForm(a: DoctorAppointmentItem) {
     // Ensure other modals are closed
-    this.patientModalOpen = false;
+    this.showPatientModal = false;
     this.historyDetailModalOpen = false;
 
     this.selectedAppointment = a;
@@ -679,12 +680,14 @@ export class DoctorDashboardComponent implements OnInit {
   }
 
   closePatientModal() {
-    this.patientModalOpen = false;
+    this.showPatientModal = false;
     this.selectedAppointment = null;
     this.selectedPatient = null;
+    this.selectedPatientHistory = [];
+    this.selectedPatientDocuments = [];
   }
 
-  viewHistoryDetail(item: MedicalHistoryWithDoctorItem) {
+  openHistory(item: MedicalHistoryWithDoctorItem) {
     this.selectedHistoryDoctorInfo = item;
     this.selectedHistoryDetail = null;
     this.historyDetailModalOpen = true;

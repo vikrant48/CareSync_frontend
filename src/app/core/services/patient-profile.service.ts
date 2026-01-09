@@ -53,13 +53,15 @@ export interface MedicalHistoryWithDoctorItem {
 
 export interface PatientDocumentItem {
   id: number;
-  originalFilename: string;
-  filePath: string;
-  fileSize: number;
+  filename: string;
+  url: string;
+  size: number;
   contentType: string;
   documentType: string;
   uploadDate: string;
   description?: string;
+  downloadUrl?: string;
+  cloudinaryUrl?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -100,7 +102,7 @@ export class PatientProfileService {
 
   /** Doctor: fetch complete patient data (basic info, medical history, documents) */
   getCompleteData(patientId: number | string) {
-    return this.http.get<{ patient: PatientDto; medicalHistory: MedicalHistoryItem[]; documents: any[] }>(
+    return this.http.get<{ patient: PatientDto; medicalHistory: MedicalHistoryWithDoctorItem[]; documents: PatientDocumentItem[] }>(
       `${this.baseUrl}/api/patients/${patientId}/complete-data`
     );
   }

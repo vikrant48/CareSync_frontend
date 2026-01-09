@@ -241,7 +241,8 @@ export class PatientEditPageComponent implements OnInit {
       },
       error: (e) => {
         console.error('Upload failed', e);
-        this.toast.showError('Image upload failed');
+        const msg = typeof e?.error === 'string' ? e.error : (e?.error?.message || 'Image upload failed');
+        this.toast.showError(msg);
         this.uploading = false;
       },
     });

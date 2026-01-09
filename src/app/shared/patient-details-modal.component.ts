@@ -54,6 +54,9 @@ import { MedicalSummaryComponent } from './medical-summary.component';
                 <button class="tab-btn group whitespace-nowrap" [class.active]="activeTab === 'history'" (click)="activeTab='history'">
                    <i class="fa-solid fa-file-medical mr-2 group-hover:scale-110 transition-transform"></i> Medical History
                 </button>
+                <button class="tab-btn group whitespace-nowrap" [class.active]="activeTab === 'documents'" (click)="activeTab='documents'">
+                   <i class="fa-solid fa-file-lines mr-2 group-hover:scale-110 transition-transform"></i> Documents
+                </button>
               </div>
             </div>
 
@@ -133,6 +136,33 @@ import { MedicalSummaryComponent } from './medical-summary.component';
 
               </div>
 
+              <!-- Documents Tab -->
+              <div *ngIf="activeTab === 'documents'" class="space-y-4 animate-in fade-in slide-in-from-right-2 duration-300">
+                <div *ngFor="let d of documents" 
+                     class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600">
+                   <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                         <i class="fa-solid fa-file-pdf text-lg"></i>
+                      </div>
+                      <div>
+                         <div class="font-bold text-gray-900 dark:text-white text-sm">{{ d.filename }}</div>
+                         <div class="text-xs text-gray-500 dark:text-gray-400">{{ d.documentType }} · {{ (d.size / 1024).toFixed(1) }} KB</div>
+                      </div>
+                   </div>
+                   <a [href]="d.cloudinaryUrl || d.url" target="_blank" 
+                      class="px-4 py-2 bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-500 transition-colors shadow-sm">
+                      View
+                   </a>
+                </div>
+
+                <div *ngIf="(documents || []).length === 0" class="flex flex-col items-center justify-center py-12 text-gray-400">
+                   <div class="w-16 h-16 bg-gray-50 dark:bg-gray-700/50 rounded-full flex items-center justify-center mb-3">
+                      <i class="fa-solid fa-folder-open text-2xl"></i>
+                   </div>
+                   <p>No documents found for this patient.</p>
+                </div>
+              </div>
+
             </div>
 
              <ng-template #loadingPatient>
@@ -186,10 +216,11 @@ export class PatientDetailsModalComponent {
   @Input() open = false;
   @Input() patient: PatientDto | null = null;
   @Input() history: MedicalHistoryWithDoctorItem[] = [];
+  @Input() documents: any[] = [];
   @Output() close = new EventEmitter<void>();
   @Output() historyClick = new EventEmitter<MedicalHistoryWithDoctorItem>();
 
-  activeTab: 'overview' | 'summary' | 'history' = 'overview';
+  activeTab: 'overview' | 'summary' | 'history' | 'documents' = 'overview';
 
   sortedHistory(): MedicalHistoryWithDoctorItem[] {
     const base = this.history || [];

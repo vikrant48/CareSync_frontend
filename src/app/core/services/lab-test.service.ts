@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { PaymentRequest } from './payment.service';
+import { PatientDocumentItem } from './patient-profile.service';
 
 export interface LabTest {
   id: number;
@@ -32,7 +33,7 @@ export interface BookingResponse {
   notes?: string;
   createdAt: string;
   updatedAt: string;
-  labReports?: any[];
+  labReports?: PatientDocumentItem[];
   paymentTransactionId?: string;
   paymentStatus?: string;
 }

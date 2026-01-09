@@ -176,7 +176,10 @@ export class PatientBookAppointmentComponent {
         const active = (res || []).filter((d) => d.isActive !== false);
         this.doctors = active;
         this.loadingDoctors = false;
-        this.doctors.forEach((d) => this.loadRating(d));
+        // Populate ratings from in-line data
+        this.doctors.forEach((d) => {
+          this.ratings[d.id] = { avg: d.averageRating || 0, count: d.reviewCount || 0 };
+        });
       },
       error: () => (this.loadingDoctors = false),
     });
@@ -196,18 +199,6 @@ export class PatientBookAppointmentComponent {
     });
   }
 
-  loadRating(d: Doctor) {
-    this.doctorApi.getAverageRating(d.id).subscribe({
-      next: (avgResp) => {
-        this.doctorApi.getRatingDistribution(d.id).subscribe({
-          next: (dist) => {
-            const count = Object.values(dist || {}).reduce((acc, n) => acc + (n || 0), 0);
-            this.ratings[d.id] = { avg: avgResp?.averageRating ?? 0, count };
-          },
-        });
-      },
-    });
-  }
 
   openDoctor(d: Doctor) {
     this.router.navigate(['/patient/doctor', d.username]);

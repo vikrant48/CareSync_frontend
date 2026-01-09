@@ -197,7 +197,8 @@ export class NotificationDropdownComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['userId']) {
+    // Only refresh if userId actually changed and it's not the first change (which is handled by ngOnInit)
+    if (changes['userId'] && !changes['userId'].firstChange) {
       const uid = this.userId ?? (this.auth.userId() ? Number(this.auth.userId()) : null);
       this.refreshUnreadCount(uid);
     }

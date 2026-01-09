@@ -251,8 +251,10 @@ export class PatientDashboardComponent {
         const active = (res || []).filter((d) => d.isActive !== false);
         this.doctors = active;
         this.loadingDoctors = false;
-        // Load ratings for each doctor
-        this.doctors.forEach((d) => this.loadRating(d));
+        // Populate ratings from in-line data
+        (res || []).forEach(d => {
+          this.ratings[d.id] = { avg: d.averageRating || 0, count: d.reviewCount || 0 };
+        });
         this.enrichAppointments();
         this.cdr.markForCheck();
       },
@@ -296,19 +298,6 @@ export class PatientDashboardComponent {
     return s.sort((x, y) => getAppointmentEpochMs(x) - getAppointmentEpochMs(y));
   }
 
-  loadRating(d: Doctor) {
-    this.doctorApi.getAverageRating(d.id).subscribe({
-      next: (avgResp) => {
-        this.doctorApi.getRatingDistribution(d.id).subscribe({
-          next: (dist) => {
-            const count = Object.values(dist || {}).reduce((acc, n) => acc + (n || 0), 0);
-            this.ratings[d.id] = { avg: avgResp?.averageRating ?? 0, count };
-            this.cdr.markForCheck();
-          },
-        });
-      },
-    });
-  }
 
   openDoctor(d: Doctor) {
     this.router.navigate(['/patient/doctor', d.username]);
@@ -599,7 +588,7 @@ export class PatientDashboardComponent {
   patientLabReports: PatientDocumentItem[] = [];
   openDocument(d: PatientDocumentItem) {
     try {
-      window.open(d.filePath, '_blank');
+      window.open(d.cloudinaryUrl || d.url, '_blank');
     } catch { }
   }
 

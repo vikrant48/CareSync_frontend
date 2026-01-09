@@ -142,7 +142,7 @@ import { ToastService } from '../../core/services/toast.service';
               </button>
               
               <a *ngIf="booking.labReports && booking.labReports.length > 0" 
-                 [href]="booking.labReports[0].fileUrl" 
+                 [href]="booking.labReports[0].cloudinaryUrl || booking.labReports[0].url" 
                  target="_blank"
                  class="px-3 py-1.5 bg-green-500/10 text-green-500 border border-green-500/50 rounded-lg text-sm font-medium hover:bg-green-500 hover:text-white transition-all duration-300 flex items-center gap-2">
                  <i class="fas fa-eye"></i>
@@ -552,10 +552,7 @@ export class PatientLabBookingsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error uploading report:', error);
-        let errorMsg = 'Failed to upload lab report';
-        if (error.error?.message) {
-          errorMsg = error.error.message;
-        }
+        const errorMsg = typeof error.error === 'string' ? error.error : (error.error?.message || 'Failed to upload lab report');
         this.toast.showError(errorMsg);
         this.isUploading.set(false);
         this.uploadBookingId.set(null);

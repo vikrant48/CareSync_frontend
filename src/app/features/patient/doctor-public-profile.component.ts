@@ -117,44 +117,20 @@ export class DoctorPublicProfileComponent {
       next: (d) => {
         this.doctor = d;
         this.age = this.computeAge(d?.dateOfBirth);
-        // Ratings
-        this.doctors.getAverageRating(d.id).subscribe({
-          next: (r) => (this.avgRating = r?.averageRating ?? null),
-        });
-        // Details
-        this.loadDetails(username);
+        this.avgRating = d?.averageRating ?? null;
+
+        // Populate detail fields from the enriched DTO
+        this.educations = d.educations || [];
+        this.experiences = d.experiences || [];
+        this.certificates = d.certificates || [];
+
         if (this.autoBookOnLoad) {
-          // Open booking modal immediately on arrival when requested
           this.startBooking();
         }
       },
     });
   }
 
-  loadDetails(username: string) {
-    this.loadingDetails = true;
-    this.doctorProfiles.getEducations(username).subscribe({
-      next: (eds) => (this.educations = eds || []),
-      error: () => { },
-    });
-    this.doctorProfiles.getExperiences(username).subscribe({
-      next: (exps) => {
-        this.experiences = exps || [];
-        // Keep experience years in sync if booking modal is open
-        if (this.bookingOpen) {
-          this.experienceYears = (this.experiences || []).reduce((acc: number, ex: any) => acc + (ex?.yearsOfService || 0), 0);
-        }
-      },
-      error: () => { },
-    });
-    this.doctorProfiles.getCertificates(username).subscribe({
-      next: (certs) => {
-        this.certificates = certs || [];
-        this.loadingDetails = false;
-      },
-      error: () => (this.loadingDetails = false),
-    });
-  }
 
   computeAge(dob?: string): number | null {
     if (!dob) return null;

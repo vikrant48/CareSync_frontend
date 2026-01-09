@@ -18,6 +18,11 @@ export interface Doctor {
   address?: string;
   consultationFees?: number;
   isVerified?: boolean;
+  averageRating?: number;
+  reviewCount?: number;
+  experiences?: any[];
+  educations?: any[];
+  certificates?: any[];
 }
 
 @Injectable({ providedIn: 'root' })

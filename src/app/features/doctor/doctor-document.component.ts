@@ -151,7 +151,8 @@ export class DoctorDocumentsComponent implements OnInit {
         setTimeout(() => { this.successMessage = null; }, 3000);
       },
       error: (e) => {
-        this.error.set(e?.error?.message || 'Upload failed');
+        const msg = typeof e?.error === 'string' ? e.error : (e?.error?.message || 'Upload failed');
+        this.error.set(msg);
         this.uploading = false;
       },
     });
