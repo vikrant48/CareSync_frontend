@@ -18,7 +18,7 @@ export class AppComponent {
   private theme = inject(ThemeService);
   private platformId = inject(PLATFORM_ID);
 
-  constructor() {}
+  constructor() { }
 
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {

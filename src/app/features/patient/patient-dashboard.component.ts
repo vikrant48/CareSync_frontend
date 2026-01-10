@@ -77,6 +77,7 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
             <app-patient-notification class="hidden sm:block"></app-patient-notification>
             <button class="btn-primary bg-white text-blue-700 hover:bg-white/90 w-full sm:w-auto" (click)="goToBookAppointment()">Book Appointment</button>
             <button class="btn-primary bg-white text-blue-700 hover:bg-white/90 w-full sm:w-auto" (click)="goToMyAppointments()">My Appointments</button>
+            <button class="btn-primary bg-white text-blue-700 hover:bg-white/90 w-full sm:w-auto" (click)="goToVitals()"><i class="fa-solid fa-heart-pulse mr-2"></i>Health Vitals</button>
           </div>
           </div>
         </section>
@@ -240,6 +241,10 @@ export class PatientDashboardComponent {
     // Analytics handled by PatientReportsComponent
     this.loadPatientHealthData();
     this.loadFinancialStats();
+  }
+
+  goToVitals() {
+    this.router.navigate(['/patient/vitals']);
   }
 
   // ngOnDestroy not needed for notifications; no local polling

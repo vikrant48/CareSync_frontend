@@ -26,6 +26,7 @@ import { LabTestsComponent } from './features/lab-tests/lab-tests.component';
 import { LabTestManagementComponent } from './features/doctor/lab-test-management.component';
 import { PatientLabBookingsComponent } from './features/patient/patient-lab-bookings.component';
 import { VideoConsultationComponent } from './shared/video-consultation.component';
+import { VitalsTrackingComponent } from './features/patient/patient-vitals.component';
 
 import { NotFoundComponent } from './shared/not-found.component';
 
@@ -154,6 +155,12 @@ export const routes: Routes = [
   {
     path: 'patient/consultation/:id',
     component: VideoConsultationComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['PATIENT'] }
+  },
+  {
+    path: 'patient/vitals',
+    component: VitalsTrackingComponent,
     canActivate: [authGuard, roleGuard],
     data: { roles: ['PATIENT'] }
   },

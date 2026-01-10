@@ -37,6 +37,10 @@ import { AiAssistantWidgetComponent } from './ai-assistant-widget.component';
             <i class="fas fa-chart-line"></i>
             <span>Reports</span>
           </a>
+          <a routerLink="/patient/vitals" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+            <i class="fas fa-heart-pulse"></i>
+            <span>Health Vitals</span>
+          </a>
           <a routerLink="/lab-tests" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
             <i class="fas fa-flask"></i>
             <span>Lab Tests</span>
@@ -129,6 +133,10 @@ import { AiAssistantWidgetComponent } from './ai-assistant-widget.component';
             <a routerLink="/patient/reports" (click)="menuOpen=false" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800">
               <i class="fas fa-chart-line"></i>
               <span>Reports</span>
+            </a>
+            <a routerLink="/patient/vitals" (click)="menuOpen=false" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800">
+              <i class="fas fa-heart-pulse"></i>
+              <span>Health Vitals</span>
             </a>
             <a routerLink="/lab-tests" (click)="menuOpen=false" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800">
               <i class="fas fa-flask"></i>
