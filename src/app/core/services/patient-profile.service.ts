@@ -36,6 +36,7 @@ export interface MedicalHistoryItem {
   medicine?: string;
   doses?: string;
   notes?: string;
+  appointmentId?: number;
 }
 
 export interface MedicalHistoryWithDoctorItem {
@@ -119,14 +120,18 @@ export class PatientProfileService {
     return this.http.get<MedicalHistoryItem>(`${this.baseUrl}/api/medical-history/${historyId}`);
   }
 
-  /** Doctor: add medical history for a patient (explicit doctor association) */
   addMedicalHistoryWithDoctor(
     patientId: number | string,
     doctorId: number | string,
-    payload: Partial<MedicalHistoryItem>
+    payload: Partial<MedicalHistoryItem> & { appointmentId?: number }
   ) {
     const body = { patientId: Number(patientId), doctorId: Number(doctorId), ...payload } as any;
     return this.http.post(`${this.baseUrl}/api/medical-history/with-doctor`, body);
+  }
+
+  /** Update an existing medical history record */
+  updateMedicalHistory(id: number | string, payload: Partial<MedicalHistoryItem>) {
+    return this.http.put(`${this.baseUrl}/api/medical-history/${id}`, payload);
   }
 
   /** Patient: fetch own uploaded documents (prescriptions, lab reports, etc.) */

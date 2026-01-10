@@ -41,6 +41,7 @@ export interface DoctorAppointmentItem {
   patientProfileImageUrl?: string;
   videoRoomId?: string;
   isActive?: boolean;
+  medicalHistory?: any[];
 }
 
 @Injectable({ providedIn: 'root' })

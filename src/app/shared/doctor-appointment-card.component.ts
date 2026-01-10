@@ -94,7 +94,7 @@ import { DoctorAppointmentItem } from '../core/services/appointment.service';
          <div class="space-y-2" *ngIf="appointment.status === 'IN_PROGRESS'">
           <button class="btn-action btn-primary w-full py-3 shadow-indigo-500/20" (click)="onCreateMedicalDescription()" [disabled]="disabled || appointment.isActive === false">
             <i class="fa-solid fa-file-signature text-lg"></i>
-            <span class="text-base font-bold">Add Medical Record</span>
+            <span class="text-base font-bold">{{ hasMedicalRecord ? 'Edit' : 'Add' }} Medical Record</span>
           </button>
           <div class="grid grid-cols-2 gap-2">
             <button class="btn-action bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20" (click)="onJoinVideo()" [disabled]="disabled || appointment.isActive === false">
@@ -104,9 +104,21 @@ import { DoctorAppointmentItem } from '../core/services/appointment.service';
                <i class="fa-solid fa-check-circle"></i> Complete
             </button>
           </div>
-          <button class="btn-action btn-secondary w-full" (click)="onViewPatient()" [disabled]="disabled" title="View Patient Details">
-               <i class="fa-solid fa-user-info"></i> Patient Details
-          </button>
+        </div>
+
+        <!-- COMPLETED: Show Read-Only Medical Record Button or No Record Label -->
+        <div *ngIf="appointment.status === 'COMPLETED'">
+           <div *ngIf="hasMedicalRecord; else noRecord" class="mb-2">
+              <button class="btn-action btn-secondary w-full py-3 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400" (click)="onCreateMedicalDescription()" [disabled]="disabled">
+                <i class="fa-solid fa-eye text-lg"></i>
+                <span class="text-base font-bold">See Medical Record</span>
+              </button>
+           </div>
+           <ng-template #noRecord>
+              <div class="text-center p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-dashed border-gray-200 dark:border-gray-600 mb-2">
+                 <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">No Medical Record</span>
+              </div>
+           </ng-template>
         </div>
 
         <!-- COMPLETED/CANCELLED -> View Details Only -->
@@ -186,5 +198,21 @@ export class DoctorAppointmentCardComponent {
     if (s === 'CONFIRMED') return ['IN_PROGRESS'];
     if (s === 'IN_PROGRESS') return ['COMPLETED'];
     return [];
+  }
+
+  get hasMedicalRecord(): boolean {
+    if (!this.appointment.medicalHistory) return false;
+
+    // Primary check: Direct appointment link
+    const hasExplicitLink = this.appointment.medicalHistory.some(m =>
+      m.appointmentId === this.appointment.appointmentId
+    );
+    if (hasExplicitLink) return true;
+
+    // Fallback check: Matching date (for legacy or unsynced records)
+    const appointmentDate = this.appointment.appointmentDate;
+    return this.appointment.medicalHistory.some(m =>
+      m.visitDate === appointmentDate
+    );
   }
 }

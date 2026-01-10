@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-medical-history-form-modal',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  template: `
+   selector: 'app-medical-history-form-modal',
+   standalone: true,
+   imports: [CommonModule, FormsModule],
+   template: `
     <div *ngIf="open" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
       
       <!-- Backdrop -->
@@ -37,38 +37,38 @@ import { FormsModule } from '@angular/forms';
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                    <div class="form-group">
                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Visit Date</label>
-                      <input type="date" class="input-modern" [(ngModel)]="form.visitDate" name="visitDate" />
+                      <input type="date" class="input-modern" [(ngModel)]="form.visitDate" name="visitDate" [disabled]="disabled" />
                    </div>
                     <div class="form-group">
                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Diagnosis</label>
-                      <input type="text" class="input-modern" placeholder="e.g. Acute Bronchitis" [(ngModel)]="form.diagnosis" name="diagnosis" />
+                      <input type="text" class="input-modern" placeholder="e.g. Acute Bronchitis" [(ngModel)]="form.diagnosis" name="diagnosis" [disabled]="disabled" />
                    </div>
                 </div>
 
                 <div class="form-group">
                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Symptoms</label>
-                   <input type="text" class="input-modern" placeholder="e.g. Cough, fever, difficulty breathing..." [(ngModel)]="form.symptoms" name="symptoms" />
+                   <input type="text" class="input-modern" placeholder="e.g. Cough, fever, difficulty breathing..." [(ngModel)]="form.symptoms" name="symptoms" [disabled]="disabled" />
                 </div>
 
                 <div class="form-group">
                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Treatment Plan</label>
-                   <input type="text" class="input-modern" placeholder="e.g. Rest, hydration, antibiotics" [(ngModel)]="form.treatment" name="treatment" />
+                   <input type="text" class="input-modern" placeholder="e.g. Rest, hydration, antibiotics" [(ngModel)]="form.treatment" name="treatment" [disabled]="disabled" />
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                    <div class="form-group">
                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Medication</label>
-                      <input type="text" class="input-modern" placeholder="e.g. Amoxicillin" [(ngModel)]="form.medicine" name="medicine" />
+                      <input type="text" class="input-modern" placeholder="e.g. Amoxicillin" [(ngModel)]="form.medicine" name="medicine" [disabled]="disabled" />
                    </div>
                    <div class="form-group">
                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dosage</label>
-                      <input type="text" class="input-modern" placeholder="e.g. 500mg, 3 times daily" [(ngModel)]="form.doses" name="doses" />
+                      <input type="text" class="input-modern" placeholder="e.g. 500mg, 3 times daily" [(ngModel)]="form.doses" name="doses" [disabled]="disabled" />
                    </div>
                 </div>
 
                 <div class="form-group">
                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Clinical Notes</label>
-                   <textarea class="input-modern min-h-[100px]" rows="3" placeholder="Additional observations or patient instructions..." [(ngModel)]="form.notes" name="notes"></textarea>
+                   <textarea class="input-modern min-h-[100px]" rows="3" placeholder="Additional observations or patient instructions..." [(ngModel)]="form.notes" name="notes" [disabled]="disabled"></textarea>
                 </div>
 
                 <div class="text-sm bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 p-3 rounded-lg flex gap-2 items-start" *ngIf="infoText">
@@ -101,7 +101,7 @@ import { FormsModule } from '@angular/forms';
       </div>
     </div>
   `,
-  styles: [`
+   styles: [`
     .input-modern {
       @apply block w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-gray-400;
     }
@@ -117,21 +117,21 @@ import { FormsModule } from '@angular/forms';
   `]
 })
 export class MedicalHistoryFormModalComponent {
-  @Input() open = false;
-  @Input() form: any = {};
-  @Input() disabled = false;
-  @Input() saving = false;
-  @Input() saved = false;
-  @Input() error: string | null = null;
-  @Input() infoText: string | null = null;
-  @Output() close = new EventEmitter<void>();
-  @Output() submit = new EventEmitter<void>();
+   @Input() open = false;
+   @Input() form: any = {};
+   @Input() disabled = false;
+   @Input() saving = false;
+   @Input() saved = false;
+   @Input() error: string | null = null;
+   @Input() infoText: string | null = null;
+   @Output() close = new EventEmitter<void>();
+   @Output() submit = new EventEmitter<void>();
 
-  onSubmit(event: Event) {
-    event.preventDefault();
-    if (this.disabled || this.saving) {
-      return;
-    }
-    this.submit.emit();
-  }
+   onSubmit(event: Event) {
+      event.preventDefault();
+      if (this.disabled || this.saving) {
+         return;
+      }
+      this.submit.emit();
+   }
 }

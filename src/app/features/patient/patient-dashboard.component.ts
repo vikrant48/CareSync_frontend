@@ -62,7 +62,7 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
             </div>
           </ng-template>
           <div class="flex-1 w-full sm:w-auto">
-            <div class="text-base sm:text-lg">Welcome back,</div>
+            <div class="text-base sm:text-lg">Welcome,</div>
             <ng-container *ngIf="loadingWelcome; else nameReady">
               <div class="flex items-center gap-2 text-white/80">
                 <span class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>

@@ -43,7 +43,7 @@ import { forkJoin } from 'rxjs';
                 </div>
               </div>
               <div class="space-y-1">
-                <h1 class="text-xl md:text-3xl font-black tracking-tight leading-tight">Welcome back, {{ doctorName === 'Doctor' ? 'Doctor' : 'Dr. ' + doctorName }}!</h1>
+                <h1 class="text-xl md:text-3xl font-black tracking-tight leading-tight">Welcome, {{ doctorName === 'Doctor' ? 'Doctor' : 'Dr. ' + doctorName }}!</h1>
                 <div class="flex flex-col md:flex-row items-center gap-2 md:gap-3 text-blue-100/90 text-sm md:text-lg font-medium">
                   <span class="px-3 py-0.5 bg-white/10 rounded-full backdrop-blur-sm border border-white/10">{{ profile?.specialization || 'General Practitioner' }}</span>
                   <span class="hidden md:block w-1.5 h-1.5 rounded-full bg-blue-300"></span>
@@ -227,7 +227,7 @@ import { forkJoin } from 'rxjs';
           [saving]="savingHistory"
           [saved]="historySaved"
           [error]="historyError"
-          [infoText]="selectedAppointment?.status !== 'IN_PROGRESS' ? 'Form available only for in-progress appointments.' : null"
+          [infoText]="selectedAppointment?.status === 'COMPLETED' ? 'This medical record is finalized and cannot be modified.' : (selectedAppointment?.status !== 'IN_PROGRESS' ? 'Form available only for in-progress appointments.' : null)"
           (close)="closeHistoryForm()"
           (submit)="saveMedicalHistory()"
         ></app-medical-history-form-modal>
@@ -451,6 +451,7 @@ export class DoctorDashboardComponent implements OnInit {
   selectedPatient: PatientDto | null = null; // Changed type
   selectedPatientHistory: MedicalHistoryWithDoctorItem[] = []; // New field
   selectedPatientDocuments: any[] = []; // New field
+  editingHistoryId: number | null = null;
   mhForm: Partial<MedicalHistoryItem> = { visitDate: this.todayISO() };
   savingHistory = false;
   historySaved = false;
@@ -518,7 +519,10 @@ export class DoctorDashboardComponent implements OnInit {
     }
     if (this.doctorId != null) {
       this.svc.getDocumentsByDoctor(this.doctorId).subscribe({
-        next: (docs) => (this.documents = (docs || []).slice(0, 6)),
+        next: (docs) => {
+          this.documents = (docs || []).slice(0, 6);
+          this.cdr.markForCheck();
+        },
       });
       this.refreshToday();
       this.refreshLeaves();
@@ -561,12 +565,17 @@ export class DoctorDashboardComponent implements OnInit {
 
   refreshToday() {
     this.loadingAppointments = true;
+    this.cdr.markForCheck();
     this.apptApi.getDoctorTodayAppointments().subscribe({
       next: (res) => {
         this.todayAppointments = res || [];
         this.loadingAppointments = false;
+        this.cdr.markForCheck();
       },
-      error: () => (this.loadingAppointments = false),
+      error: () => {
+        this.loadingAppointments = false;
+        this.cdr.markForCheck();
+      },
     });
   }
 
@@ -580,7 +589,12 @@ export class DoctorDashboardComponent implements OnInit {
     this.apptApi.completeAppointment(a.appointmentId).subscribe({ next: () => this.refreshToday() });
   }
   cancel(a: DoctorAppointmentItem) {
-    this.apptApi.cancelAppointment(a.appointmentId).subscribe({ next: () => this.refreshToday() });
+    this.apptApi.cancelAppointment(a.appointmentId).subscribe({
+      next: () => {
+        this.refreshToday();
+        this.cdr.markForCheck();
+      }
+    });
   }
   start(a: DoctorAppointmentItem) {
     this.apptApi.updateAppointmentStatus(a.appointmentId, 'IN_PROGRESS').subscribe({
@@ -675,6 +689,33 @@ export class DoctorDashboardComponent implements OnInit {
 
     this.selectedAppointment = a;
     this.mhForm = { visitDate: this.todayISO() };
+    this.editingHistoryId = null;
+
+    // Check if matching record exists in appointment's medical history list
+    if (a.medicalHistory) {
+      // Primary: Link by appointmentId
+      let record = a.medicalHistory.find(m => m.appointmentId === a.appointmentId);
+
+      // Fallback: Link by date (for legacy records)
+      if (!record) {
+        record = a.medicalHistory.find(m => m.visitDate === a.appointmentDate);
+      }
+
+      if (record) {
+        this.editingHistoryId = record.id;
+        // Map record fields to form
+        this.mhForm = {
+          visitDate: record.visitDate || this.todayISO(),
+          symptoms: record.symptoms || '',
+          diagnosis: record.diagnosis || '',
+          treatment: record.treatment || '',
+          medicine: record.medicine || '',
+          doses: record.doses || '',
+          notes: record.notes || ''
+        };
+      }
+    }
+
     this.historyFormModalOpen = true;
     this.cdr.detectChanges();
   }
@@ -735,23 +776,35 @@ export class DoctorDashboardComponent implements OnInit {
       return;
     }
 
-    this.patientApi
-      .addMedicalHistoryWithDoctor(this.selectedAppointment.patientId, this.doctorId, this.mhForm)
-      .subscribe({
-        next: () => {
-          this.savingHistory = false;
-          this.historySaved = true;
-          this.cdr.detectChanges();
-          // Close form after successful save
-          this.closeHistoryForm();
-        },
-        error: (e) => {
-          console.error('Failed to save medical history', e);
-          this.historyError = 'Failed to save medical history';
-          this.savingHistory = false;
-          this.cdr.detectChanges();
-        },
-      });
+    const payload = {
+      ...this.mhForm,
+      patientId: this.selectedAppointment.patientId,
+      appointmentId: this.selectedAppointment.appointmentId
+    };
+
+    const request$ = this.editingHistoryId
+      ? this.patientApi.updateMedicalHistory(this.editingHistoryId, payload)
+      : this.patientApi.addMedicalHistoryWithDoctor(this.selectedAppointment.patientId, this.doctorId, payload);
+
+    request$.subscribe({
+      next: () => {
+        this.savingHistory = false;
+        this.historySaved = true;
+        this.cdr.detectChanges();
+
+        // Refresh appointments to update the record in the card
+        this.refreshToday();
+
+        // Close form after successful save
+        this.closeHistoryForm();
+      },
+      error: (e) => {
+        console.error('Failed to save medical history', e);
+        this.historyError = 'Failed to save medical history';
+        this.savingHistory = false;
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   private isoDaysAgo(days: number) {
@@ -762,21 +815,28 @@ export class DoctorDashboardComponent implements OnInit {
 
   loadAnalytics() {
     if (this.doctorId == null) return;
+    const doctorId = this.doctorId; // Narrow for TS
     const end = new Date().toISOString().slice(0, 10);
     const start = this.isoDaysAgo(30);
     this.analyticsRangeText = `${start}  ${end}`;
 
-    this.analyticsApi.getOverallAnalytics(start, end).subscribe({ next: (o) => (this.overall = o || null) });
-    this.analyticsApi.getPeakHours(this.doctorId, start, end).subscribe({
+    this.analyticsApi.getOverallAnalytics(start, end).subscribe({
+      next: (o) => {
+        this.overall = o || null;
+        this.cdr.markForCheck();
+      }
+    });
+    this.analyticsApi.getPeakHours(doctorId, start, end).subscribe({
       next: (res) => {
         this.peakHours = res || null;
         const dist = this.peakHours?.hourlyDistribution || {};
         const labels = Object.keys(dist).sort((a, b) => Number(a) - Number(b));
         this.peakHoursLabels = labels;
         this.peakHoursData = labels.map((k) => Number(dist[k] || 0));
+        this.cdr.markForCheck();
       },
     });
-    this.analyticsApi.getDayOfWeek(this.doctorId, start, end).subscribe({
+    this.analyticsApi.getDayOfWeek(doctorId, start, end).subscribe({
       next: (res) => {
         this.dayOfWeek = res || null;
         const dist = this.dayOfWeek?.dayDistribution || {};
@@ -784,18 +844,30 @@ export class DoctorDashboardComponent implements OnInit {
         const labels = order.filter((d) => dist.hasOwnProperty(d));
         this.dayOfWeekLabels = labels;
         this.dayOfWeekData = labels.map((k) => Number(dist[k] || 0));
+        this.cdr.markForCheck();
       },
     });
-    this.analyticsApi.getPatientRetention(this.doctorId).subscribe({ next: (res) => (this.retention = res || null) });
-    this.analyticsApi.getFeedbackSentiment(this.doctorId).subscribe({
+    this.analyticsApi.getPatientRetention(doctorId).subscribe({
+      next: (res) => {
+        this.retention = res || null;
+        this.cdr.markForCheck();
+      }
+    });
+    this.analyticsApi.getFeedbackSentiment(doctorId).subscribe({
       next: (res) => {
         this.feedbackSentiment = res || null;
         const s = this.feedbackSentiment || {};
         this.feedbackData = [Number(s.positivePercentage || 0), Number(s.neutralPercentage || 0), Number(s.negativePercentage || 0)];
+        this.cdr.markForCheck();
       },
     });
-    this.analyticsApi.getAppointmentDuration(this.doctorId, start, end).subscribe({ next: (res) => (this.appointmentDuration = res || null) });
-    this.analyticsApi.getSeasonalTrends(this.doctorId, new Date().getFullYear()).subscribe({
+    this.analyticsApi.getAppointmentDuration(doctorId, start, end).subscribe({
+      next: (res) => {
+        this.appointmentDuration = res || null;
+        this.cdr.markForCheck();
+      }
+    });
+    this.analyticsApi.getSeasonalTrends(doctorId, new Date().getFullYear()).subscribe({
       next: (res) => {
         this.seasonalTrends = res || null;
         const dist = this.seasonalTrends?.monthlyDistribution || {};
@@ -803,19 +875,31 @@ export class DoctorDashboardComponent implements OnInit {
         const labels = order.filter((m) => dist.hasOwnProperty(m));
         this.seasonalLabels = labels;
         this.seasonalData = labels.map((k) => Number(dist[k] || 0));
-      },
+        this.cdr.markForCheck();
+      }
     });
-    this.analyticsApi.getCancellationPatterns(this.doctorId, start, end).subscribe({ next: (res) => (this.cancellationPatterns = res || null) });
-    this.analyticsApi.getPatientDemographicsByDoctor(this.doctorId).subscribe({
+    this.analyticsApi.getCancellationPatterns(doctorId, start, end).subscribe({
+      next: (res) => {
+        this.cancellationPatterns = res || null;
+        this.cdr.markForCheck();
+      }
+    });
+    this.analyticsApi.getPatientDemographicsByDoctor(doctorId).subscribe({
       next: (res) => {
         this.patientDemographics = res || null;
         const dist = this.patientDemographics?.ageDistribution || {};
         const labels = Object.keys(dist);
         this.demographicsLabels = labels;
         this.demographicsData = labels.map((k) => Number(dist[k] || 0));
+        this.cdr.markForCheck();
       },
     });
-    this.reportsApi.getDoctorPerformance(this.doctorId, start, end).subscribe({ next: (res) => (this.performance = res || null) });
+    this.reportsApi.getDoctorPerformance(doctorId, start, end).subscribe({
+      next: (res) => {
+        this.performance = res || null;
+        this.cdr.markForCheck();
+      }
+    });
     this.reportsApi.getAppointmentTrends('daily', start, end).subscribe({
       next: (res) => {
         this.appointmentTrendsDaily = res || null;
@@ -823,8 +907,14 @@ export class DoctorDashboardComponent implements OnInit {
         const labels = Object.keys(dist).sort((a, b) => a.localeCompare(b));
         this.dailyTrendLabels = labels;
         this.dailyTrendData = labels.map((k) => Number(dist[k] || 0));
+        this.cdr.markForCheck();
       },
     });
-    this.reportsApi.getRevenueAnalysis(start, end).subscribe({ next: (res) => (this.revenueAnalysis = res || null) });
+    this.reportsApi.getRevenueAnalysis(start, end).subscribe({
+      next: (res) => {
+        this.revenueAnalysis = res || null;
+        this.cdr.markForCheck();
+      }
+    });
   }
 }
