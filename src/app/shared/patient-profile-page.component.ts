@@ -131,6 +131,10 @@ export interface AppointmentCounts {
                             <span class="font-medium text-gray-200">{{ patient?.gender || '—' }}</span>
                         </div>
                         <div class="flex justify-between border-b border-gray-800/50 pb-2">
+                            <span class="text-gray-400">Blood Group</span>
+                            <span class="font-medium text-gray-200">{{ patient?.bloodGroup || '—' }}</span>
+                        </div>
+                        <div class="flex justify-between border-b border-gray-800/50 pb-2">
                             <span class="text-gray-400">Contact</span>
                             <span class="font-medium text-gray-200">{{ patient?.contactInfo || '—' }}</span>
                         </div>

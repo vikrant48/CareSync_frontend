@@ -11,6 +11,7 @@ export interface UpdatePatientRequest {
   email?: string;
   isActive?: boolean;
   gender?: string;
+  bloodGroup?: string;
 }
 
 export interface PatientDto {
@@ -25,6 +26,7 @@ export interface PatientDto {
   username?: string;
   profileImageUrl?: string;
   gender?: string;
+  bloodGroup?: string;
 }
 
 export interface MedicalHistoryItem {

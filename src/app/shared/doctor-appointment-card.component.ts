@@ -14,40 +14,44 @@ import { DoctorAppointmentItem } from '../core/services/appointment.service';
       [class.pointer-events-none]="disabled"
     >
       <!-- Header: Patient Info & Status -->
-      <div class="flex items-start justify-between gap-3 mb-4">
-        <div class="flex items-center gap-3 min-w-0">
-          <div class="relative w-12 h-12 shrink-0">
-             <img *ngIf="appointment.patientProfileImageUrl; else initials"
-                  [src]="appointment.patientProfileImageUrl"
-                  alt="{{appointment.patientName}}"
-                  class="w-full h-full rounded-full object-cover shadow-lg shadow-blue-500/20 ring-2 ring-white dark:ring-gray-700"
-             />
-             <ng-template #initials>
-                <div class="w-full h-full rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-blue-500/20">
-                  {{ (appointment.patientName || 'P') | slice:0:1 }}
-                </div>
-             </ng-template>
+      <div class="flex gap-4 mb-4">
+        <!-- Patient Image/Initials -->
+        <div class="relative w-14 h-14 shrink-0">
+           <img *ngIf="appointment.patientProfileImageUrl; else initials"
+                [src]="appointment.patientProfileImageUrl"
+                alt="{{appointment.patientName}}"
+                class="w-full h-full rounded-full object-cover shadow-lg shadow-blue-500/10 ring-2 ring-white dark:ring-gray-700"
+           />
+           <ng-template #initials>
+              <div class="w-full h-full rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-bold text-xl shadow-lg shadow-blue-500/20">
+                {{ (appointment.patientName || 'P') | slice:0:1 }}
+              </div>
+           </ng-template>
+        </div>
+
+        <!-- Patient Name & Appointment Time Info -->
+        <div class="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+          <div class="flex items-start justify-between gap-2">
+            <h3 class="font-bold text-gray-900 dark:text-gray-100 truncate text-lg leading-tight">{{ appointment.patientName }}</h3>
+            <span
+              class="shrink-0 px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider border whitespace-nowrap mt-0.5"
+              [ngClass]="statusBadgeClass(appointment.status)"
+            >
+              {{ statusLabel(appointment) }}
+            </span>
           </div>
-          <div class="min-w-0">
-            <h3 class="font-bold text-gray-900 dark:text-gray-100 truncate text-base leading-tight">{{ appointment.patientName }}</h3>
-            <div class="flex items-center gap-2 mt-1 text-xs font-medium text-gray-500 dark:text-gray-400">
-               <span class="flex items-center gap-1 bg-gray-100 dark:bg-gray-700/50 px-2 py-0.5 rounded-md">
-                 <i class="fa-regular fa-calendar"></i>
-                 {{ appointment.appointmentDate }}
-               </span>
-               <span class="flex items-center gap-1 bg-gray-100 dark:bg-gray-700/50 px-2 py-0.5 rounded-md">
-                 <i class="fa-regular fa-clock"></i>
-                 {{ appointment.appointmentTime }}
-               </span>
-            </div>
+          
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 font-medium">
+             <div class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+               <i class="fa-regular fa-calendar text-blue-500/70"></i>
+               <span>{{ appointment.appointmentDate }}</span>
+             </div>
+             <div class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+               <i class="fa-regular fa-clock text-blue-500/70"></i>
+               <span>{{ appointment.appointmentTime }}</span>
+             </div>
           </div>
         </div>
-        <span
-          class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border"
-          [ngClass]="statusBadgeClass(appointment.status)"
-        >
-          {{ statusLabel(appointment) }}
-        </span>
       </div>
 
       <!-- Content: Reason -->

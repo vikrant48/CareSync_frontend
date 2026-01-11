@@ -20,7 +20,10 @@ import { PatientAppointmentItem } from '../core/services/appointment.service';
             <div class="min-w-0">
               <h4 class="font-bold text-gray-100 truncate text-base leading-tight">
                 {{ appointment.doctorName }}
-                <i *ngIf="appointment.doctorIsVerified" class="fa-solid fa-circle-check text-blue-500 text-xs ml-1" title="Verified"></i>
+                <span *ngIf="appointment.doctorIsVerified" class="inline-flex items-center gap-1 ml-1 px-1.5 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-[9px] font-black text-blue-400 uppercase tracking-tighter" title="Verified">
+                  <i class="fa-solid fa-circle-check"></i>
+                  <span>Verified</span>
+                </span>
               </h4>
               <p class="text-sm text-gray-400 truncate">{{ appointment.doctorSpecialization }}</p>
             </div>

@@ -71,10 +71,13 @@ import { ToastService } from '../core/services/toast.service';
           <!-- Selected Doctor Details -->
           <div *ngIf="selectedDoctor" class="bg-gray-800/40 rounded-xl p-4 border border-gray-700/50 animate-fade-in">
             <div class="flex items-start gap-4">
-               <div class="w-14 h-14 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden border-2 border-gray-600 shrink-0">
+                <div class="w-14 h-14 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden border-2 border-gray-600 shrink-0">
                   <img *ngIf="selectedDoctor.profileImageUrl" [src]="selectedDoctor.profileImageUrl" class="w-full h-full object-cover" />
                   <span *ngIf="!selectedDoctor.profileImageUrl" class="text-xl font-bold text-gray-400">{{ selectedDoctor.firstName?.charAt(0) }}</span>
-               </div>
+                </div>
+                <div *ngIf="selectedDoctor.isVerified" class="absolute -bottom-1 -right-1 bg-blue-500 text-white text-[8px] w-4 h-4 flex items-center justify-center rounded-full border border-gray-900" title="Verified">
+                    <i class="fa-solid fa-check"></i>
+                </div>
                <div class="flex-1 min-w-0">
                   <h4 class="font-bold text-gray-100">Dr. {{ selectedDoctor.firstName }} {{ selectedDoctor.lastName }}</h4>
                   <p class="text-blue-400 text-sm mb-2">{{ selectedDoctor.specialization || 'General Physician' }}</p>

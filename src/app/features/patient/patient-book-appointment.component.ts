@@ -24,9 +24,9 @@ import { SpecializationAutocompleteComponent } from '../../shared/specialization
         </div>
         
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
-           <button class="btn-primary bg-red-600/90 hover:bg-red-600 border-none shadow-lg shadow-red-900/40 text-white font-medium px-5 py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95" (click)="openEmergencyModal()">
-             <div class="w-2 h-2 rounded-full bg-white animate-pulse"></div> Emergency Booking
-           </button>
+            <button class="btn-primary !bg-red-600/90 !hover:bg-red-600 border-none shadow-lg shadow-red-900/40 text-white font-medium px-5 py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95" (click)="openEmergencyModal()">
+              <div class="w-2 h-2 rounded-full bg-white animate-pulse"></div> Emergency Booking
+            </button>
            <button class="text-blue-400 hover:text-white transition-colors text-sm font-medium px-3 py-2 flex items-center justify-center gap-2 hover:bg-white/5 rounded-lg border border-transparent hover:border-white/10" (click)="refreshDoctors()">
              <i class="fa-solid fa-rotate-right" [class.animate-spin]="loadingDoctors"></i> Refresh
            </button>
@@ -107,9 +107,12 @@ import { SpecializationAutocompleteComponent } from '../../shared/specialization
                   <img *ngIf="d.profileImageUrl" [src]="d.profileImageUrl" class="w-full h-full object-cover" (error)="d.profileImageUrl = ''" />
                   <span *ngIf="!d.profileImageUrl" class="text-xl font-bold text-gray-400">{{ doctorInitial(d) }}</span>
                 </div>
-                <div class="absolute -bottom-1 -right-1 bg-blue-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-gray-900" *ngIf="d.isVerified" title="Verified">
+                <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[8px] px-1.5 py-0.5 rounded-full flex items-center gap-1 shadow-md border border-gray-900 group-hover:scale-105 transition-all z-20" *ngIf="d.isVerified" title="Verified">
                     <i class="fa-solid fa-check"></i>
+                    <span class="font-black uppercase tracking-widest text-[7px]">Verified</span>
                 </div>
+                <!-- Debug indicator: small dot if isVerified property exists in object -->
+                <div *ngIf="d.hasOwnProperty('isVerified')" class="hidden"></div>
              </div>
              
              <div class="min-w-0 flex-1 pt-1">

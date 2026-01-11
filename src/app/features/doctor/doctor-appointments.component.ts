@@ -50,8 +50,7 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
           <div class="space-y-1.5">
             <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</label>
             <div class="relative">
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><i class="fa-solid fa-circle-check"></i></span>
-              <select class="input-modern pl-10" [(ngModel)]="statusFilter" (change)="onFilterChange()">
+              <select class="input-modern" [(ngModel)]="statusFilter" (change)="onFilterChange()">
                 <option value="ALL">All Statuses</option>
                 <option value="PENDING">Pending</option>
                 <option value="CONFIRMED">Confirmed</option>
@@ -67,8 +66,7 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
           <div class="space-y-1.5">
             <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Search</label>
             <div class="relative">
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><i class="fa-solid fa-magnifying-glass"></i></span>
-              <input type="text" class="input-modern pl-10" [(ngModel)]="searchTerm" (input)="onFilterChange()" placeholder="Search patient name or ID..." />
+              <input type="text" class="input-modern" [(ngModel)]="searchTerm" (input)="onFilterChange()" placeholder="Search patient name or ID..." />
             </div>
           </div>
 

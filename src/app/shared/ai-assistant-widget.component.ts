@@ -9,10 +9,10 @@ import { PaymentPopupComponent, PaymentDetails } from './payment-popup.component
 import { ToastService } from '../core/services/toast.service';
 
 @Component({
-    selector: 'app-ai-assistant-widget',
-    standalone: true,
-    imports: [CommonModule, FormsModule, PaymentPopupComponent],
-    template: `
+  selector: 'app-ai-assistant-widget',
+  standalone: true,
+  imports: [CommonModule, FormsModule, PaymentPopupComponent],
+  template: `
     <!-- Floating Button -->
     <button
       (click)="toggleChat()"
@@ -110,6 +110,7 @@ import { ToastService } from '../core/services/toast.service';
                        <div class="overflow-hidden">
                           <div class="text-[12px] font-bold truncate flex items-center gap-1.5">
                              {{ doc.name }}
+                             <i *ngIf="doc.isVerified" class="fa-solid fa-circle-check text-blue-500 text-[10px]" title="Verified"></i>
                              <span *ngIf="doc['isOnLeave']" class="px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-[8px] font-black uppercase rounded-md border border-red-200 dark:border-red-800 shrink-0">Away</span>
                           </div>
                           <div class="text-[10px] text-blue-600 dark:text-blue-400 font-medium truncate">{{ doc.specialization }}</div>
@@ -266,7 +267,7 @@ import { ToastService } from '../core/services/toast.service';
       (paymentError)="onPaymentError($event)"
     ></app-payment-popup>
   `,
-    styles: [`
+  styles: [`
     :host { display: block; }
     .animate-in { animation: slideUp 0.3s ease-out; }
     @keyframes slideUp {
@@ -278,223 +279,223 @@ import { ToastService } from '../core/services/toast.service';
   `]
 })
 export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
-    @ViewChild('messageContainer') private messageContainer!: ElementRef;
+  @ViewChild('messageContainer') private messageContainer!: ElementRef;
 
-    private aiService = inject(AiAssistantService);
-    private appointmentService = inject(AppointmentService);
-    private authService = inject(AuthService);
-    private toast = inject(ToastService);
+  private aiService = inject(AiAssistantService);
+  private appointmentService = inject(AppointmentService);
+  private authService = inject(AuthService);
+  private toast = inject(ToastService);
 
-    isOpen = signal(false);
-    isLoading = signal(false);
-    messages = signal<ChatMessage[]>([]);
-    userInput = '';
+  isOpen = signal(false);
+  isLoading = signal(false);
+  messages = signal<ChatMessage[]>([]);
+  userInput = '';
 
-    // Date constraints
-    private getLocalDateString(date: Date = new Date()): string {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
-    minDate = this.getLocalDateString();
+  // Date constraints
+  private getLocalDateString(date: Date = new Date()): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+  minDate = this.getLocalDateString();
 
-    // Payment State
-    isPaymentPopupVisible = false;
-    // Voice Recognition State
-    isListening = signal(false);
-    private recognition: any;
+  // Payment State
+  isPaymentPopupVisible = false;
+  // Voice Recognition State
+  isListening = signal(false);
+  private recognition: any;
 
-    currentSuggestion: AiBookingSuggestion | null = null;
-    patientId = () => this.authService.user()?.id || 0;
+  currentSuggestion: AiBookingSuggestion | null = null;
+  patientId = () => this.authService.user()?.id || 0;
 
-    constructor() { }
+  constructor() { }
 
-    ngOnInit() {
-        this.initVoiceRecognition();
-    }
+  ngOnInit() {
+    this.initVoiceRecognition();
+  }
 
-    private initVoiceRecognition() {
-        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-            console.warn('Speech recognition not supported in this browser.');
-            return;
-        }
-
-        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-        this.recognition = new SpeechRecognition();
-        this.recognition.continuous = false;
-        this.recognition.interimResults = false;
-        this.recognition.lang = 'en-US';
-
-        this.recognition.onstart = () => this.isListening.set(true);
-        this.recognition.onend = () => this.isListening.set(false);
-        this.recognition.onerror = (event: any) => {
-            console.error('Speech recognition error:', event.error);
-            this.isListening.set(false);
-            if (event.error === 'not-allowed') {
-                this.toast.showError('Microphone permission denied.');
-            }
-        };
-
-        this.recognition.onresult = (event: any) => {
-            const transcript = event.results[0][0].transcript;
-            this.userInput = transcript;
-            this.sendMessage();
-        };
+  private initVoiceRecognition() {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      console.warn('Speech recognition not supported in this browser.');
+      return;
     }
 
-    toggleVoiceInput() {
-        if (!this.recognition) {
-            this.toast.showError('Voice recognition is not supported in your browser.');
-            return;
-        }
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    this.recognition = new SpeechRecognition();
+    this.recognition.continuous = false;
+    this.recognition.interimResults = false;
+    this.recognition.lang = 'en-US';
 
-        if (this.isListening()) {
-            this.recognition.stop();
-        } else {
-            this.recognition.start();
-        }
+    this.recognition.onstart = () => this.isListening.set(true);
+    this.recognition.onend = () => this.isListening.set(false);
+    this.recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      this.isListening.set(false);
+      if (event.error === 'not-allowed') {
+        this.toast.showError('Microphone permission denied.');
+      }
+    };
+
+    this.recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      this.userInput = transcript;
+      this.sendMessage();
+    };
+  }
+
+  toggleVoiceInput() {
+    if (!this.recognition) {
+      this.toast.showError('Voice recognition is not supported in your browser.');
+      return;
     }
 
-    toggleChat() {
-        this.isOpen.set(!this.isOpen());
+    if (this.isListening()) {
+      this.recognition.stop();
+    } else {
+      this.recognition.start();
+    }
+  }
+
+  toggleChat() {
+    this.isOpen.set(!this.isOpen());
+  }
+
+  startBooking() {
+    this.sendMessage(`ACTION_GET_SPECIALIZATIONS`);
+  }
+
+  selectSpecialization(spec: string) {
+    this.sendMessage(`ACTION_SELECT_SPECIALIZATION_${spec}`);
+  }
+
+  selectDoctor(doctorId: number) {
+    this.sendMessage(`ACTION_SELECT_DOCTOR_${doctorId}`);
+  }
+
+  selectRelativeDate(doctorId: number, daysToAdd: number) {
+    const date = new Date();
+    date.setDate(date.getDate() + daysToAdd);
+    const dateStr = this.getLocalDateString(date);
+    this.sendMessage(`ACTION_SELECT_DATE_${doctorId}_${dateStr}`);
+  }
+
+  onDateSelected(doctorId: number, dateStr: string) {
+    if (!dateStr) return;
+    this.sendMessage(`ACTION_SELECT_DATE_${doctorId}_${dateStr}`);
+  }
+
+  selectFinalSlot(doctorId: number, date: string, slot: string) {
+    this.sendMessage(`ACTION_SELECT_SLOT_${doctorId}_${date}_${slot}`);
+  }
+
+  sendMessage(text: string = this.userInput.trim()) {
+    if (!text || this.isLoading()) return;
+
+    // Add user message to UI (unless it's a hidden action)
+    const isAction = text.startsWith('ACTION_');
+    if (!isAction) {
+      this.messages.update(msgs => [...msgs, {
+        text,
+        isAi: false,
+        timestamp: new Date()
+      }]);
+      this.userInput = '';
     }
 
-    startBooking() {
-        this.sendMessage(`ACTION_GET_SPECIALIZATIONS`);
-    }
+    this.isLoading.set(true);
 
-    selectSpecialization(spec: string) {
-        this.sendMessage(`ACTION_SELECT_SPECIALIZATION_${spec}`);
-    }
-
-    selectDoctor(doctorId: number) {
-        this.sendMessage(`ACTION_SELECT_DOCTOR_${doctorId}`);
-    }
-
-    selectRelativeDate(doctorId: number, daysToAdd: number) {
-        const date = new Date();
-        date.setDate(date.getDate() + daysToAdd);
-        const dateStr = this.getLocalDateString(date);
-        this.sendMessage(`ACTION_SELECT_DATE_${doctorId}_${dateStr}`);
-    }
-
-    onDateSelected(doctorId: number, dateStr: string) {
-        if (!dateStr) return;
-        this.sendMessage(`ACTION_SELECT_DATE_${doctorId}_${dateStr}`);
-    }
-
-    selectFinalSlot(doctorId: number, date: string, slot: string) {
-        this.sendMessage(`ACTION_SELECT_SLOT_${doctorId}_${date}_${slot}`);
-    }
-
-    sendMessage(text: string = this.userInput.trim()) {
-        if (!text || this.isLoading()) return;
-
-        // Add user message to UI (unless it's a hidden action)
-        const isAction = text.startsWith('ACTION_');
-        if (!isAction) {
-            this.messages.update(msgs => [...msgs, {
-                text,
-                isAi: false,
-                timestamp: new Date()
-            }]);
-            this.userInput = '';
-        }
-
-        this.isLoading.set(true);
-
-        this.aiService.sendMessage(text).subscribe({
-            next: (res) => {
-                this.isLoading.set(false);
-                if (res.success && res.response) {
-                    this.messages.update(msgs => [...msgs, {
-                        text: res.response!,
-                        isAi: true,
-                        timestamp: new Date(),
-                        suggestion: res.suggestion
-                    }]);
-                } else {
-                    this.addBotMessage(res.error || 'Sorry, I encountered an error. Please try again later.');
-                }
-            },
-            error: () => {
-                this.isLoading.set(false);
-                this.addBotMessage('Connection error. Please check your internet and try again.');
-            }
-        });
-    }
-
-    openPaymentPopup(suggestion: AiBookingSuggestion) {
-        if (!this.authService.isAuthenticated()) {
-            this.addBotMessage('Please login to book an appointment.');
-            return;
-        }
-        this.currentSuggestion = suggestion;
-        this.isPaymentPopupVisible = true;
-    }
-
-    getPaymentInfo() {
-        if (!this.currentSuggestion) return '';
-        return `Booking with ${this.currentSuggestion.doctorName} on ${this.currentSuggestion.date} at ${this.currentSuggestion.slot}`;
-    }
-
-    onPaymentSuccess(details: PaymentDetails) {
-        this.isPaymentPopupVisible = false;
-        const sug = this.currentSuggestion;
-        if (!sug || !sug.date || !sug.slot) return;
-
-        // Parse date and time from the suggestion strings (e.g., "2025-12-20" and "10:30")
-        const [year, month, day] = sug.date.split('-').map(Number);
-        const [hours, minutes] = sug.slot.split(':').map(Number);
-
-        // Build a local ISO string (YYYY-MM-DDTHH:mm:ss) to avoid UTC conversion
-        const pad = (n: number) => n.toString().padStart(2, '0');
-        const localIsoString = `${year}-${pad(month)}-${pad(day)}T${pad(hours)}:${pad(minutes)}:00`;
-
-        const payload = {
-            doctorId: sug.doctorId!,
-            appointmentDateTime: localIsoString,
-            reason: 'AI Assisted Booking'
-        };
-
-        this.isLoading.set(true);
-        this.appointmentService.bookAppointment(payload).subscribe({
-            next: () => {
-                this.isLoading.set(false);
-                this.addBotMessage(`Payment Successful! Your appointment with ${sug.doctorName} for ${sug.date} at ${sug.slot} has been confirmed. See you then!`);
-                this.currentSuggestion = null;
-            },
-            error: (err: any) => {
-                this.isLoading.set(false);
-                this.addBotMessage('Payment was successful, but booking failed: ' + (err.error?.message || 'Please contact support.'));
-            }
-        });
-    }
-
-    onPaymentError(err: string) {
-        this.isPaymentPopupVisible = false;
-        this.addBotMessage('Payment failed: ' + err);
-    }
-
-    private addBotMessage(text: string) {
-        this.messages.update(msgs => [...msgs, {
-            text,
+    this.aiService.sendMessage(text).subscribe({
+      next: (res) => {
+        this.isLoading.set(false);
+        if (res.success && res.response) {
+          this.messages.update(msgs => [...msgs, {
+            text: res.response!,
             isAi: true,
-            timestamp: new Date()
-        }]);
-    }
-
-    ngAfterViewChecked() {
-        this.scrollToBottom();
-    }
-
-    private scrollToBottom(): void {
-        if (this.messageContainer) {
-            try {
-                const el = this.messageContainer.nativeElement;
-                el.scrollTop = el.scrollHeight;
-            } catch (err) { }
+            timestamp: new Date(),
+            suggestion: res.suggestion
+          }]);
+        } else {
+          this.addBotMessage(res.error || 'Sorry, I encountered an error. Please try again later.');
         }
+      },
+      error: () => {
+        this.isLoading.set(false);
+        this.addBotMessage('Connection error. Please check your internet and try again.');
+      }
+    });
+  }
+
+  openPaymentPopup(suggestion: AiBookingSuggestion) {
+    if (!this.authService.isAuthenticated()) {
+      this.addBotMessage('Please login to book an appointment.');
+      return;
     }
+    this.currentSuggestion = suggestion;
+    this.isPaymentPopupVisible = true;
+  }
+
+  getPaymentInfo() {
+    if (!this.currentSuggestion) return '';
+    return `Booking with ${this.currentSuggestion.doctorName} on ${this.currentSuggestion.date} at ${this.currentSuggestion.slot}`;
+  }
+
+  onPaymentSuccess(details: PaymentDetails) {
+    this.isPaymentPopupVisible = false;
+    const sug = this.currentSuggestion;
+    if (!sug || !sug.date || !sug.slot) return;
+
+    // Parse date and time from the suggestion strings (e.g., "2025-12-20" and "10:30")
+    const [year, month, day] = sug.date.split('-').map(Number);
+    const [hours, minutes] = sug.slot.split(':').map(Number);
+
+    // Build a local ISO string (YYYY-MM-DDTHH:mm:ss) to avoid UTC conversion
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const localIsoString = `${year}-${pad(month)}-${pad(day)}T${pad(hours)}:${pad(minutes)}:00`;
+
+    const payload = {
+      doctorId: sug.doctorId!,
+      appointmentDateTime: localIsoString,
+      reason: 'AI Assisted Booking'
+    };
+
+    this.isLoading.set(true);
+    this.appointmentService.bookAppointment(payload).subscribe({
+      next: () => {
+        this.isLoading.set(false);
+        this.addBotMessage(`Payment Successful! Your appointment with ${sug.doctorName} for ${sug.date} at ${sug.slot} has been confirmed. See you then!`);
+        this.currentSuggestion = null;
+      },
+      error: (err: any) => {
+        this.isLoading.set(false);
+        this.addBotMessage('Payment was successful, but booking failed: ' + (err.error?.message || 'Please contact support.'));
+      }
+    });
+  }
+
+  onPaymentError(err: string) {
+    this.isPaymentPopupVisible = false;
+    this.addBotMessage('Payment failed: ' + err);
+  }
+
+  private addBotMessage(text: string) {
+    this.messages.update(msgs => [...msgs, {
+      text,
+      isAi: true,
+      timestamp: new Date()
+    }]);
+  }
+
+  ngAfterViewChecked() {
+    this.scrollToBottom();
+  }
+
+  private scrollToBottom(): void {
+    if (this.messageContainer) {
+      try {
+        const el = this.messageContainer.nativeElement;
+        el.scrollTop = el.scrollHeight;
+      } catch (err) { }
+    }
+  }
 }

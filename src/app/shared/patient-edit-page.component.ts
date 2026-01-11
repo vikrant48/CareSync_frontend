@@ -100,6 +100,26 @@ import { AuthService } from '../core/services/auth.service';
                 </div>
               </div>
 
+              <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-400">Blood Group</label>
+                <div class="relative">
+                  <select class="input appearance-none" [(ngModel)]="form.bloodGroup" name="bloodGroup">
+                    <option value="">Select Blood Group</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                  </select>
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                  </div>
+                </div>
+              </div>
+
             </div>
 
             <div class="space-y-2">
@@ -165,6 +185,7 @@ export class PatientEditPageComponent implements OnInit {
         email: this.patient.email,
         isActive: this.patient.isActive,
         gender: this.patient.gender,
+        bloodGroup: this.patient.bloodGroup,
       };
       return;
     }
@@ -182,6 +203,7 @@ export class PatientEditPageComponent implements OnInit {
           email: p.email,
           isActive: p.isActive,
           gender: p.gender,
+          bloodGroup: p.bloodGroup,
         };
       },
     });
@@ -260,6 +282,7 @@ export class PatientEditPageComponent implements OnInit {
       email: p.email,
       isActive: p.isActive,
       gender: p.gender,
+      bloodGroup: p.bloodGroup,
     };
     this.error = null;
     this.success = false;

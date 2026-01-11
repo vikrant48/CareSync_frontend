@@ -27,6 +27,7 @@ export interface RegisterRequest {
   illnessDetails?: string; // patient-only
   specialization?: string; // doctor-only
   gender?: string; // gender field for both doctor and patient
+  bloodGroup?: string; // patient-only
 }
 
 export interface RefreshTokenRequest {

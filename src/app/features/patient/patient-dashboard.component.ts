@@ -101,6 +101,21 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
         </div>
       </section>
 
+      <!-- Cards Row: extracted into presentational component -->
+      <app-patient-dashboard-metrics-cards
+        [loadingPending]="loadingPending"
+        [pendingFeedbackCount]="pendingFeedbackCount"
+        [loadingAppointments]="loadingAppointments"
+        [appointments]="appointments"
+        [todayAppointmentsCount]="todayAppointmentsCount"
+        [loadingLabTests]="loadingLabTests"
+        [labTestCount]="labTestCount"
+        (openFeedback)="goToFeedbackPage()"
+        (openMyAppointments)="goToMyAppointments()"
+        (openTodayAppointments)="goToTodayAppointments()"
+        (openLabTests)="goToLabTests()"
+      ></app-patient-dashboard-metrics-cards>
+
       <!-- Cards Row moved below Upcoming Appointments -->
        <section>
          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-3">
@@ -124,20 +139,6 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
           </div>
        </section>
 
-      <!-- Cards Row: extracted into presentational component -->
-      <app-patient-dashboard-metrics-cards
-        [loadingPending]="loadingPending"
-        [pendingFeedbackCount]="pendingFeedbackCount"
-        [loadingAppointments]="loadingAppointments"
-        [appointments]="appointments"
-        [todayAppointmentsCount]="todayAppointmentsCount"
-        [loadingLabTests]="loadingLabTests"
-        [labTestCount]="labTestCount"
-        (openFeedback)="goToFeedbackPage()"
-        (openMyAppointments)="goToMyAppointments()"
-        (openTodayAppointments)="goToTodayAppointments()"
-        (openLabTests)="goToLabTests()"
-      ></app-patient-dashboard-metrics-cards>
 
       <!-- My Health extracted into reusable component -->
       <app-patient-my-health

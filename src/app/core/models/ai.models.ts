@@ -19,6 +19,7 @@ export interface DoctorSuggestion {
     profileImageUrl?: string;
     languages?: string;
     experience?: number;
+    isVerified?: boolean;
     isOnLeave?: boolean;
     leaveMessage?: string;
 }

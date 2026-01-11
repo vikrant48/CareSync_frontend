@@ -108,9 +108,9 @@ import { SpecializationService } from '../../core/services/specialization.servic
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gender <span class="text-red-500">*</span></label>
                   <select class="input-modern" formControlName="gender" [class.error]="isFieldInvalid('gender', basicForm)">
                       <option value="" disabled>Select gender</option>
-                      <option value="MALE">Male</option>
-                      <option value="FEMALE">Female</option>
-                      <option value="OTHER">Other</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
                   </select>
                   <p *ngIf="isFieldInvalid('gender', basicForm)" class="error-msg">Gender is required</p>
                 </div>
@@ -527,8 +527,7 @@ export class RegisterComponent implements OnInit {
       // 'experience' is not part of backend RegisterRequest
       // so we do not include it here to avoid JSON parse errors
     } else {
-      // 'bloodGroup' is not part of backend RegisterRequest
-      // so we do not include it here to avoid JSON parse errors
+      payload.bloodGroup = this.patientForm.value.bloodGroup || undefined;
     }
 
     this.auth.register(payload).subscribe({

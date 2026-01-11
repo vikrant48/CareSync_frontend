@@ -38,8 +38,9 @@ import { forkJoin } from 'rxjs';
                   <img *ngIf="profile?.profileImageUrl" [src]="profile?.profileImageUrl" class="w-full h-full object-cover" />
                   <span *ngIf="!profile?.profileImageUrl">{{ (doctorName || 'D').charAt(0) }}</span>
                 </div>
-                <div *ngIf="profile?.isVerified" class="absolute -bottom-1 -right-1 bg-green-400 text-white text-[10px] p-1 md:p-1.5 rounded-full border-2 border-indigo-700 shadow-sm" title="Verified">
+                <div *ngIf="profile?.isVerified" class="absolute -bottom-1 -right-1 bg-green-500 text-white text-[8px] px-1.5 py-0.5 rounded-full border-2 border-indigo-700 shadow-md flex items-center gap-1" title="Verified">
                   <i class="fa-solid fa-check"></i>
+                  <span class="font-black uppercase tracking-widest text-[7px]">Verified</span>
                 </div>
               </div>
               <div class="space-y-1">
