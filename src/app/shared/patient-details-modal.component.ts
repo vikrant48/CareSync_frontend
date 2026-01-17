@@ -82,10 +82,10 @@ import { MedicalSummaryComponent } from './medical-summary.component';
                        <div class="label"><i class="fa-solid fa-phone text-green-500 mr-2"></i> Contact</div>
                        <div class="value">{{ patient.contactInfo || '—' }}</div>
                     </div>
-                    <div class="info-card md:col-span-2">
+                    <!-- <div class="info-card md:col-span-2">
                        <div class="label"><i class="fa-solid fa-calendar-day text-purple-500 mr-2"></i> Date of Birth</div>
                        <div class="value">{{ formatDate(patient.dateOfBirth) }}</div>
-                    </div>
+                    </div> -->
                  </div>
 
               </div>

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { AiChatRequest, AiChatResponse, MedicalSummaryResponse } from '../models/ai.models';
+import { AiChatRequest, AiChatResponse, MedicalSummaryResponse, DiagnosisSuggestionDto } from '../models/ai.models';
 
 @Injectable({ providedIn: 'root' })
 export class AiAssistantService {
@@ -15,5 +15,9 @@ export class AiAssistantService {
 
     getMedicalSummary(patientId: number) {
         return this.http.get<MedicalSummaryResponse>(`${this.baseUrl}/api/ai/summarize/${patientId}`);
+    }
+
+    suggestDiagnosis(symptoms: string) {
+        return this.http.post<DiagnosisSuggestionDto>(`${this.baseUrl}/api/ai/suggest-diagnosis`, { symptoms });
     }
 }

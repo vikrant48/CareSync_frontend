@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
 import { ToastContainerComponent } from './toast-container.component';
+import { AiAssistantWidgetComponent } from './ai-assistant-widget.component';
 
 @Component({
   selector: 'app-doctor-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, ToastContainerComponent],
+  imports: [CommonModule, RouterModule, ToastContainerComponent, AiAssistantWidgetComponent],
   template: `
     <div class="h-full w-full md:grid md:grid-cols-[16rem_1fr] md:h-[calc(100dvh-3.5rem)] md:min-h-0 md:items-stretch bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
       
@@ -105,6 +106,7 @@ import { ToastContainerComponent } from './toast-container.component';
              <ng-content></ng-content>
         </div>
         <app-toast-container></app-toast-container>
+        <app-ai-assistant-widget></app-ai-assistant-widget>
       </main>
 
        <!-- Mobile Bottom Navigation - Standard Fixed Bar -->

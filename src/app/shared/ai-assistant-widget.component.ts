@@ -38,7 +38,7 @@ import { ToastService } from '../core/services/toast.service';
             <i class="fas fa-robot text-xl"></i>
           </div>
           <div>
-            <h3 class="font-bold text-sm">CareSync AI Assistant</h3>
+            <h3 class="font-bold text-sm">{{ isDoctor() ? 'Clinical AI Assistant' : 'CareSync AI Assistant' }}</h3>
             <div class="flex items-center gap-1.5">
               <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
               <span class="text-[10px] text-blue-100 uppercase tracking-wider font-semibold">Online</span>
@@ -58,10 +58,12 @@ import { ToastService } from '../core/services/toast.service';
             <i class="fas fa-robot text-xs text-blue-600 dark:text-blue-400"></i>
           </div>
           <div class="bg-white dark:bg-gray-800 p-3 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 dark:border-gray-700">
-            <p class="text-sm">Hello! I'm your CareSync Assistant. How can I help you with your health today?</p>
-            <p class="text-[10px] text-gray-500 mt-2 italic font-medium">CareSync AI can provide health guidance but is not a substitute for professional medical advice.</p>
+            <p class="text-sm" *ngIf="!isDoctor()">Hello! I'm your CareSync Assistant. How can I help you with your health today?</p>
+            <p class="text-sm" *ngIf="isDoctor()">Hello Doctor. I'm your Clinical Assistant. How can I assist you with patient history or clinical queries today?</p>
+            <p class="text-[10px] text-gray-500 mt-2 italic font-medium">{{ isDoctor() ? 'This AI assistant is for clinical guidance and does not replace medical evidence.' : 'CareSync AI can provide health guidance but is not a substitute for professional medical advice.' }}</p>
             
             <button 
+              *ngIf="!isDoctor()"
               (click)="startBooking()"
               class="mt-3 flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all transform active:scale-95 shadow-lg shadow-blue-500/20"
             >
@@ -91,7 +93,7 @@ import { ToastService } from '../core/services/toast.service';
              <!-- SPECIALIZATIONS -->
              <div *ngIf="msg.suggestion.type === 'SPECIALIZATIONS'" class="flex flex-wrap gap-2 py-1">
                 <button *ngFor="let spec of msg.suggestion.specializations" 
-                        (click)="selectSpecialization(spec)"
+                        (click)="selectSpecialization(spec, msg.suggestion.reason)"
                         class="px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-[11px] font-semibold hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm">
                    {{ spec }}
                 </button>
@@ -100,7 +102,7 @@ import { ToastService } from '../core/services/toast.service';
              <!-- DOCTOR LIST -->
              <div *ngIf="msg.suggestion.type === 'DOCTORS'" class="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
                 <div *ngFor="let doc of msg.suggestion.doctors" 
-                     (click)="selectDoctor(doc.id)"
+                     (click)="selectDoctor(doc.id, msg.suggestion.reason)"
                      class="min-w-[200px] bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 rounded-xl shadow-md hover:border-blue-500 border-2 cursor-pointer transition-all hover:shadow-lg">
                    <div class="flex items-start gap-3 mb-3">
                       <div class="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center overflow-hidden shrink-0 border border-blue-100">
@@ -139,12 +141,12 @@ import { ToastService } from '../core/services/toast.service';
              <div *ngIf="msg.suggestion.type === 'DATES'" class="bg-white dark:bg-gray-800 border border-blue-50 dark:border-blue-900/30 p-4 rounded-xl shadow-md">
                 <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Select Appointment Date</div>
                 <div class="flex flex-wrap gap-2">
-                   <button (click)="selectRelativeDate(msg.suggestion.doctorId!, 0)" class="px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition-all">Today</button>
-                   <button (click)="selectRelativeDate(msg.suggestion.doctorId!, 1)" class="px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition-all">Tomorrow</button>
+                    <button (click)="selectRelativeDate(msg.suggestion.doctorId!, 0, msg.suggestion.reason)" class="px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition-all">Today</button>
+                   <button (click)="selectRelativeDate(msg.suggestion.doctorId!, 1, msg.suggestion.reason)" class="px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition-all">Tomorrow</button>
                    
                    <div class="relative">
                       <input #datePicker type="date" class="absolute inset-0 opacity-0 cursor-pointer" 
-                             [min]="minDate" (change)="onDateSelected(msg.suggestion.doctorId!, datePicker.value)">
+                             [min]="minDate" (change)="onDateSelected(msg.suggestion.doctorId!, datePicker.value, msg.suggestion.reason)">
                       <button class="px-4 py-2 border-2 border-dashed border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-blue-50 transition-all">
                          <i class="fas fa-calendar-alt"></i>
                          Custom Date
@@ -161,23 +163,31 @@ import { ToastService } from '../core/services/toast.service';
                 </div>
                 <div class="grid grid-cols-3 gap-2">
                    <button *ngFor="let slot of msg.suggestion.slots" 
-                           [value]="slot"
-                           #slotBtn
-                           (click)="selectFinalSlot(msg.suggestion.doctorId!, msg.suggestion.date!, slotBtn.value)"
+                           (click)="selectFinalSlot(msg.suggestion.doctorId!, msg.suggestion.date!, slot, msg.suggestion.reason)"
                            class="py-2 px-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-[10px] font-bold hover:bg-blue-600 hover:text-white transition-all">
                       {{ slot }}
                    </button>
                 </div>
              </div>
 
-             <!-- CONFIRMATION & PAYMENT -->
+              <!-- CONFIRMATION & PAYMENT -->
              <div *ngIf="msg.suggestion.type === 'CONFIRM'" class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-5 rounded-xl shadow-lg relative overflow-hidden">
                 <div class="relative z-10">
-                   <div class="text-[10px] opacity-80 mb-1 uppercase tracking-wider">Appointment Overview</div>
+                   <div class="text-[10px] opacity-80 mb-1 uppercase tracking-wider">
+                      {{ msg.suggestion.reason?.startsWith('RESCHEDULE') ? 'Rescheduling Overview' : 'Appointment Overview' }}
+                   </div>
                    <div class="font-bold text-base mb-1">{{ msg.suggestion.doctorName }}</div>
                    <div class="text-[11px] opacity-90 mb-4">{{ msg.suggestion.specialization }}</div>
                    
                    <div class="space-y-2 mb-6">
+                      <div *ngIf="msg.suggestion.reason?.startsWith('RESCHEDULE')" class="p-2 bg-white/10 rounded-lg mb-3 border border-white/20">
+                         <div class="text-[9px] uppercase tracking-tighter opacity-70 mb-1">Rescheduling from</div>
+                         <div class="text-[11px] font-medium flex items-center gap-2">
+                           <i class="fas fa-history opacity-50"></i>
+                           {{ msg.suggestion.originalDate | date:'mediumDate' }} at {{ msg.suggestion.originalSlot }}
+                         </div>
+                      </div>
+
                       <div class="flex items-center gap-3 text-xs">
                          <i class="fas fa-calendar-day opacity-70"></i>
                          <span>{{ msg.suggestion.date | date:'fullDate' }}</span>
@@ -186,9 +196,17 @@ import { ToastService } from '../core/services/toast.service';
                          <i class="fas fa-clock opacity-70"></i>
                          <span>{{ msg.suggestion.slot }}</span>
                       </div>
-                      <div class="flex items-center gap-3 text-xs">
+                      <div *ngIf="!msg.suggestion.reason?.startsWith('RESCHEDULE')" class="flex items-center gap-3 text-xs">
                          <i class="fas fa-wallet opacity-70"></i>
                          <span class="font-bold">₹{{ msg.suggestion.consultationFee }}</span>
+                      </div>
+                      
+                      <div class="mt-4 p-2 bg-white/10 rounded-lg border border-white/20">
+                         <div class="text-[9px] uppercase tracking-tighter opacity-70 mb-1">Reason for visit</div>
+                         <input type="text" [(ngModel)]="editableReason" 
+                                [name]="'reason_' + msg.timestamp.getTime()"
+                                class="w-full bg-transparent border-none text-[11px] font-medium placeholder-white/50 focus:ring-0 p-0"
+                                placeholder="State your reason...">
                       </div>
                    </div>
 
@@ -197,10 +215,41 @@ import { ToastService } from '../core/services/toast.service';
                      class="w-full py-3 bg-white text-blue-700 rounded-xl text-xs font-bold shadow-xl hover:bg-blue-50 transition-all active:scale-95 flex items-center justify-center gap-2"
                    >
                      <i class="fas fa-check-circle"></i>
-                     Confirm & Pay Now
+                     {{ msg.suggestion.reason?.startsWith('RESCHEDULE') ? 'Confirm Reschedule' : 'Confirm & Pay Now' }}
                    </button>
                 </div>
                 <i class="fas fa-calendar-check absolute -bottom-4 -right-4 text-8xl opacity-10 rotate-12"></i>
+             </div>
+
+             <!-- MY APPOINTMENTS -->
+             <div *ngIf="msg.suggestion.type === 'MY_APPOINTMENTS'" class="space-y-3">
+                <div *ngFor="let appt of msg.suggestion.appointments" 
+                     class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 rounded-xl shadow-sm">
+                   <div class="flex items-center justify-between mb-3">
+                      <div>
+                         <div class="text-[12px] font-bold">{{ appt.doctorName }}</div>
+                         <div class="text-[10px] text-gray-500">{{ appt.appointmentDateTime | date:'medium' }}</div>
+                      </div>
+                      <span class="px-2 py-0.5 rounded-full text-[8px] font-bold uppercase"
+                            [ngClass]="{
+                               'bg-green-100 text-green-700': appt.status === 'CONFIRMED',
+                               'bg-yellow-100 text-yellow-700': appt.status === 'PENDING',
+                               'bg-red-100 text-red-700': appt.status === 'CANCELLED'
+                            }">
+                         {{ appt.status }}
+                      </span>
+                   </div>
+                   <div class="flex gap-2">
+                      <button (click)="cancelAppointment(appt.id)" 
+                              class="flex-1 py-2 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold hover:bg-red-600 hover:text-white transition-all">
+                         Cancel
+                      </button>
+                      <button (click)="rescheduleAppointment(appt.id)" 
+                              class="flex-1 py-2 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-bold hover:bg-blue-600 hover:text-white transition-all">
+                         Reschedule
+                      </button>
+                   </div>
+                </div>
              </div>
 
           </div>
@@ -287,9 +336,11 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
   private toast = inject(ToastService);
 
   isOpen = signal(false);
+  isDoctor = signal(false);
   isLoading = signal(false);
   messages = signal<ChatMessage[]>([]);
   userInput = '';
+  editableReason = '';
 
   // Date constraints
   private getLocalDateString(date: Date = new Date()): string {
@@ -312,6 +363,7 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
   constructor() { }
 
   ngOnInit() {
+    this.isDoctor.set(this.authService.user()?.role === 'DOCTOR');
     this.initVoiceRecognition();
   }
 
@@ -365,29 +417,41 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
     this.sendMessage(`ACTION_GET_SPECIALIZATIONS`);
   }
 
-  selectSpecialization(spec: string) {
-    this.sendMessage(`ACTION_SELECT_SPECIALIZATION_${spec}`);
+  selectSpecialization(spec: string, reason?: string) {
+    this.sendMessage(`ACTION_SELECT_SPECIALIZATION_${spec}${reason ? '_' + reason : ''}`);
   }
 
-  selectDoctor(doctorId: number) {
-    this.sendMessage(`ACTION_SELECT_DOCTOR_${doctorId}`);
+  selectDoctor(doctorId: number, reason?: string) {
+    this.sendMessage(`ACTION_SELECT_DOCTOR_${doctorId}${reason ? '_' + reason : ''}`);
   }
 
-  selectRelativeDate(doctorId: number, daysToAdd: number) {
+  selectRelativeDate(doctorId: number, daysToAdd: number, reason?: string) {
     const date = new Date();
     date.setDate(date.getDate() + daysToAdd);
     const dateStr = this.getLocalDateString(date);
-    this.sendMessage(`ACTION_SELECT_DATE_${doctorId}_${dateStr}`);
+    this.sendMessage(`ACTION_SELECT_DATE_${doctorId}_${dateStr}${reason ? '_' + reason : ''}`);
   }
 
-  onDateSelected(doctorId: number, dateStr: string) {
+  onDateSelected(doctorId: number, dateStr: string, reason?: string) {
     if (!dateStr) return;
-    this.sendMessage(`ACTION_SELECT_DATE_${doctorId}_${dateStr}`);
+    this.sendMessage(`ACTION_SELECT_DATE_${doctorId}_${dateStr}${reason ? '_' + reason : ''}`);
   }
 
-  selectFinalSlot(doctorId: number, date: string, slot: string) {
-    this.sendMessage(`ACTION_SELECT_SLOT_${doctorId}_${date}_${slot}`);
+  selectFinalSlot(doctorId: number, date: string, slot: string, reason?: string) {
+    this.sendMessage(`ACTION_SELECT_SLOT_${doctorId}_${date}_${slot}${reason ? '_' + reason : ''}`);
   }
+
+  cancelAppointment(apptId: number) {
+    this.sendingInternalAction = true;
+    this.sendMessage(`ACTION_CANCEL_APPOINTMENT_${apptId}`);
+  }
+
+  rescheduleAppointment(apptId: number) {
+    this.sendingInternalAction = true;
+    this.sendMessage(`ACTION_START_RESCHEDULE_${apptId}`);
+  }
+
+  private sendingInternalAction = false;
 
   sendMessage(text: string = this.userInput.trim()) {
     if (!text || this.isLoading()) return;
@@ -408,6 +472,7 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
     this.aiService.sendMessage(text).subscribe({
       next: (res) => {
         this.isLoading.set(false);
+        this.sendingInternalAction = false;
         if (res.success && res.response) {
           this.messages.update(msgs => [...msgs, {
             text: res.response!,
@@ -432,6 +497,12 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
       return;
     }
     this.currentSuggestion = suggestion;
+    this.editableReason = suggestion.reason || 'AI Assisted Booking';
+
+    if (suggestion.reason?.startsWith('RESCHEDULE')) {
+      this.executeAppointmentAction(suggestion);
+      return;
+    }
     this.isPaymentPopupVisible = true;
   }
 
@@ -442,7 +513,12 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
 
   onPaymentSuccess(details: PaymentDetails) {
     this.isPaymentPopupVisible = false;
-    const sug = this.currentSuggestion;
+    if (this.currentSuggestion) {
+      this.executeAppointmentAction(this.currentSuggestion);
+    }
+  }
+
+  private executeAppointmentAction(sug: AiBookingSuggestion) {
     if (!sug || !sug.date || !sug.slot) return;
 
     // Parse date and time from the suggestion strings (e.g., "2025-12-20" and "10:30")
@@ -453,24 +529,40 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
     const pad = (n: number) => n.toString().padStart(2, '0');
     const localIsoString = `${year}-${pad(month)}-${pad(day)}T${pad(hours)}:${pad(minutes)}:00`;
 
-    const payload = {
-      doctorId: sug.doctorId!,
-      appointmentDateTime: localIsoString,
-      reason: 'AI Assisted Booking'
-    };
-
     this.isLoading.set(true);
-    this.appointmentService.bookAppointment(payload).subscribe({
-      next: () => {
-        this.isLoading.set(false);
-        this.addBotMessage(`Payment Successful! Your appointment with ${sug.doctorName} for ${sug.date} at ${sug.slot} has been confirmed. See you then!`);
-        this.currentSuggestion = null;
-      },
-      error: (err: any) => {
-        this.isLoading.set(false);
-        this.addBotMessage('Payment was successful, but booking failed: ' + (err.error?.message || 'Please contact support.'));
-      }
-    });
+
+    if (sug.reason?.startsWith('RESCHEDULE:')) {
+      const apptId = parseInt(sug.reason.split(':')[1]);
+      this.appointmentService.rescheduleMyAppointment(apptId, localIsoString).subscribe({
+        next: () => {
+          this.isLoading.set(false);
+          this.addBotMessage(`Success! Your appointment has been rescheduled to ${sug.date} at ${sug.slot}.`);
+          this.currentSuggestion = null;
+        },
+        error: (err: any) => {
+          this.isLoading.set(false);
+          this.addBotMessage('Rescheduling failed: ' + (err.error?.message || 'Internal error.'));
+        }
+      });
+    } else {
+      const payload = {
+        doctorId: sug.doctorId!,
+        appointmentDateTime: localIsoString,
+        reason: this.editableReason || 'AI Assisted Booking'
+      };
+
+      this.appointmentService.bookAppointment(payload).subscribe({
+        next: () => {
+          this.isLoading.set(false);
+          this.addBotMessage(`Success! Your appointment with ${sug.doctorName} for ${sug.date} at ${sug.slot} has been confirmed. See you then!`);
+          this.currentSuggestion = null;
+        },
+        error: (err: any) => {
+          this.isLoading.set(false);
+          this.addBotMessage('Booking failed: ' + (err.error?.message || 'Please contact support.'));
+        }
+      });
+    }
   }
 
   onPaymentError(err: string) {

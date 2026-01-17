@@ -1,6 +1,8 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AiAssistantService } from '../core/services/ai-assistant.service';
+import { ClinicalMatch, DiagnosisSuggestionDto } from '../core/models/ai.models';
 
 @Component({
    selector: 'app-medical-history-form-modal',
@@ -46,8 +48,43 @@ import { FormsModule } from '@angular/forms';
                 </div>
 
                 <div class="form-group">
-                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Symptoms</label>
+                   <div class="flex items-center justify-between mb-1">
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Symptoms</label>
+                      <button type="button" 
+                              (click)="onSuggest()" 
+                              [disabled]="disabled || loadingSuggestions || !form.symptoms"
+                              class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-50"
+                              title="Get AI Suggestions">
+                         <i class="fa-solid fa-wand-magic-sparkles" [class.animate-pulse]="loadingSuggestions"></i>
+                         AI Suggest
+                      </button>
+                   </div>
                    <input type="text" class="input-modern" placeholder="e.g. Cough, fever, difficulty breathing..." [(ngModel)]="form.symptoms" name="symptoms" [disabled]="disabled" />
+                </div>
+
+                <!-- AI Suggestions Area -->
+                <div *ngIf="clinicalSuggestions.length > 0" class="bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30 rounded-xl p-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                   <div class="flex items-center justify-between mb-3">
+                      <h4 class="text-xs font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+                         <i class="fa-solid fa-robot"></i> AI Clinical Suggestions
+                      </h4>
+                      <button (click)="clinicalSuggestions = []" class="text-gray-400 hover:text-gray-600 text-xs">Clear</button>
+                   </div>
+                   <div class="space-y-3">
+                      <div *ngFor="let s of clinicalSuggestions" 
+                           (click)="applySuggestion(s)"
+                           class="group bg-white dark:bg-gray-800 p-3 rounded-lg border border-indigo-100 dark:border-indigo-700/50 hover:border-indigo-400 dark:hover:border-indigo-500 cursor-pointer transition-all shadow-sm hover:shadow-md">
+                         <div class="flex justify-between items-start mb-1">
+                            <div class="font-bold text-gray-900 dark:text-white text-sm group-hover:text-indigo-600 transition-colors">{{ s.diagnosis }}</div>
+                            <i class="fa-solid fa-plus-circle text-indigo-300 group-hover:text-indigo-600"></i>
+                         </div>
+                         <div class="text-[10px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                            <strong>Treatment:</strong> {{ s.treatment }} 
+                            <span *ngIf="s.medicine">| <strong>Rx:</strong> {{ s.medicine }} ({{ s.dosage }})</span>
+                         </div>
+                         <div class="mt-2 text-[9px] italic text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity">Click to auto-fill record</div>
+                      </div>
+                   </div>
                 </div>
 
                 <div class="form-group">
@@ -126,6 +163,36 @@ export class MedicalHistoryFormModalComponent {
    @Input() infoText: string | null = null;
    @Output() close = new EventEmitter<void>();
    @Output() submit = new EventEmitter<void>();
+
+   private aiService = inject(AiAssistantService);
+
+   loadingSuggestions = false;
+   clinicalSuggestions: ClinicalMatch[] = [];
+
+   onSuggest() {
+      if (!this.form.symptoms) return;
+
+      this.loadingSuggestions = true;
+      this.aiService.suggestDiagnosis(this.form.symptoms).subscribe({
+         next: (res: DiagnosisSuggestionDto) => {
+            this.loadingSuggestions = false;
+            this.clinicalSuggestions = res.suggestions || [];
+         },
+         error: () => {
+            this.loadingSuggestions = false;
+            this.clinicalSuggestions = [];
+         }
+      });
+   }
+
+   applySuggestion(s: ClinicalMatch) {
+      this.form.diagnosis = s.diagnosis;
+      this.form.treatment = s.treatment;
+      this.form.medicine = s.medicine;
+      this.form.doses = s.dosage;
+      this.form.notes = (this.form.notes || '') + (this.form.notes ? '\n\n' : '') + 'AI Reasoning: ' + s.reasoning;
+      this.clinicalSuggestions = [];
+   }
 
    onSubmit(event: Event) {
       event.preventDefault();

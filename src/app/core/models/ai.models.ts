@@ -9,7 +9,7 @@ export interface AiChatResponse {
     suggestion?: AiBookingSuggestion;
 }
 
-export type SuggestionType = 'SPECIALIZATIONS' | 'DOCTORS' | 'DATES' | 'SLOTS' | 'CONFIRM';
+export type SuggestionType = 'SPECIALIZATIONS' | 'DOCTORS' | 'DATES' | 'SLOTS' | 'CONFIRM' | 'MY_APPOINTMENTS';
 
 export interface DoctorSuggestion {
     id: number;
@@ -28,12 +28,17 @@ export interface AiBookingSuggestion {
     type: SuggestionType;
     specializations?: string[];
     doctors?: DoctorSuggestion[];
+    appointments?: any[]; // For upcoming appointments
     slots?: string[];
     doctorId?: number;
     doctorName?: string;
     specialization?: string;
     slot?: string;
     date?: string;
+    originalDate?: string;
+    originalSlot?: string;
+    appointmentId?: number;
+    reason?: string;
     consultationFee?: number;
 }
 
@@ -48,4 +53,16 @@ export interface MedicalSummaryResponse {
     summary?: string;
     success: boolean;
     error?: string;
+}
+
+export interface ClinicalMatch {
+    diagnosis: string;
+    treatment: string;
+    medicine: string;
+    dosage: string;
+    reasoning: string;
+}
+
+export interface DiagnosisSuggestionDto {
+    suggestions: ClinicalMatch[];
 }
