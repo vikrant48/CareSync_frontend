@@ -10,6 +10,7 @@ import { CancellationModalComponent } from '../../shared/cancellation-modal.comp
 import { getAppointmentEpochMs, isAppointmentToday } from '../../shared/appointment-utils';
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { ToastService } from '../../core/services/toast.service';
+import { MasterDataService } from '../../core/services/master-data.service';
 
 @Component({
   selector: 'app-my-appointments',
@@ -50,13 +51,7 @@ import { ToastService } from '../../core/services/toast.service';
             <div class="relative">
               <select class="input w-full appearance-none bg-gray-900/50" [(ngModel)]="statusFilter">
                 <option value="">All Statuses</option>
-                <option value="BOOKED">Booked</option>
-                <option value="CONFIRMED">Confirmed</option>
-                <option value="RESCHEDULED">Rescheduled</option>
-                <option value="CANCELLED">Cancelled (Any)</option>
-                <option value="CANCELLED_BY_PATIENT">Cancelled by Me</option>
-                <option value="CANCELLED_BY_DOCTOR">Cancelled by Doctor</option>
-                <option value="COMPLETED">Completed</option>
+                <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
               </select>
                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                   <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
@@ -157,6 +152,7 @@ export class MyAppointmentsComponent {
   statusFilter = '';
   specializationFilter = '';
   rangeFilter: 'upcoming' | 'today' | 'past' | '' = '';
+  statuses: string[] = [];
 
   rescheduleTarget: PatientAppointmentItem | null = null;
   cancellationTarget: PatientAppointmentItem | null = null;
@@ -170,9 +166,13 @@ export class MyAppointmentsComponent {
     private router: Router,
     private doctorApi: DoctorService,
     private route: ActivatedRoute,
-    private toast: ToastService
+    private toast: ToastService,
+    private masterDataService: MasterDataService
   ) {
     this.refresh();
+    this.masterDataService.getStatuses().subscribe({
+      next: (s) => this.statuses = s || []
+    });
     // Apply default filters from query params if provided
     const qp = this.route.snapshot.queryParamMap;
     const statusParam = (qp.get('status') || '').toUpperCase();

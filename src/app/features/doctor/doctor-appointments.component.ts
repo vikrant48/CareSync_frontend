@@ -8,6 +8,7 @@ import { PatientDetailsModalComponent } from '../../shared/patient-details-modal
 import { MedicalHistoryDetailModalComponent } from '../../shared/medical-history-detail-modal.component';
 import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 import { AppointmentService, DoctorAppointmentItem } from '../../core/services/appointment.service';
+import { MasterDataService } from '../../core/services/master-data.service';
 import { PatientProfileService, PatientDto, MedicalHistoryWithDoctorItem } from '../../core/services/patient-profile.service';
 import { forkJoin, map, firstValueFrom } from 'rxjs';
 
@@ -52,12 +53,7 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
             <div class="relative">
               <select class="input-modern" [(ngModel)]="statusFilter" (change)="onFilterChange()">
                 <option value="ALL">All Statuses</option>
-                <option value="PENDING">Pending</option>
-                <option value="CONFIRMED">Confirmed</option>
-                <option value="COMPLETED">Completed</option>
-                <option value="CANCELLED">Cancelled (Any)</option>
-                <option value="CANCELLED_BY_PATIENT">Cancelled by Patient</option>
-                <option value="CANCELLED_BY_DOCTOR">Cancelled by Me</option>
+                <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
               </select>
             </div>
           </div>
@@ -162,7 +158,8 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
 export class DoctorAppointmentsComponent {
   loading = false;
   appointments: DoctorAppointmentItem[] = [];
-  statusFilter: 'ALL' | 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'CANCELLED_BY_PATIENT' | 'CANCELLED_BY_DOCTOR' = 'ALL';
+  statusFilter: string = 'ALL';
+  statuses: string[] = [];
   range: TimeRange = 'UPCOMING';
   searchTerm = '';
 
@@ -177,8 +174,16 @@ export class DoctorAppointmentsComponent {
   selectedHistoryDetail: any | null = null;
   selectedHistoryDoctorInfo: { doctorName: string; doctorSpecialization?: string; doctorContactInfo?: string } | null = null;
 
-  constructor(private appts: AppointmentService, private patients: PatientProfileService, private router: Router) {
+  constructor(
+    private appts: AppointmentService,
+    private patients: PatientProfileService,
+    private router: Router,
+    private masterDataService: MasterDataService
+  ) {
     this.refresh();
+    this.masterDataService.getStatuses().subscribe({
+      next: (s) => this.statuses = s || []
+    });
   }
 
   refresh() {

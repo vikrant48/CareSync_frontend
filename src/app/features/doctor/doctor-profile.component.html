@@ -236,9 +236,7 @@
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Gender</label>
                     <select class="input-modern" [(ngModel)]="profileForm.gender">
                       <option [ngValue]="undefined">Select</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
+                      <option *ngFor="let g of genders" [value]="g">{{ g }}</option>
                     </select>
                   </div>
                   <div class="space-y-1.5">

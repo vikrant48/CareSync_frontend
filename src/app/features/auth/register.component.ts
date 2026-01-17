@@ -7,6 +7,7 @@ import { RegisterRequest } from '../../core/models/auth.models';
 import { ToastService } from '../../core/services/toast.service';
 import { ToastContainerComponent } from '../../shared/toast-container.component';
 import { SpecializationService } from '../../core/services/specialization.service';
+import { MasterDataService } from '../../core/services/master-data.service';
 
 @Component({
   selector: 'app-register',
@@ -108,9 +109,7 @@ import { SpecializationService } from '../../core/services/specialization.servic
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gender <span class="text-red-500">*</span></label>
                   <select class="input-modern" formControlName="gender" [class.error]="isFieldInvalid('gender', basicForm)">
                       <option value="" disabled>Select gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
+                      <option *ngFor="let g of genders" [value]="g">{{ g }}</option>
                   </select>
                   <p *ngIf="isFieldInvalid('gender', basicForm)" class="error-msg">Gender is required</p>
                 </div>
@@ -302,6 +301,7 @@ export class RegisterComponent implements OnInit {
   private auth = inject(AuthService);
   private toast = inject(ToastService);
   private specializationService = inject(SpecializationService);
+  private masterDataService = inject(MasterDataService);
 
   specializations: string[] = [];
 
@@ -342,6 +342,14 @@ export class RegisterComponent implements OnInit {
       next: (specs) => this.specializations = specs || [],
       error: (err) => console.error('Failed to load specializations', err)
     });
+
+    this.masterDataService.getAllMasterData().subscribe({
+      next: (data) => {
+        if (data.genders?.length) this.genders = data.genders;
+        if (data.bloodGroups?.length) this.bloodGroups = data.bloodGroups;
+      },
+      error: (err) => console.error('Failed to load master data', err)
+    });
   }
 
   // Wizard state
@@ -360,7 +368,8 @@ export class RegisterComponent implements OnInit {
   doctorForm!: FormGroup;
   patientForm!: FormGroup;
 
-  bloodGroups = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
+  genders: string[] = [];
+  bloodGroups: string[] = [];
 
   // Helper method to check if a field is invalid and should show error
   isFieldInvalid(fieldName: string, form: FormGroup): boolean {

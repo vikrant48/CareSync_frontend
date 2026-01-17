@@ -6,6 +6,7 @@ import { PatientLayoutComponent } from './patient-layout.component';
 import { ToastService } from '../core/services/toast.service';
 import { PatientProfileService, PatientDto, UpdatePatientRequest } from '../core/services/patient-profile.service';
 import { AuthService } from '../core/services/auth.service';
+import { MasterDataService } from '../core/services/master-data.service';
 
 @Component({
   selector: 'app-patient-edit-page',
@@ -90,9 +91,7 @@ import { AuthService } from '../core/services/auth.service';
                 <div class="relative">
                   <select class="input appearance-none" [(ngModel)]="form.gender" name="gender">
                     <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
+                    <option *ngFor="let g of genders" [value]="g">{{ g }}</option>
                   </select>
                   <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
                     <i class="fa-solid fa-chevron-down text-xs"></i>
@@ -105,14 +104,7 @@ import { AuthService } from '../core/services/auth.service';
                 <div class="relative">
                   <select class="input appearance-none" [(ngModel)]="form.bloodGroup" name="bloodGroup">
                     <option value="">Select Blood Group</option>
-                    <option value="A+">A+</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B-">B-</option>
-                    <option value="O+">O+</option>
-                    <option value="O-">O-</option>
-                    <option value="AB+">AB+</option>
-                    <option value="AB-">AB-</option>
+                    <option *ngFor="let bg of bloodGroups" [value]="bg">{{ bg }}</option>
                   </select>
                   <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
                     <i class="fa-solid fa-chevron-down text-xs"></i>
@@ -159,6 +151,7 @@ export class PatientEditPageComponent implements OnInit {
   private auth = inject(AuthService);
   private router = inject(Router);
   private toast = inject(ToastService);
+  private masterDataService = inject(MasterDataService);
 
   @Input() backLink: string = '/patient/profile';
   @Input() patient: PatientDto | null = null;
@@ -173,7 +166,16 @@ export class PatientEditPageComponent implements OnInit {
   // Ref to reset file input after successful upload
   profileFileInput?: HTMLInputElement;
 
+  genders: string[] = [];
+  bloodGroups: string[] = [];
+
   ngOnInit() {
+    this.masterDataService.getAllMasterData().subscribe({
+      next: (data) => {
+        if (data.genders?.length) this.genders = data.genders;
+        if (data.bloodGroups?.length) this.bloodGroups = data.bloodGroups;
+      }
+    });
     if (this.patient) {
       this.editableProfile = { ...this.patient };
       this.form = {

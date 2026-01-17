@@ -7,6 +7,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 import { SpecializationAutocompleteComponent } from '../../shared/specialization-autocomplete.component';
 import { ToastService } from '../../core/services/toast.service';
+import { MasterDataService } from '../../core/services/master-data.service';
 
 @Component({
   selector: 'app-doctor-profile',
@@ -19,6 +20,7 @@ export class DoctorProfileComponent implements OnInit {
   private svc = inject(DoctorProfileService);
   auth = inject(AuthService);
   private toast = inject(ToastService);
+  private masterDataService = inject(MasterDataService);
 
   loading = signal<boolean>(true);
   error = signal<string | null>(null);
@@ -41,25 +43,15 @@ export class DoctorProfileComponent implements OnInit {
     languages: [],
   };
 
-  languageOptions: string[] = ['Hindi', 'English', 'Others'];
+  languageOptions: string[] = [];
 
   // Education
   educations: any[] = [];
   newEducation: CreateEducationRequest = { degree: '', institution: '', yearOfCompletion: new Date().getFullYear(), details: '' };
   editingEducationId: number | null = null;
   // Dropdown options and custom entries for Education
-  degreeOptions: string[] = [
-    'MBBS', 'MD', 'MS', 'DM', 'MCh', 'DNB', 'BDS', 'MDS',
-    'BAMS', 'BHMS', 'BUMS', 'BNYS', 'BPT', 'MPT', 'PG Diploma',
-    'PhD (Medical)', 'MPH', 'MSc (Nursing)', 'Diploma in Clinical Medicine'
-  ];
-  institutionOptions: string[] = [
-    'AIIMS New Delhi', 'PGIMER Chandigarh', 'CMC Vellore', 'JIPMER Puducherry',
-    'KGMU Lucknow', 'IMS-BHU Varanasi', 'NIMHANS Bengaluru', 'AFMC Pune',
-    'MAMC New Delhi', 'Grant Medical College Mumbai', 'SMS Jaipur',
-    'Kasturba Medical College Manipal', 'GMC Chennai', 'GMCH Chandigarh',
-    'Seth GS Medical College Mumbai'
-  ];
+  degreeOptions: string[] = [];
+  institutionOptions: string[] = [];
   customDegree: string = '';
   customInstitution: string = '';
 
@@ -68,17 +60,8 @@ export class DoctorProfileComponent implements OnInit {
   newExperience: CreateExperienceRequest = { hospitalName: '', position: '', yearsOfService: 1, details: '' };
   editingExperienceId: number | null = null;
   // Dropdown options and custom entries for Experience
-  hospitalOptions: string[] = [
-    'AIIMS New Delhi', 'PGIMER Chandigarh', 'CMC Vellore', 'JIPMER Puducherry',
-    'NIMHANS Bengaluru', 'KGMU Lucknow', 'IMS-BHU Varanasi', 'AFMC Pune',
-    'Apollo Hospitals', 'Fortis Healthcare', 'Max Healthcare', 'Manipal Hospitals',
-    'Tata Memorial Hospital', 'Sankara Nethralaya', 'Sir Ganga Ram Hospital'
-  ];
-  positionOptions: string[] = [
-    'Resident Doctor', 'Senior Resident', 'Consultant', 'Senior Consultant',
-    'Attending Physician', 'Registrar', 'Medical Officer', 'Surgeon',
-    'Professor', 'Assistant Professor', 'Associate Professor'
-  ];
+  hospitalOptions: string[] = [];
+  positionOptions: string[] = [];
   customHospital: string = '';
   customPosition: string = '';
 
@@ -107,6 +90,7 @@ export class DoctorProfileComponent implements OnInit {
   editingEducationMode = false;
   editingExperienceMode = false;
   editingCertificatesMode = false;
+  genders: string[] = [];
 
   // Toasts are used for messaging; container is mounted in DoctorLayout
 
@@ -119,6 +103,16 @@ export class DoctorProfileComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.masterDataService.getAllMasterData().subscribe({
+      next: (data) => {
+        if (data.genders) this.genders = data.genders;
+        if (data.languages) this.languageOptions = data.languages;
+        if (data.degrees) this.degreeOptions = data.degrees;
+        if (data.institutions) this.institutionOptions = data.institutions;
+        if (data.hospitals) this.hospitalOptions = data.hospitals;
+        if (data.positions) this.positionOptions = data.positions;
+      }
+    });
     this.username = this.auth.username();
     const idStr = this.auth.userId();
     this.doctorId = idStr ? Number(idStr) : null;

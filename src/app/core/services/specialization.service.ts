@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, of } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { MasterDataService } from './master-data.service';
 
 export interface Specialization {
   id?: number;
@@ -16,8 +17,9 @@ export interface Specialization {
 })
 export class SpecializationService {
   private http = inject(HttpClient);
+  private masterDataService = inject(MasterDataService);
   private baseUrl = environment.apiBaseUrl || 'http://localhost:8080';
-  
+
   // Cache for specializations
   private specializationsSubject = new BehaviorSubject<string[]>([]);
   public specializations$ = this.specializationsSubject.asObservable();
@@ -25,7 +27,7 @@ export class SpecializationService {
   // Default specializations list (fallback)
   private defaultSpecializations = [
     'Cardiology',
-    'Dermatology', 
+    'Dermatology',
     'Endocrinology',
     'Gastroenterology',
     'General Medicine',
@@ -46,19 +48,25 @@ export class SpecializationService {
     this.loadSpecializations();
   }
 
-  /**
-   * Load all specializations from various sources
-   */
   loadSpecializations(): void {
-    // Try to get specializations from the reports API (existing specializations from doctors)
-    this.getExistingSpecializations().subscribe({
+    this.masterDataService.getSpecializations().subscribe({
       next: (specializations) => {
-        // Merge with default specializations and remove duplicates
         const allSpecializations = [...new Set([...this.defaultSpecializations, ...specializations])];
         this.specializationsSubject.next(allSpecializations.sort());
       },
       error: () => {
-        // Fallback to default specializations
+        this.loadFallbackSpecializations();
+      }
+    });
+  }
+
+  private loadFallbackSpecializations(): void {
+    this.getExistingSpecializations().subscribe({
+      next: (specializations) => {
+        const allSpecializations = [...new Set([...this.defaultSpecializations, ...specializations])];
+        this.specializationsSubject.next(allSpecializations.sort());
+      },
+      error: () => {
         this.specializationsSubject.next(this.defaultSpecializations);
       }
     });
@@ -96,7 +104,7 @@ export class SpecializationService {
           return specializations;
         }
         const searchTerm = query.toLowerCase().trim();
-        return specializations.filter(spec => 
+        return specializations.filter(spec =>
           spec.toLowerCase().includes(searchTerm)
         );
       })
@@ -113,9 +121,9 @@ export class SpecializationService {
 
     const trimmedSpec = specialization.trim();
     const currentSpecializations = this.specializationsSubject.value;
-    
+
     // Check if specialization already exists (case-insensitive)
-    const exists = currentSpecializations.some(spec => 
+    const exists = currentSpecializations.some(spec =>
       spec.toLowerCase() === trimmedSpec.toLowerCase()
     );
 
@@ -134,7 +142,7 @@ export class SpecializationService {
         if (!specialization || !specialization.trim()) {
           return false;
         }
-        return specializations.some(spec => 
+        return specializations.some(spec =>
           spec.toLowerCase() === specialization.toLowerCase().trim()
         );
       })

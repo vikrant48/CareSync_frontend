@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DoctorService, Doctor } from '../../core/services/doctor.service';
+import { MasterDataService } from '../../core/services/master-data.service';
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { EmergencyAppointmentModalComponent } from '../../shared/emergency-appointment-modal.component';
 import { SpecializationAutocompleteComponent } from '../../shared/specialization-autocomplete.component';
@@ -62,9 +63,7 @@ import { SpecializationAutocompleteComponent } from '../../shared/specialization
           <div class="relative z-10">
             <select class="input w-full appearance-none bg-gray-900/50" [(ngModel)]="genderFilter">
               <option value="">All Genders</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
+              <option *ngFor="let g of genders" [value]="g">{{ g }}</option>
             </select>
             <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
               <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
@@ -160,6 +159,7 @@ export class PatientBookAppointmentComponent {
   addressFilter = '';
   loadingDoctors = false;
   showEmergencyModal = false;
+  genders: string[] = [];
 
   doctors: Doctor[] = [];
   ratings: Record<number, { avg: number; count: number }> = {};
@@ -168,8 +168,12 @@ export class PatientBookAppointmentComponent {
   constructor(
     private doctorApi: DoctorService,
     private router: Router,
+    private masterDataService: MasterDataService
   ) {
     this.refreshDoctors();
+    this.masterDataService.getGenders().subscribe({
+      next: (g) => this.genders = g || this.genders
+    });
   }
 
   refreshDoctors() {
