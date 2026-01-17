@@ -22,7 +22,14 @@ export class AuthService {
   userId = signal<string | null>(this.getStored('userId'));
   user = signal<any | null>(this.getStoredJson('user'));
 
-  constructor(private http: HttpClient, private router: Router) {}
+  private logoutTimer: any;
+  private readonly INACTIVITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+
+  constructor(private http: HttpClient, private router: Router) {
+    if (this.isAuthenticated()) {
+      this.initInactivityTimer();
+    }
+  }
 
   register(payload: RegisterRequest) {
     return this.http.post<AuthenticationResponse>(`${this.baseUrl}/api/auth/register`, payload);
@@ -62,13 +69,13 @@ export class AuthService {
   isTokenExpired(): boolean {
     const token = this.accessToken();
     if (!token) return true;
-    
+
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const exp = payload.exp * 1000; // Convert to milliseconds
       const now = Date.now();
       const fiveMinutes = 5 * 60 * 1000; // 5 minutes in milliseconds
-      
+
       return exp <= (now + fiveMinutes); // Return true if expired or expires within 5 minutes
     } catch (error) {
       return true; // If we can't parse the token, consider it expired
@@ -79,12 +86,12 @@ export class AuthService {
   isTokenActuallyExpired(): boolean {
     const token = this.accessToken();
     if (!token) return true;
-    
+
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const exp = payload.exp * 1000; // Convert to milliseconds
       const now = Date.now();
-      
+
       return exp <= now; // Return true if actually expired
     } catch (error) {
       return true; // If we can't parse the token, consider it expired
@@ -95,13 +102,13 @@ export class AuthService {
   isTokenLongExpired(): boolean {
     const token = this.accessToken();
     if (!token) return true;
-    
+
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const exp = payload.exp * 1000; // Convert to milliseconds
       const now = Date.now();
       const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
-      
+
       return exp <= (now - oneHour); // Return true if expired for more than 1 hour
     } catch (error) {
       return true; // If we can't parse the token, consider it long expired
@@ -113,11 +120,11 @@ export class AuthService {
     if (!this.isTokenActuallyExpired()) {
       return 'valid';
     }
-    
+
     if (this.isTokenLongExpired()) {
       return 'long_expired';
     }
-    
+
     return 'short_expired';
   }
 
@@ -143,6 +150,7 @@ export class AuthService {
     this.username.set(resp.username);
     this.userId.set(id != null ? String(id) : null);
     this.user.set(resp.user ?? null);
+    this.initInactivityTimer();
   }
 
   logout() {
@@ -159,6 +167,7 @@ export class AuthService {
     this.username.set(null);
     this.userId.set(null);
     this.user.set(null);
+    this.stopInactivityTimer();
     this.router.navigate(['/login']);
   }
 
@@ -186,7 +195,38 @@ export class AuthService {
     try {
       if (value == null) localStorage.removeItem(key);
       else localStorage.setItem(key, String(value));
-    } catch {}
+    } catch { }
+  }
+
+  // --- HIPAA Inactivity Logic ---
+
+  private initInactivityTimer() {
+    if (!this.isBrowser()) return;
+    this.stopInactivityTimer();
+    this.resetInactivityTimer();
+
+    // Listen for user activity
+    window.addEventListener('mousemove', () => this.resetInactivityTimer());
+    window.addEventListener('keydown', () => this.resetInactivityTimer());
+    window.addEventListener('click', () => this.resetInactivityTimer());
+    window.addEventListener('scroll', () => this.resetInactivityTimer());
+  }
+
+  private resetInactivityTimer() {
+    if (this.logoutTimer) clearTimeout(this.logoutTimer);
+    this.logoutTimer = setTimeout(() => {
+      console.log('User inactive for 15 minutes. Logging out for security.');
+      this.logout();
+    }, this.INACTIVITY_TIMEOUT);
+  }
+
+  private stopInactivityTimer() {
+    if (this.logoutTimer) clearTimeout(this.logoutTimer);
+    if (!this.isBrowser()) return;
+    window.removeEventListener('mousemove', () => this.resetInactivityTimer());
+    window.removeEventListener('keydown', () => this.resetInactivityTimer());
+    window.removeEventListener('click', () => this.resetInactivityTimer());
+    window.removeEventListener('scroll', () => this.resetInactivityTimer());
   }
 
   private getStoredJson(key: string) {
@@ -200,6 +240,6 @@ export class AuthService {
     try {
       if (value == null) localStorage.removeItem(key);
       else localStorage.setItem(key, JSON.stringify(value));
-    } catch {}
+    } catch { }
   }
 }
