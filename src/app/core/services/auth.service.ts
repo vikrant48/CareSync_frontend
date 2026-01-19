@@ -35,6 +35,18 @@ export class AuthService {
     return this.http.post<AuthenticationResponse>(`${this.baseUrl}/api/auth/register`, payload);
   }
 
+  checkAvailability(username?: string, email?: string) {
+    return this.http.get<{ usernameAvailable: boolean; emailAvailable: boolean }>(
+      `${this.baseUrl}/api/auth/check-availability`,
+      {
+        params: {
+          ...(username && { username }),
+          ...(email && { email })
+        }
+      }
+    );
+  }
+
   // Email verification APIs
   startEmailVerification(payload: { name: string; email: string; mobileNumber?: string }) {
     return this.http.post<{ message?: string }>(`${this.baseUrl}/api/auth/email-verification/start`, payload);

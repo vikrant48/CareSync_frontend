@@ -411,12 +411,41 @@ export class RegisterComponent implements OnInit {
   next() {
     if (this.currentStep === 1) {
       if (this.basicForm.valid) {
-        this.currentStep = 2;
-        this.showValidationErrors = false;
-        // Keep verification email in sync with basic form
-        this.verificationForm.patchValue({ email: this.basicForm.value.email || '' });
-        // Initiate email verification and send OTP
-        this.sendVerificationCode();
+        this.loading = true;
+        const { username, email } = this.basicForm.value;
+
+        this.auth.checkAvailability(username, email).subscribe({
+          next: (res) => {
+            this.loading = false;
+            let hasError = false;
+
+            if (!res.usernameAvailable) {
+              this.basicForm.get('username')?.setErrors({ taken: true });
+              this.toast.showError('Username is already taken');
+              hasError = true;
+            }
+
+            if (!res.emailAvailable) {
+              this.basicForm.get('email')?.setErrors({ taken: true });
+              this.toast.showError('Email is already registered');
+              hasError = true;
+            }
+
+            if (!hasError) {
+              this.currentStep = 2;
+              this.showValidationErrors = false;
+              // Keep verification email in sync with basic form
+              this.verificationForm.patchValue({ email: this.basicForm.value.email || '' });
+              // Initiate email verification and send OTP
+              this.sendVerificationCode();
+            }
+          },
+          error: (err) => {
+            this.loading = false;
+            this.toast.showError('Failed to check availability');
+            console.error(err);
+          }
+        });
       } else {
         this.showValidationErrors = true;
         this.markFormGroupTouched(this.basicForm);

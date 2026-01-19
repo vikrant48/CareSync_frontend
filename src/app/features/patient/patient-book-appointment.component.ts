@@ -135,7 +135,7 @@ import { SpecializationAutocompleteComponent } from '../../shared/specialization
 
           <div class="mt-auto pt-4 border-t border-gray-800">
              <button class="btn-primary w-full shadow-lg shadow-blue-900/20 group-hover:shadow-blue-500/20 transition-all" (click)="goToDoctorAndBook(d); $event.stopPropagation()">
-                Book Appointment
+                View & Book Appointment
              </button>
           </div>
         </div>
