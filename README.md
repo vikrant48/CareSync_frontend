@@ -1,34 +1,63 @@
-# CaresyncFrontend
+# CareSync - Patient & Doctor Portal (Frontend)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.7.
+![Angular](https://img.shields.io/badge/Angular-19-dd0031?style=for-the-badge&logo=angular)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?style=for-the-badge&logo=typescript)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-3.0-38B2AC?style=for-the-badge&logo=tailwind-css)
+![RxJS](https://img.shields.io/badge/RxJS-Reactive-B7178C?style=for-the-badge&logo=reactivex)
 
-## Features
+The **CareSync Frontend** is a modern, responsive Single Page Application (SPA) meticulously engineered to provide two distinct, role-optimized experiences within a single codebase: a smooth, accessible portal for **Patients** and a powerful, data-dense dashboard for **Doctors**.
 
-- Authentication: login, multi-step register (Doctor/Patient), OTP-based reset password
-- Roles & Layouts: dedicated Doctor and Patient layouts with role-aware navigation
-- Appointments (Patient): browse/filter doctors; book regular/emergency; view/reschedule/cancel
-- Appointments (Doctor): today/upcoming/completed/cancelled views; confirm/complete/cancel statuses
-- Dashboards: doctor dashboard with stats and today’s appointments; patient dashboard overview
-- Medical History: patients view history; doctors add entries; recent health section on dashboard
-- Profiles: doctor profile manage experience/education/certificates; patient profile update and image upload
-- Documents: upload, retrieve, update description, and delete for both roles
-- Ratings: doctor average rating and distribution visible to patients
-- Lab Tests (Patient): discover/select tests, calculate total, full-body checkup group, book with payment
-- Lab Tests (Doctor/Admin): doctor-initiated bookings; create/update/toggle/soft-delete tests
-- Payments: UPI/QR/Card flows with validation, success modal, receipts via PDF
-- Notifications: dropdown with unread count, status, grouping (Today/Yesterday/Earlier), mark-as-read, deep links
-- Analytics: overall metrics (appointments, doctors, patients, revenue, ratings, trends)
-- Reports: doctor performance, clinic overview, appointment trends, specialization analysis, patient analytics
-- Patient Insights: charts for overview, visits by doctor, and appointment status
-- Theme & Preferences: dark/light theme with persistence; enable notifications; compact UI density
+---
 
-## Database ERD
+## 🎨 UX/UI Engineering & Design
 
-Link to the database entity-relationship diagram:
-https://dbdiagram.io/d/6919c7fb6735e11170077862
+- **Role-Based Layouts**: Implemented a dynamic layout engine that serves completely different navigation structures and dashboards/themes based on the logged-in user's role (`Doctor` vs `Patient`) using Angular's content projection and routing.
+- **Responsive & Adaptive**: Built with **TailwindCSS** mobile-first utility classes, ensuring a native-like experience on phones while leveraging large screen real-estate for complex data tables on desktops.
+- **Interactive Dashboards**: Integrated **Chart.js** to visualize key metrics (Patient trends, Revenue, Appointment distributions) for data-driven decision making.
 
+---
 
+## 🔧 Technical Architecture & Patterns
 
-## Additional Resources
+### 🛡️ Secure Authentication & State
+- **Reactive State Management**: Heavy usage of **RxJS BehaviorSubjects** in services to manage global state (User Session, Notifications, Theme Preference) without prop-drilling.
+- **Http Interceptors**: Custom `TokenInterceptor` automatically attaches JWTs to outgoing requests and handles `401 Unauthorized` errors by triggering the refresh token flow seamlessly.
+- **Route Guards**: `AuthGuard` and `RoleGuard` protect sensitive routes, ensuring users can only navigate to authorized areas.
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+### 🧩 Modular Design Philosophy
+- **Feature Modules**: The codebase is architected into domain-specific modules (`Auth`, `Doctor`, `Patient`, `Shared`) to enforce separation of concerns and maintainability.
+- **Reusable Components**: Created a library of "dumb" presentation components (Cards, Tables, Modals) in the `Shared` module to reduce code duplication and ensure design consistency.
+- **Lazy Loading**: Route-level code splitting ensures fast initial load times by only downloading the chunks required for the current view.
+
+### 📡 Real-Time Integration
+- **WebSocket Client**: Integrated `@stomp/stompjs` to subscribe to personal notification topics, providing instant feedback (Toasts/Snackbars) when appointments are booked or statuses change.
+
+---
+
+## 🛠️ Tech Stack
+
+| Category | Technology |
+|----------|------------|
+| **Framework** | Angular 19+ |
+| **Language** | TypeScript |
+| **Styling** | TailwindCSS, PostCSS |
+| **Async Operations** | RxJS (Observables, Pipeable Operators) |
+| **Data Viz** | Chart.js |
+| **Build Tool** | Angular CLI / Vite |
+
+---
+
+## 🚀 Key Features
+
+### For Patients
+- **Smart Booking Flow**: 3-step wizard for selecting specialized doctors, choosing slots, and secure payment.
+- **Medical Vault**: Access history, prescriptions, and lab reports.
+- **Video Consultations**: Integrated interface for remote consultations.
+
+### For Doctors
+- **Practice Management**: Calendar view of daily appointments with drag-and-drop rescheduling (planned).
+- **EMR Editor**: Rich text tools to write prescriptions and diagnosis notes.
+- **Financial Analytics**: Revenue tracking and payout reports.
+
+---
+*Built by Vikrant - Demonstrating expertise in frontend architecture, component design, and reactive programming.*
