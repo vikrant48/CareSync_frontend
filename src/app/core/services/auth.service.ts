@@ -1,4 +1,4 @@
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, signal, inject, computed } from '@angular/core';
 import { PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -183,9 +183,7 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
-  isAuthenticated(): boolean {
-    return !!this.accessToken();
-  }
+  isAuthenticated = computed(() => !!this.accessToken());
 
   redirectToDashboard(role: Role | null) {
     if (role === 'DOCTOR') this.router.navigate(['/doctor']);

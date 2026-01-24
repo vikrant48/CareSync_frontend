@@ -44,6 +44,13 @@ export interface DoctorAppointmentItem {
   medicalHistory?: any[];
 }
 
+export interface SlotAvailabilityResponse {
+  availableSlots: string[];
+  onLeave: boolean;
+  leaveMessage: string | null;
+  leaveEndDate: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AppointmentService {
   private baseUrl = environment.apiBaseUrl;
@@ -51,7 +58,7 @@ export class AppointmentService {
   constructor(private http: HttpClient) { }
 
   getAvailableSlots(doctorId: number, dateISO: string) {
-    return this.http.get<string[]>(
+    return this.http.get<SlotAvailabilityResponse>(
       `${this.baseUrl}/api/appointments/available-slots?doctorId=${doctorId}&date=${dateISO}`
     );
   }

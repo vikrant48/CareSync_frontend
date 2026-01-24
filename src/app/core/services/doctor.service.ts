@@ -23,6 +23,7 @@ export interface Doctor {
   experiences?: any[];
   educations?: any[];
   certificates?: any[];
+  completionPercentage?: number;
 }
 
 @Injectable({ providedIn: 'root' })

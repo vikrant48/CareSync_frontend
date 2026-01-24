@@ -25,6 +25,10 @@ export class ToastService {
     this.show(message, 'error', durationMs);
   }
 
+  showInfo(message: string, durationMs: number = 2000) {
+    this.show(message, 'info', durationMs);
+  }
+
   show(message: string, type: ToastType, durationMs: number = 2000) {
     const id = this.nextId++;
     const expiresAt = Date.now() + durationMs;

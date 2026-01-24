@@ -151,8 +151,13 @@ export class DoctorPublicProfileComponent {
     this.selectedSlot = null;
     this.bookError = null;
     this.appts.getAvailableSlots(this.doctor.id, this.selectedDate).subscribe({
-      next: (slots) => {
-        this.slots = slots || [];
+      next: (resp) => {
+        if (resp.onLeave) {
+          this.slots = [];
+          this.toast.showInfo(resp.leaveMessage || 'Doctor is on leave');
+        } else {
+          this.slots = resp.availableSlots || [];
+        }
         this.loadingSlots = false;
       },
       error: () => (this.loadingSlots = false),
@@ -174,14 +179,15 @@ export class DoctorPublicProfileComponent {
     if (!this.selectedSlot || !this.doctor) return;
     this.validating = true;
     this.appts.getAvailableSlots(this.doctor.id, this.selectedDate).subscribe({
-      next: (slots) => {
-        const stillAvailable = (slots || []).includes(this.selectedSlot!);
+      next: (resp) => {
+        const slots = resp.availableSlots || [];
+        const stillAvailable = slots.includes(this.selectedSlot!);
         this.validating = false;
-        if (stillAvailable) {
+        if (stillAvailable && !resp.onLeave) {
           this.paymentModalOpen = true;
         } else {
           this.toast.showError('Selected slot is no longer available. Please choose another.');
-          this.slots = slots || [];
+          this.slots = slots;
           this.selectedSlot = null;
         }
       },

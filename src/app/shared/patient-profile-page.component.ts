@@ -43,6 +43,15 @@ export interface AppointmentCounts {
 
           <!-- Right: Action & Stats -->
           <div class="w-full md:w-auto flex flex-col items-start md:items-end gap-4">
+             <div class="w-full md:w-48 text-right">
+               <div class="flex justify-between md:justify-end gap-3 text-xs mb-1 text-gray-400 font-medium uppercase tracking-wider">
+                 <span>Profile Strength</span>
+                 <span class="text-blue-400 font-bold">{{ patient?.completionPercentage || 0 }}%</span>
+               </div>
+               <div class="w-full bg-gray-700 rounded-full h-1.5 overflow-hidden">
+                 <div class="bg-blue-500 h-1.5 rounded-full transition-all duration-1000" [style.width.%]="patient?.completionPercentage || 0"></div>
+               </div>
+             </div>
              <a class="btn-primary w-full md:w-auto shadow-lg shadow-blue-500/20" routerLink="/patient/profile/edit">
                <i class="fa-solid fa-pen-to-square mr-2"></i> Edit Profile
              </a>

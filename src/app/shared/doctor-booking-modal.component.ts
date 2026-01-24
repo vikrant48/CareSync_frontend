@@ -54,7 +54,15 @@ import { ToastService } from '../core/services/toast.service';
                  <span *ngIf="loadingSlots" class="text-xs text-emerald-500"><i class="fa-solid fa-circle-notch fa-spin mr-1"></i> Checking...</span>
               </div>
               
-              <div *ngIf="!loadingSlots" class="min-h-[100px]">
+              <div *ngIf="isOnLeave" class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-xl p-4 flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+                 <i class="fa-solid fa-calendar-xmark text-amber-500 mt-1"></i>
+                 <div>
+                    <h4 class="text-sm font-bold text-amber-800 dark:text-amber-200">Doctor Unavailable</h4>
+                    <p class="text-sm text-amber-700 dark:text-amber-300 mt-0.5">{{ leaveMessage }}</p>
+                 </div>
+              </div>
+
+              <div *ngIf="!loadingSlots && !isOnLeave" class="min-h-[100px]">
                 <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">
                   <button
                     *ngFor="let s of slots"
@@ -82,8 +90,8 @@ import { ToastService } from '../core/services/toast.service';
         <!-- Sticky Footer -->
         <div class="p-4 pb-8 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 shrink-0">
             <button 
-              class="btn-primary w-full py-3 text-base shadow-lg shadow-emerald-500/20" 
-              [disabled]="validating || !selectedSlot" 
+              class="btn-primary w-full py-3 text-base shadow-lg shadow-emerald-500/20 disabled:bg-gray-300 disabled:dark:bg-gray-700 disabled:text-gray-500 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none" 
+              [disabled]="validating || !selectedSlot || isOnLeave || slots.length === 0" 
               (click)="book()"
             >
               <span *ngIf="!validating">Confirm Booking <i class="fa-solid fa-arrow-right ml-2 opacity-80"></i></span>
@@ -113,6 +121,8 @@ export class DoctorBookingModalComponent implements OnChanges {
   loadingSlots = false;
   validating = false;
   minDate = '';
+  isOnLeave = false;
+  leaveMessage: string | null = null;
 
   ngOnChanges(changes: SimpleChanges): void {
     if ((changes['open'] || changes['doctor']) && this.open && this.doctor) {
@@ -130,9 +140,16 @@ export class DoctorBookingModalComponent implements OnChanges {
     this.loadingSlots = true;
     this.selectedSlot = null;
     this.appts.getAvailableSlots(this.doctor.id, this.selectedDate).subscribe({
-      next: (slots) => {
-        const filtered = this.filterPastSlots(slots || []);
-        this.slots = filtered;
+      next: (resp) => {
+        this.isOnLeave = resp.onLeave;
+        this.leaveMessage = resp.leaveMessage;
+
+        if (this.isOnLeave) {
+          this.slots = [];
+        } else {
+          const filtered = this.filterPastSlots(resp.availableSlots || []);
+          this.slots = filtered;
+        }
         this.loadingSlots = false;
       },
       error: () => (this.loadingSlots = false),
@@ -177,8 +194,17 @@ export class DoctorBookingModalComponent implements OnChanges {
     }
     this.validating = true;
     this.appts.getAvailableSlots(this.doctor.id, this.selectedDate).subscribe({
-      next: (slots) => {
-        const filtered = this.filterPastSlots(slots || []);
+      next: (resp) => {
+        if (resp.onLeave) {
+          this.validating = false;
+          this.toast.showError(resp.leaveMessage || 'Doctor is on leave.');
+          this.isOnLeave = true;
+          this.leaveMessage = resp.leaveMessage;
+          this.slots = [];
+          return;
+        }
+
+        const filtered = this.filterPastSlots(resp.availableSlots || []);
         const stillAvailable = filtered.includes(this.selectedSlot!);
         this.validating = false;
         if (stillAvailable) {

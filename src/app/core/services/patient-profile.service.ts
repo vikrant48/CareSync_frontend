@@ -27,6 +27,7 @@ export interface PatientDto {
   profileImageUrl?: string;
   gender?: string;
   bloodGroup?: string;
+  completionPercentage?: number;
 }
 
 export interface MedicalHistoryItem {

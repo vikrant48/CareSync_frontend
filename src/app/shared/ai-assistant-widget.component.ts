@@ -45,9 +45,14 @@ import { ToastService } from '../core/services/toast.service';
             </div>
           </div>
         </div>
-        <button (click)="toggleChat()" class="text-white/80 hover:text-white">
-          <i class="fas fa-times"></i>
-        </button>
+        <div class="flex items-center gap-2">
+           <button (click)="clearChat()" class="text-white/80 hover:text-white" title="Clear Chat">
+             <i class="fas fa-trash-alt"></i>
+           </button>
+           <button (click)="toggleChat()" class="text-white/80 hover:text-white">
+             <i class="fas fa-times"></i>
+           </button>
+        </div>
       </div>
 
       <!-- Messages Area -->
@@ -100,59 +105,68 @@ import { ToastService } from '../core/services/toast.service';
              </div>
 
              <!-- DOCTOR LIST -->
-             <div *ngIf="msg.suggestion.type === 'DOCTORS'" class="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
-                <div *ngFor="let doc of msg.suggestion.doctors" 
-                     (click)="selectDoctor(doc.id, msg.suggestion.reason)"
-                     class="min-w-[200px] bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 rounded-xl shadow-md hover:border-blue-500 border-2 cursor-pointer transition-all hover:shadow-lg">
-                   <div class="flex items-start gap-3 mb-3">
-                      <div class="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center overflow-hidden shrink-0 border border-blue-100">
-                         <img *ngIf="doc.profileImageUrl" [src]="doc.profileImageUrl" class="w-full h-full object-cover">
-                         <i *ngIf="!doc.profileImageUrl" class="fas fa-user-md text-xl text-blue-500"></i>
-                      </div>
-                       <div class="overflow-hidden">
-                          <div class="text-[12px] font-bold truncate flex items-center gap-1.5">
-                             {{ doc.name }}
-                             <i *ngIf="doc.isVerified" class="fa-solid fa-circle-check text-blue-500 text-[10px]" title="Verified"></i>
-                             <span *ngIf="doc['isOnLeave']" class="px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-[8px] font-black uppercase rounded-md border border-red-200 dark:border-red-800 shrink-0">Away</span>
-                          </div>
-                          <div class="text-[10px] text-blue-600 dark:text-blue-400 font-medium truncate">{{ doc.specialization }}</div>
-                       </div>
-                   </div>
-                   
-                   <div class="space-y-1.5 mb-3">
-                      <div class="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400">
-                         <i class="fas fa-star text-amber-400"></i>
-                         <span>{{ doc.experience }} Years Experience</span>
-                      </div>
-                      <div class="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400">
-                         <i class="fas fa-language text-indigo-500"></i>
-                         <span class="truncate">{{ doc.languages || 'English, Hindi' }}</span>
-                      </div>
-                   </div>
+             <div *ngIf="msg.suggestion.type === 'DOCTORS'" class="space-y-3">
+               <div class="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
+                  <div *ngFor="let doc of msg.suggestion.doctors" 
+                       (click)="selectDoctor(doc.id, msg.suggestion.reason)"
+                       class="min-w-[200px] bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 rounded-xl shadow-md hover:border-blue-500 border-2 cursor-pointer transition-all hover:shadow-lg">
+                     <div class="flex items-start gap-3 mb-3">
+                        <div class="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center overflow-hidden shrink-0 border border-blue-100">
+                           <img *ngIf="doc.profileImageUrl" [src]="doc.profileImageUrl" class="w-full h-full object-cover">
+                           <i *ngIf="!doc.profileImageUrl" class="fas fa-user-md text-xl text-blue-500"></i>
+                        </div>
+                         <div class="overflow-hidden">
+                            <div class="text-[12px] font-bold truncate flex items-center gap-1.5">
+                               {{ doc.name }}
+                               <i *ngIf="doc.isVerified" class="fa-solid fa-circle-check text-blue-500 text-[10px]" title="Verified"></i>
+                               <span *ngIf="doc['isOnLeave']" class="px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-[8px] font-black uppercase rounded-md border border-red-200 dark:border-red-800 shrink-0">Away</span>
+                            </div>
+                            <div class="text-[10px] text-blue-600 dark:text-blue-400 font-medium truncate">{{ doc.specialization }}</div>
+                         </div>
+                     </div>
+                     
+                     <div class="space-y-1.5 mb-3">
+                        <div class="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400">
+                           <i class="fas fa-star text-amber-400"></i>
+                           <span>{{ doc.experience }} Years Experience</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400">
+                           <i class="fas fa-language text-indigo-500"></i>
+                           <span class="truncate">{{ doc.languages || 'English, Hindi' }}</span>
+                        </div>
+                     </div>
 
-                   <div class="flex items-center justify-between pt-2 border-t border-gray-50 dark:border-gray-700">
-                      <span class="text-[10px] text-gray-400">Consultation Fee</span>
-                      <span class="text-[12px] font-bold text-green-600">₹{{ doc.consultationFee }}</span>
-                   </div>
-                </div>
+                     <div class="flex items-center justify-between pt-2 border-t border-gray-50 dark:border-gray-700">
+                        <span class="text-[10px] text-gray-400">Consultation Fee</span>
+                        <span class="text-[12px] font-bold text-green-600">₹{{ doc.consultationFee }}</span>
+                     </div>
+                  </div>
+               </div>
+               
+               <button (click)="startBooking()" class="text-xs text-blue-500 hover:text-blue-700 hover:underline flex items-center gap-1 pl-1">
+                  <i class="fas fa-arrow-left"></i> Change Specialization
+               </button>
              </div>
 
              <!-- DATE SELECTION -->
              <div *ngIf="msg.suggestion.type === 'DATES'" class="bg-white dark:bg-gray-800 border border-blue-50 dark:border-blue-900/30 p-4 rounded-xl shadow-md">
                 <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Select Appointment Date</div>
-                <div class="flex flex-wrap gap-2">
+                <div class="flex flex-wrap gap-2 mb-3">
                     <button (click)="selectRelativeDate(msg.suggestion.doctorId!, 0, msg.suggestion.reason)" class="px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition-all">Today</button>
                    <button (click)="selectRelativeDate(msg.suggestion.doctorId!, 1, msg.suggestion.reason)" class="px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition-all">Tomorrow</button>
                    
                    <div class="relative">
-                      <input #datePicker type="date" class="absolute inset-0 opacity-0 cursor-pointer" 
+                      <input #datePicker type="date" class="absolute inset-0 opacity-0 cursor-pointer pointer-events-none" 
                              [min]="minDate" (change)="onDateSelected(msg.suggestion.doctorId!, datePicker.value, msg.suggestion.reason)">
-                      <button class="px-4 py-2 border-2 border-dashed border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-blue-50 transition-all">
+                      <button (click)="openDatePicker(datePicker)" class="px-4 py-2 border-2 border-dashed border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-blue-50 transition-all">
                          <i class="fas fa-calendar-alt"></i>
                          Custom Date
                       </button>
                    </div>
                 </div>
+                <button (click)="selectSpecialization(msg.suggestion.specialization!, msg.suggestion.reason)" class="text-xs text-blue-500 hover:text-blue-700 hover:underline flex items-center gap-1 pl-1">
+                  <i class="fas fa-arrow-left"></i> Change Doctor
+               </button>
              </div>
 
              <!-- SLOT GRID -->
@@ -161,13 +175,16 @@ import { ToastService } from '../core/services/toast.service';
                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Available Slots</div>
                    <div class="text-[10px] font-bold text-blue-600">{{ msg.suggestion.date | date:'mediumDate' }}</div>
                 </div>
-                <div class="grid grid-cols-3 gap-2">
+                <div class="grid grid-cols-3 gap-2 mb-3">
                    <button *ngFor="let slot of msg.suggestion.slots" 
                            (click)="selectFinalSlot(msg.suggestion.doctorId!, msg.suggestion.date!, slot, msg.suggestion.reason)"
                            class="py-2 px-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-[10px] font-bold hover:bg-blue-600 hover:text-white transition-all">
                       {{ slot }}
                    </button>
                 </div>
+                <button (click)="selectDoctor(msg.suggestion.doctorId!, msg.suggestion.reason)" class="text-xs text-blue-500 hover:text-blue-700 hover:underline flex items-center gap-1 pl-1">
+                  <i class="fas fa-arrow-left"></i> Change Date
+               </button>
              </div>
 
               <!-- CONFIRMATION & PAYMENT -->
@@ -212,10 +229,14 @@ import { ToastService } from '../core/services/toast.service';
 
                    <button
                      (click)="openPaymentPopup(msg.suggestion)"
-                     class="w-full py-3 bg-white text-blue-700 rounded-xl text-xs font-bold shadow-xl hover:bg-blue-50 transition-all active:scale-95 flex items-center justify-center gap-2"
+                     class="w-full py-3 bg-white text-blue-700 rounded-xl text-xs font-bold shadow-xl hover:bg-blue-50 transition-all active:scale-95 flex items-center justify-center gap-2 mb-3"
                    >
                      <i class="fas fa-check-circle"></i>
                      {{ msg.suggestion.reason?.startsWith('RESCHEDULE') ? 'Confirm Reschedule' : 'Confirm & Pay Now' }}
+                   </button>
+                   
+                   <button (click)="onDateSelected(msg.suggestion.doctorId!, msg.suggestion.date!, msg.suggestion.reason)" class="w-full text-xs text-white/70 hover:text-white flex items-center justify-center gap-1">
+                      <i class="fas fa-arrow-left"></i> Change Slot
                    </button>
                 </div>
                 <i class="fas fa-calendar-check absolute -bottom-4 -right-4 text-8xl opacity-10 rotate-12"></i>
@@ -413,6 +434,11 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
     this.isOpen.set(!this.isOpen());
   }
 
+  clearChat() {
+    this.messages.set([]);
+    this.userInput = '';
+  }
+
   startBooking() {
     this.sendMessage(`ACTION_GET_SPECIALIZATIONS`);
   }
@@ -430,6 +456,14 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
     date.setDate(date.getDate() + daysToAdd);
     const dateStr = this.getLocalDateString(date);
     this.sendMessage(`ACTION_SELECT_DATE_${doctorId}_${dateStr}${reason ? '_' + reason : ''}`);
+  }
+
+  openDatePicker(input: HTMLInputElement) {
+    if (input.showPicker) {
+      input.showPicker();
+    } else {
+      input.click(); // Fallback
+    }
   }
 
   onDateSelected(doctorId: number, dateStr: string, reason?: string) {

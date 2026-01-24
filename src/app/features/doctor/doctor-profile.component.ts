@@ -278,6 +278,7 @@ export class DoctorProfileComponent implements OnInit {
       next: (e) => {
         this.educations.push(e);
         this.newEducation = { degree: '', institution: '', yearOfCompletion: new Date().getFullYear(), details: '' };
+        this.refreshProfileStats();
         this.editingEducationMode = false;
         this.toast.showSuccess('Education added successfully');
       },
@@ -336,6 +337,7 @@ export class DoctorProfileComponent implements OnInit {
         this.editingEducationId = null;
         this.newEducation = { degree: '', institution: '', yearOfCompletion: new Date().getFullYear(), details: '' };
         this.svc.getEducations(this.username!).subscribe({ next: (list) => (this.educations = list || []) });
+        this.refreshProfileStats();
         this.editingEducationMode = false;
         this.toast.showSuccess('Education updated successfully');
       },
@@ -373,7 +375,10 @@ export class DoctorProfileComponent implements OnInit {
   deleteEducation(item: any) {
     if (!this.username) return;
     this.svc.deleteEducation(this.username, item.id).subscribe({
-      next: () => (this.educations = this.educations.filter((e) => e.id !== item.id)),
+      next: () => {
+        this.educations = this.educations.filter((e) => e.id !== item.id);
+        this.refreshProfileStats();
+      },
     });
   }
 
@@ -393,6 +398,7 @@ export class DoctorProfileComponent implements OnInit {
       next: (e) => {
         this.experiences.push(e);
         this.newExperience = { hospitalName: '', position: '', yearsOfService: 1, details: '' };
+        this.refreshProfileStats();
         this.editingExperienceMode = false;
         this.toast.showSuccess('Experience added successfully');
       },
@@ -450,6 +456,7 @@ export class DoctorProfileComponent implements OnInit {
         this.editingExperienceId = null;
         this.newExperience = { hospitalName: '', position: '', yearsOfService: 1, details: '' };
         this.svc.getExperiences(this.username!).subscribe({ next: (list) => (this.experiences = list || []) });
+        this.refreshProfileStats();
         this.editingExperienceMode = false;
         this.toast.showSuccess('Experience updated successfully');
       },
@@ -487,7 +494,10 @@ export class DoctorProfileComponent implements OnInit {
   deleteExperience(item: any) {
     if (!this.username) return;
     this.svc.deleteExperience(this.username, item.id).subscribe({
-      next: () => (this.experiences = this.experiences.filter((e) => e.id !== item.id)),
+      next: () => {
+        this.experiences = this.experiences.filter((e) => e.id !== item.id);
+        this.refreshProfileStats();
+      },
     });
   }
 
@@ -539,6 +549,7 @@ export class DoctorProfileComponent implements OnInit {
         }
         this.uploadingCertificate = false;
         this.editingCertificatesMode = false;
+        this.refreshProfileStats();
         this.toast.showSuccess('Certificate uploaded successfully');
       },
       error: (e) => {
@@ -573,6 +584,7 @@ export class DoctorProfileComponent implements OnInit {
               next: (list) => {
                 this.certificates = list || [];
                 this.initCertEdit();
+                this.refreshProfileStats();
               },
             }),
           });
@@ -663,8 +675,18 @@ export class DoctorProfileComponent implements OnInit {
   deleteCertificate(item: any) {
     if (!this.username) return;
     this.svc.deleteCertificate(this.username, item.id).subscribe({
-      next: () => (this.certificates = this.certificates.filter((c) => c.id !== item.id)),
+      next: () => {
+        this.certificates = this.certificates.filter((c) => c.id !== item.id);
+        this.refreshProfileStats();
+      },
     });
+  }
+
+  // Refresh profile to update completion percentage without full reload
+  private refreshProfileStats() {
+    if (this.username) {
+      this.svc.getProfile(this.username).subscribe((p) => (this.profile = p));
+    }
   }
 
 

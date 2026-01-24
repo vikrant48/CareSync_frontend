@@ -97,7 +97,14 @@ export class RescheduleAppointmentModalComponent {
       return;
     }
     this.apptApi.getAvailableSlots(did, date).subscribe({
-      next: (slots) => (this.availableSlots = slots || []),
+      next: (resp) => {
+        if (resp.onLeave) {
+          this.error = resp.leaveMessage || 'Doctor is on leave';
+          this.availableSlots = [];
+        } else {
+          this.availableSlots = resp.availableSlots || [];
+        }
+      },
       error: () => (this.error = 'Unable to load slots'),
     });
   }

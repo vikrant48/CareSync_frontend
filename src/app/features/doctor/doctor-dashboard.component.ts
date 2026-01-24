@@ -64,6 +64,18 @@ import { forkJoin } from 'rxjs';
           </div>
         </div>
 
+        <!-- Active Leave Warning -->
+        <div *ngIf="isOnLeaveToday" class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 rounded-r shadow-md animate-fade-in flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+                <div>
+                   <p class="font-bold">You are currently on leave.</p>
+                   <p class="text-sm">Your booking slots are hidden from patients until your leave ends.</p>
+                </div>
+            </div>
+            <button (click)="leaveModalOpen = true" class="text-sm underline font-bold hover:text-orange-900">Manage Leave</button>
+        </div>
+
         <!-- Stats Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <!-- Total Today -->
@@ -172,6 +184,15 @@ import { forkJoin } from 'rxjs';
             <!-- Profile Quick View -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
                <h3 class="font-bold text-gray-900 dark:text-white mb-4">Profile Details</h3>
+               <div class="mb-4">
+                 <div class="flex justify-between text-xs mb-1">
+                   <span class="font-medium text-gray-600 dark:text-gray-300">Completion</span>
+                   <span class="font-bold text-blue-600">{{ profile?.completionPercentage || 0 }}%</span>
+                 </div>
+                 <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                   <div class="bg-blue-600 h-2 rounded-full transition-all duration-500" [style.width.%]="profile?.completionPercentage || 0"></div>
+                 </div>
+               </div>
                <div class="space-y-3">
                  <div class="flex items-center gap-3 text-sm">
                    <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 flex items-center justify-center"><i class="fa-solid fa-envelope"></i></div>
@@ -488,6 +509,11 @@ export class DoctorDashboardComponent implements OnInit {
   appointmentTrendsDaily: any = null;
   revenueAnalysis: any = null;
   analyticsRangeText: string | null = null;
+
+  get isOnLeaveToday(): boolean {
+    const today = this.todayISO();
+    return this.upcomingLeaves.some(l => l.startDate <= today && l.endDate >= today);
+  }
 
   // Chart data holders
   peakHoursLabels: string[] = [];

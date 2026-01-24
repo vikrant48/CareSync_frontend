@@ -71,6 +71,15 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
             </ng-container>
             <ng-template #nameReady>
               <div class="text-xl sm:text-2xl font-semibold">{{ patientName || 'Patient' }}!</div>
+              <div class="mt-2 text-sm text-white/90 w-48">
+                <div class="flex items-center justify-between mb-1 text-xs">
+                  <span>Profile Completion</span>
+                  <span class="font-bold">{{ completionPercentage || 0 }}%</span>
+                </div>
+                <div class="w-full bg-white/30 rounded-full h-1.5">
+                  <div class="bg-white h-1.5 rounded-full transition-all duration-500" [style.width.%]="completionPercentage || 0"></div>
+                </div>
+              </div>
             </ng-template>
           </div>
           <div class="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-4 sm:mt-0">
@@ -173,6 +182,7 @@ export class PatientDashboardComponent {
   loadingWelcome = true;
   patientName: string | null = null;
   profileImageUrl: string | null = null;
+  completionPercentage: number = 0;
 
   doctors: Doctor[] = [];
   ratings: Record<number, { avg: number; count: number }> = {};
@@ -379,6 +389,7 @@ export class PatientDashboardComponent {
         const name = [p?.firstName, p?.lastName].filter(Boolean).join(' ').trim();
         this.patientName = name || p?.username || 'Patient';
         this.profileImageUrl = p?.profileImageUrl || null;
+        this.completionPercentage = p?.completionPercentage || 0;
         this.loadingWelcome = false;
         this.cdr.markForCheck();
       },
