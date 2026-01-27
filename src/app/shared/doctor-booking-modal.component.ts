@@ -17,7 +17,7 @@ import { ToastService } from '../core/services/toast.service';
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between shrink-0 bg-white dark:bg-gray-900">
              <div class="flex items-center gap-3" *ngIf="doctor as doc">
                <div class="flex flex-col items-center gap-1">
-                 <div class="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center text-white border-2" [ngClass]="{'border-emerald-500': doc.isVerified, 'border-transparent': !doc.isVerified, 'bg-gray-700': !doc.profileImageUrl}">
+                 <div class="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center text-gray-400 dark:text-white border-2" [ngClass]="{'border-emerald-500': doc.isVerified, 'border-transparent': !doc.isVerified, 'bg-gray-200 dark:bg-gray-700': !doc.profileImageUrl}">
                    <img *ngIf="doc.profileImageUrl" [src]="doc.profileImageUrl" class="w-full h-full object-cover" (error)="doc.profileImageUrl = ''" />
                    <span *ngIf="!doc.profileImageUrl">{{ doctorInitial(doc) }}</span>
                  </div>

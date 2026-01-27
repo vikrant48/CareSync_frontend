@@ -10,27 +10,27 @@ import { ToastService } from '../core/services/toast.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="w-full max-w-lg mx-auto bg-gray-900 rounded-2xl shadow-xl border border-gray-800 overflow-hidden">
+    <div class="w-full max-w-lg mx-auto bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
       <!-- Header -->
-      <div class="bg-gradient-to-r from-gray-800 to-gray-900 border-b border-gray-700 px-6 py-4">
-        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+      <div class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+        <h2 class="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
           <i class="fa-solid fa-lock text-indigo-400"></i>
           Change Password
         </h2>
-        <p class="text-gray-400 text-xs mt-1">Ensure your account is secure by using a strong password.</p>
+        <p class="text-gray-500 dark:text-gray-400 text-xs mt-1">Ensure your account is secure by using a strong password.</p>
       </div>
 
       <div class="p-6 space-y-6">
         
         <!-- Current Password -->
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-300">Current Password</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Password</label>
           <div class="relative group">
             <input 
               [type]="showCurrent ? 'text' : 'password'" 
               [(ngModel)]="form.currentPassword"
               placeholder="Enter current password"
-              class="w-full pl-4 pr-12 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all shadow-sm group-hover:border-gray-600"
+              class="w-full pl-4 pr-12 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all shadow-sm group-hover:border-gray-300 dark:group-hover:border-gray-600"
             />
             <button 
               type="button" 
@@ -43,15 +43,15 @@ import { ToastService } from '../core/services/toast.service';
         </div>
 
         <!-- New Password -->
-        <div class="space-y-4 pt-2 border-t border-gray-800/50">
+        <div class="space-y-4 pt-2 border-t border-gray-200 dark:border-gray-800/50">
           <div class="space-y-2">
-            <label class="block text-sm font-medium text-gray-300">New Password</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">New Password</label>
             <div class="relative group">
               <input 
                 [type]="showNew ? 'text' : 'password'" 
                 [(ngModel)]="form.newPassword"
                 placeholder="Enter new password"
-                class="w-full pl-4 pr-12 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all shadow-sm group-hover:border-gray-600"
+                class="w-full pl-4 pr-12 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all shadow-sm group-hover:border-gray-300 dark:group-hover:border-gray-600"
               />
               <button 
                 type="button" 
@@ -65,13 +65,13 @@ import { ToastService } from '../core/services/toast.service';
 
           <!-- Confirm Password -->
           <div class="space-y-2">
-            <label class="block text-sm font-medium text-gray-300">Confirm New Password</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm New Password</label>
             <div class="relative group">
               <input 
                 [type]="showConfirm ? 'text' : 'password'" 
                 [(ngModel)]="form.confirmPassword"
                 placeholder="Confirm new password"
-                class="w-full pl-4 pr-12 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all shadow-sm group-hover:border-gray-600"
+                class="w-full pl-4 pr-12 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all shadow-sm group-hover:border-gray-300 dark:group-hover:border-gray-600"
               />
               <button 
                 type="button" 

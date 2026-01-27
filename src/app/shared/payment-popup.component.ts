@@ -31,72 +31,72 @@ export interface PaymentDetails {
       <div class="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity" (click)="closePayment()"></div>
 
       <!-- Modal -->
-      <div class="relative w-full max-w-lg bg-gray-900 rounded-2xl shadow-2xl ring-1 ring-white/10 overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
+      <div class="relative w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10 overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
         
         <!-- Header -->
-        <div class="relative px-6 py-5 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border-b border-white/5">
+        <div class="relative px-6 py-5 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-600/20 dark:to-purple-600/20 border-b border-gray-200 dark:border-white/5">
           <div class="flex items-center justify-between">
             <div>
-              <h2 class="text-xl font-bold text-white tracking-tight">{{ title }}</h2>
-              <p class="text-sm text-indigo-200 mt-0.5" *ngIf="additionalInfo">{{ additionalInfo }}</p>
+              <h2 class="text-xl font-bold text-gray-900 dark:text-white tracking-tight">{{ title }}</h2>
+              <p class="text-sm text-indigo-600 dark:text-indigo-200 mt-0.5" *ngIf="additionalInfo">{{ additionalInfo }}</p>
             </div>
             <button 
               (click)="closePayment()"
-              class="p-2 -mr-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-colors focus:outline-none"
+              class="p-2 -mr-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors focus:outline-none"
             >
               <i class="fa-solid fa-xmark text-lg"></i>
             </button>
           </div>
           
           <!-- Amount Badge -->
-          <div class="absolute top-5 right-14 bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 px-3 py-1 rounded-full text-sm font-semibold shadow-inner">
+          <div class="absolute top-5 right-14 bg-white dark:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-300 px-3 py-1 rounded-full text-sm font-semibold shadow-sm dark:shadow-inner">
             ₹{{ amount | number:'1.2-2' }}
           </div>
         </div>
 
         <!-- Content -->
-        <div class="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+        <div class="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 scrollbar-track-transparent">
           
           <!-- Method Selection -->
           <div *ngIf="!selectedMethod()">
-             <div class="text-sm font-medium text-gray-400 mb-3 uppercase tracking-wider">Select Payment Method</div>
+             <div class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wider">Select Payment Method</div>
              <div class="grid gap-3">
                <!-- UPI Option -->
                <button 
                  (click)="selectPaymentMethod('upi')"
-                 class="group relative flex items-center p-4 rounded-xl border border-gray-700 bg-gray-800/50 hover:bg-gray-800 hover:border-indigo-500/50 transition-all duration-200 text-left"
+                 class="group relative flex items-center p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800 hover:border-indigo-500 dark:hover:border-indigo-500/50 transition-all duration-200 text-left shadow-sm hover:shadow-md"
                >
-                 <div class="h-10 w-10 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                 <div class="h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform">
                    <i class="fa-solid fa-mobile-screen-button text-lg"></i>
                  </div>
                  <div class="ml-4 flex-1">
-                   <h3 class="font-semibold text-gray-200 group-hover:text-white">UPI Payment</h3>
-                   <p class="text-xs text-gray-400">Google Pay, PhonePe, Paytm</p>
+                   <h3 class="font-semibold text-gray-900 dark:text-gray-200 group-hover:text-indigo-600 dark:group-hover:text-white">UPI Payment</h3>
+                   <p class="text-xs text-gray-500 dark:text-gray-400">Google Pay, PhonePe, Paytm</p>
                  </div>
-                 <i class="fa-solid fa-chevron-right text-gray-600 group-hover:text-indigo-400"></i>
+                 <i class="fa-solid fa-chevron-right text-gray-400 dark:text-gray-600 group-hover:text-indigo-500 dark:group-hover:text-indigo-400"></i>
                </button>
  
                <!-- Card Option -->
                <button 
                  (click)="selectPaymentMethod('card')"
-                 class="group relative flex items-center p-4 rounded-xl border border-gray-700 bg-gray-800/50 hover:bg-gray-800 hover:border-purple-500/50 transition-all duration-200 text-left"
+                 class="group relative flex items-center p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800 hover:border-purple-500 dark:hover:border-purple-500/50 transition-all duration-200 text-left shadow-sm hover:shadow-md"
                >
-                 <div class="h-10 w-10 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                 <div class="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-500/10 flex items-center justify-center text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
                    <i class="fa-regular fa-credit-card text-lg"></i>
                  </div>
                  <div class="ml-4 flex-1">
-                   <h3 class="font-semibold text-gray-200 group-hover:text-white">Card Payment</h3>
-                   <p class="text-xs text-gray-400">Credit & Debit Cards</p>
+                   <h3 class="font-semibold text-gray-900 dark:text-gray-200 group-hover:text-purple-600 dark:group-hover:text-white">Card Payment</h3>
+                   <p class="text-xs text-gray-500 dark:text-gray-400">Credit & Debit Cards</p>
                  </div>
-                 <i class="fa-solid fa-chevron-right text-gray-600 group-hover:text-purple-400"></i>
+                 <i class="fa-solid fa-chevron-right text-gray-400 dark:text-gray-600 group-hover:text-purple-500 dark:group-hover:text-purple-400"></i>
                </button>
  
                <!-- QR Option -->
                <button 
                  (click)="selectPaymentMethod('qr')"
-                 class="group relative flex items-center p-4 rounded-xl border border-gray-700 bg-gray-800/50 hover:bg-gray-800 hover:border-emerald-500/50 transition-all duration-200 text-left"
+                 class="group relative flex items-center p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800 hover:border-emerald-500 dark:hover:border-emerald-500/50 transition-all duration-200 text-left shadow-sm hover:shadow-md"
                >
-                 <div class="h-10 w-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                 <div class="h-10 w-10 rounded-full bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
                    <i class="fa-solid fa-qrcode text-lg"></i>
                  </div>
                  <div class="ml-4 flex-1">
@@ -112,15 +112,15 @@ export interface PaymentDetails {
           <div *ngIf="selectedMethod()" class="animate-in slide-in-from-right-4 duration-300">
              
              <!-- Back Button -->
-             <button (click)="resetForm()" class="flex items-center text-sm text-gray-400 hover:text-white mb-4 transition-colors">
+             <button (click)="resetForm()" class="flex items-center text-sm text-gray-400 hover:text-gray-600 dark:hover:text-white mb-4 transition-colors">
                <i class="fa-solid fa-arrow-left mr-2"></i> Back to options
              </button>
  
              <!-- UPI Flow -->
              <div *ngIf="selectedMethod() === 'upi'" class="space-y-4">
-                <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50 text-center mb-4">
-                  <div class="text-gray-400 text-sm mb-1">Total Payable</div>
-                  <div class="text-2xl font-bold text-white">₹{{ amount }}</div>
+                <div class="bg-gray-100 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700/50 text-center mb-4">
+                  <div class="text-gray-500 dark:text-gray-400 text-sm mb-1">Total Payable</div>
+                  <div class="text-2xl font-bold text-gray-900 dark:text-white">₹{{ amount }}</div>
                 </div>
  
                 <div class="relative group">
@@ -134,21 +134,21 @@ export interface PaymentDetails {
                       [(ngModel)]="upiId"
                       (input)="onUpiInput($event)"
                       placeholder="username@bank"
-                      class="w-full pl-9 pr-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium"
+                      class="w-full pl-9 pr-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium"
                       [class.border-red-500_50]="errorMessage()"
                     >
                   </div>
  
                   <!-- Autocomplete Dropdown -->
                   <div *ngIf="showUpiSuggestions() && upiSuggestions.length > 0" 
-                       class="absolute z-10 w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl overflow-hidden animate-in fade-in duration-200">
+                       class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl overflow-hidden animate-in fade-in duration-200">
                      <button 
                        *ngFor="let suggestion of upiSuggestions"
                        (click)="selectUpiSuggestion(suggestion)"
-                       class="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors flex items-center justify-between group/item"
+                       class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center justify-between group/item"
                      >
                        <span>{{ suggestion }}</span>
-                       <span class="text-xs text-gray-500 group-hover/item:text-indigo-400">Select</span>
+                       <span class="text-xs text-gray-400 dark:text-gray-500 group-hover/item:text-indigo-500 dark:group-hover/item:text-indigo-400">Select</span>
                      </button>
                   </div>
                   <p *ngIf="errorMessage()" class="text-red-400 text-xs mt-1 ml-0.5 animate-in slide-in-from-top-1">{{ errorMessage() }}</p>
@@ -213,7 +213,7 @@ export interface PaymentDetails {
                        [(ngModel)]="cardDetails.cvv"
                        placeholder="123"
                        maxlength="3"
-                       class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-center text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 outline-none transition-all"
+                       class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-center text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 outline-none transition-all"
                      >
                    </div>
                 </div>
@@ -223,8 +223,8 @@ export interface PaymentDetails {
              <div *ngIf="selectedMethod() === 'qr'" class="flex flex-col items-center justify-center space-y-4 py-4">
                 <div class="relative bg-white p-4 rounded-xl shadow-lg border-4 border-emerald-500/20">
                   <!-- Simulated QR -->
-                  <div class="w-48 h-48 bg-gray-100 flex flex-col items-center justify-center text-gray-300 relative overflow-hidden">
-                     <i class="fa-solid fa-qrcode text-8xl opacity-20"></i>
+                  <div class="w-48 h-48 bg-gray-50 dark:bg-gray-100 flex flex-col items-center justify-center text-gray-300 relative overflow-hidden">
+                     <i class="fa-solid fa-qrcode text-8xl opacity-20 text-gray-400 dark:text-gray-300"></i>
                      <div class="absolute inset-0 flex flex-col items-center justify-center text-gray-800 animate-pulse">
                         <span class="text-xs font-bold uppercase tracking-widest text-emerald-600">Scan to Pay</span>
                         <span class="text-lg font-bold">₹{{ amount }}</span>
@@ -235,7 +235,7 @@ export interface PaymentDetails {
                   </div>
                 </div>
                 <div class="text-center space-y-1">
-                  <p class="text-sm text-gray-300 font-medium">Scan with any UPI App</p>
+                  <p class="text-sm text-gray-600 dark:text-gray-300 font-medium">Scan with any UPI App</p>
                   <p class="text-xs text-gray-500">{{ merchantUpiId }}</p>
                 </div>
              </div>
@@ -244,7 +244,7 @@ export interface PaymentDetails {
         </div>
 
         <!-- Footer Actions -->
-        <div class="p-6 pt-4 border-t border-white/5 bg-gray-900/50 flex flex-col sm:flex-row gap-3 items-center" *ngIf="selectedMethod()">
+        <div class="p-6 pt-4 border-t border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-gray-900/50 flex flex-col sm:flex-row gap-3 items-center" *ngIf="selectedMethod()">
            <button 
              *ngIf="selectedMethod() !== 'qr'"
              (click)="processPayment()"

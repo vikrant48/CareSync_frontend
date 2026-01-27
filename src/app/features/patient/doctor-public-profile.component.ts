@@ -18,6 +18,7 @@ import { AuthService } from '../../core/services/auth.service';
   imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, DoctorDetailsPanelComponent, PaymentPopupComponent, DoctorBookingModalComponent],
   template: `
     <app-patient-layout>
+    <div class="max-w-7xl mx-auto p-4 sm:p-6">
     <doctor-details-panel
       *ngIf="doctor; else loadingTpl"
       [doctor]="doctor"
@@ -60,6 +61,7 @@ import { AuthService } from '../../core/services/auth.service';
         <div class="sr-only">Loading doctor profile...</div>
       </div>
     </ng-template>
+    </div>
     </app-patient-layout>
   `,
 })

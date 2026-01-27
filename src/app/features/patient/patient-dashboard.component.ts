@@ -29,7 +29,7 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-patient-layout>
-    <div class="max-w-6xl mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8">
+    <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8">
       <!-- Welcome Banner -->
       <section class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl p-4 sm:p-6 shadow">
         <!-- Small screen top bar: avatar left, notification right -->
@@ -403,10 +403,10 @@ export class PatientDashboardComponent {
   statusClass(status: string) {
     const s = (status || '').toUpperCase();
     return {
-      'bg-green-700 text-white': s === 'CONFIRMED' || s === 'COMPLETED',
-      'bg-yellow-700 text-white': s === 'BOOKED' || s === 'SCHEDULED',
-      'bg-red-700 text-white': s === 'CANCELLED',
-      'bg-gray-700 text-white': !s,
+      'bg-green-100 text-green-800 dark:bg-green-700 dark:text-white': s === 'CONFIRMED' || s === 'COMPLETED',
+      'bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-white': s === 'BOOKED' || s === 'SCHEDULED',
+      'bg-red-100 text-red-800 dark:bg-red-700 dark:text-white': s === 'CANCELLED',
+      'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-white': !s,
     } as any;
   }
 

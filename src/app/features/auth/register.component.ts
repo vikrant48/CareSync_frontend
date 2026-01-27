@@ -27,7 +27,7 @@ import { MasterDataService } from '../../core/services/master-data.service';
         <!-- Header -->
         <div class="text-center mb-6">
           <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Create your account</h2>
-          <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Join CareSync to manage your health journey</p>
+          <!-- <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Join CareSync to manage your health journey</p> -->
         </div>
 
         <div class="bg-white dark:bg-gray-800 shadow-2xl shadow-gray-200/50 dark:shadow-gray-900/50 rounded-2xl sm:rounded-3xl border border-gray-100 dark:border-gray-700 backdrop-blur-sm overflow-hidden flex flex-col h-[70vh] sm:h-auto sm:max-h-[80vh]">

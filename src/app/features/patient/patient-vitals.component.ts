@@ -15,7 +15,7 @@ Chart.register(...registerables);
   imports: [CommonModule, FormsModule, ReactiveFormsModule, PatientLayoutComponent],
   template: `
     <app-patient-layout>
-      <div class="max-w-6xl mx-auto p-4 sm:p-6 space-y-8">
+      <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
         <!-- Header -->
         <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
           <div>

@@ -14,7 +14,7 @@ import { AiAssistantWidgetComponent } from './ai-assistant-widget.component';
       <!-- Sidebar (hidden on small screens) -->
       <aside class="hidden md:flex md:h-full bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex-col overflow-hidden">
         <div class="px-4 py-4 border-b border-gray-700">
-          <div class="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-100">
+          <div class="text-lg font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-100">
             <i class="fas fa-user-injured"></i>
             <span>CareSync Patient</span>
           </div>
@@ -75,7 +75,7 @@ import { AiAssistantWidgetComponent } from './ai-assistant-widget.component';
 
       <!-- Content Area -->
       <main class="relative min-h-0 md:h-full h-[calc(100dvh-3.5rem-4rem)] overflow-y-auto overflow-x-hidden min-w-0 md:pb-0 pb-[env(safe-area-inset-bottom)]">
-        <div class="p-4 sm:p-6">
+        <div>
           <ng-content></ng-content>
         </div>
         <app-toast-container></app-toast-container>

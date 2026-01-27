@@ -39,7 +39,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
       <!-- Dropdown -->
       <div 
         *ngIf="showDropdown && (filteredSpecializations.length > 0 || canAddNew)"
-        class="absolute z-50 w-full mt-2 bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-xl shadow-2xl overflow-hidden animate-fade-in"
+        class="absolute z-50 w-full mt-2 bg-white dark:bg-gray-900/95 backdrop-blur-xl border border-gray-200 dark:border-gray-700/50 rounded-xl shadow-2xl overflow-hidden animate-fade-in"
       >
         <div class="max-h-60 overflow-y-auto custom-scrollbar p-1">
           <!-- Existing specializations -->
@@ -48,8 +48,10 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
             class="px-3 py-2 cursor-pointer flex items-center justify-between rounded-lg transition-colors group/item"
             [class.bg-blue-600]="selectedIndex === i"
             [class.text-white]="selectedIndex === i"
-            [class.hover:bg-gray-800]="selectedIndex !== i"
-            [class.text-gray-200]="selectedIndex !== i"
+            [class.hover:bg-gray-100]="selectedIndex !== i"
+            [class.dark:hover:bg-gray-800]="selectedIndex !== i"
+            [class.text-gray-800]="selectedIndex !== i"
+            [class.dark:text-gray-200]="selectedIndex !== i"
             (mousedown)="selectSpecialization(spec)"
             (mouseenter)="selectedIndex = i"
           >
@@ -60,8 +62,9 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
           <!-- Add new option -->
           <div
             *ngIf="canAddNew && inputValue.trim()"
-            class="px-3 py-2 cursor-pointer mt-1 border-t border-gray-700/50 text-emerald-400 rounded-lg hover:bg-gray-800/50 transition-colors flex items-center gap-2"
-            [class.bg-gray-800]="selectedIndex === filteredSpecializations.length"
+            class="px-3 py-2 cursor-pointer mt-1 border-t border-gray-200 dark:border-gray-700/50 text-emerald-600 dark:text-emerald-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors flex items-center gap-2"
+            [class.bg-gray-100]="selectedIndex === filteredSpecializations.length"
+            [class.dark:bg-gray-800]="selectedIndex === filteredSpecializations.length"
             (mousedown)="addNewSpecialization()"
             (mouseenter)="selectedIndex = filteredSpecializations.length"
           >
@@ -75,7 +78,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
         <!-- No results -->
         <div
           *ngIf="filteredSpecializations.length === 0 && !canAddNew"
-          class="px-4 py-3 text-gray-500 text-sm text-center italic border-t border-gray-800"
+          class="px-4 py-3 text-gray-500 text-sm text-center italic border-t border-gray-200 dark:border-gray-800"
         >
           No specializations found
         </div>

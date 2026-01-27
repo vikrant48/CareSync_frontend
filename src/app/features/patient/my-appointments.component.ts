@@ -18,13 +18,13 @@ import { MasterDataService } from '../../core/services/master-data.service';
   imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, PatientAppointmentCardComponent, RescheduleAppointmentModalComponent, CancellationModalComponent],
   template: `
     <app-patient-layout>
-    <div class="max-w-6xl mx-auto space-y-6">
+    <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
       
       <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 class="text-2xl font-bold text-gray-100 tracking-tight">My Appointments</h2>
-           <p class="text-gray-400 text-sm mt-1">Manage and track your scheduled consultations</p>
+          <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200 tracking-tight">My Appointments</h2>
+           <p class="text-gray-800 dark:text-gray-400 text-sm mt-1">Manage and track your scheduled consultations</p>
         </div>
         <button class="btn-secondary self-start sm:self-auto text-sm py-2 px-4 shadow-lg shadow-gray-900/20" (click)="refresh()" [disabled]="loading">
            <i class="fa-solid fa-rotate mr-2" [class.fa-spin]="loading"></i> Refresh
@@ -36,20 +36,20 @@ import { MasterDataService } from '../../core/services/master-data.service';
         <div class="flex items-center justify-between gap-2 mb-2">
             <div class="flex items-center gap-2">
                <i class="fa-solid fa-filter text-blue-500"></i>
-               <span class="font-semibold text-gray-200">Filters</span>
+               <span class="font-semibold text-gray-800 dark:text-gray-200">Filters</span>
             </div>
             <button *ngIf="statusFilter || specializationFilter || rangeFilter" 
                     (click)="clearFilters()" 
-                    class="text-xs text-red-400 hover:text-red-300 hover:underline flex items-center gap-1 transition-colors">
+                    class="text-xs text-red-600 dark:text-red-400 hover:text-red-300 hover:underline flex items-center gap-1 transition-colors">
                <i class="fa-solid fa-xmark"></i> Clear Filters
             </button>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="relative z-10">
-            <label class="block text-xs font-medium text-gray-400 mb-1 ml-1">Status</label>
+            <label class="block text-xs font-medium text-gray-800 dark:text-gray-400 mb-1 ml-1">Status</label>
             <div class="relative">
-              <select class="input w-full appearance-none bg-gray-900/50" [(ngModel)]="statusFilter">
+              <select class="input w-full appearance-none bg-gray-800/50" [(ngModel)]="statusFilter">
                 <option value="">All Statuses</option>
                 <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
               </select>
@@ -60,14 +60,14 @@ import { MasterDataService } from '../../core/services/master-data.service';
           </div>
           
           <div class="relative z-10">
-            <label class="block text-xs font-medium text-gray-400 mb-1 ml-1">Specialization</label>
-            <input type="text" class="input w-full bg-gray-900/50" [(ngModel)]="specializationFilter" placeholder="e.g. Cardiology..." />
+            <label class="block text-xs font-medium text-gray-800 dark:text-gray-400 mb-1 ml-1">Specialization</label>
+            <input type="text" class="input w-full bg-gray-800/50" [(ngModel)]="specializationFilter" placeholder="e.g. Cardiology..." />
           </div>
           
           <div class="relative z-10">
-             <label class="block text-xs font-medium text-gray-400 mb-1 ml-1">Time Range</label>
+             <label class="block text-xs font-medium text-gray-800 dark:text-gray-400 mb-1 ml-1">Time Range</label>
              <div class="relative">
-                <select class="input w-full appearance-none bg-gray-900/50" [(ngModel)]="rangeFilter">
+                <select class="input w-full appearance-none bg-gray-800/50" [(ngModel)]="rangeFilter">
                   <option value="">All Time</option>
                   <option value="upcoming">Upcoming</option>
                   <option value="today">Today</option>
@@ -81,8 +81,8 @@ import { MasterDataService } from '../../core/services/master-data.service';
         </div>
 
         <div class="flex items-center justify-end border-t border-gray-800 pt-3 mt-2">
-          <div class="text-xs text-gray-400">
-             Showing <span class="font-bold text-gray-200">{{ filtered().length }}</span> of {{ appointments.length }} appointments
+          <div class="text-xs text-gray-800 dark:text-gray-400">
+             Showing <span class="font-bold text-gray-800 dark:text-gray-200">{{ filtered().length }}</span> of {{ appointments.length }} appointments
           </div>
         </div>
       </div>
@@ -94,12 +94,12 @@ import { MasterDataService } from '../../core/services/master-data.service';
       </section>
 
       <!-- Empty State -->
-      <div *ngIf="!loading && filtered().length === 0" class="flex flex-col items-center justify-center py-16 text-center animate-fade-in bg-gray-800/20 rounded-2xl border border-gray-800 border-dashed">
-         <div class="w-20 h-20 rounded-full bg-gray-800 flex items-center justify-center text-4xl mb-4 text-gray-600">
+      <div *ngIf="!loading && filtered().length === 0" class="flex flex-col items-center justify-center py-16 text-center animate-fade-in bg-gray-50 dark:bg-gray-800/20 rounded-2xl border border-gray-200 dark:border-gray-800 border-dashed">
+         <div class="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-4xl mb-4 text-gray-400 dark:text-gray-600">
             <i class="fa-regular fa-calendar-xmark"></i>
          </div>
-         <h3 class="text-xl font-bold text-gray-300 mb-2">No Appointments Found</h3>
-         <p class="text-gray-500 max-w-md mx-auto mb-6">
+         <h3 class="text-xl font-bold text-gray-800 dark:text-gray-300 mb-2">No Appointments Found</h3>
+         <p class="text-gray-600 dark:text-gray-500 max-w-md mx-auto mb-6">
             {{ appointments.length === 0 ? "You haven't booked any appointments yet." : "No appointments match your current filters." }}
          </p>
          <button *ngIf="appointments.length > 0" (click)="clearFilters()" class="btn-secondary">
@@ -240,7 +240,9 @@ export class MyAppointmentsComponent {
   filtered() {
     const list = [...this.appointments];
     const nowMs = new Date().getTime();
-    return list.filter((a) => {
+
+    // First apply filters
+    const filteredList = list.filter((a) => {
       const statusOk = !this.statusFilter || (a.status || '').toUpperCase() === this.statusFilter.toUpperCase();
       const specOk = !this.specializationFilter || (a.doctorSpecialization || '').toLowerCase().includes(this.specializationFilter.toLowerCase());
       let rangeOk = true;
@@ -249,6 +251,22 @@ export class MyAppointmentsComponent {
       if (this.rangeFilter === 'today') rangeOk = isAppointmentToday(a);
       return statusOk && specOk && rangeOk;
     });
+
+    return this.sortBySmart(filteredList);
+  }
+
+  private sortBySmart(items: PatientAppointmentItem[]) {
+    const now = Date.now();
+    const upcoming = items.filter(a => getAppointmentEpochMs(a) >= now);
+    const past = items.filter(a => getAppointmentEpochMs(a) < now);
+
+    // Sort upcoming by nearest date (Ascending)
+    upcoming.sort((a, b) => getAppointmentEpochMs(a) - getAppointmentEpochMs(b));
+
+    // Sort past by most recent date (Descending)
+    past.sort((a, b) => getAppointmentEpochMs(b) - getAppointmentEpochMs(a));
+
+    return [...upcoming, ...past];
   }
 
   // Status class moved to shared utils (cards consume it internally)

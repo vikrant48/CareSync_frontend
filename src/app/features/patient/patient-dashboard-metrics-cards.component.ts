@@ -13,7 +13,7 @@ import { PatientAppointmentItem } from '../../core/services/appointment.service'
         <!-- Pending Feedback Card -->
         <div class="panel p-5 flex flex-col items-center justify-between transition-transform hover:scale-[1.02] shadow-lg">
           <div class="w-full flex items-center justify-between mb-2">
-            <span class="font-bold text-gray-200">Pending Feedback</span>
+            <span class="font-bold text-gray-800 dark:text-gray-200">Pending Feedback</span>
             <button class="text-blue-400 hover:text-blue-300 text-sm font-medium" (click)="openFeedback.emit()">View All</button>
           </div>
           <div class="flex-1 flex flex-col items-center justify-center py-2">
@@ -26,7 +26,7 @@ import { PatientAppointmentItem } from '../../core/services/appointment.service'
         <!-- My Appointments Card -->
         <div class="panel p-5 flex flex-col items-center justify-between transition-transform hover:scale-[1.02] shadow-lg">
           <div class="w-full flex items-center justify-between mb-2">
-            <span class="font-bold text-gray-200">My Appointments</span>
+            <span class="font-bold text-gray-800 dark:text-gray-200">My Appointments</span>
             <button class="text-blue-400 hover:text-blue-300 text-sm font-medium" (click)="openMyAppointments.emit()">View All</button>
           </div>
           <div class="flex-1 flex flex-col items-center justify-center py-2">
@@ -39,7 +39,7 @@ import { PatientAppointmentItem } from '../../core/services/appointment.service'
         <!-- Today Appointments Card -->
         <div class="panel p-5 flex flex-col items-center justify-between transition-transform hover:scale-[1.02] shadow-lg">
           <div class="w-full flex items-center justify-between mb-2">
-            <span class="font-bold text-gray-200">Today</span>
+            <span class="font-bold text-gray-800 dark:text-gray-200">Today</span>
             <button class="text-blue-400 hover:text-blue-300 text-sm font-medium" (click)="openTodayAppointments.emit()">View All</button>
           </div>
           <div class="flex-1 flex flex-col items-center justify-center py-2">
@@ -52,7 +52,7 @@ import { PatientAppointmentItem } from '../../core/services/appointment.service'
         <!-- Lab Tests Card -->
         <div class="panel p-5 flex flex-col items-center justify-between transition-transform hover:scale-[1.02] shadow-lg">
           <div class="w-full flex items-center justify-between mb-2">
-            <span class="font-bold text-gray-200">Lab Tests</span>
+            <span class="font-bold text-gray-800 dark:text-gray-200">Lab Tests</span>
             <button class="text-blue-400 hover:text-blue-300 text-sm font-medium" (click)="openLabTests.emit()">View All</button>
           </div>
           <div class="flex-1 flex flex-col items-center justify-center py-2">

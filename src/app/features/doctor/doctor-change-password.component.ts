@@ -10,8 +10,10 @@ import { ChangePasswordFormComponent } from '../../shared/change-password-form.c
   imports: [CommonModule, RouterModule, DoctorLayoutComponent, ChangePasswordFormComponent],
   template: `
     <app-doctor-layout>
-      <app-change-password-form />
+      <div class="max-w-7xl mx-auto p-4 sm:p-6">
+        <app-change-password-form />
+      </div>
     </app-doctor-layout>
   `,
 })
-export class DoctorChangePasswordComponent {}
+export class DoctorChangePasswordComponent { }

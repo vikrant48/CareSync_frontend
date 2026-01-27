@@ -14,11 +14,11 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-patient-layout>
-      <div class="space-y-8">
+      <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
         <!-- Header -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Analytics & Insights</h2>
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">Analytics & Insights</h2>
             <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Track your health journey and appointment history.</p>
           </div>
           <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
@@ -37,7 +37,7 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
               <div class="absolute right-0 top-0 w-24 h-24 bg-blue-50 dark:bg-blue-900/20 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
               <div class="relative z-10">
                 <div class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Total Appointments</div>
-                <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ patientAnalytics?.totalAppointments || 0 }}</div>
+                <div class="text-3xl font-bold text-gray-800 dark:text-white">{{ patientAnalytics?.totalAppointments || 0 }}</div>
                 <div class="mt-2 text-xs text-blue-600 dark:text-blue-400 font-medium flex items-center gap-1">
                   <i class="fa-solid fa-arrow-up"></i>
                   <span>All time</span>
@@ -50,7 +50,7 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
               <div class="absolute right-0 top-0 w-24 h-24 bg-emerald-50 dark:bg-emerald-900/20 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
               <div class="relative z-10">
                 <div class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Avg. Visits / Month</div>
-                <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ patientAnalytics?.averageVisitsPerMonth || 0 }}</div>
+                <div class="text-3xl font-bold text-gray-800 dark:text-white">{{ patientAnalytics?.averageVisitsPerMonth || 0 }}</div>
                 <div class="mt-2 text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
                   <i class="fa-solid fa-chart-line"></i>
                   <span>Activity Level</span>
@@ -63,7 +63,7 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
               <div class="absolute right-0 top-0 w-24 h-24 bg-rose-50 dark:bg-rose-900/20 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
               <div class="relative z-10">
                 <div class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Cancelled</div>
-                <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ patientAnalytics?.cancelledAppointments || 0 }}</div>
+                <div class="text-3xl font-bold text-gray-800 dark:text-white">{{ patientAnalytics?.cancelledAppointments || 0 }}</div>
                 <div class="mt-2 text-xs text-rose-600 dark:text-rose-400 font-medium flex items-center gap-1">
                   <i class="fa-solid fa-ban"></i>
                   <span>Missed</span>
@@ -76,7 +76,7 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
               <div class="absolute right-0 top-0 w-24 h-24 bg-indigo-50 dark:bg-indigo-900/20 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
               <div class="relative z-10">
                 <div class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Completed</div>
-                <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ patientAnalytics?.totalVisits || 0 }}</div>
+                <div class="text-3xl font-bold text-gray-800 dark:text-white">{{ patientAnalytics?.totalVisits || 0 }}</div>
                 <div class="mt-2 text-xs text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-1">
                   <i class="fa-solid fa-check-double"></i>
                   <span>Successful</span>
@@ -92,7 +92,7 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
               <div class="absolute right-0 top-0 w-24 h-24 bg-amber-50 dark:bg-amber-900/20 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
               <div class="relative z-10">
                 <div class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Total Spend</div>
-                <div class="text-3xl font-bold text-gray-900 dark:text-white">₹{{ financialStats?.totalSpend || 0 }}</div>
+                <div class="text-3xl font-bold text-gray-800 dark:text-white">₹{{ financialStats?.totalSpend || 0 }}</div>
                 <div class="mt-2 text-xs text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
                   <i class="fa-solid fa-wallet"></i>
                   <span>Lifetime</span>
@@ -105,7 +105,7 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
               <div class="absolute right-0 top-0 w-24 h-24 bg-cyan-50 dark:bg-cyan-900/20 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
               <div class="relative z-10">
                 <div class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Appointment Spend</div>
-                <div class="text-3xl font-bold text-gray-900 dark:text-white">₹{{ financialStats?.totalAppointmentSpend || 0 }}</div>
+                <div class="text-3xl font-bold text-gray-800 dark:text-white">₹{{ financialStats?.totalAppointmentSpend || 0 }}</div>
                 <div class="mt-2 text-xs text-cyan-600 dark:text-cyan-400 font-medium flex items-center gap-1">
                   <i class="fa-solid fa-user-doctor"></i>
                   <span>Consultations</span>
@@ -118,7 +118,7 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
               <div class="absolute right-0 top-0 w-24 h-24 bg-purple-50 dark:bg-purple-900/20 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
               <div class="relative z-10">
                 <div class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Lab Test Spend</div>
-                <div class="text-3xl font-bold text-gray-900 dark:text-white">₹{{ financialStats?.totalLabTestSpend || 0 }}</div>
+                <div class="text-3xl font-bold text-gray-800 dark:text-white">₹{{ financialStats?.totalLabTestSpend || 0 }}</div>
                 <div class="mt-2 text-xs text-purple-600 dark:text-purple-400 font-medium flex items-center gap-1">
                   <i class="fa-solid fa-flask"></i>
                   <span>Tests & Diagnostics</span>
@@ -131,7 +131,7 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Doctor Visits Chart -->
             <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">Visits by Doctor</h3>
+              <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-6">Visits by Doctor</h3>
               <div class="flex-1 min-h-[300px]">
                 <app-chart-widget
                   *ngIf="doctorVisitLabels.length > 0; else noDataDocs"
@@ -150,7 +150,7 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
 
             <!-- Appointment Status Chart -->
             <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">Appointment Status</h3>
+              <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-6">Appointment Status</h3>
               <div class="flex-1 min-h-[300px]">
                 <app-chart-widget
                   *ngIf="appointmentStatusData.length > 0 && hasData(appointmentStatusData); else noDataStatus"
@@ -169,7 +169,7 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
 
              <!-- Overview Bar Chart (Full Width) -->
             <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">Appointment Overview</h3>
+              <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-6">Appointment Overview</h3>
               <div class="flex-1 min-h-[300px]">
                  <app-chart-widget
                   *ngIf="overviewData.length > 0; else noDataOverview"

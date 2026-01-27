@@ -14,14 +14,14 @@ import { SpecializationAutocompleteComponent } from '../../shared/specialization
   imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent],
   template: `
     <app-patient-layout>
-    <div class="max-w-6xl mx-auto space-y-6">
+    <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
       <!-- Header Section -->
       <section class="panel p-4 sm:p-6 flex flex-col items-center justify-between gap-4 md:flex-row shadow-lg">
         <div class="flex flex-col gap-1 w-full md:w-auto text-center md:text-left">
           <h2 class="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
              Find & Book Appointments
           </h2>
-          <p class="text-sm text-gray-400">Search for specialized doctors and book your slot.</p>
+          <p class="text-sm text-gray-600 dark:text-gray-400">Search for specialized doctors and book your slot.</p>
         </div>
         
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
@@ -39,11 +39,11 @@ import { SpecializationAutocompleteComponent } from '../../shared/specialization
         <div class="flex items-center justify-between gap-2 mb-2">
             <div class="flex items-center gap-2">
                <i class="fa-solid fa-filter text-blue-500"></i>
-               <span class="font-semibold text-gray-200">Filters</span>
+               <span class="font-semibold text-gray-800 dark:text-gray-200">Filters</span>
             </div>
             <button *ngIf="specializationFilter || nameFilter || genderFilter || addressFilter" 
                     (click)="resetFilters()" 
-                    class="text-xs text-red-400 hover:text-red-300 hover:underline flex items-center gap-1 transition-colors">
+                    class="text-xs text-red-600 dark:text-red-400 hover:text-red-300 hover:underline flex items-center gap-1 transition-colors">
                <i class="fa-solid fa-xmark"></i> Clear Filters
             </button>
         </div>
@@ -52,26 +52,26 @@ import { SpecializationAutocompleteComponent } from '../../shared/specialization
             class="w-full relative z-40"
             [(ngModel)]="specializationFilter"
             placeholder="Specialization..."
-            inputClass="input w-full bg-gray-900/50"
+            inputClass="input w-full bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
             [allowAddNew]="false">
           </app-specialization-autocomplete>
           
           <div class="relative z-10">
-             <input type="text" class="input w-full bg-gray-900/50" placeholder="Doctor name..." [(ngModel)]="nameFilter" />
+             <input type="text" class="input w-full bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400" placeholder="Doctor name..." [(ngModel)]="nameFilter" />
           </div>
 
           <div class="relative z-10">
-            <select class="input w-full appearance-none bg-gray-900/50" [(ngModel)]="genderFilter">
-              <option value="">All Genders</option>
-              <option *ngFor="let g of genders" [value]="g">{{ g }}</option>
+            <select class="input w-full appearance-none bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100" [(ngModel)]="genderFilter">
+              <option value="" class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">All Genders</option>
+              <option *ngFor="let g of genders" [value]="g" class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">{{ g }}</option>
             </select>
             <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-              <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
+              <i class="fa-solid fa-chevron-down text-xs text-gray-600 dark:text-gray-400"></i>
             </div>
          </div>
 
          <div class="relative z-10">
-             <input type="text" class="input w-full bg-gray-900/50" placeholder="Location..." [(ngModel)]="addressFilter" />
+             <input type="text" class="input w-full bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400" placeholder="Location..." [(ngModel)]="addressFilter" />
           </div>
         </div>
       </section>
@@ -96,8 +96,8 @@ import { SpecializationAutocompleteComponent } from '../../shared/specialization
           <!-- Rating Badge -->
           <div class="absolute top-3 right-3 text-xs font-bold bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1 border border-white/10 shadow-sm z-10" *ngIf="ratings[d.id] as r">
              <i class="fa-solid fa-star text-yellow-400 text-[10px]"></i>
-             <span class="text-gray-200">{{ r.avg.toFixed(1) }}</span>
-             <span class="text-gray-500 text-[10px]">({{ r.count }})</span>
+             <span class="text-gray-800 dark:text-gray-200">{{ r.avg.toFixed(1) }}</span>
+             <span class="text-gray-800 dark:text-gray-200 text-[10px]">({{ r.count }})</span>
           </div>
 
           <div class="flex items-start gap-4 mb-4">
@@ -115,19 +115,19 @@ import { SpecializationAutocompleteComponent } from '../../shared/specialization
              </div>
              
              <div class="min-w-0 flex-1 pt-1">
-                <h3 class="font-bold text-lg text-gray-100 truncate group-hover:text-blue-400 transition-colors">{{ formatDoctorName(d) }}</h3>
+                <h3 class="font-bold text-lg text-gray-800 dark:text-gray-200 truncate group-hover:text-blue-400 transition-colors">{{ formatDoctorName(d) }}</h3>
                 <div class="text-sm text-blue-400 font-medium truncate mb-0.5">{{ d.specialization || 'General Practitioner' }}</div>
-                <div class="text-xs text-gray-500 truncate" *ngIf="d.gender"><span class="capitalize">{{ d.gender }}</span> Doctor</div>
+                <div class="text-xs text-gray-800 dark:text-gray-200 truncate" *ngIf="d.gender"><span class="capitalize">{{ d.gender }}</span> Doctor</div>
              </div>
           </div>
 
           <!-- Info Rows -->
           <div class="space-y-2 mb-5 flex-1">
-             <div class="flex items-center gap-2 text-sm text-gray-400" *ngIf="d.consultationFees">
+             <div class="flex items-center gap-2 text-sm text-gray-800 dark:text-gray-200" *ngIf="d.consultationFees">
                 <div class="w-6 flex justify-center"><i class="fa-solid fa-money-bill-wave text-green-500/70"></i></div>
                 <span>Rs. {{ d.consultationFees }} / Visit</span>
              </div>
-             <div class="flex items-center gap-2 text-sm text-gray-400" *ngIf="d.address">
+             <div class="flex items-center gap-2 text-sm text-gray-800 dark:text-gray-200" *ngIf="d.address">
                 <div class="w-6 flex justify-center"><i class="fa-solid fa-location-dot text-red-400/70"></i></div>
                 <span class="truncate">{{ d.address }}</span>
              </div>

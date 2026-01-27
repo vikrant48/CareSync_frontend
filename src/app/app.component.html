@@ -4,10 +4,12 @@
     <a [routerLink]="auth.isAuthenticated() ? (auth.role() === 'DOCTOR' ? '/doctor' : (auth.role() === 'PATIENT' ? '/patient' : '/login')) : '/login'"
       class="text-base sm:text-lg font-semibold" title="Home">CareSync</a>
     <nav class="flex flex-wrap gap-2 items-center">
-      <span *ngIf="!auth.accessToken()" class="flex items-center gap-2">
+      @if (!auth.isAuthenticated()) {
+      <span class="flex items-center gap-2">
         <a routerLink="/login" class="btn-secondary" aria-label="Login">Login</a>
         <a routerLink="/register" class="btn-primary" aria-label="Register">Register</a>
       </span>
+      }
     </nav>
   </div>
 </header>

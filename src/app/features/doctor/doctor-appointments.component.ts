@@ -20,7 +20,7 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
   imports: [CommonModule, FormsModule, RouterModule, DoctorAppointmentCardComponent, PatientDetailsModalComponent, MedicalHistoryDetailModalComponent, DoctorLayoutComponent],
   template: `
     <app-doctor-layout>
-    <div class="p-6 space-y-6 max-w-7xl mx-auto">
+    <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
       <!-- Header -->
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
@@ -351,6 +351,16 @@ export class DoctorAppointmentsComponent {
   }
 
   private sortByNearestUpcoming(items: DoctorAppointmentItem[]) {
-    return items.slice().sort((x, y) => getDoctorAppointmentEpochMs(x) - getDoctorAppointmentEpochMs(y));
+    const now = Date.now();
+    const upcoming = items.filter(a => getDoctorAppointmentEpochMs(a) >= now);
+    const past = items.filter(a => getDoctorAppointmentEpochMs(a) < now);
+
+    // Sort upcoming by nearest date (Ascending)
+    upcoming.sort((a, b) => getDoctorAppointmentEpochMs(a) - getDoctorAppointmentEpochMs(b));
+
+    // Sort past by most recent date (Descending)
+    past.sort((a, b) => getDoctorAppointmentEpochMs(b) - getDoctorAppointmentEpochMs(a));
+
+    return [...upcoming, ...past];
   }
 }

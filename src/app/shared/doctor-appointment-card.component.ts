@@ -35,7 +35,7 @@ import { DoctorAppointmentItem } from '../core/services/appointment.service';
             <h3 class="font-bold text-gray-900 dark:text-gray-100 truncate text-lg leading-tight">{{ appointment.patientName }}</h3>
             <span
               class="shrink-0 px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider border whitespace-nowrap mt-0.5"
-              [ngClass]="statusBadgeClass(appointment.status)"
+              [ngClass]="statusBadgeClass(appointment)"
             >
               {{ statusLabel(appointment) }}
             </span>
@@ -178,8 +178,14 @@ export class DoctorAppointmentCardComponent {
   onJoinVideo() { this.joinVideo.emit(this.appointment); }
   changeStatus(appointment: DoctorAppointmentItem, status: string) { this.statusChange.emit({ appointment, status }); }
 
-  statusBadgeClass(status: string) {
-    const s = (status || '').toUpperCase();
+  statusBadgeClass(a: DoctorAppointmentItem) {
+    const s = (a.status || '').toUpperCase();
+
+    // Check for expired state first
+    if (a.isActive === false && s !== 'COMPLETED' && !s.startsWith('CANCELLED')) {
+      return 'bg-gray-200 text-gray-500 border-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600 line-through decoration-gray-400';
+    }
+
     if (s === 'CONFIRMED') return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800';
     if (s === 'COMPLETED') return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800';
     if (s.startsWith('CANCELLED')) return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800';
@@ -189,9 +195,16 @@ export class DoctorAppointmentCardComponent {
   }
 
   statusLabel(a: DoctorAppointmentItem) {
-    if (a.status === 'CANCELLED_BY_DOCTOR') return 'Cancelled by Me';
-    if (a.status === 'CANCELLED_BY_PATIENT') return 'Cancelled by Patient';
-    if (a.status === 'CANCELLED') return 'Cancelled';
+    const s = (a.status || '').toUpperCase();
+
+    // Check for expired state first
+    if (a.isActive === false && s !== 'COMPLETED' && !s.startsWith('CANCELLED')) {
+      return 'Expired';
+    }
+
+    if (s === 'CANCELLED_BY_DOCTOR') return 'Cancelled by Me';
+    if (s === 'CANCELLED_BY_PATIENT') return 'Cancelled by Patient';
+    if (s === 'CANCELLED') return 'Cancelled';
     return a.status;
   }
 

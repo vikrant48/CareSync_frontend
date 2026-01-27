@@ -18,32 +18,32 @@ import { PatientAppointmentItem } from '../core/services/appointment.service';
                <span *ngIf="!appointment.doctorProfileImageUrl">{{ (appointment.doctorName || 'D') | slice:0:1 }}</span>
             </div>
             <div class="min-w-0">
-              <h4 class="font-bold text-gray-100 truncate text-base leading-tight">
+              <h4 class="font-bold text-gray-800 dark:text-gray-100 truncate text-base leading-tight">
                 {{ appointment.doctorName }}
                 <span *ngIf="appointment.doctorIsVerified" class="inline-flex items-center gap-1 ml-1 px-1.5 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-[9px] font-black text-blue-400 uppercase tracking-tighter" title="Verified">
                   <i class="fa-solid fa-circle-check"></i>
                   <span>Verified</span>
                 </span>
               </h4>
-              <p class="text-sm text-gray-400 truncate">{{ appointment.doctorSpecialization }}</p>
+              <p class="text-sm text-gray-800 dark:text-gray-400 truncate">{{ appointment.doctorSpecialization }}</p>
             </div>
           </div>
-          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border" [ngClass]="statusClass(appointment.status)">
+          <span class="px-2.5 py-1 rounded-full text-[10px] dark:text-[10px] font-bold tracking-wider uppercase border" [ngClass]="statusClass(appointment)">
             {{ statusLabel(appointment) }}
           </span>
         </div>
 
         <!-- Details -->
-        <div class="bg-gray-900/50 rounded-lg p-3 space-y-2 border border-gray-800/50">
-           <div class="flex items-center gap-2 text-sm text-gray-300">
+        <div class="bg-gray-400/50 dark:bg-gray-900/50 rounded-lg p-3 space-y-2 border border-gray-800/50">
+           <div class="flex items-center gap-2 text-sm text-gray-800 dark:text-gray-300">
              <i class="fa-regular fa-calendar text-blue-400 w-4"></i>
              <span>{{ appointment.appointmentDate | date:'mediumDate' }}</span>
            </div>
-           <div class="flex items-center gap-2 text-sm text-gray-300">
+           <div class="flex items-center gap-2 text-sm text-gray-800 dark:text-gray-300">
              <i class="fa-regular fa-clock text-blue-400 w-4"></i>
              <span>{{ appointment.appointmentTime }}</span>
            </div>
-           <div class="flex items-start gap-2 text-sm text-gray-300" *ngIf="appointment.reason">
+           <div class="flex items-start gap-2 text-sm text-gray-800 dark:text-gray-300" *ngIf="appointment.reason">
              <i class="fa-regular fa-note-sticky text-gray-500 w-4 mt-0.5"></i>
              <span class="italic text-gray-400 text-xs">{{ appointment.reason }}</span>
            </div>
@@ -84,8 +84,14 @@ export class PatientAppointmentCardComponent {
   onViewDoctor() { this.viewDoctor.emit(this.appointment); }
   onJoinVideo() { this.joinVideo.emit(this.appointment); }
 
-  statusClass(status: string) {
-    const s = (status || '').toUpperCase();
+  statusClass(a: PatientAppointmentItem) {
+    const s = (a.status || '').toUpperCase();
+
+    // Check for expired state first
+    if (a.isActive === false && s !== 'COMPLETED' && !s.startsWith('CANCELLED')) {
+      return 'bg-gray-200 text-gray-500 border-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600 line-through decoration-gray-400';
+    }
+
     return {
       'bg-blue-500/10 text-blue-400 border-blue-500/20': s === 'CONFIRMED',
       'bg-green-500/10 text-green-400 border-green-500/20': s === 'COMPLETED',
@@ -99,6 +105,12 @@ export class PatientAppointmentCardComponent {
 
   statusLabel(a: PatientAppointmentItem) {
     const s = (a.status || '').toUpperCase();
+
+    // Check for expired state first
+    if (a.isActive === false && s !== 'COMPLETED' && !s.startsWith('CANCELLED')) {
+      return 'Expired';
+    }
+
     if (s === 'CANCELLED_BY_PATIENT') return 'Cancelled by Me';
     if (s === 'CANCELLED_BY_DOCTOR') return 'Cancelled by Doctor';
     if (s === 'CANCELLED') return 'Cancelled';

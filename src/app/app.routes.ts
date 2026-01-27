@@ -11,6 +11,8 @@ import { DoctorProfileComponent } from './features/doctor/doctor-profile.compone
 import { PatientProfileComponent } from './features/patient/patient-profile.component';
 import { PatientEditPageComponent } from './shared/patient-edit-page.component';
 import { DoctorPublicProfileComponent } from './features/patient/doctor-public-profile.component';
+import { DoctorLeaveManagementComponent } from './features/doctor/doctor-leave-management.component';
+import { DoctorScheduleComponent } from './features/doctor/doctor-schedule.component';
 import { PatientBookAppointmentComponent } from './features/patient/patient-book-appointment.component';
 import { MyAppointmentsComponent } from './features/patient/my-appointments.component';
 import { PatientFeedbackComponent } from './features/patient/patient-feedback.component';
@@ -83,6 +85,18 @@ export const routes: Routes = [
   {
     path: 'doctor/lab-test-management',
     component: LabTestManagementComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['DOCTOR'] }
+  },
+  {
+    path: 'doctor/leaves',
+    component: DoctorLeaveManagementComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['DOCTOR'] }
+  },
+  {
+    path: 'doctor/schedule',
+    component: DoctorScheduleComponent,
     canActivate: [authGuard, roleGuard],
     data: { roles: ['DOCTOR'] }
   },
