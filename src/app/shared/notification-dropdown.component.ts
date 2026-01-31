@@ -2,7 +2,7 @@ import { Component, Input, inject, ChangeDetectionStrategy, ChangeDetectorRef, O
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
-import { NotificationService, NotificationItem, NotificationStatus } from '../core/services/notification.service';
+import { NotificationService, NotificationItem } from '../core/services/notification.service';
 
 @Component({
   selector: 'app-notification-dropdown',
@@ -56,10 +56,10 @@ import { NotificationService, NotificationItem, NotificationStatus } from '../co
         <div class="max-h-[70vh] sm:max-h-96 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
           
           <!-- Loading/Status (Optional) -->
-          <div *ngIf="showStatus && notifStatus" class="px-4 py-2 text-[10px] text-gray-500 bg-gray-900/50 border-b border-gray-800/50 flex justify-between">
-             <span>Service Status</span>
-             <span [class.text-green-500]="notifStatus.status !== 'Unknown'" [class.text-gray-500]="notifStatus.status === 'Unknown'">
-               {{ notifStatus.status }}
+          <div *ngIf="showStatus" class="px-4 py-2 text-[10px] text-gray-500 bg-gray-900/50 border-b border-gray-800/50 flex justify-between">
+             <span>Live Status</span>
+             <span [class.text-green-500]="isConnected" [class.text-red-500]="!isConnected">
+               {{ isConnected ? 'Connected' : 'Disconnected' }}
              </span>
           </div>
 
@@ -183,7 +183,7 @@ export class NotificationDropdownComponent implements OnInit, OnChanges {
   unreadCount = 0;
   feed: NotificationItem[] = [];
   groupedFeedData: { label: 'Today' | 'Yesterday' | 'Earlier'; items: NotificationItem[] }[] = [];
-  notifStatus: NotificationStatus | null = null;
+  isConnected = false;
 
   private auth = inject(AuthService);
   private notifApi = inject(NotificationService);
@@ -194,6 +194,33 @@ export class NotificationDropdownComponent implements OnInit, OnChanges {
   ngOnInit(): void {
     const uid = this.userId ?? (this.auth.userId() ? Number(this.auth.userId()) : null);
     this.refreshUnreadCount(uid);
+
+    // Subscribe to connection status
+    this.notifApi.isSocketConnected().subscribe(connected => {
+      this.isConnected = connected;
+      this.cdr.markForCheck();
+    });
+
+    // Subscribe to real-time notifications
+    this.notifApi.listenForRealTimeNotifications().subscribe((notification: NotificationItem) => {
+      // Optimistically add to feed if it's for this user
+      // The backend sends to /user/queue/notifications so it should be for us
+      this.unreadCount = (this.unreadCount || 0) + 1;
+      this.feed = [notification, ...this.feed];
+
+      // If grouped, re-compute
+      if (this.grouped) {
+        const todayLabel = 'Today';
+        const todayGroup = this.groupedFeedData.find(g => g.label === todayLabel);
+        if (todayGroup) {
+          todayGroup.items.unshift(notification);
+        } else {
+          this.groupedFeedData.unshift({ label: 'Today', items: [notification] });
+        }
+      }
+
+      this.cdr.markForCheck();
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -240,7 +267,6 @@ export class NotificationDropdownComponent implements OnInit, OnChanges {
   }
 
   fetchNotifications(userId: number | null) {
-    this.notifApi.getStatus().subscribe({ next: (s) => (this.notifStatus = s) });
     if (userId == null) {
       this.feed = [];
       this.groupedFeedData = [];

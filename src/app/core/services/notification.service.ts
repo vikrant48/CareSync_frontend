@@ -14,22 +14,21 @@ export interface NotificationItem {
   link?: string; // optional router link for navigation
 }
 
-export interface NotificationStatus {
-  service: string;
-  status: string;
-  timestamp: string;
-}
+
+
+import { WebSocketService } from './websocket.service';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
   private baseUrl = `${environment.apiBaseUrl}/api/notifications`;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private webSocketService: WebSocketService
+  ) { }
 
-  getStatus(): Observable<NotificationStatus | null> {
-    return this.http.get<NotificationStatus>(`${this.baseUrl}/status`).pipe(
-      catchError(() => of(null))
-    );
+  isSocketConnected(): Observable<boolean> {
+    return this.webSocketService.isConnected();
   }
 
   getDoctorFeed(doctorId: number): Observable<NotificationItem[]> {
@@ -62,5 +61,9 @@ export class NotificationService {
     if (ts >= startOfToday) return 'Today';
     if (ts >= startOfYesterday && ts < startOfToday) return 'Yesterday';
     return 'Earlier';
+  }
+
+  listenForRealTimeNotifications(): Observable<NotificationItem> {
+    return this.webSocketService.getNotificationStream();
   }
 }

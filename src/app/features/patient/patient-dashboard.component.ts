@@ -15,6 +15,7 @@ import { AnalyticsApiService } from '../../core/services/analytics.service';
 import { RescheduleAppointmentModalComponent } from '../../shared/reschedule-appointment-modal.component';
 import { MedicalHistoryDetailModalComponent } from '../../shared/medical-history-detail-modal.component';
 import { PatientAppointmentCardComponent } from '../../shared/patient-appointment-card.component';
+import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.component';
 import { getAppointmentEpochMs, isAppointmentToday } from '../../shared/appointment-utils';
 // ChartWidget moved into PatientReportsComponent
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
@@ -25,7 +26,7 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
 @Component({
   selector: 'app-patient-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, PatientAppointmentCardComponent, RescheduleAppointmentModalComponent, PatientNotificationComponent, MedicalHistoryDetailModalComponent, PatientDashboardMetricsCardsComponent, PatientMyHealthComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, PatientAppointmentCardComponent, RescheduleAppointmentModalComponent, PatientNotificationComponent, MedicalHistoryDetailModalComponent, PatientDashboardMetricsCardsComponent, PatientMyHealthComponent, SharedChatModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-patient-layout>
@@ -144,6 +145,7 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
               (cancel)="cancelAppointment($event)"
               (viewDoctor)="viewDoctorFromAppointment($event)"
               (joinVideo)="joinConsultation($event)"
+              (openChat)="openChat($event)"
             ></patient-appointment-card>
           </div>
        </section>
@@ -171,6 +173,14 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
         [doctorInfo]="selectedHistoryDoctorInfo"
         (close)="closeHistoryDetail()"
       ></app-medical-history-detail-modal>
+      <!-- Shared Chat Modal -->
+      <app-shared-chat-modal
+        [isOpen]="chatOpen"
+        [appointmentId]="chatAppointmentId"
+        [participantName]="chatParticipantName"
+        [participantImage]="chatParticipantImage"
+        (close)="closeChat()"
+      ></app-shared-chat-modal>
     </div>
     </app-patient-layout>
   `,
@@ -611,5 +621,25 @@ export class PatientDashboardComponent {
 
   joinConsultation(a: PatientAppointmentItem) {
     this.router.navigate(['/patient/consultation', a.appointmentId]);
+  }
+
+  // Chat Logic
+  chatOpen = false;
+  chatAppointmentId: number | null = null;
+  chatParticipantName: string | null = null;
+  chatParticipantImage: string | null = null;
+
+  openChat(a: PatientAppointmentItem) {
+    this.chatAppointmentId = a.appointmentId;
+    this.chatParticipantName = a.doctorName || 'Doctor';
+    this.chatParticipantImage = a.doctorProfileImageUrl || null;
+    this.chatOpen = true;
+  }
+
+  closeChat() {
+    this.chatOpen = false;
+    this.chatAppointmentId = null;
+    this.chatParticipantName = null;
+    this.chatParticipantImage = null;
   }
 }

@@ -2,11 +2,12 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DoctorAppointmentItem } from '../core/services/appointment.service';
+import { RouterModule } from '@angular/router';
 
 @Component({
   standalone: true,
   selector: 'doctor-appointment-card',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   template: `
     <div
       class="group relative bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-300 h-full flex flex-col"
@@ -108,6 +109,9 @@ import { DoctorAppointmentItem } from '../core/services/appointment.service';
                <i class="fa-solid fa-check-circle"></i> Complete
             </button>
           </div>
+          <button class="btn-action bg-blue-500 hover:bg-blue-600 text-white w-full" (click)="toggleChat()" [disabled]="disabled || appointment.isActive === false">
+            <i class="fa-solid fa-comments"></i> Chat with Patient
+          </button>
         </div>
 
         <!-- COMPLETED: Show Read-Only Medical Record Button or No Record Label -->
@@ -130,6 +134,7 @@ import { DoctorAppointmentItem } from '../core/services/appointment.service';
           <i class="fa-regular fa-id-card"></i> View Patient Details
         </button>
       </div>
+
     </div>
   `,
   styles: [`
@@ -167,6 +172,7 @@ export class DoctorAppointmentCardComponent {
   @Output() cancel = new EventEmitter<DoctorAppointmentItem>();
   @Output() joinVideo = new EventEmitter<DoctorAppointmentItem>();
   @Output() statusChange = new EventEmitter<{ appointment: DoctorAppointmentItem; status: string }>();
+  @Output() openChat = new EventEmitter<DoctorAppointmentItem>();
 
   onViewPatient() { this.viewPatient.emit(this.appointment); }
   onCreateMedicalDescription() { this.openHistoryForm.emit(this.appointment); }
@@ -177,6 +183,10 @@ export class DoctorAppointmentCardComponent {
   onCancel() { this.cancel.emit(this.appointment); }
   onJoinVideo() { this.joinVideo.emit(this.appointment); }
   changeStatus(appointment: DoctorAppointmentItem, status: string) { this.statusChange.emit({ appointment, status }); }
+
+  toggleChat() {
+    this.openChat.emit(this.appointment);
+  }
 
   statusBadgeClass(a: DoctorAppointmentItem) {
     const s = (a.status || '').toUpperCase();

@@ -10,6 +10,7 @@ import { MedicalHistoryFormModalComponent } from '../../shared/medical-history-f
 import { AppointmentService, DoctorAppointmentItem } from '../../core/services/appointment.service';
 import { PatientProfileService, PatientDto, MedicalHistoryItem, MedicalHistoryWithDoctorItem } from '../../core/services/patient-profile.service';
 import { AuthService } from '../../core/services/auth.service';
+import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.component';
 
 @Component({
     selector: 'app-doctor-schedule',
@@ -22,7 +23,8 @@ import { AuthService } from '../../core/services/auth.service';
         DoctorAppointmentCardComponent,
         PatientDetailsModalComponent,
         MedicalHistoryDetailModalComponent,
-        MedicalHistoryFormModalComponent
+        MedicalHistoryFormModalComponent,
+        SharedChatModalComponent
     ],
     template: `
     <app-doctor-layout>
@@ -93,6 +95,7 @@ import { AuthService } from '../../core/services/auth.service';
              (cancel)="cancel($event)"
              (joinVideo)="joinConsultation($event)"
              (statusChange)="changeStatus($event.appointment, $event.status)"
+             (openChat)="openChat($event)"
              class="h-full"
            ></doctor-appointment-card>
         </div>
@@ -125,6 +128,15 @@ import { AuthService } from '../../core/services/auth.service';
           (close)="closeHistoryForm()"
           (submit)="saveMedicalHistory()"
         ></app-medical-history-form-modal>
+
+        <!-- Shared Chat Modal -->
+        <app-shared-chat-modal
+          [isOpen]="chatOpen"
+          [appointmentId]="chatAppointmentId"
+          [participantName]="chatParticipantName"
+          [participantImage]="chatParticipantImage"
+          (close)="closeChat()"
+        ></app-shared-chat-modal>
 
       </div>
     </app-doctor-layout>
@@ -307,5 +319,25 @@ export class DoctorScheduleComponent implements OnInit {
                 this.historyError = 'Failed to save record';
             }
         });
+    }
+
+    // Chat Logic
+    chatOpen = false;
+    chatAppointmentId: number | null = null;
+    chatParticipantName: string | null = null;
+    chatParticipantImage: string | null = null;
+
+    openChat(a: DoctorAppointmentItem) {
+        this.chatAppointmentId = a.appointmentId;
+        this.chatParticipantName = a.patientName || 'Patient';
+        this.chatParticipantImage = a.patientProfileImageUrl || null;
+        this.chatOpen = true;
+    }
+
+    closeChat() {
+        this.chatOpen = false;
+        this.chatAppointmentId = null;
+        this.chatParticipantName = null;
+        this.chatParticipantImage = null;
     }
 }

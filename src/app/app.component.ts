@@ -17,6 +17,7 @@ export class AppComponent {
   auth = inject(AuthService);
   private theme = inject(ThemeService);
   private platformId = inject(PLATFORM_ID);
+  isBrowser = isPlatformBrowser(this.platformId);
 
   constructor() { }
 

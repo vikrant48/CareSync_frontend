@@ -9,6 +9,7 @@ import { MedicalHistoryDetailModalComponent } from '../../shared/medical-history
 import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 import { AppointmentService, DoctorAppointmentItem } from '../../core/services/appointment.service';
 import { MasterDataService } from '../../core/services/master-data.service';
+import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.component';
 import { PatientProfileService, PatientDto, MedicalHistoryWithDoctorItem } from '../../core/services/patient-profile.service';
 import { forkJoin, map, firstValueFrom } from 'rxjs';
 
@@ -17,7 +18,7 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
 @Component({
   selector: 'app-doctor-appointments',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, DoctorAppointmentCardComponent, PatientDetailsModalComponent, MedicalHistoryDetailModalComponent, DoctorLayoutComponent],
+  imports: [CommonModule, FormsModule, RouterModule, DoctorAppointmentCardComponent, PatientDetailsModalComponent, MedicalHistoryDetailModalComponent, DoctorLayoutComponent, SharedChatModalComponent],
   template: `
     <app-doctor-layout>
     <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
@@ -109,6 +110,7 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
           (cancel)="changeStatus($event, 'CANCELLED')"
           (joinVideo)="joinConsultation($event)"
           (statusChange)="changeStatus($event.appointment, $event.status)"
+          (openChat)="openChat($event)"
         ></doctor-appointment-card>
       </div>
 
@@ -128,6 +130,15 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
         [doctorInfo]="selectedHistoryDoctorInfo"
         (close)="closeHistoryDetail()"
       ></app-medical-history-detail-modal>
+
+      <!-- Shared Chat Modal -->
+      <app-shared-chat-modal
+        [isOpen]="chatOpen"
+        [appointmentId]="chatAppointmentId"
+        [participantName]="chatParticipantName"
+        [participantImage]="chatParticipantImage"
+        (close)="closeChat()"
+      ></app-shared-chat-modal>
     </div>
     </app-doctor-layout>
   `,
@@ -362,5 +373,25 @@ export class DoctorAppointmentsComponent {
     past.sort((a, b) => getDoctorAppointmentEpochMs(b) - getDoctorAppointmentEpochMs(a));
 
     return [...upcoming, ...past];
+  }
+
+  // Chat Logic
+  chatOpen = false;
+  chatAppointmentId: number | null = null;
+  chatParticipantName: string | null = null;
+  chatParticipantImage: string | null = null;
+
+  openChat(a: DoctorAppointmentItem) {
+    this.chatAppointmentId = a.appointmentId;
+    this.chatParticipantName = a.patientName || 'Patient';
+    this.chatParticipantImage = a.patientProfileImageUrl || null;
+    this.chatOpen = true;
+  }
+
+  closeChat() {
+    this.chatOpen = false;
+    this.chatAppointmentId = null;
+    this.chatParticipantName = null;
+    this.chatParticipantImage = null;
   }
 }
