@@ -4,60 +4,64 @@ import { RouterModule } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
 import { ToastContainerComponent } from './toast-container.component';
 import { AiAssistantWidgetComponent } from './ai-assistant-widget.component';
+import { ProductTourComponent } from './product-tour/product-tour.component';
+import { TourService } from '../core/services/tour.service';
+import { inject } from '@angular/core';
 
 @Component({
   selector: 'app-patient-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, ToastContainerComponent, AiAssistantWidgetComponent],
+  imports: [CommonModule, RouterModule, ToastContainerComponent, AiAssistantWidgetComponent, ProductTourComponent],
   template: `
+    <app-product-tour></app-product-tour>
     <div class="h-full w-full md:grid md:grid-cols-[16rem_1fr] md:h-[calc(100dvh-3.5rem)] md:min-h-0 md:items-stretch bg-[var(--bg)] text-[var(--text)]">
       <!-- Sidebar (hidden on small screens) -->
       <aside class="hidden md:flex md:h-full bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex-col overflow-hidden">
         <div class="px-4 py-4 border-b border-gray-700">
           <div class="text-lg font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-100">
             <i class="fas fa-user-injured"></i>
-            <span>CareSync Patient</span>
+            <span>Patient</span>
           </div>
-          <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">Welcome</div>
         </div>
         <nav class="flex-1 px-3 py-3 space-y-1">
-          <a routerLink="/patient" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+          <a id="nav-dashboard" routerLink="/patient" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
             <i class="fas fa-home"></i>
             <span>Dashboard</span>
           </a>
-          <a routerLink="/patient/book-appointment" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+          <a id="nav-book-appointment" routerLink="/patient/book-appointment" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
             <i class="fas fa-calendar-plus"></i>
             <span>Book Appointment</span>
           </a>
-          <a routerLink="/patient/appointments" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+          <a id="nav-my-appointments" routerLink="/patient/appointments" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
             <i class="fas fa-calendar-check"></i>
             <span>My Appointments</span>
           </a>
-          <a routerLink="/patient/reports" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+          <a id="nav-reports" routerLink="/patient/reports" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
             <i class="fas fa-chart-line"></i>
             <span>Reports</span>
           </a>
-          <a routerLink="/patient/vitals" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+          <a id="nav-health-vitals" routerLink="/patient/vitals" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
             <i class="fas fa-heart-pulse"></i>
             <span>Health Vitals</span>
           </a>
-          <a routerLink="/lab-tests" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+          <a id="nav-lab-tests" routerLink="/lab-tests" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
             <i class="fas fa-flask"></i>
             <span>Lab Tests</span>
           </a>
-          <a routerLink="/patient/lab-bookings" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+          <a id="nav-lab-bookings" routerLink="/patient/lab-bookings" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
             <i class="fas fa-vial"></i>
             <span>My Lab Bookings</span>
           </a>
-          <a routerLink="/patient/feedback" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+          <a id="nav-feedback" routerLink="/patient/feedback" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
             <i class="fas fa-star"></i>
             <span>Feedback</span>
           </a>
-          <a routerLink="/patient/profile" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+          <a id="nav-profile" routerLink="/patient/profile" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
             <i class="fas fa-id-badge"></i>
             <span>Profile</span>
           </a>
-          <a routerLink="/settings" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+
+          <a id="nav-settings" routerLink="/settings" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
             <i class="fas fa-cog"></i>
             <span>Settings</span>
           </a>
@@ -65,7 +69,7 @@ import { AiAssistantWidgetComponent } from './ai-assistant-widget.component';
             <i class="fas fa-sign-out-alt"></i>
             <span>Logout</span>
           </button>
-          <a routerLink="/patient/change-password" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+          <a id="nav-change-password" routerLink="/patient/change-password" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
             <i class="fas fa-key"></i>
             <span>Change Password</span>
           </a>
@@ -150,6 +154,7 @@ import { AiAssistantWidgetComponent } from './ai-assistant-widget.component';
               <i class="fas fa-star"></i>
               <span>Feedback</span>
             </a>
+
             <a routerLink="/settings" (click)="menuOpen=false" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800">
               <i class="fas fa-cog"></i>
               <span>Settings</span>
@@ -170,7 +175,11 @@ import { AiAssistantWidgetComponent } from './ai-assistant-widget.component';
 })
 export class PatientLayoutComponent {
   menuOpen = false;
+  protected tour = inject(TourService);
   constructor(private auth: AuthService) { }
+  ngOnInit() {
+    this.tour.startTourIfRequested();
+  }
   logout() {
     this.auth.logout();
   }

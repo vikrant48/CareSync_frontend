@@ -15,6 +15,7 @@ import { ToastService } from '../core/services/toast.service';
   template: `
     <!-- Floating Button -->
     <button
+      id="ai-widget-trigger"
       (click)="toggleChat()"
       class="fixed bottom-20 right-6 md:bottom-10 md:right-10 w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-[60] group"
     >
