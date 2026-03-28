@@ -1,5 +1,5 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit, AfterViewInit, HostListener, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
@@ -8,300 +8,368 @@ import { ToastService } from '../../core/services/toast.service';
 import { ToastContainerComponent } from '../../shared/toast-container.component';
 import { SpecializationService } from '../../core/services/specialization.service';
 import { MasterDataService } from '../../core/services/master-data.service';
+import flatpickr from 'flatpickr';
 
 @Component({
   selector: 'app-register',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule, ToastContainerComponent],
   template: `
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col justify-center pt-8 pb-24 px-4 sm:px-6 lg:px-8 relative transition-colors duration-300">
+    <div class="min-h-screen bg-white dark:bg-gray-950 grid lg:grid-cols-2 overflow-hidden transition-all duration-500">
       
-      <!-- Background Elements -->
-      <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute -top-40 -left-40 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl opacity-50 dark:opacity-20 animate-pulse-slow"></div>
-        <div class="absolute top-1/2 right-0 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl opacity-50 dark:opacity-20 translate-x-1/2"></div>
-      </div>
+      <!-- Left Side: Branding & Info Panel (Hidden on Mobile) -->
+      <div class="hidden lg:flex flex-col justify-between p-8 bg-gradient-to-br from-emerald-600 via-teal-700 to-emerald-900 text-white relative overflow-hidden">
+        <!-- Animated Background Elements -->
+        <div class="absolute -top-20 -left-20 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-pulse-slow"></div>
+        <div class="absolute bottom-1/4 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
 
-      <div class="sm:mx-auto sm:w-full sm:max-w-3xl relative z-10">
-        
-        <!-- Header -->
-        <div class="text-center mb-6">
-          <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Create your account</h2>
-          <!-- <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Join CareSync to manage your health journey</p> -->
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 shadow-2xl shadow-gray-200/50 dark:shadow-gray-900/50 rounded-2xl sm:rounded-3xl border border-gray-100 dark:border-gray-700 backdrop-blur-sm overflow-hidden flex flex-col h-[70vh] sm:h-auto sm:max-h-[80vh]">
-          
-          <!-- Progress Bar -->
-          <div class="bg-gray-50 dark:bg-gray-700/30 px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-            <div class="flex items-center justify-between relative">
-               <!-- Line behind circles -->
-               <div class="absolute left-0 right-0 top-1/2 h-0.5 bg-gray-200 dark:bg-gray-600 -z-0"></div>
-               <div class="absolute left-0 top-1/2 h-0.5 bg-emerald-500 transition-all duration-500 ease-in-out -z-0" [style.width.%]="(currentStep - 1) * 33.33"></div>
-
-               <!-- Steps -->
-               <ng-container *ngFor="let step of [1, 2, 3, 4]; let i = index">
-                  <div class="relative z-10 flex flex-col items-center group cursor-default" [class.cursor-pointer]="i + 1 < currentStep" (click)="i + 1 < currentStep ? navigateToStep(i + 1) : null">
-                     <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 ring-4 ring-white dark:ring-gray-800"
-                          [ngClass]="getStepClasses(step)">
-                        <i class="fa-solid fa-check" *ngIf="step < currentStep"></i>
-                        <span *ngIf="step >= currentStep">{{ step }}</span>
-                     </div>
-                     <span class="absolute -bottom-6 text-xs font-medium whitespace-nowrap hidden sm:block transition-colors duration-300"
-                           [ngClass]="step <= currentStep ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400 dark:text-gray-500'">
-                        {{ getStepLabel(step) }}
-                     </span>
-                  </div>
-               </ng-container>
+        <div class="relative z-10">
+          <div class="flex items-center gap-2 mb-10 animate-in fade-in slide-in-from-top-4 duration-700">
+            <div class="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-xl flex items-center justify-center border border-white/30 shadow-xl shadow-black/10">
+              <i class="fa-solid fa-heart-pulse text-xl"></i>
             </div>
+            <span class="text-xl font-black tracking-tight uppercase">CareSync</span>
           </div>
 
-          <!-- Form Content Area -->
-          <div class="flex-1 overflow-y-auto p-6 sm:p-10 custom-scrollbar">
+          <div class="space-y-4 max-w-lg">
+            <h1 class="text-4xl font-black leading-[1.1] tracking-tighter animate-in fade-in slide-in-from-left-8 duration-700 delay-100">
+              Your Health, <br/>
+              <span class="text-emerald-300">Synchronized</span>.
+            </h1>
+            <p class="text-base text-emerald-50/70 leading-relaxed font-light animate-in fade-in slide-in-from-left-8 duration-700 delay-200">
+              Join the elite network of healthcare providers and patients leveraging AI-driven medical precision.
+            </p>
             
-            <!-- Stage 1: Basic Details -->
-            <section *ngIf="currentStep === 1" [formGroup]="basicForm" class="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-              <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Personal Information</h3>
-              
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <!-- First Name -->
-                <div class="form-group">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">First Name <span class="text-red-500">*</span></label>
-                  <input class="input-modern" formControlName="firstName" [class.error]="isFieldInvalid('firstName', basicForm)" placeholder="John" />
-                  <p *ngIf="isFieldInvalid('firstName', basicForm)" class="error-msg">First Name is required</p>
+            <div class="pt-6 grid grid-cols-2 gap-x-4 gap-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
+              <div class="group">
+                <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center mb-1.5 group-hover:bg-emerald-400 group-hover:text-emerald-900 transition-all duration-300">
+                  <i class="fa-solid fa-shield-halved text-base"></i>
                 </div>
-
-                <!-- Last Name -->
-                <div class="form-group">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Last Name <span class="text-red-500">*</span></label>
-                  <input class="input-modern" formControlName="lastName" [class.error]="isFieldInvalid('lastName', basicForm)" placeholder="Doe" />
-                  <p *ngIf="isFieldInvalid('lastName', basicForm)" class="error-msg">Last Name is required</p>
+                <h4 class="font-bold text-sm">Security</h4>
+                <p class="text-[10px] text-emerald-100/50 leading-tight">HIPAA compliant, end-to-end encrypted vaults.</p>
+              </div>
+              <div class="group">
+                <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center mb-1.5 group-hover:bg-emerald-400 group-hover:text-emerald-900 transition-all duration-300">
+                  <i class="fa-solid fa-brain text-base"></i>
                 </div>
-
-                <!-- Email -->
-                <div class="form-group">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email <span class="text-red-500">*</span></label>
-                  <div class="relative">
-                     <input class="input-modern" type="email" formControlName="email" [class.error]="isFieldInvalid('email', basicForm)" placeholder="john@example.com" />
-                  </div>
-                  <p *ngIf="isFieldInvalid('email', basicForm)" class="error-msg">
-                    <span *ngIf="basicForm.get('email')?.errors?.['required']">Email is required</span>
-                    <span *ngIf="basicForm.get('email')?.errors?.['email']">Invalid email address</span>
-                  </p>
+                <h4 class="font-bold text-sm">AI Ready</h4>
+                <p class="text-[10px] text-emerald-100/50 leading-tight">Smart diagnostic & medical summarization.</p>
+              </div>
+              <div class="group">
+                <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center mb-1.5 group-hover:bg-emerald-400 group-hover:text-emerald-900 transition-all duration-300">
+                  <i class="fa-solid fa-video text-base"></i>
                 </div>
-
-                <!-- Phone -->
-                <div class="form-group">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
-                  <div class="relative">
-                     <input class="input-modern" formControlName="contactInfo" (input)="onPhoneInput($event)" placeholder="+91 9876543210" />
-                  </div>
+                <h4 class="font-bold text-sm">Video Consulting</h4>
+                <p class="text-[10px] text-emerald-100/50 leading-tight">HD tele-health bridging home & clinic.</p>
+              </div>
+              <div class="group">
+                <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center mb-1.5 group-hover:bg-emerald-400 group-hover:text-emerald-900 transition-all duration-300">
+                  <i class="fa-solid fa-file-waveform text-base"></i>
                 </div>
+                <h4 class="font-bold text-sm">Unified Health</h4>
+                <p class="text-[10px] text-emerald-100/50 leading-tight">Secure access to all your medical records.</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
-                <!-- DOB -->
-                <div class="form-group">
-                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date of Birth</label>
-                   <input class="input-modern" type="date" formControlName="dateOfBirth" />
+        <div class="relative z-10 mt-auto opacity-50">
+           <p class="text-[10px] font-black uppercase tracking-widest text-emerald-100/50">© 2026 CareSync Digital Health</p>
+        </div>
+      </div>
+
+      <!-- Right Side: Interaction Panel -->
+      <div class="relative flex flex-col h-screen overflow-y-auto custom-scrollbar bg-white dark:bg-gray-950">
+        
+        <!-- Mobile Header -->
+        <div class="lg:hidden px-6 py-3 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md sticky top-0 z-50">
+          <div class="flex items-center gap-2">
+            <div class="w-6 h-6 bg-emerald-500 rounded-lg flex items-center justify-center text-white text-xs">
+              <i class="fa-solid fa-heart-pulse"></i>
+            </div>
+            <span class="text-sm font-black uppercase tracking-tight dark:text-white">CareSync</span>
+          </div>
+          <a routerLink="/login" class="text-[10px] font-black uppercase tracking-widest text-emerald-600">Sign In</a>
+        </div>
+
+        <div class="flex-1 flex flex-col justify-center px-6 py-6 lg:px-12 xl:px-20 max-w-[54rem] mx-auto w-full transition-all duration-500">
+          
+          <!-- Page Header -->
+          <div class="mb-4">
+            <h2 class="text-2xl font-black text-gray-900 dark:text-white tracking-tighter mb-0.5 leading-none">Create Account</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Join our healthcare network</p>
+          </div>
+
+          <!-- Progress Indicator -->
+          <div class="relative flex items-center justify-between mb-8 px-1">
+            <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-[1.5px] bg-gray-100 dark:bg-gray-800 z-0"></div>
+            <div class="absolute left-0 top-1/2 -translate-y-1/2 h-[2px] bg-emerald-500 transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] shadow-[0_0_12px_rgba(16,185,129,0.5)] z-0" 
+                 [style.width.%]="(currentStep - 1) * 33.33"></div>
+            
+            <ng-container *ngFor="let step of [1, 2, 3, 4]; let i = index">
+              <div class="relative z-10 flex flex-col items-center group" 
+                   [class.cursor-pointer]="i + 1 < currentStep" 
+                   (click)="i + 1 < currentStep ? navigateToStep(i + 1) : null">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-[10px] sm:text-[11px] font-black transition-all duration-500 ring-[4px] ring-white dark:ring-gray-950"
+                     [ngClass]="getStepClasses(step)">
+                  <i class="fa-solid fa-check text-[9px]" *ngIf="step < currentStep"></i>
+                  <span *ngIf="step >= currentStep">{{ step }}</span>
                 </div>
-
-                <!-- Gender -->
-                <div class="form-group">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gender <span class="text-red-500">*</span></label>
-                  <select class="input-modern" formControlName="gender" [class.error]="isFieldInvalid('gender', basicForm)">
-                      <option value="" disabled>Select gender</option>
-                      <option *ngFor="let g of genders" [value]="g">{{ g }}</option>
-                  </select>
-                  <p *ngIf="isFieldInvalid('gender', basicForm)" class="error-msg">Gender is required</p>
+                <!-- Label Tooltip -->
+                <div class="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[8px] uppercase tracking-[0.1em] font-black transition-all duration-300"
+                     [ngClass]="step <= currentStep ? 'text-emerald-500 opacity-100' : 'text-gray-300 dark:text-gray-700 opacity-0 group-hover:opacity-100'">
+                  {{ getStepLabel(step) }}
                 </div>
               </div>
+            </ng-container>
+          </div>
 
-              <div class="h-px bg-gray-100 dark:bg-gray-700 my-4"></div>
-
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Account Credentials</h3>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                 <!-- Username -->
-                <div class="form-group">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Username <span class="text-red-500">*</span></label>
-                  <div class="relative">
-                     <input class="input-modern" formControlName="username" [class.error]="isFieldInvalid('username', basicForm)" placeholder="johndoe123" />
-                  </div>
-                  <p *ngIf="isFieldInvalid('username', basicForm)" class="error-msg">Username is required</p>
+          <!-- Form Content -->
+          <div class="min-h-[300px] lg:min-h-[340px] px-1 pt-4">
+            
+            <!-- Step 1: Personal (Dense 2-column) -->
+            <section *ngIf="currentStep === 1" [formGroup]="basicForm" class="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div class="space-y-1">
+                  <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">First Name</label>
+                  <input class="input-modern py-2 text-sm pl-4" formControlName="firstName" placeholder="John" />
                 </div>
-
-                <!-- Password -->
-                <div class="form-group">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password <span class="text-red-500">*</span></label>
-                  <div class="relative">
-                     <input class="input-modern pr-10" [type]="showPassword ? 'text' : 'password'" formControlName="password" [class.error]="isFieldInvalid('password', basicForm)" placeholder="••••••••" />
-                     <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" (click)="togglePassword()">
-                        <i [class]="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
-                     </button>
-                  </div>
-                  <p *ngIf="isFieldInvalid('password', basicForm)" class="error-msg">
-                     <span *ngIf="basicForm.get('password')?.errors?.['required']">Password is required</span>
-                     <span *ngIf="basicForm.get('password')?.errors?.['minlength']">Min 6 characters required</span>
-                  </p>
+                <div class="space-y-1">
+                  <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Last Name</label>
+                  <input class="input-modern py-2 text-sm pl-4" formControlName="lastName" placeholder="Doe" />
                 </div>
-              </div>
-            </section>
-
-            <!-- Stage 2: Email Verification -->
-            <section *ngIf="currentStep === 2" [formGroup]="verificationForm" class="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300 max-w-lg mx-auto text-center">
-               <div class="bg-blue-50 dark:bg-blue-900/20 rounded-full w-20 h-20 mx-auto flex items-center justify-center mb-4">
-                  <i class="fa-solid fa-envelope-circle-check text-4xl text-blue-500"></i>
-               </div>
-               <h3 class="text-xl font-bold text-gray-900 dark:text-white">Verify Your Email</h3>
-               <p class="text-gray-600 dark:text-gray-400 text-sm">We need to verify your email address to secure your account. Enter the code sent to your email.</p>
-               
-               <div class="bg-gray-50 dark:bg-gray-700/50 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 text-left space-y-4">
-                  <!-- Email Input for Verification -->
-                  <div class="form-group">
-                     <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Email Address</label>
-                     <div class="flex gap-2">
-                        <input class="input-modern flex-1" type="email" formControlName="email" [class.error]="isFieldInvalid('email', verificationForm)" (input)="resetVerificationState()" />
-                        <button class="btn-secondary whitespace-nowrap px-4 py-2 text-sm" (click)="sendVerificationCode()" [disabled]="loading || isFieldInvalid('email', verificationForm)">
-                          <i class="fa-regular fa-paper-plane mr-2"></i>Send Code
-                        </button>
-                     </div>
-                     <p *ngIf="isFieldInvalid('email', verificationForm)" class="error-msg">Invalid email address</p>
+                <div class="space-y-1">
+                  <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Email Address</label>
+                  <input class="input-modern py-2 text-sm pl-4" type="email" formControlName="email" placeholder="john.doe@medical.id" />
+                </div>
+                <div class="space-y-1">
+                  <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Mobile Number</label>
+                  <input class="input-modern py-2 text-sm pl-4" formControlName="contactInfo" (input)="onPhoneInput($event)" placeholder="+91 9876543210" />
+                </div>
+                <div class="space-y-1">
+                  <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Birth Date</label>
+                  <div class="relative">
+                    <input id="dob-picker" class="input-modern py-2 text-sm pl-4 pr-3 cursor-pointer bg-white dark:bg-gray-800" type="text" formControlName="dateOfBirth" placeholder="DD-MM-YYYY" readonly />
+                    <i class="fa-regular fa-calendar absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-xs"></i>
                   </div>
-
-                  <!-- OTP Input -->
-                  <div class="form-group">
-                     <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Verification Code</label>
-                     <input class="input-modern text-center text-2xl tracking-[0.5em] py-3 font-mono" formControlName="otp" placeholder="••••••" maxlength="6" (input)="resetVerificationFlag()" />
-                     <p *ngIf="isFieldInvalid('otp', verificationForm)" class="error-msg mt-2 text-center">Enter valid 6-digit code</p>
-                  </div>
-
-                  <button class="btn-primary w-full py-3 rounded-xl shadow-lg shadow-emerald-500/20" (click)="verifyEmail()" [disabled]="loading">
-                     <i class="fa-solid fa-circle-check mr-2"></i> Verify & Continue
+                </div>
+                <div class="space-y-1 relative" id="gender-dropdown-container">
+                  <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Gender</label>
+                  <button type="button" 
+                          (click)="toggleGenderDropdown($event)"
+                          class="input-modern py-2 text-sm pl-4 pr-10 w-full text-left bg-white dark:bg-gray-800 relative transition-all duration-300">
+                    <span [class.text-gray-400]="!basicForm.get('gender')?.value">
+                      {{ basicForm.get('gender')?.value || 'Select gender' }}
+                    </span>
+                    <i class="fa-solid fa-chevron-down text-[10px] absolute right-4 top-1/2 -translate-y-1/2 transition-transform duration-300"
+                       [class.rotate-180]="isGenderDropdownOpen"></i>
                   </button>
-               </div>
+
+                  <!-- Custom Dropdown List -->
+                  <div *ngIf="isGenderDropdownOpen" 
+                       class="absolute z-[100] left-0 right-0 mt-1.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-2xl shadow-black/10 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div *ngFor="let g of genders" 
+                         (click)="selectGender(g)"
+                         class="px-4 py-2.5 text-sm cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center justify-between group">
+                      <span class="font-medium capitalize">{{ g.toLowerCase() }}</span>
+                      <i class="fa-solid fa-check text-[10px] opacity-0 group-hover:opacity-100" *ngIf="basicForm.get('gender')?.value === g"></i>
+                    </div>
+                  </div>
+                </div>
+                <div class="space-y-1">
+                  <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Username</label>
+                  <input class="input-modern py-2 text-sm pl-4" formControlName="username" placeholder="johndoe_md" />
+                </div>
+                <div class="space-y-1">
+                  <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Password</label>
+                  <div class="relative group">
+                    <input class="input-modern pr-11 py-2 text-sm pl-4" [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="••••••••" />
+                    <button type="button" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 hover:text-emerald-500 transition-colors" (click)="togglePassword()">
+                      <i [class]="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye' + ' text-sm'"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </section>
 
-            <!-- Stage 3: Role Selection -->
-            <section *ngIf="currentStep === 3" [formGroup]="roleForm" class="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-               <div class="text-center max-w-lg mx-auto">
-                  <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Choose your intent</h3>
-                  <p class="text-gray-600 dark:text-gray-400">Are you a doctor looking to manage patients, or a patient looking for care?</p>
-               </div>
-
-               <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
-                  <!-- Doctor Option -->
-                  <label class="group relative bg-white dark:bg-gray-800 p-6 rounded-2xl border-2 cursor-pointer transition-all duration-300 overflow-hidden hover:shadow-xl"
-                         [ngClass]="roleForm.get('role')?.value === 'DOCTOR' ? 'border-emerald-500 ring-4 ring-emerald-500/10' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'">
-                     <input type="radio" class="sr-only" formControlName="role" value="DOCTOR" />
-                     <div class="absolute top-4 right-4 text-emerald-500 opacity-0 transform scale-50 transition-all duration-300 group-hover:opacity-100 group-hover:scale-100" [class.opacity-100]="roleForm.get('role')?.value === 'DOCTOR'" [class.scale-100]="roleForm.get('role')?.value === 'DOCTOR'">
-                        <i class="fa-solid fa-circle-check text-2xl"></i>
-                     </div>
-                     <div class="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center text-blue-500 mb-4 group-hover:scale-110 transition-transform duration-300">
-                        <i class="fa-solid fa-user-doctor text-3xl"></i>
-                     </div>
-                     <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-2">I am a Doctor</h4>
-                     <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">Create a profile, manage appointments, and provide care.</p>
-                  </label>
-
-                  <!-- Patient Option -->
-                  <label class="group relative bg-white dark:bg-gray-800 p-6 rounded-2xl border-2 cursor-pointer transition-all duration-300 overflow-hidden hover:shadow-xl"
-                         [ngClass]="roleForm.get('role')?.value === 'PATIENT' ? 'border-emerald-500 ring-4 ring-emerald-500/10' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'">
-                     <input type="radio" class="sr-only" formControlName="role" value="PATIENT" />
-                     <div class="absolute top-4 right-4 text-emerald-500 opacity-0 transform scale-50 transition-all duration-300 group-hover:opacity-100 group-hover:scale-100" [class.opacity-100]="roleForm.get('role')?.value === 'PATIENT'" [class.scale-100]="roleForm.get('role')?.value === 'PATIENT'">
-                        <i class="fa-solid fa-circle-check text-2xl"></i>
-                     </div>
-                     <div class="w-16 h-16 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl flex items-center justify-center text-emerald-500 mb-4 group-hover:scale-110 transition-transform duration-300">
-                        <i class="fa-solid fa-user text-3xl"></i>
-                     </div>
-                     <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-2">I am a Patient</h4>
-                     <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">Book appointments, view reports, and find the best doctors.</p>
-                  </label>
-               </div>
+            <!-- Step 2: Verification -->
+            <section *ngIf="currentStep === 2" [formGroup]="verificationForm" class="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500 text-center py-2">
+              <div class="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl mx-auto flex items-center justify-center mb-2 ring-4 ring-emerald-500/5">
+                <i class="fa-solid fa-paper-plane text-xl text-emerald-500 animate-bounce"></i>
+              </div>
+              <div>
+                <h3 class="text-lg font-black text-gray-900 dark:text-white mb-0.5">Check inbox</h3>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400 font-medium italic">Sent code to verify your identity.</p>
+              </div>
+              
+              <div class="max-w-xs mx-auto space-y-3">
+                <div class="space-y-2">
+                   <input class="w-full bg-gray-50 dark:bg-gray-900 border-2 border-gray-100 dark:border-gray-800 rounded-2xl px-4 py-2 text-center text-xl font-black tracking-[0.4em] focus:border-emerald-500 outline-none"
+                          formControlName="otp" placeholder="000000" maxlength="6" />
+                   <button (click)="sendVerificationCode()" class="text-[8px] font-black uppercase tracking-widest text-emerald-600 hover:text-emerald-500" [disabled]="loading">
+                      Resend Code
+                   </button>
+                </div>
+                <button (click)="verifyEmail()" [disabled]="loading" class="btn-modern-primary w-full py-3 text-sm">
+                  <span *ngIf="!loading">Verify & Proceed</span>
+                  <span *ngIf="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
+                </button>
+              </div>
             </section>
 
-            <!-- Stage 4: Additional Details -->
-            <!-- Stage 4: Additional Details -->
-            <section *ngIf="currentStep === 4" class="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-               <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  {{ roleForm.value.role === 'DOCTOR' ? 'Professional Details' : 'Medical Details' }}
-               </h3>
+            <!-- Step 3: Role Selection -->
+            <section *ngIf="currentStep === 3" [formGroup]="roleForm" class="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <label class="relative group cursor-pointer">
+                  <input type="radio" class="sr-only peer" formControlName="role" value="DOCTOR" />
+                  <div class="h-full p-5 rounded-[1.2rem] border-2 border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all duration-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-50/20 dark:peer-checked:bg-emerald-950/20 peer-checked:ring-2 peer-checked:ring-emerald-500/10">
+                    <div class="w-9 h-9 bg-emerald-100 dark:bg-emerald-900/40 rounded-xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-3 group-hover:scale-110 transition-transform">
+                      <i class="fa-solid fa-user-doctor text-lg"></i>
+                    </div>
+                    <h4 class="text-base font-black text-gray-900 dark:text-white mb-0.5">Doctor</h4>
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400 leading-tight">Manage clinical workflows and prescriptions.</p>
+                  </div>
+                </label>
+
+                <label class="relative group cursor-pointer">
+                  <input type="radio" class="sr-only peer" formControlName="role" value="PATIENT" />
+                  <div class="h-full p-5 rounded-[1.2rem] border-2 border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all duration-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-50/20 dark:peer-checked:bg-emerald-950/20 peer-checked:ring-2 peer-checked:ring-emerald-500/10">
+                    <div class="w-9 h-9 bg-emerald-100 dark:bg-emerald-900/40 rounded-xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-3 group-hover:scale-110 transition-transform">
+                      <i class="fa-solid fa-user text-lg"></i>
+                    </div>
+                    <h4 class="text-base font-black text-gray-900 dark:text-white mb-0.5">Patient</h4>
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400 leading-tight">Book appointments and track active medical journey.</p>
+                  </div>
+                </label>
+              </div>
+            </section>
+
+            <!-- Step 4: Final Details -->
+            <section *ngIf="currentStep === 4" class="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
+               <div>
+                  <h3 class="text-lg font-black text-gray-900 dark:text-white mb-0.5">Specifications</h3>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400 italic">Help us personalize your active experience.</p>
+               </div>
 
                <!-- Doctor fields -->
-               <div *ngIf="roleForm.value.role === 'DOCTOR'" [formGroup]="doctorForm" class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                 <div class="form-group">
-                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Specialization <span class="text-red-500">*</span></label>
-                   <select class="input-modern" formControlName="specialization" [class.error]="isFieldInvalid('specialization', doctorForm)">
-                      <option value="" disabled>Select specialization</option>
-                      <option *ngFor="let spec of specializations" [value]="spec">{{ spec }}</option>
-                   </select>
-                   <p *ngIf="isFieldInvalid('specialization', doctorForm)" class="error-msg">Specialization is required</p>
+               <div *ngIf="roleForm.value.role === 'DOCTOR'" [formGroup]="doctorForm" class="grid grid-cols-1 gap-3">
+                 <div class="space-y-1 relative" id="specialization-dropdown-container">
+                   <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Specialization</label>
+                   <button type="button" 
+                           (click)="toggleSpecializationDropdown($event)"
+                           class="input-modern py-2 text-sm pl-4 pr-10 w-full text-left bg-white dark:bg-gray-800 relative transition-all duration-300">
+                     <span [class.text-gray-400]="!doctorForm.get('specialization')?.value">
+                       {{ doctorForm.get('specialization')?.value || 'Select specialization' }}
+                     </span>
+                     <i class="fa-solid fa-chevron-down text-[10px] absolute right-4 top-1/2 -translate-y-1/2 transition-transform duration-300"
+                        [class.rotate-180]="isSpecializationDropdownOpen"></i>
+                   </button>
+
+                   <!-- Specialization Dropdown List (High Density) -->
+                   <div *ngIf="isSpecializationDropdownOpen" 
+                        class="absolute z-[100] left-0 right-0 mt-1.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-2xl shadow-black/10 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-[180px] overflow-y-auto custom-scrollbar">
+                     <div *ngFor="let spec of specializations" 
+                          (click)="selectSpecialization(spec)"
+                          class="px-4 py-2 text-xs cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center justify-between group">
+                       <span class="font-bold">{{ spec }}</span>
+                       <i class="fa-solid fa-check text-[9px] opacity-0 group-hover:opacity-100" *ngIf="doctorForm.get('specialization')?.value === spec"></i>
+                     </div>
+                   </div>
                  </div>
-                 <div class="form-group">
-                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Experience (Years)</label>
-                   <input class="input-modern" type="number" formControlName="experience" [class.error]="isFieldInvalid('experience', doctorForm)" placeholder="e.g. 5" />
-                   <p *ngIf="isFieldInvalid('experience', doctorForm)" class="error-msg">Enter valid experience</p>
+                 <div class="space-y-1">
+                   <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Experience (Years)</label>
+                   <div class="flex items-center gap-1.5">
+                     <button type="button" 
+                             (click)="decrementExperience()"
+                             class="w-10 h-10 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-400 hover:border-emerald-500 hover:text-emerald-500 transition-all flex items-center justify-center active:scale-90">
+                       <i class="fa-solid fa-minus text-xs"></i>
+                     </button>
+                     
+                     <div class="relative flex-1">
+                       <input class="input-modern py-2 text-sm pl-4 pr-10 text-center font-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+                              type="number" 
+                              formControlName="experience" 
+                              placeholder="0" />
+                       <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase text-gray-400 tracking-tighter pointer-events-none">Yrs</span>
+                     </div>
+                     
+                     <button type="button" 
+                             (click)="incrementExperience()"
+                             class="w-10 h-10 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-400 hover:border-emerald-500 hover:text-emerald-500 transition-all flex items-center justify-center active:scale-90">
+                       <i class="fa-solid fa-plus text-xs"></i>
+                     </button>
+                   </div>
                  </div>
                </div>
 
                <!-- Patient fields -->
-               <div *ngIf="roleForm.value.role === 'PATIENT'" [formGroup]="patientForm" class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                 <div class="form-group">
-                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Blood Group</label>
-                   <select class="input-modern" formControlName="bloodGroup">
-                      <option value="" disabled>Select blood group</option>
-                      <option *ngFor="let bg of bloodGroups" [value]="bg">{{ bg }}</option>
-                   </select>
+               <div *ngIf="roleForm.value.role === 'PATIENT'" [formGroup]="patientForm" class="grid grid-cols-1 gap-3">
+                 <div class="space-y-2">
+                   <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Blood Group</label>
+                   <div class="grid grid-cols-4 gap-2">
+                      <label *ngFor="let bg of ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-']" class="relative group cursor-pointer">
+                        <input type="radio" class="sr-only peer" formControlName="bloodGroup" [value]="bg" />
+                        <div class="py-2 text-center rounded-xl border-2 border-gray-100 dark:border-gray-800 font-black text-xs peer-checked:border-emerald-500 peer-checked:bg-emerald-500 peer-checked:text-white transition-all scale-90">
+                          {{bg}}
+                        </div>
+                      </label>
+                   </div>
                  </div>
                </div>
-               
-               <p *ngIf="error" class="bg-red-50 dark:bg-red-900/20 text-red-500 p-3 rounded-lg text-sm flex items-center">
-                  <i class="fa-solid fa-circle-exclamation mr-2"></i> {{ error }}
-               </p>
             </section>
-
           </div>
 
-          <!-- Bottom Navigation Bar -->
-          <div class="bg-gray-50 dark:bg-gray-700/30 px-6 py-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
-             <button *ngIf="currentStep > 1" (click)="prev()" class="btn-secondary px-6">
-                Back
+          <!-- Bottom Navigation -->
+          <div class="mt-4 flex items-center justify-between gap-4 transition-all">
+             <button *ngIf="currentStep > 1" (click)="prev()" 
+                     class="group px-4 py-2 text-[9px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left transition-transform group-hover:-translate-x-1"></i> Back
              </button>
-             <div class="flex-1"></div> <!-- Spacer -->
+             <div class="flex-1"></div>
              
-             <!-- Next Buttons -->
-             <button *ngIf="currentStep === 1" (click)="next()" class="btn-primary px-8">
-                Next <i class="fa-solid fa-arrow-right ml-2"></i>
-             </button>
-             
-             <!-- Step 2 Next handled inside the section for verification flow -->
-             <span *ngIf="currentStep === 2" class="text-xs text-gray-400 italic">Verify email to proceed</span>
-
-             <button *ngIf="currentStep === 3" (click)="next()" class="btn-primary px-8">
-                Next <i class="fa-solid fa-arrow-right ml-2"></i>
+             <button *ngIf="currentStep === 1 || currentStep === 3" (click)="next()" [disabled]="loading" 
+                     class="btn-modern-primary px-6 py-2.5 text-xs min-w-[110px]">
+                <span *ngIf="!loading" class="flex items-center gap-2">Continue <i class="fa-solid fa-arrow-right text-[10px]"></i></span>
+                <span *ngIf="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
              </button>
 
-             <button *ngIf="currentStep === 4" (click)="complete()" [disabled]="loading" class="btn-primary px-8 bg-gradient-to-r from-emerald-500 to-teal-600">
-                <span *ngIf="!loading">Complete Registration <i class="fa-solid fa-check ml-2"></i></span>
-                <span *ngIf="loading"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Creating...</span>
+             <button *ngIf="currentStep === 4" (click)="complete()" [disabled]="loading" 
+                     class="btn-modern-primary px-6 py-2.5 text-xs bg-emerald-500 hover:bg-emerald-600 border-none min-w-[140px] shadow-lg shadow-emerald-500/20">
+                <span *ngIf="!loading" class="flex items-center gap-2">Finish <i class="fa-solid fa-check text-[10px]"></i></span>
+                <span *ngIf="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
              </button>
           </div>
-        </div>
 
-        <div class="text-center mt-6">
-           <p class="text-sm text-gray-600 dark:text-gray-400">
-              Already have an account? <a routerLink="/login" class="font-medium text-emerald-600 hover:text-emerald-500 dark:text-emerald-400 transition-colors">Sign in</a>
-           </p>
+          <!-- Footer -->
+          <div class="mt-4 text-center hidden sm:block">
+            <p class="text-[10px] font-medium text-gray-500 dark:text-gray-400 italic">
+              Existing Participant? 
+              <a routerLink="/login" class="text-emerald-600 font-black hover:text-emerald-500 transition-colors ml-1 uppercase underline underline-offset-2">Sign In</a>
+            </p>
+          </div>
         </div>
-
       </div>
       <app-toast-container></app-toast-container>
     </div>
   `,
-  styles: []
+  styles: [`
+    :host {
+      display: block;
+      height: 100vh;
+      overflow: hidden;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.5);
+      cursor: pointer;
+    }
+  `]
 })
-export class RegisterComponent implements OnInit {
+export class RegisterComponent implements OnInit, AfterViewInit {
   private auth = inject(AuthService);
   private toast = inject(ToastService);
   private specializationService = inject(SpecializationService);
   private masterDataService = inject(MasterDataService);
+  private platformId = inject(PLATFORM_ID);
 
   specializations: string[] = [];
 
@@ -352,6 +420,30 @@ export class RegisterComponent implements OnInit {
     });
   }
 
+  ngAfterViewInit() {
+    this.initDobPicker();
+  }
+
+  private initDobPicker() {
+    if (isPlatformBrowser(this.platformId) && this.currentStep === 1) {
+      setTimeout(() => {
+        const input = document.getElementById('dob-picker');
+        if (input) {
+          flatpickr(input, {
+            dateFormat: "Y-m-d", // Format sent to backend
+            altInput: true,      // New input for user display
+            altFormat: "d-m-Y",  // Format user sees: DD-MM-YYYY
+            altInputClass: "input-modern py-2 text-sm pl-4 pr-10 cursor-pointer bg-white dark:bg-gray-800",
+            allowInput: true,
+            onChange: (selectedDates, dateStr) => {
+              this.basicForm.patchValue({ dateOfBirth: dateStr });
+            }
+          });
+        }
+      }, 0);
+    }
+  }
+
   // Wizard state
   currentStep = 1;
   loading = false;
@@ -368,8 +460,52 @@ export class RegisterComponent implements OnInit {
   doctorForm!: FormGroup;
   patientForm!: FormGroup;
 
-  genders: string[] = [];
+  isGenderDropdownOpen = false;
+  isSpecializationDropdownOpen = false;
+
+  genders = ['MALE', 'FEMALE', 'OTHER'];
   bloodGroups: string[] = [];
+
+  toggleGenderDropdown(event: Event) {
+    event.stopPropagation();
+    this.isSpecializationDropdownOpen = false; // Close other
+    this.isGenderDropdownOpen = !this.isGenderDropdownOpen;
+  }
+
+  selectGender(gender: string) {
+    this.basicForm.patchValue({ gender });
+    this.isGenderDropdownOpen = false;
+  }
+
+  toggleSpecializationDropdown(event: Event) {
+    event.stopPropagation();
+    this.isGenderDropdownOpen = false; // Close other
+    this.isSpecializationDropdownOpen = !this.isSpecializationDropdownOpen;
+  }
+
+  selectSpecialization(spec: string) {
+    this.doctorForm.patchValue({ specialization: spec });
+    this.isSpecializationDropdownOpen = false;
+  }
+
+  incrementExperience() {
+    const current = this.doctorForm.get('experience')?.value || 0;
+    this.doctorForm.patchValue({ experience: current + 1 });
+  }
+
+  decrementExperience() {
+    const current = this.doctorForm.get('experience')?.value || 0;
+    if (current > 0) {
+      this.doctorForm.patchValue({ experience: current - 1 });
+    }
+  }
+
+  // Close dropdowns on outside click
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    this.isGenderDropdownOpen = false;
+    this.isSpecializationDropdownOpen = false;
+  }
 
   // Helper method to check if a field is invalid and should show error
   isFieldInvalid(fieldName: string, form: FormGroup): boolean {
@@ -384,6 +520,7 @@ export class RegisterComponent implements OnInit {
     // Allow navigation to previous steps only
     if (step < this.currentStep) {
       this.currentStep = step;
+      if (step === 1) this.initDobPicker();
     }
   }
 
@@ -480,6 +617,7 @@ export class RegisterComponent implements OnInit {
     if (this.currentStep > 1) {
       this.currentStep -= 1;
       this.showValidationErrors = false;
+      if (this.currentStep === 1) this.initDobPicker();
     }
   }
 
