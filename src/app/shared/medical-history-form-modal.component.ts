@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AiAssistantService } from '../core/services/ai-assistant.service';
 import { ClinicalMatch, DiagnosisSuggestionDto } from '../core/models/ai.models';
+import { DatePickerComponent } from './date-picker.component';
 
 @Component({
    selector: 'app-medical-history-form-modal',
    standalone: true,
-   imports: [CommonModule, FormsModule],
+   imports: [CommonModule, FormsModule, DatePickerComponent],
    template: `
     <div *ngIf="open" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
       
@@ -37,9 +38,14 @@ import { ClinicalMatch, DiagnosisSuggestionDto } from '../core/models/ai.models'
              <form (ngSubmit)="onSubmit($event)" class="space-y-5">
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                   <div class="form-group">
-                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Visit Date</label>
-                      <input type="date" class="input-modern" [(ngModel)]="form.visitDate" name="visitDate" [disabled]="disabled" />
+                   <div class="form-group min-h-[70px]">
+                      <app-date-picker
+                        [(ngModel)]="form.visitDate"
+                        name="visitDate"
+                        label="Visit Date"
+                        placeholder="Select Date"
+                        [disabled]="disabled">
+                      </app-date-picker>
                    </div>
                     <div class="form-group">
                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Diagnosis</label>

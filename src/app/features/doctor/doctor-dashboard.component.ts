@@ -13,6 +13,7 @@ import { DoctorProfileService } from '../../core/services/doctor-profile.service
 import { AppointmentService, DoctorAppointmentItem } from '../../core/services/appointment.service';
 import { getDoctorAppointmentEpochMs } from '../../shared/doctor-appointment-utils';
 import { PatientProfileService, PatientDto, MedicalHistoryItem, MedicalHistoryWithDoctorItem } from '../../core/services/patient-profile.service';
+import { DatePickerComponent } from '../../shared/date-picker.component';
 
 import { AnalyticsApiService, OverallAnalytics } from '../../core/services/analytics.service';
 import { ReportsApiService } from '../../core/services/reports.service';
@@ -23,7 +24,7 @@ import { forkJoin } from 'rxjs';
 @Component({
   selector: 'app-doctor-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientDetailsModalComponent, MedicalHistoryDetailModalComponent, MedicalHistoryFormModalComponent, DoctorLayoutComponent, DoctorNotificationComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientDetailsModalComponent, MedicalHistoryDetailModalComponent, MedicalHistoryFormModalComponent, DoctorLayoutComponent, DoctorNotificationComponent, DatePickerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-doctor-layout>
@@ -286,14 +287,18 @@ import { forkJoin } from 'rxjs';
               <div class="bg-blue-50/30 dark:bg-blue-900/10 p-5 rounded-2xl border border-blue-100/50 dark:border-blue-800/20">
                 <h4 class="font-bold text-gray-900 dark:text-white mb-4 text-sm uppercase tracking-wider">Schedule New Leave</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div class="space-y-1.5">
-                    <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Start Date</label>
-                    <input type="date" [(ngModel)]="leafForm.startDate" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                  </div>
-                  <div class="space-y-1.5">
-                    <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">End Date</label>
-                    <input type="date" [(ngModel)]="leafForm.endDate" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                  </div>
+                    <app-date-picker
+                      [(ngModel)]="leafForm.startDate"
+                      label="Start Date"
+                      placeholder="Select Date"
+                      [minDate]="'today'">
+                    </app-date-picker>
+                    <app-date-picker
+                      [(ngModel)]="leafForm.endDate"
+                      label="End Date"
+                      placeholder="Select Date"
+                      [minDate]="leafForm.startDate || 'today'">
+                    </app-date-picker>
                 </div>
                 <div class="space-y-1.5 mb-4">
                   <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Reason (Optional)</label>

@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { AppointmentService } from '../core/services/appointment.service';
 import { Doctor } from '../core/services/doctor.service';
 import { ToastService } from '../core/services/toast.service';
+import { SelectDropdownComponent, SelectOption } from './select-dropdown.component';
 
 @Component({
   selector: 'app-emergency-appointment-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SelectDropdownComponent],
   template: `
     <div *ngIf="isOpen" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
       <div class="panel p-0 w-full max-w-2xl relative max-h-[85dvh] overflow-hidden flex flex-col shadow-2xl shadow-red-900/40 border border-red-200 dark:border-red-500/30 rounded-2xl bg-white dark:bg-gray-900">
@@ -48,21 +49,13 @@ import { ToastService } from '../core/services/toast.service';
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
               Select Specialist <span class="text-red-500 dark:text-red-400">*</span>
             </label>
-            <div class="relative">
-               <i class="fa-solid fa-user-doctor absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
-               <select 
-                 class="input w-full pl-10 bg-gray-50 dark:bg-gray-900/50 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white" 
-                 [(ngModel)]="selectedDoctorId"
-                 [class.border-red-500]="showValidation && !selectedDoctorId"
-               >
-                 <option [ngValue]="null">-- Select a doctor --</option>
-                 <option *ngFor="let doctor of availableDoctors" [value]="doctor.id">
-                   Dr. {{ doctor.firstName }} {{ doctor.lastName }} 
-                   {{ doctor.specialization ? '(' + doctor.specialization + ')' : '' }}
-                 </option>
-               </select>
-               <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 pointer-events-none"></i>
-            </div>
+             <app-select-dropdown 
+                label="Select Specialist" 
+                [options]="doctorOptions" 
+                placeholder="-- Select a doctor --"
+                [(ngModel)]="selectedDoctorId"
+                [class.border-red-500]="showValidation && !selectedDoctorId">
+             </app-select-dropdown>
             <p *ngIf="showValidation && !selectedDoctorId" class="text-red-400 text-xs ml-1 animate-pulse">
                Please select a doctor to proceed.
             </p>
@@ -167,6 +160,13 @@ export class EmergencyAppointmentModalComponent {
   currentTime = new Date().toLocaleTimeString();
 
   constructor(private appointmentService: AppointmentService, private toast: ToastService) { }
+
+  get doctorOptions(): SelectOption[] {
+    return this.availableDoctors.map(d => ({
+      value: d.id,
+      label: `Dr. ${d.firstName} ${d.lastName} ${d.specialization ? '(' + d.specialization + ')' : ''}`
+    }));
+  }
 
   get selectedDoctor(): Doctor | null {
     if (!this.selectedDoctorId) return null;

@@ -11,6 +11,7 @@ import { AppointmentService, DoctorAppointmentItem } from '../../core/services/a
 import { PatientProfileService, PatientDto, MedicalHistoryItem, MedicalHistoryWithDoctorItem } from '../../core/services/patient-profile.service';
 import { AuthService } from '../../core/services/auth.service';
 import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.component';
+import { SelectDropdownComponent } from '../../shared/select-dropdown.component';
 
 @Component({
     selector: 'app-doctor-schedule',
@@ -24,7 +25,8 @@ import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.co
         PatientDetailsModalComponent,
         MedicalHistoryDetailModalComponent,
         MedicalHistoryFormModalComponent,
-        SharedChatModalComponent
+        SharedChatModalComponent,
+        SelectDropdownComponent
     ],
     template: `
     <app-doctor-layout>
@@ -58,9 +60,13 @@ import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.co
            <!-- Filter -->
            <div class="flex items-center gap-2 w-full sm:w-auto">
              <label class="text-xs font-bold text-gray-500 uppercase tracking-wider shrink-0">Filter Status:</label>
-             <select class="py-2 px-3 pr-8 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 text-sm focus:ring-2 focus:ring-blue-500 outline-none w-full sm:w-auto" [(ngModel)]="filterStatus">
-               <option *ngFor="let s of statusFilterOptions" [value]="s">{{ s === 'ALL' ? 'All Appointments' : s }}</option>
-             </select>
+             <app-select-dropdown
+               [(ngModel)]="filterStatus"
+               [options]="statusFilterOptions"
+               (ngModelChange)="cdr.detectChanges()"
+               placeholder="All Appointments"
+               class="min-w-[180px]">
+             </app-select-dropdown>
            </div>
         </div>
 
@@ -147,7 +153,7 @@ export class DoctorScheduleComponent implements OnInit {
     private patientApi = inject(PatientProfileService);
     private router = inject(Router);
     private auth = inject(AuthService);
-    private cdr = inject(ChangeDetectorRef);
+    public cdr = inject(ChangeDetectorRef);
 
     todayDate = new Date();
     todayAppointments: DoctorAppointmentItem[] = [];

@@ -1,13 +1,15 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { SelectDropdownComponent } from './select-dropdown.component';
+import { DatePickerComponent } from './date-picker.component';
 import { AppointmentService, PatientAppointmentItem } from '../core/services/appointment.service';
 import { Doctor } from '../core/services/doctor.service';
 
 @Component({
   selector: 'reschedule-appointment-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SelectDropdownComponent, DatePickerComponent],
   template: `
     <div *ngIf="appointment" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
       <div class="panel rounded-2xl shadow-2xl w-full max-w-md p-6 border border-gray-700/50">
@@ -32,18 +34,22 @@ import { Doctor } from '../core/services/doctor.service';
              </div>
           </div>
 
-          <label class="block space-y-1.5">
-            <span class="text-sm font-medium text-gray-300 ml-1">Select New Date</span>
-            <input type="date" class="input w-full bg-gray-900/50" [(ngModel)]="rescheduleDateISO" (change)="loadSlotsForDate()" />
-          </label>
+          <app-date-picker
+            [(ngModel)]="rescheduleDateISO"
+            (ngModelChange)="loadSlotsForDate()"
+            [minDate]="'today'"
+            label="Select New Date"
+            placeholder="DD-MM-YYYY">
+          </app-date-picker>
           
-          <label class="block space-y-1.5">
-            <span class="text-sm font-medium text-gray-300 ml-1">Available Slots</span>
-            <select class="input w-full bg-gray-900/50" [(ngModel)]="rescheduleTimeSlot" [disabled]="!rescheduleDateISO">
-              <option [ngValue]="null">-- Select time --</option>
-              <option *ngFor="let s of availableSlots" [value]="s">{{ s }}</option>
-            </select>
-          </label>
+          <app-select-dropdown 
+             label="Available Slots" 
+             [options]="availableSlots" 
+             placeholder="Select time"
+             [disabled]="!rescheduleDateISO || availableSlots.length === 0"
+             [autoCapitalize]="false"
+             [(ngModel)]="rescheduleTimeSlot">
+          </app-select-dropdown>
 
           <div class="pt-4 flex items-center gap-3">
             <button class="btn-secondary flex-1" (click)="onClose()">Cancel</button>

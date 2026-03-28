@@ -11,11 +11,12 @@ import { getAppointmentEpochMs, isAppointmentToday } from '../../shared/appointm
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { ToastService } from '../../core/services/toast.service';
 import { MasterDataService } from '../../core/services/master-data.service';
+import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropdown.component';
 
 @Component({
   selector: 'app-my-appointments',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, PatientAppointmentCardComponent, RescheduleAppointmentModalComponent, CancellationModalComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, PatientAppointmentCardComponent, RescheduleAppointmentModalComponent, CancellationModalComponent, SelectDropdownComponent],
   template: `
     <app-patient-layout>
     <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
@@ -48,15 +49,11 @@ import { MasterDataService } from '../../core/services/master-data.service';
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="relative z-10">
             <label class="block text-xs font-medium text-gray-800 dark:text-gray-400 mb-1 ml-1">Status</label>
-            <div class="relative">
-              <select class="input w-full appearance-none bg-gray-800/50" [(ngModel)]="statusFilter">
-                <option value="">All Statuses</option>
-                <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
-              </select>
-               <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
-               </div>
-            </div>
+            <app-select-dropdown
+              [(ngModel)]="statusFilter"
+              [options]="statusOptions"
+              placeholder="All Statuses">
+            </app-select-dropdown>
           </div>
           
           <div class="relative z-10">
@@ -66,17 +63,11 @@ import { MasterDataService } from '../../core/services/master-data.service';
           
           <div class="relative z-10">
              <label class="block text-xs font-medium text-gray-800 dark:text-gray-400 mb-1 ml-1">Time Range</label>
-             <div class="relative">
-                <select class="input w-full appearance-none bg-gray-800/50" [(ngModel)]="rangeFilter">
-                  <option value="">All Time</option>
-                  <option value="upcoming">Upcoming</option>
-                  <option value="today">Today</option>
-                  <option value="past">Past</option>
-                </select>
-                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
-               </div>
-             </div>
+             <app-select-dropdown
+                [(ngModel)]="rangeFilter"
+                [options]="rangeOptions"
+                placeholder="All Time">
+             </app-select-dropdown>
           </div>
         </div>
 
@@ -153,6 +144,22 @@ export class MyAppointmentsComponent {
   specializationFilter = '';
   rangeFilter: 'upcoming' | 'today' | 'past' | '' = '';
   statuses: string[] = [];
+
+  get statusOptions(): SelectOption[] {
+    return [
+      { value: '', label: 'All Statuses' },
+      ...this.statuses.map(s => ({ value: s, label: s }))
+    ];
+  }
+
+  get rangeOptions(): SelectOption[] {
+    return [
+      { value: '', label: 'All Time' },
+      { value: 'today', label: 'Today' },
+      { value: 'upcoming', label: 'Upcoming' },
+      { value: 'past', label: 'Past' }
+    ];
+  }
 
   rescheduleTarget: PatientAppointmentItem | null = null;
   cancellationTarget: PatientAppointmentItem | null = null;

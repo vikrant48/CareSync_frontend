@@ -7,11 +7,12 @@ import { MasterDataService } from '../../core/services/master-data.service';
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { EmergencyAppointmentModalComponent } from '../../shared/emergency-appointment-modal.component';
 import { SpecializationAutocompleteComponent } from '../../shared/specialization-autocomplete.component';
+import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropdown.component';
 
 @Component({
   selector: 'app-patient-book-appointment',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent, SelectDropdownComponent],
   template: `
     <app-patient-layout>
     <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
@@ -60,15 +61,13 @@ import { SpecializationAutocompleteComponent } from '../../shared/specialization
              <input type="text" class="input w-full bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400" placeholder="Doctor name..." [(ngModel)]="nameFilter" />
           </div>
 
-          <div class="relative z-10">
-            <select class="input w-full appearance-none bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100" [(ngModel)]="genderFilter">
-              <option value="" class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">All Genders</option>
-              <option *ngFor="let g of genders" [value]="g" class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">{{ g }}</option>
-            </select>
-            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-              <i class="fa-solid fa-chevron-down text-xs text-gray-600 dark:text-gray-400"></i>
-            </div>
-         </div>
+          <div class="relative z-10 font-medium">
+            <app-select-dropdown
+              [(ngModel)]="genderFilter"
+              [options]="genderOptions"
+              placeholder="All Genders">
+            </app-select-dropdown>
+          </div>
 
          <div class="relative z-10">
              <input type="text" class="input w-full bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400" placeholder="Location..." [(ngModel)]="addressFilter" />
@@ -160,6 +159,13 @@ export class PatientBookAppointmentComponent {
   loadingDoctors = false;
   showEmergencyModal = false;
   genders: string[] = [];
+
+  get genderOptions(): SelectOption[] {
+    return [
+      { value: '', label: 'All Genders' },
+      ...this.genders.map(g => ({ value: g, label: g }))
+    ];
+  }
 
   doctors: Doctor[] = [];
   ratings: Record<number, { avg: number; count: number }> = {};

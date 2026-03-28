@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { AppointmentService } from '../core/services/appointment.service';
 import { Doctor } from '../core/services/doctor.service';
 import { ToastService } from '../core/services/toast.service';
+import { DatePickerComponent } from './date-picker.component';
 
 @Component({
   selector: 'app-doctor-booking-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DatePickerComponent],
   template: `
     <div *ngIf="open" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4 backdrop-blur-sm transition-opacity">
       <div class="panel w-full max-w-xl relative flex flex-col max-h-[75vh] sm:max-h-[85vh] shadow-2xl rounded-2xl overflow-hidden animate-in zoom-in-95 duration-200 ring-1 ring-white/10">
@@ -40,12 +41,13 @@ import { ToastService } from '../core/services/toast.service';
         <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6 bg-white dark:bg-gray-900/95">
            
            <!-- Date Selection -->
-           <div class="space-y-2">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Select Date</label>
-              <div class="relative">
-                 <input type="date" class="input w-full" [(ngModel)]="selectedDate" (change)="loadSlots()" [min]="minDate" />
-              </div>
-           </div>
+               <app-date-picker
+                 [(ngModel)]="selectedDate"
+                 (ngModelChange)="loadSlots()"
+                 [minDate]="minDate"
+                 label="Select Date"
+                 placeholder="Select Date">
+               </app-date-picker>
 
            <!-- Slots -->
            <div class="space-y-2">

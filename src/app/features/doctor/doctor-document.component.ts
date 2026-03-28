@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 import { AuthService } from '../../core/services/auth.service';
 import { DoctorProfileService, DocumentItem } from '../../core/services/doctor-profile.service';
+import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropdown.component';
 
 @Component({
   selector: 'app-doctor-documents',
   standalone: true,
-  imports: [CommonModule, FormsModule, DoctorLayoutComponent],
+  imports: [CommonModule, FormsModule, DoctorLayoutComponent, SelectDropdownComponent],
   templateUrl: './doctor-document.component.html',
   styleUrl: './doctor-document.component.css'
 })
@@ -58,6 +59,38 @@ export class DoctorDocumentsComponent implements OnInit {
     'MCh',
     'Diploma',
     'Other',
+  ];
+
+  // Prepared options for SelectDropdownComponent
+  readonly documentTypeOptions: SelectOption[] = this.documentTypes.map(t => ({
+    value: t,
+    label: t.replace(/_/g, ' ').split(' ').map(w => w.charAt(0) + w.slice(1).toLowerCase()).join(' ')
+  }));
+
+  readonly categoryOptions: SelectOption[] = [
+    { value: 'Education', label: 'Education' },
+    { value: 'Experience', label: 'Experience' },
+    { value: 'Other', label: 'Other' }
+  ];
+
+  readonly typeFilterOptions: SelectOption[] = [
+    { value: 'ALL', label: 'All Types' },
+    ...this.documentTypeOptions
+  ];
+
+  readonly categoryFilterOptions: SelectOption[] = [
+    { value: 'ALL', label: 'All Categories' },
+    ...this.categoryOptions
+  ];
+
+  readonly educationSubtypeOptions: SelectOption[] = [
+    { value: '', label: 'Select Level' },
+    ...this.educationSubtypes.map(s => ({ value: s, label: s }))
+  ];
+
+  readonly educationSubtypeFilterOptions: SelectOption[] = [
+    { value: 'ALL', label: 'All Levels' },
+    ...this.educationSubtypes.map(s => ({ value: s, label: s }))
   ];
 
   ngOnInit(): void {

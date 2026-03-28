@@ -8,11 +8,13 @@ import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 import { SpecializationAutocompleteComponent } from '../../shared/specialization-autocomplete.component';
 import { ToastService } from '../../core/services/toast.service';
 import { MasterDataService } from '../../core/services/master-data.service';
+import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropdown.component';
+import { DatePickerComponent } from '../../shared/date-picker.component';
 
 @Component({
   selector: 'app-doctor-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, DoctorLayoutComponent, SpecializationAutocompleteComponent],
+  imports: [CommonModule, FormsModule, DoctorLayoutComponent, SpecializationAutocompleteComponent, SelectDropdownComponent, DatePickerComponent],
   templateUrl: './doctor-profile.component.html',
   styleUrls: ['./doctor-profile.component.css']
 })
@@ -103,14 +105,16 @@ export class DoctorProfileComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Add "Other" options to master data for dropdowns
     this.masterDataService.getAllMasterData().subscribe({
       next: (data) => {
         if (data.genders) this.genders = data.genders;
         if (data.languages) this.languageOptions = data.languages;
-        if (data.degrees) this.degreeOptions = data.degrees;
-        if (data.institutions) this.institutionOptions = data.institutions;
-        if (data.hospitals) this.hospitalOptions = data.hospitals;
-        if (data.positions) this.positionOptions = data.positions;
+        
+        if (data.degrees) this.degreeOptions = [...data.degrees, '__other__'];
+        if (data.institutions) this.institutionOptions = [...data.institutions, '__other__'];
+        if (data.hospitals) this.hospitalOptions = [...data.hospitals, '__other__'];
+        if (data.positions) this.positionOptions = [...data.positions, '__other__'];
       }
     });
     this.username = this.auth.username();

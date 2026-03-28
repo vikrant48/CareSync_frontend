@@ -7,11 +7,13 @@ import { ToastService } from '../core/services/toast.service';
 import { PatientProfileService, PatientDto, UpdatePatientRequest } from '../core/services/patient-profile.service';
 import { AuthService } from '../core/services/auth.service';
 import { MasterDataService } from '../core/services/master-data.service';
+import { SelectDropdownComponent } from './select-dropdown.component';
+import { DatePickerComponent } from './date-picker.component';
 
 @Component({
   selector: 'app-patient-edit-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, PatientLayoutComponent],
+  imports: [CommonModule, FormsModule, RouterModule, PatientLayoutComponent, SelectDropdownComponent, DatePickerComponent],
   template: `
     <app-patient-layout>
       <div class="max-w-7xl mx-auto space-y-6 p-4 sm:p-6">
@@ -81,36 +83,29 @@ import { MasterDataService } from '../core/services/master-data.service';
                 <input class="input bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white" [(ngModel)]="form.contactInfo" name="contactInfo" placeholder="+1 (555) 000-0000" />
               </div>
 
-              <div class="space-y-2">
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-400">Date of Birth</label>
-                <input class="input bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white" [(ngModel)]="form.dateOfBirth" name="dateOfBirth" type="date" />
-              </div>
+              <app-date-picker
+                [(ngModel)]="form.dateOfBirth"
+                name="dateOfBirth"
+                label="Date of Birth"
+                placeholder="Select Date">
+              </app-date-picker>
 
-              <div class="space-y-2">
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-400">Gender</label>
-                <div class="relative">
-                  <select class="input appearance-none bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white" [(ngModel)]="form.gender" name="gender">
-                    <option value="">Select Gender</option>
-                    <option *ngFor="let g of genders" [value]="g">{{ g }}</option>
-                  </select>
-                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400">
-                    <i class="fa-solid fa-chevron-down text-xs"></i>
-                  </div>
-                </div>
-              </div>
+                <app-select-dropdown 
+                   label="Gender" 
+                   [options]="genders" 
+                   placeholder="Select Gender"
+                   [(ngModel)]="form.gender" 
+                   name="gender">
+                </app-select-dropdown>
 
-              <div class="space-y-2">
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-400">Blood Group</label>
-                <div class="relative">
-                  <select class="input appearance-none bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white" [(ngModel)]="form.bloodGroup" name="bloodGroup">
-                    <option value="">Select Blood Group</option>
-                    <option *ngFor="let bg of bloodGroups" [value]="bg">{{ bg }}</option>
-                  </select>
-                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400">
-                    <i class="fa-solid fa-chevron-down text-xs"></i>
-                  </div>
-                </div>
-              </div>
+                <app-select-dropdown 
+                   label="Blood Group" 
+                   [options]="bloodGroups" 
+                   placeholder="Select Blood Group"
+                   [autoCapitalize]="false"
+                   [(ngModel)]="form.bloodGroup" 
+                   name="bloodGroup">
+                </app-select-dropdown>
 
             </div>
 

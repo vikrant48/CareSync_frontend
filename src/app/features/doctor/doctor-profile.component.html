@@ -245,10 +245,11 @@
                 <div class="grid grid-cols-2 gap-4">
                   <div class="space-y-1.5">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Gender</label>
-                    <select class="input-modern" [(ngModel)]="profileForm.gender">
-                      <option [ngValue]="undefined">Select</option>
-                      <option *ngFor="let g of genders" [value]="g">{{ g }}</option>
-                    </select>
+                    <app-select-dropdown 
+                      [(ngModel)]="profileForm.gender" 
+                      [options]="genders" 
+                      placeholder="Select Gender">
+                    </app-select-dropdown>
                   </div>
                   <div class="space-y-1.5">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Fees (₹)</label>
@@ -316,11 +317,11 @@
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Degree /
                   Qualification</label>
-                <select class="input-modern" [(ngModel)]="newEducation.degree">
-                  <option [ngValue]="''">Select degree</option>
-                  <option *ngFor="let d of degreeOptions" [value]="d">{{ d }}</option>
-                  <option value="__other__">Add new degree…</option>
-                </select>
+                <app-select-dropdown
+                  [(ngModel)]="newEducation.degree"
+                  [options]="degreeOptions"
+                  placeholder="Select degree">
+                </app-select-dropdown>
                 <div *ngIf="newEducation.degree==='__other__'" class="mt-2 flex items-center gap-2">
                   <input class="input flex-1" [(ngModel)]="customDegree" placeholder="Enter degree" />
                   <button class="btn-secondary !p-3" (click)="addCustomDegree()"><i
@@ -330,11 +331,11 @@
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Institution /
                   University</label>
-                <select class="input-modern" [(ngModel)]="newEducation.institution">
-                  <option [ngValue]="''">Select institution</option>
-                  <option *ngFor="let i of institutionOptions" [value]="i">{{ i }}</option>
-                  <option value="__other__">Add new institution…</option>
-                </select>
+                <app-select-dropdown
+                  [(ngModel)]="newEducation.institution"
+                  [options]="institutionOptions"
+                  placeholder="Select institution">
+                </app-select-dropdown>
                 <div *ngIf="newEducation.institution==='__other__'" class="mt-2 flex items-center gap-2">
                   <input class="input flex-1" [(ngModel)]="customInstitution" placeholder="Enter institution" />
                   <button class="btn-secondary !p-3" (click)="addCustomInstitution()"><i
@@ -424,11 +425,11 @@
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Hospital / Clinic
                   Name</label>
-                <select class="input-modern" [(ngModel)]="newExperience.hospitalName">
-                  <option [ngValue]="''">Select hospital</option>
-                  <option *ngFor="let h of hospitalOptions" [value]="h">{{ h }}</option>
-                  <option value="__other__">Add new hospital…</option>
-                </select>
+                <app-select-dropdown
+                  [(ngModel)]="newExperience.hospitalName"
+                  [options]="hospitalOptions"
+                  placeholder="Select hospital">
+                </app-select-dropdown>
                 <div *ngIf="newExperience.hospitalName==='__other__'" class="mt-2 flex items-center gap-2">
                   <input class="input flex-1" [(ngModel)]="customHospital" placeholder="Enter hospital" />
                   <button class="btn-secondary !p-3" (click)="addCustomHospital()"><i
@@ -438,11 +439,11 @@
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Designation /
                   Role</label>
-                <select class="input-modern" [(ngModel)]="newExperience.position">
-                  <option [ngValue]="''">Select position</option>
-                  <option *ngFor="let p of positionOptions" [value]="p">{{ p }}</option>
-                  <option value="__other__">Add new position…</option>
-                </select>
+                <app-select-dropdown
+                  [(ngModel)]="newExperience.position"
+                  [options]="positionOptions"
+                  placeholder="Select position">
+                </app-select-dropdown>
                 <div *ngIf="newExperience.position==='__other__'" class="mt-2 flex items-center gap-2">
                   <input class="input flex-1" [(ngModel)]="customPosition" placeholder="Enter position" />
                   <button class="btn-secondary !p-3" (click)="addCustomPosition()"><i
@@ -633,12 +634,18 @@
                 <input class="input-modern" [(ngModel)]="certEdit[eid].issuingOrganization" placeholder="Institution" />
               </div>
               <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Issue Date</label>
-                <input class="input-modern" type="date" [(ngModel)]="certEdit[eid].issueDate" />
+                <app-date-picker
+                  [(ngModel)]="certEdit[eid].issueDate"
+                  label="Issue Date"
+                  placeholder="Select Date">
+                </app-date-picker>
               </div>
               <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Expiry Date</label>
-                <input class="input-modern" type="date" [(ngModel)]="certEdit[eid].expiryDate" />
+                <app-date-picker
+                  [(ngModel)]="certEdit[eid].expiryDate"
+                  label="Expiry Date"
+                  placeholder="Select Date">
+                </app-date-picker>
               </div>
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Credential ID

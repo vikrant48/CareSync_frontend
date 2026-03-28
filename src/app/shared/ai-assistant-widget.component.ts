@@ -7,11 +7,12 @@ import { AppointmentService } from '../core/services/appointment.service';
 import { AuthService } from '../core/services/auth.service';
 import { PaymentPopupComponent, PaymentDetails } from './payment-popup.component';
 import { ToastService } from '../core/services/toast.service';
+import { DatePickerComponent } from './date-picker.component';
 
 @Component({
   selector: 'app-ai-assistant-widget',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaymentPopupComponent],
+  imports: [CommonModule, FormsModule, PaymentPopupComponent, DatePickerComponent],
   template: `
     <!-- Floating Button -->
     <button
@@ -156,13 +157,14 @@ import { ToastService } from '../core/services/toast.service';
                     <button (click)="selectRelativeDate(msg.suggestion.doctorId!, 0, msg.suggestion.reason)" class="px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition-all">Today</button>
                    <button (click)="selectRelativeDate(msg.suggestion.doctorId!, 1, msg.suggestion.reason)" class="px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition-all">Tomorrow</button>
                    
-                   <div class="relative">
-                      <input #datePicker type="date" class="absolute inset-0 opacity-0 cursor-pointer pointer-events-none" 
-                             [min]="minDate" (change)="onDateSelected(msg.suggestion.doctorId!, datePicker.value, msg.suggestion.reason)">
-                      <button (click)="openDatePicker(datePicker)" class="px-4 py-2 border-2 border-dashed border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-blue-50 transition-all">
-                         <i class="fas fa-calendar-alt"></i>
-                         Custom Date
-                      </button>
+                   <div class="mt-2 text-gray-900 dark:text-gray-100">
+                      <app-date-picker
+                        #customDP
+                        label="Custom Date"
+                        [minDate]="minDate"
+                        placeholder="DD-MM-YYYY"
+                        (dateChange)="onDateSelected(msg.suggestion.doctorId!, $event, msg.suggestion.reason)">
+                      </app-date-picker>
                    </div>
                 </div>
                 <button (click)="selectSpecialization(msg.suggestion.specialization!, msg.suggestion.reason)" class="text-xs text-blue-500 hover:text-blue-700 hover:underline flex items-center gap-1 pl-1">
@@ -459,13 +461,6 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
     this.sendMessage(`ACTION_SELECT_DATE_${doctorId}_${dateStr}${reason ? '_' + reason : ''}`);
   }
 
-  openDatePicker(input: HTMLInputElement) {
-    if (input.showPicker) {
-      input.showPicker();
-    } else {
-      input.click(); // Fallback
-    }
-  }
 
   onDateSelected(doctorId: number, dateStr: string, reason?: string) {
     if (!dateStr) return;

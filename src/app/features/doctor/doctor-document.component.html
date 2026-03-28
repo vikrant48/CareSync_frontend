@@ -68,29 +68,32 @@
           <!-- Document Type -->
           <div class="space-y-2">
             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Document Type</label>
-            <select class="input-modern" [(ngModel)]="uploadType">
-              <option *ngFor="let t of documentTypes" [value]="t">{{ t.replace('_', ' ') | titlecase }}</option>
-            </select>
+            <app-select-dropdown
+              [(ngModel)]="uploadType"
+              [options]="documentTypeOptions"
+              placeholder="Select Type">
+            </app-select-dropdown>
           </div>
 
           <!-- Category -->
           <div class="space-y-2">
             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Category</label>
-            <select class="input-modern" [(ngModel)]="uploadCategory">
-              <option value="Education">Education</option>
-              <option value="Experience">Experience</option>
-              <option value="Other">Other</option>
-            </select>
+            <app-select-dropdown
+              [(ngModel)]="uploadCategory"
+              [options]="categoryOptions"
+              placeholder="Select Category">
+            </app-select-dropdown>
           </div>
 
           <!-- Subtype (Conditional) -->
           <div class="space-y-2" *ngIf="uploadCategory === 'Education'">
             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Education Level</label>
             <div class="relative animate-in fade-in slide-in-from-top-1">
-              <select class="input-modern" [(ngModel)]="uploadEducationSubtype">
-                <option value="">Select Level</option>
-                <option *ngFor="let s of educationSubtypes" [value]="s">{{ s }}</option>
-              </select>
+              <app-select-dropdown
+                [(ngModel)]="uploadEducationSubtype"
+                [options]="educationSubtypeOptions"
+                placeholder="Select Level">
+              </app-select-dropdown>
             </div>
           </div>
 
@@ -145,30 +148,34 @@
           <div class="relative">
             <span
               class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs uppercase font-bold tracking-wider">Type</span>
-            <select class="input-filter pl-16" [(ngModel)]="filterType" (change)="onFilterChanged()">
-              <option value="ALL">All Types</option>
-              <option *ngFor="let t of documentTypes" [value]="t">{{ t.replace('_', ' ') | titlecase }}</option>
-            </select>
+            <app-select-dropdown
+              [(ngModel)]="filterType"
+              [options]="typeFilterOptions"
+              (ngModelChange)="onFilterChanged()"
+              placeholder="All Types">
+            </app-select-dropdown>
           </div>
 
           <div class="relative">
             <span
               class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs uppercase font-bold tracking-wider">Cat</span>
-            <select class="input-filter pl-14" [(ngModel)]="filterCategory" (change)="onFilterChanged()">
-              <option value="ALL">All Categories</option>
-              <option value="Education">Education</option>
-              <option value="Experience">Experience</option>
-              <option value="Other">Other</option>
-            </select>
+            <app-select-dropdown
+              [(ngModel)]="filterCategory"
+              [options]="categoryFilterOptions"
+              (ngModelChange)="onFilterChanged()"
+              placeholder="All Categories">
+            </app-select-dropdown>
           </div>
 
           <div class="relative" *ngIf="filterCategory === 'Education'">
             <span
               class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs uppercase font-bold tracking-wider">Level</span>
-            <select class="input-filter pl-16" [(ngModel)]="filterEducationSubtype" (change)="onFilterChanged()">
-              <option value="ALL">All Levels</option>
-              <option *ngFor="let s of educationSubtypes" [value]="s">{{ s }}</option>
-            </select>
+            <app-select-dropdown
+              [(ngModel)]="filterEducationSubtype"
+              [options]="educationSubtypeFilterOptions"
+              (ngModelChange)="onFilterChanged()"
+              placeholder="All Levels">
+            </app-select-dropdown>
           </div>
         </div>
       </div>

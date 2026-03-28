@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 import { LeaveService, DoctorLeave } from '../../core/services/leave.service';
 import { ToastService } from '../../core/services/toast.service';
+import { DatePickerComponent } from '../../shared/date-picker.component';
 
 @Component({
     selector: 'app-doctor-leave-management',
     standalone: true,
-    imports: [CommonModule, FormsModule, DoctorLayoutComponent],
+    imports: [CommonModule, FormsModule, DoctorLayoutComponent, DatePickerComponent],
     template: `
     <app-doctor-layout>
       <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
@@ -31,15 +32,21 @@ import { ToastService } from '../../core/services/toast.service';
               </h3>
               
               <form (ngSubmit)="applyLeave()" class="space-y-4">
-                <div class="space-y-1.5">
-                  <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">From Date</label>
-                  <input type="date" class="input-modern w-full" [(ngModel)]="form.startDate" name="startDate" required [min]="minDate" />
-                </div>
+                <app-date-picker
+                  [(ngModel)]="form.startDate"
+                  name="startDate"
+                  label="From Date"
+                  [minDate]="'today'"
+                  placeholder="Select Date">
+                </app-date-picker>
                 
-                <div class="space-y-1.5">
-                  <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">To Date</label>
-                  <input type="date" class="input-modern w-full" [(ngModel)]="form.endDate" name="endDate" required [min]="form.startDate || minDate" />
-                </div>
+                <app-date-picker
+                  [(ngModel)]="form.endDate"
+                  name="endDate"
+                  label="To Date"
+                  [minDate]="form.startDate || 'today'"
+                  placeholder="Select Date">
+                </app-date-picker>
                 
                 <div class="space-y-1.5">
                    <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Reason</label>

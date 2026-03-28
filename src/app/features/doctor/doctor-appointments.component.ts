@@ -12,13 +12,14 @@ import { MasterDataService } from '../../core/services/master-data.service';
 import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.component';
 import { PatientProfileService, PatientDto, MedicalHistoryWithDoctorItem } from '../../core/services/patient-profile.service';
 import { forkJoin, map, firstValueFrom } from 'rxjs';
+import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropdown.component';
 
 type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
 
 @Component({
   selector: 'app-doctor-appointments',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, DoctorAppointmentCardComponent, PatientDetailsModalComponent, MedicalHistoryDetailModalComponent, DoctorLayoutComponent, SharedChatModalComponent],
+  imports: [CommonModule, FormsModule, RouterModule, DoctorAppointmentCardComponent, PatientDetailsModalComponent, MedicalHistoryDetailModalComponent, DoctorLayoutComponent, SharedChatModalComponent, SelectDropdownComponent],
   template: `
     <app-doctor-layout>
     <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
@@ -51,12 +52,12 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
           <!-- Status Filter -->
           <div class="space-y-1.5">
             <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</label>
-            <div class="relative">
-              <select class="input-modern" [(ngModel)]="statusFilter" (change)="onFilterChange()">
-                <option value="ALL">All Statuses</option>
-                <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
-              </select>
-            </div>
+              <app-select-dropdown
+                [(ngModel)]="statusFilter"
+                [options]="statusOptions"
+                (ngModelChange)="onFilterChange()"
+                placeholder="All Statuses">
+              </app-select-dropdown>
           </div>
 
           <!-- Search Filter -->
@@ -171,6 +172,12 @@ export class DoctorAppointmentsComponent {
   appointments: DoctorAppointmentItem[] = [];
   statusFilter: string = 'ALL';
   statuses: string[] = [];
+  get statusOptions(): SelectOption[] {
+    return [
+      { value: 'ALL', label: 'All Statuses' },
+      ...this.statuses.map(s => ({ value: s, label: s }))
+    ];
+  }
   range: TimeRange = 'UPCOMING';
   searchTerm = '';
 

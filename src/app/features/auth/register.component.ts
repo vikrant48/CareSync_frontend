@@ -1,19 +1,20 @@
 import { Component, inject, OnInit, AfterViewInit, HostListener, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators, FormGroup, FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { RegisterRequest } from '../../core/models/auth.models';
 import { ToastService } from '../../core/services/toast.service';
 import { ToastContainerComponent } from '../../shared/toast-container.component';
+import { SelectDropdownComponent } from '../../shared/select-dropdown.component';
 import { SpecializationService } from '../../core/services/specialization.service';
 import { MasterDataService } from '../../core/services/master-data.service';
-import flatpickr from 'flatpickr';
+import { DatePickerComponent } from '../../shared/date-picker.component';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, ToastContainerComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, ToastContainerComponent, SelectDropdownComponent, DatePickerComponent],
   template: `
     <div class="min-h-screen bg-white dark:bg-gray-950 grid lg:grid-cols-2 overflow-hidden transition-all duration-500">
       
@@ -146,36 +147,17 @@ import flatpickr from 'flatpickr';
                   <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Mobile Number</label>
                   <input class="input-modern py-2 text-sm pl-4" formControlName="contactInfo" (input)="onPhoneInput($event)" placeholder="+91 9876543210" />
                 </div>
-                <div class="space-y-1">
-                  <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Birth Date</label>
-                  <div class="relative">
-                    <input id="dob-picker" class="input-modern py-2 text-sm pl-4 pr-3 cursor-pointer bg-white dark:bg-gray-800" type="text" formControlName="dateOfBirth" placeholder="DD-MM-YYYY" readonly />
-                    <i class="fa-regular fa-calendar absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-xs"></i>
-                  </div>
-                </div>
-                <div class="space-y-1 relative" id="gender-dropdown-container">
-                  <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Gender</label>
-                  <button type="button" 
-                          (click)="toggleGenderDropdown($event)"
-                          class="input-modern py-2 text-sm pl-4 pr-10 w-full text-left bg-white dark:bg-gray-800 relative transition-all duration-300">
-                    <span [class.text-gray-400]="!basicForm.get('gender')?.value">
-                      {{ basicForm.get('gender')?.value || 'Select gender' }}
-                    </span>
-                    <i class="fa-solid fa-chevron-down text-[10px] absolute right-4 top-1/2 -translate-y-1/2 transition-transform duration-300"
-                       [class.rotate-180]="isGenderDropdownOpen"></i>
-                  </button>
-
-                  <!-- Custom Dropdown List -->
-                  <div *ngIf="isGenderDropdownOpen" 
-                       class="absolute z-[100] left-0 right-0 mt-1.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-2xl shadow-black/10 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                    <div *ngFor="let g of genders" 
-                         (click)="selectGender(g)"
-                         class="px-4 py-2.5 text-sm cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center justify-between group">
-                      <span class="font-medium capitalize">{{ g.toLowerCase() }}</span>
-                      <i class="fa-solid fa-check text-[10px] opacity-0 group-hover:opacity-100" *ngIf="basicForm.get('gender')?.value === g"></i>
-                    </div>
-                  </div>
-                </div>
+                <app-date-picker 
+                  formControlName="dateOfBirth" 
+                  label="Birth Date" 
+                  placeholder="DD-MM-YYYY">
+                </app-date-picker>
+                <app-select-dropdown 
+                   label="Gender" 
+                   [options]="genders" 
+                   placeholder="Select gender"
+                   formControlName="gender">
+                </app-select-dropdown>
                 <div class="space-y-1">
                   <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Username</label>
                   <input class="input-modern py-2 text-sm pl-4" formControlName="username" placeholder="johndoe_md" />
@@ -253,29 +235,13 @@ import flatpickr from 'flatpickr';
 
                <!-- Doctor fields -->
                <div *ngIf="roleForm.value.role === 'DOCTOR'" [formGroup]="doctorForm" class="grid grid-cols-1 gap-3">
-                 <div class="space-y-1 relative" id="specialization-dropdown-container">
-                   <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Specialization</label>
-                   <button type="button" 
-                           (click)="toggleSpecializationDropdown($event)"
-                           class="input-modern py-2 text-sm pl-4 pr-10 w-full text-left bg-white dark:bg-gray-800 relative transition-all duration-300">
-                     <span [class.text-gray-400]="!doctorForm.get('specialization')?.value">
-                       {{ doctorForm.get('specialization')?.value || 'Select specialization' }}
-                     </span>
-                     <i class="fa-solid fa-chevron-down text-[10px] absolute right-4 top-1/2 -translate-y-1/2 transition-transform duration-300"
-                        [class.rotate-180]="isSpecializationDropdownOpen"></i>
-                   </button>
-
-                   <!-- Specialization Dropdown List (High Density) -->
-                   <div *ngIf="isSpecializationDropdownOpen" 
-                        class="absolute z-[100] left-0 right-0 mt-1.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-2xl shadow-black/10 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-[180px] overflow-y-auto custom-scrollbar">
-                     <div *ngFor="let spec of specializations" 
-                          (click)="selectSpecialization(spec)"
-                          class="px-4 py-2 text-xs cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center justify-between group">
-                       <span class="font-bold">{{ spec }}</span>
-                       <i class="fa-solid fa-check text-[9px] opacity-0 group-hover:opacity-100" *ngIf="doctorForm.get('specialization')?.value === spec"></i>
-                     </div>
-                   </div>
-                 </div>
+                 <app-select-dropdown 
+                    label="Specialization" 
+                    [options]="specializations" 
+                    placeholder="Select specialization"
+                    [autoCapitalize]="false"
+                    formControlName="specialization">
+                 </app-select-dropdown>
                  <div class="space-y-1">
                    <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Experience (Years)</label>
                    <div class="flex items-center gap-1.5">
@@ -358,13 +324,9 @@ import flatpickr from 'flatpickr';
       height: 100vh;
       overflow: hidden;
     }
-    input[type="date"]::-webkit-calendar-picker-indicator {
-      filter: invert(0.5);
-      cursor: pointer;
-    }
   `]
 })
-export class RegisterComponent implements OnInit, AfterViewInit {
+export class RegisterComponent implements OnInit {
   private auth = inject(AuthService);
   private toast = inject(ToastService);
   private specializationService = inject(SpecializationService);
@@ -420,29 +382,7 @@ export class RegisterComponent implements OnInit, AfterViewInit {
     });
   }
 
-  ngAfterViewInit() {
-    this.initDobPicker();
-  }
 
-  private initDobPicker() {
-    if (isPlatformBrowser(this.platformId) && this.currentStep === 1) {
-      setTimeout(() => {
-        const input = document.getElementById('dob-picker');
-        if (input) {
-          flatpickr(input, {
-            dateFormat: "Y-m-d", // Format sent to backend
-            altInput: true,      // New input for user display
-            altFormat: "d-m-Y",  // Format user sees: DD-MM-YYYY
-            altInputClass: "input-modern py-2 text-sm pl-4 pr-10 cursor-pointer bg-white dark:bg-gray-800",
-            allowInput: true,
-            onChange: (selectedDates, dateStr) => {
-              this.basicForm.patchValue({ dateOfBirth: dateStr });
-            }
-          });
-        }
-      }, 0);
-    }
-  }
 
   // Wizard state
   currentStep = 1;
@@ -460,33 +400,8 @@ export class RegisterComponent implements OnInit, AfterViewInit {
   doctorForm!: FormGroup;
   patientForm!: FormGroup;
 
-  isGenderDropdownOpen = false;
-  isSpecializationDropdownOpen = false;
-
   genders = ['MALE', 'FEMALE', 'OTHER'];
   bloodGroups: string[] = [];
-
-  toggleGenderDropdown(event: Event) {
-    event.stopPropagation();
-    this.isSpecializationDropdownOpen = false; // Close other
-    this.isGenderDropdownOpen = !this.isGenderDropdownOpen;
-  }
-
-  selectGender(gender: string) {
-    this.basicForm.patchValue({ gender });
-    this.isGenderDropdownOpen = false;
-  }
-
-  toggleSpecializationDropdown(event: Event) {
-    event.stopPropagation();
-    this.isGenderDropdownOpen = false; // Close other
-    this.isSpecializationDropdownOpen = !this.isSpecializationDropdownOpen;
-  }
-
-  selectSpecialization(spec: string) {
-    this.doctorForm.patchValue({ specialization: spec });
-    this.isSpecializationDropdownOpen = false;
-  }
 
   incrementExperience() {
     const current = this.doctorForm.get('experience')?.value || 0;
@@ -498,13 +413,6 @@ export class RegisterComponent implements OnInit, AfterViewInit {
     if (current > 0) {
       this.doctorForm.patchValue({ experience: current - 1 });
     }
-  }
-
-  // Close dropdowns on outside click
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent) {
-    this.isGenderDropdownOpen = false;
-    this.isSpecializationDropdownOpen = false;
   }
 
   // Helper method to check if a field is invalid and should show error
@@ -520,7 +428,6 @@ export class RegisterComponent implements OnInit, AfterViewInit {
     // Allow navigation to previous steps only
     if (step < this.currentStep) {
       this.currentStep = step;
-      if (step === 1) this.initDobPicker();
     }
   }
 
@@ -617,7 +524,9 @@ export class RegisterComponent implements OnInit, AfterViewInit {
     if (this.currentStep > 1) {
       this.currentStep -= 1;
       this.showValidationErrors = false;
-      if (this.currentStep === 1) this.initDobPicker();
+      if (this.currentStep === 1) {
+        // DOB picker is now handled by shared component
+      }
     }
   }
 
