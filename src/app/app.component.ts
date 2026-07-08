@@ -4,6 +4,7 @@ import { RouterOutlet, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './core/services/auth.service';
 import { ThemeService } from './core/services/theme.service';
+import { BackendStatusService } from './core/services/backend-status.service';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +16,7 @@ import { ThemeService } from './core/services/theme.service';
 export class AppComponent {
   title = 'caresync-frontend';
   auth = inject(AuthService);
+  statusService = inject(BackendStatusService);
   private theme = inject(ThemeService);
   private platformId = inject(PLATFORM_ID);
   isBrowser = isPlatformBrowser(this.platformId);

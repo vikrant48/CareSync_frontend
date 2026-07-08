@@ -2,11 +2,13 @@ import { HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpErrorResponse } from
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { BackendStatusService } from '../services/backend-status.service';
 import { catchError, switchMap, throwError } from 'rxjs';
 
 export const tokenInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: HttpHandlerFn) => {
   const auth = inject(AuthService);
-  const router = inject(Router);
+  const router = Router && inject(Router);
+  const statusService = inject(BackendStatusService);
 
   // Skip token logic for auth endpoints (login, register, refresh, etc.) EXCEPT logout, current-user, and change-password
   if (req.url.includes('/api/auth/') &&
@@ -14,7 +16,15 @@ export const tokenInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next:
     !req.url.includes('/api/auth/email-verification') &&
     !req.url.includes('/api/auth/current-user') &&
     !req.url.includes('/api/auth/change-password')) {
-    return next(req);
+    // We still want to intercept errors to check if server went offline during an unauthenticated request (like login or check availability)
+    return next(req).pipe(
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === 0 || error.status === 502 || error.status === 503 || error.status === 504) {
+          statusService.setOffline();
+        }
+        return throwError(() => error);
+      })
+    );
   }
 
   // Check if token needs refresh before making the request
@@ -47,6 +57,11 @@ export const tokenInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next:
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
+      // Check if server offline or connection timed out
+      if (error.status === 0 || error.status === 502 || error.status === 503 || error.status === 504) {
+        statusService.setOffline();
+      }
+
       // Handle 401 (Unauthorized) for expired tokens
       // NOTE: We do not handle 403 (Forbidden) here anymore, as it indicates valid token but insufficient permissions.
       // Auto-logout on 403 causes poor UX when it's just a permission error.
