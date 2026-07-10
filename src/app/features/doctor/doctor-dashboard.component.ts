@@ -37,17 +37,20 @@ import { forkJoin } from 'rxjs';
               <div class="relative">
                 <div class="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-white/30 shadow-lg overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center text-2xl md:text-3xl font-bold">
                   <img *ngIf="profile?.profileImageUrl" [src]="profile?.profileImageUrl" class="w-full h-full object-cover" />
-                  <span *ngIf="!profile?.profileImageUrl">{{ (doctorName || 'D').charAt(0) }}</span>
+                  <span *ngIf="!profile?.profileImageUrl && doctorName">{{ (doctorName || 'D').charAt(0) }}</span>
+                  <div *ngIf="!doctorName" class="w-full h-full bg-white/10 animate-pulse"></div>
                 </div>
                 <div *ngIf="profile?.isVerified" class="absolute -bottom-1 -right-1 bg-green-500 text-white text-[8px] px-1.5 py-0.5 rounded-full border-2 border-indigo-700 shadow-md flex items-center gap-1" title="Verified">
                   <i class="fa-solid fa-check"></i>
                   <span class="font-black uppercase tracking-widest text-[7px]">Verified</span>
                 </div>
               </div>
-              <div class="space-y-1">
-                <h1 class="text-xl md:text-3xl font-black tracking-tight leading-tight">Welcome, {{ doctorName === 'Doctor' ? 'Doctor' : 'Dr. ' + doctorName }}!</h1>
+              <div class="space-y-2">
+                <h1 class="text-xl md:text-3xl font-black tracking-tight leading-tight animate-fade-in" *ngIf="doctorName">Welcome, {{ doctorName === 'Doctor' ? 'Doctor' : 'Dr. ' + doctorName }}!</h1>
+                <div class="h-8 w-48 bg-white/20 rounded animate-pulse my-1" *ngIf="!doctorName"></div>
                 <div class="flex flex-col md:flex-row items-center gap-2 md:gap-3 text-blue-100/90 text-sm md:text-lg font-medium">
-                  <span class="px-3 py-0.5 bg-white/10 rounded-full backdrop-blur-sm border border-white/10">{{ profile?.specialization || 'General Practitioner' }}</span>
+                  <span *ngIf="profile" class="px-3 py-0.5 bg-white/10 rounded-full backdrop-blur-sm border border-white/10 animate-fade-in">{{ profile?.specialization || 'General Practitioner' }}</span>
+                  <span *ngIf="!profile" class="h-6 w-36 bg-white/20 rounded animate-pulse"></span>
                   <span class="hidden md:block w-1.5 h-1.5 rounded-full bg-blue-300"></span>
                   <span class="opacity-80">{{ todayISO() | date:'fullDate' }}</span>
                 </div>

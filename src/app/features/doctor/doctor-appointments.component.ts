@@ -120,6 +120,7 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
         [open]="detailsOpen"
         [patient]="patient"
         [history]="history"
+        [documents]="documents"
         (close)="closeDetails()"
         (historyClick)="viewHistoryDetail($event)"
       ></app-patient-details-modal>
@@ -185,6 +186,7 @@ export class DoctorAppointmentsComponent {
   detailsOpen = false;
   patient: PatientDto | null = null;
   history: MedicalHistoryWithDoctorItem[] = [];
+  documents: any[] = [];
   selectedAppointment: DoctorAppointmentItem | null = null;
 
   // History detail modal state
@@ -320,10 +322,12 @@ export class DoctorAppointmentsComponent {
     this.detailsOpen = true;
     this.patient = null;
     this.history = [];
+    this.documents = [];
     this.patients.getCompleteData(a.patientId).subscribe({
       next: (resp) => {
         this.patient = resp?.patient ?? null;
         this.history = (resp?.medicalHistory as any) || [];
+        this.documents = resp?.documents || [];
       }
     });
     // Also load with-doctor records if available
@@ -357,6 +361,7 @@ export class DoctorAppointmentsComponent {
     this.selectedAppointment = null;
     this.patient = null;
     this.history = [];
+    this.documents = [];
   }
 
   private dedupById(items: DoctorAppointmentItem[]) {

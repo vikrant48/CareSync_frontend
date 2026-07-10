@@ -35,7 +35,7 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
       <section class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl p-4 sm:p-6 shadow">
         <!-- Small screen top bar: avatar left, notification right -->
         <div class="sm:hidden flex items-center justify-between mb-4">
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-3" *ngIf="!loadingWelcome">
             <img *ngIf="profileImageUrl; else avatarSm" [src]="profileImageUrl" alt="Profile" class="w-10 h-10 rounded-full ring-2 ring-white/60 object-cover" />
             <ng-template #avatarSm>
               <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-base font-semibold">
@@ -47,33 +47,50 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
               <div class="text-lg font-semibold">{{ patientName || 'Patient' }}!</div>
             </div>
           </div>
+          <!-- Small screen skeleton loader -->
+          <div class="flex items-center gap-3 animate-pulse" *ngIf="loadingWelcome">
+            <div class="w-10 h-10 rounded-full bg-white/20"></div>
+            <div class="space-y-1">
+              <div class="h-3 w-16 bg-white/20 rounded"></div>
+              <div class="h-4 w-28 bg-white/20 rounded"></div>
+            </div>
+          </div>
           <app-patient-notification></app-patient-notification>
         </div>
 
         <div class="flex flex-col sm:flex-row sm:flex-wrap items-center gap-4 sm:gap-6">
-          <img
-            *ngIf="profileImageUrl; else avatar"
-            [src]="profileImageUrl"
-            alt="Profile"
-            class="hidden sm:block w-14 h-14 sm:w-16 sm:h-16 rounded-full ring-2 ring-white/60 object-cover"
-          />
-          <ng-template #avatar>
-            <div class="hidden sm:flex w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white/20 items-center justify-center text-lg sm:text-xl font-semibold">
-              {{ (patientName || 'P').charAt(0) }}
-            </div>
-          </ng-template>
+          <ng-container *ngIf="!loadingWelcome">
+            <img
+              *ngIf="profileImageUrl; else avatar"
+              [src]="profileImageUrl"
+              alt="Profile"
+              class="hidden sm:block w-14 h-14 sm:w-16 sm:h-16 rounded-full ring-2 ring-white/60 object-cover"
+            />
+            <ng-template #avatar>
+              <div class="hidden sm:flex w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white/20 items-center justify-center text-lg sm:text-xl font-semibold">
+                {{ (patientName || 'P').charAt(0) }}
+              </div>
+            </ng-template>
+          </ng-container>
+          <!-- Desktop avatar skeleton loader -->
+          <div *ngIf="loadingWelcome" class="hidden sm:block w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white/20 animate-pulse"></div>
+
           <div class="flex-1 w-full sm:w-auto">
             <div class="text-base sm:text-lg">Welcome,</div>
             <ng-container *ngIf="loadingWelcome; else nameReady">
-              <div class="flex items-center gap-2 text-white/80">
-                <span class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
-                Loading…
+              <!-- Desktop name & profile strength skeleton loader -->
+              <div class="space-y-2 mt-1 animate-pulse">
+                <div class="h-6 w-32 bg-white/20 rounded"></div>
+                <div class="space-y-1 w-48 mt-2">
+                  <div class="h-3 w-24 bg-white/20 rounded"></div>
+                  <div class="h-1.5 w-full bg-white/20 rounded"></div>
+                </div>
               </div>
             </ng-container>
             <ng-template #nameReady>
               <div class="text-xl sm:text-2xl font-semibold">{{ patientName || 'Patient' }}!</div>
               <div class="mt-2 text-sm text-white/90 w-48">
-                <div class="flex items-center justify-between mb-1 text-xs">
+                <div class="flex items-center justify-between mb-1 text-xs font-semibold">
                   <span>Profile Completion</span>
                   <span class="font-bold">{{ completionPercentage || 0 }}%</span>
                 </div>

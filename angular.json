@@ -25,7 +25,8 @@
               "@babel/runtime",
               "core-js",
               "raf",
-              "rgbcolor"
+              "rgbcolor",
+              "sockjs-client"
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
@@ -47,6 +48,11 @@
           },
           "configurations": {
             "production": {
+              "optimization": {
+                "fonts": {
+                  "inline": false
+                }
+              },
               "budgets": [
                 {
                   "type": "initial",
