@@ -224,7 +224,28 @@ export class PatientEditPageComponent implements OnInit {
   onFileChange(e: Event) {
     const input = e.target as HTMLInputElement;
     this.profileFileInput = input;
-    this.file = (input.files && input.files.length > 0) ? input.files[0] : null;
+    const selected = input.files && input.files.length > 0 ? input.files[0] : null;
+
+    if (selected) {
+      const maxSizeBytes = 5 * 1024 * 1024; // 5 MB
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+
+      if (selected.size > maxSizeBytes) {
+        this.toast.showError('File too large. Maximum allowed size is 5 MB. Please choose a smaller image.');
+        input.value = '';
+        this.file = null;
+        return;
+      }
+
+      if (!allowedTypes.includes(selected.type)) {
+        this.toast.showError('Unsupported file type. Please upload a JPG, JPEG, PNG, or WebP image.');
+        input.value = '';
+        this.file = null;
+        return;
+      }
+    }
+
+    this.file = selected;
   }
 
   uploadImage() {
