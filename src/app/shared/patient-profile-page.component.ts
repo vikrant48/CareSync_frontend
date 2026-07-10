@@ -54,7 +54,7 @@ export interface AppointmentCounts {
           <!-- Right: Action & Stats -->
           <div class="w-full md:w-auto flex flex-col items-start md:items-end gap-4">
              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full md:w-auto">
-               <div class="bg-gray-50 dark:bg-gray-850 rounded-lg p-3 text-center min-w-[80px] border border-gray-200 dark:border-gray-800 shadow-sm animate-fade-in">
+               <div class="bg-gray-500/10 dark:bg-gray-850 rounded-lg p-3 text-center min-w-[80px] border border-gray-200 dark:border-gray-800 shadow-sm animate-fade-in">
                  <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium">Total</div>
                  <div class="text-lg font-bold text-gray-800 dark:text-white">{{ appointmentCounts?.total ?? 0 }}</div>
                </div>
