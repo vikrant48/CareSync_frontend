@@ -19,7 +19,7 @@ export interface SelectOption {
     }
   ],
   template: `
-    <div class="space-y-1 relative" [id]="dropdownId">
+    <div class="space-y-1 relative" [class.z-50]="isOpen" [id]="dropdownId">
       <label *ngIf="label" class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 ml-1">
         {{ label }}
       </label>
@@ -43,7 +43,7 @@ export interface SelectOption {
            [ngClass]="listClass">
         <div class="max-h-[220px] overflow-y-auto custom-scrollbar">
           <div *ngFor="let option of normalizedOptions" 
-               (click)="select(option.value)"
+               (click)="select($event, option.value)"
                class="px-4 py-2.5 text-sm cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center justify-between group">
             <span class="font-medium" [class.capitalize]="autoCapitalize">{{ option.label }}</span>
             <i class="fa-solid fa-check text-[10px] opacity-0 group-hover:opacity-100" 
@@ -67,7 +67,7 @@ export class SelectDropdownComponent implements ControlValueAccessor {
   @Input() autoCapitalize: boolean = true;
 
   private platformId = inject(PLATFORM_ID);
-  
+
   isOpen = false;
   selectedValue: any = null;
   disabled = false;
@@ -91,8 +91,8 @@ export class SelectDropdownComponent implements ControlValueAccessor {
   }
 
   // ControlValueAccessor implementation
-  onChange: any = () => {};
-  onTouched: any = () => {};
+  onChange: any = () => { };
+  onTouched: any = () => { };
 
   writeValue(value: any): void {
     this.selectedValue = value;
@@ -116,7 +116,9 @@ export class SelectDropdownComponent implements ControlValueAccessor {
     this.isOpen = !this.isOpen;
   }
 
-  select(value: any) {
+  select(event: Event, value: any) {
+    event.stopPropagation();
+    event.preventDefault();
     this.selectedValue = value;
     this.onChange(value);
     this.onTouched();
@@ -126,7 +128,11 @@ export class SelectDropdownComponent implements ControlValueAccessor {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     if (isPlatformBrowser(this.platformId)) {
-      this.isOpen = false;
+      const target = event.target as HTMLElement;
+      const element = document.getElementById(this.dropdownId);
+      if (element && !element.contains(target)) {
+        this.isOpen = false;
+      }
     }
   }
 }

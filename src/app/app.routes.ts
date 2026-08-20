@@ -30,6 +30,7 @@ import { PatientLabBookingsComponent } from './features/patient/patient-lab-book
 import { VideoConsultationComponent } from './shared/video-consultation.component';
 import { VitalsTrackingComponent } from './features/patient/patient-vitals.component';
 
+import { AdminDashboardComponent } from './features/admin/admin-dashboard.component';
 import { NotFoundComponent } from './shared/not-found.component';
 
 export const routes: Routes = [
@@ -40,6 +41,12 @@ export const routes: Routes = [
   { path: 'auth/token-refresh', component: TokenRefreshComponent },
   { path: 'auth/session-expired', component: SessionExpiredComponent },
   { path: 'settings', component: SettingsComponent, canActivate: [authGuard] },
+  {
+    path: 'admin',
+    component: AdminDashboardComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ADMIN'] }
+  },
   {
     path: 'lab-tests',
     component: LabTestsComponent,

@@ -186,7 +186,8 @@ export class AuthService {
   isAuthenticated = computed(() => !!this.accessToken());
 
   redirectToDashboard(role: Role | null) {
-    if (role === 'DOCTOR') this.router.navigate(['/doctor']);
+    if (role === 'ADMIN') this.router.navigate(['/admin']);
+    else if (role === 'DOCTOR') this.router.navigate(['/doctor']);
     else if (role === 'PATIENT') this.router.navigate(['/patient']);
     else this.router.navigate(['/login']);
   }
