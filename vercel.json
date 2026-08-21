@@ -1,8 +1,9 @@
 {
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ]
+    "outputDirectory": "dist/caresync-frontend/browser",
+    "rewrites": [
+        {
+            "source": "/(.*)",
+            "destination": "/index.html"
+        }
+    ]
 }
