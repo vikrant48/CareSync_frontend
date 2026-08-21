@@ -150,19 +150,21 @@ import { DatePickerComponent } from '../../shared/date-picker.component';
                 <app-date-picker 
                   formControlName="dateOfBirth" 
                   label="Birth Date" 
-                  placeholder="DD-MM-YYYY">
+                  placeholder="DD-MM-YYYY"
+                  class="relative z-20">
                 </app-date-picker>
                 <app-select-dropdown 
                    label="Gender" 
                    [options]="genders" 
                    placeholder="Select gender"
-                   formControlName="gender">
+                   formControlName="gender"
+                   class="relative z-30">
                 </app-select-dropdown>
-                <div class="space-y-1">
+                <div class="space-y-1 relative z-10">
                   <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Username</label>
                   <input class="input-modern py-2 text-sm pl-4" formControlName="username" placeholder="johndoe_md" />
                 </div>
-                <div class="space-y-1">
+                <div class="space-y-1 relative z-10">
                   <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Password</label>
                   <div class="relative group">
                     <input class="input-modern pr-11 py-2 text-sm pl-4" [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="••••••••" />
