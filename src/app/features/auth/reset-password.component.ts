@@ -1,7 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ToastService } from '../../core/services/toast.service';
@@ -87,45 +87,6 @@ import { ToastContainerComponent } from '../../shared/toast-container.component'
               </div>
             </section>
 
-
-            <!-- Step 3: Set New Password -->
-            <section *ngIf="verified" class="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-               <div class="text-center">
-                 <div class="w-16 h-16 bg-green-50 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-4 text-green-500">
-                    <i class="fa-solid fa-lock text-2xl"></i>
-                 </div>
-                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Set New Password</h3>
-                 <p class="text-sm text-gray-500 dark:text-gray-400">Create a strong password to secure your account.</p>
-              </div>
-
-              <div class="space-y-4">
-                 <div class="form-group">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New Password</label>
-                    <div class="relative">
-                      <input [type]="showNewPassword ? 'text' : 'password'" class="input-modern pr-10" [(ngModel)]="resetForm.newPassword" placeholder="••••••••" />
-                      <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200" (click)="showNewPassword = !showNewPassword">
-                        <i [class]="showNewPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
-                      </button>
-                    </div>
-                 </div>
-
-                 <div class="form-group">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm Password</label>
-                    <div class="relative">
-                      <input [type]="showConfirmPassword ? 'text' : 'password'" class="input-modern pr-10" [(ngModel)]="resetForm.confirmPassword" placeholder="••••••••" />
-                      <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200" (click)="showConfirmPassword = !showConfirmPassword">
-                        <i [class]="showConfirmPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
-                      </button>
-                    </div>
-                 </div>
-              </div>
-
-               <button class="btn-primary w-full py-3 rounded-xl shadow-lg shadow-green-500/20 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700" (click)="resetWithOtp()" [disabled]="resetLoading">
-                  <span *ngIf="!resetLoading">Reset Password <i class="fa-solid fa-check ml-2"></i></span>
-                  <span *ngIf="resetLoading"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Resetting...</span>
-               </button>
-            </section>
-
           </div>
           
           <div class="bg-gray-50 dark:bg-gray-700/30 px-6 py-4 border-t border-gray-100 dark:border-gray-700 text-center">
@@ -136,6 +97,69 @@ import { ToastContainerComponent } from '../../shared/toast-container.component'
 
         </div>
       </div>
+
+      <!-- Password Reset Modal Popup -->
+      <div *ngIf="showResetModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-md w-full border border-gray-100 dark:border-gray-700 overflow-hidden transform animate-in zoom-in-95 duration-200">
+          
+          <!-- Modal Header -->
+          <div class="px-6 pt-6 pb-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-700">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl flex items-center justify-center text-emerald-500">
+                <i class="fa-solid fa-key text-lg"></i>
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white">Create New Password</h3>
+            </div>
+            <button (click)="closeResetModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-1 rounded-lg">
+              <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="p-6 space-y-5">
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              Code verified! Please enter your new password below.
+            </p>
+
+            <div class="space-y-4">
+              <!-- New Password Input -->
+              <div class="form-group">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New Password</label>
+                <div class="relative">
+                  <input [type]="showNewPassword ? 'text' : 'password'" class="input-modern pr-10" [(ngModel)]="resetForm.newPassword" placeholder="••••••••" />
+                  <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200" (click)="showNewPassword = !showNewPassword">
+                    <i [class]="showNewPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Confirm Password Input -->
+              <div class="form-group">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm New Password</label>
+                <div class="relative">
+                  <input [type]="showConfirmPassword ? 'text' : 'password'" class="input-modern pr-10" [(ngModel)]="resetForm.confirmPassword" placeholder="••••••••" />
+                  <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200" (click)="showConfirmPassword = !showConfirmPassword">
+                    <i [class]="showConfirmPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/30 border-t border-gray-100 dark:border-gray-700 flex justify-end space-x-3">
+            <button type="button" (click)="closeResetModal()" class="px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+              Cancel
+            </button>
+            <button type="button" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-sm font-semibold shadow-lg shadow-emerald-500/20 transition-all transform hover:scale-[1.02] disabled:opacity-50" (click)="resetWithOtp()" [disabled]="resetLoading">
+              <span *ngIf="!resetLoading">Save Password <i class="fa-solid fa-check ml-1.5"></i></span>
+              <span *ngIf="resetLoading"><i class="fa-solid fa-circle-notch fa-spin mr-1.5"></i> Updating...</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
       <app-toast-container></app-toast-container>
     </div>
   `,
@@ -174,11 +198,12 @@ export class ResetPasswordComponent implements OnDestroy {
   resetError: string | null = null;
   resetSuccess: string | null = null;
 
-  // UI toggles for password visibility
+  // UI toggles for password visibility and modal state
   showNewPassword = false;
   showConfirmPassword = false;
+  showResetModal = false;
 
-  constructor(private http: HttpClient, private toast: ToastService) { }
+  constructor(private http: HttpClient, private toast: ToastService, private router: Router) { }
 
   requestOtp() {
     if (!this.forgotEmail) {
@@ -224,10 +249,10 @@ export class ResetPasswordComponent implements OnDestroy {
       .post(`${this.baseUrl}/api/auth/verify-otp`, { email: this.forgotEmail, otp: this.otp })
       .subscribe({
         next: (resp: any) => {
-          const msg = resp?.message || 'OTP verified';
+          const msg = resp?.message || 'OTP verified successfully';
           this.toast.showSuccess(msg);
           this.verified = true;
-          this.otpStage = 'hidden'; // Hide OTP stage, show Reset Stage
+          this.showResetModal = true;
           this.verifyLoading = false;
         },
         error: (err) => {
@@ -236,6 +261,10 @@ export class ResetPasswordComponent implements OnDestroy {
           this.verifyLoading = false;
         },
       });
+  }
+
+  closeResetModal() {
+    this.showResetModal = false;
   }
 
   resendOtp() {
@@ -283,14 +312,15 @@ export class ResetPasswordComponent implements OnDestroy {
       })
       .subscribe({
         next: (resp: any) => {
-          const msg = resp?.message || 'Password reset successfully';
-          this.toast.showSuccess(msg);
+          const msg = resp?.message || 'Password reset successfully!';
+          this.toast.showSuccess(msg + ' Redirecting to login page...');
           this.resetLoading = false;
-          // Optionally redirect to login or show success state
+          this.showResetModal = false;
           this.verified = false;
           this.otpStage = 'hidden';
-          // Navigate to login after short delay? 
-          // For now, let's just reset form or letting user click 'Sign in'
+          setTimeout(() => {
+            this.router.navigate(['/login']);
+          }, 1000);
         },
         error: (err) => {
           const msg = err?.error?.error || 'Failed to reset password';
