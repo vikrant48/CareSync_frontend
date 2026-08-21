@@ -63,6 +63,10 @@ export class DoctorProfileService {
     return this.http.get<any>(`${this.baseUrl}/api/doctors/profile/${username}`);
   }
 
+  getProfileById(id: number | string) {
+    return this.http.get<any>(`${this.baseUrl}/api/doctors/${id}`);
+  }
+
   updateProfile(username: string, payload: UpdateDoctorRequest) {
     return this.http.put<any>(`${this.baseUrl}/api/doctors/profile/${username}`, payload);
   }

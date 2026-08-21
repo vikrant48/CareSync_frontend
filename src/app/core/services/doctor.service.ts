@@ -23,6 +23,7 @@ export interface Doctor {
   experiences?: any[];
   educations?: any[];
   certificates?: any[];
+  languages?: string;
   completionPercentage?: number;
 }
 

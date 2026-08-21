@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService, UserSummary, BlockedIP } from '../../core/services/admin.service';
 import { DoctorService, Doctor } from '../../core/services/doctor.service';
+import { DoctorProfileService } from '../../core/services/doctor-profile.service';
 import { MasterDataService } from '../../core/services/master-data.service';
 import { ToastService } from '../../core/services/toast.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -218,6 +219,12 @@ import { AuthService } from '../../core/services/auth.service';
                   </td>
                   <td class="py-3.5 px-4 text-right flex items-center justify-end gap-2">
                     <button
+                      (click)="openDoctorModal(doc)"
+                      class="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 transition flex items-center gap-1"
+                    >
+                      <span> View Profile</span>
+                    </button>
+                    <button
                       *ngIf="!doc.isVerified"
                       (click)="toggleDoctorVerification(doc, true)"
                       [disabled]="verifyingDoctorId === doc.id"
@@ -378,12 +385,206 @@ import { AuthService } from '../../core/services/auth.service';
           </div>
         </div>
       </main>
+
+      <!-- DOCTOR DETAIL VIEW MODAL -->
+      <div *ngIf="selectedDoctor" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200">
+          
+          <!-- Modal Header -->
+          <div class="px-6 py-4 bg-slate-800/80 border-b border-slate-700/60 flex items-center justify-between sticky top-0 z-20">
+            <div class="flex items-center gap-3">
+              <div class="relative w-12 h-12 rounded-xl bg-slate-700 overflow-hidden border border-slate-600 flex-shrink-0">
+                <img
+                  *ngIf="selectedDoctorProfile?.profileImageUrl"
+                  [src]="selectedDoctorProfile.profileImageUrl"
+                  alt="Doctor Photo"
+                  class="w-full h-full object-cover"
+                />
+                <div *ngIf="!selectedDoctorProfile?.profileImageUrl" class="w-full h-full flex items-center justify-center text-slate-400 font-bold text-lg">
+                  {{ selectedDoctor.firstName?.charAt(0) || 'D' }}
+                </div>
+              </div>
+              <div>
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                  Dr. {{ selectedDoctorProfile?.firstName || selectedDoctor.firstName }} {{ selectedDoctorProfile?.lastName || selectedDoctor.lastName }}
+                  <span
+                    class="text-xs px-2.5 py-0.5 rounded-full border font-semibold"
+                    [ngClass]="{
+                      'bg-cyan-500/10 border-cyan-500/30 text-cyan-300': selectedDoctor.isVerified,
+                      'bg-amber-500/10 border-amber-500/30 text-amber-300': !selectedDoctor.isVerified
+                    }"
+                  >
+                    {{ selectedDoctor.isVerified ? '✓ Verified' : '⏳ Pending' }}
+                  </span>
+                </h3>
+                <p class="text-xs text-slate-400">
+                  Specialization: <span class="text-indigo-300 font-medium">{{ selectedDoctorProfile?.specialization || selectedDoctor.specialization || 'General Practitioner' }}</span>
+                  | &#64;{{ selectedDoctor.username }}
+                </p>
+              </div>
+            </div>
+            <button
+              (click)="closeDoctorModal()"
+              class="w-8 h-8 rounded-xl bg-slate-700/50 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition border border-slate-600"
+            >
+              ✕
+            </button>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="p-6 overflow-y-auto space-y-6 custom-scrollbar text-sm text-slate-300">
+            
+            <div *ngIf="loadingDoctorDetails" class="py-12 text-center text-slate-400 flex flex-col items-center gap-3">
+              <div class="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+              <span>Fetching full doctor credentials & background data...</span>
+            </div>
+
+            <ng-container *ngIf="!loadingDoctorDetails">
+              <!-- Section 1: Personal & Contact Information -->
+              <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-3 flex items-center gap-2">
+                  📋 Personal & Account Information
+                </h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                  <div>
+                    <span class="text-slate-500 block">Full Name</span>
+                    <span class="font-semibold text-slate-200">Dr. {{ selectedDoctorProfile?.firstName || selectedDoctor.firstName }} {{ selectedDoctorProfile?.lastName || selectedDoctor.lastName }}</span>
+                  </div>
+                  <div>
+                    <span class="text-slate-500 block">Email Address</span>
+                    <span class="font-semibold text-slate-200">{{ selectedDoctorProfile?.email || selectedDoctor.email || 'N/A' }}</span>
+                  </div>
+                  <div>
+                    <span class="text-slate-500 block">Contact Phone</span>
+                    <span class="font-semibold text-slate-200">{{ selectedDoctorProfile?.contactInfo || selectedDoctor.contactInfo || 'N/A' }}</span>
+                  </div>
+                  <div>
+                    <span class="text-slate-500 block">Gender & DOB</span>
+                    <span class="font-semibold text-slate-200">{{ selectedDoctorProfile?.gender || selectedDoctor.gender || 'N/A' }} | {{ selectedDoctorProfile?.dateOfBirth || selectedDoctor.dateOfBirth || 'N/A' }}</span>
+                  </div>
+                  <div>
+                    <span class="text-slate-500 block">Consultation Fees</span>
+                    <span class="font-semibold text-emerald-400">₹{{ selectedDoctorProfile?.consultationFees || selectedDoctor.consultationFees || '0.00' }}</span>
+                  </div>
+                  <div>
+                    <span class="text-slate-500 block">Languages Spoken</span>
+                    <span class="font-semibold text-slate-200">{{ selectedDoctorProfile?.languages || 'English' }}</span>
+                  </div>
+                  <div class="sm:col-span-2">
+                    <span class="text-slate-500 block">Clinic Address</span>
+                    <span class="font-semibold text-slate-200">{{ selectedDoctorProfile?.address || selectedDoctor.address || 'Not Provided' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 2: Experience Records -->
+              <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-3 flex items-center gap-2">
+                  🏥 Experience & Employment History ({{ selectedDoctorExperiences.length }})
+                </h4>
+                <div *ngIf="selectedDoctorExperiences.length === 0" class="text-xs text-slate-500 italic">
+                  No experience records added yet.
+                </div>
+                <div *ngIf="selectedDoctorExperiences.length > 0" class="space-y-3">
+                  <div *ngFor="let exp of selectedDoctorExperiences" class="p-3 bg-slate-900/60 rounded-lg border border-slate-700/40">
+                    <div class="flex justify-between items-start font-semibold text-slate-200">
+                      <span>{{ exp.position }}</span>
+                      <span class="text-xs text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md">{{ exp.yearsOfService }} Years</span>
+                    </div>
+                    <div class="text-xs text-slate-400 mt-1 font-medium">{{ exp.hospitalName }}</div>
+                    <p *ngIf="exp.details" class="text-xs text-slate-500 mt-1.5">{{ exp.details }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 3: Education & Academic Qualifications -->
+              <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-3 flex items-center gap-2">
+                  🎓 Education & Degrees ({{ selectedDoctorEducations.length }})
+                </h4>
+                <div *ngIf="selectedDoctorEducations.length === 0" class="text-xs text-slate-500 italic">
+                  No education records added yet.
+                </div>
+                <div *ngIf="selectedDoctorEducations.length > 0" class="space-y-3">
+                  <div *ngFor="let edu of selectedDoctorEducations" class="p-3 bg-slate-900/60 rounded-lg border border-slate-700/40">
+                    <div class="flex justify-between items-start font-semibold text-slate-200">
+                      <span>{{ edu.degree }}</span>
+                      <span class="text-xs text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-md">Year: {{ edu.yearOfCompletion }}</span>
+                    </div>
+                    <div class="text-xs text-slate-400 mt-1 font-medium">{{ edu.institution }}</div>
+                    <p *ngIf="edu.details" class="text-xs text-slate-500 mt-1.5">{{ edu.details }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 4: Certificates & Documents -->
+              <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-3 flex items-center gap-2">
+                  📜 Medical Licenses & Certificates ({{ selectedDoctorCertificates.length }})
+                </h4>
+                <div *ngIf="selectedDoctorCertificates.length === 0" class="text-xs text-slate-500 italic">
+                  No certificates or medical licenses uploaded.
+                </div>
+                <div *ngIf="selectedDoctorCertificates.length > 0" class="space-y-3">
+                  <div *ngFor="let cert of selectedDoctorCertificates" class="p-3 bg-slate-900/60 rounded-lg border border-slate-700/40 flex items-center justify-between gap-4">
+                    <div>
+                      <div class="font-semibold text-slate-200">{{ cert.name }}</div>
+                      <div class="text-xs text-slate-400">{{ cert.issuingOrganization || 'Medical Board' }} | {{ cert.issueDate }}</div>
+                    </div>
+                    <a
+                      *ngIf="cert.url"
+                      [href]="cert.url"
+                      target="_blank"
+                      class="px-2.5 py-1 text-xs font-semibold bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 rounded-lg transition"
+                    >
+                      View Doc 🔗
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+            </ng-container>
+
+          </div>
+
+          <!-- Modal Footer / Verification Action Bar -->
+          <div class="px-6 py-4 bg-slate-800/80 border-t border-slate-700/60 flex items-center justify-between gap-4 sticky bottom-0 z-20">
+            <button
+              (click)="closeDoctorModal()"
+              class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white bg-slate-700/50 hover:bg-slate-700 rounded-xl border border-slate-600 transition"
+            >
+              Close
+            </button>
+
+            <div class="flex items-center gap-3">
+              <button
+                *ngIf="!selectedDoctor.isVerified"
+                (click)="toggleDoctorVerification(selectedDoctor, true); closeDoctorModal()"
+                [disabled]="verifyingDoctorId === selectedDoctor.id"
+                class="px-4 py-2 text-xs font-bold bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 rounded-xl shadow-lg shadow-cyan-500/20 transition transform active:scale-95"
+              >
+                ✓ Verify & Approve Doctor
+              </button>
+              <button
+                *ngIf="selectedDoctor.isVerified"
+                (click)="toggleDoctorVerification(selectedDoctor, false); closeDoctorModal()"
+                [disabled]="verifyingDoctorId === selectedDoctor.id"
+                class="px-4 py-2 text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl transition"
+              >
+                Diverify (Unverify Doctor)
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
     </div>
   `
 })
 export class AdminDashboardComponent implements OnInit {
   adminService = inject(AdminService);
   doctorService = inject(DoctorService);
+  doctorProfileService = inject(DoctorProfileService);
   masterService = inject(MasterDataService);
   toastService = inject(ToastService);
   authService = inject(AuthService);
@@ -398,6 +599,14 @@ export class AdminDashboardComponent implements OnInit {
   doctors: Doctor[] = [];
   doctorSearch = '';
   verifyingDoctorId: number | null = null;
+
+  // Doctor Detail Modal State
+  selectedDoctor: Doctor | null = null;
+  selectedDoctorProfile: any = null;
+  selectedDoctorExperiences: any[] = [];
+  selectedDoctorEducations: any[] = [];
+  selectedDoctorCertificates: any[] = [];
+  loadingDoctorDetails = false;
 
   blockedIPs: BlockedIP[] = [];
 
@@ -475,6 +684,58 @@ export class AdminDashboardComponent implements OnInit {
         this.toastService.showError(err.error?.error || 'Failed to update doctor verification');
       }
     });
+  }
+
+  openDoctorModal(doc: Doctor) {
+    this.selectedDoctor = doc;
+    this.selectedDoctorProfile = doc;
+    this.selectedDoctorExperiences = [];
+    this.selectedDoctorEducations = [];
+    this.selectedDoctorCertificates = [];
+    this.loadingDoctorDetails = true;
+
+    if (doc.username) {
+      this.doctorProfileService.getProfile(doc.username).subscribe({
+        next: (profile) => {
+          this.selectedDoctorProfile = { ...doc, ...profile };
+        },
+        error: () => {
+          this.selectedDoctorProfile = doc;
+        }
+      });
+
+      this.doctorProfileService.getExperiences(doc.username).subscribe({
+        next: (exp) => (this.selectedDoctorExperiences = exp || []),
+        error: () => (this.selectedDoctorExperiences = [])
+      });
+
+      this.doctorProfileService.getEducations(doc.username).subscribe({
+        next: (edu) => (this.selectedDoctorEducations = edu || []),
+        error: () => (this.selectedDoctorEducations = [])
+      });
+
+      this.doctorProfileService.getCertificates(doc.username).subscribe({
+        next: (cert) => {
+          this.selectedDoctorCertificates = cert || [];
+          this.loadingDoctorDetails = false;
+        },
+        error: () => {
+          this.selectedDoctorCertificates = [];
+          this.loadingDoctorDetails = false;
+        }
+      });
+    } else {
+      this.loadingDoctorDetails = false;
+    }
+  }
+
+  closeDoctorModal() {
+    this.selectedDoctor = null;
+    this.selectedDoctorProfile = null;
+    this.selectedDoctorExperiences = [];
+    this.selectedDoctorEducations = [];
+    this.selectedDoctorCertificates = [];
+    this.loadingDoctorDetails = false;
   }
 
   loadCurrentMasterItems() {
