@@ -198,7 +198,7 @@ export class MyAppointmentsComponent {
     else if (rangeParam === 'PAST') this.rangeFilter = 'past';
     else this.rangeFilter = '';
     // Preload doctors list to enable navigation to doctor profile from appointments
-    this.doctorApi.getAllForPatients().subscribe({
+    this.doctorApi.getAllForPatients(0, 50).subscribe({
       next: (res) => {
         this.doctors = res || [];
         this.enrichAppointments();

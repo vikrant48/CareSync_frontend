@@ -15,7 +15,7 @@ import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropd
   imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent, SelectDropdownComponent],
   template: `
     <app-patient-layout>
-    <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
+    <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6 pb-24">
       <!-- Header Section -->
       <section class="panel p-4 sm:p-6 flex flex-col items-center justify-between gap-4 md:flex-row shadow-lg">
         <div class="flex flex-col gap-1 w-full md:w-auto text-center md:text-left">
@@ -52,25 +52,27 @@ import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropd
           <app-specialization-autocomplete
             class="w-full relative z-40"
             [(ngModel)]="specializationFilter"
+            (ngModelChange)="onFilterChange()"
             placeholder="Specialization..."
             inputClass="input w-full bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
             [allowAddNew]="false">
           </app-specialization-autocomplete>
           
           <div class="relative z-10">
-             <input type="text" class="input w-full bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400" placeholder="Doctor name..." [(ngModel)]="nameFilter" />
+             <input type="text" class="input w-full bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400" placeholder="Doctor name..." [(ngModel)]="nameFilter" (ngModelChange)="onFilterChange()" />
           </div>
 
           <div class="relative z-10 font-medium">
             <app-select-dropdown
               [(ngModel)]="genderFilter"
+              (ngModelChange)="onFilterChange()"
               [options]="genderOptions"
               placeholder="All Genders">
             </app-select-dropdown>
           </div>
 
          <div class="relative z-10">
-             <input type="text" class="input w-full bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400" placeholder="Location..." [(ngModel)]="addressFilter" />
+             <input type="text" class="input w-full bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400" placeholder="Location..." [(ngModel)]="addressFilter" (ngModelChange)="onFilterChange()" />
           </div>
         </div>
       </section>
@@ -81,16 +83,16 @@ import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropd
         <span class="text-sm tracking-wider uppercase font-semibold">Loading doctors...</span>
       </div>
 
-      <div *ngIf="!loadingDoctors && filteredDoctors().length === 0" class="flex flex-col items-center justify-center min-h-[300px] text-gray-500 animate-fade-in">
+      <div *ngIf="!loadingDoctors && doctors.length === 0" class="flex flex-col items-center justify-center min-h-[300px] text-gray-500 animate-fade-in">
          <i class="fa-regular fa-face-frown text-4xl mb-3 opacity-50"></i>
          <p>No doctors found matching your criteria.</p>
          <button class="mt-4 text-blue-400 hover:text-blue-300 text-sm hover:underline" (click)="resetFilters()">Clear Filters</button>
       </div>
 
       <!-- Doctors Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in" *ngIf="!loadingDoctors && filteredDoctors().length > 0">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in" *ngIf="!loadingDoctors && doctors.length > 0">
         <div class="panel p-5 cursor-pointer relative group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10 border border-gray-800 hover:border-blue-500/30 flex flex-col"
-          *ngFor="let d of filteredDoctors()" (click)="openDoctor(d)">
+          *ngFor="let d of doctors" (click)="openDoctor(d)">
           
           <!-- Rating Badge -->
           <div class="absolute top-3 right-3 text-xs font-bold bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1 border border-white/10 shadow-sm z-10" *ngIf="ratings[d.id] as r">
@@ -109,8 +111,6 @@ import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropd
                     <i class="fa-solid fa-check"></i>
                     <span class="font-black uppercase tracking-widest text-[7px]">Verified</span>
                 </div>
-                <!-- Debug indicator: small dot if isVerified property exists in object -->
-                <div *ngIf="d.hasOwnProperty('isVerified')" class="hidden"></div>
              </div>
              
              <div class="min-w-0 flex-1 pt-1">
@@ -140,6 +140,37 @@ import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropd
         </div>
       </div>
     </div>
+
+    <!-- Fixed Bottom Pagination Bar (Constrained to Main Content Column) -->
+    <div *ngIf="!loadingDoctors && totalDoctorsCount > 0"
+      class="fixed bottom-16 md:bottom-0 left-0 md:left-64 right-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 shadow-2xl px-4 sm:px-8 py-2 flex items-center justify-between transition-all">
+      
+      <div class="flex items-center gap-3 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+        <span class="font-medium">
+          Showing <span class="font-bold text-gray-900 dark:text-gray-100">{{ startItemIndex }}–{{ endItemIndex }}</span> of <span class="font-bold text-blue-600 dark:text-blue-400">{{ totalDoctorsCount }}</span> doctors
+        </span>
+        <span class="hidden sm:inline text-gray-300 dark:text-gray-700">|</span>
+        <span class="hidden sm:inline font-medium">
+          Page <span class="font-semibold text-gray-900 dark:text-gray-100">{{ page + 1 }}</span> of {{ totalPages }}
+        </span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm"
+          [disabled]="page === 0" (click)="prevPage()">
+          <i class="fa-solid fa-chevron-left text-[10px]"></i> Prev
+        </button>
+
+        <span class="sm:hidden text-xs font-semibold text-gray-700 dark:text-gray-300 px-1">
+          {{ page + 1 }}/{{ totalPages }}
+        </span>
+
+        <button class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm"
+          [disabled]="page >= totalPages - 1" (click)="nextPage()">
+          Next <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        </button>
+      </div>
+    </div>
     
     <!-- Emergency Appointment Modal -->
     <app-emergency-appointment-modal
@@ -160,6 +191,11 @@ export class PatientBookAppointmentComponent {
   showEmergencyModal = false;
   genders: string[] = [];
 
+  // Pagination & Search state
+  page = 0;
+  size = 50;
+  totalDoctorsCount = 0;
+
   get genderOptions(): SelectOption[] {
     return [
       { value: '', label: 'All Genders' },
@@ -170,48 +206,85 @@ export class PatientBookAppointmentComponent {
   doctors: Doctor[] = [];
   ratings: Record<number, { avg: number; count: number }> = {};
 
-
   constructor(
     private doctorApi: DoctorService,
     private router: Router,
     private masterDataService: MasterDataService
   ) {
-    this.refreshDoctors();
+    this.searchDoctors();
     this.masterDataService.getGenders().subscribe({
       next: (g) => this.genders = g || this.genders
     });
   }
 
   refreshDoctors() {
+    this.page = 0;
+    this.searchDoctors();
+  }
+
+  searchDoctors() {
     this.loadingDoctors = true;
-    this.doctorApi.getAllForPatients().subscribe({
+    const searchParams = {
+      query: this.nameFilter || undefined,
+      specialization: this.specializationFilter || undefined,
+      location: this.addressFilter || undefined,
+      gender: this.genderFilter || undefined,
+      page: this.page,
+      size: this.size
+    };
+
+    // Fetch doctors for current page
+    this.doctorApi.searchDoctors(searchParams).subscribe({
       next: (res) => {
-        const active = (res || []).filter((d) => d.isActive !== false);
-        this.doctors = active;
+        this.doctors = res || [];
         this.loadingDoctors = false;
-        // Populate ratings from in-line data
-        this.doctors.forEach((d) => {
+        (res || []).forEach((d) => {
           this.ratings[d.id] = { avg: d.averageRating || 0, count: d.reviewCount || 0 };
         });
       },
       error: () => (this.loadingDoctors = false),
     });
-  }
 
-  filteredDoctors() {
-    const spec = (this.specializationFilter || '').toLowerCase().trim();
-    const name = (this.nameFilter || '').toLowerCase().trim();
-    const gender = (this.genderFilter || '').trim();
-    const addr = (this.addressFilter || '').toLowerCase().trim();
-    return this.doctors.filter((d) => {
-      const dName = (d.name || `${d.firstName || ''} ${d.lastName || ''}`).toLowerCase();
-      const dSpec = (d.specialization || '').toLowerCase();
-      const dGenderMatch = !gender || (d.gender || '').toLowerCase() === gender.toLowerCase();
-      const dAddr = (d.address || '').toLowerCase();
-      return dSpec.includes(spec) && dName.includes(name) && dGenderMatch && dAddr.includes(addr);
+    // Fetch total doctor count for filtered query
+    this.doctorApi.countDoctors(searchParams).subscribe({
+      next: (count) => {
+        this.totalDoctorsCount = count || 0;
+      },
+      error: () => { }
     });
   }
 
+  get startItemIndex(): number {
+    if (this.totalDoctorsCount === 0) return 0;
+    return this.page * this.size + 1;
+  }
+
+  get endItemIndex(): number {
+    return Math.min((this.page + 1) * this.size, this.totalDoctorsCount);
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.totalDoctorsCount / this.size));
+  }
+
+  onFilterChange() {
+    this.page = 0;
+    this.searchDoctors();
+  }
+
+  nextPage() {
+    if (this.page < this.totalPages - 1) {
+      this.page++;
+      this.searchDoctors();
+    }
+  }
+
+  prevPage() {
+    if (this.page > 0) {
+      this.page--;
+      this.searchDoctors();
+    }
+  }
 
   openDoctor(d: Doctor) {
     this.router.navigate(['/patient/doctor', d.username]);
@@ -246,12 +319,12 @@ export class PatientBookAppointmentComponent {
     this.nameFilter = '';
     this.genderFilter = '';
     this.addressFilter = '';
+    this.page = 0;
+    this.searchDoctors();
   }
 
   onEmergencyAppointmentBooked(appointment: any) {
     console.log('Emergency appointment booked:', appointment);
-
-    // Navigate to appointments page to show the newly booked appointment
     this.router.navigate(['/patient/appointments']);
   }
 }

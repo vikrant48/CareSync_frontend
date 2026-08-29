@@ -260,7 +260,7 @@ export class PatientFeedbackComponent {
 
   constructor(private feedbackApi: FeedbackService, private router: Router, private toast: ToastService, private auth: AuthService, private doctorApi: DoctorService) {
     // Preload doctors so we can resolve names from ids in feedback
-    this.doctorApi.getAllForPatients().subscribe({
+    this.doctorApi.getAllForPatients(0, 50).subscribe({
       next: (res) => {
         this.doctors = res || [];
         this.doctorNameById = {};

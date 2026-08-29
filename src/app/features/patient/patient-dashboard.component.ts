@@ -289,7 +289,7 @@ export class PatientDashboardComponent {
 
   refreshDoctors() {
     this.loadingDoctors = true;
-    this.doctorApi.getAllForPatients().subscribe({
+    this.doctorApi.getAllForPatients(0, 50).subscribe({
       next: (res) => {
         const active = (res || []).filter((d) => d.isActive !== false);
         this.doctors = active;

@@ -299,7 +299,7 @@ export class PatientReportsComponent implements OnInit {
   }
 
   private loadDoctors() {
-    this.doctorApi.getAllForPatients().subscribe({
+    this.doctorApi.getAllForPatients(0, 50).subscribe({
       next: (list) => {
         this.doctors = list || [];
         this.doctorNameById = {};
