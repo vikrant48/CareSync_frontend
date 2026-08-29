@@ -1,28 +1,30 @@
-<header
-  class="fixed top-0 left-0 right-0 z-50 h-14 backdrop-blur border-b bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
-  <div class="container h-full px-4 flex items-center justify-between text-gray-900 dark:text-gray-100">
-    <a [routerLink]="auth.isAuthenticated() ? (auth.role() === 'DOCTOR' ? '/doctor' : (auth.role() === 'PATIENT' ? '/patient' : '/login')) : '/login'"
-      class="flex items-center gap-2 text-base sm:text-lg font-semibold group" title="Home">
-      <div
-        class="w-8 h-8 rounded-full overflow-hidden border border-gray-100 dark:border-gray-700 shadow-sm transition-transform group-hover:scale-105">
-        <img src="/logo-cross1.png" alt="Logo" class="w-full h-full object-cover scale-150" />
-      </div>
-      <span class="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">CareSync</span>
-    </a>
-    <nav class="flex flex-wrap gap-2 items-center">
-      @if (isBrowser && !auth.isAuthenticated()) {
-      <span class="flex items-center gap-2">
-        <a routerLink="/login" class="btn-secondary btn-sm" aria-label="Login">Login</a>
-        <a routerLink="/register" class="btn-primary btn-sm" aria-label="Register">Register</a>
-      </span>
-      }
-    </nav>
-  </div>
-</header>
+<div class="min-h-screen w-full bg-[var(--bg)] text-[var(--text)]">
+  <header
+    class="fixed top-0 left-0 right-0 z-50 h-14 backdrop-blur border-b bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+    <div class="container h-full px-4 flex items-center justify-between text-gray-900 dark:text-gray-100">
+      <a [routerLink]="auth.isAuthenticated() ? (auth.role() === 'DOCTOR' ? '/doctor' : (auth.role() === 'PATIENT' ? '/patient' : '/login')) : '/login'"
+        class="flex items-center gap-2 text-base sm:text-lg font-semibold group" title="Home">
+        <div
+          class="w-8 h-8 rounded-full overflow-hidden border border-gray-100 dark:border-gray-700 shadow-sm transition-transform group-hover:scale-105">
+          <img src="/logo-cross1.png" alt="Logo" class="w-full h-full object-cover scale-150" />
+        </div>
+        <span class="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">CareSync</span>
+      </a>
+      <nav class="flex flex-wrap gap-2 items-center">
+        @if (isBrowser && !auth.isAuthenticated()) {
+        <span class="flex items-center gap-2">
+          <a routerLink="/login" class="btn-secondary btn-sm" aria-label="Login">Login</a>
+          <a routerLink="/register" class="btn-primary btn-sm" aria-label="Register">Register</a>
+        </span>
+        }
+      </nav>
+    </div>
+  </header>
 
-<main class="h-screen w-screen overflow-hidden pt-14 bg-[var(--bg)] text-[var(--text)]">
-  <router-outlet></router-outlet>
-</main>
+  <main class="pt-14 min-h-screen w-full">
+    <router-outlet></router-outlet>
+  </main>
+</div>
 
 <!-- Floating Backend Connection Status Loader -->
 @if (isBrowser && statusService.isConnecting()) {

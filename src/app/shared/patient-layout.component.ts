@@ -11,19 +11,21 @@ import { inject } from '@angular/core';
 @Component({
   selector: 'app-patient-layout',
   standalone: true,
+  host: { class: 'block h-full w-full' },
   imports: [CommonModule, RouterModule, ToastContainerComponent, AiAssistantWidgetComponent, ProductTourComponent],
   template: `
     <app-product-tour></app-product-tour>
-    <div class="h-full w-full md:grid md:grid-cols-[16rem_1fr] md:h-[calc(100dvh-3.5rem)] md:min-h-0 md:items-stretch bg-[var(--bg)] text-[var(--text)]">
-      <!-- Sidebar (hidden on small screens) -->
-      <aside class="hidden md:flex md:h-full bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex-col overflow-hidden">
-        <div class="px-4 py-4 border-b border-gray-700">
+    <div class="min-h-[calc(100vh-3.5rem)] w-full bg-[var(--bg)] text-[var(--text)]">
+      <!-- Fixed Sidebar (Desktop) -->
+      <aside class="hidden md:flex fixed top-14 left-0 bottom-0 w-64 flex-col bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 z-30 overflow-hidden">
+        <div class="px-4 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
           <div class="text-lg font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-100">
             <i class="fas fa-user-injured"></i>
             <span>Patient</span>
           </div>
         </div>
-        <nav class="flex-1 px-3 py-3 space-y-1">
+
+        <nav class="flex-1 px-3 py-3 space-y-1 overflow-y-auto custom-scrollbar">
           <a id="nav-dashboard" routerLink="/patient" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
             <i class="fas fa-home"></i>
             <span>Dashboard</span>
@@ -61,24 +63,30 @@ import { inject } from '@angular/core';
             <span>Profile</span>
           </a>
 
-          <a id="nav-settings" routerLink="/settings" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+          <div class="pt-2 my-2 border-t border-gray-200 dark:border-gray-700/60"></div>
+
+          <a id="nav-settings" routerLink="/settings" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
             <i class="fas fa-cog"></i>
             <span>Settings</span>
           </a>
-          <button type="button" (click)="logout()" class="w-full text-left flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-700">
-            <i class="fas fa-sign-out-alt"></i>
-            <span>Logout</span>
-          </button>
-          <a id="nav-change-password" routerLink="/patient/change-password" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+          <a id="nav-change-password" routerLink="/patient/change-password" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
             <i class="fas fa-key"></i>
             <span>Change Password</span>
           </a>
+          <button type="button" (click)="logout()" class="w-full text-left flex items-center gap-3 px-3 py-2 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 transition-colors">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+          </button>
         </nav>
-        <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">© 2025 CareSync. All rights reserved.</div>
+
+        <!-- Copyright Footer -->
+        <div class="mt-auto px-4 py-3 border-t border-gray-200 dark:border-gray-700/80 flex-shrink-0 text-xs text-gray-500 dark:text-gray-400">
+          © 2025 CareSync. All rights reserved.
+        </div>
       </aside>
 
       <!-- Content Area -->
-      <main class="relative min-h-0 md:h-full h-[calc(100dvh-3.5rem-4rem)] overflow-y-auto overflow-x-hidden min-w-0 md:pb-0 pb-[env(safe-area-inset-bottom)]">
+      <main class="md:pl-64 w-full min-h-[calc(100vh-3.5rem)]">
         <div>
           <ng-content></ng-content>
         </div>
