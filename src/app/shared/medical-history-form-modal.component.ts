@@ -174,6 +174,7 @@ export class MedicalHistoryFormModalComponent {
 
    loadingSuggestions = false;
    clinicalSuggestions: ClinicalMatch[] = [];
+   clinicalDisclaimer?: string;
 
    onSuggest() {
       if (!this.form.symptoms) return;
@@ -183,10 +184,12 @@ export class MedicalHistoryFormModalComponent {
          next: (res: DiagnosisSuggestionDto) => {
             this.loadingSuggestions = false;
             this.clinicalSuggestions = res.suggestions || [];
+            this.clinicalDisclaimer = res.disclaimer || 'Preliminary AI differential conditions only. Not a final diagnosis.';
          },
          error: () => {
             this.loadingSuggestions = false;
             this.clinicalSuggestions = [];
+            this.clinicalDisclaimer = undefined;
          }
       });
    }

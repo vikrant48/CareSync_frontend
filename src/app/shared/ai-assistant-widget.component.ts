@@ -89,7 +89,8 @@ import { DatePickerComponent } from './date-picker.component';
             </div>
             <div class="p-3 rounded-2xl shadow-sm border" 
                  [ngClass]="msg.isAi ? 'bg-white dark:bg-gray-800 rounded-tl-none border-gray-100 dark:border-gray-700' : 'bg-indigo-600 text-white rounded-tr-none border-indigo-500'">
-              <p class="text-sm whitespace-pre-wrap">{{ msg.text }}</p>
+              <div *ngIf="msg.isAi" [innerHTML]="formatAiMessage(msg.text)" class="text-sm"></div>
+              <p *ngIf="!msg.isAi" class="text-sm whitespace-pre-wrap">{{ msg.text }}</p>
               <span class="text-[9px] mt-1 block opacity-60 text-right">{{ msg.timestamp | date:'shortTime' }}</span>
             </div>
           </div>
@@ -438,6 +439,7 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
   }
 
   clearChat() {
+    this.aiService.resetConversation();
     this.messages.set([]);
     this.userInput = '';
   }
@@ -610,6 +612,29 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
 
   ngAfterViewChecked() {
     this.scrollToBottom();
+  }
+
+  formatAiMessage(text: string): string {
+    if (!text) return '';
+    let formatted = text;
+
+    // Convert bold syntax **text** -> <strong>
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-gray-900 dark:text-gray-100">$1</strong>');
+
+    // Convert headers ## and ###
+    formatted = formatted.replace(/^### (.*$)/gim, '<h3 class="text-xs font-bold text-indigo-600 dark:text-indigo-400 mt-2 mb-1 flex items-center gap-1.5"><i class="fas fa-notes-medical"></i> $1</h3>');
+    formatted = formatted.replace(/^## (.*$)/gim, '<h2 class="text-sm font-bold text-indigo-700 dark:text-indigo-300 mt-3 mb-1 border-b border-gray-100 dark:border-gray-700 pb-1 flex items-center gap-1.5"><i class="fas fa-file-medical-alt"></i> $1</h2>');
+
+    // Convert bullet points (* or -)
+    formatted = formatted.replace(/^[ \t]*[\*\-] (.*$)/gim, '<li class="ml-2 mb-1 flex items-start gap-1.5"><span class="text-indigo-500 font-bold mt-0.5">•</span><span>$1</span></li>');
+
+    // Wrap <li> blocks in styled list cards
+    formatted = formatted.replace(/(<li[\s\S]*?<\/li>)+/g, '<ul class="my-2 space-y-1 bg-gray-50/80 dark:bg-gray-900/50 p-2.5 rounded-xl border border-gray-100 dark:border-gray-800">$&</ul>');
+
+    // Paragraph line breaks
+    formatted = formatted.replace(/\n{2,}/g, '<div class="my-1.5"></div>');
+
+    return formatted;
   }
 
   private scrollToBottom(): void {

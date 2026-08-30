@@ -1,11 +1,13 @@
 export interface AiChatRequest {
     message: string;
+    conversationId?: string;
 }
 
 export interface AiChatResponse {
     response?: string;
     success: boolean;
     error?: string;
+    conversationId?: string;
     suggestion?: AiBookingSuggestion;
 }
 
@@ -64,5 +66,6 @@ export interface ClinicalMatch {
 }
 
 export interface DiagnosisSuggestionDto {
+    disclaimer?: string;
     suggestions: ClinicalMatch[];
 }

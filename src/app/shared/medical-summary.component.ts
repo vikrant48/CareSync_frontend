@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { AiAssistantService } from '../core/services/ai-assistant.service';
 
 @Component({
-    selector: 'app-medical-summary',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-medical-summary',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
       <!-- Header -->
       <div class="px-5 py-4 bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
@@ -78,56 +78,67 @@ import { AiAssistantService } from '../core/services/ai-assistant.service';
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     :host { display: block; }
     ::ng-deep .prose ul { padding-left: 1.25rem; list-style-type: disc; }
     ::ng-deep .prose h2, ::ng-deep .prose h3 { margin-top: 1.5rem; }
   `]
 })
 export class MedicalSummaryComponent implements OnInit {
-    @Input({ required: true }) patientId!: number;
+  @Input({ required: true }) patientId!: number;
 
-    private aiService = inject(AiAssistantService);
+  private aiService = inject(AiAssistantService);
 
-    summary = signal<string | null>(null);
-    isLoading = signal(false);
-    error = signal<string | null>(null);
+  summary = signal<string | null>(null);
+  isLoading = signal(false);
+  error = signal<string | null>(null);
 
-    ngOnInit() {
-        // Optionally auto-load on init
-        // this.loadSummary();
-    }
+  ngOnInit() {
+    // Optionally auto-load on init
+    // this.loadSummary();
+  }
 
-    loadSummary() {
-        this.isLoading.set(true);
-        this.error.set(null);
+  loadSummary() {
+    this.isLoading.set(true);
+    this.error.set(null);
 
-        this.aiService.getMedicalSummary(this.patientId).subscribe({
-            next: (res) => {
-                this.isLoading.set(false);
-                if (res.success) {
-                    this.summary.set(res.summary ?? null);
-                } else {
-                    this.error.set(res.error || 'Failed to generate summary.');
-                }
-            },
-            error: (err) => {
-                this.isLoading.set(false);
-                this.error.set('Connection error. Could not reach AI service.');
-                console.error('Summary error:', err);
-            }
-        });
-    }
+    this.aiService.getMedicalSummary(this.patientId).subscribe({
+      next: (res) => {
+        this.isLoading.set(false);
+        if (res.success) {
+          this.summary.set(res.summary ?? null);
+        } else {
+          this.error.set(res.error || 'Failed to generate summary.');
+        }
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        this.error.set('Connection error. Could not reach AI service.');
+        console.error('Summary error:', err);
+      }
+    });
+  }
 
-    formattedSummary() {
-        const text = this.summary();
-        if (!text) return '';
+  formattedSummary() {
+    let text = this.summary();
+    if (!text) return '';
 
-        // Basic Markdown-like formatting for AI output
-        return text
-            .replace(/^### (.*$)/gim, '<h3 class="text-base mt-4 mb-2">$1</h3>')
-            .replace(/^## (.*$)/gim, '<h2 class="text-lg mt-6 mb-3">$2</h2>')
-            .replace(/^\* (.*$)/gim, '<li class="ml-4">$1</li>')
-            .replace(/^- (.*$)/gim, '<li class="ml-4">$1</li>');
-    }
+    // Convert bold syntax **text** -> <strong>
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-gray-900 dark:text-gray-100">$1</strong>');
+
+    // Convert headers ## and ###
+    text = text.replace(/^### (.*$)/gim, '<h3 class="text-sm font-bold text-indigo-600 dark:text-indigo-400 mt-4 mb-2 flex items-center gap-1.5"><i class="fas fa-notes-medical"></i> $1</h3>');
+    text = text.replace(/^## (.*$)/gim, '<h2 class="text-base font-bold text-indigo-700 dark:text-indigo-300 mt-5 mb-3 border-b border-gray-100 dark:border-gray-700 pb-1 flex items-center gap-2"><i class="fas fa-file-medical-alt"></i> $1</h2>');
+
+    // Convert bullet points (* or -)
+    text = text.replace(/^[ \t]*[\*\-] (.*$)/gim, '<li class="ml-2 mb-2 flex items-start gap-2"><span class="text-indigo-500 font-bold mt-1">•</span><span>$1</span></li>');
+
+    // Wrap continuous <li> elements into styled container card
+    text = text.replace(/(<li[\s\S]*?<\/li>)+/g, '<ul class="my-3 space-y-1 bg-gray-50/80 dark:bg-gray-900/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800">$&</ul>');
+
+    // Spacing for paragraphs
+    text = text.replace(/\n{2,}/g, '<div class="my-2"></div>');
+
+    return text;
+  }
 }
