@@ -115,6 +115,37 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
         ></doctor-appointment-card>
       </div>
 
+      <!-- Fixed Bottom Pagination Bar -->
+      <div *ngIf="!loading && totalAppointmentsCount > 0"
+        class="fixed bottom-16 md:bottom-0 left-0 md:left-64 right-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 shadow-2xl px-4 sm:px-8 py-2 flex items-center justify-between transition-all">
+        
+        <div class="flex items-center gap-3 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+          <span class="font-medium">
+            Showing <span class="font-bold text-gray-900 dark:text-gray-100">{{ startItemIndex }}–{{ endItemIndex }}</span> of <span class="font-bold text-blue-600 dark:text-blue-400">{{ totalAppointmentsCount }}</span> appointments
+          </span>
+          <span class="hidden sm:inline text-gray-300 dark:text-gray-700">|</span>
+          <span class="hidden sm:inline font-medium">
+            Page <span class="font-semibold text-gray-900 dark:text-gray-100">{{ page + 1 }}</span> of {{ totalPages }}
+          </span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm"
+            [disabled]="page === 0" (click)="prevPage()">
+            <i class="fa-solid fa-chevron-left text-[10px]"></i> Prev
+          </button>
+
+          <span class="sm:hidden text-xs font-semibold text-gray-700 dark:text-gray-300 px-1">
+            {{ page + 1 }}/{{ totalPages }}
+          </span>
+
+          <button class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm"
+            [disabled]="page >= totalPages - 1" (click)="nextPage()">
+            Next <i class="fa-solid fa-chevron-right text-[10px]"></i>
+          </button>
+        </div>
+      </div>
+
       <!-- Details Modal (Shared) -->
       <app-patient-details-modal
         [open]="detailsOpen"
@@ -182,6 +213,24 @@ export class DoctorAppointmentsComponent {
   range: TimeRange = 'UPCOMING';
   searchTerm = '';
 
+  // Pagination state
+  page = 0;
+  size = 10;
+  totalAppointmentsCount = 0;
+
+  get startItemIndex(): number {
+    if (this.totalAppointmentsCount === 0) return 0;
+    return this.page * this.size + 1;
+  }
+
+  get endItemIndex(): number {
+    return Math.min((this.page + 1) * this.size, this.totalAppointmentsCount);
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.totalAppointmentsCount / this.size));
+  }
+
   // Modal state
   detailsOpen = false;
   patient: PatientDto | null = null;
@@ -207,71 +256,55 @@ export class DoctorAppointmentsComponent {
   }
 
   refresh() {
+    this.page = 0;
     this.loadAppointments();
   }
 
   setRange(r: TimeRange) {
     this.range = r;
+    this.page = 0;
     this.loadAppointments();
   }
 
   onFilterChange() {
+    this.page = 0;
     this.loadAppointments();
+  }
+
+  nextPage() {
+    if (this.page < this.totalPages - 1) {
+      this.page++;
+      this.loadAppointments();
+    }
+  }
+
+  prevPage() {
+    if (this.page > 0) {
+      this.page--;
+      this.loadAppointments();
+    }
   }
 
   private loadAppointments() {
     this.loading = true;
-    const now = Date.now();
 
-    // If a specific status is selected, hit status endpoint first, then filter by range
-    const fetchByStatus = async () => {
-      try {
-        const statuses = this.statusFilter === 'PENDING' ? ['BOOKED', 'SCHEDULED'] : [this.statusFilter];
-        const arrays = await Promise.all(statuses.map((s) => firstValueFrom(this.appts.getDoctorAppointmentsByStatus(s))));
-        const merged = ([] as DoctorAppointmentItem[]).concat(...arrays);
-        const dedup = this.dedupById(merged);
-        this.applyRangeFilterAndSet(dedup, now);
-      } catch (e) {
-        this.appointments = [];
-        this.loading = false;
-      }
-    };
-
-    if (this.statusFilter !== 'ALL') {
-      fetchByStatus();
-      return;
-    }
-
-    // Fetch based on range
-    let obs;
-    switch (this.range) {
-      case 'TODAY':
-        obs = this.appts.getDoctorTodayAppointments();
-        break;
-      case 'UPCOMING':
-        obs = forkJoin([
-          this.appts.getDoctorUpcomingAppointments(),
-          this.appts.getDoctorAppointmentsByStatus('IN_PROGRESS')
-        ]).pipe(map(([up, ip]: [DoctorAppointmentItem[], DoctorAppointmentItem[]]) => [...up, ...ip]));
-        break;
-      case 'PAST':
-        obs = this.appts.getDoctorAllAppointments();
-        break;
-      case 'ALL':
-      default:
-        obs = this.appts.getDoctorAllAppointments();
-        break;
-    }
-
-    obs.subscribe({
-      next: (items: DoctorAppointmentItem[]) => {
-        const list = this.range === 'PAST' ? items.filter((a: DoctorAppointmentItem) => getDoctorAppointmentEpochMs(a) < now) : items;
-        this.appointments = this.sortByNearestUpcoming(list);
+    this.appts.getDoctorPaginatedAppointments(this.page, this.size, this.statusFilter, this.range, this.searchTerm).subscribe({
+      next: (items) => {
+        this.appointments = items || [];
         this.loading = false;
       },
       error: () => {
         this.appointments = [];
         this.loading = false;
+      }
+    });
+
+    this.appts.countDoctorAppointments(this.statusFilter, this.range, this.searchTerm).subscribe({
+      next: (count) => {
+        this.totalAppointmentsCount = count || 0;
+      },
+      error: () => {
+        this.totalAppointmentsCount = 0;
       }
     });
   }

@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { PatientAppointmentItem } from '../core/services/appointment.service';
+import { PdfService } from '../core/services/pdf.service';
 
 @Component({
   standalone: true,
@@ -28,9 +29,16 @@ import { PatientAppointmentItem } from '../core/services/appointment.service';
               <p class="text-sm text-gray-800 dark:text-gray-400 truncate">{{ appointment.doctorSpecialization }}</p>
             </div>
           </div>
-          <span class="px-2.5 py-1 rounded-full text-[10px] dark:text-[10px] font-bold tracking-wider uppercase border" [ngClass]="statusClass(appointment)">
-            {{ statusLabel(appointment) }}
-          </span>
+          <div class="flex items-center gap-2">
+            <button (click)="onDownloadReceipt()" 
+                    class="p-2 text-gray-500 hover:text-green-600 hover:bg-green-100/50 dark:hover:bg-green-500/10 rounded-lg transition-colors border border-transparent hover:border-green-200 dark:hover:border-transparent" 
+                    title="Download Receipt">
+               <i class="fas fa-download"></i>
+            </button>
+            <span class="px-2.5 py-1 rounded-full text-[10px] dark:text-[10px] font-bold tracking-wider uppercase border" [ngClass]="statusClass(appointment)">
+              {{ statusLabel(appointment) }}
+            </span>
+          </div>
         </div>
 
         <!-- Details -->
@@ -66,6 +74,13 @@ import { PatientAppointmentItem } from '../core/services/appointment.service';
             <i class="fa-solid fa-comments"></i> Chat with Doctor
           </button>
 
+          <button *ngIf="appointment.status === 'COMPLETED'"
+            class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow-md text-xs transition-all active:scale-95 flex items-center justify-center gap-2 w-full"
+            (click)="onDownloadPrescription()"
+            [disabled]="disabled">
+            <i class="fa-solid fa-file-pdf text-sm"></i> Download Prescription PDF
+          </button>
+
           <button class="btn-primary flex-1 text-sm py-2" (click)="onViewDoctor()" [disabled]="disabled">
             Profile
           </button>
@@ -90,7 +105,43 @@ export class PatientAppointmentCardComponent {
   @Output() joinVideo = new EventEmitter<PatientAppointmentItem>();
   @Output() openChat = new EventEmitter<PatientAppointmentItem>();
 
-  constructor() { }
+  constructor(private pdfService: PdfService) { }
+
+  onDownloadReceipt() {
+    this.pdfService.generateAppointmentReceiptByBookingId(this.appointment.appointmentId, this.appointment);
+  }
+
+  onDownloadPrescription() {
+    const medHistory = this.appointment.appointmentMedicalHistory
+      || (this.appointment.medicalHistory
+        ? this.appointment.medicalHistory.find((m: any) => m.appointmentId && Number(m.appointmentId) === Number(this.appointment.appointmentId))
+        : null);
+
+    const medicinesList: Array<{ name: string; dosage?: string; duration?: string; instructions?: string }> = [];
+
+    if (medHistory?.medicine) {
+      medicinesList.push({
+        name: medHistory.medicine,
+        dosage: medHistory.doses || medHistory.treatment || 'As prescribed',
+        duration: medHistory.treatment || 'As directed'
+      });
+    }
+
+    this.pdfService.generatePrescriptionPdf({
+      appointmentId: this.appointment.appointmentId,
+      patientName: String(this.appointment.patientName),
+      doctorName: String(this.appointment.doctorName),
+      doctorSpecialization: String(this.appointment.doctorSpecialization),
+      visitDate: `${this.appointment.appointmentDate} ${this.appointment.appointmentTime}`,
+      symptoms: medHistory?.symptoms || this.appointment.reason || 'General Consultation',
+      diagnosis: medHistory?.diagnosis || (medHistory ? 'Consultation Completed' : 'Completed Consultation Record'),
+      medicine: medHistory?.medicine,
+      doses: medHistory?.doses,
+      medicines: medicinesList.length > 0 ? medicinesList : undefined,
+      prescriptionNotes: medHistory?.notes || (medHistory?.treatment ? `Treatment Plan: ${medHistory.treatment}` : undefined),
+      verificationUrl: `https://caresync.app/verify/prescription/${this.appointment.appointmentId}`
+    });
+  }
 
   get isUpcoming() {
     const s = (this.appointment.status || '').toUpperCase();

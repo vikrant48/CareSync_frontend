@@ -31,7 +31,7 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
   template: `
     <app-patient-layout>
     <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8">
-      <!-- Welcome Banner -->
+      <!--  Banner -->
       <section class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl p-4 sm:p-6 shadow">
         <!-- Small screen top bar: avatar left, notification right -->
         <div class="sm:hidden flex items-center justify-between mb-4">
@@ -43,7 +43,7 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
               </div>
             </ng-template>
             <div class="text-sm">
-              <div>Welcome back,</div>
+              <!-- <div>Welcome back,</div> -->
               <div class="text-lg font-semibold">{{ patientName || 'Patient' }}!</div>
             </div>
           </div>
@@ -76,7 +76,7 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
           <div *ngIf="loadingWelcome" class="hidden sm:block w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white/20 animate-pulse"></div>
 
           <div class="flex-1 w-full sm:w-auto">
-            <div class="text-base sm:text-lg">Welcome,</div>
+            <!-- <div class="text-base sm:text-lg">Welcome,</div> -->
             <ng-container *ngIf="loadingWelcome; else nameReady">
               <!-- Desktop name & profile strength skeleton loader -->
               <div class="space-y-2 mt-1 animate-pulse">

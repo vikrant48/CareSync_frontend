@@ -79,4 +79,10 @@ export class MasterDataService {
         const params = new HttpParams().set('orgId', this.orgId.toString());
         return this.http.get<string[]>(`${this.baseUrl}/api/master/positions`, { params });
     }
+
+    deleteMasterData(masterType: string, value: string): Observable<{ message: string }> {
+        this.masterData$ = undefined;
+        const params = new HttpParams().set('value', value).set('orgId', this.orgId.toString());
+        return this.http.delete<{ message: string }>(`${this.baseUrl}/api/master/${masterType}`, { params });
+    }
 }

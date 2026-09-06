@@ -324,14 +324,55 @@ import { AuthService } from '../../core/services/auth.service';
               <div class="flex flex-wrap gap-2 max-h-80 overflow-y-auto p-1">
                 <span
                   *ngFor="let item of masterItems"
-                  class="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs font-medium text-slate-200 flex items-center gap-2"
+                  class="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs font-medium text-slate-200 flex items-center gap-2 hover:border-slate-600 transition"
                 >
                   <span>{{ item }}</span>
+                  <button
+                    (click)="openDeleteConfirmation(item)"
+                    title="Delete {{ item }}"
+                    class="w-4 h-4 rounded-full bg-slate-700/80 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 flex items-center justify-center text-[10px] font-bold transition border border-slate-600/50 hover:border-rose-500/40"
+                  >
+                    ✕
+                  </button>
                 </span>
                 <div *ngIf="masterItems.length === 0" class="py-8 text-center text-slate-500 text-xs w-full">
                   No items configured for this master type yet.
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MASTER DATA DELETE CONFIRMATION MODAL -->
+        <div *ngIf="itemToDelete" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-md w-full p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-rose-400 font-bold text-lg"></div>
+              <div>
+                <h3 class="text-base font-bold text-white">Delete Master Data Item</h3>
+                <p class="text-xs text-slate-400">Confirmation Required</p>
+              </div>
+            </div>
+
+            <p class="text-sm text-slate-300 mb-6 leading-relaxed">
+              Are you sure you want to delete <span class="font-semibold text-white px-2 py-0.5 bg-slate-800 border border-slate-700 rounded-md">{{ itemToDelete }}</span> from <span class="font-semibold text-indigo-300 capitalize">{{ selectedMasterType }}</span>?
+            </p>
+
+            <div class="flex items-center justify-end gap-3">
+              <button
+                (click)="itemToDelete = null"
+                class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 transition"
+              >
+                Cancel
+              </button>
+              <button
+                (click)="confirmDeleteMasterItem()"
+                [disabled]="isDeletingMaster"
+                class="px-4 py-2 text-xs font-bold bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white rounded-xl shadow-lg shadow-rose-600/20 transition disabled:opacity-50 flex items-center gap-2"
+              >
+                <span *ngIf="isDeletingMaster" class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                <span>{{ isDeletingMaster ? 'Deleting...' : 'Save & Confirm Delete' }}</span>
+              </button>
             </div>
           </div>
         </div>
@@ -615,6 +656,10 @@ export class AdminDashboardComponent implements OnInit {
   masterItems: string[] = [];
   isSubmittingMaster = false;
 
+  // Master Data Delete Confirmation Modal State
+  itemToDelete: string | null = null;
+  isDeletingMaster = false;
+
   ngOnInit() {
     this.loadUsers();
     this.loadDoctors();
@@ -783,6 +828,29 @@ export class AdminDashboardComponent implements OnInit {
       error: (err) => {
         this.isSubmittingMaster = false;
         this.toastService.showError(err.error?.error || 'Failed to add master data item');
+      }
+    });
+  }
+
+  openDeleteConfirmation(value: string) {
+    this.itemToDelete = value;
+  }
+
+  confirmDeleteMasterItem() {
+    if (!this.itemToDelete) return;
+    const value = this.itemToDelete;
+    this.isDeletingMaster = true;
+
+    this.masterService.deleteMasterData(this.selectedMasterType, value).subscribe({
+      next: (res) => {
+        this.isDeletingMaster = false;
+        this.itemToDelete = null;
+        this.toastService.showSuccess(res.message || `Deleted '${value}'`);
+        this.loadCurrentMasterItems();
+      },
+      error: (err) => {
+        this.isDeletingMaster = false;
+        this.toastService.showError(err.error?.error || 'Failed to delete master data item');
       }
     });
   }

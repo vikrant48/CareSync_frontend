@@ -1,15 +1,18 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 
 export interface CreateAppointmentRequest {
   doctorId: number;
   appointmentDateTime: string; // ISO string: YYYY-MM-DDTHH:mm:ss
   reason?: string;
+  transactionId?: string;
 }
 
 export interface PatientAppointmentItem {
   appointmentId: number;
+  patientId?: number;
+  patientName?: string;
   doctorName: string;
   doctorSpecialization?: string;
   doctorEmail?: string;
@@ -24,12 +27,18 @@ export interface PatientAppointmentItem {
   doctorProfileImageUrl?: string;
   videoRoomId?: string;
   isActive?: boolean;
+  consultationFees?: number;
+  transactionId?: string;
+  appointmentMedicalHistory?: any;
+  medicalHistory?: any[];
 }
 
 export interface DoctorAppointmentItem {
   appointmentId: number;
   patientId: number;
   patientName: string;
+  doctorName?: string;
+  doctorSpecialization?: string;
   patientEmail?: string;
   patientContactInfo?: string;
   appointmentDate: string;
@@ -41,6 +50,7 @@ export interface DoctorAppointmentItem {
   patientProfileImageUrl?: string;
   videoRoomId?: string;
   isActive?: boolean;
+  appointmentMedicalHistory?: any;
   medicalHistory?: any[];
 }
 
@@ -65,6 +75,18 @@ export class AppointmentService {
 
   bookAppointment(payload: CreateAppointmentRequest) {
     return this.http.post<PatientAppointmentItem>(`${this.baseUrl}/api/appointments/patient/book`, payload);
+  }
+
+  bookAppointmentWithPayment(payload: {
+    doctorId: number;
+    appointmentDateTime: string;
+    reason?: string;
+    amount: number;
+    paymentMethod: string;
+    upiId?: string;
+    cardDetails?: any;
+  }) {
+    return this.http.post<PatientAppointmentItem>(`${this.baseUrl}/api/appointments/patient/book-with-payment`, payload);
   }
 
   bookEmergencyAppointment(doctorId: number, reason?: string) {
@@ -113,6 +135,28 @@ export class AppointmentService {
   // Doctor endpoints
   getDoctorAllAppointments() {
     return this.http.get<DoctorAppointmentItem[]>(`${this.baseUrl}/api/appointments/doctor/my-patients`);
+  }
+
+  getDoctorPaginatedAppointments(page: number = 0, size: number = 10, status: string = 'ALL', range: string = 'UPCOMING', search?: string) {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('status', status)
+      .set('range', range);
+    if (search) {
+      params = params.set('search', search);
+    }
+    return this.http.get<DoctorAppointmentItem[]>(`${this.baseUrl}/api/appointments/doctor/my-patients/paginated`, { params });
+  }
+
+  countDoctorAppointments(status: string = 'ALL', range: string = 'UPCOMING', search?: string) {
+    let params = new HttpParams()
+      .set('status', status)
+      .set('range', range);
+    if (search) {
+      params = params.set('search', search);
+    }
+    return this.http.get<number>(`${this.baseUrl}/api/appointments/doctor/my-patients/count`, { params });
   }
 
   getDoctorTodayAppointments() {

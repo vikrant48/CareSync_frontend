@@ -29,7 +29,7 @@ import { forkJoin } from 'rxjs';
   template: `
     <app-doctor-layout>
       <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
-        <!-- Welcome Header -->
+        <!-- Header -->
         <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative">
           <div class="absolute inset-0 bg-white/10 opacity-30 pattern-dots"></div>
           <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6">
@@ -46,7 +46,7 @@ import { forkJoin } from 'rxjs';
                 </div>
               </div>
               <div class="space-y-2">
-                <h1 class="text-xl md:text-3xl font-black tracking-tight leading-tight animate-fade-in" *ngIf="doctorName">Welcome, {{ doctorName === 'Doctor' ? 'Doctor' : 'Dr. ' + doctorName }}!</h1>
+                <h1 class="text-xl md:text-3xl font-black tracking-tight leading-tight animate-fade-in" *ngIf="doctorName">{{ doctorName === 'Doctor' ? 'Doctor' : 'Dr. ' + doctorName }}!</h1>
                 <div class="h-8 w-48 bg-white/20 rounded animate-pulse my-1" *ngIf="!doctorName"></div>
                 <div class="flex flex-col md:flex-row items-center gap-2 md:gap-3 text-blue-100/90 text-sm md:text-lg font-medium">
                   <span *ngIf="profile" class="px-3 py-0.5 bg-white/10 rounded-full backdrop-blur-sm border border-white/10 animate-fade-in">{{ profile?.specialization || 'General Practitioner' }}</span>

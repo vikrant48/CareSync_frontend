@@ -73,9 +73,14 @@ export class PatientProfileService {
   private baseUrl = environment.apiBaseUrl;
   private http = inject(HttpClient);
 
-  /** Get all patients (for doctors only) */
-  getAllPatients() {
-    return this.http.get<PatientDto[]>(`${this.baseUrl}/api/patients`);
+  /** Get all patients with pagination (for doctors/admin only) */
+  getAllPatients(page: number = 0, size: number = 50) {
+    return this.http.get<PatientDto[]>(`${this.baseUrl}/api/patients?page=${page}&size=${size}`);
+  }
+
+  /** Get total patient count */
+  getPatientCount() {
+    return this.http.get<number>(`${this.baseUrl}/api/patients/count`);
   }
 
   getProfile(username: string) {

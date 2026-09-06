@@ -228,6 +228,9 @@ export class MyAppointmentsComponent {
       });
       if (doc) {
         a.doctorIsVerified = doc.isVerified;
+        if (!a.consultationFees && doc.consultationFees) {
+          a.consultationFees = doc.consultationFees;
+        }
       }
     });
   }

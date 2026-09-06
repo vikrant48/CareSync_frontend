@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DoctorAppointmentItem } from '../core/services/appointment.service';
 import { RouterModule } from '@angular/router';
+import { PdfService } from '../core/services/pdf.service';
 
 @Component({
   standalone: true,
@@ -114,17 +115,24 @@ import { RouterModule } from '@angular/router';
           </button>
         </div>
 
-        <!-- COMPLETED: Show Read-Only Medical Record Button or No Record Label -->
+        <!-- COMPLETED: Show Read-Only Medical Record Button & Prescription PDF Button -->
         <div *ngIf="appointment.status === 'COMPLETED'">
-           <div *ngIf="hasMedicalRecord; else noRecord" class="mb-2">
-              <button class="btn-action btn-secondary w-full py-3 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400" (click)="onCreateMedicalDescription()" [disabled]="disabled">
-                <i class="fa-solid fa-eye text-lg"></i>
-                <span class="text-base font-bold">See Medical Record</span>
+           <div *ngIf="hasMedicalRecord; else noRecord" class="grid grid-cols-2 gap-2 mb-2">
+              <button class="btn-action btn-secondary py-2 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400" (click)="onCreateMedicalDescription()" [disabled]="disabled">
+                <i class="fa-solid fa-eye"></i>
+                <span class="text-xs font-bold">Medical Record</span>
+              </button>
+              <button class="btn-action bg-emerald-600 hover:bg-emerald-700 text-white shadow-md py-2" (click)="onDownloadPrescription()" [disabled]="disabled">
+                <i class="fa-solid fa-file-pdf"></i>
+                <span class="text-xs font-bold">Prescription PDF</span>
               </button>
            </div>
            <ng-template #noRecord>
-              <div class="text-center p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-dashed border-gray-200 dark:border-gray-600 mb-2">
-                 <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">No Medical Record</span>
+              <div class="flex items-center justify-between p-2.5 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-dashed border-gray-200 dark:border-gray-600 mb-2">
+                 <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">No Record</span>
+                 <button class="btn-action bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5" (click)="onDownloadPrescription()" [disabled]="disabled">
+                   <i class="fa-solid fa-file-pdf"></i> PDF Rx
+                 </button>
               </div>
            </ng-template>
         </div>
@@ -225,6 +233,40 @@ export class DoctorAppointmentCardComponent {
     if (s === 'CONFIRMED') return ['IN_PROGRESS'];
     if (s === 'IN_PROGRESS') return ['COMPLETED'];
     return [];
+  }
+
+  constructor(private pdfService: PdfService) { }
+
+  onDownloadPrescription() {
+    const medHistory = this.appointment.appointmentMedicalHistory
+      || (this.appointment.medicalHistory
+        ? this.appointment.medicalHistory.find((m: any) => m.appointmentId && Number(m.appointmentId) === Number(this.appointment.appointmentId))
+        : null);
+
+    const medicinesList: Array<{ name: string; dosage?: string; duration?: string; instructions?: string }> = [];
+
+    if (medHistory?.medicine) {
+      medicinesList.push({
+        name: medHistory.medicine,
+        dosage: medHistory.doses || medHistory.treatment || 'As prescribed',
+        duration: medHistory.treatment || 'As directed'
+      });
+    }
+
+    this.pdfService.generatePrescriptionPdf({
+      appointmentId: this.appointment.appointmentId,
+      patientName: this.appointment.patientName,
+      doctorName: String(this.appointment.doctorName),
+      doctorSpecialization: String(this.appointment.doctorSpecialization),
+      visitDate: `${this.appointment.appointmentDate} ${this.appointment.appointmentTime}`,
+      symptoms: medHistory?.symptoms || this.appointment.reason || 'General Consultation',
+      diagnosis: medHistory?.diagnosis || (medHistory ? 'Consultation Completed' : 'Completed Consultation Record'),
+      medicine: medHistory?.medicine,
+      doses: medHistory?.doses,
+      medicines: medicinesList.length > 0 ? medicinesList : undefined,
+      prescriptionNotes: medHistory?.notes || (medHistory?.treatment ? `Treatment Plan: ${medHistory.treatment}` : undefined),
+      verificationUrl: `https://caresync.app/verify/prescription/${this.appointment.appointmentId}`
+    });
   }
 
   get hasMedicalRecord(): boolean {

@@ -9,8 +9,9 @@ export interface PaymentRequest {
   paymentType: 'LAB_TEST' | 'APPOINTMENT' | 'CONSULTATION' | 'MEDICINE' | 'HEALTH_CHECKUP' | 'SUBSCRIPTION' | 'OTHER';
   additionalInfo?: string; // Optional additional info for auto-generating descriptions
   paymentMethod: 'UPI' | 'CARD' | 'QR_CODE';
-  patientId: number; // Required field as per backend
+  patientId: number;
   bookingId?: number;
+  appointmentId?: number;
   currency?: string;
   // UPI specific field (flattened from upiDetails)
   upiId?: string;
@@ -149,18 +150,7 @@ export class PaymentService {
     return this.http.get<PaymentStatusResponse>(`${this.baseUrl}/api/payments/transaction/${transactionId}`);
   }
 
-  /**
-   * Link payment to booking after booking creation
-   */
-  linkPaymentToBooking(transactionId: string, bookingId: number): Observable<string> {
-    return this.http.put<string>(`${this.baseUrl}/api/payments/link-booking`, null, {
-      params: {
-        transactionId: transactionId,
-        bookingId: bookingId.toString()
-      },
-      responseType: 'text' as 'json'
-    });
-  }
+
 
   /**
    * Get payment by booking ID
@@ -239,7 +229,7 @@ export class PaymentService {
    */
   getCardType(cardNumber: string): string {
     const cleanNumber = cardNumber.replace(/\s/g, '');
-    
+
     if (/^4/.test(cleanNumber)) {
       return 'Visa';
     } else if (/^5[1-5]/.test(cleanNumber)) {

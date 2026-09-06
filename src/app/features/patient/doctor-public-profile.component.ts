@@ -11,6 +11,7 @@ import { PaymentPopupComponent, PaymentDetails } from '../../shared/payment-popu
 import { DoctorBookingModalComponent } from '../../shared/doctor-booking-modal.component';
 import { ToastService } from '../../core/services/toast.service';
 import { AuthService } from '../../core/services/auth.service';
+import { PaymentService } from '../../core/services/payment.service';
 
 @Component({
   selector: 'app-doctor-public-profile',
@@ -46,6 +47,7 @@ import { AuthService } from '../../core/services/auth.service';
       [amount]="doctor?.consultationFees || 0"
       [title]="'Appointment Booking Payment'"
       [patientId]="getCurrentPatientId()"
+      [appointmentBookingDetails]="appointmentBookingDetails"
       [paymentType]="'APPOINTMENT'"
       [additionalInfo]="getAppointmentInfo()"
       (paymentSuccess)="onPaymentSuccess($event)"
@@ -97,6 +99,7 @@ export class DoctorPublicProfileComponent {
   paymentModalOpen = false;
   paymentCompleted = false;
   paymentDetails: PaymentDetails | null = null;
+  appointmentBookingDetails?: { doctorId: number; appointmentDateTime: string; reason?: string };
 
   private authService = inject(AuthService);
 
@@ -200,32 +203,8 @@ export class DoctorPublicProfileComponent {
     });
   }
 
-  // This method will be called after successful payment
-  proceedWithBooking() {
-    if (!this.selectedSlot || !this.doctor) return;
+  private paymentService = inject(PaymentService);
 
-    this.booking = true;
-    this.bookError = null;
-    const payload = {
-      doctorId: this.doctor.id,
-      appointmentDateTime: this.toIso(this.selectedDate, this.selectedSlot),
-      reason: this.reason || undefined
-    };
-    this.appts.bookAppointment(payload).subscribe({
-      next: () => {
-        this.booking = false;
-        this.toast.showSuccess('Appointment booked successfully.');
-        // Optionally close modal after success
-        // this.bookingOpen = false;
-      },
-      error: (err) => {
-        this.booking = false;
-        const msg = err?.error?.message || 'Booking failed. Please try another slot.';
-        this.bookError = msg;
-        this.toast.showError(msg);
-      },
-    });
-  }
 
   startBooking() {
     this.bookingOpen = true;
@@ -256,9 +235,7 @@ export class DoctorPublicProfileComponent {
     this.paymentDetails = paymentDetails;
     this.paymentCompleted = true;
     this.paymentModalOpen = false;
-
-    // Automatically proceed with booking after successful payment
-    this.proceedWithBooking();
+    this.toast.showSuccess('Appointment booked and payment completed successfully.');
   }
 
   onPaymentError(error: string) {
@@ -298,10 +275,16 @@ export class DoctorPublicProfileComponent {
   }
 
   onProceedToPayment(evt: { date: string; slot: string; reason: string }) {
+    if (!this.doctor) return;
     this.selectedDate = evt.date;
     this.selectedSlot = evt.slot;
     this.reason = evt.reason || '';
     this.bookingOpen = false;
+    this.appointmentBookingDetails = {
+      doctorId: this.doctor.id,
+      appointmentDateTime: this.toIso(this.selectedDate, this.selectedSlot),
+      reason: this.reason || undefined
+    };
     this.paymentModalOpen = true;
   }
 }

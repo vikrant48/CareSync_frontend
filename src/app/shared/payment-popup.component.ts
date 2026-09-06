@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../environments/environment';
 import { PaymentService, PaymentRequest } from '../core/services/payment.service';
+import { AppointmentService } from '../core/services/appointment.service';
+import { LabTestService, BookingRequest } from '../core/services/lab-test.service';
+import { AuthService } from '../core/services/auth.service';
 import { ToastService } from '../core/services/toast.service';
 import { PaymentSuccessModalComponent } from './payment-success-modal.component';
 
@@ -18,7 +21,9 @@ export interface PaymentDetails {
   };
   transactionId?: string;
   patientId?: number;
+  patientName?: string;
   bookingId?: number;
+  appointmentId?: number;
 }
 
 @Component({
@@ -295,14 +300,21 @@ export class PaymentPopupComponent {
   @Input() title = 'Payment Details';
   @Input() patientId?: number;
   @Input() bookingId?: number;
+  @Input() appointmentId?: number;
   @Input() paymentType?: 'APPOINTMENT' | 'CONSULTATION' | 'LAB_TEST';
   @Input() additionalInfo?: string;
+
+  @Input() appointmentBookingDetails?: { doctorId: number; appointmentDateTime: string; reason?: string };
+  @Input() labTestBookingDetails?: BookingRequest | null;
 
   @Output() paymentSuccess = new EventEmitter<PaymentDetails>();
   @Output() paymentCancel = new EventEmitter<void>();
   @Output() paymentError = new EventEmitter<string>();
 
   private paymentService = inject(PaymentService);
+  private appointmentService = inject(AppointmentService);
+  private labTestService = inject(LabTestService);
+  private authService = inject(AuthService);
   private toast = inject(ToastService);
 
   selectedMethod = signal<'upi' | 'card' | 'qr' | null>(null);
@@ -401,7 +413,9 @@ export class PaymentPopupComponent {
       currency: 'INR',
       paymentType: this.paymentType || 'APPOINTMENT',
       additionalInfo: this.additionalInfo,
-      description: this.title
+      description: this.title,
+      bookingId: this.bookingId,
+      appointmentId: this.appointmentId
     };
 
     if (this.selectedMethod() === 'upi') paymentRequest.upiId = this.upiId;
@@ -414,6 +428,46 @@ export class PaymentPopupComponent {
         cvv: this.cardDetails.cvv,
         cardholderName: this.cardDetails.cardholderName
       };
+    }
+
+    if (this.paymentType === 'APPOINTMENT' && this.appointmentBookingDetails) {
+      const payload = {
+        doctorId: this.appointmentBookingDetails.doctorId,
+        appointmentDateTime: this.appointmentBookingDetails.appointmentDateTime,
+        reason: this.appointmentBookingDetails.reason,
+        amount: this.amount,
+        paymentMethod: paymentRequest.paymentMethod,
+        upiId: paymentRequest.upiId,
+        cardDetails: paymentRequest.cardDetails
+      };
+
+      this.appointmentService.bookAppointmentWithPayment(payload).subscribe({
+        next: (response) => this.handleSuccess(response),
+        error: (error) => this.handleError(error)
+      });
+      return;
+    }
+
+    if (this.paymentType === 'LAB_TEST' && this.labTestBookingDetails) {
+      const patientBookingWithPayment = {
+        bookingRequest: this.labTestBookingDetails,
+        paymentRequest: {
+          amount: this.amount,
+          description: `Lab tests booking`,
+          paymentMethod: paymentRequest.paymentMethod,
+          paymentType: 'LAB_TEST' as const,
+          patientId: this.patientId || parseInt(this.authService.userId() || '0'),
+          currency: 'INR',
+          upiId: paymentRequest.upiId,
+          cardDetails: paymentRequest.cardDetails
+        }
+      };
+
+      this.labTestService.createPatientBookingWithPayment(patientBookingWithPayment).subscribe({
+        next: (response) => this.handleSuccess(response),
+        error: (error) => this.handleError(error)
+      });
+      return;
     }
 
     const request$ = this.bookingId
@@ -429,11 +483,12 @@ export class PaymentPopupComponent {
   private handleSuccess(response: any) {
     setTimeout(() => {
       this.isProcessing.set(false);
-      if (response.success || response.transactionId) {
+      if (response.success || response.paymentTransactionId || response.transactionId || response.appointmentId || response.id) {
         this.successPaymentDetails = {
           method: this.selectedMethod()!,
           amount: this.amount,
-          transactionId: response.transactionId || 'TXN-' + Date.now(),
+          transactionId: response.paymentTransactionId || response.transactionId || ('APPT_' + (response.appointmentId || response.id)),
+          bookingId: response.id || response.bookingId,
           patientId: this.patientId,
           upiId: this.upiId
         };

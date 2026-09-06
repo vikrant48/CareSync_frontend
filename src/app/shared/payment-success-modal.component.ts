@@ -1,9 +1,8 @@
 import { Component, EventEmitter, Input, Output, ElementRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PaymentDetails } from './payment-popup.component';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { ToastService } from '../core/services/toast.service';
+import { PdfService, PaymentReceiptData } from '../core/services/pdf.service';
 
 @Component({
   selector: 'app-payment-success-modal',
@@ -104,11 +103,6 @@ import { ToastService } from '../core/services/toast.service';
           </div>
 
         </div>
-
-        <!-- Footer Decor -->
-        <!-- <div class="bg-gray-50 p-3 text-center text-xs text-gray-400 border-t border-gray-100">
-           CareSync Secure Payments
-        </div> -->
       </div>
     </div>
   `
@@ -123,6 +117,7 @@ export class PaymentSuccessModalComponent {
   @ViewChild('modalContent', { static: false }) modalContent!: ElementRef;
 
   private toast = inject(ToastService);
+  private pdfService = inject(PdfService);
 
   getPaymentMethodDisplay(): string {
     if (!this.paymentDetails) return '';
@@ -158,26 +153,38 @@ export class PaymentSuccessModalComponent {
     this.modalClose.emit();
   }
 
-  async downloadPDF() {
-    if (!this.modalContent) return;
+  downloadPDF() {
+    if (!this.paymentDetails) return;
 
     try {
-      const element = this.modalContent.nativeElement;
-      const canvas = await html2canvas(element, {
-        backgroundColor: '#ffffff', // Capture as white background
-        scale: 2,
-        logging: false,
-        useCORS: true
-      });
+      if (this.paymentDetails.bookingId) {
+        this.pdfService.generateReceiptByBookingId(this.paymentDetails.bookingId);
+        this.toast.showSuccess('Receipt downloaded successfully');
+        return;
+      }
 
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      if (this.paymentDetails.appointmentId) {
+        this.pdfService.generateAppointmentReceiptByBookingId(this.paymentDetails.appointmentId);
+        this.toast.showSuccess('Receipt downloaded successfully');
+        return;
+      }
 
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
+      const receiptData: PaymentReceiptData = {
+        transactionId: String(this.paymentDetails.transactionId) ,
+        amount: this.paymentDetails.amount,
+        currency: 'INR',
+        paymentMethod: this.getPaymentMethodDisplay(),
+        patientName: String(this.paymentDetails.patientName) || 'Patient',
+        patientId: this.paymentDetails.patientId || 0,
+        paymentDate: new Date().toISOString(),
+        paidTo: this.recipientUpiId || 'CareSync Healthcare Services',
+        recipientUpiId: this.recipientUpiId,
+        upiId: this.paymentDetails.upiId,
+        status: 'SUCCESS',
+        description: 'Healthcare Service Payment Receipt'
+      };
 
-      const filename = `Receipt-${this.paymentDetails?.transactionId || 'Txn'}.pdf`;
-      pdf.save(filename);
+      this.pdfService.generatePaymentReceipt(receiptData);
       this.toast.showSuccess('Receipt downloaded successfully');
     } catch (error) {
       console.error('PDF Generation Error', error);

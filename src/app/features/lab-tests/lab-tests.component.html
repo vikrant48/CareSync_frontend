@@ -278,5 +278,6 @@
 <!-- Payment Popup -->
 <app-payment-popup *ngIf="showPaymentPopup()" [isVisible]="showPaymentPopup()" [amount]="totalPrice()"
   [title]="'Lab Test Booking - ' + selectedCount() + ' test(s)'" [patientId]="getPatientIdForPayment()"
-  [paymentType]="'LAB_TEST'" (paymentSuccess)="onPaymentSuccess($event)" (paymentCancel)="onPaymentCancel()">
+  [paymentType]="'LAB_TEST'" [labTestBookingDetails]="pendingBookingRequest()"
+  (paymentSuccess)="onPaymentSuccess($event)" (paymentCancel)="onPaymentCancel()">
 </app-payment-popup>

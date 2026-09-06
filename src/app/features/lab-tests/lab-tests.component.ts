@@ -45,11 +45,11 @@ export class LabTestsComponent implements OnInit {
   isLoadingPatients = signal<boolean>(false);
 
   // Computed values
-  selectedTests = computed(() => 
+  selectedTests = computed(() =>
     this.labTests().filter(test => this.selectedTestIds().has(test.id))
   );
 
-  totalPrice = computed(() => 
+  totalPrice = computed(() =>
     this.labTestService.calculateTotalPrice(this.selectedTests())
   );
 
@@ -73,7 +73,7 @@ export class LabTestsComponent implements OnInit {
    */
   loadPatients() {
     this.isLoadingPatients.set(true);
-    
+
     this.appointmentService.getDoctorUniquePatients().subscribe({
       next: (patients) => {
         this.patients.set(patients);
@@ -119,15 +119,15 @@ export class LabTestsComponent implements OnInit {
    */
   toggleTestSelection(testId: number) {
     const currentSelection = new Set(this.selectedTestIds());
-    
+
     if (currentSelection.has(testId)) {
       currentSelection.delete(testId);
     } else {
       currentSelection.add(testId);
     }
-    
+
     this.selectedTestIds.set(currentSelection);
-    
+
     // If not all tests are selected, uncheck full body checkup
     if (currentSelection.size !== this.labTests().length) {
       this.isFullBodyCheckup.set(false);
@@ -157,7 +157,7 @@ export class LabTestsComponent implements OnInit {
   toggleFullBodyCheckup() {
     const newValue = !this.isFullBodyCheckup();
     this.isFullBodyCheckup.set(newValue);
-    
+
     if (newValue) {
       this.selectAllTests();
     } else {
@@ -226,22 +226,10 @@ export class LabTestsComponent implements OnInit {
    */
   onPaymentSuccess(paymentDetails: PaymentDetails) {
     console.log('Payment successful for lab test booking:', paymentDetails);
-    
-    // Get the pending booking request
-    const bookingRequest = this.pendingBookingRequest();
-    
-    if (!bookingRequest) {
-      this.toast.showError('No pending booking request found.');
-      return;
-    }
-    
-    // Create the booking after successful payment
-    this.createPatientBookingWithPayment(bookingRequest, paymentDetails);
-    
-    // // Close the payment popup after a delay to allow success modal to show
-    // setTimeout(() => {
-    //   this.closePaymentPopup();
-    // }, 3000); // Give time for user to see the success modal
+    this.toast.showSuccess('Lab tests booked successfully!');
+    this.clearSelections();
+    this.showPaymentPopup.set(false);
+    this.pendingBookingRequest.set(null);
   }
 
   /**
@@ -300,7 +288,7 @@ export class LabTestsComponent implements OnInit {
         this.toast.showSuccess('Booking created successfully with payment!');
         this.clearSelections();
         this.isBooking.set(false);
-        
+
         // Auto-hide success message after 3 seconds
         setTimeout(() => {
           this.toast.clearAll();
@@ -309,7 +297,7 @@ export class LabTestsComponent implements OnInit {
       error: (error) => {
         console.error('Error creating booking with payment:', error);
         let errorMsg = 'Failed to create booking with payment. Please try again.';
-        
+
         if (error.error?.message) {
           errorMsg = error.error.message;
         } else if (error.status === 401) {
@@ -318,7 +306,7 @@ export class LabTestsComponent implements OnInit {
         } else if (error.status === 403) {
           errorMsg = 'You do not have permission to book tests.';
         }
-        
+
         this.toast.showError(errorMsg);
         this.isBooking.set(false);
       }
@@ -336,7 +324,7 @@ export class LabTestsComponent implements OnInit {
         this.toast.showSuccess('Booking created successfully! Patient can pay later.');
         this.clearSelections();
         this.isBooking.set(false);
-        
+
         // Auto-hide success message after 3 seconds
         setTimeout(() => {
           this.toast.clearAll();
@@ -345,7 +333,7 @@ export class LabTestsComponent implements OnInit {
       error: (error) => {
         console.error('Error creating doctor booking:', error);
         let errorMsg = 'Failed to create booking. Please try again.';
-        
+
         if (error.error?.message) {
           errorMsg = error.error.message;
         } else if (error.status === 401) {
@@ -354,7 +342,7 @@ export class LabTestsComponent implements OnInit {
         } else if (error.status === 403) {
           errorMsg = 'You do not have permission to book tests.';
         }
-        
+
         this.toast.showError(errorMsg);
         this.isBooking.set(false);
       }
@@ -375,7 +363,7 @@ export class LabTestsComponent implements OnInit {
           this.toast.showSuccess('Booking created successfully!');
           this.clearSelections();
           this.isBooking.set(false);
-          
+
           setTimeout(() => {
             this.toast.clearAll();
           }, 3000);
@@ -409,7 +397,7 @@ export class LabTestsComponent implements OnInit {
   getSelectedPatientName(): string {
     const selectedId = this.selectedPatientId();
     if (!selectedId) return '';
-    
+
     const patient = this.patients().find(p => p.id === selectedId);
     return patient ? `${patient.firstName} ${patient.lastName}` : '';
   }
@@ -434,7 +422,7 @@ export class LabTestsComponent implements OnInit {
   getPrescriberName(): string {
     const role = this.currentRole();
     const user = this.currentUser();
-    
+
     if (role === 'DOCTOR' && user) {
       const firstName = user.firstName || '';
       const lastName = user.lastName || '';
