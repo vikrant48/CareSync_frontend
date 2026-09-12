@@ -34,7 +34,7 @@ import { AdminDashboardComponent } from './features/admin/admin-dashboard.compon
 import { NotFoundComponent } from './shared/not-found.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '', redirectTo: 'register', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
   { path: 'register', component: RegisterComponent },
