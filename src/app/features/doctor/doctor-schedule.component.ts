@@ -270,24 +270,35 @@ export class DoctorScheduleComponent implements OnInit {
     // Medical History Form Logic
     openHistoryForm(a: DoctorAppointmentItem) {
         this.selectedAppointment = a;
-        this.mhForm = { visitDate: new Date().toISOString().slice(0, 10) };
         this.editingHistoryId = null;
 
-        if (a.medicalHistory) {
-            const record = a.medicalHistory.find(m => m.appointmentId === a.appointmentId) ||
-                a.medicalHistory.find(m => m.visitDate === a.appointmentDate);
-            if (record) {
-                this.editingHistoryId = record.id;
-                this.mhForm = {
-                    visitDate: record.visitDate,
-                    symptoms: record.symptoms,
-                    diagnosis: record.diagnosis,
-                    treatment: record.treatment,
-                    medicine: record.medicine,
-                    doses: record.doses,
-                    notes: record.notes
-                };
-            }
+        let record: any = a.appointmentMedicalHistory || null;
+
+        if (!record && a.medicalHistory) {
+            record = a.medicalHistory.find(m => m.appointmentId && Number(m.appointmentId) === Number(a.appointmentId));
+        }
+
+        if (record) {
+            this.editingHistoryId = record.id;
+            this.mhForm = {
+                visitDate: record.visitDate,
+                symptoms: record.symptoms,
+                diagnosis: record.diagnosis,
+                treatment: record.treatment,
+                medicine: record.medicine,
+                doses: record.doses,
+                notes: record.notes
+            };
+        } else {
+            this.mhForm = {
+                visitDate: a.appointmentDate,
+                symptoms: '',
+                diagnosis: '',
+                treatment: '',
+                medicine: '',
+                doses: '',
+                notes: ''
+            };
         }
         this.historyFormModalOpen = true;
     }
@@ -311,7 +322,11 @@ export class DoctorScheduleComponent implements OnInit {
             appointmentId: this.selectedAppointment.appointmentId
         };
 
-        this.patientApi.addMedicalHistoryWithDoctor(this.selectedAppointment.patientId, this.doctorId, data).subscribe({
+        const request$ = this.editingHistoryId
+            ? this.patientApi.updateMedicalHistory(this.editingHistoryId, data)
+            : this.patientApi.addMedicalHistoryWithDoctor(this.selectedAppointment.patientId, this.doctorId, data);
+
+        request$.subscribe({
             next: () => {
                 this.savingHistory = false;
                 this.historySaved = true;

@@ -1,4 +1,4 @@
-import { Component, inject, PLATFORM_ID } from '@angular/core';
+import { Component, inject, PLATFORM_ID, ElementRef, HostListener } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { RouterOutlet, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -19,13 +19,31 @@ export class AppComponent {
   statusService = inject(BackendStatusService);
   private theme = inject(ThemeService);
   private platformId = inject(PLATFORM_ID);
+  private elementRef = inject(ElementRef);
   isBrowser = isPlatformBrowser(this.platformId);
+  isGitDropdownOpen = false;
 
   constructor() { }
 
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
       this.theme.init();
+    }
+  }
+
+  toggleGitDropdown(event: Event) {
+    event.stopPropagation();
+    this.isGitDropdownOpen = !this.isGitDropdownOpen;
+  }
+
+  closeGitDropdown() {
+    this.isGitDropdownOpen = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (this.isGitDropdownOpen && !this.elementRef.nativeElement.querySelector('.git-repo-dropdown-container')?.contains(event.target as Node)) {
+      this.isGitDropdownOpen = false;
     }
   }
 }

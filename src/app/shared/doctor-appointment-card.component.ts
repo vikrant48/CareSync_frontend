@@ -246,10 +246,14 @@ export class DoctorAppointmentCardComponent {
     const medicinesList: Array<{ name: string; dosage?: string; duration?: string; instructions?: string }> = [];
 
     if (medHistory?.medicine) {
-      medicinesList.push({
-        name: medHistory.medicine,
-        dosage: medHistory.doses || medHistory.treatment || 'As prescribed',
-        duration: medHistory.treatment || 'As directed'
+      const medNames = String(medHistory.medicine).split(',').map((s: string) => s.trim()).filter(Boolean);
+      const dosages = String(medHistory.doses || '').split(',').map((s: string) => s.trim()).filter(Boolean);
+      medNames.forEach((name: string, idx: number) => {
+        medicinesList.push({
+          name: name,
+          dosage: dosages[idx] || (dosages.length === 1 ? dosages[0] : 'As prescribed'),
+          duration: 'As directed'
+        });
       });
     }
 
@@ -261,8 +265,6 @@ export class DoctorAppointmentCardComponent {
       visitDate: `${this.appointment.appointmentDate} ${this.appointment.appointmentTime}`,
       symptoms: medHistory?.symptoms || this.appointment.reason || 'General Consultation',
       diagnosis: medHistory?.diagnosis || (medHistory ? 'Consultation Completed' : 'Completed Consultation Record'),
-      medicine: medHistory?.medicine,
-      doses: medHistory?.doses,
       medicines: medicinesList.length > 0 ? medicinesList : undefined,
       prescriptionNotes: medHistory?.notes || (medHistory?.treatment ? `Treatment Plan: ${medHistory.treatment}` : undefined),
       verificationUrl: `https://caresync.app/verify/prescription/${this.appointment.appointmentId}`

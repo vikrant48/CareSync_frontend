@@ -83,7 +83,7 @@ export class PdfService {
     }
 
     const paidToDisplay = receiptData.paidTo || receiptData.recipientUpiId || receiptData.upiId || receiptData.merchantUpiId || 'CareSync Healthcare Services';
-    const txnId = receiptData.transactionId ;
+    const txnId = receiptData.transactionId;
     const paymentMethodDisplay = (receiptData.paymentMethod).toUpperCase();
 
     // 1. Header Bar (Dark Slate Gradient)
@@ -353,8 +353,8 @@ export class PdfService {
           amount: amt,
           currency: payment.currency || 'INR',
           paymentMethod: payment.paymentMethod,
-          patientName: payment.patientName || appointmentData?.patientName ,
-          patientId: payment.patientId ,
+          patientName: payment.patientName || appointmentData?.patientName,
+          patientId: payment.patientId,
           bookingId: appointmentId,
           totalPrice: amt,
           bookingDate: appointmentData?.appointmentDate || dateStr,
@@ -520,40 +520,70 @@ export class PdfService {
     doc.text('Rx - PRESCRIBED MEDICINES & DOSAGE', 16, y);
     y += 8;
 
-    const medicinesList = data.medicines && data.medicines.length > 0
-      ? data.medicines
-      : (data.medicine ? [{
-        name: data.medicine,
-        dosage: data.doses || 'As prescribed by physician',
+    let medicinesList: Array<{ name: string; dosage?: string; duration?: string; instructions?: string }> = [];
+
+    if (data.medicines && data.medicines.length > 0) {
+      medicinesList = data.medicines;
+    } else if (data.medicine) {
+      const medNames = String(data.medicine).split(',').map(s => s.trim()).filter(Boolean);
+      const dosages = String(data.doses || '').split(',').map(s => s.trim()).filter(Boolean);
+      medicinesList = medNames.map((name, idx) => ({
+        name: name,
+        dosage: dosages[idx] || (dosages.length === 1 ? dosages[0] : 'As prescribed by physician'),
         duration: 'As directed'
-      }] : []);
+      }));
+    }
 
     if (medicinesList.length > 0) {
-      // Table Header
-      doc.setFillColor(241, 245, 249);
+      // Table Header Background (Dark slate)
+      doc.setFillColor(30, 41, 59);
       doc.rect(16, y, 178, 8, 'F');
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(30, 41, 59);
-      doc.text('Medicine Name', 22, y + 5.5);
-      doc.text('Dosage & Instructions', 95, y + 5.5);
-      y += 11;
+      doc.setTextColor(255, 255, 255);
+      doc.text('#', 20, y + 5.5);
+      doc.text('Medicine Name', 30, y + 5.5);
+      doc.text('Dosage & Instructions', 110, y + 5.5);
+      y += 8;
 
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(71, 85, 105);
-      medicinesList.forEach((m) => {
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(30, 41, 59);
-        const splitMedName = doc.splitTextToSize(m.name, 68);
-        doc.text(splitMedName, 22, y);
+      medicinesList.forEach((m, idx) => {
+        if (y > 250) {
+          doc.addPage();
+          y = 20;
+        }
 
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(71, 85, 105);
+        // Alternating background row fill
+        if (idx % 2 === 0) {
+          doc.setFillColor(248, 250, 252);
+        } else {
+          doc.setFillColor(255, 255, 255);
+        }
+
+        const splitMedName = doc.splitTextToSize(m.name, 75);
         const dosageText = `${m.dosage || 'As directed'}${m.instructions ? ' (' + m.instructions + ')' : ''}`.trim();
-        const splitDosage = doc.splitTextToSize(dosageText, 95);
-        doc.text(splitDosage, 95, y);
+        const splitDosage = doc.splitTextToSize(dosageText, 80);
 
         const rowHeight = Math.max(splitMedName.length, splitDosage.length) * 5.5 + 4;
+
+        doc.rect(16, y, 178, rowHeight, 'F');
+        doc.setDrawColor(241, 245, 249);
+        doc.rect(16, y, 178, rowHeight, 'D');
+
+        // Row Index #
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(71, 85, 105);
+        doc.text(`${idx + 1}.`, 20, y + 5);
+
+        // Medicine Name (Bold)
+        doc.setTextColor(30, 41, 59);
+        doc.text(splitMedName, 30, y + 5);
+
+        // Dosage & Instructions (Normal)
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(71, 85, 105);
+        doc.text(splitDosage, 110, y + 5);
+
         y += rowHeight;
       });
       y += 4;

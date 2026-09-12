@@ -12,11 +12,12 @@ import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { ToastService } from '../../core/services/toast.service';
 import { MasterDataService } from '../../core/services/master-data.service';
 import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropdown.component';
+import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.component';
 
 @Component({
   selector: 'app-my-appointments',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, PatientAppointmentCardComponent, RescheduleAppointmentModalComponent, CancellationModalComponent, SelectDropdownComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, PatientAppointmentCardComponent, RescheduleAppointmentModalComponent, CancellationModalComponent, SelectDropdownComponent, SharedChatModalComponent],
   template: `
     <app-patient-layout>
     <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
@@ -111,6 +112,7 @@ import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropd
           (cancel)="cancelAppointment($event)"
           (viewDoctor)="viewDoctorFromAppointment($event)"
           (joinVideo)="joinConsultation($event)"
+          (openChat)="openChat($event)"
           class="h-full"
         ></patient-appointment-card>
       </div>
@@ -130,6 +132,15 @@ import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropd
         (confirmCancel)="confirmCancellation()"
         (requestReschedule)="handleRescheduleFromCancellation()"
       ></app-cancellation-modal>
+
+      <!-- Shared Chat Modal -->
+      <app-shared-chat-modal
+        [isOpen]="chatOpen"
+        [appointmentId]="chatAppointmentId"
+        [participantName]="chatParticipantName"
+        [participantImage]="chatParticipantImage"
+        (close)="closeChat()"
+      ></app-shared-chat-modal>
     </div>
     </app-patient-layout>
   `,
@@ -359,5 +370,25 @@ export class MyAppointmentsComponent {
 
   joinConsultation(a: PatientAppointmentItem) {
     this.router.navigate(['/patient/consultation', a.appointmentId]);
+  }
+
+  // Chat Logic
+  chatOpen = false;
+  chatAppointmentId: number | null = null;
+  chatParticipantName: string | null = null;
+  chatParticipantImage: string | null = null;
+
+  openChat(a: PatientAppointmentItem) {
+    this.chatAppointmentId = a.appointmentId;
+    this.chatParticipantName = a.doctorName || 'Doctor';
+    this.chatParticipantImage = a.doctorProfileImageUrl || null;
+    this.chatOpen = true;
+  }
+
+  closeChat() {
+    this.chatOpen = false;
+    this.chatAppointmentId = null;
+    this.chatParticipantName = null;
+    this.chatParticipantImage = null;
   }
 }

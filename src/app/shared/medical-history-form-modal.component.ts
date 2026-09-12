@@ -1,9 +1,14 @@
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AiAssistantService } from '../core/services/ai-assistant.service';
 import { ClinicalMatch, DiagnosisSuggestionDto } from '../core/models/ai.models';
 import { DatePickerComponent } from './date-picker.component';
+
+export interface MedicationItem {
+   medicine: string;
+   doses: string;
+}
 
 @Component({
    selector: 'app-medical-history-form-modal',
@@ -37,25 +42,21 @@ import { DatePickerComponent } from './date-picker.component';
           <div class="px-6 py-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
              <form (ngSubmit)="onSubmit($event)" class="space-y-5">
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                   <div class="form-group min-h-[70px]">
-                      <app-date-picker
-                        [(ngModel)]="form.visitDate"
-                        name="visitDate"
-                        label="Visit Date"
-                        placeholder="Select Date"
-                        [disabled]="disabled">
-                      </app-date-picker>
-                   </div>
-                    <div class="form-group">
-                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Diagnosis</label>
-                      <input type="text" class="input-modern" placeholder="e.g. Acute Bronchitis" [(ngModel)]="form.diagnosis" name="diagnosis" [disabled]="disabled" />
-                   </div>
+                <!-- 1. Visit Date -->
+                <div class="form-group min-h-[70px]">
+                   <app-date-picker
+                     [(ngModel)]="form.visitDate"
+                     name="visitDate"
+                     label="Visit Date"
+                     placeholder="Select Date"
+                     [disabled]="disabled">
+                   </app-date-picker>
                 </div>
 
+                <!-- 2. Symptoms & AI Suggest -->
                 <div class="form-group">
                    <div class="flex items-center justify-between mb-1">
-                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Symptoms</label>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Symptoms / Patient Issues</label>
                       <button type="button" 
                               (click)="onSuggest()" 
                               [disabled]="disabled || loadingSuggestions || !form.symptoms"
@@ -68,7 +69,7 @@ import { DatePickerComponent } from './date-picker.component';
                    <input type="text" class="input-modern" placeholder="e.g. Cough, fever, difficulty breathing..." [(ngModel)]="form.symptoms" name="symptoms" [disabled]="disabled" />
                 </div>
 
-                <!-- AI Suggestions Area -->
+                <!-- 3. AI Suggestions Area -->
                 <div *ngIf="clinicalSuggestions.length > 0" class="bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30 rounded-xl p-4 animate-in fade-in slide-in-from-top-2 duration-300">
                    <div class="flex items-center justify-between mb-3">
                       <h4 class="text-xs font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
@@ -93,22 +94,53 @@ import { DatePickerComponent } from './date-picker.component';
                    </div>
                 </div>
 
+                <!-- 4. Diagnosis -->
+                <div class="form-group">
+                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Diagnosis</label>
+                   <input type="text" class="input-modern" placeholder="e.g. Acute Bronchitis" [(ngModel)]="form.diagnosis" name="diagnosis" [disabled]="disabled" />
+                </div>
+
+                <!-- 5. Treatment Plan -->
                 <div class="form-group">
                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Treatment Plan</label>
                    <input type="text" class="input-modern" placeholder="e.g. Rest, hydration, antibiotics" [(ngModel)]="form.treatment" name="treatment" [disabled]="disabled" />
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                   <div class="form-group">
-                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Medication</label>
-                      <input type="text" class="input-modern" placeholder="e.g. Amoxicillin" [(ngModel)]="form.medicine" name="medicine" [disabled]="disabled" />
+                <!-- 6. Dynamic Medications List -->
+                <div class="space-y-3">
+                   <div class="flex items-center justify-between">
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Medications & Dosages</label>
+                      <button type="button" 
+                              (click)="addMedication()" 
+                              [disabled]="disabled"
+                              class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1 transition-all active:scale-95 disabled:opacity-50">
+                         <i class="fa-solid fa-plus text-xs"></i> Add Medication
+                      </button>
                    </div>
-                   <div class="form-group">
-                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dosage</label>
-                      <input type="text" class="input-modern" placeholder="e.g. 500mg, 3 times daily" [(ngModel)]="form.doses" name="doses" [disabled]="disabled" />
+
+                   <div *ngFor="let med of medicationList; let i = index" class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center bg-gray-50/50 dark:bg-gray-700/30 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+                      <div class="md:col-span-6">
+                         <label class="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1 md:hidden">Medication Name</label>
+                         <input type="text" class="input-modern" placeholder="e.g. Amoxicillin" [(ngModel)]="med.medicine" [name]="'medicine_' + i" [disabled]="disabled" />
+                      </div>
+                      <div class="md:col-span-5">
+                         <label class="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1 md:hidden">Dosage</label>
+                         <input type="text" class="input-modern" placeholder="e.g. 500mg, 3 times daily" [(ngModel)]="med.doses" [name]="'doses_' + i" [disabled]="disabled" />
+                      </div>
+                      <div class="md:col-span-1 flex items-center justify-center">
+                         <button type="button" 
+                                 (click)="removeMedication(i)" 
+                                 *ngIf="medicationList.length > 1"
+                                 [disabled]="disabled"
+                                 class="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"
+                                 title="Remove medication">
+                            <i class="fa-solid fa-trash-can text-sm"></i>
+                         </button>
+                      </div>
                    </div>
                 </div>
 
+                <!-- 7. Clinical Notes -->
                 <div class="form-group">
                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Clinical Notes</label>
                    <textarea class="input-modern min-h-[100px]" rows="3" placeholder="Additional observations or patient instructions..." [(ngModel)]="form.notes" name="notes" [disabled]="disabled"></textarea>
@@ -159,7 +191,7 @@ import { DatePickerComponent } from './date-picker.component';
     }
   `]
 })
-export class MedicalHistoryFormModalComponent {
+export class MedicalHistoryFormModalComponent implements OnChanges {
    @Input() open = false;
    @Input() form: any = {};
    @Input() disabled = false;
@@ -175,6 +207,42 @@ export class MedicalHistoryFormModalComponent {
    loadingSuggestions = false;
    clinicalSuggestions: ClinicalMatch[] = [];
    clinicalDisclaimer?: string;
+   medicationList: MedicationItem[] = [{ medicine: '', doses: '' }];
+
+   ngOnChanges(changes: SimpleChanges): void {
+      if (changes['open']?.currentValue || changes['form']?.currentValue) {
+         this.initMedicationList();
+      }
+   }
+
+   initMedicationList(): void {
+      const medStr = (this.form && this.form.medicine) ? String(this.form.medicine) : '';
+      const doseStr = (this.form && this.form.doses) ? String(this.form.doses) : '';
+
+      const meds = medStr.split(',').map(s => s.trim()).filter(Boolean);
+      const doses = doseStr.split(',').map(s => s.trim()).filter(Boolean);
+
+      if (meds.length > 0) {
+         this.medicationList = meds.map((m, idx) => ({
+            medicine: m,
+            doses: doses[idx] || (doses.length === 1 ? doses[0] : '')
+         }));
+      } else {
+         this.medicationList = [{ medicine: medStr, doses: doseStr }];
+      }
+   }
+
+   addMedication(): void {
+      this.medicationList.push({ medicine: '', doses: '' });
+   }
+
+   removeMedication(index: number): void {
+      if (this.medicationList.length > 1) {
+         this.medicationList.splice(index, 1);
+      } else {
+         this.medicationList = [{ medicine: '', doses: '' }];
+      }
+   }
 
    onSuggest() {
       if (!this.form.symptoms) return;
@@ -197,8 +265,16 @@ export class MedicalHistoryFormModalComponent {
    applySuggestion(s: ClinicalMatch) {
       this.form.diagnosis = s.diagnosis;
       this.form.treatment = s.treatment;
-      this.form.medicine = s.medicine;
-      this.form.doses = s.dosage;
+
+      if (s.medicine || s.dosage) {
+         const firstRow = this.medicationList[0];
+         if (this.medicationList.length === 1 && (!firstRow || (!firstRow.medicine && !firstRow.doses))) {
+            this.medicationList[0] = { medicine: s.medicine || '', doses: s.dosage || '' };
+         } else {
+            this.medicationList.push({ medicine: s.medicine || '', doses: s.dosage || '' });
+         }
+      }
+
       this.form.notes = (this.form.notes || '') + (this.form.notes ? '\n\n' : '') + 'AI Reasoning: ' + s.reasoning;
       this.clinicalSuggestions = [];
    }
@@ -208,6 +284,9 @@ export class MedicalHistoryFormModalComponent {
       if (this.disabled || this.saving) {
          return;
       }
+      const validMeds = this.medicationList.filter(m => m.medicine.trim() || m.doses.trim());
+      this.form.medicine = validMeds.map(m => m.medicine.trim()).join(', ');
+      this.form.doses = validMeds.map(m => m.doses.trim()).join(', ');
       this.submit.emit();
    }
 }

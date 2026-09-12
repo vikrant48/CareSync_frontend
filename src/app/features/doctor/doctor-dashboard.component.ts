@@ -727,32 +727,38 @@ export class DoctorDashboardComponent implements OnInit {
     this.historyDetailModalOpen = false;
 
     this.selectedAppointment = a;
-    this.mhForm = { visitDate: this.todayISO() };
     this.editingHistoryId = null;
 
-    // Check if matching record exists in appointment's medical history list
-    if (a.medicalHistory) {
-      // Primary: Link by appointmentId
-      let record = a.medicalHistory.find(m => m.appointmentId === a.appointmentId);
+    // Check if a record exists specifically linked to this appointmentId
+    let record: any = a.appointmentMedicalHistory || null;
 
-      // Fallback: Link by date (for legacy records)
-      if (!record) {
-        record = a.medicalHistory.find(m => m.visitDate === a.appointmentDate);
-      }
+    if (!record && a.medicalHistory) {
+      record = a.medicalHistory.find(m => m.appointmentId && Number(m.appointmentId) === Number(a.appointmentId));
+    }
 
-      if (record) {
-        this.editingHistoryId = record.id;
-        // Map record fields to form
-        this.mhForm = {
-          visitDate: record.visitDate || this.todayISO(),
-          symptoms: record.symptoms || '',
-          diagnosis: record.diagnosis || '',
-          treatment: record.treatment || '',
-          medicine: record.medicine || '',
-          doses: record.doses || '',
-          notes: record.notes || ''
-        };
-      }
+    if (record) {
+      this.editingHistoryId = record.id;
+      // Map record fields to form so doctor can edit
+      this.mhForm = {
+        visitDate: record.visitDate || this.todayISO(),
+        symptoms: record.symptoms || '',
+        diagnosis: record.diagnosis || '',
+        treatment: record.treatment || '',
+        medicine: record.medicine || '',
+        doses: record.doses || '',
+        notes: record.notes || ''
+      };
+    } else {
+      // Start completely empty for new prescription
+      this.mhForm = {
+        visitDate: a.appointmentDate || this.todayISO(),
+        symptoms: '',
+        diagnosis: '',
+        treatment: '',
+        medicine: '',
+        doses: '',
+        notes: ''
+      };
     }
 
     this.historyFormModalOpen = true;
