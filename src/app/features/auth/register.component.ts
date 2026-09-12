@@ -10,73 +10,18 @@ import { SelectDropdownComponent } from '../../shared/select-dropdown.component'
 import { SpecializationService } from '../../core/services/specialization.service';
 import { MasterDataService } from '../../core/services/master-data.service';
 import { DatePickerComponent } from '../../shared/date-picker.component';
+import { FeatureCarouselComponent } from './feature-carousel.component';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, ToastContainerComponent, SelectDropdownComponent, DatePickerComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, ToastContainerComponent, SelectDropdownComponent, DatePickerComponent, FeatureCarouselComponent],
   template: `
     <div class="min-h-screen bg-white dark:bg-gray-950 grid lg:grid-cols-2 overflow-hidden transition-all duration-500">
       
-      <!-- Left Side: Branding & Info Panel (Hidden on Mobile) -->
-      <div class="hidden lg:flex flex-col justify-between p-8 bg-gradient-to-br from-emerald-600 via-teal-700 to-emerald-900 text-white relative overflow-hidden">
-        <!-- Animated Background Elements -->
-        <div class="absolute -top-20 -left-20 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-pulse-slow"></div>
-        <div class="absolute bottom-1/4 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
-
-        <div class="relative z-10">
-          <div class="flex items-center gap-2 mb-10 animate-in fade-in slide-in-from-top-4 duration-700">
-            <div class="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-xl flex items-center justify-center border border-white/30 shadow-xl shadow-black/10">
-              <i class="fa-solid fa-heart-pulse text-xl"></i>
-            </div>
-            <span class="text-xl font-black tracking-tight uppercase">CareSync</span>
-          </div>
-
-          <div class="space-y-4 max-w-lg">
-            <h1 class="text-4xl font-black leading-[1.1] tracking-tighter animate-in fade-in slide-in-from-left-8 duration-700 delay-100">
-              Your Health, <br/>
-              <span class="text-emerald-300">Synchronized</span>.
-            </h1>
-            <p class="text-base text-emerald-50/70 leading-relaxed font-light animate-in fade-in slide-in-from-left-8 duration-700 delay-200">
-              Join the elite network of healthcare providers and patients leveraging AI-driven medical precision.
-            </p>
-            
-            <div class="pt-6 grid grid-cols-2 gap-x-4 gap-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
-              <div class="group">
-                <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center mb-1.5 group-hover:bg-emerald-400 group-hover:text-emerald-900 transition-all duration-300">
-                  <i class="fa-solid fa-shield-halved text-base"></i>
-                </div>
-                <h4 class="font-bold text-sm">Security</h4>
-                <p class="text-[10px] text-emerald-100/50 leading-tight">HIPAA compliant, end-to-end encrypted vaults.</p>
-              </div>
-              <div class="group">
-                <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center mb-1.5 group-hover:bg-emerald-400 group-hover:text-emerald-900 transition-all duration-300">
-                  <i class="fa-solid fa-brain text-base"></i>
-                </div>
-                <h4 class="font-bold text-sm">AI Ready</h4>
-                <p class="text-[10px] text-emerald-100/50 leading-tight">Smart diagnostic & medical summarization.</p>
-              </div>
-              <div class="group">
-                <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center mb-1.5 group-hover:bg-emerald-400 group-hover:text-emerald-900 transition-all duration-300">
-                  <i class="fa-solid fa-video text-base"></i>
-                </div>
-                <h4 class="font-bold text-sm">Video Consulting</h4>
-                <p class="text-[10px] text-emerald-100/50 leading-tight">HD tele-health bridging home & clinic.</p>
-              </div>
-              <div class="group">
-                <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center mb-1.5 group-hover:bg-emerald-400 group-hover:text-emerald-900 transition-all duration-300">
-                  <i class="fa-solid fa-file-waveform text-base"></i>
-                </div>
-                <h4 class="font-bold text-sm">Unified Health</h4>
-                <p class="text-[10px] text-emerald-100/50 leading-tight">Secure access to all your medical records.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="relative z-10 mt-auto opacity-50">
-           <p class="text-[10px] font-black uppercase tracking-widest text-emerald-100/50">© 2026 CareSync Digital Health</p>
-        </div>
+      <!-- Left Side: Auto-Rotating Feature Carousel (Hidden on Mobile) -->
+      <div class="hidden lg:block h-full">
+        <app-feature-carousel></app-feature-carousel>
       </div>
 
       <!-- Right Side: Interaction Panel -->
@@ -93,7 +38,7 @@ import { DatePickerComponent } from '../../shared/date-picker.component';
           <a routerLink="/login" class="text-[10px] font-black uppercase tracking-widest text-emerald-600">Sign In</a>
         </div>
 
-        <div class="flex-1 flex flex-col justify-center px-6 py-6 lg:px-12 xl:px-20 max-w-[54rem] mx-auto w-full transition-all duration-500">
+        <div class="flex-1 flex flex-col justify-start pt-4 sm:pt-6 lg:pt-8 pb-6 px-6 lg:px-12 xl:px-20 max-w-[54rem] mx-auto w-full transition-all duration-500">
           
           <!-- Page Header -->
           <div class="mb-4">
@@ -117,8 +62,12 @@ import { DatePickerComponent } from '../../shared/date-picker.component';
                   <span *ngIf="step >= currentStep">{{ step }}</span>
                 </div>
                 <!-- Label Tooltip -->
-                <div class="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[8px] uppercase tracking-[0.1em] font-black transition-all duration-300"
-                     [ngClass]="step <= currentStep ? 'text-emerald-500 opacity-100' : 'text-gray-300 dark:text-gray-700 opacity-0 group-hover:opacity-100'">
+                <div class="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[8.5px] uppercase tracking-[0.08em] font-black transition-all duration-300"
+                     [ngClass]="{
+                       'text-emerald-600 dark:text-emerald-400 opacity-100 scale-105': step === currentStep,
+                       'text-emerald-600/80 dark:text-emerald-400/80 opacity-100': step < currentStep,
+                       'text-gray-400 dark:text-gray-400 opacity-100': step > currentStep
+                     }">
                   {{ getStepLabel(step) }}
                 </div>
               </div>

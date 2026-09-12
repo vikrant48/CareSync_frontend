@@ -6,23 +6,37 @@ import { AuthService } from '../../core/services/auth.service';
 import { LoginRequest } from '../../core/models/auth.models';
 import { ToastService } from '../../core/services/toast.service';
 import { ToastContainerComponent } from '../../shared/toast-container.component';
+import { FeatureCarouselComponent } from './feature-carousel.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ToastContainerComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ToastContainerComponent, FeatureCarouselComponent],
   template: `
-    <div class="h-screen bg-gray-50 dark:bg-gray-950 flex flex-col justify-center pt-12 pb-40 px-4 sm:px-6 lg:px-8 relative overflow-hidden transition-colors duration-300">
+    <div class="min-h-screen bg-white dark:bg-gray-950 grid lg:grid-cols-2 overflow-hidden transition-all duration-500">
       
-      <!-- Background Elements -->
-      <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute -top-40 -right-40 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl opacity-50 dark:opacity-20 animate-pulse-slow"></div>
-        <div class="absolute bottom-0 left-0 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl opacity-50 dark:opacity-20"></div>
+      <!-- Left Side: Auto-Rotating Feature Carousel (Hidden on Mobile) -->
+      <div class="hidden lg:block h-full">
+        <app-feature-carousel></app-feature-carousel>
       </div>
 
-      <div class="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+      <!-- Right Side: Interaction Panel -->
+      <div class="relative flex flex-col h-screen overflow-y-auto custom-scrollbar justify-start pt-6 sm:pt-12 lg:pt-16 pb-8 px-4 sm:px-6 lg:px-12 bg-white dark:bg-gray-950">
+        
+        <!-- Mobile Header -->
+        <div class="lg:hidden px-4 py-3 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md sticky top-0 z-50 mb-6">
+          <div class="flex items-center gap-2">
+            <div class="w-6 h-6 bg-emerald-500 rounded-lg flex items-center justify-center text-white text-xs">
+              <i class="fa-solid fa-heart-pulse"></i>
+            </div>
+            <span class="text-sm font-black uppercase tracking-tight dark:text-white">CareSync</span>
+          </div>
+          <a routerLink="/register" class="text-[10px] font-black uppercase tracking-widest text-emerald-600">Register</a>
+        </div>
+
+        <div class="sm:mx-auto sm:w-full sm:max-w-md relative z-10 mt-2 sm:mt-4">
             <div class="text-center mb-8">
-              <h2 class="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+              <h2 class="mt-2 text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
                 Welcome back
               </h2>
               <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
@@ -105,7 +119,8 @@ import { ToastContainerComponent } from '../../shared/toast-container.component'
               </form>
             </div>
           </div>
-          <app-toast-container></app-toast-container>
+        </div>
+      <app-toast-container></app-toast-container>
     </div>
   `,
 })
