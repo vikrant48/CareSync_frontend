@@ -75,6 +75,11 @@ export interface PaymentStatusResponse {
   cardType?: string;
   razorpayPaymentId?: string;
   upiTransactionId?: string;
+  doctorName?: string;
+  doctorSpecialization?: string;
+  appointmentDate?: string;
+  appointmentTime?: string;
+  additionalInfo?: string;
 }
 
 @Injectable({

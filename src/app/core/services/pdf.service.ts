@@ -12,6 +12,11 @@ export interface PaymentReceiptData {
   patientName: string;
   patientId: number;
   bookingId?: number;
+  appointmentDate?: string;
+  appointmentTime?: string;
+  doctorName?: string;
+  doctorSpecialization?: string;
+  reason?: string;
   selectedTests?: Array<{
     testName: string;
     price: number;
@@ -195,14 +200,14 @@ export class PdfService {
     doc.text(receiptData.patientName || 'N/A', 60, infoY);
 
     // Row 1 Right: Booking ID
-    if (receiptData.bookingId) {
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(100, 116, 139);
-      doc.text('Booking / Appt ID:', 120, infoY);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(15, 23, 42);
-      doc.text(`#${receiptData.bookingId}`, 160, infoY);
-    }
+    // if (receiptData.bookingId) {
+    //   doc.setFont('helvetica', 'normal');
+    //   doc.setTextColor(100, 116, 139);
+    //   doc.text('Booking / Appt ID:', 120, infoY);
+    //   doc.setFont('helvetica', 'bold');
+    //   doc.setTextColor(15, 23, 42);
+    //   doc.text(`#${receiptData.bookingId}`, 160, infoY);
+    // }
     infoY += 8;
 
     // Row 2: Description / Service
@@ -265,6 +270,69 @@ export class PdfService {
         const desc = test.description || 'Standard Test';
         doc.text(desc.substring(0, 35) + (desc.length > 35 ? '...' : ''), 85, y + 5.5);
         doc.text(test.price.toFixed(2), 160, y + 5.5);
+        y += 8;
+      });
+
+      // Total Row
+      doc.setDrawColor(226, 232, 240);
+      doc.line(16, y, 194, y);
+      y += 6;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(16, 185, 129);
+      doc.text(`Total Amount Paid: Rs. ${(receiptData.totalPrice || receiptData.amount).toFixed(2)}`, 125, y);
+    } else if (receiptData.doctorName || receiptData.appointmentDate || receiptData.reason || receiptData.description) {
+      // 4. Appointment Details Table (if applicable)
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(15, 23, 42);
+      doc.text('Appointment Booking Details', 16, y);
+      y += 6;
+
+      // Table Header
+      doc.setFillColor(30, 41, 59); // slate-800
+      doc.rect(16, y, 178, 8, 'F');
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(255, 255, 255);
+      doc.text('Detail / Parameter', 22, y + 5.5);
+      doc.text('Booking Information', 85, y + 5.5);
+      y += 8;
+
+      const doctorDisplay = receiptData.doctorName
+        ? (receiptData.doctorName.startsWith('Dr.') ? receiptData.doctorName : `Dr. ${receiptData.doctorName}`) + (receiptData.doctorSpecialization ? ` (${receiptData.doctorSpecialization})` : '')
+        : 'Medical Specialist';
+
+      const scheduleDisplay = (receiptData.appointmentDate || receiptData.bookingDate || 'Scheduled') +
+        (receiptData.appointmentTime ? ` at ${receiptData.appointmentTime}` : '');
+
+      const apptRows = [
+        { label: 'Consulting Doctor', info: doctorDisplay },
+        { label: 'Appointment Schedule', info: scheduleDisplay },
+        { label: 'Reason / Description', info: receiptData.reason || receiptData.description || 'Doctor Consultation' }
+      ];
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      apptRows.forEach((row, idx) => {
+        if (y > 265) {
+          doc.addPage();
+          y = 20;
+        }
+
+        if (idx % 2 === 0) {
+          doc.setFillColor(248, 250, 252);
+          doc.rect(16, y, 178, 8, 'F');
+        }
+
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42);
+        doc.text(row.label, 22, y + 5.5);
+
+        doc.setFont('helvetica', 'normal');
+        const desc = row.info || 'N/A';
+        const displayDesc = desc.length > 55 ? desc.substring(0, 55) + '...' : desc;
+        doc.text(displayDesc, 85, y + 5.5);
         y += 8;
       });
 
@@ -348,20 +416,31 @@ export class PdfService {
         const dateStr = payment.paymentCompletedAt || payment.createdAt || appointmentData?.appointmentDate || new Date().toISOString();
         const amt = Number(payment.amount) > 0 ? Number(payment.amount) : Number(appointmentData?.consultationFees || appointmentData?.doctorConsultationFees || 500);
 
+        const doctorName = appointmentData?.doctorName || payment.doctorName;
+        const doctorSpec = appointmentData?.doctorSpecialization || payment.doctorSpecialization;
+        const apptDate = appointmentData?.appointmentDate;
+        const apptTime = appointmentData?.appointmentTime;
+        const reasonStr = appointmentData?.reason || payment.additionalInfo || payment.description || 'Doctor Consultation';
+
         const receiptData: PaymentReceiptData = {
           transactionId: payment.transactionId,
           amount: amt,
           currency: payment.currency || 'INR',
           paymentMethod: payment.paymentMethod,
-          patientName: payment.patientName || appointmentData?.patientName,
+          patientName: payment.patientName || appointmentData?.patientName || 'Patient',
           patientId: payment.patientId,
           bookingId: appointmentId,
+          doctorName: doctorName,
+          doctorSpecialization: doctorSpec,
+          appointmentDate: apptDate,
+          appointmentTime: apptTime,
+          reason: reasonStr,
           totalPrice: amt,
-          bookingDate: appointmentData?.appointmentDate || dateStr,
+          bookingDate: apptDate || dateStr,
           paymentDate: dateStr,
           status: payment.paymentStatus || 'Completed',
-          description: `Doctor Appointment - ${appointmentData?.doctorName || 'Doctor'} (${appointmentData?.doctorSpecialization || 'Consultation'})`,
-          prescribedBy: appointmentData?.doctorName ? `Dr. ${appointmentData.doctorName}` : undefined,
+          description: `Doctor Appointment in (${doctorSpec || 'Consultation'})`,
+          prescribedBy: doctorName ? (doctorName.startsWith('Dr.') ? doctorName : `Dr. ${doctorName}`) : undefined,
           upiId: payment.upiId
         };
 
