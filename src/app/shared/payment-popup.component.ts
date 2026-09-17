@@ -484,11 +484,15 @@ export class PaymentPopupComponent {
     setTimeout(() => {
       this.isProcessing.set(false);
       if (response.success || response.paymentTransactionId || response.transactionId || response.appointmentId || response.id) {
+        const apptId = response.appointmentId || (this.paymentType === 'APPOINTMENT' ? (response.id || response.appointmentId) : undefined);
+        const labBookingId = this.paymentType === 'LAB_TEST' ? (response.id || response.bookingId) : response.bookingId;
+
         this.successPaymentDetails = {
           method: this.selectedMethod()!,
           amount: this.amount,
-          transactionId: response.paymentTransactionId || response.transactionId || ('APPT_' + (response.appointmentId || response.id)),
-          bookingId: response.id || response.bookingId,
+          transactionId: response.paymentTransactionId || response.transactionId || ('APPT_' + (apptId || response.id)),
+          bookingId: labBookingId,
+          appointmentId: apptId,
           patientId: this.patientId,
           upiId: this.upiId
         };

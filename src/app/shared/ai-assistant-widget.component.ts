@@ -334,6 +334,7 @@ import { DatePickerComponent } from './date-picker.component';
       [amount]="currentSuggestion?.consultationFee || 0"
       [title]="'Appointment Booking via AI'"
       [patientId]="patientId()"
+      [appointmentBookingDetails]="getAppointmentBookingDetails()"
       [paymentType]="'APPOINTMENT'"
       [additionalInfo]="getPaymentInfo()"
       (paymentSuccess)="onPaymentSuccess($event)"
@@ -538,15 +539,32 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
     this.isPaymentPopupVisible = true;
   }
 
+  getAppointmentBookingDetails(): { doctorId: number; appointmentDateTime: string; reason?: string } | undefined {
+    if (!this.currentSuggestion || !this.currentSuggestion.doctorId || !this.currentSuggestion.date || !this.currentSuggestion.slot) {
+      return undefined;
+    }
+    const [year, month, day] = this.currentSuggestion.date.split('-').map(Number);
+    const [hours, minutes] = this.currentSuggestion.slot.split(':').map(Number);
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const localIsoString = `${year}-${pad(month)}-${pad(day)}T${pad(hours)}:${pad(minutes)}:00`;
+
+    return {
+      doctorId: this.currentSuggestion.doctorId,
+      appointmentDateTime: localIsoString,
+      reason: this.editableReason || 'AI Assisted Booking'
+    };
+  }
+
   getPaymentInfo() {
     if (!this.currentSuggestion) return '';
     return `Booking with ${this.currentSuggestion.doctorName} on ${this.currentSuggestion.date} at ${this.currentSuggestion.slot}`;
   }
 
   onPaymentSuccess(details: PaymentDetails) {
-    this.isPaymentPopupVisible = false;
     if (this.currentSuggestion) {
-      this.executeAppointmentAction(this.currentSuggestion);
+      const sug = this.currentSuggestion;
+      this.addBotMessage(`Success! Your appointment with ${sug.doctorName} for ${sug.date} at ${sug.slot} has been confirmed and paid. Receipt generated!`);
+      this.currentSuggestion = null;
     }
   }
 

@@ -157,20 +157,20 @@ export class PaymentSuccessModalComponent {
     if (!this.paymentDetails) return;
 
     try {
-      if (this.paymentDetails.bookingId) {
-        this.pdfService.generateReceiptByBookingId(this.paymentDetails.bookingId);
-        this.toast.showSuccess('Receipt downloaded successfully');
-        return;
-      }
-
       if (this.paymentDetails.appointmentId) {
         this.pdfService.generateAppointmentReceiptByBookingId(this.paymentDetails.appointmentId);
         this.toast.showSuccess('Receipt downloaded successfully');
         return;
       }
 
+      if (this.paymentDetails.bookingId) {
+        this.pdfService.generateReceiptByBookingId(this.paymentDetails.bookingId);
+        this.toast.showSuccess('Receipt downloaded successfully');
+        return;
+      }
+
       const receiptData: PaymentReceiptData = {
-        transactionId: String(this.paymentDetails.transactionId) ,
+        transactionId: String(this.paymentDetails.transactionId),
         amount: this.paymentDetails.amount,
         currency: 'INR',
         paymentMethod: this.getPaymentMethodDisplay(),
