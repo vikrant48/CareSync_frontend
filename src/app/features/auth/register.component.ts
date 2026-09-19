@@ -11,13 +11,14 @@ import { SpecializationService } from '../../core/services/specialization.servic
 import { MasterDataService } from '../../core/services/master-data.service';
 import { DatePickerComponent } from '../../shared/date-picker.component';
 import { FeatureCarouselComponent } from './feature-carousel.component';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-register',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, ToastContainerComponent, SelectDropdownComponent, DatePickerComponent, FeatureCarouselComponent],
   template: `
-    <div class="min-h-[calc(100dvh-3.5rem)] bg-white dark:bg-gray-950 grid lg:grid-cols-2 overflow-hidden transition-all duration-500">
+    <div class="min-h-[calc(100dvh-3.5rem)] lg:h-[calc(100dvh-3.5rem)] w-full bg-white dark:bg-gray-950 grid lg:grid-cols-2 overflow-hidden transition-all duration-500">
       
       <!-- Left Side: Auto-Rotating Feature Carousel (Hidden on Mobile) -->
       <div class="hidden lg:block h-full">
@@ -25,18 +26,48 @@ import { FeatureCarouselComponent } from './feature-carousel.component';
       </div>
 
       <!-- Right Side: Interaction Panel -->
-      <div class="relative flex flex-col justify-start min-h-[calc(100dvh-3.5rem)] py-4 sm:py-6 lg:py-8 px-4 sm:px-6 lg:px-12 xl:px-20 max-w-[54rem] mx-auto w-full bg-white dark:bg-gray-950">
+      <div class="relative flex flex-col justify-center min-h-[calc(100dvh-3.5rem)] lg:h-[calc(100dvh-3.5rem)] py-2 sm:py-3.5 px-2.5 sm:px-6 lg:px-10 max-w-[46rem] mx-auto w-full bg-white dark:bg-gray-950 overflow-hidden">
         
-        <div>
+        <div class="w-full">
           
           <!-- Page Header -->
-          <div class="mb-4">
-            <h2 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tighter mb-0.5 leading-none">Create Account</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Join our healthcare network</p>
+          <div class="mb-1.5 sm:mb-2.5">
+            <h2 class="text-base sm:text-xl font-black text-gray-900 dark:text-white tracking-tighter mb-0.5 leading-none">Create Account</h2>
+            <p class="text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 font-medium">Join our healthcare network</p>
+          </div>
+
+          <!-- Quick Google Sign-Up Option -->
+          <div class="mb-2 sm:mb-3 p-1.5 sm:p-2 bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-800/40 rounded-xl flex flex-row items-center justify-between gap-1.5 sm:gap-2">
+            <div class="flex items-center gap-1.5 sm:gap-2">
+              <span class="text-[10px] sm:text-[11px] font-bold text-gray-700 dark:text-gray-300">Sign up as:</span>
+              <div class="flex items-center justify-center p-0.5 bg-white dark:bg-gray-800 rounded-lg shadow-xs border border-gray-200 dark:border-gray-700">
+                <button type="button" (click)="googleRole = 'PATIENT'"
+                        [class]="googleRole === 'PATIENT' ? 'bg-emerald-500 text-white shadow-xs font-bold' : 'text-gray-500 dark:text-gray-400 font-medium'"
+                        class="px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] rounded-md transition-all cursor-pointer">
+                  Patient
+                </button>
+                <button type="button" (click)="googleRole = 'DOCTOR'"
+                        [class]="googleRole === 'DOCTOR' ? 'bg-emerald-500 text-white shadow-xs font-bold' : 'text-gray-500 dark:text-gray-400 font-medium'"
+                        class="px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] rounded-md transition-all cursor-pointer">
+                  Doctor
+                </button>
+              </div>
+            </div>
+
+            <button type="button" (click)="onGoogleSignUp()" [disabled]="loading"
+                    class="flex items-center justify-center gap-1.5 py-1 px-2.5 border border-gray-300 dark:border-gray-600 rounded-lg shadow-xs text-[10px] sm:text-xs font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all cursor-pointer shrink-0">
+              <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              <span>Sign Up with Google</span>
+            </button>
           </div>
 
           <!-- Progress Indicator -->
-          <div class="relative flex items-center justify-between mb-8 px-2 sm:px-4">
+          <div class="relative flex items-center justify-between mb-2.5 sm:mb-4 px-2 sm:px-4">
             <div class="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-[1.5px] bg-gray-100 dark:bg-gray-800 z-0"></div>
             <div class="absolute left-4 top-1/2 -translate-y-1/2 h-[2px] bg-emerald-500 transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] shadow-[0_0_12px_rgba(16,185,129,0.5)] z-0" 
                  [style.width.%]="(currentStep - 1) * 31"></div>
@@ -45,13 +76,13 @@ import { FeatureCarouselComponent } from './feature-carousel.component';
               <div class="relative z-10 flex flex-col items-center group" 
                    [class.cursor-pointer]="i + 1 < currentStep" 
                    (click)="i + 1 < currentStep ? navigateToStep(i + 1) : null">
-                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-[10px] sm:text-[11px] font-black transition-all duration-500 ring-[4px] ring-white dark:ring-gray-950"
+                <div class="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[9px] sm:text-[10px] font-black transition-all duration-500 ring-[2px] sm:ring-[3px] ring-white dark:ring-gray-950"
                      [ngClass]="getStepClasses(step)">
-                  <i class="fa-solid fa-check text-[9px]" *ngIf="step < currentStep"></i>
+                  <i class="fa-solid fa-check text-[7px] sm:text-[8px]" *ngIf="step < currentStep"></i>
                   <span *ngIf="step >= currentStep">{{ step }}</span>
                 </div>
                 <!-- Label Tooltip -->
-                <div class="absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap text-[8px] sm:text-[9px] uppercase tracking-wider font-black transition-all duration-300"
+                <div class="absolute -bottom-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap text-[7px] sm:text-[8px] uppercase tracking-wider font-extrabold transition-all duration-300"
                      [ngClass]="{
                        'text-emerald-600 dark:text-emerald-400 opacity-100 scale-105': step === currentStep,
                        'text-emerald-600/80 dark:text-emerald-400/80 opacity-100': step < currentStep,
@@ -64,26 +95,26 @@ import { FeatureCarouselComponent } from './feature-carousel.component';
           </div>
 
           <!-- Form Content -->
-          <div class="min-h-[300px] lg:min-h-[340px] px-1 pt-4">
+          <div class="px-0.5 pt-0.5">
             
             <!-- Step 1: Personal (Dense 2-column) -->
-            <section *ngIf="currentStep === 1" [formGroup]="basicForm" class="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                <div class="space-y-1">
-                  <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">First Name</label>
-                  <input class="input-modern py-2 text-sm pl-4" formControlName="firstName" placeholder="John" />
+            <section *ngIf="currentStep === 1" [formGroup]="basicForm" class="space-y-1.5 sm:space-y-2.5 animate-in fade-in slide-in-from-right-4 duration-500">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
+                <div class="space-y-0.5">
+                  <label class="block text-[9px] sm:text-[9px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500">First Name</label>
+                  <input class="input-modern h-[36px] sm:h-[34px] py-0 text-xs px-2.5 sm:px-3" formControlName="firstName" placeholder="John" />
                 </div>
-                <div class="space-y-1">
-                  <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Last Name</label>
-                  <input class="input-modern py-2 text-sm pl-4" formControlName="lastName" placeholder="Doe" />
+                <div class="space-y-0.5">
+                  <label class="block text-[9px] sm:text-[9px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500">Last Name</label>
+                  <input class="input-modern h-[36px] sm:h-[34px] py-0 text-xs px-2.5 sm:px-3" formControlName="lastName" placeholder="Doe" />
                 </div>
-                <div class="space-y-1">
-                  <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Email Address</label>
-                  <input class="input-modern py-2 text-sm pl-4" type="email" formControlName="email" placeholder="john.doe@medical.id" />
+                <div class="space-y-0.5">
+                  <label class="block text-[9px] sm:text-[9px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500">Email Address</label>
+                  <input class="input-modern h-[36px] sm:h-[34px] py-0 text-xs px-2.5 sm:px-3" type="email" formControlName="email" placeholder="john.doe@medical.id" />
                 </div>
-                <div class="space-y-1">
-                  <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Mobile Number</label>
-                  <input class="input-modern py-2 text-sm pl-4" formControlName="contactInfo" (input)="onPhoneInput($event)" placeholder="+91 9876543210" />
+                <div class="space-y-0.5">
+                  <label class="block text-[9px] sm:text-[9px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500">Mobile Number</label>
+                  <input class="input-modern h-[36px] sm:h-[34px] py-0 text-xs px-2.5 sm:px-3" formControlName="contactInfo" (input)="onPhoneInput($event)" placeholder="+91 9876543210" />
                 </div>
                 <app-date-picker 
                   formControlName="dateOfBirth" 
@@ -98,16 +129,16 @@ import { FeatureCarouselComponent } from './feature-carousel.component';
                    formControlName="gender"
                    class="relative z-30">
                 </app-select-dropdown>
-                <div class="space-y-1 relative z-10">
-                  <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Username</label>
-                  <input class="input-modern py-2 text-sm pl-4" formControlName="username" placeholder="johndoe_md" />
+                <div class="space-y-0.5 relative z-10">
+                  <label class="block text-[9px] sm:text-[9px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500">Username</label>
+                  <input class="input-modern h-[36px] sm:h-[34px] py-0 text-xs px-2.5 sm:px-3" formControlName="username" placeholder="johndoe_md" />
                 </div>
-                <div class="space-y-1 relative z-10">
-                  <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Password</label>
+                <div class="space-y-0.5 relative z-10">
+                  <label class="block text-[9px] sm:text-[9px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500">Password</label>
                   <div class="relative group">
-                    <input class="input-modern pr-11 py-2 text-sm pl-4" [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="••••••••" />
-                    <button type="button" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 hover:text-emerald-500 transition-colors" (click)="togglePassword()">
-                      <i [class]="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye' + ' text-sm'"></i>
+                    <input class="input-modern pr-7 sm:pr-8 h-[36px] sm:h-[34px] py-0 text-xs px-2.5 sm:px-3" [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="••••••••" />
+                    <button type="button" class="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-emerald-500 transition-colors" (click)="togglePassword()">
+                      <i [class]="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye' + ' text-[10px] sm:text-xs'"></i>
                     </button>
                   </div>
                 </div>
@@ -115,24 +146,24 @@ import { FeatureCarouselComponent } from './feature-carousel.component';
             </section>
 
             <!-- Step 2: Verification -->
-            <section *ngIf="currentStep === 2" [formGroup]="verificationForm" class="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500 text-center py-2">
-              <div class="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl mx-auto flex items-center justify-center mb-2 ring-4 ring-emerald-500/5">
-                <i class="fa-solid fa-paper-plane text-xl text-emerald-500 animate-bounce"></i>
+            <section *ngIf="currentStep === 2" [formGroup]="verificationForm" class="space-y-3 animate-in fade-in slide-in-from-right-4 duration-500 text-center py-2">
+              <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl mx-auto flex items-center justify-center mb-1.5 ring-4 ring-emerald-500/5">
+                <i class="fa-solid fa-paper-plane text-lg text-emerald-500 animate-bounce"></i>
               </div>
               <div>
-                <h3 class="text-lg font-black text-gray-900 dark:text-white mb-0.5">Check inbox</h3>
+                <h3 class="text-base font-black text-gray-900 dark:text-white mb-0.5">Check inbox</h3>
                 <p class="text-[10px] text-gray-500 dark:text-gray-400 font-medium italic">Sent code to verify your identity.</p>
               </div>
               
-              <div class="max-w-xs mx-auto space-y-3">
-                <div class="space-y-2">
-                   <input class="w-full bg-gray-50 dark:bg-gray-900 border-2 border-gray-100 dark:border-gray-800 rounded-2xl px-4 py-2 text-center text-xl font-black tracking-[0.4em] focus:border-emerald-500 outline-none"
+              <div class="max-w-xs mx-auto space-y-2.5">
+                <div class="space-y-1.5">
+                   <input class="w-full bg-gray-50 dark:bg-gray-900 border-2 border-gray-100 dark:border-gray-800 rounded-xl px-3 py-1.5 text-center text-lg font-black tracking-[0.3em] focus:border-emerald-500 outline-none"
                           formControlName="otp" placeholder="000000" maxlength="6" />
                    <button (click)="sendVerificationCode()" class="text-[8px] font-black uppercase tracking-widest text-emerald-600 hover:text-emerald-500" [disabled]="loading">
                       Resend Code
                    </button>
                 </div>
-                <button (click)="verifyEmail()" [disabled]="loading" class="btn-modern-primary w-full py-3 text-sm">
+                <button (click)="verifyEmail()" [disabled]="loading" class="btn-modern-primary w-full py-2 text-xs font-bold">
                   <span *ngIf="!loading">Verify & Proceed</span>
                   <span *ngIf="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
                 </button>
@@ -140,26 +171,26 @@ import { FeatureCarouselComponent } from './feature-carousel.component';
             </section>
 
             <!-- Step 3: Role Selection -->
-            <section *ngIf="currentStep === 3" [formGroup]="roleForm" class="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <section *ngIf="currentStep === 3" [formGroup]="roleForm" class="space-y-3 animate-in fade-in slide-in-from-right-4 duration-500">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <label class="relative group cursor-pointer">
                   <input type="radio" class="sr-only peer" formControlName="role" value="DOCTOR" />
-                  <div class="h-full p-5 rounded-[1.2rem] border-2 border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all duration-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-50/20 dark:peer-checked:bg-emerald-950/20 peer-checked:ring-2 peer-checked:ring-emerald-500/10">
-                    <div class="w-9 h-9 bg-emerald-100 dark:bg-emerald-900/40 rounded-xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-3 group-hover:scale-110 transition-transform">
-                      <i class="fa-solid fa-user-doctor text-lg"></i>
+                  <div class="h-full p-4 rounded-xl border-2 border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all duration-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-50/20 dark:peer-checked:bg-emerald-950/20 peer-checked:ring-2 peer-checked:ring-emerald-500/10">
+                    <div class="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/40 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-2 group-hover:scale-110 transition-transform">
+                      <i class="fa-solid fa-user-doctor text-base"></i>
                     </div>
-                    <h4 class="text-base font-black text-gray-900 dark:text-white mb-0.5">Doctor</h4>
+                    <h4 class="text-sm font-black text-gray-900 dark:text-white mb-0.5">Doctor</h4>
                     <p class="text-[10px] text-gray-500 dark:text-gray-400 leading-tight">Manage clinical workflows and prescriptions.</p>
                   </div>
                 </label>
 
                 <label class="relative group cursor-pointer">
                   <input type="radio" class="sr-only peer" formControlName="role" value="PATIENT" />
-                  <div class="h-full p-5 rounded-[1.2rem] border-2 border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all duration-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-50/20 dark:peer-checked:bg-emerald-950/20 peer-checked:ring-2 peer-checked:ring-emerald-500/10">
-                    <div class="w-9 h-9 bg-emerald-100 dark:bg-emerald-900/40 rounded-xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-3 group-hover:scale-110 transition-transform">
-                      <i class="fa-solid fa-user text-lg"></i>
+                  <div class="h-full p-4 rounded-xl border-2 border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all duration-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-50/20 dark:peer-checked:bg-emerald-950/20 peer-checked:ring-2 peer-checked:ring-emerald-500/10">
+                    <div class="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/40 rounded-xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-2 group-hover:scale-110 transition-transform">
+                      <i class="fa-solid fa-user text-base"></i>
                     </div>
-                    <h4 class="text-base font-black text-gray-900 dark:text-white mb-0.5">Patient</h4>
+                    <h4 class="text-sm font-black text-gray-900 dark:text-white mb-0.5">Patient</h4>
                     <p class="text-[10px] text-gray-500 dark:text-gray-400 leading-tight">Book appointments and track active medical journey.</p>
                   </div>
                 </label>
@@ -167,14 +198,14 @@ import { FeatureCarouselComponent } from './feature-carousel.component';
             </section>
 
             <!-- Step 4: Final Details -->
-            <section *ngIf="currentStep === 4" class="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
+            <section *ngIf="currentStep === 4" class="space-y-3 animate-in fade-in slide-in-from-right-4 duration-500">
                <div>
-                  <h3 class="text-lg font-black text-gray-900 dark:text-white mb-0.5">Specifications</h3>
+                  <h3 class="text-base font-black text-gray-900 dark:text-white mb-0.5">Specifications</h3>
                   <p class="text-[10px] text-gray-500 dark:text-gray-400 italic">Help us personalize your active experience.</p>
                </div>
 
                <!-- Doctor fields -->
-               <div *ngIf="roleForm.value.role === 'DOCTOR'" [formGroup]="doctorForm" class="grid grid-cols-1 gap-3">
+               <div *ngIf="roleForm.value.role === 'DOCTOR'" [formGroup]="doctorForm" class="grid grid-cols-1 gap-2.5">
                  <app-select-dropdown 
                     label="Specialization" 
                     [options]="specializations" 
@@ -182,40 +213,40 @@ import { FeatureCarouselComponent } from './feature-carousel.component';
                     [autoCapitalize]="false"
                     formControlName="specialization">
                  </app-select-dropdown>
-                 <div class="space-y-1">
-                   <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Experience (Years)</label>
+                 <div class="space-y-0.5">
+                   <label class="block text-[9px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500">Experience (Years)</label>
                    <div class="flex items-center gap-1.5">
                      <button type="button" 
                              (click)="decrementExperience()"
-                             class="w-10 h-10 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-400 hover:border-emerald-500 hover:text-emerald-500 transition-all flex items-center justify-center active:scale-90">
-                       <i class="fa-solid fa-minus text-xs"></i>
+                             class="w-8 h-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-400 hover:border-emerald-500 hover:text-emerald-500 transition-all flex items-center justify-center active:scale-90">
+                       <i class="fa-solid fa-minus text-[10px]"></i>
                      </button>
                      
                      <div class="relative flex-1">
-                       <input class="input-modern py-2 text-sm pl-4 pr-10 text-center font-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+                       <input class="input-modern py-1.5 text-xs pl-3 pr-8 text-center font-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
                               type="number" 
                               formControlName="experience" 
                               placeholder="0" />
-                       <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase text-gray-400 tracking-tighter pointer-events-none">Yrs</span>
+                       <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[8px] font-black uppercase text-gray-400 tracking-tighter pointer-events-none">Yrs</span>
                      </div>
                      
                      <button type="button" 
                              (click)="incrementExperience()"
-                             class="w-10 h-10 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-400 hover:border-emerald-500 hover:text-emerald-500 transition-all flex items-center justify-center active:scale-90">
-                       <i class="fa-solid fa-plus text-xs"></i>
+                             class="w-8 h-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-400 hover:border-emerald-500 hover:text-emerald-500 transition-all flex items-center justify-center active:scale-90">
+                       <i class="fa-solid fa-plus text-[10px]"></i>
                      </button>
                    </div>
                  </div>
                </div>
 
                <!-- Patient fields -->
-               <div *ngIf="roleForm.value.role === 'PATIENT'" [formGroup]="patientForm" class="grid grid-cols-1 gap-3">
-                 <div class="space-y-2">
-                   <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Blood Group</label>
-                   <div class="grid grid-cols-4 gap-2">
+               <div *ngIf="roleForm.value.role === 'PATIENT'" [formGroup]="patientForm" class="grid grid-cols-1 gap-2.5">
+                 <div class="space-y-1.5">
+                   <label class="block text-[9px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500">Blood Group</label>
+                   <div class="grid grid-cols-4 gap-1.5">
                       <label *ngFor="let bg of ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-']" class="relative group cursor-pointer">
                         <input type="radio" class="sr-only peer" formControlName="bloodGroup" [value]="bg" />
-                        <div class="py-2 text-center rounded-xl border-2 border-gray-100 dark:border-gray-800 font-black text-xs peer-checked:border-emerald-500 peer-checked:bg-emerald-500 peer-checked:text-white transition-all scale-90">
+                        <div class="py-1.5 text-center rounded-lg border-2 border-gray-100 dark:border-gray-800 font-black text-xs peer-checked:border-emerald-500 peer-checked:bg-emerald-500 peer-checked:text-white transition-all scale-95">
                           {{bg}}
                         </div>
                       </label>
@@ -226,28 +257,28 @@ import { FeatureCarouselComponent } from './feature-carousel.component';
           </div>
 
           <!-- Bottom Navigation -->
-          <div class="mt-4 flex items-center justify-between gap-4 transition-all">
+          <div class="mt-2.5 sm:mt-3 flex items-center justify-between gap-3 transition-all">
              <button *ngIf="currentStep > 1" (click)="prev()" 
-                     class="group px-4 py-2 text-[9px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-2">
+                     class="group px-3 py-1.5 text-[9px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-1.5">
                 <i class="fa-solid fa-arrow-left transition-transform group-hover:-translate-x-1"></i> Back
              </button>
              <div class="flex-1"></div>
              
              <button *ngIf="currentStep === 1 || currentStep === 3" (click)="next()" [disabled]="loading" 
-                     class="btn-modern-primary px-6 py-2.5 text-xs min-w-[110px]">
-                <span *ngIf="!loading" class="flex items-center gap-2">Continue <i class="fa-solid fa-arrow-right text-[10px]"></i></span>
+                     class="btn-modern-primary px-5 py-2 text-xs min-w-[100px] font-semibold">
+                <span *ngIf="!loading" class="flex items-center gap-1.5">Continue <i class="fa-solid fa-arrow-right text-[9px]"></i></span>
                 <span *ngIf="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
              </button>
 
              <button *ngIf="currentStep === 4" (click)="complete()" [disabled]="loading" 
-                     class="btn-modern-primary px-6 py-2.5 text-xs bg-emerald-500 hover:bg-emerald-600 border-none min-w-[140px] shadow-lg shadow-emerald-500/20">
-                <span *ngIf="!loading" class="flex items-center gap-2">Finish <i class="fa-solid fa-check text-[10px]"></i></span>
+                     class="btn-modern-primary px-5 py-2 text-xs bg-emerald-500 hover:bg-emerald-600 border-none min-w-[120px] shadow-md shadow-emerald-500/20 font-semibold">
+                <span *ngIf="!loading" class="flex items-center gap-1.5">Finish <i class="fa-solid fa-check text-[9px]"></i></span>
                 <span *ngIf="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
              </button>
           </div>
 
           <!-- Footer -->
-          <div class="mt-4 text-center hidden sm:block">
+          <div class="mt-1 sm:mt-1.5 text-center hidden sm:block">
             <p class="text-[10px] font-medium text-gray-500 dark:text-gray-400 italic">
               Existing Participant? 
               <a routerLink="/login" class="text-emerald-600 font-black hover:text-emerald-500 transition-colors ml-1 uppercase underline underline-offset-2">Sign In</a>
@@ -633,6 +664,66 @@ export class RegisterComponent implements OnInit {
       error: (err) => {
         this.verificationError = err?.error?.error || 'Invalid or expired OTP';
         this.toast.showError(this.verificationError);
+        this.loading = false;
+      },
+    });
+  }
+
+  googleRole: 'PATIENT' | 'DOCTOR' = 'PATIENT';
+
+  onGoogleSignUp() {
+    if (typeof (window as any).google === 'undefined') {
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.onload = () => this.initGoogleAuth();
+      document.head.appendChild(script);
+    } else {
+      this.initGoogleAuth();
+    }
+  }
+
+  private initGoogleAuth() {
+    const google = (window as any).google;
+    if (!google) {
+      this.toast.showError('Unable to load Google Identity Services');
+      return;
+    }
+
+    google.accounts.id.initialize({
+      client_id: environment.googleClientId,
+      callback: (response: any) => this.handleGoogleResponse(response),
+    });
+
+    google.accounts.id.prompt((notification: any) => {
+      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+        this.toast.showInfo('Select your Google account to complete registration');
+      }
+    });
+  }
+
+  private handleGoogleResponse(response: any) {
+    if (!response || !response.credential) {
+      this.toast.showError('Google authentication cancelled or failed');
+      return;
+    }
+
+    this.loading = true;
+    // Use selected googleRole or role from roleForm
+    const targetRole = this.googleRole || this.roleForm.value.role || 'PATIENT';
+
+    this.auth.loginWithGoogle(response.credential, targetRole).subscribe({
+      next: (resp) => {
+        this.auth.storeAuth(resp);
+        this.toast.showSuccess(`Google Sign Up successful as ${resp.role}!`);
+        setTimeout(() => {
+          this.auth.redirectToDashboard(resp.role);
+        }, 800);
+      },
+      error: (err) => {
+        this.error = err?.error?.error || 'Google registration failed';
+        this.toast.showError(this.error);
         this.loading = false;
       },
     });

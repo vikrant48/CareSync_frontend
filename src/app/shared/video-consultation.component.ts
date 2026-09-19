@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, inject, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 import { AuthService } from '../core/services/auth.service';
 import { AppointmentService } from '../core/services/appointment.service';
 

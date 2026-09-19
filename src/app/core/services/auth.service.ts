@@ -3,7 +3,7 @@ import { PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 import { AuthenticationResponse, LoginRequest, RefreshTokenRequest, RegisterRequest, Role } from '../models/auth.models';
 
 @Injectable({ providedIn: 'root' })
@@ -64,6 +64,10 @@ export class AuthService {
 
   login(payload: LoginRequest) {
     return this.http.post<AuthenticationResponse>(`${this.baseUrl}/api/auth/login`, payload);
+  }
+
+  loginWithGoogle(idToken: string, role?: string) {
+    return this.http.post<AuthenticationResponse>(`${this.baseUrl}/api/auth/google`, { idToken, role });
   }
 
   refresh() {

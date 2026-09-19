@@ -19,18 +19,18 @@ export interface SelectOption {
     }
   ],
   template: `
-    <div class="space-y-1 relative" [class.z-50]="isOpen" [id]="dropdownId">
-      <label *ngIf="label" class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 ml-1">
+    <div class="space-y-0.5 relative" [class.z-50]="isOpen" [id]="dropdownId">
+      <label *ngIf="label" class="block text-[9px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 ml-0.5">
         {{ label }}
       </label>
       
       <button type="button" 
               (click)="toggle($event)"
               [disabled]="disabled"
-              class="w-full text-left bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-900 dark:text-white relative transition-all duration-200 group focus:ring-2 focus:ring-blue-500 outline-none shadow-sm min-h-0"
+              class="input-modern h-[36px] sm:h-[34px] py-0 text-xs px-3 w-full cursor-pointer relative transition-all duration-200 group flex items-center justify-between min-h-0 text-left font-medium text-gray-900 dark:text-white"
               [class.opacity-50]="disabled"
               [class.cursor-not-allowed]="disabled">
-        <span [class.text-gray-400]="!selectedValue" class="block truncate pr-6">
+        <span [class.text-gray-400]="!selectedValue" class="block truncate pr-5">
           {{ getDisplayLabel() || placeholder }}
         </span>
         <i class="fa-solid fa-chevron-down text-[10px] absolute right-3 top-1/2 -translate-y-1/2 transition-transform duration-300 text-gray-400"

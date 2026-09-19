@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 import { AiChatRequest, AiChatResponse, MedicalSummaryResponse, DiagnosisSuggestionDto } from '../models/ai.models';
 
 @Injectable({ providedIn: 'root' })

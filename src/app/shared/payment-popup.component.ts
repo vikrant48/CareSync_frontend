@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 import { PaymentService, PaymentRequest } from '../core/services/payment.service';
 import { AppointmentService } from '../core/services/appointment.service';
 import { LabTestService, BookingRequest } from '../core/services/lab-test.service';

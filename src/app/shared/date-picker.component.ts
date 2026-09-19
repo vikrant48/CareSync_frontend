@@ -1,12 +1,12 @@
-import { 
-  Component, 
-  Input, 
-  PLATFORM_ID, 
-  inject, 
-  forwardRef, 
-  ViewChild, 
-  ElementRef, 
-  AfterViewInit, 
+import {
+  Component,
+  Input,
+  PLATFORM_ID,
+  inject,
+  forwardRef,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
   OnDestroy,
   Output,
   EventEmitter,
@@ -14,10 +14,10 @@ import {
   OnChanges
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { 
-  ControlValueAccessor, 
-  NG_VALUE_ACCESSOR, 
-  FormsModule 
+import {
+  ControlValueAccessor,
+  NG_VALUE_ACCESSOR,
+  FormsModule
 } from '@angular/forms';
 import flatpickr from 'flatpickr';
 
@@ -33,8 +33,8 @@ import flatpickr from 'flatpickr';
     }
   ],
   template: `
-    <div class="space-y-1.5 relative" [id]="containerId">
-      <label *ngIf="label" class="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 ml-1">
+    <div class="space-y-0.5 relative" [id]="containerId">
+      <label *ngIf="label" class="block text-[9px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 ml-0.5">
         {{ label }}
       </label>
       
@@ -43,16 +43,16 @@ import flatpickr from 'flatpickr';
                type="text"
                [placeholder]="placeholder"
                [disabled]="disabled"
-               class="input-modern py-2 text-sm pl-4 pr-10 w-full cursor-pointer"
+               class="input-modern h-[36px] sm:h-[34px] text-xs pl-3 pr-9 w-full cursor-pointer"
                [class.error]="error"
                [class.opacity-50]="disabled"
                [class.cursor-not-allowed]="disabled">
         
-        <i class="fa-solid fa-calendar text-sm absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-blue-500 transition-colors pointer-events-none"
+        <i class="fa-solid fa-calendar text-xs absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-emerald-500 transition-colors pointer-events-none"
            [class.text-red-400]="error"></i>
       </div>
       
-      <p *ngIf="error" class="error-msg animate-in fade-in slide-in-from-top-1 duration-200">
+      <p *ngIf="error" class="error-msg animate-in fade-in slide-in-from-top-1 duration-200 text-[10px]">
         {{ error }}
       </p>
     </div>
@@ -67,7 +67,7 @@ export class DatePickerComponent implements ControlValueAccessor, AfterViewInit,
   @Input() containerId: string = 'date-picker-' + Math.random().toString(36).substr(2, 9);
   @Input() config: any = {};
   @Input() error: string = '';
-  
+
   // Flatpickr specific configs
   @Input() dateFormat: string = 'Y-m-d';
   @Input() altFormat: string = 'd-m-Y';
@@ -75,7 +75,7 @@ export class DatePickerComponent implements ControlValueAccessor, AfterViewInit,
   @Input() minDate?: string | Date;
   @Input() maxDate?: string | Date;
   @Input() mode: 'single' | 'multiple' | 'range' = 'single';
-  
+
   @Output() dateChange = new EventEmitter<string>();
 
   @ViewChild('dateInput') dateInput!: ElementRef<HTMLInputElement>;
@@ -85,8 +85,8 @@ export class DatePickerComponent implements ControlValueAccessor, AfterViewInit,
   private value: any;
   disabled = false;
 
-  onChange: any = () => {};
-  onTouched: any = () => {};
+  onChange: any = () => { };
+  onTouched: any = () => { };
 
   ngOnChanges(changes: SimpleChanges) {
     if (this.fpInstance) {
@@ -133,7 +133,7 @@ export class DatePickerComponent implements ControlValueAccessor, AfterViewInit,
   }
 
   private getAltInputClass(): string {
-    return 'input-modern py-2 text-sm pl-4 pr-10 w-full cursor-pointer' + (this.error ? ' error' : '');
+    return 'input-modern h-[36px] sm:h-[34px] text-xs pl-3 pr-9 w-full cursor-pointer' + (this.error ? ' error' : '');
   }
 
   private updateAltInputClass() {

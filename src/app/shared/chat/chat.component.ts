@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { WebSocketService } from '../../core/services/websocket.service';
 import { AuthService } from '../../core/services/auth.service';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 import { Subscription } from 'rxjs';
 
 interface ChatMessage {
