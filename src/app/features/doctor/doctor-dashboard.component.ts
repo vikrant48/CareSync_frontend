@@ -30,38 +30,35 @@ import { forkJoin } from 'rxjs';
     <app-doctor-layout>
       <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
         <!-- Header -->
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative">
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl sm:rounded-3xl p-4 sm:p-8 text-white shadow-xl relative">
           <div class="absolute inset-0 bg-white/10 opacity-30 pattern-dots"></div>
-          <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6">
-            <div class="flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-left">
-              <div class="relative">
-                <div class="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-white/30 shadow-lg overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center text-2xl md:text-3xl font-bold">
+          <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-4 sm:gap-6">
+            <div class="flex flex-col md:flex-row items-center gap-3 sm:gap-6 text-center md:text-left">
+              <div class="relative shrink-0">
+                <div class="w-14 h-14 md:w-20 md:h-20 rounded-full border-2 sm:border-4 border-white/30 shadow-lg overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center text-xl md:text-3xl font-bold">
                   <img *ngIf="profile?.profileImageUrl" [src]="profile?.profileImageUrl" class="w-full h-full object-cover" />
                   <span *ngIf="!profile?.profileImageUrl && doctorName">{{ (doctorName || 'D').charAt(0) }}</span>
                   <div *ngIf="!doctorName" class="w-full h-full bg-white/10 animate-pulse"></div>
                 </div>
                 <div *ngIf="profile?.isVerified" class="absolute -bottom-1 -right-1 bg-green-500 text-white text-[8px] px-1.5 py-0.5 rounded-full border-2 border-indigo-700 shadow-md flex items-center gap-1" title="Verified">
-                  <i class="fa-solid fa-check"></i>
+                  <i class="fa-solid fa-check text-[7px]"></i>
                   <span class="font-black uppercase tracking-widest text-[7px]">Verified</span>
                 </div>
               </div>
-              <div class="space-y-2">
-                <h1 class="text-xl md:text-3xl font-black tracking-tight leading-tight animate-fade-in" *ngIf="doctorName">{{ doctorName === 'Doctor' ? 'Doctor' : 'Dr. ' + doctorName }}!</h1>
-                <div class="h-8 w-48 bg-white/20 rounded animate-pulse my-1" *ngIf="!doctorName"></div>
-                <div class="flex flex-col md:flex-row items-center gap-2 md:gap-3 text-blue-100/90 text-sm md:text-lg font-medium">
-                  <span *ngIf="profile" class="px-3 py-0.5 bg-white/10 rounded-full backdrop-blur-sm border border-white/10 animate-fade-in">{{ profile?.specialization || 'General Practitioner' }}</span>
+              <div class="space-y-1 sm:space-y-2">
+                <h1 class="text-lg md:text-3xl font-black tracking-tight leading-tight animate-fade-in" *ngIf="doctorName">{{ doctorName === 'Doctor' ? 'Doctor' : 'Dr. ' + doctorName }}!</h1>
+                <div class="h-6 sm:h-8 w-48 bg-white/20 rounded animate-pulse my-1" *ngIf="!doctorName"></div>
+                <div class="flex flex-wrap items-center justify-center md:justify-start gap-1.5 sm:gap-3 text-blue-100/90 text-xs sm:text-lg font-medium">
+                  <span *ngIf="profile" class="px-2.5 py-0.5 bg-white/10 rounded-full backdrop-blur-sm border border-white/10 text-xs sm:text-sm animate-fade-in">{{ profile?.specialization || 'General Practitioner' }}</span>
                   <span *ngIf="!profile" class="h-6 w-36 bg-white/20 rounded animate-pulse"></span>
                   <span class="hidden md:block w-1.5 h-1.5 rounded-full bg-blue-300"></span>
-                  <span class="opacity-80">{{ todayISO() | date:'fullDate' }}</span>
+                  <span class="opacity-80 text-xs sm:text-base">{{ todayISO() | date:'fullDate' }}</span>
                 </div>
               </div>
             </div>
-            <div class="flex gap-3">
+            <div class="flex items-center gap-2 sm:gap-3">
                <app-doctor-notification></app-doctor-notification>
-               <a routerLink="/doctor/profile" class="bg-white/20 hover:bg-white/30 text-white backdrop-blur-md border border-white/40 px-5 py-2.5 rounded-xl font-medium transition-all active:scale-95 flex items-center gap-2">
-                 <i class="fa-regular fa-user"></i> Profile
-               </a>
-               <button (click)="refreshToday()" class="bg-white text-blue-700 hover:bg-blue-50 px-5 py-2.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 flex items-center gap-2">
+               <button (click)="refreshToday()" class="bg-white text-blue-700 hover:bg-blue-50 px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl text-xs sm:text-base font-bold shadow-lg transition-all active:scale-95 flex items-center gap-1.5 sm:gap-2">
                  <i class="fa-solid fa-arrows-rotate" [class.animate-spin]="loadingAppointments"></i>
                </button>
             </div>
@@ -80,52 +77,52 @@ import { forkJoin } from 'rxjs';
             <button (click)="leaveModalOpen = true" class="text-sm underline font-bold hover:text-orange-900">Manage Leave</button>
         </div>
 
-        <!-- Stats Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Stats Grid (2 per row on mobile) -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
           <!-- Total Today -->
-          <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
-            <div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xl">
+          <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-gray-100 dark:border-gray-700 shadow-sm flex items-center gap-2.5 sm:gap-4 hover:shadow-md transition-shadow">
+            <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm sm:text-xl shrink-0">
               <i class="fa-solid fa-calendar-day"></i>
             </div>
-            <div>
-              <div class="text-sm text-gray-500 dark:text-gray-400 font-medium">Today's Appointments</div>
-              <div class="text-2xl font-bold text-gray-800 dark:text-white" *ngIf="!loadingAppointments">{{ (todayAppointments || []).length }}</div>
-              <div class="h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" *ngIf="loadingAppointments"></div>
+            <div class="min-w-0 flex-1">
+              <div class="text-[11px] sm:text-sm text-gray-500 dark:text-gray-400 font-medium truncate leading-tight">Today's Appts</div>
+              <div class="text-base sm:text-2xl font-bold text-gray-800 dark:text-white" *ngIf="!loadingAppointments">{{ (todayAppointments || []).length }}</div>
+              <div class="h-6 sm:h-8 w-12 sm:w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" *ngIf="loadingAppointments"></div>
             </div>
           </div>
 
           <!-- Confirmed Today -->
-          <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
-            <div class="w-12 h-12 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 flex items-center justify-center text-xl">
+          <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-gray-100 dark:border-gray-700 shadow-sm flex items-center gap-2.5 sm:gap-4 hover:shadow-md transition-shadow">
+            <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 flex items-center justify-center text-sm sm:text-xl shrink-0">
               <i class="fa-solid fa-check-circle"></i>
             </div>
-            <div>
-              <div class="text-sm text-gray-500 dark:text-gray-400 font-medium">Confirmed Today</div>
-              <div class="text-2xl font-bold text-gray-800 dark:text-white" *ngIf="!loadingAppointments">{{ todayStats().CONFIRMED }}</div>
-               <div class="h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" *ngIf="loadingAppointments"></div>
+            <div class="min-w-0 flex-1">
+              <div class="text-[11px] sm:text-sm text-gray-500 dark:text-gray-400 font-medium truncate leading-tight">Confirmed</div>
+              <div class="text-base sm:text-2xl font-bold text-gray-800 dark:text-white" *ngIf="!loadingAppointments">{{ todayStats().CONFIRMED }}</div>
+               <div class="h-6 sm:h-8 w-12 sm:w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" *ngIf="loadingAppointments"></div>
             </div>
           </div>
 
           <!-- Pending (Scheduled) -->
-          <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
-            <div class="w-12 h-12 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400 flex items-center justify-center text-xl">
+          <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-gray-100 dark:border-gray-700 shadow-sm flex items-center gap-2.5 sm:gap-4 hover:shadow-md transition-shadow">
+            <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400 flex items-center justify-center text-sm sm:text-xl shrink-0">
               <i class="fa-solid fa-clock"></i>
             </div>
-            <div>
-              <div class="text-sm text-gray-500 dark:text-gray-400 font-medium">Pending Requests</div>
-              <div class="text-2xl font-bold text-gray-900 dark:text-white" *ngIf="!loadingAppointments">{{ todayStats().BOOKED }}</div>
-               <div class="h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" *ngIf="loadingAppointments"></div>
+            <div class="min-w-0 flex-1">
+              <div class="text-[11px] sm:text-sm text-gray-500 dark:text-gray-400 font-medium truncate leading-tight">Pending</div>
+              <div class="text-base sm:text-2xl font-bold text-gray-900 dark:text-white" *ngIf="!loadingAppointments">{{ todayStats().BOOKED }}</div>
+               <div class="h-6 sm:h-8 w-12 sm:w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" *ngIf="loadingAppointments"></div>
             </div>
           </div>
 
           <!-- Upcoming Leaves -->
-          <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer" (click)="leaveModalOpen = true">
-            <div class="w-12 h-12 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 flex items-center justify-center text-xl">
+          <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-gray-100 dark:border-gray-700 shadow-sm flex items-center gap-2.5 sm:gap-4 hover:shadow-md transition-shadow cursor-pointer" (click)="leaveModalOpen = true">
+            <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 flex items-center justify-center text-sm sm:text-xl shrink-0">
               <i class="fa-solid fa-calendar-minus"></i>
             </div>
-            <div>
-              <div class="text-sm text-gray-500 dark:text-gray-400 font-medium">Doctor Leaves</div>
-              <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ upcomingLeaves.length }}</div>
+            <div class="min-w-0 flex-1">
+              <div class="text-[11px] sm:text-sm text-gray-500 dark:text-gray-400 font-medium truncate leading-tight">Doctor Leaves</div>
+              <div class="text-base sm:text-2xl font-bold text-gray-900 dark:text-white">{{ upcomingLeaves.length }}</div>
             </div>
           </div>
         </div>
@@ -138,44 +135,44 @@ import { forkJoin } from 'rxjs';
           <!-- Up Next / Current Priority Card -->
           <div class="lg:col-span-2 space-y-6">
              <div class="rounded-3xl p-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 shadow-xl" *ngIf="nextAppointment as next">
-                <div class="bg-white dark:bg-gray-800 rounded-[1.3rem] p-6 sm:p-8">
-                   <div class="flex items-center justify-between mb-6">
-                      <div class="flex items-center gap-3">
-                         <span class="relative flex h-4 w-4">
+                <div class="bg-white dark:bg-gray-800 rounded-[1.3rem] p-4 sm:p-8">
+                   <div class="flex items-center justify-between mb-4 sm:mb-6">
+                      <div class="flex items-center gap-2.5 sm:gap-3">
+                         <span class="relative flex h-3.5 w-3.5 sm:h-4 sm:w-4">
                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                           <span class="relative inline-flex rounded-full h-4 w-4 bg-blue-500"></span>
+                           <span class="relative inline-flex rounded-full h-3.5 w-3.5 sm:h-4 sm:w-4 bg-blue-500"></span>
                          </span>
-                         <h2 class="text-xl font-bold text-gray-900 dark:text-white uppercase tracking-wider">
+                         <h2 class="text-sm sm:text-xl font-bold text-gray-900 dark:text-white uppercase tracking-wider">
                             {{ next.status === 'IN_PROGRESS' ? 'Currently in Session' : 'Up Next' }}
                          </h2>
                       </div>
-                      <div class="px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-bold text-sm">
+                      <div class="px-3 py-1 sm:px-4 sm:py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-bold text-xs sm:text-sm">
                         {{ next.appointmentTime }}
                       </div>
                    </div>
 
-                   <div class="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
+                   <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center">
                       <div class="relative shrink-0">
-                         <img [src]="next.patientProfileImageUrl || 'assets/default-profile.png'" class="w-24 h-24 rounded-2xl object-cover shadow-md border-2 border-gray-100 dark:border-gray-700" onerror="this.src='assets/default-profile.png'">
-                         <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center shadow-lg text-sm">
+                         <img [src]="next.patientProfileImageUrl || 'assets/default-profile.png'" class="w-16 h-16 sm:w-24 sm:h-24 rounded-xl sm:rounded-2xl object-cover shadow-md border-2 border-gray-100 dark:border-gray-700" onerror="this.src='assets/default-profile.png'">
+                         <div class="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center shadow-lg text-xs sm:text-sm">
                             <i class="fa-solid fa-video"></i>
                          </div>
                       </div>
                       
-                      <div class="flex-1 space-y-2">
-                         <h3 class="text-2xl font-black text-gray-900 dark:text-white leading-tight">{{ next.patientName }}</h3>
-                         <div class="flex flex-wrap gap-3 text-sm text-gray-500 dark:text-gray-400">
-                            <span *ngIf="next.patientContactInfo"><i class="fa-solid fa-phone mr-1.5 opacity-70"></i> {{ next.patientContactInfo }}</span>
-                            <span *ngIf="next.reason"><i class="fa-solid fa-notes-medical mr-1.5 opacity-70"></i> {{ next.reason }}</span>
+                      <div class="flex-1 space-y-1 sm:space-y-2">
+                         <h3 class="text-lg sm:text-2xl font-black text-gray-900 dark:text-white leading-tight">{{ next.patientName }}</h3>
+                         <div class="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                            <span *ngIf="next.patientContactInfo"><i class="fa-solid fa-phone mr-1 opacity-70"></i> {{ next.patientContactInfo }}</span>
+                            <span *ngIf="next.reason"><i class="fa-solid fa-notes-medical mr-1 opacity-70"></i> {{ next.reason }}</span>
                          </div>
                       </div>
 
-                      <div class="flex flex-col gap-3 w-full sm:w-auto shrink-0">
-                         <button (click)="start(next)" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transition-all active:scale-95 flex items-center justify-center gap-2">
+                      <div class="flex flex-col gap-2 sm:gap-3 w-full sm:w-auto shrink-0">
+                         <button (click)="start(next)" class="px-5 sm:px-8 py-2.5 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-base rounded-xl shadow-lg shadow-blue-500/30 transition-all active:scale-95 flex items-center justify-center gap-2">
                            <span>{{ next.status === 'IN_PROGRESS' ? 'Resume Consultation' : 'Start Consultation' }}</span>
                            <i class="fa-solid fa-arrow-right"></i>
                          </button>
-                         <button (click)="openPatient(next)" class="px-6 py-2.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-bold text-sm hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-all">
+                         <button (click)="openPatient(next)" class="px-4 sm:px-6 py-2 sm:py-2.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-bold text-xs sm:text-sm hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-all">
                            View Patient Details
                          </button>
                       </div>
@@ -183,14 +180,14 @@ import { forkJoin } from 'rxjs';
                 </div>
              </div>
 
-             <!-- Empty State (All Caught Up) -->
-             <div class="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 rounded-3xl p-8 text-center border border-green-100 dark:border-green-800/30" *ngIf="!nextAppointment && !loadingAppointments">
-                <div class="w-20 h-20 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 text-green-500 shadow-md text-3xl">
+             <!-- Empty State (All Caught Up) - Compact Size -->
+             <div class="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl sm:rounded-3xl p-5 sm:p-8 text-center border border-green-100 dark:border-green-800/30" *ngIf="!nextAppointment && !loadingAppointments">
+                <div class="w-12 h-12 sm:w-20 sm:h-20 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-3 text-green-500 shadow-md text-xl sm:text-3xl">
                   <i class="fa-solid fa-mug-hot"></i>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">All Caught Up!</h3>
-                <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-sm mx-auto">You have no pending appointments right now. Enjoy your break or check your full schedule.</p>
-                <a routerLink="/doctor/schedule" class="inline-flex items-center gap-2 px-6 py-3 bg-white text-green-700 font-bold rounded-xl transition-all shadow-sm hover:shadow-md active:scale-95 border border-green-200">
+                <h3 class="text-base sm:text-xl font-bold text-gray-900 dark:text-white mb-1">All Caught Up!</h3>
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-4 max-w-sm mx-auto">You have no pending appointments right now. Enjoy your break or check your full schedule.</p>
+                <a routerLink="/doctor/schedule" class="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-white text-green-700 font-bold text-xs sm:text-sm rounded-xl transition-all shadow-sm hover:shadow-md active:scale-95 border border-green-200">
                   <i class="fa-solid fa-calendar-day"></i>
                   <span>View Full Schedule</span>
                 </a>
@@ -200,47 +197,15 @@ import { forkJoin } from 'rxjs';
 
           <!-- Sidebar (Right 1/3) -->
           <div class="space-y-6">
-            <!-- Profile Quick View -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
-               <h3 class="font-bold text-gray-900 dark:text-white mb-4">Profile Details</h3>
-               <div class="mb-4">
-                 <div class="flex justify-between text-xs mb-1">
-                   <span class="font-medium text-gray-600 dark:text-gray-300">Completion</span>
-                   <span class="font-bold text-blue-600">{{ profile?.completionPercentage || 0 }}%</span>
-                 </div>
-                 <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                   <div class="bg-blue-600 h-2 rounded-full transition-all duration-500" [style.width.%]="profile?.completionPercentage || 0"></div>
-                 </div>
-               </div>
-               <div class="space-y-3">
-                 <div class="flex items-center gap-3 text-sm">
-                   <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 flex items-center justify-center"><i class="fa-solid fa-envelope"></i></div>
-                   <div class="truncate flex-1 text-gray-600 dark:text-gray-300">{{ profile?.email || 'No email' }}</div>
-                 </div>
-                 <div class="flex items-center gap-3 text-sm">
-                   <div class="w-8 h-8 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 flex items-center justify-center"><i class="fa-solid fa-phone"></i></div>
-                   <div class="truncate flex-1 text-gray-600 dark:text-gray-300">{{ profile?.contactInfo || 'No phone' }}</div>
-                 </div>
-                  <div class="flex items-center gap-3 text-sm">
-                   <div class="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 flex items-center justify-center"><i class="fa-solid fa-user-tag"></i></div>
-                   <div class="truncate flex-1 text-gray-600 dark:text-gray-300">{{ profile?.isActive ? 'Active Status' : 'Inactive' }}</div>
-                 </div>
-               </div>
-               <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-                  <a routerLink="/doctor/profile" class="text-blue-600 text-sm font-medium hover:underline flex items-center gap-1 justify-center">Manage Profile <i class="fa-solid fa-arrow-right"></i></a>
-               </div>
-            </div>
-
-             <!-- Quick Actions (Optional placeholder for future features) -->
-            <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-5 text-white shadow-lg overflow-hidden relative">
+             <!-- Quick Actions Guide - Compact Size -->
+            <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-4 sm:p-5 text-white shadow-lg overflow-hidden relative">
               <div class="relative z-10">
-                <h3 class="font-bold mb-2">Need Help?</h3>
-                <p class="text-indigo-100 text-sm mb-4">Check out our guide for doctors to manage appointments effectively.</p>
-                <button (click)="guideModalOpen = true" class="bg-white text-indigo-700 text-sm font-bold py-2 px-4 rounded-lg w-full hover:bg-indigo-50 transition-all active:scale-95 shadow-lg shadow-black/10">View Guide</button>
+                <h3 class="font-bold text-sm sm:text-base mb-1.5">Need Help?</h3>
+                <p class="text-indigo-100 text-xs sm:text-sm mb-3">Check out our guide for doctors to manage appointments effectively.</p>
+                <button (click)="guideModalOpen = true" class="bg-white text-indigo-700 text-xs sm:text-sm font-bold py-2 px-4 rounded-xl w-full hover:bg-indigo-50 transition-all active:scale-95 shadow-lg shadow-black/10">View Guide</button>
               </div>
-              <i class="fa-solid fa-circle-info absolute -bottom-4 -right-4 text-8xl opacity-10 rotate-12"></i>
+              <i class="fa-solid fa-circle-info absolute -bottom-4 -right-4 text-7xl sm:text-8xl opacity-10 rotate-12"></i>
             </div>
-          
           </div>
         </div>
 

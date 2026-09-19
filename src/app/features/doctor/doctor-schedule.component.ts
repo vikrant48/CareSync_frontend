@@ -33,58 +33,58 @@ import { SelectDropdownComponent } from '../../shared/select-dropdown.component'
       <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
         
         <!-- Header -->
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
           <div>
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">My Schedule</h2>
-            <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Manage your daily appointments and patient flow</p>
+            <h2 class="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">My Schedule</h2>
+            <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mt-0.5">Manage your daily appointments and patient flow</p>
           </div>
-          <div class="flex items-center gap-3 self-end sm:self-auto">
-            <div class="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-xl font-bold text-sm">
+          <div class="flex items-center gap-2 sm:gap-3 self-end sm:self-auto">
+            <div class="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl font-bold text-xs sm:text-sm">
                {{ todayDate | date:'fullDate' }}
             </div>
-            <button (click)="refreshToday()" class="btn-secondary w-10 h-10 flex items-center justify-center p-0 rounded-xl">
+            <button (click)="refreshToday()" class="btn-secondary w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center p-0 rounded-xl text-xs sm:text-sm">
                <i class="fa-solid fa-rotate" [class.animate-spin]="loading"></i>
             </button>
           </div>
         </div>
 
-        <!-- Toolbar -->
-        <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
+        <!-- Toolbar (Minimized Filter Card) -->
+        <div class="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-2.5 sm:gap-4">
            
            <!-- Search -->
            <div class="relative w-full sm:max-w-xs">
-             <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-             <input type="text" [(ngModel)]="searchTerm" placeholder="Search patient..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+             <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs sm:text-sm"></i>
+             <input type="text" [(ngModel)]="searchTerm" placeholder="Search patient..." class="w-full pl-9 pr-3 py-1.5 sm:py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all">
            </div>
 
            <!-- Filter -->
            <div class="flex items-center gap-2 w-full sm:w-auto">
-             <label class="text-xs font-bold text-gray-500 uppercase tracking-wider shrink-0">Filter Status:</label>
+             <label class="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider shrink-0">Filter Status:</label>
              <app-select-dropdown
                [(ngModel)]="filterStatus"
                [options]="statusFilterOptions"
                (ngModelChange)="cdr.detectChanges()"
                placeholder="All Appointments"
-               class="min-w-[180px]">
+               class="flex-1 sm:flex-initial sm:min-w-[160px]">
              </app-select-dropdown>
            </div>
         </div>
 
         <!-- Content -->
-        <div *ngIf="loading" class="flex flex-col items-center justify-center py-20 text-gray-400 animate-in fade-in">
-           <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-3 text-blue-500"></i>
-           <p>Loading schedule...</p>
+        <div *ngIf="loading" class="flex flex-col items-center justify-center py-12 sm:py-20 text-gray-400 animate-in fade-in">
+           <i class="fa-solid fa-circle-notch fa-spin text-2xl sm:text-3xl mb-2 text-blue-500"></i>
+           <p class="text-xs sm:text-sm">Loading schedule...</p>
         </div>
 
-        <div *ngIf="!loading && filteredAppointments().length === 0" class="flex flex-col items-center justify-center py-20 text-center animate-in fade-in zoom-in duration-300">
-           <div class="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-400 mb-4 shadow-inner">
-             <i class="fa-regular fa-calendar-xmark text-4xl"></i>
+        <div *ngIf="!loading && filteredAppointments().length === 0" class="flex flex-col items-center justify-center py-10 sm:py-16 text-center animate-in fade-in zoom-in duration-300">
+           <div class="w-14 h-14 sm:w-20 sm:h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-400 mb-3 shadow-inner">
+             <i class="fa-regular fa-calendar-xmark text-2xl sm:text-3xl"></i>
            </div>
-           <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">No appointments found</h3>
-           <p class="text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
+           <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-1">No appointments found</h3>
+           <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
              {{ filterStatus !== 'ALL' || searchTerm ? 'Try adjusting your filters or search terms.' : 'You have no appointments scheduled for today.' }}
            </p>
-           <button *ngIf="filterStatus !== 'ALL' || searchTerm" (click)="resetFilters()" class="mt-6 text-blue-600 font-bold hover:underline">Clear Filters</button>
+           <button *ngIf="filterStatus !== 'ALL' || searchTerm" (click)="resetFilters()" class="mt-4 text-xs sm:text-sm text-blue-600 font-bold hover:underline">Clear Filters</button>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in slide-in-from-bottom-4 fade-in" *ngIf="!loading && filteredAppointments().length > 0">

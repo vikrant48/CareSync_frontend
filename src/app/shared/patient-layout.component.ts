@@ -87,7 +87,7 @@ import { inject } from '@angular/core';
 
       <!-- Content Area -->
       <main class="md:pl-64 w-full min-h-[calc(100vh-3.5rem)]">
-        <div>
+        <div class="pb-28 md:pb-8">
           <ng-content></ng-content>
         </div>
         <app-toast-container></app-toast-container>

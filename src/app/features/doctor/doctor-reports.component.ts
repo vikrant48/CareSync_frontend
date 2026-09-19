@@ -13,77 +13,77 @@ import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-doctor-layout>
-      <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
+      <div class="max-w-7xl mx-auto p-3 sm:p-6 space-y-4 sm:space-y-8">
         <!-- Header -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4">
           <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Analytics & Insights</h1>
-            <p class="text-gray-500 dark:text-gray-400 mt-1">Track your performance and patient engagement metrics.</p>
+            <h1 class="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Analytics & Insights</h1>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1">Track your performance and patient engagement metrics.</p>
           </div>
-          <div class="flex items-center gap-3 bg-white dark:bg-gray-800 px-4 py-2 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-             <i class="fa-regular fa-calendar text-blue-500"></i>
-             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ analyticsRangeText || 'Last 30 Days' }}</span>
+          <div class="flex items-center gap-2 sm:gap-3 bg-white dark:bg-gray-800 px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 self-start md:self-auto">
+             <i class="fa-regular fa-calendar text-blue-500 text-xs sm:text-sm"></i>
+             <span class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{{ analyticsRangeText || 'Last 30 Days' }}</span>
           </div>
         </div>
 
         <!-- Key Stats Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
             <!-- Total Appointments -->
-            <div class="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-5 text-white shadow-lg relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <i class="fa-solid fa-calendar-check text-5xl"></i>
+            <div class="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl sm:rounded-2xl p-3 sm:p-5 text-white shadow-lg relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-2 sm:p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i class="fa-solid fa-calendar-check text-3xl sm:text-5xl"></i>
                 </div>
-                <p class="text-blue-100 text-sm font-medium mb-1">Total Appointments</p>
-                <div class="flex items-end gap-2">
-                    <h3 class="text-3xl font-bold">{{ overall?.totalAppointments ?? '-' }}</h3>
-                    <span *ngIf="loadingOverall" class="text-xs animate-pulse">Loading...</span>
+                <p class="text-blue-100 text-xs sm:text-sm font-medium mb-0.5 sm:mb-1">Total Appointments</p>
+                <div class="flex items-end gap-1.5 sm:gap-2">
+                    <h3 class="text-xl sm:text-3xl font-bold">{{ overall?.totalAppointments ?? '-' }}</h3>
+                    <span *ngIf="loadingOverall" class="text-[10px] sm:text-xs animate-pulse">Loading...</span>
                 </div>
-                <div class="mt-2 text-xs text-blue-100/80 bg-white/10 inline-block px-2 py-0.5 rounded-lg backdrop-blur-sm">
+                <div class="mt-1.5 sm:mt-2 text-[10px] sm:text-xs text-blue-100/80 bg-white/10 inline-block px-1.5 py-0.5 rounded-md sm:rounded-lg backdrop-blur-sm">
                    Last 30 days
                 </div>
             </div>
 
             <!-- Revenue -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group hover:border-blue-200 dark:hover:border-blue-800 transition-colors">
-                 <div class="absolute top-0 right-0 p-4 text-gray-100 dark:text-gray-700 group-hover:text-green-500/10 transition-colors">
-                    <i class="fa-solid fa-sack-dollar text-5xl"></i>
+            <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group hover:border-blue-200 dark:hover:border-blue-800 transition-colors">
+                 <div class="absolute top-0 right-0 p-2 sm:p-4 text-gray-100 dark:text-gray-700 group-hover:text-green-500/10 transition-colors">
+                    <i class="fa-solid fa-sack-dollar text-3xl sm:text-5xl"></i>
                 </div>
-                <p class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Total Revenue</p>
-                <div class="flex items-end gap-2">
-                     <h3 class="text-3xl font-bold text-gray-900 dark:text-white">{{ overall?.totalRevenue ?? '-' }}</h3>
-                     <span *ngIf="loadingOverall" class="text-xs text-gray-400 animate-pulse">Loading...</span>
+                <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium mb-0.5 sm:mb-1">Total Revenue</p>
+                <div class="flex items-end gap-1.5 sm:gap-2">
+                     <h3 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">{{ overall?.totalRevenue ?? '-' }}</h3>
+                     <span *ngIf="loadingOverall" class="text-[10px] sm:text-xs text-gray-400 animate-pulse">Loading...</span>
                 </div>
-                <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-2 font-medium flex items-center gap-1">
+                <p class="text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 mt-1.5 sm:mt-2 font-medium flex items-center gap-1">
                    <i class="fa-solid fa-arrow-trend-up"></i>
                    <span class="text-gray-500 dark:text-gray-400 font-normal">Gross income</span>
                 </p>
             </div>
 
              <!-- Avg Rating -->
-             <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group hover:border-yellow-200 dark:hover:border-yellow-800 transition-colors">
-                <div class="absolute top-0 right-0 p-4 text-gray-100 dark:text-gray-700 group-hover:text-yellow-500/10 transition-colors">
-                   <i class="fa-solid fa-star text-5xl"></i>
+             <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group hover:border-yellow-200 dark:hover:border-yellow-800 transition-colors">
+                <div class="absolute top-0 right-0 p-2 sm:p-4 text-gray-100 dark:text-gray-700 group-hover:text-yellow-500/10 transition-colors">
+                   <i class="fa-solid fa-star text-3xl sm:text-5xl"></i>
                </div>
-               <p class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Average Rating</p>
-               <div class="flex items-end gap-2">
-                    <h3 class="text-3xl font-bold text-gray-900 dark:text-white">{{ overall?.avgRating ?? '-' }}</h3>
-                    <i class="fa-solid fa-star text-yellow-400 text-xl mb-1"></i>
-                    <span *ngIf="loadingOverall" class="text-xs text-gray-400 animate-pulse">Loading...</span>
+               <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium mb-0.5 sm:mb-1">Average Rating</p>
+               <div class="flex items-end gap-1.5 sm:gap-2">
+                    <h3 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">{{ overall?.avgRating ?? '-' }}</h3>
+                    <i class="fa-solid fa-star text-yellow-400 text-sm sm:text-xl mb-0.5 sm:mb-1"></i>
+                    <span *ngIf="loadingOverall" class="text-[10px] sm:text-xs text-gray-400 animate-pulse">Loading...</span>
                </div>
-                <p class="text-xs text-gray-400 mt-2">Based on patient feedback</p>
+                <p class="text-[10px] sm:text-xs text-gray-400 mt-1.5 sm:mt-2">Based on feedback</p>
            </div>
            
            <!-- Completion Rate -->
-           <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group hover:border-purple-200 dark:hover:border-purple-800 transition-colors">
-               <div class="absolute top-0 right-0 p-4 text-gray-100 dark:text-gray-700 group-hover:text-purple-500/10 transition-colors">
-                  <i class="fa-solid fa-clipboard-check text-5xl"></i>
+           <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group hover:border-purple-200 dark:hover:border-purple-800 transition-colors">
+               <div class="absolute top-0 right-0 p-2 sm:p-4 text-gray-100 dark:text-gray-700 group-hover:text-purple-500/10 transition-colors">
+                  <i class="fa-solid fa-clipboard-check text-3xl sm:text-5xl"></i>
               </div>
-              <p class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Completion Rate</p>
-              <div class="flex items-end gap-2">
-                   <h3 class="text-3xl font-bold text-gray-900 dark:text-white">{{ retention?.retentionRate ?? '-' }}%</h3>
-                   <span *ngIf="loadingRetention" class="text-xs text-gray-400 animate-pulse">Loading...</span>
+              <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium mb-0.5 sm:mb-1">Completion Rate</p>
+              <div class="flex items-end gap-1.5 sm:gap-2">
+                   <h3 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">{{ retention?.retentionRate ?? '-' }}%</h3>
+                   <span *ngIf="loadingRetention" class="text-[10px] sm:text-xs text-gray-400 animate-pulse">Loading...</span>
               </div>
-               <p class="text-xs text-purple-600 dark:text-purple-400 mt-2 font-medium flex items-center gap-1">
+               <p class="text-[10px] sm:text-xs text-purple-600 dark:text-purple-400 mt-1.5 sm:mt-2 font-medium flex items-center gap-1">
                    New vs Returning Ratio
                </p>
           </div>

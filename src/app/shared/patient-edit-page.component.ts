@@ -16,43 +16,43 @@ import { DatePickerComponent } from './date-picker.component';
   imports: [CommonModule, FormsModule, RouterModule, PatientLayoutComponent, SelectDropdownComponent, DatePickerComponent],
   template: `
     <app-patient-layout>
-      <div class="max-w-7xl mx-auto space-y-6 p-4 sm:p-6">
+      <div class="max-w-7xl mx-auto space-y-4 sm:space-y-6 p-3.5 sm:p-6">
         
         <!-- Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Edit Profile</h2>
-          <a class="btn-secondary self-start sm:self-auto" [routerLink]="backLink">
-            <i class="fa-solid fa-arrow-left mr-2"></i> Back
+        <div class="flex flex-row items-center justify-between gap-3 sm:gap-4">
+          <h2 class="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Edit Profile</h2>
+          <a class="btn-secondary !py-1.5 sm:!py-2 text-xs sm:text-sm flex items-center" [routerLink]="backLink">
+            <i class="fa-solid fa-arrow-left mr-1.5 sm:mr-2"></i> Back
           </a>
         </div>
 
-        <section class="panel p-6 sm:p-8 space-y-8 animate-fade-in">
+        <section class="panel p-3.5 sm:p-8 space-y-4 sm:space-y-8 animate-fade-in">
           
           <!-- Identity Section -->
-          <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 pb-6 border-b border-gray-200 dark:border-gray-800">
+          <div class="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-6 pb-4 sm:pb-6 border-b border-gray-200 dark:border-gray-800">
             <div class="relative group">
-              <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden ring-4 ring-white dark:ring-gray-800 shadow-xl flex items-center justify-center text-gray-400 dark:text-white text-3xl font-bold">
+              <div class="w-16 h-16 sm:w-28 sm:h-28 rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden ring-2 sm:ring-4 ring-white dark:ring-gray-800 shadow-md sm:shadow-xl flex items-center justify-center text-gray-400 dark:text-white text-xl sm:text-3xl font-bold">
                 <img *ngIf="editableProfile?.profileImageUrl; else initials" [src]="editableProfile?.profileImageUrl" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" (error)="onImageError()" />
                 <ng-template #initials>
                   <span>{{ initialsFromName(editableProfile) }}</span>
                 </ng-template>
               </div>
-              <label class="absolute bottom-0 right-0 p-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full cursor-pointer shadow-lg transition-transform hover:scale-105" title="Change Photo">
+              <label class="absolute bottom-0 right-0 p-1.5 sm:p-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full cursor-pointer shadow-lg transition-transform hover:scale-105" title="Change Photo">
                 <input #profileFileInput type="file" class="hidden" (change)="onFileChange($event)" />
-                <i class="fa-solid fa-camera text-sm"></i>
+                <i class="fa-solid fa-camera text-xs sm:text-sm"></i>
               </label>
             </div>
             
-            <div class="text-center sm:text-left space-y-1 flex-1">
-              <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ fullName(editableProfile) }}</h3>
-              <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-sm text-gray-500 dark:text-gray-400">
-                <span class="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-gray-600 dark:text-gray-300">ID: {{ editableProfile?.id ?? '—' }}</span>
+            <div class="text-center sm:text-left space-y-0.5 sm:space-y-1 flex-1">
+              <h3 class="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">{{ fullName(editableProfile) }}</h3>
+              <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                <span class="bg-gray-100 dark:bg-gray-800 px-2 py-0.5 sm:py-1 rounded text-gray-600 dark:text-gray-300">ID: {{ editableProfile?.id ?? '—' }}</span>
                 <span>{{ editableProfile?.email || '—' }}</span>
               </div>
               
-              <div class="pt-3" *ngIf="file">
-                 <button type="button" class="btn-primary text-sm py-1.5 px-3" (click)="uploadImage()" [disabled]="uploading">
-                   <i class="fa-solid fa-cloud-arrow-up mr-2"></i>
+              <div class="pt-2 sm:pt-3" *ngIf="file">
+                 <button type="button" class="btn-primary text-xs sm:text-sm py-1.5 px-3" (click)="uploadImage()" [disabled]="uploading">
+                   <i class="fa-solid fa-cloud-arrow-up mr-1.5 sm:mr-2"></i>
                    {{ uploading ? 'Uploading...' : 'Confirm Upload' }}
                  </button>
               </div>
@@ -60,27 +60,27 @@ import { DatePickerComponent } from './date-picker.component';
           </div>
 
           <!-- Edit Form -->
-          <form class="space-y-6" (ngSubmit)="save()">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <form class="space-y-4 sm:space-y-6" (ngSubmit)="save()">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
               
-              <div class="space-y-2">
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-400">First Name</label>
-                <input class="input bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white" [(ngModel)]="form.firstName" name="firstName" placeholder="John" />
+              <div class="space-y-1 sm:space-y-2">
+                <label class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-400">First Name</label>
+                <input class="input text-xs sm:text-sm bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white" [(ngModel)]="form.firstName" name="firstName" placeholder="John" />
               </div>
 
-              <div class="space-y-2">
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-400">Last Name</label>
-                <input class="input bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white" [(ngModel)]="form.lastName" name="lastName" placeholder="Doe" />
+              <div class="space-y-1 sm:space-y-2">
+                <label class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-400">Last Name</label>
+                <input class="input text-xs sm:text-sm bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white" [(ngModel)]="form.lastName" name="lastName" placeholder="Doe" />
               </div>
 
-              <div class="space-y-2">
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-400">Email Address</label>
-                <input class="input bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white" [(ngModel)]="form.email" name="email" type="email" placeholder="john@example.com" />
+              <div class="space-y-1 sm:space-y-2">
+                <label class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-400">Email Address</label>
+                <input class="input text-xs sm:text-sm bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white" [(ngModel)]="form.email" name="email" type="email" placeholder="john@example.com" />
               </div>
 
-              <div class="space-y-2">
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-400">Contact Number</label>
-                <input class="input bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white" [(ngModel)]="form.contactInfo" name="contactInfo" placeholder="+1 (555) 000-0000" />
+              <div class="space-y-1 sm:space-y-2">
+                <label class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-400">Contact Number</label>
+                <input class="input text-xs sm:text-sm bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white" [(ngModel)]="form.contactInfo" name="contactInfo" placeholder="+1 (555) 000-0000" />
               </div>
 
               <app-date-picker
@@ -109,16 +109,16 @@ import { DatePickerComponent } from './date-picker.component';
 
             </div>
 
-            <div class="space-y-2">
-              <label class="text-sm font-medium text-gray-700 dark:text-gray-400">Medical History / Illness Details</label>
-              <textarea class="input min-h-[100px] bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white" rows="4" [(ngModel)]="form.illnessDetails" name="illnessDetails" placeholder="Any existing conditions..."></textarea>
+            <div class="space-y-1 sm:space-y-2">
+              <label class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-400">Medical History / Illness Details</label>
+              <textarea class="input min-h-[70px] sm:min-h-[100px] text-xs sm:text-sm bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white" rows="3" [(ngModel)]="form.illnessDetails" name="illnessDetails" placeholder="Any existing conditions..."></textarea>
             </div>
 
-            <div class="pt-6 border-t border-gray-200 dark:border-gray-800 flex items-center justify-end gap-3">
-              <button type="button" class="btn-secondary" (click)="reset()" [disabled]="saving">Reset Changes</button>
-              <button type="submit" class="btn-primary min-w-[120px]" [disabled]="saving">
-                <i class="fa-solid fa-save mr-2" *ngIf="!saving"></i>
-                <i class="fa-solid fa-circle-notch animate-spin mr-2" *ngIf="saving"></i>
+            <div class="pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-800 flex items-center justify-end gap-2 sm:gap-3">
+              <button type="button" class="btn-secondary !py-1.5 sm:!py-2.5 text-xs sm:text-sm" (click)="reset()" [disabled]="saving">Reset Changes</button>
+              <button type="submit" class="btn-primary !py-1.5 sm:!py-2.5 text-xs sm:text-sm min-w-[100px] sm:min-w-[120px]" [disabled]="saving">
+                <i class="fa-solid fa-save mr-1.5 sm:mr-2" *ngIf="!saving"></i>
+                <i class="fa-solid fa-circle-notch animate-spin mr-1.5 sm:mr-2" *ngIf="saving"></i>
                 {{ saving ? 'Saving...' : 'Save Changes' }}
               </button>
             </div>

@@ -15,47 +15,47 @@ Chart.register(...registerables);
   imports: [CommonModule, FormsModule, ReactiveFormsModule, PatientLayoutComponent],
   template: `
     <app-patient-layout>
-      <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
+      <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-8">
         <!-- Header -->
-        <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+        <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 bg-white dark:bg-gray-800 p-3.5 sm:p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
           <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Health Vitals Tracking</h1>
-            <p class="text-gray-500 dark:text-gray-400">Log and monitor your key health metrics over time.</p>
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Health Vitals Tracking</h1>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Log and monitor your key health metrics over time.</p>
           </div>
-          <button (click)="showLogForm = !showLogForm" class="btn-primary flex items-center gap-2">
+          <button (click)="showLogForm = !showLogForm" class="btn-primary flex items-center justify-center gap-2 py-2 sm:py-2.5 px-4 sm:px-5 text-xs sm:text-sm shadow-md">
             <i class="fa-solid" [class.fa-plus]="!showLogForm" [class.fa-minus]="showLogForm"></i>
             {{ showLogForm ? 'Close Form' : 'Log New Vitals' }}
           </button>
         </header>
 
         <!-- Log Form -->
-        <section *ngIf="showLogForm" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border-t-4 border-blue-500 animate-in fade-in slide-in-from-top-4 duration-300">
-          <h2 class="text-lg font-semibold mb-4 flex items-center gap-2 dark:text-gray-100">
+        <section *ngIf="showLogForm" class="bg-white dark:bg-gray-800 p-3.5 sm:p-6 rounded-xl shadow-md border-t-4 border-blue-500 animate-in fade-in slide-in-from-top-4 duration-300">
+          <h2 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center gap-2 dark:text-gray-100">
             <i class="fa-solid fa-file-medical text-blue-500"></i> Log Your Current Metrics
           </h2>
-          <form [formGroup]="vitalsForm" (ngSubmit)="onSubmit()" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <form [formGroup]="vitalsForm" (ngSubmit)="onSubmit()" class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
             <div class="form-group">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Systolic BP (mmHg)</label>
+              <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Systolic BP (mmHg)</label>
               <input type="number" formControlName="systolicBP" class="form-input w-full" placeholder="e.g. 120" />
             </div>
             <div class="form-group">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Diastolic BP (mmHg)</label>
+              <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Diastolic BP (mmHg)</label>
               <input type="number" formControlName="diastolicBP" class="form-input w-full" placeholder="e.g. 80" />
             </div>
             <div class="form-group">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sugar Level (mg/dL)</label>
+              <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sugar Level (mg/dL)</label>
               <input type="number" formControlName="sugarLevel" class="form-input w-full" placeholder="e.g. 100" />
             </div>
             <div class="form-group">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Weight (kg)</label>
+              <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Weight (kg)</label>
               <input type="number" formControlName="weight" class="form-input w-full" placeholder="e.g. 70" />
             </div>
             <div class="form-group">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Temperature (°F)</label>
+              <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Temperature (°F)</label>
               <input type="number" step="0.1" formControlName="temperature" class="form-input w-full" placeholder="e.g. 98.6" />
             </div>
             <div class="form-group">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Heart Rate (bpm)</label>
+              <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Heart Rate (bpm)</label>
               <input type="number" formControlName="heartRate" class="form-input w-full" placeholder="e.g. 72" />
             </div>
             <div class="md:col-span-3 flex justify-end gap-3 mt-4">
@@ -68,27 +68,27 @@ Chart.register(...registerables);
         </section>
 
         <!-- Charts Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 dark:text-gray-100">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
+          <div class="bg-white dark:bg-gray-800 p-3.5 sm:p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <h3 class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 flex items-center gap-2 dark:text-gray-100">
               <i class="fa-solid fa-heart-pulse text-red-500"></i> Blood Pressure Trend
             </h3>
             <canvas #bpChart></canvas>
           </div>
-          <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 dark:text-gray-100">
+          <div class="bg-white dark:bg-gray-800 p-3.5 sm:p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <h3 class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 flex items-center gap-2 dark:text-gray-100">
               <i class="fa-solid fa-droplet text-orange-500"></i> Sugar Level Trend
             </h3>
             <canvas #sugarChart></canvas>
           </div>
-          <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-             <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 dark:text-gray-100">
+          <div class="bg-white dark:bg-gray-800 p-3.5 sm:p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+             <h3 class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 flex items-center gap-2 dark:text-gray-100">
               <i class="fa-solid fa-weight-scale text-blue-500"></i> Weight Trend
             </h3>
             <canvas #weightChart></canvas>
           </div>
-          <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 dark:text-gray-100">
+          <div class="bg-white dark:bg-gray-800 p-3.5 sm:p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <h3 class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 flex items-center gap-2 dark:text-gray-100">
               <i class="fa-solid fa-thermometer text-yellow-500"></i> Body Temperature Trend
             </h3>
             <canvas #tempChart></canvas>
@@ -97,32 +97,32 @@ Chart.register(...registerables);
 
         <!-- History Table -->
         <section class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-          <div class="p-6 border-b border-gray-100 dark:border-gray-700">
-            <h3 class="text-lg font-semibold dark:text-gray-100">Log History</h3>
+          <div class="p-3.5 sm:p-6 border-b border-gray-100 dark:border-gray-700">
+            <h3 class="text-base sm:text-lg font-semibold dark:text-gray-100">Log History</h3>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-left">
-              <thead class="bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-sm uppercase font-medium">
+              <thead class="bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-xs sm:text-sm uppercase font-medium">
                 <tr>
-                  <th class="px-6 py-4">Date</th>
-                  <th class="px-6 py-4">BP (S/D)</th>
-                  <th class="px-6 py-4">Sugar</th>
-                  <th class="px-6 py-4">Weight</th>
-                  <th class="px-6 py-4">Temp</th>
-                  <th class="px-6 py-4">Heart Rate</th>
+                  <th class="px-3 sm:px-6 py-2.5 sm:py-4">Date</th>
+                  <th class="px-3 sm:px-6 py-2.5 sm:py-4">BP (S/D)</th>
+                  <th class="px-3 sm:px-6 py-2.5 sm:py-4">Sugar</th>
+                  <th class="px-3 sm:px-6 py-2.5 sm:py-4">Weight</th>
+                  <th class="px-3 sm:px-6 py-2.5 sm:py-4">Temp</th>
+                  <th class="px-3 sm:px-6 py-2.5 sm:py-4">Heart Rate</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                 <tr *ngFor="let vital of vitalsHistory" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                  <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{{ vital.recordedAt | date:'medium' }}</td>
-                  <td class="px-6 py-4 text-sm font-medium dark:text-gray-200">{{ vital.systolicBP || '--' }}/{{ vital.diastolicBP || '--' }} <span class="text-xs text-gray-400">mmHg</span></td>
-                  <td class="px-6 py-4 text-sm font-medium text-orange-600 dark:text-orange-400">{{ vital.sugarLevel || '--' }} <span class="text-xs text-gray-400">mg/dL</span></td>
-                  <td class="px-6 py-4 text-sm font-medium text-blue-600 dark:text-blue-400">{{ vital.weight || '--' }} <span class="text-xs text-gray-400">kg</span></td>
-                  <td class="px-6 py-4 text-sm font-medium text-yellow-600 dark:text-yellow-400">{{ vital.temperature || '--' }} <span class="text-xs text-gray-400">°F</span></td>
-                  <td class="px-6 py-4 text-sm font-medium text-red-600 dark:text-red-400">{{ vital.heartRate || '--' }} <span class="text-xs text-gray-400">bpm</span></td>
+                  <td class="px-3 sm:px-6 py-2.5 sm:py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-300">{{ vital.recordedAt | date:'medium' }}</td>
+                  <td class="px-3 sm:px-6 py-2.5 sm:py-4 text-xs sm:text-sm font-medium dark:text-gray-200">{{ vital.systolicBP || '--' }}/{{ vital.diastolicBP || '--' }} <span class="text-xs text-gray-400">mmHg</span></td>
+                  <td class="px-3 sm:px-6 py-2.5 sm:py-4 text-xs sm:text-sm font-medium text-orange-600 dark:text-orange-400">{{ vital.sugarLevel || '--' }} <span class="text-xs text-gray-400">mg/dL</span></td>
+                  <td class="px-3 sm:px-6 py-2.5 sm:py-4 text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400">{{ vital.weight || '--' }} <span class="text-xs text-gray-400">kg</span></td>
+                  <td class="px-3 sm:px-6 py-2.5 sm:py-4 text-xs sm:text-sm font-medium text-yellow-600 dark:text-yellow-400">{{ vital.temperature || '--' }} <span class="text-xs text-gray-400">°F</span></td>
+                  <td class="px-3 sm:px-6 py-2.5 sm:py-4 text-xs sm:text-sm font-medium text-red-600 dark:text-red-400">{{ vital.heartRate || '--' }} <span class="text-xs text-gray-400">bpm</span></td>
                 </tr>
                  <tr *ngIf="vitalsHistory.length === 0">
-                  <td colspan="6" class="px-6 py-10 text-center text-gray-400 italic">No logs found. Start by tracking your metrics today!</td>
+                  <td colspan="6" class="px-3 sm:px-6 py-6 sm:py-10 text-center text-xs sm:text-sm text-gray-400 italic">No logs found. Start by tracking your metrics today!</td>
                 </tr>
               </tbody>
             </table>

@@ -16,13 +16,13 @@ import { DatePickerComponent } from './date-picker.component';
   template: `
     <!-- Floating Button -->
     <button
+      *ngIf="!isOpen()"
       id="ai-widget-trigger"
       (click)="toggleChat()"
-      class="fixed bottom-20 right-6 md:bottom-10 md:right-10 w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-[60] group"
+      class="fixed bottom-20 right-4 md:bottom-8 md:right-8 w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-[60] group"
     >
-      <i class="fas fa-robot text-2xl group-hover:rotate-12 transition-transform" *ngIf="!isOpen()"></i>
-      <i class="fas fa-times text-2xl" *ngIf="isOpen()"></i>
-      <span class="absolute -top-1 -right-1 flex h-3 w-3" *ngIf="!isOpen() && messages().length === 0">
+      <i class="fas fa-robot text-xl md:text-2xl group-hover:rotate-12 transition-transform"></i>
+      <span class="absolute -top-1 -right-1 flex h-3 w-3" *ngIf="messages().length === 0">
         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
         <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
       </span>
@@ -31,10 +31,10 @@ import { DatePickerComponent } from './date-picker.component';
     <!-- Chat Window -->
     <div
       *ngIf="isOpen()"
-      class="fixed bottom-36 right-6 md:bottom-28 md:right-10 w-[min(calc(100vw-3rem),480px)] h-[min(calc(100vh-15rem),700px)] bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden z-[60] animate-in slide-in-from-bottom-5 duration-300"
+      class="fixed bottom-20 right-3 sm:right-6 md:bottom-6 md:right-8 w-[min(calc(100vw-1.5rem),440px)] max-h-[calc(100dvh-5.5rem)] h-[min(calc(100dvh-6rem),620px)] bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden z-[60] animate-in slide-in-from-bottom-5 duration-300"
     >
       <!-- Header -->
-      <div class="p-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white flex items-center justify-between">
+      <div class="p-3.5 sm:p-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white flex items-center justify-between shrink-0">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
             <i class="fas fa-robot text-xl"></i>

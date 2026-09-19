@@ -78,7 +78,7 @@ import { PdfService } from '../core/services/pdf.service';
             class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow-md text-xs transition-all active:scale-95 flex items-center justify-center gap-2 w-full"
             (click)="onDownloadPrescription()"
             [disabled]="disabled">
-            <i class="fa-solid fa-file-pdf text-sm"></i> Download Prescription PDF
+            <i class="fa-solid fa-file-pdf text-sm"></i> Download Prescription
           </button>
 
           <button class="btn-primary flex-1 text-sm py-2" (click)="onViewDoctor()" [disabled]="disabled">

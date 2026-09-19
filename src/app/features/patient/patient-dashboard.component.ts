@@ -109,8 +109,8 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
           </div>
         </section>
 
-      <!-- Financial Overview -->
-      <section *ngIf="financialStats" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- Financial Overview (Hidden on Mobile) -->
+      <section *ngIf="financialStats" class="hidden md:grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="bg-white p-4 rounded-xl shadow border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
           <div class="text-sm text-gray-500 dark:text-gray-400">Total Spent</div>
           <div class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">₹{{ financialStats.totalSpend | number:'1.2-2' }}</div>

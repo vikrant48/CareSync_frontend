@@ -1,102 +1,106 @@
 <app-doctor-layout>
-  <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
+  <div class="max-w-7xl mx-auto p-3 sm:p-6 space-y-4 sm:space-y-8">
     <!-- Hero Section -->
     <div
-      class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
+      class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl sm:rounded-3xl p-4 sm:p-8 text-white shadow-xl relative overflow-hidden">
       <div class="absolute inset-0 bg-white/10 opacity-30 pattern-dots"></div>
-      <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-6">
         <div>
-          <h1 class="text-3xl font-bold tracking-tight mb-2">Lab Test Management</h1>
-          <p class="text-blue-100 text-lg">Create, update, and manage the catalog of lab tests available for your
+          <h1 class="text-xl sm:text-3xl font-bold tracking-tight mb-1 sm:mb-2">Lab Test Management</h1>
+          <p class="text-blue-100 text-xs sm:text-lg">Create, update, and manage the catalog of lab tests available for
+            your
             patients.</p>
         </div>
         <button (click)="showAddForm = true; window.scrollTo({ top: 0, behavior: 'smooth' })"
-          class="bg-white text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-xl font-bold shadow-lg transition-all transform hover:-translate-y-1 flex items-center gap-2">
-          <i class="fa-solid fa-plus"></i>
+          class="bg-white text-blue-600 hover:bg-blue-50 px-3.5 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-base font-bold shadow-lg transition-all transform hover:-translate-y-1 flex items-center gap-1.5 sm:gap-2 self-start md:self-auto">
+          <i class="fa-solid fa-plus text-xs sm:text-sm"></i>
           Add New Test
         </button>
       </div>
     </div>
 
     <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
 
       <!-- Form Section (Left Column) -->
       <div class="lg:col-span-1" [class.hidden]="!editingTest() && !showAddForm && labTests().length > 0">
         <div
-          class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 sticky top-6 overflow-hidden">
+          class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 sticky top-6 overflow-hidden">
           <div
-            class="bg-gray-50 dark:bg-gray-700/50 p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
-            <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            class="bg-gray-50 dark:bg-gray-700/50 p-3 sm:p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+            <h2 class="text-sm sm:text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <i class="fa-solid"
                 [ngClass]="editingTest() ? 'fa-pen-to-square text-orange-500' : 'fa-flask text-blue-500'"></i>
               {{ editingTest() ? 'Edit Lab Test' : 'New Lab Test' }}
             </h2>
             <button *ngIf="labTests().length > 0" (click)="cancelEdit(); showAddForm = false"
               class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-              <i class="fa-solid fa-times"></i>
+              <i class="fa-solid fa-times text-xs sm:text-base"></i>
             </button>
           </div>
 
-          <div class="p-6">
-            <form [formGroup]="labTestForm" (ngSubmit)="onSubmit()" class="space-y-5">
+          <div class="p-3.5 sm:p-6">
+            <form [formGroup]="labTestForm" (ngSubmit)="onSubmit()" class="space-y-3 sm:space-y-5">
               <!-- Test Name -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Test Name</label>
+                <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Test
+                  Name</label>
                 <div class="relative">
-                  <i class="fa-solid fa-tag absolute left-3 top-3.5 text-gray-400"></i>
+                  <i class="fa-solid fa-tag absolute left-3 top-2.5 sm:top-3.5 text-xs sm:text-base text-gray-400"></i>
                   <input type="text" formControlName="testName"
-                    class="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    class="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3 text-xs sm:text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="e.g. Complete Blood Count"
                     [class.border-red-300]="labTestForm.get('testName')?.invalid && labTestForm.get('testName')?.touched">
                 </div>
                 <p *ngIf="labTestForm.get('testName')?.invalid && labTestForm.get('testName')?.touched"
-                  class="text-red-500 text-xs mt-1 ml-1">Test name is required</p>
+                  class="text-red-500 text-[10px] sm:text-xs mt-1 ml-1">Test name is required</p>
               </div>
 
               <!-- Price -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Price (₹)</label>
+                <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Price
+                  (₹)</label>
                 <div class="relative">
-                  <span class="absolute left-3 top-3.5 text-gray-400 font-bold">₹</span>
+                  <span class="absolute left-3 top-2.5 sm:top-3.5 text-xs sm:text-base text-gray-400 font-bold">₹</span>
                   <input type="number" formControlName="price"
-                    class="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    class="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3 text-xs sm:text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="0.00" step="0.01"
                     [class.border-red-300]="labTestForm.get('price')?.invalid && labTestForm.get('price')?.touched">
                 </div>
                 <p *ngIf="labTestForm.get('price')?.invalid && labTestForm.get('price')?.touched"
-                  class="text-red-500 text-xs mt-1 ml-1">Valid price is required</p>
+                  class="text-red-500 text-[10px] sm:text-xs mt-1 ml-1">Valid price is required</p>
               </div>
 
               <!-- Description -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Description</label>
-                <textarea formControlName="description" rows="3"
-                  class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                <label
+                  class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                <textarea formControlName="description" rows="2"
+                  class="w-full px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
                   placeholder="Details about what this test covers..."></textarea>
               </div>
 
               <!-- Active Toggle -->
               <div
-                class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-100 dark:border-gray-700">
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Active Status</span>
+                class="flex items-center justify-between p-2.5 sm:p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg sm:rounded-xl border border-gray-100 dark:border-gray-700">
+                <span class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Active Status</span>
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" formControlName="isActive" class="sr-only peer">
                   <div
-                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+                    class="w-9 h-5 sm:w-11 sm:h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 sm:after:h-5 sm:after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
                   </div>
                 </label>
               </div>
 
               <!-- Actions -->
-              <div class="flex gap-3 pt-2">
+              <div class="flex gap-2.5 sm:gap-3 pt-1 sm:pt-2">
                 <button type="button" (click)="cancelEdit(); showAddForm = false"
-                  class="flex-1 px-4 py-3 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  class="flex-1 px-3 py-2 sm:px-4 sm:py-3 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 text-xs sm:text-sm font-semibold rounded-lg sm:rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                   Cancel
                 </button>
                 <button type="submit" [disabled]="labTestForm.invalid || isSubmitting()"
-                  class="flex-1 px-4 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-blue-500/30">
-                  <i *ngIf="isSubmitting()" class="fa-solid fa-circle-notch fa-spin mr-2"></i>
+                  class="flex-1 px-3 py-2 sm:px-4 sm:py-3 bg-blue-600 text-white text-xs sm:text-sm font-semibold rounded-lg sm:rounded-xl hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-blue-500/30">
+                  <i *ngIf="isSubmitting()" class="fa-solid fa-circle-notch fa-spin mr-1.5 sm:mr-2"></i>
                   {{ isSubmitting() ? 'Saving...' : (editingTest() ? 'Update Changes' : 'Create Test') }}
                 </button>
               </div>
@@ -108,84 +112,89 @@
       <!-- Test List Section -->
       <div [class.lg:col-span-2]="editingTest() || showAddForm" [class.lg:col-span-3]="!editingTest() && !showAddForm">
 
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+        <div class="flex items-center justify-between mb-3 sm:mb-6">
+          <h2 class="text-base sm:text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
             Available Tests
             <span
-              class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-bold px-2.5 py-0.5 rounded-full">{{
+              class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full">{{
               labTests().length }}</span>
           </h2>
-          <!-- Optional Filters could go here -->
         </div>
 
         <!-- Loading State -->
-        <div *ngIf="isLoading()" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div *ngIf="isLoading()" class="grid grid-cols-2 md:grid-cols-2 gap-3 sm:gap-6">
           <div *ngFor="let i of [1,2,3,4]"
-            class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 animate-pulse">
-            <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
-            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2"></div>
-            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+            class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-sm border border-gray-100 dark:border-gray-700 animate-pulse">
+            <div class="h-5 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-3"></div>
+            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2"></div>
+            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
           </div>
         </div>
 
         <!-- Empty State -->
         <div *ngIf="!isLoading() && labTests().length === 0"
-          class="text-center py-20 bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 border-dashed">
+          class="text-center py-12 sm:py-20 bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl border border-gray-100 dark:border-gray-700 border-dashed">
           <div
-            class="bg-blue-50 dark:bg-blue-900/20 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
-            <i class="fa-solid fa-flask text-4xl text-blue-500"></i>
+            class="bg-blue-50 dark:bg-blue-900/20 w-16 h-16 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+            <i class="fa-solid fa-flask text-2xl sm:text-4xl text-blue-500"></i>
           </div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">No Lab Tests Added Yet</h3>
-          <p class="text-gray-500 dark:text-gray-400 max-w-sm mx-auto mb-8">Start building your test catalog by adding
+          <h3 class="text-base sm:text-xl font-bold text-gray-900 dark:text-white mb-1.5 sm:mb-2">No Lab Tests Added Yet
+          </h3>
+          <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto mb-6 sm:mb-8">Start building
+            your test catalog by adding
             your first lab test.</p>
-          <button (click)="showAddForm = true" class="text-blue-600 font-semibold hover:underline">Create a Test
+          <button (click)="showAddForm = true"
+            class="text-blue-600 text-xs sm:text-sm font-semibold hover:underline">Create a Test
             Now</button>
         </div>
 
-        <!-- Cards Grid -->
-        <div *ngIf="!isLoading() && labTests().length > 0" class="grid grid-cols-1 gap-6"
+        <!-- Cards Grid (Compact Horizontal Layout for High Density) -->
+        <div *ngIf="!isLoading() && labTests().length > 0" class="grid grid-cols-1 gap-3"
           [class.md:grid-cols-2]="editingTest() || showAddForm" [class.lg:grid-cols-3]="!editingTest() && !showAddForm">
           <div *ngFor="let test of labTests(); trackBy: trackByTestId"
-            class="group bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+            class="group bg-white dark:bg-gray-800 rounded-xl p-2.5 sm:p-3 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-200 relative overflow-hidden flex items-center justify-between gap-2.5">
 
             <!-- Active Indicator Strip -->
-            <div class="absolute left-0 top-0 bottom-0 w-1.5 transition-colors"
+            <div class="absolute left-0 top-0 bottom-0 w-1 transition-colors"
               [ngClass]="test.isActive ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'"></div>
 
-            <div class="flex justify-between items-start mb-4 pl-2">
-              <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl">
-                <i class="fa-solid fa-microscope text-2xl text-blue-600 dark:text-blue-400"></i>
-              </div>
-              <div class="flex gap-1">
-                <button (click)="editTest(test); showAddForm = false"
-                  class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
-                  title="Edit">
-                  <i class="fa-solid fa-pen"></i>
-                </button>
-                <button (click)="toggleTestStatus(test)" class="p-2 rounded-lg transition-colors"
-                  [ngClass]="test.isActive ? 'text-green-500 hover:bg-green-50 dark:hover:bg-green-900/30' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'"
-                  [title]="test.isActive ? 'Deactivate' : 'Activate'">
-                  <i class="fa-solid" [ngClass]="test.isActive ? 'fa-toggle-on text-xl' : 'fa-toggle-off text-xl'"></i>
-                </button>
-              </div>
+            <!-- Left Icon -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg shrink-0 ml-1">
+              <i class="fa-solid fa-microscope text-sm sm:text-base text-blue-600 dark:text-blue-400"></i>
             </div>
 
-            <div class="pl-2">
-              <h3 class="font-bold text-gray-900 dark:text-white text-lg mb-1">{{ test.testName }}</h3>
-              <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 h-10 mb-4">{{ test.description || 'No
-                description provided.' }}</p>
-
-              <div class="flex items-center justify-between border-t border-gray-100 dark:border-gray-700 pt-4 mt-2">
-                <div class="flex flex-col">
-                  <span class="text-xs text-gray-400 font-medium uppercase tracking-wider">Price</span>
-                  <span class="text-xl font-bold text-gray-900 dark:text-white">₹{{ test.price }}</span>
-                </div>
-                <span class="px-3 py-1 rounded-full text-xs font-bold border"
+            <!-- Center Content -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-1.5 mb-0.5">
+                <h3 class="font-bold text-gray-900 dark:text-white text-xs sm:text-sm truncate" [title]="test.testName">
+                  {{ test.testName }}</h3>
+                <span class="px-1.5 py-0.2 rounded-full text-[9px] font-bold border shrink-0"
                   [ngClass]="test.isActive ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800/50' : 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600'">
                   {{ test.isActive ? 'ACTIVE' : 'INACTIVE' }}
                 </span>
               </div>
+              <p class="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 truncate mb-0.5">{{ test.description ||
+                'No description provided.' }}</p>
+              <div class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white">
+                ₹{{ test.price }}
+              </div>
             </div>
+
+            <!-- Right Actions -->
+            <div class="flex items-center gap-0.5 sm:gap-1 shrink-0">
+              <button (click)="editTest(test); showAddForm = false"
+                class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                title="Edit">
+                <i class="fa-solid fa-pen text-xs"></i>
+              </button>
+              <button (click)="toggleTestStatus(test)" class="p-1.5 rounded-lg transition-colors"
+                [ngClass]="test.isActive ? 'text-green-500 hover:bg-green-50 dark:hover:bg-green-900/30' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'"
+                [title]="test.isActive ? 'Deactivate' : 'Activate'">
+                <i class="fa-solid text-sm sm:text-base"
+                  [ngClass]="test.isActive ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
+              </button>
+            </div>
+
           </div>
         </div>
 

@@ -17,62 +17,61 @@ export interface AppointmentCounts {
   template: `
     <div class="max-w-7xl mx-auto space-y-6 p-4 sm:p-6" *ngIf="patient; else loading">
       <!-- Top Header -->
-      <section class="panel p-6 sm:p-8 animate-fade-in bg-white dark:bg-gray-900">
-        <div class="flex flex-col md:flex-row gap-6 items-start justify-between">
+      <section class="panel p-3.5 sm:p-8 animate-fade-in bg-white dark:bg-gray-900">
+        <div class="flex flex-col md:flex-row gap-4 sm:gap-6 items-start justify-between">
           <!-- Left: Identity -->
-          <div class="flex items-start gap-5 w-full md:w-auto">
+          <div class="flex items-start gap-3 sm:gap-5 w-full md:w-auto">
             <div class="relative shrink-0">
-              <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gray-100 dark:bg-gray-800 ring-4 ring-white dark:ring-gray-800/50 shadow-xl overflow-hidden flex items-center justify-center text-gray-400 dark:text-white text-2xl font-bold">
+              <div class="w-14 h-14 sm:w-24 sm:h-24 rounded-full bg-gray-100 dark:bg-gray-800 ring-2 sm:ring-4 ring-white dark:ring-gray-800/50 shadow-md sm:shadow-xl overflow-hidden flex items-center justify-center text-gray-400 dark:text-white text-lg sm:text-2xl font-bold">
                 <img *ngIf="patient.profileImageUrl; else initials" [src]="patient.profileImageUrl" class="w-full h-full object-cover transition-transform hover:scale-110 duration-500" (error)="onImageError()" />
                 <ng-template #initials>
                   <span>{{ initialsFromName(patient) }}</span>
                 </ng-template>
               </div>
-              <div class="absolute bottom-0 right-0 w-5 h-5 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full" title="Active"></div>
+              <div class="absolute bottom-0 right-0 w-3.5 h-3.5 sm:w-5 sm:h-5 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full" title="Active"></div>
             </div>
             
-            <div class="flex-1 min-w-0 space-y-1">
-              <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight truncate">{{ fullName(patient) }}</h2>
-              <div class="flex flex-wrap gap-x-4 gap-y-2 text-sm text-gray-600 dark:text-gray-400">
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-hashtag text-gray-500 dark:text-gray-600"></i> {{ patient.id }}</span>
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-envelope text-gray-500 dark:text-gray-600"></i> {{ patient.email || '—' }}</span>
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-phone text-gray-500 dark:text-gray-600"></i> {{ patient.contactInfo || '—' }}</span>
+            <div class="flex-1 min-w-0 space-y-0.5 sm:space-y-1">
+              <h2 class="text-lg sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight truncate">{{ fullName(patient) }}</h2>
+              <div class="flex flex-wrap gap-x-3 gap-y-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                <span class="flex items-center gap-1"><i class="fa-solid fa-hashtag text-gray-500 dark:text-gray-600 text-[11px] sm:text-xs"></i> {{ patient.id }}</span>
+                <span class="flex items-center gap-1"><i class="fa-solid fa-envelope text-gray-500 dark:text-gray-600 text-[11px] sm:text-xs"></i> {{ patient.email || '—' }}</span>
+                <span class="flex items-center gap-1"><i class="fa-solid fa-phone text-gray-500 dark:text-gray-600 text-[11px] sm:text-xs"></i> {{ patient.contactInfo || '—' }}</span>
               </div>
-              <br>
-              <div class="w-full md:w-48 text-right">
-               <div class="flex justify-between md:justify-end gap-3 text-xs mb-1 text-gray-800 dark:text-gray-400 font-medium uppercase tracking-wider">
+              <div class="w-full md:w-48 mt-1.5 sm:mt-2">
+               <div class="flex justify-between md:justify-end gap-3 text-[10px] sm:text-xs mb-0.5 sm:mb-1 text-gray-800 dark:text-gray-400 font-medium uppercase tracking-wider">
                  <span>Profile Strength</span>
                  <span class="text-blue-400 font-bold">{{ patient.completionPercentage || 0 }}%</span>
                </div>
-               <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
-                 <div class="bg-blue-500 h-1.5 rounded-full transition-all duration-1000" [style.width.%]="patient.completionPercentage || 0"></div>
+               <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 sm:h-1.5 overflow-hidden">
+                 <div class="bg-blue-500 h-1 sm:h-1.5 rounded-full transition-all duration-1000" [style.width.%]="patient.completionPercentage || 0"></div>
                </div>
               </div>
             </div>
           </div>
 
           <!-- Right: Action & Stats -->
-          <div class="w-full md:w-auto flex flex-col items-start md:items-end gap-4">
-             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full md:w-auto">
-               <div class="bg-gray-500/10 dark:bg-gray-850 rounded-lg p-3 text-center min-w-[80px] border border-gray-200 dark:border-gray-800 shadow-sm animate-fade-in">
-                 <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium">Total</div>
-                 <div class="text-lg font-bold text-gray-800 dark:text-white">{{ appointmentCounts?.total ?? 0 }}</div>
+          <div class="w-full md:w-auto flex flex-col items-start md:items-end gap-2.5 sm:gap-4">
+             <div class="grid grid-cols-4 gap-1.5 sm:gap-3 w-full md:w-auto">
+               <div class="bg-gray-500/10 dark:bg-gray-850 rounded-lg p-1.5 sm:p-3 text-center border border-gray-200 dark:border-gray-800 shadow-sm animate-fade-in">
+                 <div class="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium">Total</div>
+                 <div class="text-sm sm:text-lg font-bold text-gray-800 dark:text-white">{{ appointmentCounts?.total ?? 0 }}</div>
                </div>
-               <div class="bg-emerald-500/10 rounded-lg p-3 text-center min-w-[80px] border border-emerald-500/20">
-                 <div class="text-xs text-emerald-400 uppercase tracking-wider font-medium">Done</div>
-                 <div class="text-lg font-bold text-emerald-400">{{ appointmentCounts?.completed ?? 0 }}</div>
+               <div class="bg-emerald-500/10 rounded-lg p-1.5 sm:p-3 text-center border border-emerald-500/20">
+                 <div class="text-[9px] sm:text-xs text-emerald-400 uppercase tracking-wider font-medium">Done</div>
+                 <div class="text-sm sm:text-lg font-bold text-emerald-400">{{ appointmentCounts?.completed ?? 0 }}</div>
                </div>
-               <div class="bg-amber-500/10 rounded-lg p-3 text-center min-w-[80px] border border-amber-500/20">
-                 <div class="text-xs text-amber-400 uppercase tracking-wider font-medium">Upcoming</div>
-                 <div class="text-lg font-bold text-amber-400">{{ appointmentCounts?.upcoming ?? 0 }}</div>
+               <div class="bg-amber-500/10 rounded-lg p-1.5 sm:p-3 text-center border border-amber-500/20">
+                 <div class="text-[9px] sm:text-xs text-amber-400 uppercase tracking-wider font-medium">Upcoming</div>
+                 <div class="text-sm sm:text-lg font-bold text-amber-400">{{ appointmentCounts?.upcoming ?? 0 }}</div>
                </div>
-               <div class="bg-red-500/10 rounded-lg p-3 text-center min-w-[85px] border border-red-500/20">
-                 <div class="text-xs text-red-400 uppercase tracking-wider font-medium">Cancel</div>
-                 <div class="text-lg font-bold text-red-400">{{ appointmentCounts?.cancelled ?? 0 }}</div>
+               <div class="bg-red-500/10 rounded-lg p-1.5 sm:p-3 text-center border border-red-500/20">
+                 <div class="text-[9px] sm:text-xs text-red-400 uppercase tracking-wider font-medium">Cancel</div>
+                 <div class="text-sm sm:text-lg font-bold text-red-400">{{ appointmentCounts?.cancelled ?? 0 }}</div>
                </div>
              </div>
-             <a class="btn-primary w-full md:w-auto shadow-lg shadow-blue-500/20" routerLink="/patient/profile/edit">
-               <i class="fa-solid fa-pen-to-square mr-2"></i> Edit Profile
+             <a class="btn-primary w-full md:w-auto !py-1.5 sm:!py-2.5 text-xs sm:text-sm text-center shadow-lg shadow-blue-500/20" routerLink="/patient/profile/edit">
+               <i class="fa-solid fa-pen-to-square mr-1.5"></i> Edit Profile
              </a>
           </div>
         </div>
@@ -130,12 +129,8 @@ export interface AppointmentCounts {
                     </h3>
                     <div class="space-y-4">
                         <div class="flex justify-between border-b border-gray-200 dark:border-gray-800/50 pb-2">
-                            <span class="text-gray-600 dark:text-gray-400">First Name</span>
-                            <span class="font-medium text-gray-800 dark:text-gray-200">{{ patient.firstName || '—' }}</span>
-                        </div>
-                        <div class="flex justify-between border-b border-gray-200 dark:border-gray-800/50 pb-2">
-                            <span class="text-gray-600 dark:text-gray-400">Last Name</span>
-                            <span class="font-medium text-gray-800 dark:text-gray-200">{{ patient.lastName || '—' }}</span>
+                            <span class="text-gray-600 dark:text-gray-400">Full Name</span>
+                            <span class="font-medium text-gray-800 dark:text-gray-200">{{ fullName(patient) }}</span>
                         </div>
                         <div class="flex justify-between border-b border-gray-200 dark:border-gray-800/50 pb-2">
                             <span class="text-gray-600 dark:text-gray-400">Date of Birth</span>

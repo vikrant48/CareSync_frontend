@@ -170,9 +170,9 @@ import { AiAssistantWidgetComponent } from './ai-assistant-widget.component';
                <i class="fa-solid fa-gear text-2xl mb-2"></i>
                <span class="text-sm font-medium">Settings</span>
              </a>
-             <button (click)="onLogout(); menuOpen=false" class="col-span-2 flex items-center justify-center gap-2 p-4 rounded-2xl bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors mt-2">
-               <i class="fa-solid fa-right-from-bracket"></i>
-               <span class="font-bold">Log Out</span>
+             <button (click)="onLogout(); menuOpen=false" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors">
+               <i class="fa-solid fa-right-from-bracket text-2xl mb-2"></i>
+               <span class="text-sm font-medium">Log Out</span>
              </button>
          </div>
          <!-- Spacer for bottom safe area -->

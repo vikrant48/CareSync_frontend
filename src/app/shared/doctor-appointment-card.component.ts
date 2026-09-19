@@ -124,7 +124,7 @@ import { PdfService } from '../core/services/pdf.service';
               </button>
               <button class="btn-action bg-emerald-600 hover:bg-emerald-700 text-white shadow-md py-2" (click)="onDownloadPrescription()" [disabled]="disabled">
                 <i class="fa-solid fa-file-pdf"></i>
-                <span class="text-xs font-bold">Prescription PDF</span>
+                <span class="text-xs font-bold">Prescription</span>
               </button>
            </div>
            <ng-template #noRecord>

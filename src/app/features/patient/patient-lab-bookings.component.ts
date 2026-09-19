@@ -15,136 +15,128 @@ import { ToastService } from '../../core/services/toast.service';
   imports: [CommonModule, PatientLayoutComponent, PaymentPopupComponent],
   template: `
     <app-patient-layout>
-      <div class="max-w-7xl mx-auto p-4 sm:p-6 pb-24">
+      <div class="max-w-7xl mx-auto p-3.5 sm:p-6 pb-20 sm:pb-24">
         <!-- Header -->
-        <div class="mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="mb-4 sm:mb-8 flex flex-row items-center justify-between gap-2.5 sm:gap-4">
           <div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
-              My Lab Test Bookings
+            <h1 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
+            Lab Test Bookings
             </h1>
-            <p class="text-gray-600 dark:text-gray-400 mt-1">View and manage your diagnostic test appointments</p>
+            <p class="text-xs sm:text-base text-gray-600 dark:text-gray-400 mt-0.5 sm:mt-1">View and manage your diagnostic test appointments</p>
           </div>
 
-          <div class="flex items-center gap-3 w-full md:w-auto">
-            <button (click)="loadBookings()" 
-                    class="btn-secondary !py-2.5 flex items-center gap-2 justify-center flex-1 md:flex-none">
-              <i class="fas fa-rotate-right" [class.fa-spin]="isLoading()"></i>
-              <span>Refresh</span>
-            </button>
-
-            <button (click)="navigateToBooking()" 
-                    class="btn-primary !py-2.5 flex items-center gap-2 justify-center flex-1 md:flex-none shadow-lg shadow-blue-500/20">
-              <i class="fas fa-plus"></i>
-              <span>New Test</span>
-            </button>
-          </div>
+          <button (click)="navigateToBooking()" 
+                  class="btn-primary !py-1.5 sm:!py-2.5 px-3 sm:px-4 text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 justify-center shrink-0 shadow-lg shadow-blue-500/20">
+            <i class="fas fa-plus"></i>
+            <span>New Test</span>
+          </button>
         </div>
 
         <!-- Loading State -->
-        <div *ngIf="isLoading()" class="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
-           <div class="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-4"></div>
-           <p class="text-gray-400 animate-pulse">Loading your bookings...</p>
+        <div *ngIf="isLoading()" class="flex flex-col items-center justify-center py-12 sm:py-20 text-center animate-fade-in">
+           <div class="w-12 h-12 sm:w-16 sm:h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-3 sm:mb-4"></div>
+           <p class="text-xs sm:text-sm text-gray-400 animate-pulse">Loading your bookings...</p>
         </div>
 
         <!-- Error State -->
-        <div *ngIf="errorMessage()" class="bg-red-900/20 border border-red-500/50 rounded-xl p-4 mb-6 flex items-start gap-4">
-          <div class="p-2 bg-red-500/20 rounded-lg text-red-400">
+        <div *ngIf="errorMessage()" class="bg-red-900/20 border border-red-500/50 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 flex items-start gap-3 sm:gap-4">
+          <div class="p-1.5 sm:p-2 bg-red-500/20 rounded-lg text-red-400 text-xs sm:text-base">
              <i class="fas fa-exclamation-triangle"></i>
           </div>
           <div>
-            <h3 class="font-bold text-red-400">Error Loading Bookings</h3>
-            <p class="text-red-300/80 text-sm mt-1">{{ errorMessage() }}</p>
+            <h3 class="font-bold text-xs sm:text-base text-red-400">Error Loading Bookings</h3>
+            <p class="text-red-300/80 text-xs mt-0.5 sm:mt-1">{{ errorMessage() }}</p>
           </div>
         </div>
 
         <!-- Empty State -->
         <div *ngIf="!isLoading() && !errorMessage() && bookings().length === 0" 
-             class="flex flex-col items-center justify-center py-20 text-center bg-gray-50 dark:bg-gray-900/40 backdrop-blur-md border border-gray-300 dark:border-gray-700/50 rounded-2xl border-dashed">
-          <div class="w-24 h-24 bg-white dark:bg-gray-800/80 rounded-full flex items-center justify-center mb-6 shadow-md ring-1 ring-gray-200 dark:ring-gray-700">
-            <i class="fas fa-file-medical text-4xl text-blue-400 dark:text-gray-600"></i>
+             class="flex flex-col items-center justify-center py-12 sm:py-20 p-4 text-center bg-gray-50 dark:bg-gray-900/40 backdrop-blur-md border border-gray-300 dark:border-gray-700/50 rounded-xl sm:rounded-2xl border-dashed">
+          <div class="w-16 h-16 sm:w-24 sm:h-24 bg-white dark:bg-gray-800/80 rounded-full flex items-center justify-center mb-4 sm:mb-6 shadow-md ring-1 ring-gray-200 dark:ring-gray-700">
+            <i class="fas fa-file-medical text-2xl sm:text-4xl text-blue-400 dark:text-gray-600"></i>
           </div>
-          <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-200 mb-2">No Bookings Found</h3>
-          <p class="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-8 font-medium">You haven't booked any lab tests yet. Your upcoming and past test bookings will appear here.</p>
+          <h3 class="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-200 mb-1.5 sm:mb-2">No Bookings Found</h3>
+          <p class="text-xs sm:text-base text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-6 sm:mb-8 font-medium">You haven't booked any lab tests yet. Your upcoming and past test bookings will appear here.</p>
           <button (click)="navigateToBooking()" 
-                  class="btn-primary py-3 px-8 shadow-lg shadow-blue-600/20 transform hover:-translate-y-1 transition-all duration-300 font-bold">
+                  class="btn-primary py-2 sm:py-3 px-6 sm:px-8 text-xs sm:text-sm shadow-lg shadow-blue-600/20 transform hover:-translate-y-1 transition-all duration-300 font-bold">
             Book Your First Test
           </button>
         </div>
 
         <!-- Bookings Grid -->
         <div *ngIf="!isLoading() && !errorMessage() && bookings().length > 0" 
-             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
+             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6 animate-fade-in">
           
           <div *ngFor="let booking of bookings()" 
-               class="group bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-300 dark:border-gray-700/50 rounded-2xl overflow-hidden hover:border-blue-400 dark:hover:border-blue-500/30 hover:shadow-xl hover:shadow-blue-900/10 transition-all duration-300 flex flex-col shadow-sm">
+               class="group bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-300 dark:border-gray-700/50 rounded-xl sm:rounded-2xl overflow-hidden hover:border-blue-400 dark:hover:border-blue-500/30 hover:shadow-xl hover:shadow-blue-900/10 transition-all duration-300 flex flex-col shadow-sm">
             
             <!-- Card Header -->
-            <div class="p-5 border-b border-gray-200 dark:border-gray-700/50 bg-gray-100/50 dark:bg-gray-800/30">
-              <div class="flex justify-between items-start mb-2">
+            <div class="p-3.5 sm:p-5 border-b border-gray-200 dark:border-gray-700/50 bg-gray-100/50 dark:bg-gray-800/30">
+              <div class="flex justify-between items-start mb-1.5 sm:mb-2">
                 <div>
-                   <span class="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-500">Booking ID</span>
-                   <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 font-mono">#{{ booking.id }}</h3>
+                   <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-500">Booking ID</span>
+                   <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 font-mono">#{{ booking.id }}</h3>
                 </div>
-                <div [class]="getStatusClass(booking.status)" class="px-3 py-1 rounded-full text-xs font-bold border border-current/20 shadow-sm">
+                <div [class]="getStatusClass(booking.status)" class="px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold border border-current/20 shadow-sm">
                   {{ getStatusLabel(booking.status) }}
                 </div>
               </div>
               
-              <div class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-400 mt-3 font-medium">
+              <div class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-700 dark:text-gray-400 mt-2 sm:mt-3 font-medium">
                 <i class="far fa-calendar-alt text-blue-600 dark:text-blue-400"></i>
                 <span>{{ formatDate(booking.createdAt) }}</span>
               </div>
             </div>
 
             <!-- Card Body -->
-            <div class="p-5 flex-1 bg-white dark:bg-transparent">
-              <div class="space-y-3">
-                 <div class="flex justify-between items-center text-sm">
+            <div class="p-3.5 sm:p-5 flex-1 bg-white dark:bg-transparent">
+              <div class="space-y-2 sm:space-y-3">
+                 <div class="flex justify-between items-center text-xs sm:text-sm">
                    <span class="text-gray-600 dark:text-gray-400 font-medium">Tests</span>
                    <span class="text-gray-900 dark:text-gray-200 font-bold bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-md">{{ booking.selectedTests.length }} Test(s)</span>
                  </div>
                  
-                 <div class="flex justify-between items-center text-sm" *ngIf="booking.prescribedBy">
+                 <div class="flex justify-between items-center text-xs sm:text-sm" *ngIf="booking.prescribedBy">
                    <span class="text-gray-600 dark:text-gray-400 font-medium">Prescribed By</span>
                    <span class="text-blue-600 dark:text-blue-300 font-medium">{{ booking.prescribedBy }}</span>
                  </div>
                  
-                 <div class="pt-3 mt-3 border-t border-gray-200 dark:border-gray-700/50 flex justify-between items-end">
-                   <span class="text-gray-600 dark:text-gray-400 text-sm font-medium">Total Amount</span>
-                   <span class="text-xl font-black text-green-600 dark:text-green-400">₹{{ booking.totalPrice }}</span>
+                 <div class="pt-2 sm:pt-3 mt-2 sm:mt-3 border-t border-gray-200 dark:border-gray-700/50 flex justify-between items-end">
+                   <span class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm font-medium">Total Amount</span>
+                   <span class="text-base sm:text-xl font-black text-green-600 dark:text-green-400">₹{{ booking.totalPrice }}</span>
                  </div>
               </div>
             </div>
 
             <!-- Card Footer (Actions) -->
-            <div class="p-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700/50 flex flex-wrap gap-2 justify-end">
+            <div class="p-3 sm:p-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700/50 flex flex-wrap gap-1.5 sm:gap-2 justify-end">
               <button (click)="viewBookingDetails(booking)" 
-                      class="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-100/50 dark:hover:bg-blue-500/10 rounded-lg transition-colors border border-transparent hover:border-blue-200 dark:hover:border-transparent" title="View Details">
+                      class="p-1.5 sm:p-2 text-xs sm:text-base text-gray-500 hover:text-blue-600 hover:bg-blue-100/50 dark:hover:bg-blue-500/10 rounded-lg transition-colors border border-transparent hover:border-blue-200 dark:hover:border-transparent" title="View Details">
                  <i class="fas fa-eye"></i>
               </button>
               
               <button (click)="downloadReceipt(booking)" 
-                      class="p-2 text-gray-500 hover:text-green-600 hover:bg-green-100/50 dark:hover:bg-green-500/10 rounded-lg transition-colors border border-transparent hover:border-green-200 dark:hover:border-transparent" title="Download Receipt">
+                      class="p-1.5 sm:p-2 text-xs sm:text-base text-gray-500 hover:text-green-600 hover:bg-green-100/50 dark:hover:bg-green-500/10 rounded-lg transition-colors border border-transparent hover:border-green-200 dark:hover:border-transparent" title="Download Receipt">
                  <i class="fas fa-download"></i>
               </button>
 
               <button *ngIf="canCancelBooking(booking)" 
                       (click)="cancelBooking(booking)" 
-                      class="p-2 text-gray-500 hover:text-red-500 hover:bg-red-100/50 dark:hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-200 dark:hover:border-transparent" title="Cancel Booking">
+                      class="p-1.5 sm:p-2 text-xs sm:text-base text-gray-500 hover:text-red-500 hover:bg-red-100/50 dark:hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-200 dark:hover:border-transparent" title="Cancel Booking">
                  <i class="fas fa-times-circle"></i>
               </button>
 
               <button *ngIf="(booking.status === 'COMPLETED' || booking.status === 'IN_PROGRESS') && (!booking.labReports || booking.labReports.length === 0)" 
                       (click)="fileInput.click()" 
-                      class="px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg text-sm font-semibold hover:bg-blue-600 hover:text-white hover:border-blue-600 hover:shadow-md transition-all duration-300 flex items-center gap-2 dark:bg-blue-500/10 dark:text-blue-500 dark:border-blue-500/50">
-                 <i class="fas fa-upload" [class.fa-spinner]="isUploading() && uploadBookingId() === booking.id" [class.fa-spin]="isUploading() && uploadBookingId() === booking.id"></i>
-                 <span>{{ isUploading() && uploadBookingId() === booking.id ? 'Uploading...' : 'Upload Report' }}</span>
+                      class="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg text-xs sm:text-sm font-semibold hover:bg-blue-600 hover:text-white hover:border-blue-600 hover:shadow-md transition-all duration-300 flex items-center gap-1.5 sm:gap-2 dark:bg-blue-500/10 dark:text-blue-500 dark:border-blue-500/50">
+                  <i class="fas fa-upload" [class.fa-spinner]="isUploading() && uploadBookingId() === booking.id" [class.fa-spin]="isUploading() && uploadBookingId() === booking.id"></i>
+                  <span>{{ isUploading() && uploadBookingId() === booking.id ? 'Uploading...' : 'Upload Report' }}</span>
               </button>
               
               <a *ngIf="booking.labReports && booking.labReports.length > 0" 
                  [href]="booking.labReports[0].cloudinaryUrl || booking.labReports[0].url" 
                  target="_blank"
-                 class="px-3 py-1.5 bg-green-50 text-green-600 border border-green-200 rounded-lg text-sm font-semibold hover:bg-green-600 hover:text-white hover:border-green-600 hover:shadow-md transition-all duration-300 flex items-center gap-2 dark:bg-green-500/10 dark:text-green-500 dark:border-green-500/50">
+                 class="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-green-50 text-green-600 border border-green-200 rounded-lg text-xs sm:text-sm font-semibold hover:bg-green-600 hover:text-white hover:border-green-600 hover:shadow-md transition-all duration-300 flex items-center gap-1.5 sm:gap-2 dark:bg-green-500/10 dark:text-green-500 dark:border-green-500/50">
                  <i class="fas fa-eye"></i>
                  <span>View Report</span>
               </a>
@@ -153,7 +145,7 @@ import { ToastService } from '../../core/services/toast.service';
 
               <button *ngIf="booking.status === 'PENDING'" 
                       (click)="payForBooking(booking)"
-                      class="ml-auto px-4 py-1.5 bg-yellow-50 text-yellow-600 border border-yellow-200 rounded-lg text-sm font-bold hover:bg-yellow-500 hover:text-white hover:border-yellow-500 hover:shadow-md transition-all duration-300 dark:bg-yellow-500/10 dark:text-yellow-500 dark:border-yellow-500/50">
+                      class="ml-auto px-3 sm:px-4 py-1 sm:py-1.5 bg-yellow-50 text-yellow-600 border border-yellow-200 rounded-lg text-xs sm:text-sm font-bold hover:bg-yellow-500 hover:text-white hover:border-yellow-500 hover:shadow-md transition-all duration-300 dark:bg-yellow-500/10 dark:text-yellow-500 dark:border-yellow-500/50">
                  Pay Now
               </button>
             </div>

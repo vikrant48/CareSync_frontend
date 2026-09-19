@@ -150,67 +150,67 @@
 
         <!-- Overview Tab -->
         <div *ngIf="activeTab==='overview'" class="animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-black text-gray-900 dark:text-white">General Overview</h2>
-            <button class="btn-secondary !py-2 !px-4 text-sm" *ngIf="!editingOverview" (click)="startEditOverview()">
+          <div class="flex items-center justify-between mb-4 md:mb-6">
+            <h2 class="text-base sm:text-xl font-black text-gray-900 dark:text-white">General Overview</h2>
+            <button class="btn-secondary !py-1 sm:!py-2 !px-3 sm:!px-4 text-xs sm:text-sm font-semibold"
+              *ngIf="!editingOverview" (click)="startEditOverview()">
               <i class="fa-solid fa-pen-to-square"></i> Edit Profile
             </button>
           </div>
 
           <!-- View Mode: Overview Cards -->
-          <div *ngIf="!editingOverview" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div *ngIf="!editingOverview" class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-stretch">
             <div
-              class="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
+              class="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm space-y-3 md:space-y-4 flex flex-col justify-between">
               <h3 class="font-bold text-gray-400 uppercase tracking-widest text-[10px] flex items-center gap-2">
                 <i class="fa-solid fa-user"></i> Personal Details
               </h3>
-              <div class="space-y-3">
+              <div class="space-y-2 md:space-y-3">
                 <div class="flex justify-between border-b border-gray-50 dark:border-gray-700/50 pb-2">
-                  <span class="text-sm text-gray-500">First Name</span>
-                  <span class="text-sm font-bold">{{ profile?.firstName || '—' }}</span>
+                  <span class="text-xs md:text-sm text-gray-500">Full Name</span>
+                  <span class="text-xs md:text-sm font-bold">{{ ((profile?.firstName || '') + ' ' + (profile?.lastName
+                    || '')).trim() || '—' }}</span>
                 </div>
                 <div class="flex justify-between border-b border-gray-50 dark:border-gray-700/50 pb-2">
-                  <span class="text-sm text-gray-500">Last Name</span>
-                  <span class="text-sm font-bold">{{ profile?.lastName || '—' }}</span>
-                </div>
-                <div class="flex justify-between border-b border-gray-50 dark:border-gray-700/50 pb-2">
-                  <span class="text-sm text-gray-500">Gender</span>
-                  <span class="text-sm font-bold">{{ profile?.gender || '—' }}</span>
+                  <span class="text-xs md:text-sm text-gray-500">Gender</span>
+                  <span class="text-xs md:text-sm font-bold">{{ profile?.gender || '—' }}</span>
                 </div>
                 <div class="flex justify-between">
-                  <span class="text-sm text-gray-500">Languages</span>
+                  <span class="text-xs md:text-sm text-gray-500">Languages</span>
                   <div class="flex flex-wrap gap-1 justify-end">
                     <span *ngFor="let lang of profileForm.languages"
                       class="text-[10px] font-bold bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-md">
                       {{ lang }}
                     </span>
-                    <span *ngIf="!profileForm.languages?.length" class="text-sm font-bold">None</span>
+                    <span *ngIf="!profileForm.languages?.length" class="text-xs md:text-sm font-bold">None</span>
                   </div>
                 </div>
               </div>
             </div>
 
             <div
-              class="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
+              class="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm space-y-3 md:space-y-4 flex flex-col justify-between">
               <h3 class="font-bold text-gray-400 uppercase tracking-widest text-[10px] flex items-center gap-2">
                 <i class="fa-solid fa-address-book"></i> Contact & Fees
               </h3>
-              <div class="space-y-3">
+              <div class="space-y-2 md:space-y-3">
                 <div class="flex justify-between border-b border-gray-50 dark:border-gray-700/50 pb-2">
-                  <span class="text-sm text-gray-500">Email Address</span>
-                  <span class="text-sm font-bold">{{ profile?.email || '—' }}</span>
+                  <span class="text-xs md:text-sm text-gray-500">Email Address</span>
+                  <span class="text-xs md:text-sm font-bold">{{ profile?.email || '—' }}</span>
                 </div>
                 <div class="flex justify-between border-b border-gray-50 dark:border-gray-700/50 pb-2">
-                  <span class="text-sm text-gray-500">Contact Number</span>
-                  <span class="text-sm font-bold">{{ profile?.contactInfo || '—' }}</span>
+                  <span class="text-xs md:text-sm text-gray-500">Contact Number</span>
+                  <span class="text-xs md:text-sm font-bold">{{ profile?.contactInfo || '—' }}</span>
                 </div>
                 <div class="flex justify-between border-b border-gray-50 dark:border-gray-700/50 pb-2">
-                  <span class="text-sm text-gray-500">Consultation Fees</span>
-                  <span class="text-sm font-bold text-blue-600">₹{{ profile?.consultationFees ?? '0' }}</span>
+                  <span class="text-xs md:text-sm text-gray-500">Consultation Fees</span>
+                  <span class="text-xs md:text-sm font-bold text-blue-600">₹{{ profile?.consultationFees ?? '0'
+                    }}</span>
                 </div>
                 <div class="flex justify-between">
-                  <span class="text-sm text-gray-500">Location</span>
-                  <span class="text-sm font-bold text-right max-w-[150px] truncate" [title]="profile?.address">{{
+                  <span class="text-xs md:text-sm text-gray-500">Location</span>
+                  <span class="text-xs md:text-sm font-bold text-right max-w-[150px] truncate"
+                    [title]="profile?.address">{{
                     profile?.address || '—' }}</span>
                 </div>
               </div>
@@ -245,9 +245,7 @@
                 <div class="grid grid-cols-2 gap-4">
                   <div class="space-y-1.5">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Gender</label>
-                    <app-select-dropdown 
-                      [(ngModel)]="profileForm.gender" 
-                      [options]="genders" 
+                    <app-select-dropdown [(ngModel)]="profileForm.gender" [options]="genders"
                       placeholder="Select Gender">
                     </app-select-dropdown>
                   </div>
@@ -302,10 +300,12 @@
         </div>
 
         <!-- Education Tab -->
-        <div *ngIf="activeTab==='education'" class="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6">
+        <div *ngIf="activeTab==='education'"
+          class="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-4 md:space-y-6">
           <div class="flex items-center justify-between">
-            <h2 class="text-xl font-black text-gray-900 dark:text-white">Education & Credentials</h2>
-            <button class="btn-primary !py-2 !px-4 text-sm" *ngIf="!editingEducationMode" (click)="startAddEducation()">
+            <h2 class="text-base sm:text-xl font-black text-gray-900 dark:text-white">Education & Credentials</h2>
+            <button class="btn-primary !py-1 sm:!py-2 !px-3 sm:!px-4 text-xs sm:text-sm font-semibold"
+              *ngIf="!editingEducationMode" (click)="startAddEducation()">
               <i class="fa-solid fa-plus"></i> Add New
             </button>
           </div>
@@ -317,9 +317,7 @@
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Degree /
                   Qualification</label>
-                <app-select-dropdown
-                  [(ngModel)]="newEducation.degree"
-                  [options]="degreeOptions"
+                <app-select-dropdown [(ngModel)]="newEducation.degree" [options]="degreeOptions"
                   placeholder="Select degree">
                 </app-select-dropdown>
                 <div *ngIf="newEducation.degree==='__other__'" class="mt-2 flex items-center gap-2">
@@ -331,9 +329,7 @@
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Institution /
                   University</label>
-                <app-select-dropdown
-                  [(ngModel)]="newEducation.institution"
-                  [options]="institutionOptions"
+                <app-select-dropdown [(ngModel)]="newEducation.institution" [options]="institutionOptions"
                   placeholder="Select institution">
                 </app-select-dropdown>
                 <div *ngIf="newEducation.institution==='__other__'" class="mt-2 flex items-center gap-2">
@@ -409,11 +405,12 @@
         </div>
 
         <!-- Experience Tab -->
-        <div *ngIf="activeTab==='experience'" class="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6">
+        <div *ngIf="activeTab==='experience'"
+          class="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-4 md:space-y-6">
           <div class="flex items-center justify-between">
-            <h2 class="text-xl font-black text-gray-900 dark:text-white">Professional Experience</h2>
-            <button class="btn-primary !py-2 !px-4 text-sm" *ngIf="!editingExperienceMode"
-              (click)="startAddExperience()">
+            <h2 class="text-base sm:text-xl font-black text-gray-900 dark:text-white">Professional Experience</h2>
+            <button class="btn-primary !py-1 sm:!py-2 !px-3 sm:!px-4 text-xs sm:text-sm font-semibold"
+              *ngIf="!editingExperienceMode" (click)="startAddExperience()">
               <i class="fa-solid fa-plus"></i> Add New
             </button>
           </div>
@@ -425,9 +422,7 @@
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Hospital / Clinic
                   Name</label>
-                <app-select-dropdown
-                  [(ngModel)]="newExperience.hospitalName"
-                  [options]="hospitalOptions"
+                <app-select-dropdown [(ngModel)]="newExperience.hospitalName" [options]="hospitalOptions"
                   placeholder="Select hospital">
                 </app-select-dropdown>
                 <div *ngIf="newExperience.hospitalName==='__other__'" class="mt-2 flex items-center gap-2">
@@ -439,9 +434,7 @@
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Designation /
                   Role</label>
-                <app-select-dropdown
-                  [(ngModel)]="newExperience.position"
-                  [options]="positionOptions"
+                <app-select-dropdown [(ngModel)]="newExperience.position" [options]="positionOptions"
                   placeholder="Select position">
                 </app-select-dropdown>
                 <div *ngIf="newExperience.position==='__other__'" class="mt-2 flex items-center gap-2">
@@ -520,11 +513,11 @@
 
         <!-- Certificates Tab -->
         <div *ngIf="activeTab==='certificates'"
-          class="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6">
+          class="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-4 md:space-y-6">
           <div class="flex items-center justify-between">
-            <h2 class="text-xl font-black text-gray-900 dark:text-white">Medical Certificates</h2>
-            <button class="btn-primary !py-2 !px-4 text-sm" *ngIf="!editingCertificatesMode"
-              (click)="startAddCertificate()">
+            <h2 class="text-base sm:text-xl font-black text-gray-900 dark:text-white">Medical Certificates</h2>
+            <button class="btn-primary !py-1 sm:!py-2 !px-3 sm:!px-4 text-xs sm:text-sm font-semibold"
+              *ngIf="!editingCertificatesMode" (click)="startAddCertificate()">
               <i class="fa-solid fa-upload"></i> Upload Certificate
             </button>
           </div>
@@ -634,17 +627,11 @@
                 <input class="input-modern" [(ngModel)]="certEdit[eid].issuingOrganization" placeholder="Institution" />
               </div>
               <div class="space-y-1.5">
-                <app-date-picker
-                  [(ngModel)]="certEdit[eid].issueDate"
-                  label="Issue Date"
-                  placeholder="Select Date">
+                <app-date-picker [(ngModel)]="certEdit[eid].issueDate" label="Issue Date" placeholder="Select Date">
                 </app-date-picker>
               </div>
               <div class="space-y-1.5">
-                <app-date-picker
-                  [(ngModel)]="certEdit[eid].expiryDate"
-                  label="Expiry Date"
-                  placeholder="Select Date">
+                <app-date-picker [(ngModel)]="certEdit[eid].expiryDate" label="Expiry Date" placeholder="Select Date">
                 </app-date-picker>
               </div>
               <div class="space-y-1.5">

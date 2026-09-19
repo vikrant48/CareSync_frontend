@@ -24,34 +24,43 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
     <app-doctor-layout>
     <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
       <!-- Header -->
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Appointments</h2>
-          <p class="text-gray-500 dark:text-gray-400 text-sm">Manage your patient appointments and schedules</p>
+          <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Appointments</h2>
+          <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mt-0.5">Manage your patient appointments and schedules</p>
         </div>
-        <button class="btn-secondary flex items-center gap-2" (click)="refresh()" [disabled]="loading">
-          <i class="fa-solid fa-arrows-rotate" [class.animate-spin]="loading"></i>
-          <span>Refresh</span>
-        </button>
       </div>
 
-      <!-- Filters -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm space-y-5">
-        <div class="flex items-center justify-between mb-2">
-           <div class="flex items-center gap-2">
-             <i class="fa-solid fa-filter text-blue-600 dark:text-blue-400"></i>
-             <h3 class="font-semibold text-gray-900 dark:text-white">Filters</h3>
+      <!-- Filters (Minimized & Collapsible for Mobile) -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-gray-100 dark:border-gray-700 shadow-sm space-y-3 sm:space-y-4">
+        <div class="flex items-center justify-between cursor-pointer sm:cursor-default" (click)="toggleFilter()">
+           <div class="flex items-center gap-2 min-w-0">
+             <i class="fa-solid fa-filter text-blue-600 dark:text-blue-400 text-xs sm:text-sm"></i>
+             <h3 class="font-semibold text-xs sm:text-base text-gray-900 dark:text-white">Filters</h3>
+             <span *ngIf="statusFilter !== 'ALL' || searchTerm || range !== 'ALL'" class="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0">
+               Active
+             </span>
            </div>
-           <button *ngIf="statusFilter !== 'ALL' || searchTerm || range !== 'ALL'" 
-                   (click)="statusFilter='ALL'; range='ALL'; searchTerm=''; refresh()" 
-                   class="text-sm text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium hover:underline transition-all animate-in fade-in">
-             Clear All
-           </button>
+           
+           <div class="flex items-center gap-2 shrink-0" (click)="$event.stopPropagation()">
+             <button *ngIf="statusFilter !== 'ALL' || searchTerm || range !== 'ALL'" 
+                     (click)="statusFilter='ALL'; range='ALL'; searchTerm=''; refresh()" 
+                     class="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium hover:underline transition-all">
+               Clear All
+             </button>
+             <button (click)="toggleFilter()" class="sm:hidden text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-lg flex items-center gap-1 text-xs font-bold transition-all shrink-0">
+               <i class="fa-solid fa-sliders text-[10px]"></i>
+               <span>{{ isFilterExpanded ? 'Hide' : 'Filter' }}</span>
+               <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300" [class.rotate-180]="isFilterExpanded"></i>
+             </button>
+           </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-5 transition-all duration-300"
+             [ngClass]="{ 'hidden sm:grid': !isFilterExpanded, 'grid pt-2': isFilterExpanded }">
           <!-- Status Filter -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</label>
+          <div class="space-y-1">
+            <label class="text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</label>
               <app-select-dropdown
                 [(ngModel)]="statusFilter"
                 [options]="statusOptions"
@@ -61,21 +70,21 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
           </div>
 
           <!-- Search Filter -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Search</label>
+          <div class="space-y-1">
+            <label class="text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Search</label>
             <div class="relative">
-              <input type="text" class="input-modern" [(ngModel)]="searchTerm" (input)="onFilterChange()" placeholder="Search patient name or ID..." />
+              <input type="text" class="w-full px-3 py-1.5 sm:py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all text-gray-900 dark:text-white" [(ngModel)]="searchTerm" (input)="onFilterChange()" placeholder="Search patient name or ID..." />
             </div>
           </div>
 
           <!-- Time Range Filter -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Time Range</label>
-            <div class="flex bg-gray-100 dark:bg-gray-700/50 p-1 rounded-xl">
-              <button class="btn-tab flex-1" [class.active]="range==='TODAY'" (click)="setRange('TODAY')">Today</button>
-              <button class="btn-tab flex-1" [class.active]="range==='UPCOMING'" (click)="setRange('UPCOMING')">Upcoming</button>
-              <button class="btn-tab flex-1" [class.active]="range==='PAST'" (click)="setRange('PAST')">Past</button>
-              <button class="btn-tab flex-1" [class.active]="range==='ALL'" (click)="setRange('ALL')">All</button>
+          <div class="space-y-1">
+            <label class="text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Time Range</label>
+            <div class="flex bg-gray-100 dark:bg-gray-700/50 p-1 rounded-xl gap-1">
+              <button class="flex-1 py-1 px-1.5 text-xs font-medium rounded-lg transition-all" [class.bg-white]="range==='TODAY'" [class.dark:bg-gray-800]="range==='TODAY'" [class.shadow-sm]="range==='TODAY'" [class.text-blue-600]="range==='TODAY'" (click)="setRange('TODAY')">Today</button>
+              <button class="flex-1 py-1 px-1.5 text-xs font-medium rounded-lg transition-all" [class.bg-white]="range==='UPCOMING'" [class.dark:bg-gray-800]="range==='UPCOMING'" [class.shadow-sm]="range==='UPCOMING'" [class.text-blue-600]="range==='UPCOMING'" (click)="setRange('UPCOMING')">Upcoming</button>
+              <button class="flex-1 py-1 px-1.5 text-xs font-medium rounded-lg transition-all" [class.bg-white]="range==='PAST'" [class.dark:bg-gray-800]="range==='PAST'" [class.shadow-sm]="range==='PAST'" [class.text-blue-600]="range==='PAST'" (click)="setRange('PAST')">Past</button>
+              <button class="flex-1 py-1 px-1.5 text-xs font-medium rounded-lg transition-all" [class.bg-white]="range==='ALL'" [class.dark:bg-gray-800]="range==='ALL'" [class.shadow-sm]="range==='ALL'" [class.text-blue-600]="range==='ALL'" (click)="setRange('ALL')">All</button>
             </div>
           </div>
         </div>
@@ -204,6 +213,12 @@ export class DoctorAppointmentsComponent {
   appointments: DoctorAppointmentItem[] = [];
   statusFilter: string = 'ALL';
   statuses: string[] = [];
+  isFilterExpanded = false;
+
+  toggleFilter() {
+    this.isFilterExpanded = !this.isFilterExpanded;
+  }
+
   get statusOptions(): SelectOption[] {
     return [
       { value: 'ALL', label: 'All Statuses' },

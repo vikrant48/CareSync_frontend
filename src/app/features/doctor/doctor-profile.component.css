@@ -1,14 +1,14 @@
 /* Custom Profile Styles */
 .profile-cover {
-    @apply h-32 md:h-48 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 relative rounded-t-[2rem];
+    @apply h-24 md:h-48 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 relative rounded-t-[2rem];
 }
 
 .profile-avatar-container {
-    @apply relative -mt-16 md:-mt-20 z-10 mx-auto md:mx-0;
+    @apply relative -mt-12 md:-mt-20 z-10 mx-auto md:mx-0;
 }
 
 .avatar-wrapper {
-    @apply w-32 h-32 md:w-40 md:h-40 rounded-full border-8 border-white dark:border-gray-950 bg-gray-100 dark:bg-gray-800 overflow-hidden shadow-2xl relative cursor-pointer;
+    @apply w-24 h-24 md:w-40 md:h-40 rounded-full border-4 md:border-8 border-white dark:border-gray-950 bg-gray-100 dark:bg-gray-800 overflow-hidden shadow-2xl relative cursor-pointer;
 }
 
 .avatar-overlay {
@@ -16,16 +16,16 @@
 }
 
 .on-image-btn {
-    @apply absolute bottom-2 right-2 w-10 h-10 rounded-full bg-blue-500 text-white border-2 border-white dark:border-gray-950 flex items-center justify-center shadow-lg hover:bg-blue-600 transition-colors z-20;
+    @apply absolute bottom-1 right-1 w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-500 text-white border-2 border-white dark:border-gray-950 flex items-center justify-center shadow-lg hover:bg-blue-600 transition-colors z-20;
 }
 
 /* Tab & Navigation */
 .tab-pills {
-    @apply flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar;
+    @apply flex items-center gap-1.5 md:gap-2 overflow-x-auto pb-2 no-scrollbar;
 }
 
 .tab-pill {
-    @apply px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all;
+    @apply px-3 py-1.5 md:px-5 md:py-2.5 rounded-full text-xs md:text-sm font-bold whitespace-nowrap transition-all;
     @apply text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700;
 }
 
@@ -35,12 +35,12 @@
 
 /* Response Cards (Mobile Lists) */
 .list-card {
-    @apply bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm space-y-3;
+    @apply bg-white dark:bg-gray-800 p-4 md:p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm space-y-3;
 }
 
 /* Utilities */
 .stat-item {
-    @apply flex flex-col items-center p-3 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 text-center min-w-[100px];
+    @apply flex flex-col items-center p-2 md:p-3 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 text-center min-w-[70px] md:min-w-[100px];
 }
 
 .link {

@@ -31,14 +31,14 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
         <div *ngIf="!loadingReports; else loadingTpl" class="space-y-8 animate-in fade-in duration-500">
           
           <!-- Summary Stats Cards -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <!-- Total Appointments -->
-            <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
-              <div class="absolute right-0 top-0 w-24 h-24 bg-blue-50 dark:bg-blue-900/20 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+            <div class="bg-white dark:bg-gray-800 p-3.5 sm:p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
+              <div class="absolute right-0 top-0 w-16 h-16 sm:w-24 sm:h-24 bg-blue-50 dark:bg-blue-900/20 rounded-full -mr-6 -mt-6 sm:-mr-8 sm:-mt-8 transition-transform group-hover:scale-110"></div>
               <div class="relative z-10">
-                <div class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Total Appointments</div>
-                <div class="text-3xl font-bold text-gray-800 dark:text-white">{{ patientAnalytics?.totalAppointments || 0 }}</div>
-                <div class="mt-2 text-xs text-blue-600 dark:text-blue-400 font-medium flex items-center gap-1">
+                <div class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium mb-1 truncate">Total Appointments</div>
+                <div class="text-xl sm:text-3xl font-bold text-gray-800 dark:text-white">{{ patientAnalytics?.totalAppointments || 0 }}</div>
+                <div class="mt-1.5 sm:mt-2 text-[10px] sm:text-xs text-blue-600 dark:text-blue-400 font-medium flex items-center gap-1">
                   <i class="fa-solid fa-arrow-up"></i>
                   <span>All time</span>
                 </div>
@@ -46,12 +46,12 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
             </div>
 
             <!-- Avg Visits -->
-            <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
-              <div class="absolute right-0 top-0 w-24 h-24 bg-emerald-50 dark:bg-emerald-900/20 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+            <div class="bg-white dark:bg-gray-800 p-3.5 sm:p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
+              <div class="absolute right-0 top-0 w-16 h-16 sm:w-24 sm:h-24 bg-emerald-50 dark:bg-emerald-900/20 rounded-full -mr-6 -mt-6 sm:-mr-8 sm:-mt-8 transition-transform group-hover:scale-110"></div>
               <div class="relative z-10">
-                <div class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Avg. Visits / Month</div>
-                <div class="text-3xl font-bold text-gray-800 dark:text-white">{{ patientAnalytics?.averageVisitsPerMonth || 0 }}</div>
-                <div class="mt-2 text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                <div class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium mb-1 truncate">Avg. Visits / Month</div>
+                <div class="text-xl sm:text-3xl font-bold text-gray-800 dark:text-white">{{ patientAnalytics?.averageVisitsPerMonth || 0 }}</div>
+                <div class="mt-1.5 sm:mt-2 text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
                   <i class="fa-solid fa-chart-line"></i>
                   <span>Activity Level</span>
                 </div>
@@ -59,12 +59,12 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
             </div>
 
              <!-- Cancelled (Derived) -->
-            <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
-              <div class="absolute right-0 top-0 w-24 h-24 bg-rose-50 dark:bg-rose-900/20 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+            <div class="bg-white dark:bg-gray-800 p-3.5 sm:p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
+              <div class="absolute right-0 top-0 w-16 h-16 sm:w-24 sm:h-24 bg-rose-50 dark:bg-rose-900/20 rounded-full -mr-6 -mt-6 sm:-mr-8 sm:-mt-8 transition-transform group-hover:scale-110"></div>
               <div class="relative z-10">
-                <div class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Cancelled</div>
-                <div class="text-3xl font-bold text-gray-800 dark:text-white">{{ patientAnalytics?.cancelledAppointments || 0 }}</div>
-                <div class="mt-2 text-xs text-rose-600 dark:text-rose-400 font-medium flex items-center gap-1">
+                <div class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium mb-1 truncate">Cancelled</div>
+                <div class="text-xl sm:text-3xl font-bold text-gray-800 dark:text-white">{{ patientAnalytics?.cancelledAppointments || 0 }}</div>
+                <div class="mt-1.5 sm:mt-2 text-[10px] sm:text-xs text-rose-600 dark:text-rose-400 font-medium flex items-center gap-1">
                   <i class="fa-solid fa-ban"></i>
                   <span>Missed</span>
                 </div>
@@ -72,12 +72,12 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
             </div>
 
             <!-- Completed (Derived) -->
-            <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
-              <div class="absolute right-0 top-0 w-24 h-24 bg-indigo-50 dark:bg-indigo-900/20 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+            <div class="bg-white dark:bg-gray-800 p-3.5 sm:p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
+              <div class="absolute right-0 top-0 w-16 h-16 sm:w-24 sm:h-24 bg-indigo-50 dark:bg-indigo-900/20 rounded-full -mr-6 -mt-6 sm:-mr-8 sm:-mt-8 transition-transform group-hover:scale-110"></div>
               <div class="relative z-10">
-                <div class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Completed</div>
-                <div class="text-3xl font-bold text-gray-800 dark:text-white">{{ patientAnalytics?.totalVisits || 0 }}</div>
-                <div class="mt-2 text-xs text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-1">
+                <div class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium mb-1 truncate">Completed</div>
+                <div class="text-xl sm:text-3xl font-bold text-gray-800 dark:text-white">{{ patientAnalytics?.totalVisits || 0 }}</div>
+                <div class="mt-1.5 sm:mt-2 text-[10px] sm:text-xs text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-1">
                   <i class="fa-solid fa-check-double"></i>
                   <span>Successful</span>
                 </div>
@@ -86,14 +86,14 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
           </div>
 
           <!-- Financial Stats Cards -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
             <!-- Total Spend -->
-            <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
-              <div class="absolute right-0 top-0 w-24 h-24 bg-amber-50 dark:bg-amber-900/20 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+            <div class="col-span-2 sm:col-span-1 bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
+              <div class="absolute right-0 top-0 w-20 h-20 sm:w-24 sm:h-24 bg-amber-50 dark:bg-amber-900/20 rounded-full -mr-6 -mt-6 sm:-mr-8 sm:-mt-8 transition-transform group-hover:scale-110"></div>
               <div class="relative z-10">
-                <div class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Total Spend</div>
-                <div class="text-3xl font-bold text-gray-800 dark:text-white">₹{{ financialStats?.totalSpend || 0 }}</div>
-                <div class="mt-2 text-xs text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
+                <div class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium mb-1">Total Spend</div>
+                <div class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white">₹{{ financialStats?.totalSpend || 0 }}</div>
+                <div class="mt-1.5 sm:mt-2 text-[10px] sm:text-xs text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
                   <i class="fa-solid fa-wallet"></i>
                   <span>Lifetime</span>
                 </div>
@@ -101,27 +101,27 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
             </div>
 
             <!-- Appointment Spend -->
-            <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
-              <div class="absolute right-0 top-0 w-24 h-24 bg-cyan-50 dark:bg-cyan-900/20 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+            <div class="col-span-1 bg-white dark:bg-gray-800 p-3.5 sm:p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
+              <div class="absolute right-0 top-0 w-16 h-16 sm:w-24 sm:h-24 bg-cyan-50 dark:bg-cyan-900/20 rounded-full -mr-6 -mt-6 sm:-mr-8 sm:-mt-8 transition-transform group-hover:scale-110"></div>
               <div class="relative z-10">
-                <div class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Appointment Spend</div>
-                <div class="text-3xl font-bold text-gray-800 dark:text-white">₹{{ financialStats?.totalAppointmentSpend || 0 }}</div>
-                <div class="mt-2 text-xs text-cyan-600 dark:text-cyan-400 font-medium flex items-center gap-1">
+                <div class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium mb-1 truncate">Appointment Spend</div>
+                <div class="text-xl sm:text-3xl font-bold text-gray-800 dark:text-white">₹{{ financialStats?.totalAppointmentSpend || 0 }}</div>
+                <div class="mt-1.5 sm:mt-2 text-[10px] sm:text-xs text-cyan-600 dark:text-cyan-400 font-medium flex items-center gap-1">
                   <i class="fa-solid fa-user-doctor"></i>
-                  <span>Consultations</span>
+                  <span class="truncate">Consultations</span>
                 </div>
               </div>
             </div>
 
             <!-- Lab Test Spend -->
-            <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
-              <div class="absolute right-0 top-0 w-24 h-24 bg-purple-50 dark:bg-purple-900/20 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+            <div class="col-span-1 bg-white dark:bg-gray-800 p-3.5 sm:p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
+              <div class="absolute right-0 top-0 w-16 h-16 sm:w-24 sm:h-24 bg-purple-50 dark:bg-purple-900/20 rounded-full -mr-6 -mt-6 sm:-mr-8 sm:-mt-8 transition-transform group-hover:scale-110"></div>
               <div class="relative z-10">
-                <div class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Lab Test Spend</div>
-                <div class="text-3xl font-bold text-gray-800 dark:text-white">₹{{ financialStats?.totalLabTestSpend || 0 }}</div>
-                <div class="mt-2 text-xs text-purple-600 dark:text-purple-400 font-medium flex items-center gap-1">
+                <div class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium mb-1 truncate">Lab Test Spend</div>
+                <div class="text-xl sm:text-3xl font-bold text-gray-800 dark:text-white">₹{{ financialStats?.totalLabTestSpend || 0 }}</div>
+                <div class="mt-1.5 sm:mt-2 text-[10px] sm:text-xs text-purple-600 dark:text-purple-400 font-medium flex items-center gap-1">
                   <i class="fa-solid fa-flask"></i>
-                  <span>Tests & Diagnostics</span>
+                  <span class="truncate">Tests & Diagnostics</span>
                 </div>
               </div>
             </div>
@@ -190,7 +190,7 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
         </div>
 
         <ng-template #loadingTpl>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 animate-pulse">
              <div class="h-32 bg-gray-200 dark:bg-gray-700 rounded-2xl" *ngFor="let i of [1,2,3,4]"></div>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 animate-pulse">

@@ -25,30 +25,39 @@ import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.co
       <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200 tracking-tight">My Appointments</h2>
-           <p class="text-gray-800 dark:text-gray-400 text-sm mt-1">Manage and track your scheduled consultations</p>
+          <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-200 tracking-tight">My Appointments</h2>
+           <p class="text-gray-800 dark:text-gray-400 text-xs sm:text-sm mt-0.5">Manage and track your scheduled consultations</p>
         </div>
-        <button class="btn-secondary self-start sm:self-auto text-sm py-2 px-4 shadow-lg shadow-gray-900/20" (click)="refresh()" [disabled]="loading">
-           <i class="fa-solid fa-rotate mr-2" [class.fa-spin]="loading"></i> Refresh
-        </button>
       </div>
 
       <!-- Filters -->
-      <div class="panel p-4 sm:p-6 space-y-4 shadow-lg relative z-30">
-        <div class="flex items-center justify-between gap-2 mb-2">
-            <div class="flex items-center gap-2">
-               <i class="fa-solid fa-filter text-blue-500"></i>
-               <span class="font-semibold text-gray-800 dark:text-gray-200">Filters</span>
+      <div class="panel p-3 sm:p-6 shadow-lg relative z-30 transition-all duration-300">
+        <div class="flex items-center justify-between gap-2 cursor-pointer sm:cursor-default" (click)="toggleFilter()">
+            <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
+               <i class="fa-solid fa-sliders text-blue-500 shrink-0"></i>
+               <span class="font-bold text-sm sm:text-base text-gray-800 dark:text-gray-200 shrink-0">Filters</span>
+               <span *ngIf="activeFilterCount > 0" class="bg-blue-600 text-white text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold shrink-0 whitespace-nowrap">
+                 {{ activeFilterCount }} Active
+               </span>
             </div>
-            <button *ngIf="statusFilter || specializationFilter || rangeFilter" 
-                    (click)="clearFilters()" 
-                    class="text-xs text-red-600 dark:text-red-400 hover:text-red-300 hover:underline flex items-center gap-1 transition-colors">
-               <i class="fa-solid fa-xmark"></i> Clear Filters
-            </button>
+            
+            <div class="flex items-center gap-2 shrink-0" (click)="$event.stopPropagation()">
+               <button *ngIf="activeFilterCount > 0" 
+                       (click)="clearFilters()" 
+                       class="text-xs text-red-600 dark:text-red-400 hover:text-red-300 hover:underline flex items-center gap-1 transition-colors font-medium shrink-0 whitespace-nowrap">
+                  <i class="fa-solid fa-xmark text-xs"></i> Clear
+               </button>
+               <button (click)="toggleFilter()" class="sm:hidden text-blue-500 hover:text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-1 rounded-lg flex items-center gap-1 text-xs font-bold transition-all shrink-0 whitespace-nowrap">
+                 <i class="fa-solid fa-filter text-[10px]"></i>
+                 <span>{{ isFilterExpanded ? 'Hide' : 'Filter' }}</span>
+                 <i class="fa-solid fa-chevron-down transition-transform duration-300" [class.rotate-180]="isFilterExpanded"></i>
+               </button>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div class="relative z-10">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 transition-all duration-300"
+             [ngClass]="{ 'hidden sm:grid': !isFilterExpanded, 'grid mt-3': isFilterExpanded }">
+          <div class="relative">
             <label class="block text-xs font-medium text-gray-800 dark:text-gray-400 mb-1 ml-1">Status</label>
             <app-select-dropdown
               [(ngModel)]="statusFilter"
@@ -57,12 +66,12 @@ import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.co
             </app-select-dropdown>
           </div>
           
-          <div class="relative z-10">
+          <div class="relative">
             <label class="block text-xs font-medium text-gray-800 dark:text-gray-400 mb-1 ml-1">Specialization</label>
             <input type="text" class="input w-full bg-gray-800/50" [(ngModel)]="specializationFilter" placeholder="e.g. Cardiology..." />
           </div>
           
-          <div class="relative z-10">
+          <div class="relative">
              <label class="block text-xs font-medium text-gray-800 dark:text-gray-400 mb-1 ml-1">Time Range</label>
              <app-select-dropdown
                 [(ngModel)]="rangeFilter"
@@ -72,7 +81,7 @@ import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.co
           </div>
         </div>
 
-        <div class="flex items-center justify-end border-t border-gray-800 pt-3 mt-2">
+        <div class="flex items-center justify-end border-t border-gray-800 pt-3 mt-3">
           <div class="text-xs text-gray-800 dark:text-gray-400">
              Showing <span class="font-bold text-gray-800 dark:text-gray-200">{{ filtered().length }}</span> of {{ appointments.length }} appointments
           </div>
@@ -155,6 +164,20 @@ export class MyAppointmentsComponent {
   specializationFilter = '';
   rangeFilter: 'upcoming' | 'today' | 'past' | '' = '';
   statuses: string[] = [];
+
+  isFilterExpanded = false;
+
+  toggleFilter() {
+    this.isFilterExpanded = !this.isFilterExpanded;
+  }
+
+  get activeFilterCount(): number {
+    let count = 0;
+    if (this.statusFilter) count++;
+    if (this.specializationFilter) count++;
+    if (this.rangeFilter) count++;
+    return count;
+  }
 
   get statusOptions(): SelectOption[] {
     return [

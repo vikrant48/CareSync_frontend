@@ -15,42 +15,52 @@ import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropd
   imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent, SelectDropdownComponent],
   template: `
     <app-patient-layout>
-    <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6 pb-24">
+    <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6 pb-36 sm:pb-28">
       <!-- Header Section -->
-      <section class="panel p-4 sm:p-6 flex flex-col items-center justify-between gap-4 md:flex-row shadow-lg">
-        <div class="flex flex-col gap-1 w-full md:w-auto text-center md:text-left">
-          <h2 class="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
+      <section class="panel p-3 sm:p-6 flex flex-col md:flex-row items-center justify-between gap-3 shadow-lg">
+        <div class="flex flex-col gap-0.5 w-full md:w-auto text-center md:text-left">
+          <h2 class="text-lg sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
              Find & Book Appointments
           </h2>
-          <p class="text-sm text-gray-600 dark:text-gray-400">Search for specialized doctors and book your slot.</p>
+          <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Search for specialized doctors and book your slot.</p>
         </div>
         
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
-            <button class="btn-primary !bg-red-600/90 !hover:bg-red-600 border-none shadow-lg shadow-red-900/40 text-white font-medium px-5 py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95" (click)="openEmergencyModal()">
-              <div class="w-2 h-2 rounded-full bg-white animate-pulse"></div> Emergency Booking
+        <div class="flex flex-row items-center justify-center gap-2 w-full md:w-auto mt-1 md:mt-0">
+            <button class="btn-primary !bg-red-600/90 !hover:bg-red-600 border-none shadow-md shadow-red-900/40 text-white font-medium px-3.5 py-1.5 sm:px-5 sm:py-2.5 rounded-lg text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all hover:scale-105 active:scale-95" (click)="openEmergencyModal()">
+              <div class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div> Emergency Booking
             </button>
-           <button class="text-blue-400 hover:text-white transition-colors text-sm font-medium px-3 py-2 flex items-center justify-center gap-2 hover:bg-white/5 rounded-lg border border-transparent hover:border-white/10" (click)="refreshDoctors()">
-             <i class="fa-solid fa-rotate-right" [class.animate-spin]="loadingDoctors"></i> Refresh
-           </button>
         </div>
       </section>
 
       <!-- Filters Section -->
-      <section class="panel p-4 sm:p-6 space-y-4 shadow-lg relative z-30">
-        <div class="flex items-center justify-between gap-2 mb-2">
-            <div class="flex items-center gap-2">
-               <i class="fa-solid fa-filter text-blue-500"></i>
-               <span class="font-semibold text-gray-800 dark:text-gray-200">Filters</span>
+      <section class="panel p-3 sm:p-6 shadow-lg relative z-30 transition-all duration-300">
+        <div class="flex items-center justify-between gap-2 cursor-pointer sm:cursor-default" (click)="toggleFilter()">
+            <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
+               <i class="fa-solid fa-sliders text-blue-500 shrink-0"></i>
+               <span class="font-bold text-sm sm:text-base text-gray-800 dark:text-gray-200 shrink-0">Filters</span>
+               <span *ngIf="activeFilterCount > 0" class="bg-blue-600 text-white text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold shrink-0 whitespace-nowrap">
+                 {{ activeFilterCount }} Active
+               </span>
             </div>
-            <button *ngIf="specializationFilter || nameFilter || genderFilter || addressFilter" 
-                    (click)="resetFilters()" 
-                    class="text-xs text-red-600 dark:text-red-400 hover:text-red-300 hover:underline flex items-center gap-1 transition-colors">
-               <i class="fa-solid fa-xmark"></i> Clear Filters
-            </button>
+            
+            <div class="flex items-center gap-2 shrink-0" (click)="$event.stopPropagation()">
+               <button *ngIf="activeFilterCount > 0" 
+                       (click)="resetFilters()" 
+                       class="text-xs text-red-600 dark:text-red-400 hover:text-red-300 hover:underline flex items-center gap-1 transition-colors font-medium shrink-0 whitespace-nowrap">
+                  <i class="fa-solid fa-xmark text-xs"></i> Clear
+               </button>
+               <button (click)="toggleFilter()" class="sm:hidden text-blue-500 hover:text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-1 rounded-lg flex items-center gap-1 text-xs font-bold transition-all shrink-0 whitespace-nowrap">
+                 <i class="fa-solid fa-filter text-[10px]"></i>
+                 <span>{{ isFilterExpanded ? 'Hide' : 'Filter' }}</span>
+                 <i class="fa-solid fa-chevron-down transition-transform duration-300" [class.rotate-180]="isFilterExpanded"></i>
+               </button>
+            </div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 transition-all duration-300"
+             [ngClass]="{ 'hidden sm:grid': !isFilterExpanded, 'grid mt-3': isFilterExpanded }">
           <app-specialization-autocomplete
-            class="w-full relative z-40"
+            class="w-full relative"
             [(ngModel)]="specializationFilter"
             (ngModelChange)="onFilterChange()"
             placeholder="Specialization..."
@@ -58,11 +68,11 @@ import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropd
             [allowAddNew]="false">
           </app-specialization-autocomplete>
           
-          <div class="relative z-10">
+          <div class="relative">
              <input type="text" class="input w-full bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400" placeholder="Doctor name..." [(ngModel)]="nameFilter" (ngModelChange)="onFilterChange()" />
           </div>
 
-          <div class="relative z-10 font-medium">
+          <div class="relative font-medium">
             <app-select-dropdown
               [(ngModel)]="genderFilter"
               (ngModelChange)="onFilterChange()"
@@ -71,7 +81,7 @@ import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropd
             </app-select-dropdown>
           </div>
 
-         <div class="relative z-10">
+         <div class="relative">
              <input type="text" class="input w-full bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400" placeholder="Location..." [(ngModel)]="addressFilter" (ngModelChange)="onFilterChange()" />
           </div>
         </div>
@@ -195,6 +205,21 @@ export class PatientBookAppointmentComponent {
   page = 0;
   size = 50;
   totalDoctorsCount = 0;
+
+  isFilterExpanded = false;
+
+  toggleFilter() {
+    this.isFilterExpanded = !this.isFilterExpanded;
+  }
+
+  get activeFilterCount(): number {
+    let count = 0;
+    if (this.specializationFilter) count++;
+    if (this.nameFilter) count++;
+    if (this.genderFilter) count++;
+    if (this.addressFilter) count++;
+    return count;
+  }
 
   get genderOptions(): SelectOption[] {
     return [
