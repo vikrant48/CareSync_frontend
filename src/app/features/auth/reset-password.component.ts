@@ -12,7 +12,7 @@ import { ToastContainerComponent } from '../../shared/toast-container.component'
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, ToastContainerComponent],
   template: `
-    <div class="h-screen bg-gray-50 dark:bg-gray-950 flex flex-col justify-center pt-12 pb-40 px-4 sm:px-6 lg:px-8 relative overflow-hidden transition-colors duration-300">
+    <div class="min-h-[calc(100dvh-3.5rem)] bg-gray-50 dark:bg-gray-950 flex flex-col justify-center py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden transition-colors duration-300">
       
       <!-- Background Elements -->
       <div class="absolute inset-0 overflow-hidden pointer-events-none">

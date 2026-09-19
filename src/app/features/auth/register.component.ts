@@ -17,7 +17,7 @@ import { FeatureCarouselComponent } from './feature-carousel.component';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, ToastContainerComponent, SelectDropdownComponent, DatePickerComponent, FeatureCarouselComponent],
   template: `
-    <div class="min-h-screen bg-white dark:bg-gray-950 grid lg:grid-cols-2 overflow-hidden transition-all duration-500">
+    <div class="min-h-[calc(100dvh-3.5rem)] bg-white dark:bg-gray-950 grid lg:grid-cols-2 overflow-hidden transition-all duration-500">
       
       <!-- Left Side: Auto-Rotating Feature Carousel (Hidden on Mobile) -->
       <div class="hidden lg:block h-full">
@@ -25,32 +25,21 @@ import { FeatureCarouselComponent } from './feature-carousel.component';
       </div>
 
       <!-- Right Side: Interaction Panel -->
-      <div class="relative flex flex-col h-screen overflow-y-auto custom-scrollbar bg-white dark:bg-gray-950">
+      <div class="relative flex flex-col justify-start min-h-[calc(100dvh-3.5rem)] py-4 sm:py-6 lg:py-8 px-4 sm:px-6 lg:px-12 xl:px-20 max-w-[54rem] mx-auto w-full bg-white dark:bg-gray-950">
         
-        <!-- Mobile Header -->
-        <div class="lg:hidden px-6 py-3 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md sticky top-0 z-50">
-          <div class="flex items-center gap-2">
-            <div class="w-6 h-6 bg-emerald-500 rounded-lg flex items-center justify-center text-white text-xs">
-              <i class="fa-solid fa-heart-pulse"></i>
-            </div>
-            <span class="text-sm font-black uppercase tracking-tight dark:text-white">CareSync</span>
-          </div>
-          <a routerLink="/login" class="text-[10px] font-black uppercase tracking-widest text-emerald-600">Sign In</a>
-        </div>
-
-        <div class="flex-1 flex flex-col justify-start pt-4 sm:pt-6 lg:pt-8 pb-6 px-6 lg:px-12 xl:px-20 max-w-[54rem] mx-auto w-full transition-all duration-500">
+        <div>
           
           <!-- Page Header -->
           <div class="mb-4">
-            <h2 class="text-2xl font-black text-gray-900 dark:text-white tracking-tighter mb-0.5 leading-none">Create Account</h2>
+            <h2 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tighter mb-0.5 leading-none">Create Account</h2>
             <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Join our healthcare network</p>
           </div>
 
           <!-- Progress Indicator -->
-          <div class="relative flex items-center justify-between mb-8 px-1">
-            <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-[1.5px] bg-gray-100 dark:bg-gray-800 z-0"></div>
-            <div class="absolute left-0 top-1/2 -translate-y-1/2 h-[2px] bg-emerald-500 transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] shadow-[0_0_12px_rgba(16,185,129,0.5)] z-0" 
-                 [style.width.%]="(currentStep - 1) * 33.33"></div>
+          <div class="relative flex items-center justify-between mb-8 px-2 sm:px-4">
+            <div class="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-[1.5px] bg-gray-100 dark:bg-gray-800 z-0"></div>
+            <div class="absolute left-4 top-1/2 -translate-y-1/2 h-[2px] bg-emerald-500 transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] shadow-[0_0_12px_rgba(16,185,129,0.5)] z-0" 
+                 [style.width.%]="(currentStep - 1) * 31"></div>
             
             <ng-container *ngFor="let step of [1, 2, 3, 4]; let i = index">
               <div class="relative z-10 flex flex-col items-center group" 
@@ -62,7 +51,7 @@ import { FeatureCarouselComponent } from './feature-carousel.component';
                   <span *ngIf="step >= currentStep">{{ step }}</span>
                 </div>
                 <!-- Label Tooltip -->
-                <div class="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[8.5px] uppercase tracking-[0.08em] font-black transition-all duration-300"
+                <div class="absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap text-[8px] sm:text-[9px] uppercase tracking-wider font-black transition-all duration-300"
                      [ngClass]="{
                        'text-emerald-600 dark:text-emerald-400 opacity-100 scale-105': step === currentStep,
                        'text-emerald-600/80 dark:text-emerald-400/80 opacity-100': step < currentStep,
@@ -394,9 +383,9 @@ export class RegisterComponent implements OnInit {
 
   getStepLabel(step: number): string {
     switch (step) {
-      case 1: return 'Basic Details';
-      case 2: return 'Verify Email';
-      case 3: return 'Choose Role';
+      case 1: return 'Details';
+      case 2: return 'Verify';
+      case 3: return 'Role';
       case 4: return 'Finish';
       default: return '';
     }

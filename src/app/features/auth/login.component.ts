@@ -13,7 +13,7 @@ import { FeatureCarouselComponent } from './feature-carousel.component';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, ToastContainerComponent, FeatureCarouselComponent],
   template: `
-    <div class="min-h-screen bg-white dark:bg-gray-950 grid lg:grid-cols-2 overflow-hidden transition-all duration-500">
+    <div class="min-h-[calc(100dvh-3.5rem)] bg-white dark:bg-gray-950 grid lg:grid-cols-2 overflow-hidden transition-all duration-500">
       
       <!-- Left Side: Auto-Rotating Feature Carousel (Hidden on Mobile) -->
       <div class="hidden lg:block h-full">
@@ -21,20 +21,8 @@ import { FeatureCarouselComponent } from './feature-carousel.component';
       </div>
 
       <!-- Right Side: Interaction Panel -->
-      <div class="relative flex flex-col h-screen overflow-y-auto custom-scrollbar justify-start pt-6 sm:pt-12 lg:pt-16 pb-8 px-4 sm:px-6 lg:px-12 bg-white dark:bg-gray-950">
-        
-        <!-- Mobile Header -->
-        <div class="lg:hidden px-4 py-3 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md sticky top-0 z-50 mb-6">
-          <div class="flex items-center gap-2">
-            <div class="w-6 h-6 bg-emerald-500 rounded-lg flex items-center justify-center text-white text-xs">
-              <i class="fa-solid fa-heart-pulse"></i>
-            </div>
-            <span class="text-sm font-black uppercase tracking-tight dark:text-white">CareSync</span>
-          </div>
-          <a routerLink="/register" class="text-[10px] font-black uppercase tracking-widest text-emerald-600">Register</a>
-        </div>
-
-        <div class="sm:mx-auto sm:w-full sm:max-w-md relative z-10 mt-2 sm:mt-4">
+      <div class="relative flex flex-col justify-center min-h-[calc(100dvh-3.5rem)] py-6 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-12 bg-white dark:bg-gray-950">
+        <div class="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
             <div class="text-center mb-8">
               <h2 class="mt-2 text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
                 Welcome back

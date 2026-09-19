@@ -99,7 +99,7 @@ import { AiAssistantWidgetComponent } from './ai-assistant-widget.component';
 
        <!-- Mobile Bottom Navigation - Standard Fixed Bar -->
       <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] overflow-hidden">
-        <div class="grid grid-cols-4 items-center h-16">
+        <div class="grid grid-cols-5 items-center h-16">
           <a routerLink="/doctor" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20" [routerLinkActiveOptions]="{ exact: true }" class="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
             <i class="fa-solid fa-house text-lg mb-1"></i>
             <span class="text-[10px] font-medium">Home</span>
