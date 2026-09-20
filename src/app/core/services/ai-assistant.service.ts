@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
-import { AiChatRequest, AiChatResponse, MedicalSummaryResponse, DiagnosisSuggestionDto } from '../models/ai.models';
+import { AiChatRequest, AiChatResponse, MedicalSummaryResponse, DiagnosisSuggestionDto, VisionScanResponse, ClinicalDictationResponse } from '../models/ai.models';
 
 @Injectable({ providedIn: 'root' })
 export class AiAssistantService {
@@ -82,5 +82,15 @@ export class AiAssistantService {
 
     suggestDiagnosis(symptoms: string) {
         return this.http.post<DiagnosisSuggestionDto>(`${this.baseUrl}/api/ai/suggest-diagnosis`, { symptoms });
+    }
+
+    scanMedicalDocument(file: File) {
+        const formData = new FormData();
+        formData.append('file', file);
+        return this.http.post<VisionScanResponse>(`${this.baseUrl}/api/ai/scan-document`, formData);
+    }
+
+    dictateClinicalNote(transcript: string) {
+        return this.http.post<ClinicalDictationResponse>(`${this.baseUrl}/api/ai/dictate-note`, { transcript });
     }
 }

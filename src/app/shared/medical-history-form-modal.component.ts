@@ -2,8 +2,9 @@ import { Component, Input, Output, EventEmitter, inject, OnChanges, SimpleChange
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AiAssistantService } from '../core/services/ai-assistant.service';
-import { ClinicalMatch, DiagnosisSuggestionDto } from '../core/models/ai.models';
+import { ClinicalMatch, DiagnosisSuggestionDto, ClinicalDictationResponse } from '../core/models/ai.models';
 import { DatePickerComponent } from './date-picker.component';
+import { ClinicalDictationComponent } from './clinical-dictation.component';
 
 export interface MedicationItem {
    medicine: string;
@@ -13,7 +14,7 @@ export interface MedicationItem {
 @Component({
    selector: 'app-medical-history-form-modal',
    standalone: true,
-   imports: [CommonModule, FormsModule, DatePickerComponent],
+   imports: [CommonModule, FormsModule, DatePickerComponent, ClinicalDictationComponent],
    template: `
     <div *ngIf="open" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
       
@@ -27,15 +28,29 @@ export interface MedicationItem {
           
           <!-- Header -->
           <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-               <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                  <i class="fa-solid fa-file-medical-alt text-lg"></i>
-               </div>
-               <h3 class="text-xl font-bold text-gray-900 dark:text-white" id="modal-title">Medical Record</h3>
-            </div>
-            <button (click)="close.emit()" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-              <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
+             <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                   <i class="fa-solid fa-file-medical-alt text-lg"></i>
+                </div>
+                <div>
+                   <h3 class="text-xl font-bold text-gray-900 dark:text-white leading-tight" id="modal-title">Medical Record</h3>
+                   <p class="text-xs text-gray-500 dark:text-gray-400">Patient consultation & prescription entry</p>
+                </div>
+             </div>
+             
+             <div class="flex items-center gap-2">
+                <button type="button" 
+                        (click)="isDictationOpen = true"
+                        [disabled]="disabled"
+                        class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-emerald-600/20 transition-all transform active:scale-95 disabled:opacity-50">
+                   <i class="fa-solid fa-microphone-lines text-sm"></i>
+                   <span class="hidden sm:inline">🎙️ AI Voice Dictation</span>
+                </button>
+
+                <button (click)="close.emit()" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                  <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+             </div>
           </div>
 
           <!-- Body -->
@@ -53,18 +68,28 @@ export interface MedicationItem {
                    </app-date-picker>
                 </div>
 
-                <!-- 2. Symptoms & AI Suggest -->
+                <!-- 2. Symptoms & AI Suggest / Dictation -->
                 <div class="form-group">
                    <div class="flex items-center justify-between mb-1">
                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Symptoms / Patient Issues</label>
-                      <button type="button" 
-                              (click)="onSuggest()" 
-                              [disabled]="disabled || loadingSuggestions || !form.symptoms"
-                              class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-50"
-                              title="Get AI Suggestions">
-                         <i class="fa-solid fa-wand-magic-sparkles" [class.animate-pulse]="loadingSuggestions"></i>
-                         AI Suggest
-                      </button>
+                      <div class="flex items-center gap-3">
+                        <button type="button" 
+                                (click)="isDictationOpen = true"
+                                [disabled]="disabled"
+                                class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 flex items-center gap-1 transition-all active:scale-95 disabled:opacity-50"
+                                title="Dictate Consultation Notes">
+                           <i class="fa-solid fa-microphone"></i>
+                           Voice Dictation
+                        </button>
+                        <button type="button" 
+                                (click)="onSuggest()" 
+                                [disabled]="disabled || loadingSuggestions || !form.symptoms"
+                                class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-50"
+                                title="Get AI Suggestions">
+                           <i class="fa-solid fa-wand-magic-sparkles" [class.animate-pulse]="loadingSuggestions"></i>
+                           AI Suggest
+                        </button>
+                      </div>
                    </div>
                    <input type="text" class="input-modern" placeholder="e.g. Cough, fever, difficulty breathing..." [(ngModel)]="form.symptoms" name="symptoms" [disabled]="disabled" />
                 </div>
@@ -174,6 +199,13 @@ export interface MedicationItem {
           </div>
         </div>
       </div>
+
+      <!-- AI Voice Dictation Modal Popup -->
+      <app-clinical-dictation
+         *ngIf="isDictationOpen"
+         (closeModal)="isDictationOpen = false"
+         (dictationComplete)="onDictationComplete($event)">
+      </app-clinical-dictation>
     </div>
   `,
    styles: [`
@@ -205,6 +237,7 @@ export class MedicalHistoryFormModalComponent implements OnChanges {
    private aiService = inject(AiAssistantService);
 
    loadingSuggestions = false;
+   isDictationOpen = false;
    clinicalSuggestions: ClinicalMatch[] = [];
    clinicalDisclaimer?: string;
    medicationList: MedicationItem[] = [{ medicine: '', doses: '' }];
@@ -277,6 +310,46 @@ export class MedicalHistoryFormModalComponent implements OnChanges {
 
       this.form.notes = (this.form.notes || '') + (this.form.notes ? '\n\n' : '') + 'AI Reasoning: ' + s.reasoning;
       this.clinicalSuggestions = [];
+   }
+
+   onDictationComplete(res: ClinicalDictationResponse): void {
+      if (!res || !res.success) return;
+
+      if (res.chiefComplaint) {
+         this.form.symptoms = res.chiefComplaint;
+      } else if (res.soapNote?.subjective) {
+         this.form.symptoms = res.soapNote.subjective;
+      }
+
+      if (res.diagnosis) {
+         this.form.diagnosis = res.diagnosis;
+      } else if (res.soapNote?.assessment) {
+         this.form.diagnosis = res.soapNote.assessment;
+      }
+
+      if (res.soapNote?.plan) {
+         this.form.treatment = res.soapNote.plan;
+      }
+
+      if (res.prescriptions && res.prescriptions.length > 0) {
+         this.medicationList = res.prescriptions.map(p => ({
+            medicine: p.name || '',
+            doses: `${p.dosage || ''} ${p.frequency || ''} ${p.duration || ''}`.trim()
+         }));
+      }
+
+      let clinicalNotes = '';
+      if (res.soapNote) {
+         clinicalNotes += `[S] ${res.soapNote.subjective || '-'}\n[O] ${res.soapNote.objective || '-'}\n[A] ${res.soapNote.assessment || '-'}\n[P] ${res.soapNote.plan || '-'}`;
+      }
+      if (res.vitals) {
+         clinicalNotes += `\n\nVitals: ${res.vitals}`;
+      }
+      if (res.labOrders && res.labOrders.length > 0) {
+         clinicalNotes += `\n\nLab Orders: ${res.labOrders.join(', ')}`;
+      }
+      this.form.notes = clinicalNotes;
+      this.isDictationOpen = false;
    }
 
    onSubmit(event: Event) {

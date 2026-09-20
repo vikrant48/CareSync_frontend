@@ -8,11 +8,14 @@ import { AuthService } from '../core/services/auth.service';
 import { PaymentPopupComponent, PaymentDetails } from './payment-popup.component';
 import { ToastService } from '../core/services/toast.service';
 import { DatePickerComponent } from './date-picker.component';
+import { VisionScannerComponent } from './vision-scanner.component';
+import { ClinicalDictationComponent } from './clinical-dictation.component';
+import { ClinicalDictationResponse } from '../core/models/ai.models';
 
 @Component({
   selector: 'app-ai-assistant-widget',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaymentPopupComponent, DatePickerComponent],
+  imports: [CommonModule, FormsModule, PaymentPopupComponent, DatePickerComponent, VisionScannerComponent, ClinicalDictationComponent],
   template: `
     <!-- Floating Button -->
     <button
@@ -48,6 +51,9 @@ import { DatePickerComponent } from './date-picker.component';
           </div>
         </div>
         <div class="flex items-center gap-2">
+           <button (click)="isVisionScannerOpen.set(true)" class="text-white/80 hover:text-white p-1" title="Scan Prescription / Lab Report (Vision AI)">
+             <i class="fas fa-camera text-sm"></i>
+           </button>
            <button (click)="clearChat()" class="text-white/80 hover:text-white" title="Clear Chat">
              <i class="fas fa-trash-alt"></i>
            </button>
@@ -69,14 +75,33 @@ import { DatePickerComponent } from './date-picker.component';
             <p class="text-sm" *ngIf="isDoctor()">Hello Doctor. I'm your Clinical Assistant. How can I assist you with patient history or clinical queries today?</p>
             <p class="text-[10px] text-gray-500 mt-2 italic font-medium">{{ isDoctor() ? 'This AI assistant is for clinical guidance and does not replace medical evidence.' : 'CareSync AI can provide health guidance but is not a substitute for professional medical advice.' }}</p>
             
-            <button 
-              *ngIf="!isDoctor()"
-              (click)="startBooking()"
-              class="mt-3 flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all transform active:scale-95 shadow-lg shadow-blue-500/20"
-            >
-              <i class="fas fa-calendar-plus"></i>
-              Book Appointment
-            </button>
+            <div class="flex flex-wrap gap-2 mt-3">
+              <button 
+                *ngIf="!isDoctor()"
+                (click)="startBooking()"
+                class="flex items-center gap-2 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all transform active:scale-95 shadow-md shadow-blue-500/20"
+              >
+                <i class="fas fa-calendar-plus"></i>
+                Book Appointment
+              </button>
+
+              <button 
+                (click)="isVisionScannerOpen.set(true)"
+                class="flex items-center gap-2 px-3.5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition-all transform active:scale-95 shadow-md shadow-purple-500/20"
+              >
+                <i class="fas fa-camera"></i>
+                Scan Prescription
+              </button>
+
+              <button 
+                *ngIf="isDoctor()"
+                (click)="isClinicalDictationOpen.set(true)"
+                class="flex items-center gap-2 px-3.5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition-all transform active:scale-95 shadow-md shadow-emerald-500/20"
+              >
+                <i class="fas fa-microphone-alt"></i>
+                Voice Dictation (SOAP)
+              </button>
+            </div>
           </div>
         </div>
 
@@ -307,6 +332,15 @@ import { DatePickerComponent } from './date-picker.component';
           <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
             <button
               type="button"
+              (click)="isVisionScannerOpen.set(true)"
+              [disabled]="isLoading()"
+              class="w-8 h-8 flex items-center justify-center text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full transition-all"
+              title="Scan Prescription / Lab Report (Vision AI)"
+            >
+              <i class="fas fa-camera text-sm"></i>
+            </button>
+            <button
+              type="button"
               (click)="toggleVoiceInput()"
               [disabled]="isLoading()"
               [class.text-red-500]="isListening()"
@@ -327,6 +361,20 @@ import { DatePickerComponent } from './date-picker.component';
         </form>
       </div>
     </div>
+
+    <!-- Vision AI Prescription & Report Scanner Modal -->
+    <app-vision-scanner
+      *ngIf="isVisionScannerOpen()"
+      (closeModal)="isVisionScannerOpen.set(false)"
+      (scanComplete)="onVisionScanComplete($event)"
+    ></app-vision-scanner>
+
+    <!-- AI Doctor Voice Dictation Modal -->
+    <app-clinical-dictation
+      *ngIf="isClinicalDictationOpen()"
+      (closeModal)="isClinicalDictationOpen.set(false)"
+      (dictationComplete)="onDictationComplete($event)"
+    ></app-clinical-dictation>
 
     <!-- Payment Popup Integration -->
     <app-payment-popup
@@ -364,6 +412,8 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
   isOpen = signal(false);
   isDoctor = signal(false);
   isLoading = signal(false);
+  isVisionScannerOpen = signal(false);
+  isClinicalDictationOpen = signal(false);
   messages = signal<ChatMessage[]>([]);
   userInput = '';
   editableReason = '';
@@ -620,6 +670,28 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
     this.addBotMessage('Payment failed: ' + err);
   }
 
+  onVisionScanComplete(res: any) {
+    if (!res || !res.success) return;
+    let summaryText = `📷 **Vision AI Scan Results (${res.documentType || 'Document'}):**\n\n`;
+    if (res.rawSummary) {
+      summaryText += `${res.rawSummary}\n\n`;
+    }
+    if (res.medications && res.medications.length > 0) {
+      summaryText += `**Extracted Medications (${res.medications.length}):**\n`;
+      res.medications.forEach((m: any) => {
+        summaryText += `- **${m.name}**: ${m.dosage || ''} ${m.frequency || ''} (${m.duration || ''})\n`;
+      });
+      summaryText += '\n';
+    }
+    if (res.labResults && res.labResults.length > 0) {
+      summaryText += `**Extracted Lab Metrics (${res.labResults.length}):**\n`;
+      res.labResults.forEach((l: any) => {
+        summaryText += `- **${l.testName}**: ${l.resultValue || ''} [Status: ${l.status || 'NORMAL'}]\n`;
+      });
+    }
+    this.addBotMessage(summaryText);
+  }
+
   private addBotMessage(text: string) {
     this.messages.update(msgs => [...msgs, {
       text,
@@ -653,6 +725,17 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
     formatted = formatted.replace(/\n{2,}/g, '<div class="my-1.5"></div>');
 
     return formatted;
+  }
+
+  onDictationComplete(res: ClinicalDictationResponse) {
+    if (!res || !res.success) return;
+    const soapMsg: ChatMessage = {
+      text: `### 🎙️ AI Voice Dictation S.O.A.P Note\n\n**Diagnosis:** ${res.diagnosis || 'Under Evaluation'}\n**Chief Complaint:** ${res.chiefComplaint || 'Consultation notes'}\n\n**[S] Subjective:** ${res.soapNote?.subjective || 'Provided'}\n**[O] Objective:** ${res.soapNote?.objective || 'Examined'}\n**[A] Assessment:** ${res.soapNote?.assessment || 'Assessed'}\n**[P] Plan:** ${res.soapNote?.plan || 'Treatment active'}\n\n**Prescriptions:** ${res.prescriptions?.length ? res.prescriptions.map(p => `${p.name} (${p.dosage})`).join(', ') : 'None'}`,
+      isAi: true,
+      timestamp: new Date()
+    };
+    this.messages.update(m => [...m, soapMsg]);
+    this.toast.showSuccess('Structured SOAP dictation added to consultation');
   }
 
   private scrollToBottom(): void {

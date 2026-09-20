@@ -69,3 +69,52 @@ export interface DiagnosisSuggestionDto {
     disclaimer?: string;
     suggestions: ClinicalMatch[];
 }
+
+export interface MedicationItem {
+    name: string;
+    dosage?: string;
+    frequency?: string;
+    duration?: string;
+    instructions?: string;
+}
+
+export interface LabResultItem {
+    testName: string;
+    resultValue?: string;
+    referenceRange?: string;
+    status?: 'NORMAL' | 'HIGH' | 'LOW' | 'ABNORMAL';
+}
+
+export interface VisionScanResponse {
+    success: boolean;
+    error?: string;
+    documentType?: 'PRESCRIPTION' | 'LAB_REPORT' | 'MEDICAL_NOTE' | 'UNKNOWN';
+    patientName?: string;
+    doctorName?: string;
+    date?: string;
+    medications?: MedicationItem[];
+    labResults?: LabResultItem[];
+    rawSummary?: string;
+    warnings?: string[];
+}
+
+export interface SoapNote {
+    subjective?: string;
+    objective?: string;
+    assessment?: string;
+    plan?: string;
+}
+
+export interface ClinicalDictationResponse {
+    success: boolean;
+    error?: string;
+    patientName?: string;
+    chiefComplaint?: string;
+    vitals?: string;
+    diagnosis?: string;
+    prescriptions?: MedicationItem[];
+    labOrders?: string[];
+    followUp?: string;
+    soapNote?: SoapNote;
+}
+
