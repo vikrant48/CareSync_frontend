@@ -5,11 +5,12 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from './core/services/auth.service';
 import { ThemeService } from './core/services/theme.service';
 import { BackendStatusService } from './core/services/backend-status.service';
+import { OfflineBannerComponent } from './shared/offline-banner.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, CommonModule],
+  imports: [RouterOutlet, RouterLink, CommonModule, OfflineBannerComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

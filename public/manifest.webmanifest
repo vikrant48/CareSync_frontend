@@ -1,0 +1,17 @@
+{
+    "name": "CareSync Healthcare Platform",
+    "short_name": "CareSync",
+    "theme_color": "#0284c7",
+    "background_color": "#0f172a",
+    "display": "standalone",
+    "orientation": "any",
+    "scope": "/",
+    "start_url": "/",
+    "icons": [
+        {
+            "src": "logo-cross1.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        }
+    ]
+}
