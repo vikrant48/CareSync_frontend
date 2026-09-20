@@ -20,8 +20,7 @@ function parseEnv(filePath) {
 const envPath = path.join(__dirname, '..', '.env');
 const parsed = parseEnv(envPath);
 
-const apiBaseUrl = process.env.API_BASE_URL || parsed.API_BASE_URL || 'http://localhost:8080';
-const prodApiBaseUrl = process.env.PROD_API_BASE_URL || parsed.PROD_API_BASE_URL || 'https://caresync-backend-aq8e.onrender.com';
+const apiBaseUrl = process.env.API_BASE_URL || parsed.API_BASE_URL;
 const googleClientId = process.env.GOOGLE_CLIENT_ID || parsed.GOOGLE_CLIENT_ID || '';
 const merchantUpiId = process.env.MERCHANT_UPI_ID || parsed.MERCHANT_UPI_ID || 'caresync@paytm';
 const qrCodeBaseUrl = process.env.QR_CODE_BASE_URL || parsed.QR_CODE_BASE_URL || `upi://pay?pa=${merchantUpiId}&pn=CareSync&cu=INR`;
@@ -43,17 +42,7 @@ export const environment = {
 };
 `;
 
-const envProdFileContent = `// Auto-generated production environment file (Do NOT edit directly or commit secrets)
-export const environment = {
-  apiBaseUrl: '${prodApiBaseUrl}',
-  googleClientId: '${googleClientId}',
-  qrCodeBaseUrl: '${qrCodeBaseUrl}',
-  merchantUpiId: '${merchantUpiId}',
-  jitsiDomain: '${jitsiDomain}'
-};
-`;
-
 fs.writeFileSync(path.join(targetDir, 'environment.ts'), envFileContent);
-fs.writeFileSync(path.join(targetDir, 'environment.prod.ts'), envProdFileContent);
+fs.writeFileSync(path.join(targetDir, 'environment.prod.ts'), envFileContent);
 
-console.log('✅ Angular environment files successfully generated from .env!');
+console.log(`✅ Angular environment files generated successfully with API_BASE_URL: ${apiBaseUrl}`);
