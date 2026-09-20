@@ -8,11 +8,12 @@ import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { EmergencyAppointmentModalComponent } from '../../shared/emergency-appointment-modal.component';
 import { SpecializationAutocompleteComponent } from '../../shared/specialization-autocomplete.component';
 import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropdown.component';
+import { SkeletonLoaderComponent } from '../../shared/skeleton.component';
 
 @Component({
   selector: 'app-patient-book-appointment',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent, SelectDropdownComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent, SelectDropdownComponent, SkeletonLoaderComponent],
   template: `
     <app-patient-layout>
     <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6 pb-36 sm:pb-28">
@@ -88,10 +89,7 @@ import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropd
       </section>
 
       <!-- Loading & Empty States -->
-      <div *ngIf="loadingDoctors" class="flex flex-col items-center justify-center min-h-[300px] text-blue-400 animate-fade-in">
-        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-3"></i>
-        <span class="text-sm tracking-wider uppercase font-semibold">Loading doctors...</span>
-      </div>
+      <app-skeleton-loader *ngIf="loadingDoctors" type="doctor-card" [count]="6"></app-skeleton-loader>
 
       <div *ngIf="!loadingDoctors && doctors.length === 0" class="flex flex-col items-center justify-center min-h-[300px] text-gray-500 animate-fade-in">
          <i class="fa-regular fa-face-frown text-4xl mb-3 opacity-50"></i>

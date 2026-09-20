@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PatientDto, MedicalHistoryWithDoctorItem } from '../core/services/patient-profile.service';
 import { MedicalSummaryComponent } from './medical-summary.component';
+import { SkeletonLoaderComponent } from './skeleton.component';
 
 @Component({
-  selector: 'app-patient-details-modal',
-  standalone: true,
-  imports: [CommonModule, FormsModule, MedicalSummaryComponent],
-  template: `
+   selector: 'app-patient-details-modal',
+   standalone: true,
+   imports: [CommonModule, FormsModule, MedicalSummaryComponent, SkeletonLoaderComponent],
+   template: `
     <div *ngIf="open" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
       
       <!-- Backdrop -->
@@ -166,9 +167,8 @@ import { MedicalSummaryComponent } from './medical-summary.component';
             </div>
 
              <ng-template #loadingPatient>
-              <div class="p-12 flex flex-col items-center justify-center space-y-4">
-                <i class="fa-solid fa-circle-notch fa-spin text-4xl text-blue-500"></i>
-                <p class="text-gray-500 font-medium">Loading patient details...</p>
+              <div class="p-6">
+                <app-skeleton-loader type="patient-history" [count]="3" containerClass="space-y-3"></app-skeleton-loader>
               </div>
             </ng-template>
 
@@ -185,7 +185,7 @@ import { MedicalSummaryComponent } from './medical-summary.component';
       </div>
     </div>
   `,
-  styles: [`
+   styles: [`
     .tab-btn {
       @apply relative py-4 px-2 text-sm font-medium text-gray-500 dark:text-gray-400 border-b-2 border-transparent hover:text-gray-700 dark:hover:text-gray-300 transition-colors outline-none;
     }
@@ -213,39 +213,39 @@ import { MedicalSummaryComponent } from './medical-summary.component';
   `]
 })
 export class PatientDetailsModalComponent {
-  @Input() open = false;
-  @Input() patient: PatientDto | null = null;
-  @Input() history: MedicalHistoryWithDoctorItem[] = [];
-  @Input() documents: any[] = [];
-  @Output() close = new EventEmitter<void>();
-  @Output() historyClick = new EventEmitter<MedicalHistoryWithDoctorItem>();
+   @Input() open = false;
+   @Input() patient: PatientDto | null = null;
+   @Input() history: MedicalHistoryWithDoctorItem[] = [];
+   @Input() documents: any[] = [];
+   @Output() close = new EventEmitter<void>();
+   @Output() historyClick = new EventEmitter<MedicalHistoryWithDoctorItem>();
 
-  activeTab: 'overview' | 'summary' | 'history' | 'documents' = 'overview';
+   activeTab: 'overview' | 'summary' | 'history' | 'documents' = 'overview';
 
-  sortedHistory(): MedicalHistoryWithDoctorItem[] {
-    const base = this.history || [];
-    return base.slice().sort((a, b) => this.safeTime(b.visitDate) - this.safeTime(a.visitDate));
-  }
+   sortedHistory(): MedicalHistoryWithDoctorItem[] {
+      const base = this.history || [];
+      return base.slice().sort((a, b) => this.safeTime(b.visitDate) - this.safeTime(a.visitDate));
+   }
 
-  trackHistory(index: number, h: MedicalHistoryWithDoctorItem) { return (h as any)?.id ?? index; }
+   trackHistory(index: number, h: MedicalHistoryWithDoctorItem) { return (h as any)?.id ?? index; }
 
-  formatDate(v: any): string {
-    const d = new Date(v);
-    if (Number.isNaN(d.getTime())) return v ?? '—';
-    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-  }
+   formatDate(v: any): string {
+      const d = new Date(v);
+      if (Number.isNaN(d.getTime())) return v ?? '—';
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+   }
 
-  private safeTime(v: any): number {
-    const d = new Date(v);
-    return Number.isNaN(d.getTime()) ? 0 : d.getTime();
-  }
+   private safeTime(v: any): number {
+      const d = new Date(v);
+      return Number.isNaN(d.getTime()) ? 0 : d.getTime();
+   }
 
-  ageFromDob(dob?: string | Date | null) {
-    if (!dob) return '—';
-    const d = new Date(dob);
-    if (Number.isNaN(d.getTime())) return '—';
-    const diff = Date.now() - d.getTime();
-    const age = Math.floor(diff / (365.25 * 24 * 60 * 60 * 1000));
-    return age;
-  }
+   ageFromDob(dob?: string | Date | null) {
+      if (!dob) return '—';
+      const d = new Date(dob);
+      if (Number.isNaN(d.getTime())) return '—';
+      const diff = Date.now() - d.getTime();
+      const age = Math.floor(diff / (365.25 * 24 * 60 * 60 * 1000));
+      return age;
+   }
 }
