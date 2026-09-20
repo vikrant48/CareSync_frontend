@@ -28,6 +28,7 @@ export interface RegisterRequest {
   specialization?: string; // doctor-only
   gender?: string; // gender field for both doctor and patient
   bloodGroup?: string; // patient-only
+  skipEmailVerification?: boolean;
 }
 
 export interface RefreshTokenRequest {

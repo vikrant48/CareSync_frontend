@@ -45,4 +45,4 @@ export const environment = {
 fs.writeFileSync(path.join(targetDir, 'environment.ts'), envFileContent);
 fs.writeFileSync(path.join(targetDir, 'environment.prod.ts'), envFileContent);
 
-console.log(`✅ Angular environment files generated successfully with API_BASE_URL: ${apiBaseUrl}`);
+console.log(`Angular environment files generated successfully with API_BASE_URL: ${apiBaseUrl}`);

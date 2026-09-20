@@ -167,6 +167,12 @@ import { environment } from '../../../../environments/environment';
                   <span *ngIf="!loading">Verify & Proceed</span>
                   <span *ngIf="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
                 </button>
+                <div class="pt-1">
+                  <button type="button" (click)="skipVerification()" 
+                          class="w-full text-[10px] font-bold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 underline underline-offset-2 flex items-center justify-center gap-1 transition-colors">
+                    <i class="fa-solid fa-forward text-[9px]"></i> Skip Email Verification
+                  </button>
+                </div>
               </div>
             </section>
 
@@ -361,6 +367,7 @@ export class RegisterComponent implements OnInit {
   error = '';
   showPassword = false;
   isEmailVerified = false;
+  isVerificationSkipped = false;
   verificationMessage = '';
   verificationError = '';
 
@@ -575,6 +582,7 @@ export class RegisterComponent implements OnInit {
       gender: base.gender || undefined,
       contactInfo: base.contactInfo && base.contactInfo.trim() !== '+91 ' ? base.contactInfo : undefined,
       dateOfBirth: base.dateOfBirth || undefined,
+      skipEmailVerification: this.isVerificationSkipped || undefined,
     } as RegisterRequest & any;
 
     if (role === 'DOCTOR') {
@@ -667,6 +675,14 @@ export class RegisterComponent implements OnInit {
         this.loading = false;
       },
     });
+  }
+
+  skipVerification() {
+    this.isEmailVerified = true;
+    this.isVerificationSkipped = true;
+    this.toast.showInfo('Email verification skipped.');
+    this.currentStep = 3;
+    this.showValidationErrors = false;
   }
 
   googleRole: 'PATIENT' | 'DOCTOR' = 'PATIENT';
