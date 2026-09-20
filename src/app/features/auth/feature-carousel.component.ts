@@ -192,6 +192,24 @@ export class FeatureCarouselComponent implements OnInit, OnDestroy {
 
   slides: (FeatureSlide & { tabLabel?: string })[] = [
     {
+      id: 'vision-scanner',
+      title: 'Vision AI Prescription & Lab Scanner',
+      tabLabel: 'Vision AI',
+      badge: 'Multimodal AI',
+      description: 'Upload or capture prescriptions & lab reports; Vision AI automatically extracts medications, dosages, & test values in seconds.',
+      icon: 'fa-solid fa-eye',
+      image: '/assets/features/vision-scanner.png'
+    },
+    {
+      id: 'voice-dictation',
+      title: 'AI Voice Dictation & SOAP Notes',
+      tabLabel: 'Voice SOAP',
+      badge: 'Doctor Voice AI',
+      description: 'Doctors speak consultation notes into a microphone; AI transcribes & structures them into Diagnosis, Prescription, & SOAP fields.',
+      icon: 'fa-solid fa-microphone-lines',
+      image: '/assets/features/voice-dictation.png'
+    },
+    {
       id: 'ai-booking',
       title: 'AI Appointment Bookings',
       tabLabel: 'AI Bookings',
