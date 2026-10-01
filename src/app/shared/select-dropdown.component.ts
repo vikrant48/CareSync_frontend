@@ -27,13 +27,13 @@ export interface SelectOption {
       <button type="button" 
               (click)="toggle($event)"
               [disabled]="disabled"
-              class="input-modern h-[36px] sm:h-[34px] py-0 text-xs px-3 w-full cursor-pointer relative transition-all duration-200 group flex items-center justify-between min-h-0 text-left font-medium text-gray-900 dark:text-white"
+              class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3.5 py-2.5 sm:py-2 text-xs sm:text-sm min-h-[42px] cursor-pointer relative transition-all duration-200 group flex items-center justify-between text-left font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 hover:border-gray-300 dark:hover:border-gray-600"
               [class.opacity-50]="disabled"
               [class.cursor-not-allowed]="disabled">
         <span [class.text-gray-400]="!selectedValue" class="block truncate pr-5">
           {{ getDisplayLabel() || placeholder }}
         </span>
-        <i class="fa-solid fa-chevron-down text-[10px] absolute right-3 top-1/2 -translate-y-1/2 transition-transform duration-300 text-gray-400"
+        <i class="fa-solid fa-chevron-down text-[10px] absolute right-3.5 top-1/2 -translate-y-1/2 transition-transform duration-300 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300"
            [class.rotate-180]="isOpen"></i>
       </button>
 
