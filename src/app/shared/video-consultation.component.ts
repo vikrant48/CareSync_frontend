@@ -33,30 +33,32 @@ export interface ChatMessage {
   selector: 'app-video-consultation',
   imports: [CommonModule, FormsModule],
   host: {
-    'class': 'block w-full h-screen overflow-hidden'
+    'class': 'block w-full h-[calc(100vh-3.5rem)] overflow-hidden'
   },
   template: `
-    <div class="h-screen w-full flex flex-col bg-gray-950 text-white font-sans overflow-hidden relative select-none">
+    <div class="h-[calc(100vh-3.5rem)] w-full flex flex-col bg-gray-950 text-white font-sans overflow-hidden relative select-none">
       
       <!-- Top Navigation Header -->
-      <header class="absolute top-0 left-0 right-0 z-30 px-4 sm:px-6 py-3 bg-gradient-to-b from-gray-950/90 via-gray-950/50 to-transparent flex items-center justify-between pointer-events-none">
-        <div class="flex items-center gap-3 pointer-events-auto">
-          <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
-            <i class="fa-solid fa-video text-lg"></i>
+      <header class="absolute top-0 left-0 right-0 z-30 px-3 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-b from-gray-950/95 via-gray-950/70 to-transparent flex items-center justify-between pointer-events-none">
+        <div class="flex items-center gap-2 sm:gap-3 pointer-events-auto min-w-0 flex-1 mr-2">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20 shrink-0">
+            <i class="fa-solid fa-video text-sm sm:text-lg"></i>
           </div>
-          <div>
-            <h2 class="text-sm sm:text-base font-bold tracking-tight text-white flex items-center gap-2">
-              CareSync Consultation
-              <span *ngIf="connected" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+          <div class="min-w-0 flex-1">
+            <h2 class="text-xs sm:text-base font-bold tracking-tight text-white flex items-center gap-1.5 truncate">
+              <span class="truncate">CareSync Consultation</span>
+              <span *ngIf="connected" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shrink-0">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                Connected
+                <span class="hidden sm:inline">Connected</span>
               </span>
             </h2>
-            <p class="text-xs text-gray-400 font-medium">Room: {{ roomName || 'Connecting...' }}</p>
+            <p class="text-[10px] sm:text-xs text-gray-400 font-medium truncate max-w-[150px] sm:max-w-xs">
+              Room: {{ roomName || 'Connecting...' }}
+            </p>
           </div>
         </div>
 
-        <div class="flex items-center gap-2 pointer-events-auto">
+        <div class="flex items-center gap-1.5 sm:gap-2 pointer-events-auto shrink-0">
           <!-- Connection Quality Badge -->
           <div *ngIf="connected" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-900/80 border border-gray-800 text-xs text-gray-300">
             <i class="fa-solid fa-signal" [ngClass]="{
@@ -68,8 +70,8 @@ export interface ChatMessage {
           </div>
 
           <!-- Leave / Exit Button -->
-          <button (click)="leaveConsultation()" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold backdrop-blur-md flex items-center gap-1.5 transition-all active:scale-95">
-            <i class="fa-solid fa-arrow-left"></i>
+          <button (click)="leaveConsultation()" class="px-2.5 sm:px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold backdrop-blur-md flex items-center gap-1.5 transition-all active:scale-95">
+            <i class="fa-solid fa-arrow-left text-xs"></i>
             <span>Exit</span>
           </button>
         </div>
@@ -125,18 +127,48 @@ export interface ChatMessage {
           </div>
 
           <!-- Hardware Device Selection Controls for BOTH Doctor and Patient -->
+          <!-- Media Device Pickers (Custom Styled Dropdowns) -->
           <div class="w-full grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 text-left">
+            <!-- Lobby Camera Picker -->
             <div>
               <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Camera Device</label>
-              <select [(ngModel)]="selectedCameraId" (change)="onDeviceChange()" class="w-full bg-gray-950 border border-gray-800 text-xs text-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-blue-500">
-                <option *ngFor="let dev of videoDevices" [value]="dev.deviceId">{{ dev.label || 'Camera (' + dev.deviceId.substring(0,5) + ')' }}</option>
-              </select>
+              <div class="relative">
+                <button type="button" (click)="activeDropdown = activeDropdown === 'lobby-camera' ? null : 'lobby-camera'"
+                  class="w-full bg-gray-950 border border-gray-800 text-xs text-gray-200 rounded-xl p-3 flex items-center justify-between gap-2 focus:outline-none focus:border-blue-500 transition-colors">
+                  <span class="truncate min-w-0 flex-1 text-left font-medium">{{ getSelectedCameraLabel() }}</span>
+                  <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 transition-transform duration-200" [class.rotate-180]="activeDropdown === 'lobby-camera'"></i>
+                </button>
+                
+                <div *ngIf="activeDropdown === 'lobby-camera'" class="absolute left-0 right-0 mt-1 z-50 bg-gray-950 border border-gray-800 rounded-xl shadow-2xl p-1.5 space-y-1 max-h-48 overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
+                  <button *ngFor="let dev of videoDevices" (click)="selectCamera(dev.deviceId)"
+                    class="w-full p-2.5 rounded-lg text-xs text-left flex items-center justify-between gap-2 transition-colors"
+                    [ngClass]="selectedCameraId === dev.deviceId ? 'bg-blue-600/20 text-blue-400 font-bold border border-blue-500/30' : 'text-gray-300 hover:bg-gray-900'">
+                    <span class="truncate min-w-0 flex-1" [title]="dev.label || ''">{{ dev.label || 'Camera' }}</span>
+                    <i *ngIf="selectedCameraId === dev.deviceId" class="fa-solid fa-check text-xs text-blue-400 shrink-0"></i>
+                  </button>
+                </div>
+              </div>
             </div>
+
+            <!-- Lobby Microphone Picker -->
             <div>
               <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Microphone Device</label>
-              <select [(ngModel)]="selectedMicId" (change)="onDeviceChange()" class="w-full bg-gray-950 border border-gray-800 text-xs text-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-blue-500">
-                <option *ngFor="let dev of audioDevices" [value]="dev.deviceId">{{ dev.label || 'Microphone (' + dev.deviceId.substring(0,5) + ')' }}</option>
-              </select>
+              <div class="relative">
+                <button type="button" (click)="activeDropdown = activeDropdown === 'lobby-mic' ? null : 'lobby-mic'"
+                  class="w-full bg-gray-950 border border-gray-800 text-xs text-gray-200 rounded-xl p-3 flex items-center justify-between gap-2 focus:outline-none focus:border-blue-500 transition-colors">
+                  <span class="truncate min-w-0 flex-1 text-left font-medium">{{ getSelectedMicLabel() }}</span>
+                  <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 transition-transform duration-200" [class.rotate-180]="activeDropdown === 'lobby-mic'"></i>
+                </button>
+                
+                <div *ngIf="activeDropdown === 'lobby-mic'" class="absolute left-0 right-0 mt-1 z-50 bg-gray-950 border border-gray-800 rounded-xl shadow-2xl p-1.5 space-y-1 max-h-48 overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
+                  <button *ngFor="let dev of audioDevices" (click)="selectMic(dev.deviceId)"
+                    class="w-full p-2.5 rounded-lg text-xs text-left flex items-center justify-between gap-2 transition-colors"
+                    [ngClass]="selectedMicId === dev.deviceId ? 'bg-blue-600/20 text-blue-400 font-bold border border-blue-500/30' : 'text-gray-300 hover:bg-gray-900'">
+                    <span class="truncate min-w-0 flex-1" [title]="dev.label || ''">{{ dev.label || 'Microphone' }}</span>
+                    <i *ngIf="selectedMicId === dev.deviceId" class="fa-solid fa-check text-xs text-blue-400 shrink-0"></i>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -185,7 +217,7 @@ export interface ChatMessage {
                 <!-- Avatar with Animated Glowing Ring -->
                 <div class="relative mb-6">
                   <div class="absolute -inset-1 rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 blur-sm opacity-70 animate-pulse"></div>
-                  <div class="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-600 flex items-center justify-center text-white text-4xl sm:text-5xl font-black shadow-2xl ring-4 ring-gray-900">
+                  <div class="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-600 flex items-center justify-center text-white text-4xl sm:text-5xl font-black shadow-2xl ring-4 transition-all duration-300" [ngClass]="hasRemoteParticipant ? 'ring-emerald-500/80 shadow-emerald-500/20' : 'ring-gray-900'">
                     <i class="fa-solid fa-user-doctor" *ngIf="auth.role() === 'PATIENT'"></i>
                     <i class="fa-solid fa-user-injured" *ngIf="auth.role() === 'DOCTOR'"></i>
                   </div>
@@ -230,8 +262,8 @@ export interface ChatMessage {
             </div>
           </div>
 
-          <!-- Local Video PIP (Picture-in-Picture Floating Window) -->
-          <div class="absolute bottom-20 sm:bottom-24 right-4 sm:right-6 w-32 sm:w-44 aspect-video rounded-2xl overflow-hidden bg-gray-900 border-2 border-gray-700/80 shadow-2xl z-20 transition-all hover:scale-105">
+          <!-- Local Video PIP (Picture-in-Picture Floating Window) with Dynamic Offset when Chat is Open -->
+          <div class="absolute bottom-24 sm:bottom-28 w-28 sm:w-44 aspect-video rounded-2xl overflow-hidden bg-gray-900 border-2 border-gray-700/80 shadow-2xl z-20 transition-all duration-300 hover:scale-105" [ngClass]="showChat ? 'right-4 md:right-84' : 'right-4 sm:right-6'">
             <video #localVideo autoplay playsinline muted class="w-full h-full object-cover" [ngClass]="{'hidden': !cameraEnabled}"></video>
             
             <!-- Local User Demo Profile Card when Camera is Off -->
@@ -260,7 +292,7 @@ export interface ChatMessage {
         </div>
 
         <!-- In-Call Floating Control Toolbar -->
-        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 sm:gap-3 bg-gray-900/90 backdrop-blur-xl px-4 py-2.5 rounded-full border border-gray-800 shadow-2xl">
+        <div class="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 sm:gap-3 bg-gray-900/90 backdrop-blur-xl px-4 py-2.5 rounded-full border border-gray-800 shadow-2xl">
           
           <!-- Mic Toggle -->
           <button (click)="toggleMicrophone()" class="w-10 sm:w-11 h-10 sm:h-11 rounded-full flex items-center justify-center transition-all active:scale-95" [ngClass]="micEnabled ? 'bg-gray-800 hover:bg-gray-700 text-white' : 'bg-red-500 text-white shadow-lg shadow-red-500/30'" [title]="micEnabled ? 'Mute Mic' : 'Unmute Mic'">
@@ -304,8 +336,11 @@ export interface ChatMessage {
           </button>
         </div>
 
-        <!-- In-Call Chat Drawer -->
-        <div *ngIf="showChat" class="w-full md:w-80 h-72 md:h-full bg-gray-900 border-t md:border-t-0 md:border-l border-gray-800 flex flex-col z-20 shadow-2xl">
+        <!-- Backdrop overlay for mobile screen chat -->
+        <div *ngIf="showChat" (click)="showChat = false" class="md:hidden fixed inset-0 z-20 bg-black/60 backdrop-blur-xs"></div>
+
+        <!-- In-Call Chat Drawer with Mobile Responsiveness & Slide-In Animation -->
+        <div *ngIf="showChat" class="fixed md:relative right-0 bottom-0 top-16 md:top-0 w-full md:w-80 h-[calc(100%-4rem)] md:h-full bg-gray-900 border-t md:border-t-0 md:border-l border-gray-800 flex flex-col z-30 shadow-2xl transition-all duration-300 animate-in slide-in-from-right-full">
           <div class="p-4 border-b border-gray-800 flex items-center justify-between bg-gray-950/50">
             <h4 class="text-xs font-bold uppercase tracking-wider text-gray-300 flex items-center gap-2">
               <i class="fa-solid fa-comments text-blue-400"></i>
@@ -341,31 +376,65 @@ export interface ChatMessage {
           </div>
         </div>
 
-        <!-- Audio / Video Settings Modal -->
-        <div *ngIf="showDeviceModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 max-w-md w-full shadow-2xl">
+        <!-- Audio / Video Settings Modal with Custom Styled Dropdown List -->
+        <div *ngIf="showDeviceModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+          <div class="bg-gray-900 border border-gray-800 rounded-3xl p-4 sm:p-6 max-w-md w-full max-h-[85vh] overflow-y-auto shadow-2xl transition-all animate-in fade-in zoom-in-95 duration-200">
             <div class="flex items-center justify-between mb-4">
-              <h3 class="text-sm font-bold text-white">Media Device Settings</h3>
-              <button (click)="showDeviceModal = false" class="text-gray-400 hover:text-white">
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <i class="fa-solid fa-gear text-blue-400"></i>
+                Media Device Settings
+              </h3>
+              <button (click)="showDeviceModal = false; activeDropdown = null" class="text-gray-400 hover:text-white p-1">
                 <i class="fa-solid fa-xmark"></i>
               </button>
             </div>
+            
             <div class="space-y-4">
+              <!-- Camera Device Picker -->
               <div>
-                <label class="block text-xs font-semibold text-gray-300 mb-1">Camera Device</label>
-                <select [(ngModel)]="selectedCameraId" (change)="onDeviceChange()" class="w-full bg-gray-950 border border-gray-800 text-xs text-white rounded-xl p-2.5">
-                  <option *ngFor="let dev of videoDevices" [value]="dev.deviceId">{{ dev.label || 'Camera' }}</option>
-                </select>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Camera Device</label>
+                <div class="relative">
+                  <button type="button" (click)="activeDropdown = activeDropdown === 'camera' ? null : 'camera'"
+                    class="w-full bg-gray-950 border border-gray-800 text-xs text-white rounded-xl p-3 flex items-center justify-between gap-2 focus:outline-none focus:border-blue-500 transition-colors">
+                    <span class="truncate min-w-0 flex-1 text-left font-medium">{{ getSelectedCameraLabel() }}</span>
+                    <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 transition-transform duration-200" [class.rotate-180]="activeDropdown === 'camera'"></i>
+                  </button>
+                  
+                  <div *ngIf="activeDropdown === 'camera'" class="absolute left-0 right-0 mt-1 z-50 bg-gray-950 border border-gray-800 rounded-xl shadow-2xl p-1.5 space-y-1 max-h-48 overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
+                    <button *ngFor="let dev of videoDevices" (click)="selectCamera(dev.deviceId)"
+                      class="w-full p-2.5 rounded-lg text-xs text-left flex items-center justify-between gap-2 transition-colors"
+                      [ngClass]="selectedCameraId === dev.deviceId ? 'bg-blue-600/20 text-blue-400 font-bold border border-blue-500/30' : 'text-gray-300 hover:bg-gray-900'">
+                      <span class="truncate min-w-0 flex-1" [title]="dev.label || ''">{{ dev.label || 'Camera' }}</span>
+                      <i *ngIf="selectedCameraId === dev.deviceId" class="fa-solid fa-check text-xs text-blue-400 shrink-0"></i>
+                    </button>
+                  </div>
+                </div>
               </div>
+
+              <!-- Microphone Device Picker -->
               <div>
-                <label class="block text-xs font-semibold text-gray-300 mb-1">Microphone Device</label>
-                <select [(ngModel)]="selectedMicId" (change)="onDeviceChange()" class="w-full bg-gray-950 border border-gray-800 text-xs text-white rounded-xl p-2.5">
-                  <option *ngFor="let dev of audioDevices" [value]="dev.deviceId">{{ dev.label || 'Microphone' }}</option>
-                </select>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Microphone Device</label>
+                <div class="relative">
+                  <button type="button" (click)="activeDropdown = activeDropdown === 'mic' ? null : 'mic'"
+                    class="w-full bg-gray-950 border border-gray-800 text-xs text-white rounded-xl p-3 flex items-center justify-between gap-2 focus:outline-none focus:border-blue-500 transition-colors">
+                    <span class="truncate min-w-0 flex-1 text-left font-medium">{{ getSelectedMicLabel() }}</span>
+                    <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 transition-transform duration-200" [class.rotate-180]="activeDropdown === 'mic'"></i>
+                  </button>
+                  
+                  <div *ngIf="activeDropdown === 'mic'" class="absolute left-0 right-0 mt-1 z-50 bg-gray-950 border border-gray-800 rounded-xl shadow-2xl p-1.5 space-y-1 max-h-48 overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
+                    <button *ngFor="let dev of audioDevices" (click)="selectMic(dev.deviceId)"
+                      class="w-full p-2.5 rounded-lg text-xs text-left flex items-center justify-between gap-2 transition-colors"
+                      [ngClass]="selectedMicId === dev.deviceId ? 'bg-blue-600/20 text-blue-400 font-bold border border-blue-500/30' : 'text-gray-300 hover:bg-gray-900'">
+                      <span class="truncate min-w-0 flex-1" [title]="dev.label || ''">{{ dev.label || 'Microphone' }}</span>
+                      <i *ngIf="selectedMicId === dev.deviceId" class="fa-solid fa-check text-xs text-blue-400 shrink-0"></i>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
+
             <div class="mt-6 flex justify-end">
-              <button (click)="showDeviceModal = false" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold">Done</button>
+              <button (click)="showDeviceModal = false; activeDropdown = null" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/20 active:scale-95">Done</button>
             </div>
           </div>
         </div>
@@ -854,6 +923,36 @@ export class VideoConsultationComponent implements OnInit, OnDestroy {
       console.warn('Error toggling screen share:', e);
       this.screenShareEnabled = false;
     }
+  }
+
+  activeDropdown: string | null = null;
+
+  getSelectedCameraLabel(): string {
+    const dev = this.videoDevices.find(d => d.deviceId === this.selectedCameraId);
+    return dev?.label || 'Camera (Default)';
+  }
+
+  getSelectedMicLabel(): string {
+    const dev = this.audioDevices.find(d => d.deviceId === this.selectedMicId);
+    return dev?.label || 'Microphone (Default)';
+  }
+
+  selectCamera(deviceId: string) {
+    this.selectedCameraId = deviceId;
+    this.activeDropdown = null;
+    this.onDeviceChange();
+  }
+
+  selectMic(deviceId: string) {
+    this.selectedMicId = deviceId;
+    this.activeDropdown = null;
+    this.onDeviceChange();
+  }
+
+  formatDeviceLabel(label?: string, maxLength: number = 30): string {
+    if (!label) return '';
+    if (label.length <= maxLength) return label;
+    return label.substring(0, maxLength - 3) + '...';
   }
 
   async onDeviceChange() {
