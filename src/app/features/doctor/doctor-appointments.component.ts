@@ -355,7 +355,6 @@ export class DoctorAppointmentsComponent {
     this.appts.updateAppointmentStatus(a.appointmentId, 'IN_PROGRESS').subscribe({
       next: (updated) => {
         this.refresh();
-        this.joinConsultation(updated);
       },
       error: (err: any) => console.error('Error starting consultation:', err)
     });

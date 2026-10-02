@@ -24,7 +24,6 @@ const apiBaseUrl = process.env.API_BASE_URL || parsed.API_BASE_URL;
 const googleClientId = process.env.GOOGLE_CLIENT_ID || parsed.GOOGLE_CLIENT_ID || '';
 const merchantUpiId = process.env.MERCHANT_UPI_ID || parsed.MERCHANT_UPI_ID || 'caresync@paytm';
 const qrCodeBaseUrl = process.env.QR_CODE_BASE_URL || parsed.QR_CODE_BASE_URL || `upi://pay?pa=${merchantUpiId}&pn=CareSync&cu=INR`;
-const jitsiDomain = process.env.JITSI_DOMAIN || parsed.JITSI_DOMAIN || 'meet.jit.si';
 
 const targetDir = path.join(__dirname, '..', 'environments');
 
@@ -37,8 +36,7 @@ export const environment = {
   apiBaseUrl: '${apiBaseUrl}',
   googleClientId: '${googleClientId}',
   qrCodeBaseUrl: '${qrCodeBaseUrl}',
-  merchantUpiId: '${merchantUpiId}',
-  jitsiDomain: '${jitsiDomain}'
+  merchantUpiId: '${merchantUpiId}'
 };
 `;
 

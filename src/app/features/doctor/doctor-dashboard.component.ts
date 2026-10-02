@@ -636,7 +636,6 @@ export class DoctorDashboardComponent implements OnInit {
     this.apptApi.updateAppointmentStatus(a.appointmentId, 'IN_PROGRESS').subscribe({
       next: (updated) => {
         this.refreshToday();
-        this.joinConsultation(updated);
       },
       error: (err: any) => console.error('Error starting consultation:', err)
     });
