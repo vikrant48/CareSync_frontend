@@ -1,0 +1,79 @@
+<app-patient-layout>
+    <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
+
+        <app-page-header title="My Appointments"
+            subtitle="Manage and track your scheduled consultations"></app-page-header>
+
+        <app-filter-bar [(expanded)]="isFilterExpanded" [activeCount]="activeFilterCount" [hasSummary]="true"
+            (clear)="clearFilters()">
+            <div class="space-y-0.5">
+                <app-select-dropdown label="Status" [(ngModel)]="statusFilter" [options]="statusOptions"
+                    placeholder="All Statuses">
+                </app-select-dropdown>
+            </div>
+
+            <div class="space-y-0.5">
+                <label class="filter-label">Specialization</label>
+                <div class="relative w-full">
+                    <i
+                        class="fa-solid fa-stethoscope absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs sm:text-sm pointer-events-none z-10"></i>
+                    <input type="text" class="filter-input-search" [(ngModel)]="specializationFilter"
+                        placeholder="e.g. Cardiology..." />
+                </div>
+            </div>
+
+            <div class="space-y-0.5">
+                <app-select-dropdown label="Time Range" [(ngModel)]="rangeFilter" [options]="rangeOptions"
+                    placeholder="All Time">
+                </app-select-dropdown>
+            </div>
+
+            <div filterSummary class="text-xs text-gray-500 dark:text-gray-400">
+                Showing <span class="font-bold text-gray-800 dark:text-gray-200">{{ filtered().length }}</span> of {{
+                appointments.length }} appointments
+            </div>
+        </app-filter-bar>
+
+        <app-skeleton *ngIf="loading" variant="card" [count]="3"
+            wrapperClass="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></app-skeleton>
+
+        <!-- Empty State -->
+        <app-empty-state *ngIf="!loading && filtered().length === 0 && appointments.length === 0"
+            icon="fa-solid fa-calendar-xmark" title="No Appointments Found"
+            message="You haven't booked any appointments yet."
+            containerClass="bg-gray-50 dark:bg-gray-800/20 rounded-2xl border border-gray-200 dark:border-gray-800 border-dashed px-4"
+            [hasAction]="true">
+            <a routerLink="/patient/book-appointment" class="btn-primary">Book Now</a>
+        </app-empty-state>
+        <app-empty-state *ngIf="!loading && filtered().length === 0 && appointments.length > 0"
+            icon="fa-solid fa-calendar-xmark" title="No Appointments Found"
+            message="No appointments match your current filters."
+            containerClass="bg-gray-50 dark:bg-gray-800/20 rounded-2xl border border-gray-200 dark:border-gray-800 border-dashed px-4"
+            [hasAction]="true">
+            <button type="button" (click)="clearFilters()" class="btn-secondary">Clear Filters</button>
+        </app-empty-state>
+
+        <!-- Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in"
+            *ngIf="!loading && filtered().length > 0">
+            <patient-appointment-card *ngFor="let a of filtered()" [appointment]="a" [disabled]="loading"
+                (reschedule)="startReschedule($event)" (cancel)="cancelAppointment($event)"
+                (viewDoctor)="viewDoctorFromAppointment($event)" (joinVideo)="joinConsultation($event)"
+                (openChat)="openChat($event)" class="h-full"></patient-appointment-card>
+        </div>
+
+        <!-- Reschedule Modal (shared) -->
+        <reschedule-appointment-modal [appointment]="rescheduleTarget" [doctors]="doctors" (close)="closeReschedule()"
+            (confirmed)="onRescheduleConfirmed($event)"></reschedule-appointment-modal>
+
+        <!-- Cancellation Modal -->
+        <app-cancellation-modal [appointment]="cancellationTarget" (close)="closeCancellation()"
+            (confirmCancel)="confirmCancellation()"
+            (requestReschedule)="handleRescheduleFromCancellation()"></app-cancellation-modal>
+
+        <!-- Shared Chat Modal -->
+        <app-shared-chat-modal [isOpen]="chatOpen" [appointmentId]="chatAppointmentId"
+            [participantName]="chatParticipantName" [participantImage]="chatParticipantImage"
+            (close)="closeChat()"></app-shared-chat-modal>
+    </div>
+</app-patient-layout>

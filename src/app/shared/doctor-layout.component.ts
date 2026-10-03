@@ -18,9 +18,8 @@ import { AiAssistantWidgetComponent } from './ai-assistant-widget.component';
         <div class="px-4 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
           <div class="text-lg font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-100">
             <i class="fa-solid fa-user-doctor"></i>
-            <span>CareSync Doctor</span>
+            <span>Doctor</span>
           </div>
-          <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">Doctor Panel</div>
         </div>
 
         <!-- Navigation Links -->

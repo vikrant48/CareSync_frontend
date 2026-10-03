@@ -1,0 +1,7 @@
+:host {
+    display: block;
+}
+
+.input-modern {
+    @apply block w-full rounded-xl border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 hover:bg-white dark:hover:bg-gray-700 transition-all duration-200 text-sm py-2.5 px-3;
+}

@@ -17,16 +17,7 @@ interface CreateLabTestRequest {
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule, DoctorLayoutComponent],
   templateUrl: './lab-test-management.component.html',
-  styles: [`
-    :host { display: block; }
-    .pattern-dots {
-      background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
-      background-size: 24px 24px;
-    }
-    :host-context(.dark) .pattern-dots {
-      background-image: radial-gradient(#374151 1.5px, transparent 1.5px);
-    }
-  `]
+  styleUrl: './lab-test-management.component.css'
 })
 export class LabTestManagementComponent implements OnInit {
   private labTestService = inject(LabTestService);

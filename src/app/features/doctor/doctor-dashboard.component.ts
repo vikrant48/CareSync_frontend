@@ -35,6 +35,11 @@ import { forkJoin } from 'rxjs';
       <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
         <!-- Header (neutral — no colored hero strip) -->
         <div class="ui-panel p-4 sm:p-8 relative">
+          <!-- Notification Bell Top-Right -->
+          <div class="absolute top-3 right-3 sm:top-6 sm:right-6 z-20">
+             <app-doctor-notification></app-doctor-notification>
+          </div>
+
           <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-4 sm:gap-6">
             <div class="flex flex-col md:flex-row items-center gap-3 sm:gap-6 text-center md:text-left">
               <div class="relative shrink-0">
@@ -58,12 +63,6 @@ import { forkJoin } from 'rxjs';
                   <span class="opacity-80 text-xs sm:text-base">{{ todayISO() | date:'fullDate' }}</span>
                 </div>
               </div>
-            </div>
-            <div class="flex items-center gap-2 sm:gap-3">
-               <app-doctor-notification></app-doctor-notification>
-               <button (click)="refreshToday()" class="btn-secondary px-3 sm:px-4 py-1.5 sm:py-2.5 text-xs sm:text-base" aria-label="Refresh today's appointments">
-                 <i class="fa-solid fa-arrows-rotate" [class.animate-spin]="loadingAppointments"></i>
-               </button>
             </div>
           </div>
         </div>

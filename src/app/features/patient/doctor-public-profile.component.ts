@@ -17,55 +17,8 @@ import { PaymentService } from '../../core/services/payment.service';
   selector: 'app-doctor-public-profile',
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, DoctorDetailsPanelComponent, PaymentPopupComponent, DoctorBookingModalComponent],
-  template: `
-    <app-patient-layout>
-    <div class="max-w-7xl mx-auto p-4 sm:p-6">
-    <doctor-details-panel
-      *ngIf="doctor; else loadingTpl"
-      [doctor]="doctor"
-      [avgRating]="avgRating"
-      [age]="age"
-      [educations]="educations"
-      [experiences]="experiences"
-      [certificates]="certificates"
-      [enableBooking]="true"
-      (openBooking)="startBooking()"
-    ></doctor-details-panel>
-    
-    <!-- Booking Modal (Shared) -->
-    <app-doctor-booking-modal
-      [open]="bookingOpen"
-      [doctor]="doctor"
-      [experienceYears]="experienceYears"
-      (close)="closeBooking()"
-      (proceedToPayment)="onProceedToPayment($event)"
-    ></app-doctor-booking-modal>
-    
-    <!-- Payment Modal -->
-    <app-payment-popup
-      [isVisible]="paymentModalOpen"
-      [amount]="doctor?.consultationFees || 0"
-      [title]="'Appointment Booking Payment'"
-      [patientId]="getCurrentPatientId()"
-      [appointmentBookingDetails]="appointmentBookingDetails"
-      [paymentType]="'APPOINTMENT'"
-      [additionalInfo]="getAppointmentInfo()"
-      (paymentSuccess)="onPaymentSuccess($event)"
-      (paymentCancel)="closePaymentModal()"
-      (paymentError)="onPaymentError($event)"
-    ></app-payment-popup>
-    
-    <ng-template #loadingTpl>
-      <div class="flex flex-col items-center justify-center min-h-[50vh] space-y-4 animate-pulse">
-        <div class="w-32 h-32 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-        <div class="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-        <div class="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-        <div class="sr-only">Loading doctor profile...</div>
-      </div>
-    </ng-template>
-    </div>
-    </app-patient-layout>
-  `,
+  templateUrl: './doctor-public-profile.component.html',
+  styleUrl: './doctor-public-profile.component.css'
 })
 export class DoctorPublicProfileComponent {
   username: string | null = null;

@@ -8,12 +8,7 @@ import { ChangePasswordFormComponent } from '../../shared/change-password-form.c
   selector: 'app-patient-change-password',
   standalone: true,
   imports: [CommonModule, RouterModule, PatientLayoutComponent, ChangePasswordFormComponent],
-  template: `
-    <app-patient-layout>
-      <div class="max-w-7xl mx-auto p-4 sm:p-6">
-        <app-change-password-form />
-      </div>
-    </app-patient-layout>
-  `,
+  templateUrl: './patient-change-password.component.html',
+  styleUrl: './patient-change-password.component.css'
 })
 export class PatientChangePasswordComponent { }

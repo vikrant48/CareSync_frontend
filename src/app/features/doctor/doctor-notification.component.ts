@@ -8,16 +8,8 @@ import { AuthService } from '../../core/services/auth.service';
   standalone: true,
   imports: [CommonModule, NotificationDropdownComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <app-notification-dropdown
-      [role]="'doctor'"
-      [grouped]="true"
-      [widthClass]="'w-96'"
-      [buttonLabel]="''"
-      [showStatus]="true"
-      [userId]="doctorId"
-    ></app-notification-dropdown>
-  `,
+  templateUrl: './doctor-notification.component.html',
+  styleUrl: './doctor-notification.component.css'
 })
 export class DoctorNotificationComponent {
   private auth = inject(AuthService);

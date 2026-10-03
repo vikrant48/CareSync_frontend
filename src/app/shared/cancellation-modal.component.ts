@@ -4,56 +4,19 @@ import { PatientAppointmentItem } from '../core/services/appointment.service';
 import { ModalShellComponent } from './ui/modal-shell.component';
 
 @Component({
-    selector: 'app-cancellation-modal',
-    standalone: true,
-    imports: [CommonModule, ModalShellComponent],
-    template: `
-    <app-modal-shell
-      [open]="!!appointment"
-      title="Cancel Appointment?"
-      titleId="cancel-modal-title"
-      icon="fa-solid fa-triangle-exclamation text-xl"
-      iconWrapClass="bg-red-500/10 text-red-400"
-      maxWidthClass="max-w-sm"
-      panelClass="panel border border-gray-700/50 rounded-2xl"
-      bodyClass="p-6"
-      [closeOnBackdrop]="false"
-      [fullScreenMobile]="true"
-      (close)="onClose()"
-    >
-      <div class="text-center mb-6 -mt-1">
-        <p class="text-gray-400 text-sm">
-          Are you sure you want to cancel your appointment with
-          <span class="text-gray-200 font-semibold">{{ appointment?.doctorName }}</span>?
-        </p>
-      </div>
-
-      <div class="space-y-3">
-        <button type="button" class="w-full btn-primary bg-red-600 hover:bg-red-700 border-red-500 text-white shadow-lg shadow-red-900/20" (click)="onConfirm()">
-          Yes, Cancel Appointment
-        </button>
-
-        <button type="button" class="w-full btn-secondary bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 border-blue-500/30" (click)="onReschedule()">
-          No, Reschedule Instead
-        </button>
-
-        <button type="button" class="w-full btn-secondary" (click)="onClose()">
-          Keep Appointment
-        </button>
-      </div>
-    </app-modal-shell>
-  `,
-    styles: [`
-    :host { display: block; }
-  `]
+  selector: 'app-cancellation-modal',
+  standalone: true,
+  imports: [CommonModule, ModalShellComponent],
+  templateUrl: './cancellation-modal.component.html',
+  styleUrl: './cancellation-modal.component.css'
 })
 export class CancellationModalComponent {
-    @Input() appointment: PatientAppointmentItem | null = null;
-    @Output() close = new EventEmitter<void>();
-    @Output() confirmCancel = new EventEmitter<void>();
-    @Output() requestReschedule = new EventEmitter<void>();
+  @Input() appointment: PatientAppointmentItem | null = null;
+  @Output() close = new EventEmitter<void>();
+  @Output() confirmCancel = new EventEmitter<void>();
+  @Output() requestReschedule = new EventEmitter<void>();
 
-    onClose() { this.close.emit(); }
-    onConfirm() { this.confirmCancel.emit(); }
-    onReschedule() { this.requestReschedule.emit(); }
+  onClose() { this.close.emit(); }
+  onConfirm() { this.confirmCancel.emit(); }
+  onReschedule() { this.requestReschedule.emit(); }
 }

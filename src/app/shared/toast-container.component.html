@@ -1,0 +1,32 @@
+<div class="fixed bottom-4 right-4 z-[9999] w-full max-w-sm flex flex-col gap-3 pointer-events-none px-4 sm:px-0">
+    <div *ngFor="let t of toasts"
+        class="pointer-events-auto transform transition-all duration-300 ease-in-out animate-in slide-in-from-bottom-2 fade-in"
+        [class.translate-x-full]="t.dismissed" role="alert">
+
+        <div class="relative overflow-hidden rounded-xl shadow-lg border backdrop-blur-md p-4 pr-10 min-h-[60px] flex items-start gap-3"
+            [ngClass]="getToastClasses(t.type)">
+
+            <!-- Icon -->
+            <div class="shrink-0 mt-0.5">
+                <i class="fa-solid text-lg" [ngClass]="getIconClass(t.type)"></i>
+            </div>
+
+            <!-- Content -->
+            <div class="flex-1">
+                <h4 class="text-sm font-semibold capitalize" [ngClass]="getTitleClass(t.type)">{{ t.type }}</h4>
+                <p class="text-xs mt-1 leading-relaxed opacity-90 font-medium">{{ t.message }}</p>
+            </div>
+
+            <!-- Progress Bar (Optional, simpler visual cue) -->
+            <div class="absolute bottom-0 left-0 h-0.5 w-full bg-current opacity-20"></div>
+
+            <!-- Dismiss Button -->
+            <button type="button" (click)="dismiss(t.id)"
+                class="absolute top-2 right-2 p-2 min-w-touch min-h-touch rounded-lg opacity-60 hover:opacity-100 hover:bg-black/5 transition-all focus:outline-none inline-flex items-center justify-center"
+                title="Dismiss" aria-label="Dismiss notification">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+
+    </div>
+</div>

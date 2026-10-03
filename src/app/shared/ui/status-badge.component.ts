@@ -22,15 +22,8 @@ export type AppStatus =
   selector: 'app-status-badge',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <span
-      class="status-badge"
-      [ngClass]="toneClass"
-      [attr.title]="label"
-    >
-      {{ label }}
-    </span>
-  `,
+  templateUrl: './status-badge.component.html',
+  styleUrl: './status-badge.component.css'
 })
 export class StatusBadgeComponent {
   @Input() status: AppStatus = '';

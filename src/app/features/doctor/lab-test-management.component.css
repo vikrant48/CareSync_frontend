@@ -1,0 +1,12 @@
+:host {
+    display: block;
+}
+
+.pattern-dots {
+    background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
+    background-size: 24px 24px;
+}
+
+:host-context(.dark) .pattern-dots {
+    background-image: radial-gradient(#374151 1.5px, transparent 1.5px);
+}

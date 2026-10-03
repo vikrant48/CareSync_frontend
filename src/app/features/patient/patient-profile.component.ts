@@ -10,15 +10,8 @@ import { AuthService } from '../../core/services/auth.service';
   selector: 'app-patient-profile',
   standalone: true,
   imports: [CommonModule, PatientLayoutComponent, PatientProfilePageComponent],
-  template: `
-    <app-patient-layout>
-      <app-patient-profile-page
-        [patient]="profile()"
-        [medicalHistory]="history()"
-        [appointmentCounts]="counts()"
-      ></app-patient-profile-page>
-    </app-patient-layout>
-  `,
+  templateUrl: './patient-profile.component.html',
+  styleUrl: './patient-profile.component.css'
 })
 export class PatientProfileComponent implements OnInit {
   private auth = inject(AuthService);
@@ -64,5 +57,5 @@ export class PatientProfileComponent implements OnInit {
     });
   }
 
-  
+
 }
