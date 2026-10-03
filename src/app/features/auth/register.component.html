@@ -131,7 +131,9 @@
                             class="relative z-20">
                         </app-date-picker>
                         <app-select-dropdown label="Gender" [options]="genders" placeholder="Select gender"
-                            formControlName="gender" class="relative z-30">
+                            formControlName="gender" class="relative z-30"
+                            customButtonClass="w-full min-h-touch sm:h-[34px] sm:min-h-0 py-2.5 sm:py-0 text-sm sm:text-xs px-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 cursor-pointer relative transition-all duration-200 group flex items-center justify-between text-left font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 hover:border-gray-300 dark:hover:border-gray-600"
+                            customLabelClass="block text-[10px] sm:text-[9px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">
                         </app-select-dropdown>
                         <div class="space-y-1 relative z-10">
                             <label
@@ -251,7 +253,9 @@
                         class="grid grid-cols-1 gap-3.5 sm:gap-2.5">
                         <app-select-dropdown label="Specialization" [options]="specializations"
                             placeholder="Select specialization" [autoCapitalize]="false"
-                            formControlName="specialization">
+                            formControlName="specialization"
+                            customButtonClass="w-full min-h-touch sm:h-[34px] sm:min-h-0 py-2.5 sm:py-0 text-sm sm:text-xs px-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 cursor-pointer relative transition-all duration-200 group flex items-center justify-between text-left font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 hover:border-gray-300 dark:hover:border-gray-600"
+                            customLabelClass="block text-[10px] sm:text-[9px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">
                         </app-select-dropdown>
                         <div class="space-y-1">
                             <label

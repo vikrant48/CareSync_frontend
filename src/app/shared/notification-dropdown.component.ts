@@ -54,7 +54,7 @@ import { EmptyStateComponent } from './ui/empty-state.component';
         </div>
 
         <!-- Scrollable Content -->
-        <div class="max-h-[70vh] sm:max-h-96 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+        <div class="max-h-[70vh] sm:max-h-96 overflow-y-auto overflow-x-hidden custom-scrollbar">
           
           <!-- Loading/Status (Optional) -->
           <div *ngIf="showStatus" class="px-4 py-2 text-[10px] text-gray-500 bg-gray-900/50 border-b border-gray-800/50 flex justify-between">

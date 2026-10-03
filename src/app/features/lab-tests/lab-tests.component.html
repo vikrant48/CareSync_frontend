@@ -53,67 +53,14 @@
   <!-- Patient Selection for Doctors -->
   <div *ngIf="currentRole() === 'DOCTOR' && !isLoading()"
     class="mb-4 sm:mb-6 p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl">
-    <h3 class="text-sm sm:text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2 sm:mb-3 flex items-center">
-      <i class="fas fa-user-injured mr-2"></i>
-      Select Patient for Booking
-    </h3>
-
-    <!-- Loading Patients -->
-    <div *ngIf="isLoadingPatients()" class="flex items-center justify-center py-4 sm:py-6">
-      <div class="text-blue-400 mr-2 sm:mr-3">
-        <i class="fas fa-spinner fa-spin"></i>
-      </div>
-      <span class="text-xs sm:text-sm text-gray-300">Loading patients...</span>
-    </div>
-
-    <!-- Patient Selection Grid -->
-    <div *ngIf="!isLoadingPatients() && patients().length > 0"
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
-      <div *ngFor="let patient of patients()"
-        class="p-2.5 sm:p-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer transition-all duration-200 hover:border-blue-400 hover:shadow-md"
-        [class.border-blue-500]="selectedPatientId() === patient.id"
-        [class.bg-blue-50]="selectedPatientId() === patient.id" (click)="selectPatient(patient.id)">
-
-        <div class="flex items-center justify-between">
-          <div class="flex-1">
-            <h4 class="font-semibold text-xs sm:text-base text-gray-800 dark:text-gray-100">{{ patient.firstName }} {{
-              patient.lastName }}
-            </h4>
-            <p class="text-xs text-gray-600 dark:text-gray-300" *ngIf="patient.email">{{ patient.email }}</p>
-            <p class="text-xs text-gray-600 dark:text-gray-300" *ngIf="patient.contactInfo">{{ patient.contactInfo }}
-            </p>
-          </div>
-
-          <div class="ml-2 sm:ml-3">
-            <div class="w-4 h-4 sm:w-5 sm:h-5 border-2 border-gray-400 rounded-full transition-all duration-200"
-              [class.bg-blue-500]="selectedPatientId() === patient.id"
-              [class.border-blue-500]="selectedPatientId() === patient.id">
-              <i class="fas fa-check text-black dark:text-white text-[10px] sm:text-xs absolute top-0.5 left-0.5"
-                [class.opacity-100]="selectedPatientId() === patient.id"
-                [class.opacity-0]="selectedPatientId() !== patient.id"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- No Patients Available -->
-    <div *ngIf="!isLoadingPatients() && patients().length === 0"
-      class="text-center py-4 sm:py-6 text-gray-700 dark:text-gray-400">
-      <i class="fas fa-user-slash text-xl sm:text-2xl mb-1.5 sm:mb-2 opacity-50"></i>
-      <p class="text-xs sm:text-base">No patients available</p>
-      <button (click)="loadPatients()"
-        class="mt-1 sm:mt-2 text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 text-xs sm:text-sm font-medium px-0 py-0">Refresh</button>
-    </div>
-
-    <!-- Selected Patient Display -->
-    <div *ngIf="selectedPatientId() && getSelectedPatientName()"
-      class="mt-2 sm:mt-3 p-2 bg-green-900/50 border border-green-700 rounded-lg text-xs sm:text-sm">
-      <div class="flex items-center">
-        <i class="fas fa-check-circle text-green-400 mr-2"></i>
-        <span class="text-green-300 font-medium">Selected Patient: {{ getSelectedPatientName() }}</span>
-      </div>
-    </div>
+    <app-searchable-select label="Select Patient for Booking"
+      placeholder="Search and select a patient by name, email, or contact..."
+      searchPlaceholder="Type patient name, email, or contact..." [options]="patients()" [value]="selectedPatientId()"
+      labelKey="firstName, lastName" subTextKey="email, contactInfo" valueKey="id" [loading]="isLoadingPatients()"
+      emptyText="No patients available with appointments" noResultsText="No patients found matching your search"
+      [hint]="!selectedPatientId() ? 'Please select a patient before booking lab tests.' : ''"
+      (selectionChange)="selectPatient($event)" (clearSelection)="selectPatient(null)">
+    </app-searchable-select>
   </div>
 
   <!-- Main Content -->

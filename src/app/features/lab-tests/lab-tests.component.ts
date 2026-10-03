@@ -10,12 +10,13 @@ import { PaymentService } from '../../core/services/payment.service';
 import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { PaymentPopupComponent, PaymentDetails } from '../../shared/payment-popup.component';
+import { SearchableSelectComponent } from '../../shared/searchable-select.component';
 import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-lab-tests',
   standalone: true,
-  imports: [CommonModule, FormsModule, DoctorLayoutComponent, PatientLayoutComponent, PaymentPopupComponent],
+  imports: [CommonModule, FormsModule, DoctorLayoutComponent, PatientLayoutComponent, PaymentPopupComponent, SearchableSelectComponent],
   templateUrl: './lab-tests.component.html'
 })
 export class LabTestsComponent implements OnInit {
@@ -90,7 +91,7 @@ export class LabTestsComponent implements OnInit {
   /**
    * Select a patient for booking (doctors only)
    */
-  selectPatient(patientId: number) {
+  selectPatient(patientId: number | null) {
     this.selectedPatientId.set(patientId);
   }
 

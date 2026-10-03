@@ -1,12 +1,3 @@
-:host ::ng-deep .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
-
-:host ::ng-deep .no-scrollbar::-webkit-scrollbar {
-    display: none;
-}
-
 .admin-tab {
     display: inline-flex;
     align-items: center;

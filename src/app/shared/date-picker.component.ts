@@ -33,8 +33,8 @@ import flatpickr from 'flatpickr';
     }
   ],
   template: `
-    <div class="space-y-0.5 relative" [id]="containerId">
-      <label *ngIf="label" class="block text-[9px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 ml-0.5">
+    <div class="space-y-1 relative" [id]="containerId">
+      <label *ngIf="label" class="block text-[10px] sm:text-[9px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500">
         {{ label }}
       </label>
       
@@ -43,7 +43,7 @@ import flatpickr from 'flatpickr';
                type="text"
                [placeholder]="placeholder"
                [disabled]="disabled"
-               class="input-modern h-[36px] sm:h-[34px] text-xs pl-3 pr-9 w-full cursor-pointer"
+               class="input-modern min-h-touch sm:h-[34px] sm:min-h-0 py-2.5 sm:py-0 text-sm sm:text-xs px-3 pr-9 w-full cursor-pointer"
                [class.error]="error"
                [class.opacity-50]="disabled"
                [class.cursor-not-allowed]="disabled">
@@ -133,7 +133,7 @@ export class DatePickerComponent implements ControlValueAccessor, AfterViewInit,
   }
 
   private getAltInputClass(): string {
-    return 'input-modern h-[36px] sm:h-[34px] text-xs pl-3 pr-9 w-full cursor-pointer' + (this.error ? ' error' : '');
+    return 'input-modern min-h-touch sm:h-[34px] sm:min-h-0 py-2.5 sm:py-0 text-sm sm:text-xs px-3 pr-9 w-full cursor-pointer' + (this.error ? ' error' : '');
   }
 
   private updateAltInputClass() {

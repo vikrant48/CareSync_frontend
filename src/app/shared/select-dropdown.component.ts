@@ -20,7 +20,7 @@ export interface SelectOption {
   ],
   template: `
     <div class="space-y-0.5 relative" [class.z-50]="isOpen" [id]="dropdownId">
-      <label *ngIf="label" class="filter-label">
+      <label *ngIf="label" [class]="customLabelClass || 'filter-label'">
         {{ label }}
       </label>
       
@@ -29,7 +29,7 @@ export interface SelectOption {
               [disabled]="disabled"
               [attr.aria-expanded]="isOpen"
               aria-haspopup="listbox"
-              class="w-full filter-control-height rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3.5 text-xs sm:text-sm cursor-pointer relative transition-all duration-200 group flex items-center justify-between text-left font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 hover:border-gray-300 dark:hover:border-gray-600"
+              [class]="customButtonClass || 'w-full filter-control-height rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3.5 text-xs sm:text-sm cursor-pointer relative transition-all duration-200 group flex items-center justify-between text-left font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 hover:border-gray-300 dark:hover:border-gray-600'"
               [class.opacity-50]="disabled"
               [class.cursor-not-allowed]="disabled">
         <span [class.text-gray-400]="!selectedValue" class="block truncate pr-5">
@@ -67,6 +67,8 @@ export class SelectDropdownComponent implements ControlValueAccessor {
   @Input() placeholder: string = 'Select option';
   @Input() dropdownId: string = 'custom-dropdown-' + Math.random().toString(36).substr(2, 9);
   @Input() listClass: string = '';
+  @Input() customButtonClass: string = '';
+  @Input() customLabelClass: string = '';
   @Input() autoCapitalize: boolean = true;
 
   @HostBinding('style.position') hostPosition = 'relative';

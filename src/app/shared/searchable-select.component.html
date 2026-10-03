@@ -1,0 +1,125 @@
+<div class="space-y-1 relative" (keydown)="onKeyDown($event)">
+    <!-- Label -->
+    <label *ngIf="label" class="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">
+        {{ label }}
+    </label>
+
+    <!-- Combobox Trigger Button -->
+    <div class="relative">
+        <button type="button" (click)="toggleDropdown($event)" [disabled]="disabled || loading"
+            [attr.aria-expanded]="isOpen" aria-haspopup="listbox" role="combobox"
+            class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-left cursor-pointer transition-all duration-200 flex items-center justify-between gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 hover:border-gray-300 dark:hover:border-gray-600 shadow-sm"
+            [class.opacity-60]="disabled || loading" [class.cursor-not-allowed]="disabled || loading"
+            [class.ring-2]="isOpen" [class.ring-blue-500]="isOpen">
+
+            <!-- Left Content (Selected or Placeholder) -->
+            <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                <i class="fa-solid fa-user-injured text-blue-500 shrink-0 text-sm"></i>
+
+                <!-- Loading Spinner in Trigger -->
+                <span *ngIf="loading" class="text-xs sm:text-sm text-gray-400 flex items-center gap-2">
+                    <i class="fa-solid fa-spinner fa-spin text-blue-500"></i>
+                    <span>Loading options...</span>
+                </span>
+
+                <!-- Selected Option Display -->
+                <div *ngIf="!loading && selectedOption" class="min-w-0 flex-1">
+                    <div class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white truncate">
+                        {{ selectedOption.label }}
+                    </div>
+                    <div *ngIf="selectedOption.subText" class="text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                        {{ selectedOption.subText }}
+                    </div>
+                </div>
+
+                <!-- Placeholder when nothing selected -->
+                <span *ngIf="!loading && !selectedOption"
+                    class="text-xs sm:text-sm text-gray-400 dark:text-gray-500 truncate">
+                    {{ placeholder }}
+                </span>
+            </div>
+
+            <!-- Right Controls: Clear Button & Chevron -->
+            <div class="flex items-center gap-1.5 shrink-0 ml-1">
+                <button *ngIf="selectedOption && !disabled" type="button" (click)="onClear($event)"
+                    title="Clear selection" aria-label="Clear selection"
+                    class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-red-500 rounded-full transition-colors">
+                    <i class="fa-solid fa-times text-xs"></i>
+                </button>
+
+                <i class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform duration-200"
+                    [class.rotate-180]="isOpen"></i>
+            </div>
+        </button>
+    </div>
+
+    <!-- Hint Text -->
+    <p *ngIf="hint" class="text-[11px] text-amber-500 dark:text-amber-400 font-medium flex items-center gap-1 mt-1">
+        <i class="fa-solid fa-info-circle"></i>
+        <span>{{ hint }}</span>
+    </p>
+
+    <!-- Dropdown Panel -->
+    <div *ngIf="isOpen" role="listbox"
+        class="absolute z-[9999] left-0 right-0 mt-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+
+        <!-- Search Bar Section -->
+        <div
+            class="p-2 sm:p-2.5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/80 dark:bg-gray-800/50 backdrop-blur-sm">
+            <div class="relative">
+                <i
+                    class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400"></i>
+                <input #searchInput type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange($event)"
+                    [placeholder]="searchPlaceholder"
+                    class="w-full pl-8 pr-7 py-2 text-xs sm:text-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all" />
+                <button *ngIf="searchQuery" type="button" (click)="searchQuery = ''; onSearchChange('')"
+                    class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Options Scrollable Container (Max height 300px) -->
+        <div class="max-h-[280px] sm:max-h-[300px] overflow-y-auto custom-scrollbar p-1">
+
+            <!-- Empty State: No options provided at all -->
+            <div *ngIf="normalizedOptions.length === 0" class="py-6 px-4 text-center text-gray-500 dark:text-gray-400">
+                <i class="fa-solid fa-user-slash text-xl mb-1.5 opacity-40"></i>
+                <p class="text-xs sm:text-sm font-medium">{{ emptyText }}</p>
+            </div>
+
+            <!-- No Search Results -->
+            <div *ngIf="normalizedOptions.length > 0 && filteredOptions.length === 0"
+                class="py-6 px-4 text-center text-gray-500 dark:text-gray-400">
+                <i class="fa-solid fa-magnifying-glass-minus text-xl mb-1.5 opacity-40"></i>
+                <p class="text-xs sm:text-sm font-medium">{{ noResultsText }}</p>
+                <p class="text-[11px] opacity-70 mt-0.5">Try searching with a different name or email</p>
+            </div>
+
+            <!-- Filtered Options List -->
+            <div *ngFor="let option of filteredOptions; let i = index; trackBy: trackByValue" role="option"
+                [attr.aria-selected]="option.value === value" [attr.data-index]="i"
+                (click)="selectOption(option, $event)"
+                class="px-3 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm cursor-pointer transition-colors flex items-center justify-between gap-3 group min-h-[44px]"
+                [ngClass]="{
+          'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-semibold': option.value === value,
+          'bg-gray-100 dark:bg-gray-800': focusedIndex === i && option.value !== value,
+          'hover:bg-gray-50 dark:hover:bg-gray-800/60': option.value !== value
+        }">
+
+                <div class="flex-1 min-w-0">
+                    <div class="font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate"
+                        [ngClass]="{ 'text-blue-600 dark:text-blue-400': option.value === value }">
+                        {{ option.label }}
+                    </div>
+                    <div *ngIf="option.subText" class="text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                        {{ option.subText }}
+                    </div>
+                </div>
+
+                <i class="fa-solid fa-check text-xs text-blue-600 dark:text-blue-400 shrink-0"
+                    [class.opacity-100]="option.value === value" [class.opacity-0]="option.value !== value"></i>
+            </div>
+        </div>
+    </div>
+</div>
