@@ -22,37 +22,37 @@ import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { PatientNotificationComponent } from './patient-notification.component';
 import { PatientDashboardMetricsCardsComponent } from './patient-dashboard-metrics-cards.component';
 import { PatientMyHealthComponent } from './patient-my-health.component';
+import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 
 @Component({
   selector: 'app-patient-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, PatientAppointmentCardComponent, RescheduleAppointmentModalComponent, PatientNotificationComponent, MedicalHistoryDetailModalComponent, PatientDashboardMetricsCardsComponent, PatientMyHealthComponent, SharedChatModalComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, PatientAppointmentCardComponent, RescheduleAppointmentModalComponent, PatientNotificationComponent, MedicalHistoryDetailModalComponent, PatientDashboardMetricsCardsComponent, PatientMyHealthComponent, SharedChatModalComponent, EmptyStateComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-patient-layout>
     <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8">
-      <!--  Banner -->
-      <section class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl p-4 sm:p-6 shadow">
+      <!-- Welcome header (neutral — no colored hero strip) -->
+      <section class="ui-panel p-4 sm:p-6">
         <!-- Small screen top bar: avatar left, notification right -->
         <div class="sm:hidden flex items-center justify-between mb-4">
           <div class="flex items-center gap-3" *ngIf="!loadingWelcome">
-            <img *ngIf="profileImageUrl; else avatarSm" [src]="profileImageUrl" alt="Profile" class="w-10 h-10 rounded-full ring-2 ring-white/60 object-cover" />
+            <img *ngIf="profileImageUrl; else avatarSm" [src]="profileImageUrl" alt="Profile" class="w-10 h-10 rounded-full ring-2 ring-brand/30 object-cover" />
             <ng-template #avatarSm>
-              <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-base font-semibold">
+              <div class="w-10 h-10 rounded-full bg-brand-soft text-brand flex items-center justify-center text-base font-semibold">
                 {{ (patientName || 'P').charAt(0) }}
               </div>
             </ng-template>
             <div class="text-sm">
-              <!-- <div>Welcome back,</div> -->
-              <div class="text-lg font-semibold">{{ patientName || 'Patient' }}!</div>
+              <div class="text-lg font-semibold text-gray-900 dark:text-white">{{ patientName || 'Patient' }}!</div>
             </div>
           </div>
           <!-- Small screen skeleton loader -->
           <div class="flex items-center gap-3 animate-pulse" *ngIf="loadingWelcome">
-            <div class="w-10 h-10 rounded-full bg-white/20"></div>
+            <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700"></div>
             <div class="space-y-1">
-              <div class="h-3 w-16 bg-white/20 rounded"></div>
-              <div class="h-4 w-28 bg-white/20 rounded"></div>
+              <div class="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              <div class="h-4 w-28 bg-gray-200 dark:bg-gray-700 rounded"></div>
             </div>
           </div>
           <app-patient-notification></app-patient-notification>
@@ -64,59 +64,57 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
               *ngIf="profileImageUrl; else avatar"
               [src]="profileImageUrl"
               alt="Profile"
-              class="hidden sm:block w-14 h-14 sm:w-16 sm:h-16 rounded-full ring-2 ring-white/60 object-cover"
+              class="hidden sm:block w-14 h-14 sm:w-16 sm:h-16 rounded-full ring-2 ring-brand/30 object-cover"
             />
             <ng-template #avatar>
-              <div class="hidden sm:flex w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white/20 items-center justify-center text-lg sm:text-xl font-semibold">
+              <div class="hidden sm:flex w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-brand-soft text-brand items-center justify-center text-lg sm:text-xl font-semibold">
                 {{ (patientName || 'P').charAt(0) }}
               </div>
             </ng-template>
           </ng-container>
           <!-- Desktop avatar skeleton loader -->
-          <div *ngIf="loadingWelcome" class="hidden sm:block w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white/20 animate-pulse"></div>
+          <div *ngIf="loadingWelcome" class="hidden sm:block w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
 
           <div class="flex-1 w-full sm:w-auto">
-            <!-- <div class="text-base sm:text-lg">Welcome,</div> -->
             <ng-container *ngIf="loadingWelcome; else nameReady">
-              <!-- Desktop name & profile strength skeleton loader -->
               <div class="space-y-2 mt-1 animate-pulse">
-                <div class="h-6 w-32 bg-white/20 rounded"></div>
+                <div class="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
                 <div class="space-y-1 w-48 mt-2">
-                  <div class="h-3 w-24 bg-white/20 rounded"></div>
-                  <div class="h-1.5 w-full bg-white/20 rounded"></div>
+                  <div class="h-3 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  <div class="h-1.5 w-full bg-gray-200 dark:bg-gray-700 rounded"></div>
                 </div>
               </div>
             </ng-container>
             <ng-template #nameReady>
-              <div class="text-xl sm:text-2xl font-semibold">{{ patientName || 'Patient' }}!</div>
-              <div class="mt-2 text-sm text-white/90 w-48">
+              <div class="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">{{ patientName || 'Patient' }}!</div>
+              <div class="mt-2 text-sm text-gray-600 dark:text-gray-300 w-48">
                 <div class="flex items-center justify-between mb-1 text-xs font-semibold">
                   <span>Profile Completion</span>
-                  <span class="font-bold">{{ completionPercentage || 0 }}%</span>
+                  <span class="font-bold text-brand">{{ completionPercentage || 0 }}%</span>
                 </div>
-                <div class="w-full bg-white/30 rounded-full h-1.5">
-                  <div class="bg-white h-1.5 rounded-full transition-all duration-500" [style.width.%]="completionPercentage || 0"></div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                  <div class="bg-brand h-1.5 rounded-full transition-all duration-500" [style.width.%]="completionPercentage || 0"></div>
                 </div>
               </div>
             </ng-template>
           </div>
           <div class="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-4 sm:mt-0">
             <app-patient-notification class="hidden sm:block"></app-patient-notification>
-            <button class="btn-primary bg-white text-blue-700 hover:bg-white/90 w-full sm:w-auto" (click)="goToBookAppointment()">Book Appointment</button>
-            <button class="btn-primary bg-white text-blue-700 hover:bg-white/90 w-full sm:w-auto" (click)="goToMyAppointments()">My Appointments</button>
-            <button class="btn-primary bg-white text-blue-700 hover:bg-white/90 w-full sm:w-auto" (click)="goToVitals()"><i class="fa-solid fa-heart-pulse mr-2"></i>Health Vitals</button>
+            <button class="btn-primary w-full sm:w-auto" (click)="goToBookAppointment()">Book Appointment</button>
+            <button class="btn-secondary w-full sm:w-auto" (click)="goToMyAppointments()">My Appointments</button>
+            <button class="btn-secondary w-full sm:w-auto" (click)="goToVitals()"><i class="fa-solid fa-heart-pulse mr-2"></i>Health Vitals</button>
           </div>
           </div>
         </section>
 
-      <!-- Financial Overview (Hidden on Mobile) -->
-      <section *ngIf="financialStats" class="hidden md:grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white p-4 rounded-xl shadow border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+      <!-- Financial Overview -->
+      <section *ngIf="financialStats" class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        <div class="bg-white p-4 rounded-xl shadow border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
           <div class="text-sm text-gray-500 dark:text-gray-400">Total Spent</div>
           <div class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">₹{{ financialStats.totalSpend | number:'1.2-2' }}</div>
-          <div class="text-xs text-green-600 mt-1 font-medium">Lifetime</div>
+          <div class="text-xs text-brand mt-1 font-medium">Lifetime</div>
         </div>
-        <div class="bg-white p-4 rounded-xl shadow border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+        <div class="bg-white p-4 rounded-xl shadow border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
           <div class="text-sm text-gray-500 dark:text-gray-400">Appointments</div>
           <div class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">₹{{ financialStats.totalAppointmentSpend | number:'1.2-2' }}</div>
           <div class="text-xs text-blue-600 mt-1 font-medium">Consultation Fees</div>
@@ -147,13 +145,19 @@ import { PatientMyHealthComponent } from './patient-my-health.component';
        <section>
          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-3">
            <h3 class="text-lg font-semibold">Today's Appointments</h3>
-           <button class="text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 text-sm font-medium px-0 py-0" (click)="refreshAppointments()">Refresh</button>
+           <button class="text-brand hover:text-blue-700 hover:underline underline-offset-2 text-sm font-medium px-0 py-0" (click)="refreshAppointments()">Refresh</button>
          </div>
           <div *ngIf="loadingAppointments" class="flex items-center gap-2 text-gray-400">
             <span class="animate-spin h-5 w-5 border-2 border-current border-t-transparent rounded-full"></span>
             Loading today's appointments...
           </div>
-          <div *ngIf="!loadingAppointments && todayAppointments().length === 0" class="text-gray-400">No appointments for today.</div>
+          <div *ngIf="!loadingAppointments && todayAppointments().length === 0">
+            <app-empty-state
+              icon="fa-regular fa-calendar"
+              message="No appointments for today."
+              [compact]="true"
+            ></app-empty-state>
+          </div>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <patient-appointment-card
               *ngFor="let a of todayAppointments()"

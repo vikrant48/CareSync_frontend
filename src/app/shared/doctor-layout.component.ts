@@ -11,11 +11,11 @@ import { AiAssistantWidgetComponent } from './ai-assistant-widget.component';
   host: { class: 'block h-full w-full' },
   imports: [CommonModule, RouterModule, ToastContainerComponent, AiAssistantWidgetComponent],
   template: `
-    <div class="min-h-[calc(100vh-3.5rem)] w-full bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
+    <div class="min-h-[calc(100vh-3.5rem)] w-full bg-[var(--bg)] text-[var(--text)] transition-colors duration-300">
       
       <!-- Fixed Sidebar (Desktop) -->
       <aside class="hidden md:flex fixed top-14 left-0 bottom-0 w-64 flex-col bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 z-30 overflow-hidden">
-        <div class="px-4 py-4 border-b border-gray-700">
+        <div class="px-4 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
           <div class="text-lg font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-100">
             <i class="fa-solid fa-user-doctor"></i>
             <span>CareSync Doctor</span>
@@ -84,13 +84,13 @@ import { AiAssistantWidgetComponent } from './ai-assistant-widget.component';
 
         <!-- Copyright Footer -->
         <div class="mt-auto px-4 py-3 border-t border-gray-200 dark:border-gray-700/80 flex-shrink-0 text-xs text-gray-500 dark:text-gray-400">
-          © 2025 CareSync. All rights reserved.
+          © 2026 CareSync. All rights reserved.
         </div>
       </aside>
 
       <!-- Main Content Area -->
-      <main class="md:pl-64 w-full min-h-[calc(100vh-3.5rem)] bg-gray-50 dark:bg-gray-950">
-        <div class="pb-32 md:pb-8">
+      <main class="md:pl-64 w-full min-h-[calc(100vh-3.5rem)]">
+        <div class="pb-[calc(8rem+env(safe-area-inset-bottom,0px))] md:pb-8">
              <ng-content></ng-content>
         </div>
         <app-toast-container></app-toast-container>
@@ -98,25 +98,25 @@ import { AiAssistantWidgetComponent } from './ai-assistant-widget.component';
       </main>
 
        <!-- Mobile Bottom Navigation - Standard Fixed Bar -->
-      <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] overflow-hidden">
+      <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] overflow-hidden safe-bottom" style="min-height: calc(4rem + env(safe-area-inset-bottom, 0px));">
         <div class="grid grid-cols-5 items-center h-16">
-          <a routerLink="/doctor" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20" [routerLinkActiveOptions]="{ exact: true }" class="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+          <a routerLink="/doctor" routerLinkActive="nav-active" [routerLinkActiveOptions]="{ exact: true }" class="flex flex-col items-center justify-center h-full min-h-touch text-gray-500 dark:text-gray-400 hover:text-brand transition-colors">
             <i class="fa-solid fa-house text-lg mb-1"></i>
             <span class="text-[10px] font-medium">Home</span>
           </a>
-          <a routerLink="/doctor/schedule" routerLinkActive="text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20" class="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+          <a routerLink="/doctor/schedule" routerLinkActive="nav-active" class="flex flex-col items-center justify-center h-full min-h-touch text-gray-500 dark:text-gray-400 hover:text-brand transition-colors">
             <i class="fa-solid fa-calendar-day text-lg mb-1"></i>
             <span class="text-[10px] font-medium">Today</span>
           </a>
-          <a routerLink="/doctor/appointments" routerLinkActive="text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20" class="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+          <a routerLink="/doctor/appointments" routerLinkActive="nav-active" class="flex flex-col items-center justify-center h-full min-h-touch text-gray-500 dark:text-gray-400 hover:text-brand transition-colors">
             <i class="fa-solid fa-calendar-check text-lg mb-1"></i>
             <span class="text-[10px] font-medium">Appts</span>
           </a>
-          <a routerLink="/doctor/profile" routerLinkActive="text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-900/20" class="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 transition-colors">
+          <a routerLink="/doctor/profile" routerLinkActive="nav-active" class="flex flex-col items-center justify-center h-full min-h-touch text-gray-500 dark:text-gray-400 hover:text-brand transition-colors">
             <i class="fa-solid fa-user-doctor text-lg mb-1"></i>
             <span class="text-[10px] font-medium">Profile</span>
           </a>
-          <button type="button" (click)="menuOpen = !menuOpen" [class.text-blue-600]="menuOpen" class="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+          <button type="button" (click)="menuOpen = !menuOpen" [attr.aria-expanded]="menuOpen" aria-label="Open menu" [class.text-brand]="menuOpen" class="flex flex-col items-center justify-center h-full min-h-touch text-gray-500 dark:text-gray-400 hover:text-brand transition-colors">
             <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-1 transition-transform" [class.rotate-90]="menuOpen">
                <i class="fa-solid" [class.fa-bars]="!menuOpen" [class.fa-xmark]="menuOpen"></i>
             </div>
@@ -136,7 +136,7 @@ import { AiAssistantWidgetComponent } from './ai-assistant-widget.component';
          <div class="sticky top-0 bg-white dark:bg-gray-900 z-10 px-6 py-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
             <span class="bg-gray-200 dark:bg-gray-700 w-12 h-1.5 rounded-full absolute top-2 left-1/2 -translate-x-1/2"></span>
            <h3 class="font-bold text-lg dark:text-white mt-2">More Options</h3>
-           <button (click)="menuOpen = false" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 mt-2">
+           <button type="button" (click)="menuOpen = false" aria-label="Close menu" class="w-11 h-11 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 mt-2 touch-target">
              <i class="fa-solid fa-xmark"></i>
            </button>
          </div>
@@ -162,7 +162,7 @@ import { AiAssistantWidgetComponent } from './ai-assistant-widget.component';
                <i class="fa-solid fa-key text-2xl mb-2"></i>
                <span class="text-sm font-medium text-center">Change Password</span>
              </a>
-             <a routerLink="/doctor/leaves" (click)="menuOpen=false" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-900/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/20 transition-colors">
+             <a routerLink="/doctor/leaves" (click)="menuOpen=false" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-brand-soft text-brand hover:brightness-95 transition-colors">
                <i class="fa-solid fa-calendar-minus text-2xl mb-2"></i>
                <span class="text-sm font-medium text-center">Leaves</span>
              </a>
@@ -175,8 +175,8 @@ import { AiAssistantWidgetComponent } from './ai-assistant-widget.component';
                <span class="text-sm font-medium">Log Out</span>
              </button>
          </div>
-         <!-- Spacer for bottom safe area -->
-         <div class="h-8"></div>
+         <!-- Spacer for bottom safe area + nav -->
+         <div class="h-8 safe-bottom" style="height: calc(2rem + env(safe-area-inset-bottom, 0px));"></div>
       </div>
 
     </div>
@@ -186,10 +186,14 @@ import { AiAssistantWidgetComponent } from './ai-assistant-widget.component';
       @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 select-none;
     }
     .active-nav {
-      @apply bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 font-semibold shadow-sm;
+      background-color: var(--primary-soft);
+      color: var(--primary);
+      font-weight: 600;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     }
     .active-nav .icon-box {
-      @apply bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400;
+      background-color: rgba(16, 185, 129, 0.1);
+      color: var(--primary);
     }
     .icon-box {
       @apply w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-200;

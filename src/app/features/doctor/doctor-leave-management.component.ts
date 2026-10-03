@@ -4,23 +4,23 @@ import { FormsModule } from '@angular/forms';
 import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 import { LeaveService, DoctorLeave } from '../../core/services/leave.service';
 import { ToastService } from '../../core/services/toast.service';
+import { ConfirmService } from '../../core/services/confirm.service';
 import { DatePickerComponent } from '../../shared/date-picker.component';
+import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 
 @Component({
   selector: 'app-doctor-leave-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, DoctorLayoutComponent, DatePickerComponent],
+  imports: [CommonModule, FormsModule, DoctorLayoutComponent, DatePickerComponent, EmptyStateComponent, PageHeaderComponent],
   template: `
     <app-doctor-layout>
-      <div class="max-w-7xl mx-auto p-3 sm:p-6 space-y-4 sm:space-y-8">
+      <div class="max-w-7xl mx-auto p-3 sm:p-6 space-y-4 sm:space-y-8 pb-28 md:pb-0">
         
-        <!-- Header -->
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-4">
-          <div>
-            <h2 class="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Leave Management</h2>
-            <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mt-0.5 sm:mt-1">Manage your availability and time off</p>
-          </div>
-        </div>
+        <app-page-header
+          title="Leave Management"
+          subtitle="Manage your availability and time off"
+        ></app-page-header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
           
@@ -28,10 +28,10 @@ import { DatePickerComponent } from '../../shared/date-picker.component';
           <div class="lg:col-span-1 space-y-4 sm:space-y-6">
             <div class="panel p-3.5 sm:p-6 bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
               <h3 class="text-sm sm:text-lg font-bold text-gray-900 dark:text-white mb-2.5 sm:mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-calendar-plus text-blue-600 dark:text-blue-400 text-xs sm:text-base"></i> Apply for Leave
+                <i class="fa-solid fa-calendar-plus text-brand text-xs sm:text-base"></i> Apply for Leave
               </h3>
               
-              <form (ngSubmit)="applyLeave()" class="space-y-2.5 sm:space-y-4">
+              <form id="leave-apply-form" (ngSubmit)="applyLeave()" class="space-y-2.5 sm:space-y-4">
                 <app-date-picker
                   [(ngModel)]="form.startDate"
                   name="startDate"
@@ -53,18 +53,26 @@ import { DatePickerComponent } from '../../shared/date-picker.component';
                    <textarea rows="2" class="input-modern w-full resize-none text-xs sm:text-sm py-2 px-3 rounded-lg sm:rounded-xl" [(ngModel)]="form.reason" name="reason" placeholder="Testing, Personal work..." required></textarea>
                 </div>
 
-                <button type="submit" class="w-full btn-primary py-2 sm:py-3 text-xs sm:text-base font-bold shadow-lg shadow-blue-600/20 rounded-lg sm:rounded-xl active:scale-95 transition-transform" [disabled]="submitting || !isFormValid()">
+                <button type="submit" class="hidden md:flex w-full btn-primary py-2 sm:py-3 text-xs sm:text-base font-bold shadow-lg shadow-blue-600/20 rounded-lg sm:rounded-xl active:scale-95 transition-transform items-center justify-center" [disabled]="submitting || !isFormValid()">
                   <i class="fa-solid fa-paper-plane mr-1.5 sm:mr-2 text-xs sm:text-sm" *ngIf="!submitting"></i>
                   <i class="fa-solid fa-circle-notch fa-spin mr-1.5 sm:mr-2 text-xs sm:text-sm" *ngIf="submitting"></i>
                   {{ submitting ? 'Applying...' : 'Apply Leave' }}
                 </button>
               </form>
             </div>
+
+            <div class="sticky-cta md:mt-0">
+              <button type="submit" form="leave-apply-form" class="w-full btn-primary py-3 text-sm font-bold shadow-lg shadow-blue-600/20 rounded-xl active:scale-95 transition-transform md:hidden flex items-center justify-center" [disabled]="submitting || !isFormValid()">
+                <i class="fa-solid fa-paper-plane mr-2 text-sm" *ngIf="!submitting"></i>
+                <i class="fa-solid fa-circle-notch fa-spin mr-2 text-sm" *ngIf="submitting"></i>
+                {{ submitting ? 'Applying...' : 'Apply Leave' }}
+              </button>
+            </div>
             
             <!-- Quick Stats -->
-            <div class="bg-blue-50 dark:bg-blue-900/10 rounded-xl sm:rounded-2xl p-3.5 sm:p-6 border border-blue-100 dark:border-blue-900/30">
-               <h4 class="font-bold text-xs sm:text-base text-blue-800 dark:text-blue-300 mb-1 sm:mb-2">Did you know?</h4>
-               <p class="text-xs sm:text-sm text-blue-600 dark:text-blue-400 leading-relaxed">
+            <div class="bg-brand-soft rounded-xl sm:rounded-2xl p-3.5 sm:p-6 border border-emerald-100 dark:border-emerald-900/30">
+               <h4 class="font-bold text-xs sm:text-base text-emerald-800 dark:text-emerald-300 mb-1 sm:mb-2">Did you know?</h4>
+               <p class="text-xs sm:text-sm text-brand leading-relaxed">
                  You can cancel upcoming leaves anytime clearly marked in the list. Past leaves are kept for your history records.
                </p>
             </div>
@@ -81,24 +89,24 @@ import { DatePickerComponent } from '../../shared/date-picker.component';
                </div>
                
                <div *ngIf="loading" class="p-6 sm:p-10 flex flex-col items-center justify-center text-gray-400">
-                  <i class="fa-solid fa-circle-notch fa-spin text-2xl sm:text-3xl mb-2 sm:mb-3 text-blue-500"></i>
+                  <i class="fa-solid fa-circle-notch fa-spin text-2xl sm:text-3xl mb-2 sm:mb-3 text-brand"></i>
                   <p class="text-xs sm:text-sm">Loading your leaves...</p>
                </div>
 
-               <div *ngIf="!loading && leaves.length === 0" class="p-6 sm:p-10 flex flex-col items-center justify-center text-center">
-                  <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gray-50 dark:bg-gray-700/50 rounded-full flex items-center justify-center text-gray-300 dark:text-gray-600 mb-2 sm:mb-3">
-                    <i class="fa-solid fa-umbrella-beach text-xl sm:text-2xl"></i>
-                  </div>
-                  <p class="text-xs sm:text-base text-gray-500 dark:text-gray-400 font-medium">No leave records found.</p>
-                  <p class="text-[11px] sm:text-sm text-gray-400 dark:text-gray-500">Apply for a leave to get started.</p>
-               </div>
+               <app-empty-state
+                 *ngIf="!loading && leaves.length === 0"
+                 icon="fa-solid fa-umbrella-beach"
+                 title="No leave records found"
+                 message="Apply for a leave to get started."
+                 [compact]="true"
+               ></app-empty-state>
                
                <div *ngIf="!loading && leaves.length > 0" class="divide-y divide-gray-100 dark:divide-gray-700">
                  <div *ngFor="let leave of leaves" class="p-3 sm:p-5 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors group">
                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
                      <div class="flex items-start gap-2.5 sm:gap-4">
                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex flex-col items-center justify-center shrink-0 border"
-                            [ngClass]="isUpcoming(leave) ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-900/30' : 'bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 border-gray-100 dark:border-gray-700'">
+                            [ngClass]="isUpcoming(leave) ? 'bg-brand-soft text-brand border-emerald-100 dark:border-emerald-900/30' : 'bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 border-gray-100 dark:border-gray-700'">
                           <span class="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-[-2px]">{{ leave.startDate | date:'MMM' }}</span>
                           <span class="text-sm sm:text-lg font-bold leading-none">{{ leave.startDate | date:'dd' }}</span>
                        </div>
@@ -140,13 +148,14 @@ import { DatePickerComponent } from '../../shared/date-picker.component';
   `,
   styles: [`
     .input-modern {
-      @apply block w-full rounded-xl border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-blue-500 hover:bg-white dark:hover:bg-gray-700 transition-all duration-200 text-sm py-2.5 px-3;
+      @apply block w-full rounded-xl border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 hover:bg-white dark:hover:bg-gray-700 transition-all duration-200 text-sm py-2.5 px-3;
     }
   `]
 })
 export class DoctorLeaveManagementComponent implements OnInit {
   private leaveService = inject(LeaveService);
   private toast = inject(ToastService);
+  private confirm = inject(ConfirmService);
 
   leaves: DoctorLeave[] = [];
   loading = true;
@@ -212,9 +221,16 @@ export class DoctorLeaveManagementComponent implements OnInit {
     });
   }
 
-  deleteLeave(leave: DoctorLeave) {
+  async deleteLeave(leave: DoctorLeave) {
     if (!leave.id) return;
-    if (!confirm('Are you sure you want to cancel this leave request?')) return;
+    const ok = await this.confirm.ask({
+      title: 'Cancel leave',
+      message: 'Are you sure you want to cancel this leave request?',
+      confirmLabel: 'Cancel leave',
+      cancelLabel: 'Keep',
+      danger: true,
+    });
+    if (!ok) return;
 
     this.deletingId = leave.id;
     this.leaveService.deleteLeave(leave.id).subscribe({

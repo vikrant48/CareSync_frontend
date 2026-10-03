@@ -8,6 +8,7 @@ import { LabTestService, BookingRequest } from '../core/services/lab-test.servic
 import { AuthService } from '../core/services/auth.service';
 import { ToastService } from '../core/services/toast.service';
 import { PaymentSuccessModalComponent } from './payment-success-modal.component';
+import { ModalShellComponent } from './ui/modal-shell.component';
 
 export interface PaymentDetails {
   method: 'upi' | 'card' | 'qr';
@@ -29,40 +30,44 @@ export interface PaymentDetails {
 @Component({
   selector: 'app-payment-popup',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaymentSuccessModalComponent],
+  imports: [CommonModule, FormsModule, PaymentSuccessModalComponent, ModalShellComponent],
   template: `
-    <div *ngIf="isVisible" class="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4">
-      <!-- Backdrop -->
-      <div class="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity" (click)="closePayment()"></div>
-
-      <!-- Modal -->
-      <div class="relative w-[min(calc(100vw-1.5rem),460px)] max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10 overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200">
-        
-        <!-- Header -->
-        <div class="px-3.5 sm:px-6 py-3 sm:py-4 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-600/20 dark:to-purple-600/20 border-b border-gray-200 dark:border-white/5">
+    <app-modal-shell
+      [open]="isVisible"
+      [showHeader]="false"
+      [hasFooter]="!!selectedMethod()"
+      maxWidthClass="max-w-lg"
+      zIndexClass="z-[100]"
+      panelClass="bg-white dark:bg-gray-900 rounded-2xl ring-1 ring-black/5 dark:ring-white/10 relative"
+      bodyClass="p-3.5 sm:p-6 space-y-3 sm:space-y-5 relative"
+      footerClass="modal-sticky-footer p-6 pt-4 pb-8 safe-bottom border-t border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-gray-900/50"
+      ariaLabel="Payment"
+      backdropClass="bg-black/70"
+      (close)="closePayment()"
+    >
+        <div modalHeader class="px-3.5 sm:px-6 py-3 sm:py-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-600/20 dark:to-indigo-600/20 border-b border-gray-200 dark:border-white/5 shrink-0">
           <div class="flex items-center justify-between gap-2">
             <div class="min-w-0 flex-1">
               <h2 class="text-sm sm:text-lg font-bold text-gray-900 dark:text-white tracking-tight truncate">{{ title }}</h2>
-              <p class="text-xs sm:text-sm text-indigo-600 dark:text-indigo-200 mt-0.5 truncate" *ngIf="additionalInfo">{{ additionalInfo }}</p>
+              <p class="text-xs sm:text-sm text-brand mt-0.5 truncate" *ngIf="additionalInfo">{{ additionalInfo }}</p>
             </div>
             
             <div class="flex items-center gap-2 shrink-0">
               <!-- Amount Badge -->
-              <div class="bg-white dark:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-300 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-bold shadow-sm dark:shadow-inner shrink-0 whitespace-nowrap">
+              <div class="bg-white dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 text-blue-700 dark:text-emerald-300 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-bold shadow-sm dark:shadow-inner shrink-0 whitespace-nowrap">
                 ₹{{ amount | number:'1.2-2' }}
               </div>
               <button 
+                type="button"
                 (click)="closePayment()"
-                class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors focus:outline-none"
+                aria-label="Close payment"
+                class="p-2.5 min-w-touch min-h-touch text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors focus:outline-none inline-flex items-center justify-center"
               >
                 <i class="fa-solid fa-xmark text-base sm:text-lg"></i>
               </button>
             </div>
           </div>
         </div>
-
-        <!-- Content -->
-        <div class="flex-1 overflow-y-auto p-3.5 sm:p-6 space-y-3 sm:space-y-5 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 scrollbar-track-transparent">
           
           <!-- Method Selection -->
           <div *ngIf="!selectedMethod()">
@@ -71,16 +76,16 @@ export interface PaymentDetails {
                <!-- UPI Option -->
                <button 
                  (click)="selectPaymentMethod('upi')"
-                 class="group relative flex items-center p-3 sm:p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800 hover:border-indigo-500 dark:hover:border-indigo-500/50 transition-all duration-200 text-left shadow-sm hover:shadow-md"
+                 class="group relative flex items-center p-3 sm:p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800 hover:border-brand dark:hover:border-brand/50 transition-all duration-200 text-left shadow-sm hover:shadow-md"
                >
-                 <div class="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform shrink-0">
+                 <div class="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-brand-soft flex items-center justify-center text-brand group-hover:scale-110 transition-transform shrink-0">
                    <i class="fa-solid fa-mobile-screen-button text-sm sm:text-lg"></i>
                  </div>
                  <div class="ml-3 sm:ml-4 flex-1 min-w-0">
-                   <h3 class="font-semibold text-xs sm:text-sm text-gray-900 dark:text-gray-200 group-hover:text-indigo-600 dark:group-hover:text-white truncate">UPI Payment</h3>
+                   <h3 class="font-semibold text-xs sm:text-sm text-gray-900 dark:text-gray-200 group-hover:text-emerald-600 dark:group-hover:text-white truncate">UPI Payment</h3>
                    <p class="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">Google Pay, PhonePe, Paytm</p>
                  </div>
-                 <i class="fa-solid fa-chevron-right text-xs text-gray-400 dark:text-gray-600 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 shrink-0"></i>
+                 <i class="fa-solid fa-chevron-right text-xs text-gray-400 dark:text-gray-600 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 shrink-0"></i>
                </button>
  
                <!-- Card Option -->
@@ -141,7 +146,7 @@ export interface PaymentDetails {
                       [(ngModel)]="upiId"
                       (input)="onUpiInput($event)"
                       placeholder="username@bank"
-                      class="w-full pl-9 pr-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium"
+                      class="w-full pl-9 pr-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-emerald-500 transition-all font-medium"
                       [class.border-red-500_50]="errorMessage()"
                     >
                   </div>
@@ -155,7 +160,7 @@ export interface PaymentDetails {
                        class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center justify-between group/item"
                      >
                        <span>{{ suggestion }}</span>
-                       <span class="text-xs text-gray-400 dark:text-gray-500 group-hover/item:text-indigo-500 dark:group-hover/item:text-indigo-400">Select</span>
+                       <span class="text-xs text-gray-400 dark:text-gray-500 group-hover/item:text-emerald-500 dark:group-hover/item:text-emerald-400">Select</span>
                      </button>
                   </div>
                   <p *ngIf="errorMessage()" class="text-red-400 text-xs mt-1 ml-0.5 animate-in slide-in-from-top-1">{{ errorMessage() }}</p>
@@ -237,7 +242,7 @@ export interface PaymentDetails {
                         <span class="text-lg font-bold">₹{{ amount }}</span>
                      </div>
                   </div>
-                  <div class="absolute -bottom-2 -right-2 bg-emerald-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-md">
+                  <div class="absolute -bottom-2 -right-2 bg-blue-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-md">
                      <i class="fa-solid fa-check mr-1"></i> Verified
                   </div>
                 </div>
@@ -248,10 +253,9 @@ export interface PaymentDetails {
              </div>
  
           </div>
-        </div>
 
         <!-- Footer Actions -->
-        <div class="p-6 pt-4 border-t border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-gray-900/50 flex flex-col sm:flex-row gap-3 items-center" *ngIf="selectedMethod()">
+        <div modalFooter class="flex flex-col sm:flex-row gap-3 items-center w-full">
            <button 
              *ngIf="selectedMethod() !== 'qr'"
              (click)="processPayment()"
@@ -267,7 +271,7 @@ export interface PaymentDetails {
              *ngIf="selectedMethod() === 'qr'"
              (click)="processPayment()"
              [disabled]="isProcessing()"
-             class="w-full btn-secondary py-3 flex items-center justify-center gap-2 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
+             class="w-full btn-secondary py-3 flex items-center justify-center gap-2 border-emerald-500/30 text-emerald-400 hover:bg-blue-500/10"
            >
              <i class="fa-solid fa-check"></i> I have made the payment
            </button>
@@ -277,15 +281,14 @@ export interface PaymentDetails {
         <div *ngIf="isProcessing()" class="absolute inset-0 bg-gray-900/80 backdrop-blur-sm z-20 flex flex-col items-center justify-center animate-in fade-in duration-300">
            <div class="relative w-16 h-16 mb-4">
              <div class="absolute inset-0 border-4 border-gray-700/50 rounded-full"></div>
-             <div class="absolute inset-0 border-4 border-indigo-500 rounded-full border-t-transparent animate-spin"></div>
+             <div class="absolute inset-0 border-4 border-emerald-500 rounded-full border-t-transparent animate-spin"></div>
              <i class="fa-solid fa-lock absolute inset-0 flex items-center justify-center text-gray-500 text-lg"></i>
            </div>
            <h3 class="text-lg font-bold text-white mb-1">Processing Secure Payment</h3>
            <p class="text-sm text-gray-400">Please do not close this window...</p>
         </div>
 
-      </div>
-    </div>
+    </app-modal-shell>
 
     <!-- Payment Success Modal -->
     <app-payment-success-modal

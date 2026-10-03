@@ -6,11 +6,12 @@ import { AuthService } from './core/services/auth.service';
 import { ThemeService } from './core/services/theme.service';
 import { BackendStatusService } from './core/services/backend-status.service';
 import { OfflineBannerComponent } from './shared/offline-banner.component';
+import { ConfirmDialogComponent } from './shared/ui/confirm-dialog.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, CommonModule, OfflineBannerComponent],
+  imports: [RouterOutlet, RouterLink, CommonModule, OfflineBannerComponent, ConfirmDialogComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

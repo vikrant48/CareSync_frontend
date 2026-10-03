@@ -13,97 +13,73 @@ import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.co
 import { PatientProfileService, PatientDto, MedicalHistoryWithDoctorItem } from '../../core/services/patient-profile.service';
 import { forkJoin, map, firstValueFrom } from 'rxjs';
 import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropdown.component';
+import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
+import { SkeletonComponent } from '../../shared/ui/skeleton.component';
+import { FilterBarComponent } from '../../shared/ui/filter-bar.component';
 
 type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
 
 @Component({
   selector: 'app-doctor-appointments',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, DoctorAppointmentCardComponent, PatientDetailsModalComponent, MedicalHistoryDetailModalComponent, DoctorLayoutComponent, SharedChatModalComponent, SelectDropdownComponent],
+  imports: [CommonModule, FormsModule, RouterModule, DoctorAppointmentCardComponent, PatientDetailsModalComponent, MedicalHistoryDetailModalComponent, DoctorLayoutComponent, SharedChatModalComponent, SelectDropdownComponent, EmptyStateComponent, SkeletonComponent, FilterBarComponent],
   template: `
     <app-doctor-layout>
     <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
       <!-- Header -->
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Appointments</h2>
+          <h2 class="font-display text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Appointments</h2>
           <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mt-0.5">Manage your patient appointments and schedules</p>
         </div>
       </div>
 
-      <!-- Filters (Minimized & Collapsible for Mobile) -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-gray-100 dark:border-gray-700 shadow-sm space-y-3 sm:space-y-4">
-        <div class="flex items-center justify-between cursor-pointer sm:cursor-default" (click)="toggleFilter()">
-           <div class="flex items-center gap-2 min-w-0">
-             <i class="fa-solid fa-filter text-blue-600 dark:text-blue-400 text-xs sm:text-sm"></i>
-             <h3 class="font-semibold text-xs sm:text-base text-gray-900 dark:text-white">Filters</h3>
-             <span *ngIf="statusFilter !== 'ALL' || searchTerm || range !== 'ALL'" class="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0">
-               Active
-             </span>
-           </div>
-           
-           <div class="flex items-center gap-2 shrink-0" (click)="$event.stopPropagation()">
-             <button *ngIf="statusFilter !== 'ALL' || searchTerm || range !== 'ALL'" 
-                     (click)="statusFilter='ALL'; range='ALL'; searchTerm=''; refresh()" 
-                     class="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium hover:underline transition-all">
-               Clear All
-             </button>
-             <button (click)="toggleFilter()" class="sm:hidden text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-lg flex items-center gap-1 text-xs font-bold transition-all shrink-0">
-               <i class="fa-solid fa-sliders text-[10px]"></i>
-               <span>{{ isFilterExpanded ? 'Hide' : 'Filter' }}</span>
-               <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300" [class.rotate-180]="isFilterExpanded"></i>
-             </button>
-           </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-5 transition-all duration-300"
-             [ngClass]="{ 'hidden sm:grid': !isFilterExpanded, 'grid pt-2': isFilterExpanded }">
-          <!-- Status Filter -->
-          <div class="space-y-1">
-            <label class="text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</label>
-              <app-select-dropdown
-                [(ngModel)]="statusFilter"
-                [options]="statusOptions"
-                (ngModelChange)="onFilterChange()"
-                placeholder="All Statuses">
-              </app-select-dropdown>
+      <app-filter-bar
+        [(expanded)]="isFilterExpanded"
+        [activeCount]="appointmentFilterActiveCount"
+        gridClass="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-5"
+        (clear)="clearAppointmentFilters()"
+      >
+          <div class="space-y-0.5">
+            <app-select-dropdown
+              label="Status"
+              [(ngModel)]="statusFilter"
+              [options]="statusOptions"
+              (ngModelChange)="onFilterChange()"
+              placeholder="All Statuses">
+            </app-select-dropdown>
           </div>
 
-          <!-- Search Filter -->
-          <div class="space-y-1">
-            <label class="text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Search</label>
-            <div class="relative">
-              <input type="text" class="w-full px-3 py-1.5 sm:py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all text-gray-900 dark:text-white" [(ngModel)]="searchTerm" (input)="onFilterChange()" placeholder="Search patient name or ID..." />
+          <div class="space-y-0.5">
+            <label class="filter-label">Search</label>
+            <div class="relative w-full">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs sm:text-sm pointer-events-none z-10"></i>
+              <input type="text" class="filter-input-search" [(ngModel)]="searchTerm" (input)="onFilterChange()" placeholder="Search patient name or ID..." />
             </div>
           </div>
 
-          <!-- Time Range Filter -->
-          <div class="space-y-1">
-            <label class="text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Time Range</label>
-            <div class="flex bg-gray-100 dark:bg-gray-700/50 p-1 rounded-xl gap-1">
-              <button class="flex-1 py-1 px-1.5 text-xs font-medium rounded-lg transition-all" [class.bg-white]="range==='TODAY'" [class.dark:bg-gray-800]="range==='TODAY'" [class.shadow-sm]="range==='TODAY'" [class.text-blue-600]="range==='TODAY'" (click)="setRange('TODAY')">Today</button>
-              <button class="flex-1 py-1 px-1.5 text-xs font-medium rounded-lg transition-all" [class.bg-white]="range==='UPCOMING'" [class.dark:bg-gray-800]="range==='UPCOMING'" [class.shadow-sm]="range==='UPCOMING'" [class.text-blue-600]="range==='UPCOMING'" (click)="setRange('UPCOMING')">Upcoming</button>
-              <button class="flex-1 py-1 px-1.5 text-xs font-medium rounded-lg transition-all" [class.bg-white]="range==='PAST'" [class.dark:bg-gray-800]="range==='PAST'" [class.shadow-sm]="range==='PAST'" [class.text-blue-600]="range==='PAST'" (click)="setRange('PAST')">Past</button>
-              <button class="flex-1 py-1 px-1.5 text-xs font-medium rounded-lg transition-all" [class.bg-white]="range==='ALL'" [class.dark:bg-gray-800]="range==='ALL'" [class.shadow-sm]="range==='ALL'" [class.text-blue-600]="range==='ALL'" (click)="setRange('ALL')">All</button>
+          <div class="space-y-0.5">
+            <label class="filter-label">Time Range</label>
+            <div class="filter-time-range-container gap-1">
+              <button type="button" class="filter-time-range-btn" [class.is-active]="range==='TODAY'" (click)="setRange('TODAY')">Today</button>
+              <button type="button" class="filter-time-range-btn" [class.is-active]="range==='UPCOMING'" (click)="setRange('UPCOMING')">Upcoming</button>
+              <button type="button" class="filter-time-range-btn" [class.is-active]="range==='PAST'" (click)="setRange('PAST')">Past</button>
+              <button type="button" class="filter-time-range-btn" [class.is-active]="range==='ALL'" (click)="setRange('ALL')">All</button>
             </div>
           </div>
-        </div>
-      </div>
+      </app-filter-bar>
 
-      <!-- List Content -->
-      <div *ngIf="loading" class="flex flex-col items-center justify-center py-20 text-gray-400 animate-in fade-in">
-        <div class="w-16 h-16 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin mb-4"></div>
-        <span class="font-medium">Loading appointments...</span>
-      </div>
+      <app-skeleton *ngIf="loading" variant="card" [count]="6" wrapperClass="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></app-skeleton>
 
-      <div *ngIf="!loading && filteredAppointments().length === 0" class="flex flex-col items-center justify-center py-20 text-center animate-in fade-in zoom-in duration-300">
-         <div class="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-400 mb-4">
-           <i class="fa-regular fa-calendar-xmark text-4xl"></i>
-         </div>
-         <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">No appointments found</h3>
-         <p class="text-gray-500 dark:text-gray-400 max-w-xs">Try adjusting your filters or search terms to find what you're looking for.</p>
-         <button class="btn-secondary mt-4" (click)="statusFilter='ALL'; range='ALL'; searchTerm=''; refresh()">Clear Filters</button>
-      </div>
+      <app-empty-state
+        *ngIf="!loading && filteredAppointments().length === 0"
+        icon="fa-solid fa-calendar-xmark"
+        title="No appointments found"
+        message="Try adjusting your filters or search terms to find what you're looking for."
+        [hasAction]="true"
+      >
+        <button type="button" class="btn-secondary" (click)="statusFilter='ALL'; range='ALL'; searchTerm=''; refresh()">Clear Filters</button>
+      </app-empty-state>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4" *ngIf="!loading && filteredAppointments().length > 0">
         <doctor-appointment-card
@@ -126,7 +102,7 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
 
       <!-- Fixed Bottom Pagination Bar -->
       <div *ngIf="!loading && totalAppointmentsCount > 0"
-        class="fixed bottom-16 md:bottom-0 left-0 md:left-64 right-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 shadow-2xl px-4 sm:px-8 py-2 flex items-center justify-between transition-all">
+        class="fixed left-0 md:left-64 right-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 shadow-2xl px-4 sm:px-8 py-2 flex items-center justify-between transition-all fixed-above-mobile-nav safe-bottom">
         
         <div class="flex items-center gap-3 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
           <span class="font-medium">
@@ -215,8 +191,19 @@ export class DoctorAppointmentsComponent {
   statuses: string[] = [];
   isFilterExpanded = false;
 
-  toggleFilter() {
-    this.isFilterExpanded = !this.isFilterExpanded;
+  get appointmentFilterActiveCount(): number {
+    let count = 0;
+    if (this.statusFilter !== 'ALL') count++;
+    if (this.searchTerm) count++;
+    if (this.range !== 'ALL') count++;
+    return count;
+  }
+
+  clearAppointmentFilters() {
+    this.statusFilter = 'ALL';
+    this.range = 'ALL';
+    this.searchTerm = '';
+    this.refresh();
   }
 
   get statusOptions(): SelectOption[] {

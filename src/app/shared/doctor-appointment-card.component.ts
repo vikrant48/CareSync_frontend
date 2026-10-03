@@ -4,167 +4,114 @@ import { FormsModule } from '@angular/forms';
 import { DoctorAppointmentItem } from '../core/services/appointment.service';
 import { RouterModule } from '@angular/router';
 import { PdfService } from '../core/services/pdf.service';
+import { StatusBadgeComponent } from './ui/status-badge.component';
 
+/**
+ * Doctor appointment card — same shell language as patient-appointment-card;
+ * actions stay role-specific.
+ */
 @Component({
   standalone: true,
   selector: 'doctor-appointment-card',
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, StatusBadgeComponent],
   template: `
     <div
-      class="group relative bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-300 h-full flex flex-col"
+      class="ui-panel-hover p-4 sm:p-5 group animate-slide-up h-full flex flex-col"
       [class.opacity-60]="disabled || appointment.isActive === false"
       [class.pointer-events-none]="disabled"
     >
-      <!-- Header: Patient Info & Status -->
-      <div class="flex gap-4 mb-4">
-        <!-- Patient Image/Initials -->
-        <div class="relative w-14 h-14 shrink-0">
-           <img *ngIf="appointment.patientProfileImageUrl; else initials"
-                [src]="appointment.patientProfileImageUrl"
-                alt="{{appointment.patientName}}"
-                class="w-full h-full rounded-full object-cover shadow-lg shadow-blue-500/10 ring-2 ring-white dark:ring-gray-700"
-           />
-           <ng-template #initials>
-              <div class="w-full h-full rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-bold text-xl shadow-lg shadow-blue-500/20">
-                {{ (appointment.patientName || 'P') | slice:0:1 }}
-              </div>
-           </ng-template>
-        </div>
-
-        <!-- Patient Name & Appointment Time Info -->
-        <div class="flex-1 min-w-0 flex flex-col justify-between py-0.5">
-          <div class="flex items-start justify-between gap-2">
-            <h3 class="font-bold text-gray-900 dark:text-gray-100 truncate text-lg leading-tight">{{ appointment.patientName }}</h3>
-            <span
-              class="shrink-0 px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider border whitespace-nowrap mt-0.5"
-              [ngClass]="statusBadgeClass(appointment)"
-            >
-              {{ statusLabel(appointment) }}
-            </span>
+      <!-- Header -->
+      <div class="flex items-start justify-between gap-3 mb-4">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-12 h-12 rounded-full bg-brand-soft text-brand flex items-center justify-center font-bold text-lg ring-2 ring-gray-200 dark:ring-gray-700/50 group-hover:ring-brand/40 transition-all overflow-hidden shrink-0">
+            <img *ngIf="appointment.patientProfileImageUrl" [src]="appointment.patientProfileImageUrl" class="w-full h-full object-cover" [alt]="appointment.patientName" />
+            <span *ngIf="!appointment.patientProfileImageUrl">{{ (appointment.patientName || 'P') | slice:0:1 }}</span>
           </div>
-          
-          <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 font-medium">
-             <div class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
-               <i class="fa-regular fa-calendar text-blue-500/70"></i>
-               <span>{{ appointment.appointmentDate }}</span>
-             </div>
-             <div class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
-               <i class="fa-regular fa-clock text-blue-500/70"></i>
-               <span>{{ appointment.appointmentTime }}</span>
-             </div>
+          <div class="min-w-0">
+            <h4 class="font-bold text-gray-800 dark:text-gray-100 truncate text-base leading-tight">{{ appointment.patientName }}</h4>
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+              <span class="inline-flex items-center gap-1"><i class="fa-solid fa-calendar text-brand"></i>{{ appointment.appointmentDate }}</span>
+              <span class="inline-flex items-center gap-1"><i class="fa-solid fa-clock text-brand"></i>{{ appointment.appointmentTime }}</span>
+            </div>
           </div>
         </div>
+        <app-status-badge [status]="appointment.status" [text]="statusLabel(appointment)"></app-status-badge>
       </div>
 
-      <!-- Content: Reason -->
-      <div class="mb-4 flex-1">
-         <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-3 border border-gray-100 dark:border-gray-700/50">
-           <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Reason for Visit</label>
-           <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2" [title]="appointment.reason || 'No reason provided'">
-             {{ appointment.reason || 'No specific reason provided.' }}
-           </p>
-         </div>
+      <!-- Details -->
+      <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3 border border-gray-200 dark:border-gray-800/50 mb-4 flex-1">
+        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Reason for visit</label>
+        <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2" [title]="appointment.reason || 'No reason provided'">
+          {{ appointment.reason || 'No specific reason provided.' }}
+        </p>
       </div>
 
-      <!-- Actions Footer -->
-      <div class="pt-4 border-t border-gray-100 dark:border-gray-700 mt-auto grid grid-cols-1 gap-2">
-        <!-- Primary Actions based on Status -->
-         
-        <!-- BOOKED -->
+      <!-- Actions (doctor-specific) -->
+      <div class="pt-3 border-t border-gray-200 dark:border-gray-800 mt-auto flex flex-col gap-2">
         <div class="grid grid-cols-2 gap-2" *ngIf="appointment.status === 'BOOKED'">
-          <button class="btn-action btn-check" (click)="onSchedule()" [disabled]="disabled">
+          <button type="button" class="btn-secondary !bg-emerald-50 dark:!bg-emerald-900/10 !text-emerald-600 dark:!text-emerald-400 !border-emerald-100 dark:!border-emerald-900/30" (click)="onSchedule()" [disabled]="disabled">
             <i class="fa-solid fa-calendar-check"></i> Accept
           </button>
-          <button class="btn-action btn-danger" (click)="onCancel()" [disabled]="disabled">
+          <button type="button" class="btn-danger" (click)="onCancel()" [disabled]="disabled">
             <i class="fa-solid fa-xmark"></i> Decline
           </button>
         </div>
 
-        <!-- SCHEDULED -->
         <div class="grid grid-cols-2 gap-2" *ngIf="appointment.status === 'SCHEDULED'">
-          <button class="btn-action btn-check" (click)="onConfirm()" [disabled]="disabled">
-             <i class="fa-solid fa-check-double"></i> Confirm
+          <button type="button" class="btn-secondary !bg-emerald-50 dark:!bg-emerald-900/10 !text-emerald-600 dark:!text-emerald-400 !border-emerald-100 dark:!border-emerald-900/30" (click)="onConfirm()" [disabled]="disabled">
+            <i class="fa-solid fa-check-double"></i> Confirm
           </button>
-          <button class="btn-action btn-danger" (click)="onCancel()" [disabled]="disabled">
-             <i class="fa-solid fa-ban"></i> Cancel
-          </button>
-        </div>
-
-        <!-- CONFIRMED -->
-        <div *ngIf="appointment.status === 'CONFIRMED'">
-          <button class="btn-action btn-primary w-full" (click)="onStart()" [disabled]="disabled">
-             <i class="fa-solid fa-stethoscope"></i> Start Consultation
+          <button type="button" class="btn-danger" (click)="onCancel()" [disabled]="disabled">
+            <i class="fa-solid fa-ban"></i> Cancel
           </button>
         </div>
 
-         <div class="space-y-2" *ngIf="appointment.status === 'IN_PROGRESS'">
-          <button class="btn-action btn-primary w-full py-3 shadow-indigo-500/20" (click)="onCreateMedicalDescription()" [disabled]="disabled || appointment.isActive === false">
-            <i class="fa-solid fa-file-signature text-lg"></i>
-            <span class="text-base font-bold">{{ hasMedicalRecord ? 'Edit' : 'Add' }} Medical Record</span>
+        <button *ngIf="appointment.status === 'CONFIRMED'" type="button" class="btn-primary w-full" (click)="onStart()" [disabled]="disabled">
+          <i class="fa-solid fa-stethoscope"></i> Start Consultation
+        </button>
+
+        <ng-container *ngIf="appointment.status === 'IN_PROGRESS'">
+          <button type="button" class="btn-primary w-full" (click)="onCreateMedicalDescription()" [disabled]="disabled || appointment.isActive === false">
+            <i class="fa-solid fa-file-signature"></i> {{ hasMedicalRecord ? 'Edit' : 'Add' }} Medical Record
           </button>
           <div class="grid grid-cols-2 gap-2">
-            <button class="btn-action bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20" (click)="onJoinVideo()" [disabled]="disabled || appointment.isActive === false">
-               <i class="fa-solid fa-video"></i> Join Video
+            <button type="button" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl shadow-lg shadow-indigo-500/25 text-sm transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50" (click)="onJoinVideo()" [disabled]="disabled || appointment.isActive === false">
+              <i class="fa-solid fa-video"></i> Join Video
             </button>
-            <button class="btn-action btn-success" (click)="onComplete()" [disabled]="disabled || appointment.isActive === false">
-               <i class="fa-solid fa-check-circle"></i> Complete
+            <button type="button" class="btn-primary !bg-green-600 hover:!bg-green-700 w-full" (click)="onComplete()" [disabled]="disabled || appointment.isActive === false">
+              <i class="fa-solid fa-check-circle"></i> Complete
             </button>
           </div>
-          <button class="btn-action bg-blue-500 hover:bg-blue-600 text-white w-full" (click)="toggleChat()" [disabled]="disabled || appointment.isActive === false">
+          <button type="button" class="btn-secondary w-full" (click)="toggleChat()" [disabled]="disabled || appointment.isActive === false">
             <i class="fa-solid fa-comments"></i> Chat with Patient
           </button>
-        </div>
+        </ng-container>
 
-        <!-- COMPLETED: Show Read-Only Medical Record Button & Prescription PDF Button -->
-        <div *ngIf="appointment.status === 'COMPLETED'">
-           <div *ngIf="hasMedicalRecord; else noRecord" class="grid grid-cols-2 gap-2 mb-2">
-              <button class="btn-action btn-secondary py-2 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400" (click)="onCreateMedicalDescription()" [disabled]="disabled">
-                <i class="fa-solid fa-eye"></i>
-                <span class="text-xs font-bold">Medical Record</span>
+        <ng-container *ngIf="appointment.status === 'COMPLETED'">
+          <div *ngIf="hasMedicalRecord; else noRecord" class="grid grid-cols-2 gap-2">
+            <button type="button" class="btn-secondary" (click)="onCreateMedicalDescription()" [disabled]="disabled">
+              <i class="fa-solid fa-eye"></i> Medical Record
+            </button>
+            <button type="button" class="btn-primary !bg-emerald-600 hover:!bg-emerald-700" (click)="onDownloadPrescription()" [disabled]="disabled">
+              <i class="fa-solid fa-file-pdf"></i> Prescription
+            </button>
+          </div>
+          <ng-template #noRecord>
+            <div class="flex items-center justify-between p-2.5 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+              <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">No record</span>
+              <button type="button" class="btn-primary !bg-emerald-600 hover:!bg-emerald-700 !py-1.5 !min-h-0 text-xs" (click)="onDownloadPrescription()" [disabled]="disabled">
+                <i class="fa-solid fa-file-pdf"></i> PDF Rx
               </button>
-              <button class="btn-action bg-emerald-600 hover:bg-emerald-700 text-white shadow-md py-2" (click)="onDownloadPrescription()" [disabled]="disabled">
-                <i class="fa-solid fa-file-pdf"></i>
-                <span class="text-xs font-bold">Prescription</span>
-              </button>
-           </div>
-           <ng-template #noRecord>
-              <div class="flex items-center justify-between p-2.5 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-dashed border-gray-200 dark:border-gray-600 mb-2">
-                 <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">No Record</span>
-                 <button class="btn-action bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5" (click)="onDownloadPrescription()" [disabled]="disabled">
-                   <i class="fa-solid fa-file-pdf"></i> PDF Rx
-                 </button>
-              </div>
-           </ng-template>
-        </div>
+            </div>
+          </ng-template>
+        </ng-container>
 
-        <!-- COMPLETED/CANCELLED -> View Details Only -->
-        <button class="btn-action btn-secondary w-full" (click)="onViewPatient()" [disabled]="disabled">
-          <i class="fa-regular fa-id-card"></i> View Patient Details
+        <button type="button" class="btn-secondary w-full" (click)="onViewPatient()" [disabled]="disabled">
+          <i class="fa-solid fa-id-card"></i> View Patient Details
         </button>
       </div>
-
     </div>
   `,
-  styles: [`
-    .btn-action {
-      @apply flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
-    }
-    .btn-primary {
-      @apply bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40;
-    }
-    .btn-secondary {
-      @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300;
-    }
-    .btn-danger {
-      @apply bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/20;
-    }
-    .btn-check {
-      @apply bg-emerald-50 dark:bg-emerald-900/10 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/20;
-    }
-    .btn-success {
-      @apply bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-500/20;
-    }
-  `]
 })
 export class DoctorAppointmentCardComponent {
   @Input() appointment!: DoctorAppointmentItem;
@@ -182,6 +129,8 @@ export class DoctorAppointmentCardComponent {
   @Output() statusChange = new EventEmitter<{ appointment: DoctorAppointmentItem; status: string }>();
   @Output() openChat = new EventEmitter<DoctorAppointmentItem>();
 
+  constructor(private pdfService: PdfService) {}
+
   onViewPatient() { this.viewPatient.emit(this.appointment); }
   onCreateMedicalDescription() { this.openHistoryForm.emit(this.appointment); }
   onSchedule() { this.schedule.emit(this.appointment); }
@@ -191,51 +140,16 @@ export class DoctorAppointmentCardComponent {
   onCancel() { this.cancel.emit(this.appointment); }
   onJoinVideo() { this.joinVideo.emit(this.appointment); }
   changeStatus(appointment: DoctorAppointmentItem, status: string) { this.statusChange.emit({ appointment, status }); }
-
-  toggleChat() {
-    this.openChat.emit(this.appointment);
-  }
-
-  statusBadgeClass(a: DoctorAppointmentItem) {
-    const s = (a.status || '').toUpperCase();
-
-    // Check for expired state first
-    if (a.isActive === false && s !== 'COMPLETED' && !s.startsWith('CANCELLED')) {
-      return 'bg-gray-200 text-gray-500 border-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600 line-through decoration-gray-400';
-    }
-
-    if (s === 'CONFIRMED') return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800';
-    if (s === 'COMPLETED') return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800';
-    if (s.startsWith('CANCELLED')) return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800';
-    if (s === 'IN_PROGRESS') return 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800';
-    if (s === 'SCHEDULED') return 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800';
-    return 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700';
-  }
+  toggleChat() { this.openChat.emit(this.appointment); }
 
   statusLabel(a: DoctorAppointmentItem) {
     const s = (a.status || '').toUpperCase();
-
-    // Check for expired state first
-    if (a.isActive === false && s !== 'COMPLETED' && !s.startsWith('CANCELLED')) {
-      return 'Expired';
-    }
-
+    if (a.isActive === false && s !== 'COMPLETED' && !s.startsWith('CANCELLED')) return 'Expired';
     if (s === 'CANCELLED_BY_DOCTOR') return 'Cancelled by Me';
     if (s === 'CANCELLED_BY_PATIENT') return 'Cancelled by Patient';
     if (s === 'CANCELLED') return 'Cancelled';
     return a.status;
   }
-
-  statusOptionsFor(a: DoctorAppointmentItem) {
-    const s = a.status;
-    if (s === 'BOOKED') return ['SCHEDULED', 'CANCELLED'];
-    if (s === 'SCHEDULED') return ['CONFIRMED', 'CANCELLED'];
-    if (s === 'CONFIRMED') return ['IN_PROGRESS'];
-    if (s === 'IN_PROGRESS') return ['COMPLETED'];
-    return [];
-  }
-
-  constructor(private pdfService: PdfService) { }
 
   onDownloadPrescription() {
     const medHistory = this.appointment.appointmentMedicalHistory
@@ -273,17 +187,11 @@ export class DoctorAppointmentCardComponent {
 
   get hasMedicalRecord(): boolean {
     if (!this.appointment.medicalHistory) return false;
-
-    // Primary check: Direct appointment link
     const hasExplicitLink = this.appointment.medicalHistory.some(m =>
       m.appointmentId === this.appointment.appointmentId
     );
     if (hasExplicitLink) return true;
-
-    // Fallback check: Matching date (for legacy or unsynced records)
     const appointmentDate = this.appointment.appointmentDate;
-    return this.appointment.medicalHistory.some(m =>
-      m.visitDate === appointmentDate
-    );
+    return this.appointment.medicalHistory.some(m => m.visitDate === appointmentDate);
   }
 }

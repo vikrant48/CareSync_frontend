@@ -4,186 +4,179 @@ import { FormsModule } from '@angular/forms';
 import { PatientDto, MedicalHistoryWithDoctorItem } from '../core/services/patient-profile.service';
 import { MedicalSummaryComponent } from './medical-summary.component';
 import { SkeletonLoaderComponent } from './skeleton.component';
+import { ModalShellComponent } from './ui/modal-shell.component';
 
 @Component({
    selector: 'app-patient-details-modal',
    standalone: true,
-   imports: [CommonModule, FormsModule, MedicalSummaryComponent, SkeletonLoaderComponent],
+   imports: [CommonModule, FormsModule, MedicalSummaryComponent, SkeletonLoaderComponent, ModalShellComponent],
    template: `
-    <div *ngIf="open" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-      
-      <!-- Backdrop -->
-      <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" (click)="close.emit()"></div>
+    <app-modal-shell
+      [open]="open"
+      [showHeader]="false"
+      [hasFooter]="true"
+      maxWidthClass="max-w-2xl"
+      panelClass="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700"
+      bodyClass="p-0"
+      footerClass="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-700"
+      ariaLabel="Patient details"
+      backdropClass="bg-gray-900/60"
+      (close)="close.emit()"
+    >
+      <div modalHeader class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-3">
+           <div class="w-12 h-12 rounded-full bg-brand-soft flex items-center justify-center text-brand font-bold text-xl shadow-inner">
+              {{ patient?.firstName?.charAt(0) || 'P' }}
+           </div>
+           <div>
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white" id="modal-title">
+                 {{ patient ? (patient.firstName + ' ' + patient.lastName) : 'Patient Details' }}
+              </h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                 <i class="fa-solid fa-id-card-clip"></i> Patient Profile
+              </p>
+           </div>
+        </div>
+        <button type="button" (click)="close.emit()" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
 
-      <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
+      <div class="flex flex-col h-[70vh] sm:h-auto">
         
-        <!-- Modal Panel -->
-        <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-gray-100 dark:border-gray-700 animate-in fade-in zoom-in duration-300">
-          
-          <!-- Header -->
-          <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-               <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-xl shadow-inner">
-                  {{ patient?.firstName?.charAt(0) || 'P' }}
-               </div>
-               <div>
-                  <h3 class="text-xl font-bold text-gray-900 dark:text-white" id="modal-title">
-                     {{ patient ? (patient.firstName + ' ' + patient.lastName) : 'Patient Details' }}
-                  </h3>
-                  <p class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                     <i class="fa-solid fa-id-card-clip"></i> Patient Profile
-                  </p>
-               </div>
-            </div>
-            <button (click)="close.emit()" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-              <i class="fa-solid fa-xmark text-lg"></i>
+        <!-- Tabs -->
+        <div class="px-6 pt-2 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm z-10">
+          <div class="flex gap-6 overflow-x-auto no-scrollbar">
+            <button class="tab-btn group whitespace-nowrap" [class.active]="activeTab === 'overview'" (click)="activeTab='overview'">
+               <i class="fa-solid fa-circle-info mr-2 group-hover:scale-110 transition-transform"></i> Overview
+            </button>
+            <button class="tab-btn group whitespace-nowrap" [class.active]="activeTab === 'summary'" (click)="activeTab='summary'">
+               <i class="fa-solid fa-magic mr-2 group-hover:scale-110 transition-transform"></i> AI Summary
+            </button>
+            <button class="tab-btn group whitespace-nowrap" [class.active]="activeTab === 'history'" (click)="activeTab='history'">
+               <i class="fa-solid fa-file-medical mr-2 group-hover:scale-110 transition-transform"></i> Medical History
+            </button>
+            <button class="tab-btn group whitespace-nowrap" [class.active]="activeTab === 'documents'" (click)="activeTab='documents'">
+               <i class="fa-solid fa-file-lines mr-2 group-hover:scale-110 transition-transform"></i> Documents
             </button>
           </div>
+        </div>
 
-          <!-- Body -->
-          <div class="flex flex-col h-[70vh] sm:h-auto">
-            
-            <!-- Tabs -->
-            <div class="px-6 pt-2 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm z-10">
-              <div class="flex gap-6 overflow-x-auto no-scrollbar">
-                <button class="tab-btn group whitespace-nowrap" [class.active]="activeTab === 'overview'" (click)="activeTab='overview'">
-                   <i class="fa-solid fa-circle-info mr-2 group-hover:scale-110 transition-transform"></i> Overview
-                </button>
-                <button class="tab-btn group whitespace-nowrap" [class.active]="activeTab === 'summary'" (click)="activeTab='summary'">
-                   <i class="fa-solid fa-magic mr-2 group-hover:scale-110 transition-transform"></i> AI Summary
-                </button>
-                <button class="tab-btn group whitespace-nowrap" [class.active]="activeTab === 'history'" (click)="activeTab='history'">
-                   <i class="fa-solid fa-file-medical mr-2 group-hover:scale-110 transition-transform"></i> Medical History
-                </button>
-                <button class="tab-btn group whitespace-nowrap" [class.active]="activeTab === 'documents'" (click)="activeTab='documents'">
-                   <i class="fa-solid fa-file-lines mr-2 group-hover:scale-110 transition-transform"></i> Documents
-                </button>
-              </div>
-            </div>
-
-            <div class="p-6 overflow-y-auto custom-scrollbar flex-1" *ngIf="patient; else loadingPatient">
-              
-              <!-- Overview Tab -->
-              <div *ngIf="activeTab === 'overview'" class="space-y-6 animate-in fade-in slide-in-from-left-2 duration-300">
-                 
-                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="info-card">
-                       <div class="label"><i class="fa-solid fa-user text-blue-500 mr-2"></i> Full Name</div>
-                       <div class="value">{{ patient.firstName }} {{ patient.lastName }}</div>
-                    </div>
-                    <div class="info-card">
-                       <div class="label"><i class="fa-solid fa-cake-candles text-pink-500 mr-2"></i> Age</div>
-                       <div class="value">{{ ageFromDob(patient.dateOfBirth) }} years</div>
-                    </div>
-                    <div class="info-card">
-                       <div class="label"><i class="fa-solid fa-envelope text-orange-500 mr-2"></i> Email</div>
-                       <div class="value truncate" title="{{ patient.email }}">{{ patient.email || '—' }}</div>
-                    </div>
-                    <div class="info-card">
-                       <div class="label"><i class="fa-solid fa-phone text-green-500 mr-2"></i> Contact</div>
-                       <div class="value">{{ patient.contactInfo || '—' }}</div>
-                    </div>
-                    <!-- <div class="info-card md:col-span-2">
-                       <div class="label"><i class="fa-solid fa-calendar-day text-purple-500 mr-2"></i> Date of Birth</div>
-                       <div class="value">{{ formatDate(patient.dateOfBirth) }}</div>
-                    </div> -->
-                 </div>
-
-              </div>
-
-              <!-- Summary Tab -->
-              <div *ngIf="activeTab === 'summary'" class="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <app-medical-summary [patientId]="patient.id"></app-medical-summary>
-              </div>
-
-              <!-- Medical History Tab -->
-              <div *ngIf="activeTab === 'history'" class="space-y-4 animate-in fade-in slide-in-from-right-2 duration-300">
-                
-                <div *ngFor="let h of sortedHistory(); trackBy: trackHistory" 
-                     class="group relative bg-white dark:bg-gray-700/50 rounded-xl p-4 border border-gray-100 dark:border-gray-600 hover:shadow-md hover:border-blue-200 dark:hover:border-blue-700 transition-all cursor-pointer"
-                     (click)="historyClick.emit(h)">
-                    
-                    <div class="flex justify-between items-start mb-2">
-                       <div class="flex items-center gap-2">
-                          <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded-md font-medium">
-                             {{ formatDate(h.visitDate) }}
-                          </span>
-                       </div>
-                       <i class="fa-solid fa-chevron-right text-gray-300 group-hover:text-blue-500 transition-colors"></i>
-                    </div>
-
-                    <h4 class="font-bold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
-                       <i class="fa-solid fa-stethoscope text-gray-400"></i> {{ h.diagnosis || 'No Diagnosis Recorded' }}
-                    </h4>
-                    
-                    <div class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-2 pt-2 border-t border-gray-100 dark:border-gray-600 border-dashed">
-                       <div class="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center text-xs">
-                          <i class="fa-solid fa-user-doctor"></i>
-                       </div>
-                       <span>Dr. {{ h.doctorName || 'Unknown' }}</span>
-                       <span *ngIf="h.doctorSpecialization" class="text-xs bg-gray-100 dark:bg-gray-600 px-1.5 py-0.5 rounded text-gray-600 dark:text-gray-300">
-                          {{ h.doctorSpecialization }}
-                       </span>
-                    </div>
-
+        <div class="p-6 overflow-y-auto custom-scrollbar flex-1" *ngIf="patient; else loadingPatient">
+          
+          <!-- Overview Tab -->
+          <div *ngIf="activeTab === 'overview'" class="space-y-6 animate-in fade-in slide-in-from-left-2 duration-300">
+             
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="info-card">
+                   <div class="label"><i class="fa-solid fa-user text-blue-500 mr-2"></i> Full Name</div>
+                   <div class="value">{{ patient.firstName }} {{ patient.lastName }}</div>
                 </div>
-
-                <div *ngIf="(sortedHistory() || []).length === 0" class="flex flex-col items-center justify-center py-12 text-gray-400">
-                   <div class="w-16 h-16 bg-gray-50 dark:bg-gray-700/50 rounded-full flex items-center justify-center mb-3">
-                      <i class="fa-solid fa-notes-medical text-2xl"></i>
-                   </div>
-                   <p>No medical history records found.</p>
+                <div class="info-card">
+                   <div class="label"><i class="fa-solid fa-cake-candles text-pink-500 mr-2"></i> Age</div>
+                   <div class="value">{{ ageFromDob(patient.dateOfBirth) }} years</div>
                 </div>
-
-              </div>
-
-              <!-- Documents Tab -->
-              <div *ngIf="activeTab === 'documents'" class="space-y-4 animate-in fade-in slide-in-from-right-2 duration-300">
-                <div *ngFor="let d of documents" 
-                     class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600">
-                   <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                         <i class="fa-solid fa-file-pdf text-lg"></i>
-                      </div>
-                      <div>
-                         <div class="font-bold text-gray-900 dark:text-white text-sm">{{ d.filename }}</div>
-                         <div class="text-xs text-gray-500 dark:text-gray-400">{{ d.documentType }} · {{ (d.size / 1024).toFixed(1) }} KB</div>
-                      </div>
-                   </div>
-                   <a [href]="d.cloudinaryUrl || d.url" target="_blank" 
-                      class="px-4 py-2 bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-500 transition-colors shadow-sm">
-                      View
-                   </a>
+                <div class="info-card">
+                   <div class="label"><i class="fa-solid fa-envelope text-orange-500 mr-2"></i> Email</div>
+                   <div class="value truncate" title="{{ patient.email }}">{{ patient.email || '—' }}</div>
                 </div>
-
-                <div *ngIf="(documents || []).length === 0" class="flex flex-col items-center justify-center py-12 text-gray-400">
-                   <div class="w-16 h-16 bg-gray-50 dark:bg-gray-700/50 rounded-full flex items-center justify-center mb-3">
-                      <i class="fa-solid fa-folder-open text-2xl"></i>
-                   </div>
-                   <p>No documents found for this patient.</p>
+                <div class="info-card">
+                   <div class="label"><i class="fa-solid fa-phone text-green-500 mr-2"></i> Contact</div>
+                   <div class="value">{{ patient.contactInfo || '—' }}</div>
                 </div>
-              </div>
-
-            </div>
-
-             <ng-template #loadingPatient>
-              <div class="p-6">
-                <app-skeleton-loader type="patient-history" [count]="3" containerClass="space-y-3"></app-skeleton-loader>
-              </div>
-            </ng-template>
+             </div>
 
           </div>
 
-          <!-- Footer -->
-          <div class="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-700 flex justify-end">
-             <button (click)="close.emit()" class="px-6 py-2.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 font-medium transition-colors shadow-sm">
-                Close
-             </button>
+          <!-- Summary Tab -->
+          <div *ngIf="activeTab === 'summary'" class="animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <app-medical-summary [patientId]="patient.id"></app-medical-summary>
+          </div>
+
+          <!-- Medical History Tab -->
+          <div *ngIf="activeTab === 'history'" class="space-y-4 animate-in fade-in slide-in-from-right-2 duration-300">
+            
+            <div *ngFor="let h of sortedHistory(); trackBy: trackHistory" 
+                 class="group relative bg-white dark:bg-gray-700/50 rounded-xl p-4 border border-gray-100 dark:border-gray-600 hover:shadow-md hover:border-blue-200 dark:hover:border-blue-700 transition-all cursor-pointer"
+                 (click)="historyClick.emit(h)">
+                
+                <div class="flex justify-between items-start mb-2">
+                   <div class="flex items-center gap-2">
+                      <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded-md font-medium">
+                         {{ formatDate(h.visitDate) }}
+                      </span>
+                   </div>
+                   <i class="fa-solid fa-chevron-right text-gray-300 group-hover:text-blue-500 transition-colors"></i>
+                </div>
+
+                <h4 class="font-bold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
+                   <i class="fa-solid fa-stethoscope text-gray-400"></i> {{ h.diagnosis || 'No Diagnosis Recorded' }}
+                </h4>
+                
+                <div class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-2 pt-2 border-t border-gray-100 dark:border-gray-600 border-dashed">
+                   <div class="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center text-xs">
+                      <i class="fa-solid fa-user-doctor"></i>
+                   </div>
+                   <span>Dr. {{ h.doctorName || 'Unknown' }}</span>
+                   <span *ngIf="h.doctorSpecialization" class="text-xs bg-gray-100 dark:bg-gray-600 px-1.5 py-0.5 rounded text-gray-600 dark:text-gray-300">
+                      {{ h.doctorSpecialization }}
+                   </span>
+                </div>
+
+            </div>
+
+            <div *ngIf="(sortedHistory() || []).length === 0" class="flex flex-col items-center justify-center py-12 text-gray-400">
+               <div class="w-16 h-16 bg-gray-50 dark:bg-gray-700/50 rounded-full flex items-center justify-center mb-3">
+                  <i class="fa-solid fa-notes-medical text-2xl"></i>
+               </div>
+               <p>No medical history records found.</p>
+            </div>
+
+          </div>
+
+          <!-- Documents Tab -->
+          <div *ngIf="activeTab === 'documents'" class="space-y-4 animate-in fade-in slide-in-from-right-2 duration-300">
+            <div *ngFor="let d of documents" 
+                 class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600">
+               <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                     <i class="fa-solid fa-file-pdf text-lg"></i>
+                  </div>
+                  <div>
+                     <div class="font-bold text-gray-900 dark:text-white text-sm">{{ d.filename }}</div>
+                     <div class="text-xs text-gray-500 dark:text-gray-400">{{ d.documentType }} · {{ (d.size / 1024).toFixed(1) }} KB</div>
+                  </div>
+               </div>
+               <a [href]="d.cloudinaryUrl || d.url" target="_blank" 
+                  class="px-4 py-2 bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-500 transition-colors shadow-sm">
+                  View
+               </a>
+            </div>
+
+            <div *ngIf="(documents || []).length === 0" class="flex flex-col items-center justify-center py-12 text-gray-400">
+               <div class="w-16 h-16 bg-gray-50 dark:bg-gray-700/50 rounded-full flex items-center justify-center mb-3">
+                  <i class="fa-solid fa-folder-open text-2xl"></i>
+               </div>
+               <p>No documents found for this patient.</p>
+            </div>
           </div>
 
         </div>
+
+         <ng-template #loadingPatient>
+          <div class="p-6">
+            <app-skeleton-loader type="patient-history" [count]="3" containerClass="space-y-3"></app-skeleton-loader>
+          </div>
+        </ng-template>
+
       </div>
-    </div>
+
+      <div modalFooter class="flex justify-end">
+         <button type="button" (click)="close.emit()" class="px-6 py-2.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 font-medium transition-colors shadow-sm">
+            Close
+         </button>
+      </div>
+    </app-modal-shell>
   `,
    styles: [`
     .tab-btn {

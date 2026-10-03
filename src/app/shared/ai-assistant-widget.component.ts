@@ -96,7 +96,7 @@ import { ClinicalDictationResponse } from '../core/models/ai.models';
               <button 
                 *ngIf="isDoctor()"
                 (click)="isClinicalDictationOpen.set(true)"
-                class="flex items-center gap-2 px-3.5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition-all transform active:scale-95 shadow-md shadow-emerald-500/20"
+                class="flex items-center gap-2 px-3.5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition-all transform active:scale-95 shadow-md shadow-blue-500/20"
               >
                 <i class="fas fa-microphone-alt"></i>
                 Voice Dictation (SOAP)

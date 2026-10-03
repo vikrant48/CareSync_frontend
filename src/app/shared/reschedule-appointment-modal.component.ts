@@ -5,65 +5,63 @@ import { SelectDropdownComponent } from './select-dropdown.component';
 import { DatePickerComponent } from './date-picker.component';
 import { AppointmentService, PatientAppointmentItem } from '../core/services/appointment.service';
 import { Doctor } from '../core/services/doctor.service';
+import { ModalShellComponent } from './ui/modal-shell.component';
 
 @Component({
   selector: 'reschedule-appointment-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, SelectDropdownComponent, DatePickerComponent],
+  imports: [CommonModule, FormsModule, SelectDropdownComponent, DatePickerComponent, ModalShellComponent],
   template: `
-    <div *ngIf="appointment" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-      <div class="panel rounded-2xl shadow-2xl w-full max-w-md p-6 border border-gray-700/50">
-        <div class="flex items-center justify-between mb-6">
-          <div class="flex items-center gap-3">
-             <div class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400">
-               <i class="fa-regular fa-calendar-check text-xl"></i>
-             </div>
-             <div class="text-lg font-bold text-gray-100">Reschedule Appointment</div>
-          </div>
-          <button class="text-gray-400 hover:text-white transition-colors p-1" (click)="onClose()">
-             <i class="fa-solid fa-xmark text-lg"></i>
+    <app-modal-shell
+      [open]="!!appointment"
+      title="Reschedule Appointment"
+      titleId="reschedule-modal-title"
+      icon="fa-regular fa-calendar-check text-xl"
+      iconWrapClass="bg-blue-500/10 text-blue-400"
+      maxWidthClass="max-w-md"
+      panelClass="panel border border-gray-700/50 rounded-2xl"
+      bodyClass="p-6"
+      [fullScreenMobile]="true"
+      (close)="onClose()"
+    >
+      <div class="space-y-4">
+        <div class="bg-gray-800/50 rounded-lg p-3 text-sm flex items-start gap-3 border border-gray-700/50">
+           <i class="fa-solid fa-user-doctor text-blue-400 mt-0.5"></i>
+           <div>
+              <span class="text-gray-400 block text-xs uppercase tracking-wider">With Doctor</span>
+              <span class="font-semibold text-gray-200">{{ appointment!.doctorName }}</span>
+           </div>
+        </div>
+
+        <app-date-picker
+          [(ngModel)]="rescheduleDateISO"
+          (ngModelChange)="loadSlotsForDate()"
+          [minDate]="'today'"
+          label="Select New Date"
+          placeholder="DD-MM-YYYY">
+        </app-date-picker>
+
+        <app-select-dropdown
+           label="Available Slots"
+           [options]="availableSlots"
+           placeholder="Select time"
+           [disabled]="!rescheduleDateISO || availableSlots.length === 0"
+           [autoCapitalize]="false"
+           [(ngModel)]="rescheduleTimeSlot">
+        </app-select-dropdown>
+
+        <div class="pt-4 flex items-center gap-3">
+          <button type="button" class="btn-secondary flex-1" (click)="onClose()">Cancel</button>
+          <button type="button" class="btn-primary flex-1" [disabled]="!rescheduleDateISO || !rescheduleTimeSlot" (click)="onConfirm()">
+             Confirm Change
           </button>
         </div>
-        
-        <div class="space-y-4">
-          <div class="bg-gray-800/50 rounded-lg p-3 text-sm flex items-start gap-3 border border-gray-700/50">
-             <i class="fa-solid fa-user-doctor text-blue-400 mt-0.5"></i>
-             <div>
-                <span class="text-gray-400 block text-xs uppercase tracking-wider">With Doctor</span>
-                <span class="font-semibold text-gray-200">{{ appointment!.doctorName }}</span>
-             </div>
-          </div>
 
-          <app-date-picker
-            [(ngModel)]="rescheduleDateISO"
-            (ngModelChange)="loadSlotsForDate()"
-            [minDate]="'today'"
-            label="Select New Date"
-            placeholder="DD-MM-YYYY">
-          </app-date-picker>
-          
-          <app-select-dropdown 
-             label="Available Slots" 
-             [options]="availableSlots" 
-             placeholder="Select time"
-             [disabled]="!rescheduleDateISO || availableSlots.length === 0"
-             [autoCapitalize]="false"
-             [(ngModel)]="rescheduleTimeSlot">
-          </app-select-dropdown>
-
-          <div class="pt-4 flex items-center gap-3">
-            <button class="btn-secondary flex-1" (click)="onClose()">Cancel</button>
-            <button class="btn-primary flex-1" [disabled]="!rescheduleDateISO || !rescheduleTimeSlot" (click)="onConfirm()">
-               Confirm Change
-            </button>
-          </div>
-          
-          <div *ngIf="error" class="p-3 rounded bg-red-900/20 border border-red-500/30 text-red-400 text-sm flex items-center gap-2">
-             <i class="fa-solid fa-circle-exclamation"></i> {{ error }}
-          </div>
+        <div *ngIf="error" class="p-3 rounded bg-red-900/20 border border-red-500/30 text-red-400 text-sm flex items-center gap-2">
+           <i class="fa-solid fa-circle-exclamation"></i> {{ error }}
         </div>
       </div>
-    </div>
+    </app-modal-shell>
   `,
 })
 export class RescheduleAppointmentModalComponent {

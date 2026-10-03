@@ -8,67 +8,63 @@ import { PdfService, PaymentReceiptData } from '../../core/services/pdf.service'
 import { PaymentService } from '../../core/services/payment.service';
 import { PaymentPopupComponent, PaymentDetails } from '../../shared/payment-popup.component';
 import { ToastService } from '../../core/services/toast.service';
+import { ConfirmService } from '../../core/services/confirm.service';
+import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { SkeletonComponent } from '../../shared/ui/skeleton.component';
+import { StatusBadgeComponent } from '../../shared/ui/status-badge.component';
+import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
+import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 
 @Component({
   selector: 'app-patient-lab-bookings',
   standalone: true,
-  imports: [CommonModule, PatientLayoutComponent, PaymentPopupComponent],
+  imports: [CommonModule, PatientLayoutComponent, PaymentPopupComponent, PageHeaderComponent, SkeletonComponent, StatusBadgeComponent, EmptyStateComponent, ModalShellComponent],
   template: `
     <app-patient-layout>
       <div class="max-w-7xl mx-auto p-3.5 sm:p-6 pb-20 sm:pb-24">
-        <!-- Header -->
-        <div class="mb-4 sm:mb-8 flex flex-row items-center justify-between gap-2.5 sm:gap-4">
-          <div>
-            <h1 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
-            Lab Test Bookings
-            </h1>
-            <p class="text-xs sm:text-base text-gray-600 dark:text-gray-400 mt-0.5 sm:mt-1">View and manage your diagnostic test appointments</p>
-          </div>
-
-          <button (click)="navigateToBooking()" 
-                  class="btn-primary !py-1.5 sm:!py-2.5 px-3 sm:px-4 text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 justify-center shrink-0 shadow-lg shadow-blue-500/20">
+        <app-page-header
+          title="Lab Test Bookings"
+          subtitle="View and manage your diagnostic test appointments"
+          [hasActions]="true"
+        >
+          <button type="button" (click)="navigateToBooking()"
+                  class="btn-primary !py-1.5 sm:!py-2.5 px-3 sm:px-4 text-xs sm:text-sm">
             <i class="fas fa-plus"></i>
             <span>New Test</span>
           </button>
-        </div>
+        </app-page-header>
 
-        <!-- Loading State -->
-        <div *ngIf="isLoading()" class="flex flex-col items-center justify-center py-12 sm:py-20 text-center animate-fade-in">
-           <div class="w-12 h-12 sm:w-16 sm:h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-3 sm:mb-4"></div>
-           <p class="text-xs sm:text-sm text-gray-400 animate-pulse">Loading your bookings...</p>
-        </div>
+        <app-skeleton *ngIf="isLoading()" variant="card" [count]="3" wrapperClass="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6"></app-skeleton>
 
-        <!-- Error State -->
-        <div *ngIf="errorMessage()" class="bg-red-900/20 border border-red-500/50 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 flex items-start gap-3 sm:gap-4">
-          <div class="p-1.5 sm:p-2 bg-red-500/20 rounded-lg text-red-400 text-xs sm:text-base">
+        <!-- Error State (inline for page-level load failures) -->
+        <div *ngIf="errorMessage() && !isLoading()" class="bg-red-500/10 border border-red-500/40 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 flex items-start gap-3 sm:gap-4">
+          <div class="p-1.5 sm:p-2 bg-red-500/20 rounded-lg text-red-500 text-xs sm:text-base">
              <i class="fas fa-exclamation-triangle"></i>
           </div>
           <div>
-            <h3 class="font-bold text-xs sm:text-base text-red-400">Error Loading Bookings</h3>
-            <p class="text-red-300/80 text-xs mt-0.5 sm:mt-1">{{ errorMessage() }}</p>
+            <h3 class="font-bold text-xs sm:text-base text-red-600 dark:text-red-400">Error Loading Bookings</h3>
+            <p class="text-red-600/80 dark:text-red-300/80 text-xs mt-0.5 sm:mt-1">{{ errorMessage() }}</p>
           </div>
         </div>
 
-        <!-- Empty State -->
-        <div *ngIf="!isLoading() && !errorMessage() && bookings().length === 0" 
-             class="flex flex-col items-center justify-center py-12 sm:py-20 p-4 text-center bg-gray-50 dark:bg-gray-900/40 backdrop-blur-md border border-gray-300 dark:border-gray-700/50 rounded-xl sm:rounded-2xl border-dashed">
-          <div class="w-16 h-16 sm:w-24 sm:h-24 bg-white dark:bg-gray-800/80 rounded-full flex items-center justify-center mb-4 sm:mb-6 shadow-md ring-1 ring-gray-200 dark:ring-gray-700">
-            <i class="fas fa-file-medical text-2xl sm:text-4xl text-blue-400 dark:text-gray-600"></i>
-          </div>
-          <h3 class="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-200 mb-1.5 sm:mb-2">No Bookings Found</h3>
-          <p class="text-xs sm:text-base text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-6 sm:mb-8 font-medium">You haven't booked any lab tests yet. Your upcoming and past test bookings will appear here.</p>
-          <button (click)="navigateToBooking()" 
-                  class="btn-primary py-2 sm:py-3 px-6 sm:px-8 text-xs sm:text-sm shadow-lg shadow-blue-600/20 transform hover:-translate-y-1 transition-all duration-300 font-bold">
-            Book Your First Test
-          </button>
-        </div>
+        <app-empty-state
+          *ngIf="!isLoading() && !errorMessage() && bookings().length === 0"
+          icon="fas fa-file-medical"
+          title="No Bookings Found"
+          message="You haven't booked any lab tests yet. Your upcoming and past test bookings will appear here."
+          containerClass="bg-gray-50 dark:bg-gray-900/40 border border-dashed border-gray-200 dark:border-gray-700/50 rounded-xl sm:rounded-2xl px-4"
+          iconWrapClass="bg-white dark:bg-gray-800/80 text-brand ring-1 ring-gray-200 dark:ring-gray-700"
+          [hasAction]="true"
+        >
+          <button type="button" (click)="navigateToBooking()" class="btn-primary">Book Your First Test</button>
+        </app-empty-state>
 
         <!-- Bookings Grid -->
         <div *ngIf="!isLoading() && !errorMessage() && bookings().length > 0" 
              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6 animate-fade-in">
           
           <div *ngFor="let booking of bookings()" 
-               class="group bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-300 dark:border-gray-700/50 rounded-xl sm:rounded-2xl overflow-hidden hover:border-blue-400 dark:hover:border-blue-500/30 hover:shadow-xl hover:shadow-blue-900/10 transition-all duration-300 flex flex-col shadow-sm">
+               class="group ui-panel-hover overflow-hidden flex flex-col animate-slide-up">
             
             <!-- Card Header -->
             <div class="p-3.5 sm:p-5 border-b border-gray-200 dark:border-gray-700/50 bg-gray-100/50 dark:bg-gray-800/30">
@@ -77,13 +73,11 @@ import { ToastService } from '../../core/services/toast.service';
                    <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-500">Booking ID</span>
                    <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 font-mono">#{{ booking.id }}</h3>
                 </div>
-                <div [class]="getStatusClass(booking.status)" class="px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold border border-current/20 shadow-sm">
-                  {{ getStatusLabel(booking.status) }}
-                </div>
+                <app-status-badge [status]="booking.status"></app-status-badge>
               </div>
               
               <div class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-700 dark:text-gray-400 mt-2 sm:mt-3 font-medium">
-                <i class="far fa-calendar-alt text-blue-600 dark:text-blue-400"></i>
+                <i class="far fa-calendar-alt text-brand"></i>
                 <span>{{ formatDate(booking.createdAt) }}</span>
               </div>
             </div>
@@ -98,7 +92,7 @@ import { ToastService } from '../../core/services/toast.service';
                  
                  <div class="flex justify-between items-center text-xs sm:text-sm" *ngIf="booking.prescribedBy">
                    <span class="text-gray-600 dark:text-gray-400 font-medium">Prescribed By</span>
-                   <span class="text-blue-600 dark:text-blue-300 font-medium">{{ booking.prescribedBy }}</span>
+                   <span class="text-brand font-medium">{{ booking.prescribedBy }}</span>
                  </div>
                  
                  <div class="pt-2 sm:pt-3 mt-2 sm:mt-3 border-t border-gray-200 dark:border-gray-700/50 flex justify-between items-end">
@@ -110,25 +104,25 @@ import { ToastService } from '../../core/services/toast.service';
 
             <!-- Card Footer (Actions) -->
             <div class="p-3 sm:p-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700/50 flex flex-wrap gap-1.5 sm:gap-2 justify-end">
-              <button (click)="viewBookingDetails(booking)" 
-                      class="p-1.5 sm:p-2 text-xs sm:text-base text-gray-500 hover:text-blue-600 hover:bg-blue-100/50 dark:hover:bg-blue-500/10 rounded-lg transition-colors border border-transparent hover:border-blue-200 dark:hover:border-transparent" title="View Details">
+              <button type="button" (click)="viewBookingDetails(booking)"
+                      class="p-2.5 min-w-touch min-h-touch text-xs sm:text-base text-gray-500 hover:text-brand hover:bg-brand-soft rounded-lg transition-colors border border-transparent hover:border-emerald-200 dark:hover:border-transparent inline-flex items-center justify-center" title="View Details" aria-label="View Details">
                  <i class="fas fa-eye"></i>
               </button>
-              
-              <button (click)="downloadReceipt(booking)" 
-                      class="p-1.5 sm:p-2 text-xs sm:text-base text-gray-500 hover:text-green-600 hover:bg-green-100/50 dark:hover:bg-green-500/10 rounded-lg transition-colors border border-transparent hover:border-green-200 dark:hover:border-transparent" title="Download Receipt">
+
+              <button type="button" (click)="downloadReceipt(booking)"
+                      class="p-2.5 min-w-touch min-h-touch text-xs sm:text-base text-gray-500 hover:text-green-600 hover:bg-green-100/50 dark:hover:bg-green-500/10 rounded-lg transition-colors border border-transparent hover:border-green-200 dark:hover:border-transparent inline-flex items-center justify-center" title="Download Receipt" aria-label="Download Receipt">
                  <i class="fas fa-download"></i>
               </button>
 
-              <button *ngIf="canCancelBooking(booking)" 
-                      (click)="cancelBooking(booking)" 
-                      class="p-1.5 sm:p-2 text-xs sm:text-base text-gray-500 hover:text-red-500 hover:bg-red-100/50 dark:hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-200 dark:hover:border-transparent" title="Cancel Booking">
+              <button *ngIf="canCancelBooking(booking)" type="button"
+                      (click)="cancelBooking(booking)"
+                      class="p-2.5 min-w-touch min-h-touch text-xs sm:text-base text-gray-500 hover:text-red-500 hover:bg-red-100/50 dark:hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-200 dark:hover:border-transparent inline-flex items-center justify-center" title="Cancel Booking" aria-label="Cancel Booking">
                  <i class="fas fa-times-circle"></i>
               </button>
 
               <button *ngIf="(booking.status === 'COMPLETED' || booking.status === 'IN_PROGRESS') && (!booking.labReports || booking.labReports.length === 0)" 
                       (click)="fileInput.click()" 
-                      class="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg text-xs sm:text-sm font-semibold hover:bg-blue-600 hover:text-white hover:border-blue-600 hover:shadow-md transition-all duration-300 flex items-center gap-1.5 sm:gap-2 dark:bg-blue-500/10 dark:text-blue-500 dark:border-blue-500/50">
+                      class="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-brand-soft text-brand border border-emerald-200 rounded-lg text-xs sm:text-sm font-semibold hover:bg-brand hover:text-white hover:border-brand hover:shadow-md transition-all duration-300 flex items-center gap-1.5 sm:gap-2 dark:border-emerald-500/50">
                   <i class="fas fa-upload" [class.fa-spinner]="isUploading() && uploadBookingId() === booking.id" [class.fa-spin]="isUploading() && uploadBookingId() === booking.id"></i>
                   <span>{{ isUploading() && uploadBookingId() === booking.id ? 'Uploading...' : 'Upload Report' }}</span>
               </button>
@@ -154,43 +148,29 @@ import { ToastService } from '../../core/services/toast.service';
       </div>
 
       <!-- Details Modal -->
-      <div *ngIf="showDetailsModal()" class="fixed inset-0 z-50 flex items-center justify-center text-gray-800 dark:text-white p-4">
-        <!-- Backdrop -->
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm animate-fade-in" (click)="closeDetailsModal()"></div>
-        
-        <!-- Modal Content -->
-        <div class="relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col animate-scale-in">
-          
-          <!-- Modal Header -->
-          <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/50 shrink-0">
-            <div>
-               <h2 class="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">Booking Details</h2>
-               <p class="text-xs text-gray-500 mt-1 font-mono">ID: #{{ selectedBooking()?.id }}</p>
-            </div>
-            <button (click)="closeDetailsModal()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-white dark:hover:bg-gray-700 transition-all">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-
+      <app-modal-shell
+        [open]="showDetailsModal()"
+        title="Booking Details"
+        [subtitle]="selectedBooking() ? ('ID: #' + selectedBooking()!.id) : ''"
+        icon="fas fa-flask"
+        iconWrapClass="bg-brand-soft text-brand"
+        maxWidthClass="max-w-2xl"
+        bodyClass="p-0"
+        footerClass="p-5 bg-gray-50 dark:bg-gray-800/50"
+        [hasFooter]="!!selectedBooking()"
+        (close)="closeDetailsModal()"
+      >
           <ng-container *ngIf="selectedBooking() as booking">
             <!-- Modal Body -->
-            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6">
+            <div class="p-6 overflow-y-auto custom-scrollbar space-y-6">
                
                <!-- Status Banner -->
                <div class="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50">
                   <div class="flex items-center gap-3">
-                     <div [class]="getStatusClass(booking.status)" class="w-10 h-10 rounded-full flex items-center justify-center border border-current/30">
-                        <i class="fas" [ngClass]="{
-                          'fa-clock': booking.status === 'PENDING',
-                          'fa-calendar-check': booking.status === 'SCHEDULED',
-                          'fa-check-circle': booking.status === 'COMPLETED',
-                          'fa-times-circle': booking.status === 'CANCELLED',
-                          'fa-spinner fa-spin': booking.status === 'IN_PROGRESS'
-                        }"></i>
-                     </div>
+                     <app-status-badge [status]="booking.status"></app-status-badge>
                      <div>
                        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Current Status</p>
-                       <p class="font-bold text-lg">{{ getStatusLabel(booking.status) }}</p>
+                       <p class="font-bold text-lg text-gray-900 dark:text-gray-100">{{ getStatusLabel(booking.status) }}</p>
                      </div>
                   </div>
                   
@@ -202,19 +182,19 @@ import { ToastService } from '../../core/services/toast.service';
 
                <!-- Info Grid -->
                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div class="p-4 rounded-xl bg-white border-2 border-gray-100 dark:bg-gray-800/30 dark:border-gray-700/30">
+                  <div class="p-4 rounded-xl bg-white border border-gray-200 dark:bg-gray-800/30 dark:border-gray-700/30">
                      <p class="text-xs text-gray-500 dark:text-gray-400 uppercase mb-1">Patient</p>
                      <p class="font-bold text-gray-800 dark:text-gray-200">{{ booking.patientName }}</p>
                   </div>
-                  <div class="p-4 rounded-xl bg-white border-2 border-gray-100 dark:bg-gray-800/30 dark:border-gray-700/30">
+                  <div class="p-4 rounded-xl bg-white border border-gray-200 dark:bg-gray-800/30 dark:border-gray-700/30">
                      <p class="text-xs text-gray-500 dark:text-gray-400 uppercase mb-1">Booking Date</p>
                      <p class="font-bold text-gray-800 dark:text-gray-200">{{ formatDate(booking.bookingDate) }}</p>
                   </div>
-                  <div class="p-4 rounded-xl bg-white border-2 border-gray-100 dark:bg-gray-800/30 dark:border-gray-700/30" *ngIf="booking.prescribedBy">
+                  <div class="p-4 rounded-xl bg-white border border-gray-200 dark:bg-gray-800/30 dark:border-gray-700/30" *ngIf="booking.prescribedBy">
                      <p class="text-xs text-gray-500 dark:text-gray-400 uppercase mb-1">Prescribed By</p>
-                     <p class="font-bold text-blue-600 dark:text-blue-300">{{ booking.prescribedBy }}</p>
+                     <p class="font-bold text-brand">{{ booking.prescribedBy }}</p>
                   </div>
-                  <div class="p-4 rounded-xl bg-white border-2 border-gray-100 dark:bg-gray-800/30 dark:border-gray-700/30" *ngIf="booking.notes">
+                  <div class="p-4 rounded-xl bg-white border border-gray-200 dark:bg-gray-800/30 dark:border-gray-700/30" *ngIf="booking.notes">
                      <p class="text-xs text-gray-500 dark:text-gray-400 uppercase mb-1">Notes</p>
                      <p class="font-medium text-gray-600 dark:text-gray-300 italic">"{{ booking.notes }}"</p>
                   </div>
@@ -223,7 +203,7 @@ import { ToastService } from '../../core/services/toast.service';
                <!-- Tests List -->
                <div>
                   <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
-                     <i class="fas fa-list-ul text-blue-600 dark:text-blue-500"></i> Selected Tests
+                     <i class="fas fa-list-ul text-brand"></i> Selected Tests
                   </h3>
                   <div class="bg-white dark:bg-gray-800/50 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700/50 shadow-sm">
                      <div *ngFor="let test of booking.selectedTests" class="p-4 border-b border-gray-100 dark:border-gray-700/50 last:border-0 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-colors">
@@ -232,30 +212,19 @@ import { ToastService } from '../../core/services/toast.service';
                      </div>
                      <div class="p-4 bg-gray-50 dark:bg-gray-800/80 flex justify-between items-center border-t border-gray-200 dark:border-gray-700">
                         <span class="font-bold text-gray-700 dark:text-gray-400">Total Amount</span>
-                        <span class="text-xl font-black text-green-600 dark:text-green-400">₹{{ booking.totalPrice }}</span>
+                        <span class="text-xl font-black text-brand">₹{{ booking.totalPrice }}</span>
                      </div>
                   </div>
                </div>
             </div>
 
-            <!-- Modal Footer -->
-            <div class="p-5 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex justify-end gap-3 shrink-0">
-               <button (click)="closeDetailsModal()" class="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 font-semibold hover:bg-gray-100 transition-all dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
-                  Close
-               </button>
-
-               <button *ngIf="canCancelBooking(booking)" (click)="cancelBooking(booking); closeDetailsModal()" class="px-5 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 font-semibold hover:bg-red-100 hover:text-red-700 transition-all dark:bg-red-900/30 dark:border-red-500/50 dark:text-red-400 dark:hover:bg-red-900/50">
-                  Cancel Booking
-               </button>
-
-               <button *ngIf="booking.status === 'PENDING'" (click)="payForBooking(booking); closeDetailsModal()" class="px-5 py-2.5 rounded-xl bg-yellow-500 hover:bg-yellow-600 text-white font-bold shadow-lg shadow-yellow-500/20 transition-all">
-                  Proceed to Payment
-               </button>
+            <div modalFooter class="flex justify-end gap-3 flex-wrap">
+               <button type="button" (click)="closeDetailsModal()" class="btn-secondary">Close</button>
+               <button *ngIf="canCancelBooking(booking)" type="button" (click)="cancelBooking(booking); closeDetailsModal()" class="btn-danger">Cancel Booking</button>
+               <button *ngIf="booking.status === 'PENDING'" type="button" (click)="payForBooking(booking); closeDetailsModal()" class="btn-primary !bg-amber-500 hover:!bg-amber-600">Proceed to Payment</button>
             </div>
           </ng-container>
-
-        </div>
-      </div>
+      </app-modal-shell>
 
       <!-- Payment Popup -->
       <app-payment-popup *ngIf="showPaymentPopup()" [isVisible]="showPaymentPopup()" [amount]="paymentBooking()?.totalPrice || 0"
@@ -273,6 +242,7 @@ export class PatientLabBookingsComponent implements OnInit {
   private pdfService = inject(PdfService);
   private paymentService = inject(PaymentService);
   private toast = inject(ToastService);
+  private confirm = inject(ConfirmService);
 
   bookings = signal<BookingResponse[]>([]);
   isLoading = signal<boolean>(false);
@@ -318,7 +288,6 @@ export class PatientLabBookingsComponent implements OnInit {
         }
 
         this.errorMessage.set(errorMsg);
-        this.toast.showError(errorMsg);
         this.isLoading.set(false);
       }
     });
@@ -350,46 +319,52 @@ export class PatientLabBookingsComponent implements OnInit {
   /**
    * Cancel a booking (if allowed)
    */
-  cancelBooking(booking: BookingResponse) {
+  async cancelBooking(booking: BookingResponse) {
     if (!this.canCancelBooking(booking)) {
       return;
     }
 
-    if (confirm(`Are you sure you want to cancel booking #${booking.id}?`)) {
-      this.isLoading.set(true);
-      this.errorMessage.set('');
+    const ok = await this.confirm.ask({
+      title: 'Cancel booking',
+      message: `Are you sure you want to cancel booking #${booking.id}?`,
+      confirmLabel: 'Cancel booking',
+      cancelLabel: 'Keep',
+      danger: true,
+    });
+    if (!ok) return;
 
-      this.labTestService.cancelBooking(booking.id).subscribe({
-        next: (response) => {
-          // Update the booking status locally with the response from server
-          const updatedBookings = this.bookings().map(b =>
-            b.id === booking.id ? response.booking : b
-          );
-          this.bookings.set(updatedBookings);
-          this.isLoading.set(false);
+    this.isLoading.set(true);
+    this.errorMessage.set('');
 
-          // Show success message via toast
-          this.toast.showSuccess(`Booking #${booking.id} cancelled successfully.`);
-        },
-        error: (error) => {
-          console.error('Error cancelling booking:', error);
-          let errorMsg = 'Failed to cancel booking. Please try again.';
+    this.labTestService.cancelBooking(booking.id).subscribe({
+      next: (response) => {
+        // Update the booking status locally with the response from server
+        const updatedBookings = this.bookings().map(b =>
+          b.id === booking.id ? response.booking : b
+        );
+        this.bookings.set(updatedBookings);
+        this.isLoading.set(false);
 
-          if (error.error?.error) {
-            errorMsg = error.error.error;
-          } else if (error.status === 401) {
-            errorMsg = 'You are not authorized. Please login again.';
-            this.authService.logout();
-          } else if (error.status === 403) {
-            errorMsg = 'You do not have permission to cancel this booking.';
-          }
+        // Show success message via toast
+        this.toast.showSuccess(`Booking #${booking.id} cancelled successfully.`);
+      },
+      error: (error) => {
+        console.error('Error cancelling booking:', error);
+        let errorMsg = 'Failed to cancel booking. Please try again.';
 
-          this.errorMessage.set(errorMsg);
-          this.toast.showError(errorMsg);
-          this.isLoading.set(false);
+        if (error.error?.error) {
+          errorMsg = error.error.error;
+        } else if (error.status === 401) {
+          errorMsg = 'You are not authorized. Please login again.';
+          this.authService.logout();
+        } else if (error.status === 403) {
+          errorMsg = 'You do not have permission to cancel this booking.';
         }
-      });
-    }
+
+        this.toast.showError(errorMsg);
+        this.isLoading.set(false);
+      }
+    });
   }
 
   /**

@@ -3,17 +3,27 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AiAssistantService } from '../core/services/ai-assistant.service';
 import { ClinicalDictationResponse } from '../core/models/ai.models';
+import { ModalShellComponent } from './ui/modal-shell.component';
 
 @Component({
     selector: 'app-clinical-dictation',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, ModalShellComponent],
     template: `
-    <div class="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-xl overflow-y-auto">
-      <div class="relative w-full max-w-4xl my-auto bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden text-slate-100 flex flex-col max-h-[92vh] transition-all">
-        
-        <!-- Header -->
-        <div class="px-6 py-4.5 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 flex items-center justify-between text-white shrink-0 border-b border-white/10">
+    <app-modal-shell
+      [open]="true"
+      [showHeader]="false"
+      [hasFooter]="true"
+      maxWidthClass="max-w-4xl"
+      zIndexClass="z-[100]"
+      panelClass="bg-slate-900 border border-slate-800 rounded-3xl text-slate-100"
+      bodyClass="p-5 sm:p-7 space-y-6"
+      footerClass="px-6 py-4 bg-slate-900 border-t border-slate-800"
+      ariaLabel="Clinical dictation"
+      backdropClass="bg-slate-950/80"
+      (close)="closeModal.emit()"
+    >
+        <div modalHeader class="px-6 py-4.5 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 flex items-center justify-between text-white shrink-0 border-b border-white/10">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center text-xl shadow-inner">
               🎙️
@@ -28,9 +38,6 @@ import { ClinicalDictationResponse } from '../core/models/ai.models';
           </button>
         </div>
 
-        <!-- Main Body -->
-        <div class="p-5 sm:p-7 space-y-6 overflow-y-auto flex-1 custom-scrollbar">
-          
           <!-- Speech Dictation Controller Bar -->
           <div class="p-5 rounded-2xl bg-slate-800/80 border border-slate-700/70 space-y-4 shadow-inner">
             <div class="flex flex-wrap items-center justify-between gap-3">
@@ -40,7 +47,7 @@ import { ClinicalDictationResponse } from '../core/models/ai.models';
                         (click)="toggleRecording()"
                         [ngClass]="{
                           'bg-rose-600 hover:bg-rose-700 shadow-rose-600/30 animate-pulse': isRecording(),
-                          'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30': !isRecording()
+                          'bg-blue-600 hover:bg-blue-700 shadow-blue-600/30': !isRecording()
                         }"
                         class="px-5 py-2.5 rounded-xl text-white text-xs font-bold flex items-center gap-2 transition-all transform active:scale-95 shadow-lg">
                   <i class="fas" [ngClass]="{ 'fa-stop-circle text-base': isRecording(), 'fa-microphone text-base': !isRecording() }"></i>
@@ -52,7 +59,7 @@ import { ClinicalDictationResponse } from '../core/models/ai.models';
                 </span>
 
                 <span *ngIf="!isRecording() && transcriptText().trim()" class="text-xs text-slate-400">
-                  <i class="fas fa-check-circle text-emerald-400 mr-1"></i> Ready to structure
+                  <i class="fas fa-check-circle text-blue-400 mr-1"></i> Ready to structure
                 </span>
               </div>
 
@@ -69,7 +76,7 @@ import { ClinicalDictationResponse } from '../core/models/ai.models';
                 (ngModelChange)="transcriptText.set($event)"
                 placeholder="Click 'Start Live Dictation' and speak into your microphone (e.g. 'Patient 45yo male presenting with throbbing headache for 3 days. Prescribe Paracetamol 500mg...'), or type consultation notes here..."
                 rows="4"
-                class="w-full bg-slate-950 border border-slate-700/80 rounded-xl p-4 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all custom-scrollbar">
+                class="w-full bg-slate-950 border border-slate-700/80 rounded-xl p-4 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all custom-scrollbar">
               </textarea>
             </div>
 
@@ -82,7 +89,7 @@ import { ClinicalDictationResponse } from '../core/models/ai.models';
                 type="button"
                 (click)="processDictation()"
                 [disabled]="!transcriptText().trim() || isProcessing()"
-                class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-teal-600/20 transition-all">
+                class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-blue-600/20 transition-all">
                 <i class="fas" [ngClass]="{ 'fa-spinner fa-spin': isProcessing(), 'fa-magic': !isProcessing() }"></i>
                 {{ isProcessing() ? 'Structuring Clinical Note...' : '✨ Structure into SOAP Note' }}
               </button>
@@ -105,12 +112,12 @@ import { ClinicalDictationResponse } from '../core/models/ai.models';
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700">
                 <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Chief Complaint</span>
-                <p class="text-xs font-semibold text-teal-300">{{ dictationResult()!.chiefComplaint || 'Not specified' }}</p>
+                <p class="text-xs font-semibold text-blue-300">{{ dictationResult()!.chiefComplaint || 'Not specified' }}</p>
               </div>
 
               <div class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700">
                 <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Diagnosis</span>
-                <p class="text-xs font-semibold text-emerald-300">{{ dictationResult()!.diagnosis || 'Under evaluation' }}</p>
+                <p class="text-xs font-semibold text-indigo-300">{{ dictationResult()!.diagnosis || 'Under evaluation' }}</p>
               </div>
 
               <div class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700">
@@ -122,7 +129,7 @@ import { ClinicalDictationResponse } from '../core/models/ai.models';
             <!-- S.O.A.P Clinical Cards -->
             <div *ngIf="dictationResult()!.soapNote" class="space-y-3">
               <h5 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                <i class="fas fa-notes-medical text-teal-400"></i> S.O.A.P Clinical Note Format
+                <i class="fas fa-notes-medical text-blue-400"></i> S.O.A.P Clinical Note Format
               </h5>
               
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -139,7 +146,7 @@ import { ClinicalDictationResponse } from '../core/models/ai.models';
                 <!-- Objective -->
                 <div class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/80 space-y-1.5">
                   <div class="flex items-center justify-between">
-                    <span class="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-900/50 text-emerald-300 border border-emerald-700/50">
+                    <span class="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase bg-blue-900/50 text-blue-300 border border-blue-700/50">
                       O - Objective
                     </span>
                   </div>
@@ -173,7 +180,20 @@ import { ClinicalDictationResponse } from '../core/models/ai.models';
               <h5 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
                 <i class="fas fa-pills text-purple-400"></i> Structured Prescriptions ({{ dictationResult()!.prescriptions!.length }})
               </h5>
-              <div class="overflow-x-auto rounded-2xl border border-slate-800 shadow-md">
+              <!-- Mobile cards -->
+              <div class="md:hidden space-y-2">
+                <article *ngFor="let med of dictationResult()!.prescriptions" class="rounded-xl border border-slate-800 bg-slate-900/60 p-3 space-y-2">
+                  <div class="font-bold text-purple-400 text-sm">{{ med.name }}</div>
+                  <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div><span class="text-slate-500 block text-[10px] uppercase">Dosage</span><span class="font-mono text-slate-300">{{ med.dosage || '-' }}</span></div>
+                    <div><span class="text-slate-500 block text-[10px] uppercase">Frequency</span><span class="text-slate-300">{{ med.frequency || '-' }}</span></div>
+                    <div><span class="text-slate-500 block text-[10px] uppercase">Duration</span><span class="text-slate-300">{{ med.duration || '-' }}</span></div>
+                    <div class="col-span-2"><span class="text-slate-500 block text-[10px] uppercase">Instructions</span><span class="text-slate-400 italic">{{ med.instructions || '-' }}</span></div>
+                  </div>
+                </article>
+              </div>
+              <!-- Desktop table -->
+              <div class="hidden md:block overflow-x-auto rounded-2xl border border-slate-800 shadow-md">
                 <table class="w-full text-left text-xs">
                   <thead class="bg-slate-800/90 font-semibold text-slate-300">
                     <tr>
@@ -208,11 +228,10 @@ import { ClinicalDictationResponse } from '../core/models/ai.models';
             </div>
 
           </div>
-        </div>
 
         <!-- Footer Actions -->
-        <div class="px-6 py-4 bg-slate-900 border-t border-slate-800 flex items-center justify-between shrink-0">
-          <button *ngIf="copiedText()" type="button" class="text-xs text-emerald-400 font-bold flex items-center gap-1.5">
+        <div modalFooter class="flex items-center justify-between w-full">
+          <button *ngIf="copiedText()" type="button" class="text-xs text-blue-400 font-bold flex items-center gap-1.5">
             <i class="fas fa-check"></i> Copied to Clipboard!
           </button>
           
@@ -224,14 +243,13 @@ import { ClinicalDictationResponse } from '../core/models/ai.models';
             <button type="button" (click)="closeModal.emit()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors">
               Close
             </button>
-            <button *ngIf="dictationResult() && dictationResult()!.success" type="button" (click)="onConfirm()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold shadow-lg shadow-emerald-600/20 hover:from-emerald-500 hover:to-teal-500 transition-all">
+            <button *ngIf="dictationResult() && dictationResult()!.success" type="button" (click)="onConfirm()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-blue-600/20 hover:from-blue-500 hover:to-indigo-500 transition-all">
               <i class="fas fa-check mr-1.5"></i> Insert into Consultation
             </button>
           </div>
         </div>
 
-      </div>
-    </div>
+    </app-modal-shell>
   `
 })
 export class ClinicalDictationComponent implements OnInit, OnDestroy {

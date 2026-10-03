@@ -7,111 +7,251 @@ import { DoctorProfileService } from '../../core/services/doctor-profile.service
 import { MasterDataService } from '../../core/services/master-data.service';
 import { ToastService } from '../../core/services/toast.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
+import { SkeletonComponent } from '../../shared/ui/skeleton.component';
+import { FilterBarComponent } from '../../shared/ui/filter-bar.component';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ModalShellComponent, SkeletonComponent, FilterBarComponent],
+  styles: [`
+    :host ::ng-deep .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    :host ::ng-deep .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .admin-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      flex-shrink: 0;
+      padding: 0.625rem 0.75rem;
+      min-height: 44px;
+      border-bottom: 2px solid transparent;
+      color: rgb(148 163 184);
+      font-size: 0.75rem;
+      font-weight: 600;
+      transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+      border-radius: 0.5rem 0.5rem 0 0;
+    }
+    @media (min-width: 640px) {
+      .admin-tab {
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+        gap: 0.5rem;
+      }
+    }
+    .admin-tab:hover {
+      color: rgb(226 232 240);
+      background: rgb(30 41 59 / 0.45);
+    }
+    .admin-tab--active {
+      color: rgb(96 165 250);
+      border-bottom-color: rgb(59 130 246);
+      background: rgb(30 41 59 / 0.55);
+    }
+    .admin-tab-label {
+      white-space: nowrap;
+    }
+    .admin-tab-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.25rem;
+      padding: 0.125rem 0.375rem;
+      border-radius: 9999px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      background: rgb(51 65 85);
+      color: rgb(203 213 225);
+    }
+    .admin-tab-count--alert {
+      background: rgb(244 63 94 / 0.2);
+      color: rgb(253 164 175);
+      border: 1px solid rgb(244 63 94 / 0.3);
+    }
+  `],
   template: `
     <div class="h-[calc(100vh-3.5rem)] overflow-y-auto custom-scrollbar bg-slate-900 text-slate-100 flex flex-col">
-      <!-- Navbar / Header -->
-      <header class="bg-slate-800/80 backdrop-blur border-b border-slate-700/60 sticky top-0 z-40 flex-shrink-0">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-cyan-400 flex items-center justify-center font-bold text-slate-900 shadow-lg shadow-indigo-500/20">
-              CS
+      <!-- Sticky chrome: header + tabs (mobile-first) -->
+      <div class="sticky top-0 z-40 shrink-0 bg-slate-900/95 backdrop-blur-md border-b border-slate-700/60 shadow-lg shadow-black/20">
+        <header class="bg-slate-800/80">
+          <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-400 flex items-center justify-center font-bold text-slate-900 shadow-lg shadow-blue-500/20 shrink-0 text-sm sm:text-base">
+                CS
+              </div>
+              <div class="min-w-0">
+                <h1 class="font-display text-base sm:text-xl font-bold bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent truncate">
+                  CareSync Admin
+                </h1>
+                <p class="text-[10px] sm:text-xs text-slate-400 truncate hidden xs:block sm:block">System Management & Governance</p>
+              </div>
             </div>
-            <div>
-              <h1 class="text-xl font-bold bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-                CareSync Admin Console
-              </h1>
-              <p class="text-xs text-slate-400">System Management & Governance</p>
+            <div class="flex items-center gap-2 sm:gap-4 shrink-0">
+              <span class="hidden sm:inline text-xs px-3 py-1 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-300 font-medium">
+                Admin: {{ authService.username() }}
+              </span>
+              <button
+                type="button"
+                (click)="logout()"
+                class="px-2.5 sm:px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-700/50 hover:bg-slate-700 rounded-lg border border-slate-600 transition min-h-touch inline-flex items-center gap-1.5"
+                aria-label="Sign out"
+              >
+                <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+                <span class="hidden sm:inline">Sign Out</span>
+              </button>
             </div>
           </div>
-          <div class="flex items-center gap-4">
-            <span class="text-xs px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 font-medium">
-              Administrator: {{ authService.username() }}
-            </span>
+        </header>
+
+        <!-- Sticky tab strip -->
+        <nav class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8" aria-label="Admin sections">
+          <div class="flex items-stretch gap-1 sm:gap-2 overflow-x-auto no-scrollbar -mb-px py-1 sm:py-0">
             <button
-              (click)="logout()"
-              class="px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-700/50 hover:bg-slate-700 rounded-lg border border-slate-600 transition"
+              type="button"
+              (click)="activeTab = 'users'"
+              [attr.aria-current]="activeTab === 'users' ? 'page' : null"
+              class="admin-tab"
+              [class.admin-tab--active]="activeTab === 'users'"
             >
-              Sign Out
+              <i class="fa-solid fa-users text-sm" aria-hidden="true"></i>
+              <span class="admin-tab-label">Users</span>
+              <span class="admin-tab-count">{{ users.length }}</span>
+            </button>
+
+            <button
+              type="button"
+              (click)="activeTab = 'doctors'"
+              [attr.aria-current]="activeTab === 'doctors' ? 'page' : null"
+              class="admin-tab"
+              [class.admin-tab--active]="activeTab === 'doctors'"
+            >
+              <i class="fa-solid fa-user-doctor text-sm" aria-hidden="true"></i>
+              <span class="admin-tab-label">Doctors</span>
+              <span class="admin-tab-count">{{ doctors.length }}</span>
+            </button>
+
+            <button
+              type="button"
+              (click)="activeTab = 'master'"
+              [attr.aria-current]="activeTab === 'master' ? 'page' : null"
+              class="admin-tab"
+              [class.admin-tab--active]="activeTab === 'master'"
+            >
+              <i class="fa-solid fa-database text-sm" aria-hidden="true"></i>
+              <span class="admin-tab-label">Master</span>
+            </button>
+
+            <button
+              type="button"
+              (click)="activeTab = 'security'"
+              [attr.aria-current]="activeTab === 'security' ? 'page' : null"
+              class="admin-tab"
+              [class.admin-tab--active]="activeTab === 'security'"
+            >
+              <i class="fa-solid fa-shield-halved text-sm" aria-hidden="true"></i>
+              <span class="admin-tab-label">Security</span>
+              <span class="admin-tab-count admin-tab-count--alert">{{ blockedIPs.length }}</span>
             </button>
           </div>
-        </div>
-      </header>
+        </nav>
+      </div>
 
-      <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-36">
-        <!-- Navigation Tabs -->
-        <div class="flex items-center gap-2 border-b border-slate-700/60 mb-6 overflow-x-auto">
-          <button
-            (click)="activeTab = 'users'"
-            [class.text-indigo-400]="activeTab === 'users'"
-            [class.border-indigo-500]="activeTab === 'users'"
-            class="px-4 py-3 text-sm font-semibold border-b-2 border-transparent hover:text-slate-200 transition flex items-center gap-2 whitespace-nowrap"
-          >
-            <span>👤 User Management</span>
-            <span class="px-2 py-0.5 text-xs rounded-full bg-slate-700 text-slate-300">{{ users.length }}</span>
-          </button>
-
-          <button
-            (click)="activeTab = 'doctors'"
-            [class.text-indigo-400]="activeTab === 'doctors'"
-            [class.border-indigo-500]="activeTab === 'doctors'"
-            class="px-4 py-3 text-sm font-semibold border-b-2 border-transparent hover:text-slate-200 transition flex items-center gap-2 whitespace-nowrap"
-          >
-            <span>👨‍⚕️ Doctor Verification</span>
-            <span class="px-2 py-0.5 text-xs rounded-full bg-slate-700 text-slate-300">{{ doctors.length }}</span>
-          </button>
-
-          <button
-            (click)="activeTab = 'master'"
-            [class.text-indigo-400]="activeTab === 'master'"
-            [class.border-indigo-500]="activeTab === 'master'"
-            class="px-4 py-3 text-sm font-semibold border-b-2 border-transparent hover:text-slate-200 transition flex items-center gap-2 whitespace-nowrap"
-          >
-            <span>⚙️ Master Data Entry</span>
-          </button>
-
-          <button
-            (click)="activeTab = 'security'"
-            [class.text-indigo-400]="activeTab === 'security'"
-            [class.border-indigo-500]="activeTab === 'security'"
-            class="px-4 py-3 text-sm font-semibold border-b-2 border-transparent hover:text-slate-200 transition flex items-center gap-2 whitespace-nowrap"
-          >
-            <span>🔒 Security & Blocked IPs</span>
-            <span class="px-2 py-0.5 text-xs rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">{{ blockedIPs.length }}</span>
-          </button>
-        </div>
-
+      <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-24 sm:pb-36">
         <!-- TAB 1: USER MANAGEMENT -->
-        <div *ngIf="activeTab === 'users'" class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 mb-16">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div *ngIf="activeTab === 'users'" class="bg-slate-800/50 border border-slate-700/60 rounded-xl sm:rounded-2xl p-3 sm:p-6 mb-8 sm:mb-16">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 mb-4 sm:mb-6">
             <div>
-              <h2 class="text-lg font-bold text-white">System Users Directory</h2>
-              <p class="text-xs text-slate-400">View and toggle user active / inactive status</p>
+              <h2 class="font-display text-base sm:text-lg font-bold text-white">System Users Directory</h2>
+              <p class="text-[11px] sm:text-xs text-slate-400">View and toggle user active / inactive status</p>
             </div>
-            <div class="flex items-center gap-3">
+          </div>
+
+          <app-filter-bar
+            class="mb-4 sm:mb-6 block"
+            tone="dark"
+            panelClass="!bg-slate-800/50 !border-slate-700/60 !shadow-none"
+            gridClass="grid grid-cols-1 sm:grid-cols-2 gap-3"
+            [activeCount]="userFilterActiveCount"
+            (clear)="clearUserFilters()"
+          >
               <input
                 type="text"
                 [(ngModel)]="userSearch"
                 placeholder="Search username..."
-                class="px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                class="px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 w-full min-h-touch"
               />
               <select
                 [(ngModel)]="selectedRoleFilter"
-                class="px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-indigo-500"
+                class="px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-blue-500 w-full min-h-touch"
               >
                 <option value="ALL">All Roles</option>
                 <option value="DOCTOR">DOCTOR</option>
                 <option value="PATIENT">PATIENT</option>
                 <option value="ADMIN">ADMIN</option>
               </select>
-            </div>
+          </app-filter-bar>
+
+          <app-skeleton *ngIf="loadingUsers" variant="table" [count]="6" panelClass="!bg-slate-900/40 !border-slate-700/50"></app-skeleton>
+
+          <!-- Mobile card rows -->
+          <div *ngIf="!loadingUsers" class="md:hidden space-y-2.5">
+            <article *ngFor="let u of filteredUsers" class="rounded-xl border border-slate-700/50 bg-slate-900/50 p-3.5 space-y-3 active:scale-[0.99] transition-transform">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0 flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-sm font-bold text-blue-300 shrink-0 uppercase">
+                    {{ (u.username || '?').charAt(0) }}
+                  </div>
+                  <div class="min-w-0">
+                    <div class="font-semibold text-white truncate">{{ u.username }}</div>
+                    <div class="text-[11px] font-mono text-slate-500">#{{ u.userId }}</div>
+                  </div>
+                </div>
+                <span
+                  class="shrink-0 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide rounded-md border"
+                  [ngClass]="{
+                    'bg-blue-500/20 border-blue-500/30 text-blue-300': u.role === 'DOCTOR',
+                    'bg-sky-500/20 border-sky-500/30 text-sky-300': u.role === 'PATIENT',
+                    'bg-purple-500/20 border-purple-500/30 text-purple-300': u.role === 'ADMIN'
+                  }"
+                >
+                  {{ u.role }}
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border"
+                  [ngClass]="{
+                    'bg-emerald-500/10 border-emerald-500/30 text-emerald-400': u.isActive,
+                    'bg-rose-500/10 border-rose-500/30 text-rose-400': !u.isActive
+                  }"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full" [ngClass]="u.isActive ? 'bg-emerald-400' : 'bg-rose-400'"></span>
+                  {{ u.isActive ? 'Active' : 'Inactive' }}
+                </span>
+                <button
+                  type="button"
+                  (click)="toggleUserStatus(u)"
+                  [disabled]="togglingUsername === u.username"
+                  class="flex-1 px-3 py-2.5 min-h-touch rounded-xl text-xs font-semibold transition border shadow-sm"
+                  [ngClass]="{
+                    'bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border-rose-500/40': u.isActive,
+                    'bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border-blue-500/40': !u.isActive
+                  }"
+                >
+                  {{ togglingUsername === u.username ? 'Updating...' : (u.isActive ? 'Set Inactive' : 'Set Active') }}
+                </button>
+              </div>
+            </article>
+            <div *ngIf="filteredUsers.length === 0" class="py-10 text-center text-slate-500 text-sm">No users match your criteria.</div>
           </div>
 
-          <div class="overflow-x-auto max-h-[380px] overflow-y-auto custom-scrollbar rounded-xl border border-slate-700/50">
+          <!-- Desktop table -->
+          <div *ngIf="!loadingUsers" class="hidden md:block overflow-x-auto max-h-[min(60vh,480px)] overflow-y-auto custom-scrollbar rounded-xl border border-slate-700/50">
             <table class="w-full text-left text-sm text-slate-300 border-collapse">
               <thead class="bg-slate-900 sticky top-0 z-10 text-xs uppercase text-slate-400 font-semibold border-b border-slate-700 shadow-sm">
                 <tr>
@@ -131,7 +271,7 @@ import { AuthService } from '../../core/services/auth.service';
                       class="px-2.5 py-1 text-xs font-semibold rounded-md border"
                       [ngClass]="{
                         'bg-blue-500/20 border-blue-500/30 text-blue-300': u.role === 'DOCTOR',
-                        'bg-emerald-500/20 border-emerald-500/30 text-emerald-300': u.role === 'PATIENT',
+                        'bg-sky-500/20 border-sky-500/30 text-sky-300': u.role === 'PATIENT',
                         'bg-purple-500/20 border-purple-500/30 text-purple-300': u.role === 'ADMIN'
                       }"
                     >
@@ -157,7 +297,7 @@ import { AuthService } from '../../core/services/auth.service';
                       class="px-3 py-1.5 rounded-xl text-xs font-semibold transition border shadow-sm"
                       [ngClass]="{
                         'bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border-rose-500/40': u.isActive,
-                        'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border-emerald-500/40': !u.isActive
+                        'bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border-blue-500/40': !u.isActive
                       }"
                     >
                       {{ togglingUsername === u.username ? 'Updating...' : (u.isActive ? 'Set Inactive' : 'Set Active') }}
@@ -173,21 +313,87 @@ import { AuthService } from '../../core/services/auth.service';
         </div>
 
         <!-- TAB 2: DOCTOR VERIFICATION -->
-        <div *ngIf="activeTab === 'doctors'" class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 mb-16">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div *ngIf="activeTab === 'doctors'" class="bg-slate-800/50 border border-slate-700/60 rounded-xl sm:rounded-2xl p-3 sm:p-6 mb-8 sm:mb-16">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 mb-4 sm:mb-6">
             <div>
-              <h2 class="text-lg font-bold text-white">Doctor Credential Verification</h2>
-              <p class="text-xs text-slate-400">Verify or unverfiy (diverify) registered medical practitioners</p>
+              <h2 class="font-display text-base sm:text-lg font-bold text-white">Doctor Credential Verification</h2>
+              <p class="text-[11px] sm:text-xs text-slate-400">Verify or unverify registered medical practitioners</p>
             </div>
+          </div>
+
+          <app-filter-bar
+            class="mb-4 sm:mb-6 block"
+            tone="dark"
+            panelClass="!bg-slate-800/50 !border-slate-700/60 !shadow-none"
+            gridClass="grid grid-cols-1 gap-3"
+            [activeCount]="doctorFilterActiveCount"
+            (clear)="clearDoctorFilters()"
+          >
             <input
               type="text"
               [(ngModel)]="doctorSearch"
               placeholder="Search doctor name or spec..."
-              class="px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              class="px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 w-full min-h-touch"
             />
+          </app-filter-bar>
+
+          <app-skeleton *ngIf="loadingDoctors" variant="table" [count]="6" panelClass="!bg-slate-900/40 !border-slate-700/50"></app-skeleton>
+
+          <!-- Mobile card rows -->
+          <div *ngIf="!loadingDoctors" class="md:hidden space-y-2.5">
+            <article *ngFor="let doc of filteredDoctors" class="rounded-xl border border-slate-700/50 bg-slate-900/50 p-3.5 space-y-3">
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-sm font-bold text-indigo-300 shrink-0">
+                  {{ (doc.firstName || doc.username || '?').charAt(0) }}
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="font-semibold text-white leading-tight">Dr. {{ doc.firstName || '' }} {{ doc.lastName || '' }}</div>
+                  <div class="text-[11px] text-slate-500 mt-0.5">&#64;{{ doc.username }} · #{{ doc.id }}</div>
+                  <div class="text-xs text-slate-300 mt-1">{{ doc.specialization || 'General Practitioner' }}</div>
+                </div>
+                <span
+                  class="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border"
+                  [ngClass]="{
+                    'bg-blue-500/10 border-blue-500/30 text-blue-300': doc.isVerified,
+                    'bg-amber-500/10 border-amber-500/30 text-amber-300': !doc.isVerified
+                  }"
+                >
+                  {{ doc.isVerified ? 'Verified' : 'Pending' }}
+                </span>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  (click)="openDoctorModal(doc)"
+                  class="px-3 py-2.5 min-h-touch rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 transition"
+                >
+                  View Profile
+                </button>
+                <button
+                  type="button"
+                  *ngIf="!doc.isVerified"
+                  (click)="toggleDoctorVerification(doc, true)"
+                  [disabled]="verifyingDoctorId === doc.id"
+                  class="px-3 py-2.5 min-h-touch rounded-xl text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40 transition"
+                >
+                  Verify
+                </button>
+                <button
+                  type="button"
+                  *ngIf="doc.isVerified"
+                  (click)="toggleDoctorVerification(doc, false)"
+                  [disabled]="verifyingDoctorId === doc.id"
+                  class="px-3 py-2.5 min-h-touch rounded-xl text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition"
+                >
+                  Unverify
+                </button>
+              </div>
+            </article>
+            <div *ngIf="filteredDoctors.length === 0" class="py-10 text-center text-slate-500 text-sm">No doctors found.</div>
           </div>
 
-          <div class="overflow-x-auto max-h-[380px] overflow-y-auto custom-scrollbar rounded-xl border border-slate-700/50">
+          <!-- Desktop table -->
+          <div *ngIf="!loadingDoctors" class="hidden md:block overflow-x-auto max-h-[min(60vh,480px)] overflow-y-auto custom-scrollbar rounded-xl border border-slate-700/50">
             <table class="w-full text-left text-sm text-slate-300 border-collapse">
               <thead class="bg-slate-900 sticky top-0 z-10 text-xs uppercase text-slate-400 font-semibold border-b border-slate-700 shadow-sm">
                 <tr>
@@ -210,36 +416,38 @@ import { AuthService } from '../../core/services/auth.service';
                     <span
                       class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border"
                       [ngClass]="{
-                        'bg-cyan-500/10 border-cyan-500/30 text-cyan-300': doc.isVerified,
+                        'bg-blue-500/10 border-blue-500/30 text-blue-300': doc.isVerified,
                         'bg-amber-500/10 border-amber-500/30 text-amber-300': !doc.isVerified
                       }"
                     >
                       <span>{{ doc.isVerified ? '✓ Verified' : '⏳ Pending / Unverified' }}</span>
                     </span>
                   </td>
-                  <td class="py-3.5 px-4 text-right flex items-center justify-end gap-2">
-                    <button
-                      (click)="openDoctorModal(doc)"
-                      class="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 transition flex items-center gap-1"
-                    >
-                      <span> View Profile</span>
-                    </button>
-                    <button
-                      *ngIf="!doc.isVerified"
-                      (click)="toggleDoctorVerification(doc, true)"
-                      [disabled]="verifyingDoctorId === doc.id"
-                      class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 transition"
-                    >
-                      Verify Doctor
-                    </button>
-                    <button
-                      *ngIf="doc.isVerified"
-                      (click)="toggleDoctorVerification(doc, false)"
-                      [disabled]="verifyingDoctorId === doc.id"
-                      class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition"
-                    >
-                      Diverify (Unverify)
-                    </button>
+                  <td class="py-3.5 px-4 text-right">
+                    <div class="flex items-center justify-end gap-2 flex-wrap">
+                      <button
+                        (click)="openDoctorModal(doc)"
+                        class="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40 transition flex items-center gap-1"
+                      >
+                        <span> View Profile</span>
+                      </button>
+                      <button
+                        *ngIf="!doc.isVerified"
+                        (click)="toggleDoctorVerification(doc, true)"
+                        [disabled]="verifyingDoctorId === doc.id"
+                        class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40 transition"
+                      >
+                        Verify Doctor
+                      </button>
+                      <button
+                        *ngIf="doc.isVerified"
+                        (click)="toggleDoctorVerification(doc, false)"
+                        [disabled]="verifyingDoctorId === doc.id"
+                        class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition"
+                      >
+                        Diverify (Unverify)
+                      </button>
+                    </div>
                   </td>
                 </tr>
                 <tr *ngIf="filteredDoctors.length === 0">
@@ -251,17 +459,18 @@ import { AuthService } from '../../core/services/auth.service';
         </div>
 
         <!-- TAB 3: MASTER DATA ENTRY -->
-        <div *ngIf="activeTab === 'master'" class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 mb-16">
-          <div class="mb-6">
-            <h2 class="text-lg font-bold text-white">Master Data Entry Management</h2>
-            <p class="text-xs text-slate-400">Add new dropdown options to any master table across the system</p>
+        <div *ngIf="activeTab === 'master'" class="bg-slate-800/50 border border-slate-700/60 rounded-xl sm:rounded-2xl p-3 sm:p-6 mb-8 sm:mb-16">
+          <div class="mb-4 sm:mb-6">
+            <h2 class="font-display text-base sm:text-lg font-bold text-white">Master Data Entry Management</h2>
+            <p class="text-[11px] sm:text-xs text-slate-400">Add new dropdown options to any master table across the system</p>
           </div>
 
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             <!-- Left Form: Add Entry -->
-            <div class="bg-slate-900/60 border border-slate-700/60 rounded-xl p-5">
+            <div class="bg-slate-900/60 border border-slate-700/60 rounded-xl p-4 sm:p-5">
               <h3 class="text-sm font-bold text-slate-200 mb-4 flex items-center gap-2">
-                <span>➕ Add Master Data Item</span>
+                <i class="fa-solid fa-plus text-blue-400" aria-hidden="true"></i>
+                <span>Add Master Data Item</span>
               </h3>
 
               <form (ngSubmit)="submitMasterData()" class="space-y-4">
@@ -271,7 +480,7 @@ import { AuthService } from '../../core/services/auth.service';
                     [(ngModel)]="selectedMasterType"
                     name="masterType"
                     (change)="loadCurrentMasterItems()"
-                    class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-indigo-500"
+                    class="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-blue-500 min-h-touch"
                   >
                     <option value="specializations">Specializations</option>
                     <option value="hospitals">Hospitals</option>
@@ -293,14 +502,14 @@ import { AuthService } from '../../core/services/auth.service';
                     name="masterValue"
                     placeholder="e.g. Cardiology, City Hospital..."
                     required
-                    class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                    class="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 min-h-touch"
                   />
                 </div>
 
                 <button
                   type="submit"
                   [disabled]="isSubmittingMaster || !newMasterValue.trim()"
-                  class="w-full py-2.5 px-4 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-semibold text-sm rounded-xl shadow-lg shadow-indigo-500/20 disabled:opacity-50 transition"
+                  class="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-sm rounded-xl shadow-lg shadow-blue-500/20 disabled:opacity-50 transition min-h-touch"
                 >
                   {{ isSubmittingMaster ? 'Saving Entry...' : 'Add Master Entry' }}
                 </button>
@@ -308,20 +517,43 @@ import { AuthService } from '../../core/services/auth.service';
             </div>
 
             <!-- Right Column: Current Master List -->
-            <div class="lg:col-span-2 bg-slate-900/60 border border-slate-700/60 rounded-xl p-5">
-              <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-bold text-slate-200 capitalize">
-                  Current {{ selectedMasterType }} Items ({{ masterItems.length }})
+            <div class="lg:col-span-2 bg-slate-900/60 border border-slate-700/60 rounded-xl p-4 sm:p-5">
+              <div class="flex items-center justify-between mb-4 gap-2">
+                <h3 class="text-sm font-bold text-slate-200 capitalize truncate">
+                  Current {{ selectedMasterType }} ({{ masterItems.length }})
                 </h3>
                 <button
+                  type="button"
                   (click)="loadCurrentMasterItems()"
-                  class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold"
+                  class="text-xs text-blue-400 hover:text-blue-300 font-semibold shrink-0 min-h-touch px-2 inline-flex items-center gap-1"
                 >
-                  🔄 Refresh List
+                  <i class="fa-solid fa-rotate" aria-hidden="true"></i> Refresh
                 </button>
               </div>
 
-              <div class="flex flex-wrap gap-2 max-h-80 overflow-y-auto p-1">
+              <!-- Mobile: stacked rows -->
+              <div class="md:hidden space-y-2">
+                <div
+                  *ngFor="let item of masterItems"
+                  class="flex items-center justify-between gap-3 px-3 py-3 rounded-xl bg-slate-800/80 border border-slate-700"
+                >
+                  <span class="text-sm text-slate-200 truncate">{{ item }}</span>
+                  <button
+                    type="button"
+                    (click)="openDeleteConfirmation(item)"
+                    [attr.aria-label]="'Delete ' + item"
+                    class="w-9 h-9 rounded-lg bg-slate-700/80 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 flex items-center justify-center transition border border-slate-600/50 hover:border-rose-500/40 shrink-0"
+                  >
+                    <i class="fa-solid fa-trash text-xs" aria-hidden="true"></i>
+                  </button>
+                </div>
+                <div *ngIf="masterItems.length === 0" class="py-8 text-center text-slate-500 text-xs">
+                  No items configured for this master type yet.
+                </div>
+              </div>
+
+              <!-- Desktop: chip wrap -->
+              <div class="hidden md:flex flex-wrap gap-2 max-h-80 overflow-y-auto p-1">
                 <span
                   *ngFor="let item of masterItems"
                   class="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs font-medium text-slate-200 flex items-center gap-2 hover:border-slate-600 transition"
@@ -344,57 +576,92 @@ import { AuthService } from '../../core/services/auth.service';
         </div>
 
         <!-- MASTER DATA DELETE CONFIRMATION MODAL -->
-        <div *ngIf="itemToDelete" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-          <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-md w-full p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div class="flex items-center gap-3 mb-4">
-              <div class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-rose-400 font-bold text-lg"></div>
-              <div>
-                <h3 class="text-base font-bold text-white">Delete Master Data Item</h3>
-                <p class="text-xs text-slate-400">Confirmation Required</p>
-              </div>
+        <app-modal-shell
+          [open]="!!itemToDelete"
+          [showHeader]="false"
+          maxWidthClass="max-w-md"
+          panelClass="bg-slate-900 border border-slate-700/80 rounded-2xl"
+          bodyClass="px-6 pb-2"
+          [hasFooter]="true"
+          footerClass="px-6 pb-6 border-0"
+          backdropClass="bg-slate-950/80"
+          [fullScreenMobile]="false"
+          ariaLabel="Delete master data item"
+          (close)="itemToDelete = null"
+        >
+          <div modalHeader class="px-6 pt-6 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0">
+              <i class="fa-solid fa-trash text-sm" aria-hidden="true"></i>
             </div>
-
-            <p class="text-sm text-slate-300 mb-6 leading-relaxed">
-              Are you sure you want to delete <span class="font-semibold text-white px-2 py-0.5 bg-slate-800 border border-slate-700 rounded-md">{{ itemToDelete }}</span> from <span class="font-semibold text-indigo-300 capitalize">{{ selectedMasterType }}</span>?
-            </p>
-
-            <div class="flex items-center justify-end gap-3">
-              <button
-                (click)="itemToDelete = null"
-                class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 transition"
-              >
-                Cancel
-              </button>
-              <button
-                (click)="confirmDeleteMasterItem()"
-                [disabled]="isDeletingMaster"
-                class="px-4 py-2 text-xs font-bold bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white rounded-xl shadow-lg shadow-rose-600/20 transition disabled:opacity-50 flex items-center gap-2"
-              >
-                <span *ngIf="isDeletingMaster" class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                <span>{{ isDeletingMaster ? 'Deleting...' : 'Save & Confirm Delete' }}</span>
-              </button>
+            <div>
+              <h3 class="text-base font-bold text-white">Delete Master Data Item</h3>
+              <p class="text-xs text-slate-400">Confirmation Required</p>
             </div>
           </div>
-        </div>
+
+          <p class="text-sm text-slate-300 mb-4 leading-relaxed">
+            Are you sure you want to delete <span class="font-semibold text-white px-2 py-0.5 bg-slate-800 border border-slate-700 rounded-md">{{ itemToDelete }}</span> from <span class="font-semibold text-blue-300 capitalize">{{ selectedMasterType }}</span>?
+          </p>
+
+          <div modalFooter class="flex items-center justify-end gap-3">
+            <button
+              type="button"
+              (click)="itemToDelete = null"
+              class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              (click)="confirmDeleteMasterItem()"
+              [disabled]="isDeletingMaster"
+              class="px-4 py-2 text-xs font-bold bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white rounded-xl shadow-lg shadow-rose-600/20 transition disabled:opacity-50 flex items-center gap-2"
+            >
+              <span *ngIf="isDeletingMaster" class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              <span>{{ isDeletingMaster ? 'Deleting...' : 'Save & Confirm Delete' }}</span>
+            </button>
+          </div>
+        </app-modal-shell>
 
         <!-- TAB 4: SECURITY & BLOCKED IPS -->
-        <div *ngIf="activeTab === 'security'" class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 mb-16">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div *ngIf="activeTab === 'security'" class="bg-slate-800/50 border border-slate-700/60 rounded-xl sm:rounded-2xl p-3 sm:p-6 mb-8 sm:mb-16">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
             <div>
-              <h2 class="text-lg font-bold text-white">Blocked IP Addresses</h2>
-              <p class="text-xs text-slate-400">View and remove IP blocks imposed by security rules</p>
+              <h2 class="font-display text-base sm:text-lg font-bold text-white">Blocked IP Addresses</h2>
+              <p class="text-[11px] sm:text-xs text-slate-400">View and remove IP blocks imposed by security rules</p>
             </div>
 
             <button
               *ngIf="blockedIPs.length > 0"
+              type="button"
               (click)="unblockAllIPs()"
-              class="px-4 py-2 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 rounded-xl text-xs font-semibold transition"
+              class="w-full sm:w-auto px-4 py-2.5 min-h-touch bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 rounded-xl text-xs font-semibold transition"
             >
               Clear / Unblock All IPs
             </button>
           </div>
 
-          <div class="overflow-x-auto max-h-[380px] overflow-y-auto custom-scrollbar rounded-xl border border-slate-700/50">
+          <!-- Mobile card rows -->
+          <div class="md:hidden space-y-2.5">
+            <article *ngFor="let ip of blockedIPs" class="rounded-xl border border-slate-700/50 bg-slate-900/50 p-3.5 space-y-2.5">
+              <div class="font-mono font-bold text-rose-300 text-sm break-all">{{ ip.ipAddress }}</div>
+              <div class="text-xs text-slate-300 leading-relaxed">{{ ip.reason || 'Exceeded failed login attempt threshold' }}</div>
+              <div class="flex items-center gap-2">
+                <div class="text-[11px] text-slate-500 flex-1">{{ ip.blockedAt || 'Recent' }}</div>
+                <button
+                  type="button"
+                  (click)="unblockSingleIP(ip.ipAddress)"
+                  class="px-3 py-2.5 min-h-touch rounded-xl text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40 transition"
+                >
+                  Unblock
+                </button>
+              </div>
+            </article>
+            <div *ngIf="blockedIPs.length === 0" class="py-10 text-center text-slate-500 text-sm">No blocked IPs right now.</div>
+          </div>
+
+          <!-- Desktop table -->
+          <div class="hidden md:block overflow-x-auto max-h-[min(60vh,480px)] overflow-y-auto custom-scrollbar rounded-xl border border-slate-700/50">
             <table class="w-full text-left text-sm text-slate-300 border-collapse">
               <thead class="bg-slate-900 sticky top-0 z-10 text-xs uppercase text-slate-400 font-semibold border-b border-slate-700 shadow-sm">
                 <tr>
@@ -412,7 +679,7 @@ import { AuthService } from '../../core/services/auth.service';
                   <td class="py-3.5 px-4 text-right">
                     <button
                       (click)="unblockSingleIP(ip.ipAddress)"
-                      class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 transition"
+                      class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40 transition"
                     >
                       Unblock IP
                     </button>
@@ -428,12 +695,21 @@ import { AuthService } from '../../core/services/auth.service';
       </main>
 
       <!-- DOCTOR DETAIL VIEW MODAL -->
-      <div *ngIf="selectedDoctor" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
-        <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200">
-          
-          <!-- Modal Header -->
-          <div class="px-6 py-4 bg-slate-800/80 border-b border-slate-700/60 flex items-center justify-between sticky top-0 z-20">
-            <div class="flex items-center gap-3">
+      <app-modal-shell
+        *ngIf="selectedDoctor"
+        [open]="true"
+        [showHeader]="false"
+        [hasFooter]="true"
+        maxWidthClass="max-w-3xl"
+        panelClass="bg-slate-900 border border-slate-700/80 rounded-2xl"
+        bodyClass="p-6 space-y-6 text-sm text-slate-300"
+        footerClass="px-6 py-4 bg-slate-800/80 border-t border-slate-700/60"
+        backdropClass="bg-slate-950/80"
+        ariaLabel="Doctor details"
+        (close)="closeDoctorModal()"
+      >
+          <div modalHeader class="px-6 py-4 bg-slate-800/80 border-b border-slate-700/60 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-3 min-w-0">
               <div class="relative w-12 h-12 rounded-xl bg-slate-700 overflow-hidden border border-slate-600 flex-shrink-0">
                 <img
                   *ngIf="selectedDoctorProfile?.profileImageUrl"
@@ -445,13 +721,13 @@ import { AuthService } from '../../core/services/auth.service';
                   {{ selectedDoctor.firstName?.charAt(0) || 'D' }}
                 </div>
               </div>
-              <div>
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+              <div class="min-w-0">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2 flex-wrap">
                   Dr. {{ selectedDoctorProfile?.firstName || selectedDoctor.firstName }} {{ selectedDoctorProfile?.lastName || selectedDoctor.lastName }}
                   <span
                     class="text-xs px-2.5 py-0.5 rounded-full border font-semibold"
                     [ngClass]="{
-                      'bg-cyan-500/10 border-cyan-500/30 text-cyan-300': selectedDoctor.isVerified,
+                      'bg-blue-500/10 border-blue-500/30 text-blue-300': selectedDoctor.isVerified,
                       'bg-amber-500/10 border-amber-500/30 text-amber-300': !selectedDoctor.isVerified
                     }"
                   >
@@ -459,138 +735,134 @@ import { AuthService } from '../../core/services/auth.service';
                   </span>
                 </h3>
                 <p class="text-xs text-slate-400">
-                  Specialization: <span class="text-indigo-300 font-medium">{{ selectedDoctorProfile?.specialization || selectedDoctor.specialization || 'General Practitioner' }}</span>
+                  Specialization: <span class="text-blue-300 font-medium">{{ selectedDoctorProfile?.specialization || selectedDoctor.specialization || 'General Practitioner' }}</span>
                   | &#64;{{ selectedDoctor.username }}
                 </p>
               </div>
             </div>
             <button
+              type="button"
               (click)="closeDoctorModal()"
-              class="w-8 h-8 rounded-xl bg-slate-700/50 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition border border-slate-600"
+              class="w-8 h-8 rounded-xl bg-slate-700/50 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition border border-slate-600 shrink-0"
+              aria-label="Close"
             >
               ✕
             </button>
           </div>
 
-          <!-- Modal Body -->
-          <div class="p-6 overflow-y-auto space-y-6 custom-scrollbar text-sm text-slate-300">
-            
-            <div *ngIf="loadingDoctorDetails" class="py-12 text-center text-slate-400 flex flex-col items-center gap-3">
-              <div class="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-              <span>Fetching full doctor credentials & background data...</span>
-            </div>
-
-            <ng-container *ngIf="!loadingDoctorDetails">
-              <!-- Section 1: Personal & Contact Information -->
-              <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-3 flex items-center gap-2">
-                  📋 Personal & Account Information
-                </h4>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                  <div>
-                    <span class="text-slate-500 block">Full Name</span>
-                    <span class="font-semibold text-slate-200">Dr. {{ selectedDoctorProfile?.firstName || selectedDoctor.firstName }} {{ selectedDoctorProfile?.lastName || selectedDoctor.lastName }}</span>
-                  </div>
-                  <div>
-                    <span class="text-slate-500 block">Email Address</span>
-                    <span class="font-semibold text-slate-200">{{ selectedDoctorProfile?.email || selectedDoctor.email || 'N/A' }}</span>
-                  </div>
-                  <div>
-                    <span class="text-slate-500 block">Contact Phone</span>
-                    <span class="font-semibold text-slate-200">{{ selectedDoctorProfile?.contactInfo || selectedDoctor.contactInfo || 'N/A' }}</span>
-                  </div>
-                  <div>
-                    <span class="text-slate-500 block">Gender & DOB</span>
-                    <span class="font-semibold text-slate-200">{{ selectedDoctorProfile?.gender || selectedDoctor.gender || 'N/A' }} | {{ selectedDoctorProfile?.dateOfBirth || selectedDoctor.dateOfBirth || 'N/A' }}</span>
-                  </div>
-                  <div>
-                    <span class="text-slate-500 block">Consultation Fees</span>
-                    <span class="font-semibold text-emerald-400">₹{{ selectedDoctorProfile?.consultationFees || selectedDoctor.consultationFees || '0.00' }}</span>
-                  </div>
-                  <div>
-                    <span class="text-slate-500 block">Languages Spoken</span>
-                    <span class="font-semibold text-slate-200">{{ selectedDoctorProfile?.languages || 'English' }}</span>
-                  </div>
-                  <div class="sm:col-span-2">
-                    <span class="text-slate-500 block">Clinic Address</span>
-                    <span class="font-semibold text-slate-200">{{ selectedDoctorProfile?.address || selectedDoctor.address || 'Not Provided' }}</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Section 2: Experience Records -->
-              <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-3 flex items-center gap-2">
-                  🏥 Experience & Employment History ({{ selectedDoctorExperiences.length }})
-                </h4>
-                <div *ngIf="selectedDoctorExperiences.length === 0" class="text-xs text-slate-500 italic">
-                  No experience records added yet.
-                </div>
-                <div *ngIf="selectedDoctorExperiences.length > 0" class="space-y-3">
-                  <div *ngFor="let exp of selectedDoctorExperiences" class="p-3 bg-slate-900/60 rounded-lg border border-slate-700/40">
-                    <div class="flex justify-between items-start font-semibold text-slate-200">
-                      <span>{{ exp.position }}</span>
-                      <span class="text-xs text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md">{{ exp.yearsOfService }} Years</span>
-                    </div>
-                    <div class="text-xs text-slate-400 mt-1 font-medium">{{ exp.hospitalName }}</div>
-                    <p *ngIf="exp.details" class="text-xs text-slate-500 mt-1.5">{{ exp.details }}</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Section 3: Education & Academic Qualifications -->
-              <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-3 flex items-center gap-2">
-                  🎓 Education & Degrees ({{ selectedDoctorEducations.length }})
-                </h4>
-                <div *ngIf="selectedDoctorEducations.length === 0" class="text-xs text-slate-500 italic">
-                  No education records added yet.
-                </div>
-                <div *ngIf="selectedDoctorEducations.length > 0" class="space-y-3">
-                  <div *ngFor="let edu of selectedDoctorEducations" class="p-3 bg-slate-900/60 rounded-lg border border-slate-700/40">
-                    <div class="flex justify-between items-start font-semibold text-slate-200">
-                      <span>{{ edu.degree }}</span>
-                      <span class="text-xs text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-md">Year: {{ edu.yearOfCompletion }}</span>
-                    </div>
-                    <div class="text-xs text-slate-400 mt-1 font-medium">{{ edu.institution }}</div>
-                    <p *ngIf="edu.details" class="text-xs text-slate-500 mt-1.5">{{ edu.details }}</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Section 4: Certificates & Documents -->
-              <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-3 flex items-center gap-2">
-                  📜 Medical Licenses & Certificates ({{ selectedDoctorCertificates.length }})
-                </h4>
-                <div *ngIf="selectedDoctorCertificates.length === 0" class="text-xs text-slate-500 italic">
-                  No certificates or medical licenses uploaded.
-                </div>
-                <div *ngIf="selectedDoctorCertificates.length > 0" class="space-y-3">
-                  <div *ngFor="let cert of selectedDoctorCertificates" class="p-3 bg-slate-900/60 rounded-lg border border-slate-700/40 flex items-center justify-between gap-4">
-                    <div>
-                      <div class="font-semibold text-slate-200">{{ cert.name }}</div>
-                      <div class="text-xs text-slate-400">{{ cert.issuingOrganization || 'Medical Board' }} | {{ cert.issueDate }}</div>
-                    </div>
-                    <a
-                      *ngIf="cert.url"
-                      [href]="cert.url"
-                      target="_blank"
-                      class="px-2.5 py-1 text-xs font-semibold bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 rounded-lg transition"
-                    >
-                      View Doc 🔗
-                    </a>
-                  </div>
-                </div>
-              </div>
-
-            </ng-container>
-
+          <div *ngIf="loadingDoctorDetails" class="py-12 text-center text-slate-400 flex flex-col items-center gap-3">
+            <div class="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <span>Fetching full doctor credentials & background data...</span>
           </div>
 
-          <!-- Modal Footer / Verification Action Bar -->
-          <div class="px-6 py-4 bg-slate-800/80 border-t border-slate-700/60 flex items-center justify-between gap-4 sticky bottom-0 z-20">
+          <ng-container *ngIf="!loadingDoctorDetails">
+            <!-- Section 1: Personal & Contact Information -->
+            <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-blue-400 mb-3 flex items-center gap-2">
+                📋 Personal & Account Information
+              </h4>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <span class="text-slate-500 block">Full Name</span>
+                  <span class="font-semibold text-slate-200">Dr. {{ selectedDoctorProfile?.firstName || selectedDoctor.firstName }} {{ selectedDoctorProfile?.lastName || selectedDoctor.lastName }}</span>
+                </div>
+                <div>
+                  <span class="text-slate-500 block">Email Address</span>
+                  <span class="font-semibold text-slate-200">{{ selectedDoctorProfile?.email || selectedDoctor.email || 'N/A' }}</span>
+                </div>
+                <div>
+                  <span class="text-slate-500 block">Contact Phone</span>
+                  <span class="font-semibold text-slate-200">{{ selectedDoctorProfile?.contactInfo || selectedDoctor.contactInfo || 'N/A' }}</span>
+                </div>
+                <div>
+                  <span class="text-slate-500 block">Gender & DOB</span>
+                  <span class="font-semibold text-slate-200">{{ selectedDoctorProfile?.gender || selectedDoctor.gender || 'N/A' }} | {{ selectedDoctorProfile?.dateOfBirth || selectedDoctor.dateOfBirth || 'N/A' }}</span>
+                </div>
+                <div>
+                  <span class="text-slate-500 block">Consultation Fees</span>
+                  <span class="font-semibold text-blue-400">₹{{ selectedDoctorProfile?.consultationFees || selectedDoctor.consultationFees || '0.00' }}</span>
+                </div>
+                <div>
+                  <span class="text-slate-500 block">Languages Spoken</span>
+                  <span class="font-semibold text-slate-200">{{ selectedDoctorProfile?.languages || 'English' }}</span>
+                </div>
+                <div class="sm:col-span-2">
+                  <span class="text-slate-500 block">Clinic Address</span>
+                  <span class="font-semibold text-slate-200">{{ selectedDoctorProfile?.address || selectedDoctor.address || 'Not Provided' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 2: Experience Records -->
+            <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-blue-400 mb-3 flex items-center gap-2">
+                🏥 Experience & Employment History ({{ selectedDoctorExperiences.length }})
+              </h4>
+              <div *ngIf="selectedDoctorExperiences.length === 0" class="text-xs text-slate-500 italic">
+                No experience records added yet.
+              </div>
+              <div *ngIf="selectedDoctorExperiences.length > 0" class="space-y-3">
+                <div *ngFor="let exp of selectedDoctorExperiences" class="p-3 bg-slate-900/60 rounded-lg border border-slate-700/40">
+                  <div class="flex justify-between items-start font-semibold text-slate-200">
+                    <span>{{ exp.position }}</span>
+                    <span class="text-xs text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md">{{ exp.yearsOfService }} Years</span>
+                  </div>
+                  <div class="text-xs text-slate-400 mt-1 font-medium">{{ exp.hospitalName }}</div>
+                  <p *ngIf="exp.details" class="text-xs text-slate-500 mt-1.5">{{ exp.details }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 3: Education & Academic Qualifications -->
+            <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-blue-400 mb-3 flex items-center gap-2">
+                🎓 Education & Degrees ({{ selectedDoctorEducations.length }})
+              </h4>
+              <div *ngIf="selectedDoctorEducations.length === 0" class="text-xs text-slate-500 italic">
+                No education records added yet.
+              </div>
+              <div *ngIf="selectedDoctorEducations.length > 0" class="space-y-3">
+                <div *ngFor="let edu of selectedDoctorEducations" class="p-3 bg-slate-900/60 rounded-lg border border-slate-700/40">
+                  <div class="flex justify-between items-start font-semibold text-slate-200">
+                    <span>{{ edu.degree }}</span>
+                    <span class="text-xs text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded-md">Year: {{ edu.yearOfCompletion }}</span>
+                  </div>
+                  <div class="text-xs text-slate-400 mt-1 font-medium">{{ edu.institution }}</div>
+                  <p *ngIf="edu.details" class="text-xs text-slate-500 mt-1.5">{{ edu.details }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 4: Certificates & Documents -->
+            <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-blue-400 mb-3 flex items-center gap-2">
+                📜 Medical Licenses & Certificates ({{ selectedDoctorCertificates.length }})
+              </h4>
+              <div *ngIf="selectedDoctorCertificates.length === 0" class="text-xs text-slate-500 italic">
+                No certificates or medical licenses uploaded.
+              </div>
+              <div *ngIf="selectedDoctorCertificates.length > 0" class="space-y-3">
+                <div *ngFor="let cert of selectedDoctorCertificates" class="p-3 bg-slate-900/60 rounded-lg border border-slate-700/40 flex items-center justify-between gap-4">
+                  <div>
+                    <div class="font-semibold text-slate-200">{{ cert.name }}</div>
+                    <div class="text-xs text-slate-400">{{ cert.issuingOrganization || 'Medical Board' }} | {{ cert.issueDate }}</div>
+                  </div>
+                  <a
+                    *ngIf="cert.url"
+                    [href]="cert.url"
+                    target="_blank"
+                    class="px-2.5 py-1 text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40 rounded-lg transition"
+                  >
+                    View Doc 🔗
+                  </a>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+          <div modalFooter class="flex items-center justify-between gap-4">
             <button
+              type="button"
               (click)="closeDoctorModal()"
               class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white bg-slate-700/50 hover:bg-slate-700 rounded-xl border border-slate-600 transition"
             >
@@ -599,14 +871,16 @@ import { AuthService } from '../../core/services/auth.service';
 
             <div class="flex items-center gap-3">
               <button
+                type="button"
                 *ngIf="!selectedDoctor.isVerified"
                 (click)="toggleDoctorVerification(selectedDoctor, true); closeDoctorModal()"
                 [disabled]="verifyingDoctorId === selectedDoctor.id"
-                class="px-4 py-2 text-xs font-bold bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 rounded-xl shadow-lg shadow-cyan-500/20 transition transform active:scale-95"
+                class="px-4 py-2 text-xs font-bold bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-400 hover:to-indigo-400 text-slate-950 rounded-xl shadow-lg shadow-blue-500/20 transition transform active:scale-95"
               >
                 ✓ Verify & Approve Doctor
               </button>
               <button
+                type="button"
                 *ngIf="selectedDoctor.isVerified"
                 (click)="toggleDoctorVerification(selectedDoctor, false); closeDoctorModal()"
                 [disabled]="verifyingDoctorId === selectedDoctor.id"
@@ -616,9 +890,7 @@ import { AuthService } from '../../core/services/auth.service';
               </button>
             </div>
           </div>
-
-        </div>
-      </div>
+      </app-modal-shell>
     </div>
   `
 })
@@ -639,6 +911,8 @@ export class AdminDashboardComponent implements OnInit {
 
   doctors: Doctor[] = [];
   doctorSearch = '';
+  loadingUsers = true;
+  loadingDoctors = true;
   verifyingDoctorId: number | null = null;
 
   // Doctor Detail Modal State
@@ -668,10 +942,29 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   loadUsers() {
+    this.loadingUsers = true;
     this.adminService.getAllUsersSummary().subscribe({
-      next: (data) => (this.users = data),
-      error: (err) => this.toastService.showError('Failed to load users list')
+      next: (data) => {
+        this.users = data;
+        this.loadingUsers = false;
+      },
+      error: (err) => {
+        this.loadingUsers = false;
+        this.toastService.showError('Failed to load users list');
+      }
     });
+  }
+
+  get userFilterActiveCount(): number {
+    let count = 0;
+    if (this.userSearch) count++;
+    if (this.selectedRoleFilter !== 'ALL') count++;
+    return count;
+  }
+
+  clearUserFilters() {
+    this.userSearch = '';
+    this.selectedRoleFilter = 'ALL';
   }
 
   get filteredUsers(): UserSummary[] {
@@ -698,10 +991,25 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   loadDoctors() {
+    this.loadingDoctors = true;
     this.adminService.getAllDoctors().subscribe({
-      next: (data) => (this.doctors = data),
-      error: (err) => this.toastService.showError('Failed to load doctors')
+      next: (data) => {
+        this.doctors = data;
+        this.loadingDoctors = false;
+      },
+      error: (err) => {
+        this.loadingDoctors = false;
+        this.toastService.showError('Failed to load doctors');
+      }
     });
+  }
+
+  get doctorFilterActiveCount(): number {
+    return this.doctorSearch ? 1 : 0;
+  }
+
+  clearDoctorFilters() {
+    this.doctorSearch = '';
   }
 
   get filteredDoctors(): Doctor[] {

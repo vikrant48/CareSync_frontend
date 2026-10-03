@@ -5,17 +5,25 @@ import { AppointmentService } from '../core/services/appointment.service';
 import { Doctor } from '../core/services/doctor.service';
 import { ToastService } from '../core/services/toast.service';
 import { SelectDropdownComponent, SelectOption } from './select-dropdown.component';
+import { ModalShellComponent } from './ui/modal-shell.component';
 
 @Component({
   selector: 'app-emergency-appointment-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, SelectDropdownComponent],
+  imports: [CommonModule, FormsModule, SelectDropdownComponent, ModalShellComponent],
   template: `
-    <div *ngIf="isOpen" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-      <div class="panel p-0 w-full max-w-2xl relative max-h-[85dvh] overflow-hidden flex flex-col shadow-2xl shadow-red-900/40 border border-red-200 dark:border-red-500/30 rounded-2xl bg-white dark:bg-gray-900">
-        
-        <!-- Header -->
-        <div class="bg-gradient-to-r from-red-600 to-red-700 dark:from-red-900/80 dark:to-red-800/60 p-5 flex items-center justify-between border-b border-red-500/30">
+    <app-modal-shell
+      [open]="isOpen"
+      [showHeader]="false"
+      maxWidthClass="max-w-2xl"
+      panelClass="panel p-0 relative max-h-[85dvh] overflow-hidden flex flex-col shadow-2xl shadow-red-900/40 border border-red-200 dark:border-red-500/30 rounded-2xl bg-white dark:bg-gray-900"
+      bodyClass="p-0 overflow-hidden flex flex-col max-h-[85dvh]"
+      ariaLabel="Emergency appointment"
+      backdropClass="bg-black/70"
+      [fullScreenMobile]="true"
+      (close)="close()"
+    >
+      <div modalHeader class="bg-gradient-to-r from-red-600 to-red-700 dark:from-red-900/80 dark:to-red-800/60 p-5 flex items-center justify-between border-b border-red-500/30 shrink-0">
            <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-full bg-red-800/20 dark:bg-red-500/20 flex items-center justify-center text-white dark:text-red-200 animate-pulse">
                 <span class="text-xl">🚨</span>
@@ -25,12 +33,12 @@ import { SelectDropdownComponent, SelectOption } from './select-dropdown.compone
                  <p class="text-red-100 dark:text-red-200 text-xs">Immediate consultation scheduling</p>
               </div>
            </div>
-           <button class="text-red-200 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-lg p-2" (click)="close()">
+           <button type="button" aria-label="Close emergency booking" class="text-red-200 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-lg p-2 touch-target inline-flex items-center justify-center" (click)="close()">
               <i class="fa-solid fa-xmark"></i>
            </button>
-        </div>
+      </div>
 
-        <div class="overflow-y-auto p-6 space-y-6 custom-scrollbar">
+        <div class="overflow-y-auto p-6 space-y-6 custom-scrollbar flex-1 min-h-0">
           <!-- Warning Notice -->
           <div class="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-500/20 rounded-xl p-4 flex gap-4">
              <i class="fa-solid fa-triangle-exclamation text-red-600 dark:text-red-500 text-xl mt-0.5"></i>
@@ -64,12 +72,14 @@ import { SelectDropdownComponent, SelectOption } from './select-dropdown.compone
           <!-- Selected Doctor Details -->
           <div *ngIf="selectedDoctor" class="bg-gray-50 dark:bg-gray-800/40 rounded-xl p-4 border border-gray-200 dark:border-gray-700/50 animate-fade-in">
             <div class="flex items-start gap-4">
-                <div class="w-14 h-14 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden border-2 border-gray-600 shrink-0">
-                  <img *ngIf="selectedDoctor.profileImageUrl" [src]="selectedDoctor.profileImageUrl" class="w-full h-full object-cover" />
-                  <span *ngIf="!selectedDoctor.profileImageUrl" class="text-xl font-bold text-gray-400">{{ selectedDoctor.firstName?.charAt(0) }}</span>
-                </div>
-                <div *ngIf="selectedDoctor.isVerified" class="absolute -bottom-1 -right-1 bg-blue-500 text-white text-[8px] w-4 h-4 flex items-center justify-center rounded-full border border-gray-900" title="Verified">
-                    <i class="fa-solid fa-check"></i>
+                <div class="relative w-14 h-14 shrink-0">
+                  <div class="w-14 h-14 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden border-2 border-gray-600">
+                    <img *ngIf="selectedDoctor.profileImageUrl" [src]="selectedDoctor.profileImageUrl" [alt]="'Dr. ' + (selectedDoctor.firstName || '') + ' photo'" class="w-full h-full object-cover" />
+                    <span *ngIf="!selectedDoctor.profileImageUrl" class="text-xl font-bold text-gray-400">{{ selectedDoctor.firstName?.charAt(0) }}</span>
+                  </div>
+                  <div *ngIf="selectedDoctor.isVerified" class="absolute -bottom-1 -right-1 bg-blue-500 text-white text-[8px] w-4 h-4 flex items-center justify-center rounded-full border border-gray-900" title="Verified" aria-label="Verified doctor">
+                      <i class="fa-solid fa-check"></i>
+                  </div>
                 </div>
                <div class="flex-1 min-w-0">
                   <h4 class="font-bold text-gray-800 dark:text-gray-100">Dr. {{ selectedDoctor.firstName }} {{ selectedDoctor.lastName }}</h4>
@@ -139,8 +149,7 @@ import { SelectDropdownComponent, SelectOption } from './select-dropdown.compone
                 {{ error }}
              </div>
         </div>
-      </div>
-    </div>
+    </app-modal-shell>
   `
 })
 export class EmergencyAppointmentModalComponent {

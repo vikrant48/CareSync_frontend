@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PatientDto, MedicalHistoryItem } from '../core/services/patient-profile.service';
 import { RouterModule } from '@angular/router';
+import { EmptyStateComponent } from './ui/empty-state.component';
 
 export interface AppointmentCounts {
   total: number;
@@ -13,7 +14,7 @@ export interface AppointmentCounts {
 @Component({
   selector: 'app-patient-profile-page',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, EmptyStateComponent],
   template: `
     <div class="max-w-7xl mx-auto space-y-6 p-4 sm:p-6" *ngIf="patient; else loading">
       <!-- Top Header -->
@@ -52,8 +53,8 @@ export interface AppointmentCounts {
 
           <!-- Right: Action & Stats -->
           <div class="w-full md:w-auto flex flex-col items-start md:items-end gap-2.5 sm:gap-4">
-             <div class="grid grid-cols-4 gap-1.5 sm:gap-3 w-full md:w-auto">
-               <div class="bg-gray-500/10 dark:bg-gray-850 rounded-lg p-1.5 sm:p-3 text-center border border-gray-200 dark:border-gray-800 shadow-sm animate-fade-in">
+             <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-3 w-full md:w-auto">
+               <div class="bg-gray-500/10 dark:bg-gray-800/80 rounded-lg p-1.5 sm:p-3 text-center border border-gray-200 dark:border-gray-800 shadow-sm animate-fade-in">
                  <div class="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium">Total</div>
                  <div class="text-sm sm:text-lg font-bold text-gray-800 dark:text-white">{{ appointmentCounts?.total ?? 0 }}</div>
                </div>
@@ -156,7 +157,7 @@ export interface AppointmentCounts {
                          <i class="fa-solid fa-file-medical text-red-500"></i> Critical Info
                     </h3>
                     <div class="bg-red-50 dark:bg-red-500/5 border border-red-200 dark:border-red-500/10 rounded-lg p-4">
-                        <div class="text-xs text-red-650 dark:text-red-300 font-bold uppercase tracking-wider mb-1">Illness Details</div>
+                        <div class="text-xs text-red-600 dark:text-red-300 font-bold uppercase tracking-wider mb-1">Illness Details</div>
                         <p class="text-gray-800 dark:text-gray-300 leading-relaxed">{{ patient.illnessDetails || 'No critical illness details recorded.' }}</p>
                     </div>
                 </div>
@@ -191,13 +192,14 @@ export interface AppointmentCounts {
 
           <!-- Medical History Tab -->
           <div *ngIf="activeTab==='history'" class="animate-fade-in space-y-4">
-            <div *ngIf="(medicalHistory || []).length===0" class="flex flex-col items-center justify-center py-12 text-gray-500">
-                <i class="fa-solid fa-folder-open text-4xl mb-3 opacity-50"></i>
-                <p>No medical history records found.</p>
-            </div>
+            <app-empty-state
+              *ngIf="(medicalHistory || []).length===0"
+              icon="fa-solid fa-folder-open"
+              message="No medical history records found."
+            ></app-empty-state>
             
             <div class="grid gap-4" *ngIf="(medicalHistory || []).length > 0">
-              <div *ngFor="let m of sortedHistory()" class="bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-gray-750 rounded-xl p-5 hover:border-blue-400/30 dark:hover:border-gray-600 transition-colors shadow-sm">
+              <div *ngFor="let m of sortedHistory()" class="bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-blue-400/30 dark:hover:border-gray-600 transition-colors shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
                    <div class="flex items-center gap-3">
                        <div class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center text-blue-500 dark:text-blue-400">
@@ -240,19 +242,19 @@ export interface AppointmentCounts {
         <!-- Header Skeleton -->
         <div class="bg-white dark:bg-gray-900 rounded-xl p-6 sm:p-8 border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row gap-6 items-start justify-between">
           <div class="flex items-start gap-5 w-full md:w-auto">
-            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gray-205 dark:bg-gray-800"></div>
+            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gray-200 dark:bg-gray-800"></div>
             <div class="space-y-3 flex-1 min-w-[200px] mt-2">
-              <div class="h-8 w-44 bg-gray-205 dark:bg-gray-800 rounded"></div>
+              <div class="h-8 w-44 bg-gray-200 dark:bg-gray-800 rounded"></div>
               <div class="flex flex-wrap gap-4 mt-2">
-                <div class="h-4 w-24 bg-gray-205 dark:bg-gray-800 rounded"></div>
-                <div class="h-4 w-36 bg-gray-205 dark:bg-gray-800 rounded"></div>
-                <div class="h-4 w-32 bg-gray-205 dark:bg-gray-800 rounded"></div>
+                <div class="h-4 w-24 bg-gray-200 dark:bg-gray-800 rounded"></div>
+                <div class="h-4 w-36 bg-gray-200 dark:bg-gray-800 rounded"></div>
+                <div class="h-4 w-32 bg-gray-200 dark:bg-gray-800 rounded"></div>
               </div>
             </div>
           </div>
           <div class="w-full md:w-auto flex flex-col items-start md:items-end gap-3">
-             <div class="h-10 w-48 bg-gray-205 dark:bg-gray-800 rounded"></div>
-             <div class="h-10 w-28 bg-gray-205 dark:bg-gray-800 rounded"></div>
+             <div class="h-10 w-48 bg-gray-200 dark:bg-gray-800 rounded"></div>
+             <div class="h-10 w-28 bg-gray-200 dark:bg-gray-800 rounded"></div>
           </div>
         </div>
 
@@ -266,14 +268,14 @@ export interface AppointmentCounts {
             <div class="space-y-4">
               <div class="h-6 w-36 bg-gray-200 dark:bg-gray-800 rounded mb-2"></div>
               <div class="space-y-3">
-                 <div class="h-10 w-full bg-gray-150 dark:bg-gray-800/40 rounded"></div>
-                 <div class="h-10 w-full bg-gray-150 dark:bg-gray-800/40 rounded"></div>
-                 <div class="h-10 w-full bg-gray-150 dark:bg-gray-800/40 rounded"></div>
+                 <div class="h-10 w-full bg-gray-100 dark:bg-gray-800/40 rounded"></div>
+                 <div class="h-10 w-full bg-gray-100 dark:bg-gray-800/40 rounded"></div>
+                 <div class="h-10 w-full bg-gray-100 dark:bg-gray-800/40 rounded"></div>
               </div>
             </div>
             <div class="space-y-4">
               <div class="h-6 w-36 bg-gray-200 dark:bg-gray-800 rounded mb-2"></div>
-              <div class="h-40 w-full bg-gray-150 dark:bg-gray-800/40 rounded"></div>
+              <div class="h-40 w-full bg-gray-100 dark:bg-gray-800/40 rounded"></div>
             </div>
           </div>
         </div>

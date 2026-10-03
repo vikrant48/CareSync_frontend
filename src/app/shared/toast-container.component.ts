@@ -31,10 +31,12 @@ import { ToastService, Toast } from '../core/services/toast.service';
           <div class="absolute bottom-0 left-0 h-0.5 w-full bg-current opacity-20"></div>
 
           <!-- Dismiss Button -->
-          <button 
-            (click)="dismiss(t.id)" 
-            class="absolute top-2 right-2 p-1.5 rounded-lg opacity-60 hover:opacity-100 hover:bg-black/5 transition-all focus:outline-none"
-            title="Dismiss">
+          <button
+            type="button"
+            (click)="dismiss(t.id)"
+            class="absolute top-2 right-2 p-2 min-w-touch min-h-touch rounded-lg opacity-60 hover:opacity-100 hover:bg-black/5 transition-all focus:outline-none inline-flex items-center justify-center"
+            title="Dismiss"
+            aria-label="Dismiss notification">
             <i class="fa-solid fa-xmark text-sm"></i>
           </button>
         </div>

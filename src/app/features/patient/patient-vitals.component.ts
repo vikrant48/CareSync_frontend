@@ -95,34 +95,72 @@ Chart.register(...registerables);
           </div>
         </div>
 
-        <!-- History Table -->
+        <!-- History Table / Cards -->
         <section class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
           <div class="p-3.5 sm:p-6 border-b border-gray-100 dark:border-gray-700">
             <h3 class="text-base sm:text-lg font-semibold dark:text-gray-100">Log History</h3>
           </div>
-          <div class="overflow-x-auto">
+
+          <!-- Empty -->
+          <div *ngIf="vitalsHistory.length === 0" class="px-4 py-10 text-center text-sm text-gray-400 italic">
+            No logs found. Start by tracking your metrics today!
+          </div>
+
+          <!-- Mobile cards -->
+          <div *ngIf="vitalsHistory.length > 0" class="md:hidden p-3 space-y-3">
+            <article
+              *ngFor="let vital of vitalsHistory"
+              class="rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4 space-y-3"
+            >
+              <div class="text-xs font-medium text-gray-500 dark:text-gray-400">
+                {{ vital.recordedAt | date:'medium' }}
+              </div>
+              <div class="grid grid-cols-2 gap-2.5">
+                <div class="rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-2.5">
+                  <div class="text-[10px] uppercase tracking-wider text-gray-400 mb-0.5">BP (S/D)</div>
+                  <div class="text-sm font-semibold dark:text-gray-100">{{ vital.systolicBP || '--' }}/{{ vital.diastolicBP || '--' }} <span class="text-[10px] font-normal text-gray-400">mmHg</span></div>
+                </div>
+                <div class="rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-2.5">
+                  <div class="text-[10px] uppercase tracking-wider text-gray-400 mb-0.5">Sugar</div>
+                  <div class="text-sm font-semibold text-orange-600 dark:text-orange-400">{{ vital.sugarLevel || '--' }} <span class="text-[10px] font-normal text-gray-400">mg/dL</span></div>
+                </div>
+                <div class="rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-2.5">
+                  <div class="text-[10px] uppercase tracking-wider text-gray-400 mb-0.5">Weight</div>
+                  <div class="text-sm font-semibold text-blue-600 dark:text-blue-400">{{ vital.weight || '--' }} <span class="text-[10px] font-normal text-gray-400">kg</span></div>
+                </div>
+                <div class="rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-2.5">
+                  <div class="text-[10px] uppercase tracking-wider text-gray-400 mb-0.5">Temp</div>
+                  <div class="text-sm font-semibold text-yellow-600 dark:text-yellow-400">{{ vital.temperature || '--' }} <span class="text-[10px] font-normal text-gray-400">°F</span></div>
+                </div>
+                <div class="rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-2.5 col-span-2">
+                  <div class="text-[10px] uppercase tracking-wider text-gray-400 mb-0.5">Heart Rate</div>
+                  <div class="text-sm font-semibold text-red-600 dark:text-red-400">{{ vital.heartRate || '--' }} <span class="text-[10px] font-normal text-gray-400">bpm</span></div>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <!-- Desktop table -->
+          <div *ngIf="vitalsHistory.length > 0" class="hidden md:block overflow-x-auto">
             <table class="w-full text-left">
-              <thead class="bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-xs sm:text-sm uppercase font-medium">
+              <thead class="bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-sm uppercase font-medium">
                 <tr>
-                  <th class="px-3 sm:px-6 py-2.5 sm:py-4">Date</th>
-                  <th class="px-3 sm:px-6 py-2.5 sm:py-4">BP (S/D)</th>
-                  <th class="px-3 sm:px-6 py-2.5 sm:py-4">Sugar</th>
-                  <th class="px-3 sm:px-6 py-2.5 sm:py-4">Weight</th>
-                  <th class="px-3 sm:px-6 py-2.5 sm:py-4">Temp</th>
-                  <th class="px-3 sm:px-6 py-2.5 sm:py-4">Heart Rate</th>
+                  <th class="px-6 py-4">Date</th>
+                  <th class="px-6 py-4">BP (S/D)</th>
+                  <th class="px-6 py-4">Sugar</th>
+                  <th class="px-6 py-4">Weight</th>
+                  <th class="px-6 py-4">Temp</th>
+                  <th class="px-6 py-4">Heart Rate</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                 <tr *ngFor="let vital of vitalsHistory" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                  <td class="px-3 sm:px-6 py-2.5 sm:py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-300">{{ vital.recordedAt | date:'medium' }}</td>
-                  <td class="px-3 sm:px-6 py-2.5 sm:py-4 text-xs sm:text-sm font-medium dark:text-gray-200">{{ vital.systolicBP || '--' }}/{{ vital.diastolicBP || '--' }} <span class="text-xs text-gray-400">mmHg</span></td>
-                  <td class="px-3 sm:px-6 py-2.5 sm:py-4 text-xs sm:text-sm font-medium text-orange-600 dark:text-orange-400">{{ vital.sugarLevel || '--' }} <span class="text-xs text-gray-400">mg/dL</span></td>
-                  <td class="px-3 sm:px-6 py-2.5 sm:py-4 text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400">{{ vital.weight || '--' }} <span class="text-xs text-gray-400">kg</span></td>
-                  <td class="px-3 sm:px-6 py-2.5 sm:py-4 text-xs sm:text-sm font-medium text-yellow-600 dark:text-yellow-400">{{ vital.temperature || '--' }} <span class="text-xs text-gray-400">°F</span></td>
-                  <td class="px-3 sm:px-6 py-2.5 sm:py-4 text-xs sm:text-sm font-medium text-red-600 dark:text-red-400">{{ vital.heartRate || '--' }} <span class="text-xs text-gray-400">bpm</span></td>
-                </tr>
-                 <tr *ngIf="vitalsHistory.length === 0">
-                  <td colspan="6" class="px-3 sm:px-6 py-6 sm:py-10 text-center text-xs sm:text-sm text-gray-400 italic">No logs found. Start by tracking your metrics today!</td>
+                  <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{{ vital.recordedAt | date:'medium' }}</td>
+                  <td class="px-6 py-4 text-sm font-medium dark:text-gray-200">{{ vital.systolicBP || '--' }}/{{ vital.diastolicBP || '--' }} <span class="text-xs text-gray-400">mmHg</span></td>
+                  <td class="px-6 py-4 text-sm font-medium text-orange-600 dark:text-orange-400">{{ vital.sugarLevel || '--' }} <span class="text-xs text-gray-400">mg/dL</span></td>
+                  <td class="px-6 py-4 text-sm font-medium text-blue-600 dark:text-blue-400">{{ vital.weight || '--' }} <span class="text-xs text-gray-400">kg</span></td>
+                  <td class="px-6 py-4 text-sm font-medium text-yellow-600 dark:text-yellow-400">{{ vital.temperature || '--' }} <span class="text-xs text-gray-400">°F</span></td>
+                  <td class="px-6 py-4 text-sm font-medium text-red-600 dark:text-red-400">{{ vital.heartRate || '--' }} <span class="text-xs text-gray-400">bpm</span></td>
                 </tr>
               </tbody>
             </table>

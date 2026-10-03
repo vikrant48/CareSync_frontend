@@ -1,0 +1,53 @@
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ConfirmService } from '../../core/services/confirm.service';
+import { ModalShellComponent } from './modal-shell.component';
+
+/**
+ * Global confirm dialog host. Mount once in app shell.
+ * UI only — callers keep the same yes/no decision via ConfirmService.ask().
+ */
+@Component({
+  selector: 'app-confirm-dialog',
+  standalone: true,
+  imports: [CommonModule, ModalShellComponent],
+  template: `
+    <app-modal-shell
+      [open]="confirm.state().open"
+      [title]="confirm.state().title || 'Please confirm'"
+      titleId="confirm-dialog-title"
+      [icon]="confirm.state().icon || 'fa-solid fa-circle-question'"
+      [iconWrapClass]="confirm.state().danger ? 'bg-red-500/10 text-red-500' : 'bg-brand-soft text-brand'"
+      maxWidthClass="max-w-sm"
+      panelClass="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl"
+      bodyClass="px-5 pb-5 pt-1"
+      [closeOnBackdrop]="true"
+      [closeOnEscape]="true"
+      [fullScreenMobile]="true"
+      zIndexClass="z-[300]"
+      (close)="confirm.respond(false)"
+    >
+      <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-5">
+        {{ confirm.state().message }}
+      </p>
+
+      <div class="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3">
+        <button type="button" class="btn-secondary flex-1" (click)="confirm.respond(false)">
+          {{ confirm.state().cancelLabel || 'Cancel' }}
+        </button>
+        <button
+          type="button"
+          class="flex-1"
+          [class.btn-primary]="!confirm.state().danger"
+          [class.btn-danger]="confirm.state().danger"
+          (click)="confirm.respond(true)"
+        >
+          {{ confirm.state().confirmLabel || 'Confirm' }}
+        </button>
+      </div>
+    </app-modal-shell>
+  `,
+})
+export class ConfirmDialogComponent {
+  confirm = inject(ConfirmService);
+}

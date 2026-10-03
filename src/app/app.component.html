@@ -1,4 +1,5 @@
 <app-offline-banner></app-offline-banner>
+<app-confirm-dialog></app-confirm-dialog>
 <div class="min-h-screen w-full bg-[var(--bg)] text-[var(--text)]">
   <header
     class="fixed top-0 left-0 right-0 z-50 h-14 backdrop-blur border-b bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
@@ -10,17 +11,17 @@
           <img src="/logo-cross1.png" alt="Logo" class="w-full h-full object-cover scale-150" />
         </div>
         <span
-          class="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent text-sm sm:text-base font-bold">CareSync</span>
+          class="font-display bg-gradient-to-r from-emerald-500 via-teal-500 to-blue-600 bg-clip-text text-transparent text-base sm:text-lg font-bold tracking-tight">CareSync</span>
       </a>
       <nav class="flex items-center gap-1.5 sm:gap-2 flex-nowrap shrink-0">
         <!-- Git Repos Dropdown Button -->
         <div class="relative git-repo-dropdown-container">
           <button type="button" (click)="toggleGitDropdown($event)"
-            class="relative inline-flex items-center justify-center h-8 gap-1.5 sm:gap-2 px-2.5 sm:px-3 rounded-lg text-xs font-bold text-white bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 shadow-md shadow-emerald-500/25 border border-emerald-400/50 transition-all duration-300 hover:scale-105 active:scale-95 group"
+            class="relative inline-flex items-center justify-center h-8 gap-1.5 sm:gap-2 px-2.5 sm:px-3 rounded-lg text-xs font-bold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-500 hover:to-indigo-500 shadow-md shadow-blue-500/25 border border-blue-400/50 transition-all duration-300 hover:scale-105 active:scale-95 group"
             title="CareSync GitHub Repositories" aria-label="GitHub Repositories">
             <i class="fa-brands fa-github text-sm text-white transition-transform group-hover:scale-110"></i>
             <span class="hidden sm:inline tracking-wide font-semibold">Git Repos</span>
-            <i class="fa-solid fa-chevron-down text-[10px] text-emerald-100 transition-transform duration-200"
+            <i class="fa-solid fa-chevron-down text-[10px] text-blue-100 transition-transform duration-200"
               [class.rotate-180]="isGitDropdownOpen"></i>
           </button>
 

@@ -7,8 +7,11 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
     imports: [CommonModule],
     template: `
     <div *ngIf="isOffline" 
-         class="fixed top-0 left-0 right-0 z-[100] bg-gradient-to-r from-amber-600 via-orange-600 to-amber-600 text-white text-xs font-bold px-4 py-2 text-center flex items-center justify-center gap-2 shadow-xl animate-in slide-in-from-top duration-300">
-      <i class="fa-solid fa-wifi-slash text-sm animate-pulse"></i>
+         role="status"
+         aria-live="polite"
+         class="fixed top-0 left-0 right-0 z-[100] bg-gradient-to-r from-amber-600 via-orange-600 to-amber-600 text-white text-xs font-bold px-4 py-2 text-center flex items-center justify-center gap-2 shadow-xl animate-in slide-in-from-top duration-300"
+         style="padding-top: calc(0.5rem + env(safe-area-inset-top, 0px));">
+      <i class="fa-solid fa-wifi-slash text-sm animate-pulse" aria-hidden="true"></i>
       <span>You are currently offline. Live video & chat features require internet connection.</span>
     </div>
   `

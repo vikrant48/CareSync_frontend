@@ -43,8 +43,8 @@ import { environment } from '../../../../environments/environment';
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <i class="fa-solid fa-user text-gray-400 text-xs"></i>
                     </div>
-                    <input type="text" name="username" [(ngModel)]="model.username" required
-                          class="block w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl leading-5 bg-white dark:bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-xs sm:text-sm dark:text-white" 
+                    <input id="username" type="text" name="username" [(ngModel)]="model.username" required
+                          class="block w-full pl-9 pr-3 py-2.5 min-h-touch border border-gray-300 dark:border-gray-600 rounded-xl leading-5 bg-white dark:bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-xs sm:text-sm dark:text-white" 
                           placeholder="Enter your username">
                   </div>
                 </div>
@@ -56,11 +56,11 @@ import { environment } from '../../../../environments/environment';
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <i class="fa-solid fa-lock text-gray-400 text-xs"></i>
                     </div>
-                    <input [type]="showPassword ? 'text' : 'password'" name="password" [(ngModel)]="model.password" required
-                          class="block w-full pl-9 pr-9 py-2 border border-gray-300 dark:border-gray-600 rounded-xl leading-5 bg-white dark:bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-xs sm:text-sm dark:text-white" 
+                    <input id="password" [type]="showPassword ? 'text' : 'password'" name="password" [(ngModel)]="model.password" required
+                          class="block w-full pl-9 pr-9 py-2.5 min-h-touch border border-gray-300 dark:border-gray-600 rounded-xl leading-5 bg-white dark:bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-xs sm:text-sm dark:text-white" 
                           placeholder="••••••••">
-                    <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer transition-colors"
-                            (click)="togglePassword()">
+                    <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer transition-colors min-w-touch justify-center"
+                            (click)="togglePassword()" [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'" [attr.aria-pressed]="showPassword">
                       <i [class]="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye' + ' text-xs'"></i>
                     </button>
                   </div>

@@ -111,7 +111,8 @@ export class DoctorPublicProfileComponent {
     private toast: ToastService
   ) {
     this.username = this.route.snapshot.paramMap.get('username');
-    this.autoBookOnLoad = this.route.snapshot.queryParamMap.get('book') === '1';
+    const bookParam = this.route.snapshot.queryParamMap.get('book');
+    this.autoBookOnLoad = bookParam === '1' || bookParam === 'true';
     if (this.username) {
       this.loadDoctor(this.username);
     }

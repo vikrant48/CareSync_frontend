@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
 import { NotificationService, NotificationItem } from '../core/services/notification.service';
+import { EmptyStateComponent } from './ui/empty-state.component';
 
 @Component({
   selector: 'app-notification-dropdown',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, EmptyStateComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="relative group">
@@ -15,14 +16,14 @@ import { NotificationService, NotificationItem } from '../core/services/notifica
       <button 
         class="relative flex items-center justify-center sm:gap-2 px-3 py-2 rounded-xl transition-all duration-300
                text-gray-400 hover:text-blue-400 hover:bg-gray-800/50 active:scale-95 border border-transparent hover:border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-        [class.bg-blue-500_10]="notifOpen"
-        [class.text-blue-400]="notifOpen"
+        [ngClass]="notifOpen ? 'bg-blue-500/10 text-blue-400' : ''"
         (click)="toggleNotif()" 
         title="Notifications" 
         aria-label="Notifications"
-      >
+        [attr.aria-expanded]="notifOpen"
+        aria-haspopup="true">
         <div class="relative">
-          <i class="fa-regular fa-bell text-xl sm:text-lg"></i>
+          <i class="fa-solid fa-bell text-xl sm:text-lg"></i>
           <span *ngIf="unreadCount > 0" class="absolute -top-1.5 -right-1.5 flex h-4 w-4">
              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
              <span class="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-[10px] font-bold text-white items-center justify-center">
@@ -64,13 +65,15 @@ import { NotificationService, NotificationItem } from '../core/services/notifica
           </div>
 
           <!-- Empty State -->
-          <div *ngIf="feed.length === 0 && groupedFeedData.length === 0" class="flex flex-col items-center justify-center py-12 px-4 text-center">
-            <div class="w-16 h-16 rounded-full bg-gray-800/50 flex items-center justify-center mb-3 text-gray-600">
-               <i class="fa-regular fa-bell-slash text-2xl"></i>
-            </div>
-            <p class="text-gray-400 text-sm font-medium">No notifications yet</p>
-            <p class="text-gray-500 text-xs mt-1">We'll let you know when something important arrives.</p>
-          </div>
+          <app-empty-state
+            *ngIf="feed.length === 0 && groupedFeedData.length === 0"
+            icon="fa-solid fa-bell-slash"
+            title="No notifications yet"
+            message="We'll let you know when something important arrives."
+            [compact]="true"
+            iconWrapClass="bg-gray-800/50 text-gray-600"
+            containerClass="px-4"
+          ></app-empty-state>
 
           <!-- Grouped List -->
           <ng-container *ngIf="grouped; else flatList">
@@ -79,7 +82,7 @@ import { NotificationService, NotificationItem } from '../core/services/notifica
               <button 
                 *ngFor="let n of g.items; trackBy: trackNotif" 
                 class="w-full text-left px-4 py-3 border-b border-gray-700/30 hover:bg-gray-700/20 transition-all duration-200 group relative overflow-hidden"
-                [class.bg-blue-500_05]="!n.read"
+                [ngClass]="!n.read ? 'bg-blue-500/5' : ''"
                 (click)="onNotificationClick(n)"
               >
                 <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 transition-transform duration-300" [class.-translate-x-full]="n.read"></div>
@@ -111,7 +114,7 @@ import { NotificationService, NotificationItem } from '../core/services/notifica
             <button 
               *ngFor="let n of feed; trackBy: trackNotif" 
               class="w-full text-left px-4 py-3 border-b border-gray-700/30 hover:bg-gray-700/20 transition-all duration-200 group relative overflow-hidden"
-              [class.bg-blue-500_05]="!n.read"
+              [ngClass]="!n.read ? 'bg-blue-500/5' : ''"
               (click)="onNotificationClick(n)"
             >
               <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 transition-transform duration-300" [class.-translate-x-full]="n.read"></div>

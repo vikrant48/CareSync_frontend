@@ -5,6 +5,7 @@ import { AiAssistantService } from '../core/services/ai-assistant.service';
 import { ClinicalMatch, DiagnosisSuggestionDto, ClinicalDictationResponse } from '../core/models/ai.models';
 import { DatePickerComponent } from './date-picker.component';
 import { ClinicalDictationComponent } from './clinical-dictation.component';
+import { ModalShellComponent } from './ui/modal-shell.component';
 
 export interface MedicationItem {
    medicine: string;
@@ -14,199 +15,193 @@ export interface MedicationItem {
 @Component({
    selector: 'app-medical-history-form-modal',
    standalone: true,
-   imports: [CommonModule, FormsModule, DatePickerComponent, ClinicalDictationComponent],
+   imports: [CommonModule, FormsModule, DatePickerComponent, ClinicalDictationComponent, ModalShellComponent],
    template: `
-    <div *ngIf="open" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-      
-      <!-- Backdrop -->
-      <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" (click)="close.emit()"></div>
+    <app-modal-shell
+      [open]="open"
+      [showHeader]="false"
+      maxWidthClass="max-w-2xl"
+      panelClass="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700"
+      bodyClass="px-6 py-6"
+      ariaLabel="Medical record"
+      backdropClass="bg-gray-900/60"
+      (close)="close.emit()"
+    >
+      <div modalHeader class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between shrink-0">
+         <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+               <i class="fa-solid fa-file-medical-alt text-lg"></i>
+            </div>
+            <div>
+               <h3 class="text-xl font-bold text-gray-900 dark:text-white leading-tight" id="modal-title">Medical Record</h3>
+               <p class="text-xs text-gray-500 dark:text-gray-400">Patient consultation & prescription entry</p>
+            </div>
+         </div>
+         
+         <div class="flex items-center gap-2">
+            <button type="button" 
+                    (click)="isDictationOpen = true"
+                    [disabled]="disabled"
+                    class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-blue-600/20 transition-all transform active:scale-95 disabled:opacity-50">
+               <i class="fa-solid fa-microphone-lines text-sm"></i>
+               <span class="hidden sm:inline">🎙️ AI Voice Dictation</span>
+            </button>
 
-      <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
-        
-        <!-- Modal Panel -->
-        <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-gray-100 dark:border-gray-700 animate-in fade-in zoom-in duration-300">
-          
-          <!-- Header -->
-          <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                   <i class="fa-solid fa-file-medical-alt text-lg"></i>
-                </div>
-                <div>
-                   <h3 class="text-xl font-bold text-gray-900 dark:text-white leading-tight" id="modal-title">Medical Record</h3>
-                   <p class="text-xs text-gray-500 dark:text-gray-400">Patient consultation & prescription entry</p>
-                </div>
-             </div>
-             
-             <div class="flex items-center gap-2">
-                <button type="button" 
-                        (click)="isDictationOpen = true"
-                        [disabled]="disabled"
-                        class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-emerald-600/20 transition-all transform active:scale-95 disabled:opacity-50">
-                   <i class="fa-solid fa-microphone-lines text-sm"></i>
-                   <span class="hidden sm:inline">🎙️ AI Voice Dictation</span>
-                </button>
-
-                <button (click)="close.emit()" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                  <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-             </div>
-          </div>
-
-          <!-- Body -->
-          <div class="px-6 py-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
-             <form (ngSubmit)="onSubmit($event)" class="space-y-5">
-                
-                <!-- 1. Visit Date -->
-                <div class="form-group min-h-[70px]">
-                   <app-date-picker
-                     [(ngModel)]="form.visitDate"
-                     name="visitDate"
-                     label="Visit Date"
-                     placeholder="Select Date"
-                     [disabled]="disabled">
-                   </app-date-picker>
-                </div>
-
-                <!-- 2. Symptoms & AI Suggest / Dictation -->
-                <div class="form-group">
-                   <div class="flex items-center justify-between mb-1">
-                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Symptoms / Patient Issues</label>
-                      <div class="flex items-center gap-3">
-                        <button type="button" 
-                                (click)="isDictationOpen = true"
-                                [disabled]="disabled"
-                                class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 flex items-center gap-1 transition-all active:scale-95 disabled:opacity-50"
-                                title="Dictate Consultation Notes">
-                           <i class="fa-solid fa-microphone"></i>
-                           Voice Dictation
-                        </button>
-                        <button type="button" 
-                                (click)="onSuggest()" 
-                                [disabled]="disabled || loadingSuggestions || !form.symptoms"
-                                class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-50"
-                                title="Get AI Suggestions">
-                           <i class="fa-solid fa-wand-magic-sparkles" [class.animate-pulse]="loadingSuggestions"></i>
-                           AI Suggest
-                        </button>
-                      </div>
-                   </div>
-                   <input type="text" class="input-modern" placeholder="e.g. Cough, fever, difficulty breathing..." [(ngModel)]="form.symptoms" name="symptoms" [disabled]="disabled" />
-                </div>
-
-                <!-- 3. AI Suggestions Area -->
-                <div *ngIf="clinicalSuggestions.length > 0" class="bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30 rounded-xl p-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                   <div class="flex items-center justify-between mb-3">
-                      <h4 class="text-xs font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
-                         <i class="fa-solid fa-robot"></i> AI Clinical Suggestions
-                      </h4>
-                      <button (click)="clinicalSuggestions = []" class="text-gray-400 hover:text-gray-600 text-xs">Clear</button>
-                   </div>
-                   <div class="space-y-3">
-                      <div *ngFor="let s of clinicalSuggestions" 
-                           (click)="applySuggestion(s)"
-                           class="group bg-white dark:bg-gray-800 p-3 rounded-lg border border-indigo-100 dark:border-indigo-700/50 hover:border-indigo-400 dark:hover:border-indigo-500 cursor-pointer transition-all shadow-sm hover:shadow-md">
-                         <div class="flex justify-between items-start mb-1">
-                            <div class="font-bold text-gray-900 dark:text-white text-sm group-hover:text-indigo-600 transition-colors">{{ s.diagnosis }}</div>
-                            <i class="fa-solid fa-plus-circle text-indigo-300 group-hover:text-indigo-600"></i>
-                         </div>
-                         <div class="text-[10px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
-                            <strong>Treatment:</strong> {{ s.treatment }} 
-                            <span *ngIf="s.medicine">| <strong>Rx:</strong> {{ s.medicine }} ({{ s.dosage }})</span>
-                         </div>
-                         <div class="mt-2 text-[9px] italic text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity">Click to auto-fill record</div>
-                      </div>
-                   </div>
-                </div>
-
-                <!-- 4. Diagnosis -->
-                <div class="form-group">
-                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Diagnosis</label>
-                   <input type="text" class="input-modern" placeholder="e.g. Acute Bronchitis" [(ngModel)]="form.diagnosis" name="diagnosis" [disabled]="disabled" />
-                </div>
-
-                <!-- 5. Treatment Plan -->
-                <div class="form-group">
-                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Treatment Plan</label>
-                   <input type="text" class="input-modern" placeholder="e.g. Rest, hydration, antibiotics" [(ngModel)]="form.treatment" name="treatment" [disabled]="disabled" />
-                </div>
-
-                <!-- 6. Dynamic Medications List -->
-                <div class="space-y-3">
-                   <div class="flex items-center justify-between">
-                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Medications & Dosages</label>
-                      <button type="button" 
-                              (click)="addMedication()" 
-                              [disabled]="disabled"
-                              class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1 transition-all active:scale-95 disabled:opacity-50">
-                         <i class="fa-solid fa-plus text-xs"></i> Add Medication
-                      </button>
-                   </div>
-
-                   <div *ngFor="let med of medicationList; let i = index" class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center bg-gray-50/50 dark:bg-gray-700/30 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
-                      <div class="md:col-span-6">
-                         <label class="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1 md:hidden">Medication Name</label>
-                         <input type="text" class="input-modern" placeholder="e.g. Amoxicillin" [(ngModel)]="med.medicine" [name]="'medicine_' + i" [disabled]="disabled" />
-                      </div>
-                      <div class="md:col-span-5">
-                         <label class="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1 md:hidden">Dosage</label>
-                         <input type="text" class="input-modern" placeholder="e.g. 500mg, 3 times daily" [(ngModel)]="med.doses" [name]="'doses_' + i" [disabled]="disabled" />
-                      </div>
-                      <div class="md:col-span-1 flex items-center justify-center">
-                         <button type="button" 
-                                 (click)="removeMedication(i)" 
-                                 *ngIf="medicationList.length > 1"
-                                 [disabled]="disabled"
-                                 class="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"
-                                 title="Remove medication">
-                            <i class="fa-solid fa-trash-can text-sm"></i>
-                         </button>
-                      </div>
-                   </div>
-                </div>
-
-                <!-- 7. Clinical Notes -->
-                <div class="form-group">
-                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Clinical Notes</label>
-                   <textarea class="input-modern min-h-[100px]" rows="3" placeholder="Additional observations or patient instructions..." [(ngModel)]="form.notes" name="notes" [disabled]="disabled"></textarea>
-                </div>
-
-                <div class="text-sm bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 p-3 rounded-lg flex gap-2 items-start" *ngIf="infoText">
-                   <i class="fa-solid fa-circle-info mt-0.5"></i>
-                   <span>{{ infoText }}</span>
-                </div>
-
-                <!-- Messages -->
-                <div class="text-green-600 bg-green-50 dark:bg-green-900/20 dark:text-green-400 p-3 rounded-lg text-sm flex items-center gap-2" *ngIf="saved">
-                   <i class="fa-solid fa-circle-check"></i> Medical history saved successfully.
-                </div>
-                <div class="text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 p-3 rounded-lg text-sm flex items-center gap-2" *ngIf="error">
-                   <i class="fa-solid fa-circle-exclamation"></i> {{ error }}
-                </div>
-
-                <!-- Actions -->
-                <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
-                   <button type="button" (click)="close.emit()" class="px-5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                      Cancel
-                   </button>
-                   <button type="submit" [disabled]="disabled || saving" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg shadow-blue-500/20 transition-all transform hover:scale-[1.02] disabled:opacity-70 disabled:cursor-not-allowed">
-                      <span *ngIf="!saving"><i class="fa-solid fa-save mr-2"></i> Save Record</span>
-                      <span *ngIf="saving"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Saving...</span>
-                   </button>
-                </div>
-
-             </form>
-          </div>
-        </div>
+            <button type="button" (click)="close.emit()" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+              <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+         </div>
       </div>
 
-      <!-- AI Voice Dictation Modal Popup -->
-      <app-clinical-dictation
-         *ngIf="isDictationOpen"
-         (closeModal)="isDictationOpen = false"
-         (dictationComplete)="onDictationComplete($event)">
-      </app-clinical-dictation>
-    </div>
+      <form (ngSubmit)="onSubmit($event)" class="space-y-5">
+         
+         <!-- 1. Visit Date -->
+         <div class="form-group min-h-[70px]">
+            <app-date-picker
+              [(ngModel)]="form.visitDate"
+              name="visitDate"
+              label="Visit Date"
+              placeholder="Select Date"
+              [disabled]="disabled">
+            </app-date-picker>
+         </div>
+
+         <!-- 2. Symptoms & AI Suggest / Dictation -->
+         <div class="form-group">
+            <div class="flex items-center justify-between mb-1">
+               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Symptoms / Patient Issues</label>
+               <div class="flex items-center gap-3">
+                 <button type="button" 
+                         (click)="isDictationOpen = true"
+                         [disabled]="disabled"
+                         class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-blue-700 flex items-center gap-1 transition-all active:scale-95 disabled:opacity-50"
+                         title="Dictate Consultation Notes">
+                    <i class="fa-solid fa-microphone"></i>
+                    Voice Dictation
+                 </button>
+                 <button type="button" 
+                         (click)="onSuggest()" 
+                         [disabled]="disabled || loadingSuggestions || !form.symptoms"
+                         class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-50"
+                         title="Get AI Suggestions">
+                    <i class="fa-solid fa-wand-magic-sparkles" [class.animate-pulse]="loadingSuggestions"></i>
+                    AI Suggest
+                 </button>
+               </div>
+            </div>
+            <input type="text" class="input-modern" placeholder="e.g. Cough, fever, difficulty breathing..." [(ngModel)]="form.symptoms" name="symptoms" [disabled]="disabled" />
+         </div>
+
+         <!-- 3. AI Suggestions Area -->
+         <div *ngIf="clinicalSuggestions.length > 0" class="bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30 rounded-xl p-4 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div class="flex items-center justify-between mb-3">
+               <h4 class="text-xs font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+                  <i class="fa-solid fa-robot"></i> AI Clinical Suggestions
+               </h4>
+               <button type="button" (click)="clinicalSuggestions = []" class="text-gray-400 hover:text-gray-600 text-xs">Clear</button>
+            </div>
+            <div class="space-y-3">
+               <div *ngFor="let s of clinicalSuggestions" 
+                    (click)="applySuggestion(s)"
+                    class="group bg-white dark:bg-gray-800 p-3 rounded-lg border border-indigo-100 dark:border-indigo-700/50 hover:border-indigo-400 dark:hover:border-indigo-500 cursor-pointer transition-all shadow-sm hover:shadow-md">
+                  <div class="flex justify-between items-start mb-1">
+                     <div class="font-bold text-gray-900 dark:text-white text-sm group-hover:text-indigo-600 transition-colors">{{ s.diagnosis }}</div>
+                     <i class="fa-solid fa-plus-circle text-indigo-300 group-hover:text-indigo-600"></i>
+                  </div>
+                  <div class="text-[10px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                     <strong>Treatment:</strong> {{ s.treatment }} 
+                     <span *ngIf="s.medicine">| <strong>Rx:</strong> {{ s.medicine }} ({{ s.dosage }})</span>
+                  </div>
+                  <div class="mt-2 text-[9px] italic text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity">Click to auto-fill record</div>
+               </div>
+            </div>
+         </div>
+
+         <!-- 4. Diagnosis -->
+         <div class="form-group">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Diagnosis</label>
+            <input type="text" class="input-modern" placeholder="e.g. Acute Bronchitis" [(ngModel)]="form.diagnosis" name="diagnosis" [disabled]="disabled" />
+         </div>
+
+         <!-- 5. Treatment Plan -->
+         <div class="form-group">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Treatment Plan</label>
+            <input type="text" class="input-modern" placeholder="e.g. Rest, hydration, antibiotics" [(ngModel)]="form.treatment" name="treatment" [disabled]="disabled" />
+         </div>
+
+         <!-- 6. Dynamic Medications List -->
+         <div class="space-y-3">
+            <div class="flex items-center justify-between">
+               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Medications & Dosages</label>
+               <button type="button" 
+                       (click)="addMedication()" 
+                       [disabled]="disabled"
+                       class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1 transition-all active:scale-95 disabled:opacity-50">
+                  <i class="fa-solid fa-plus text-xs"></i> Add Medication
+               </button>
+            </div>
+
+            <div *ngFor="let med of medicationList; let i = index" class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center bg-gray-50/50 dark:bg-gray-700/30 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+               <div class="md:col-span-6">
+                  <label class="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1 md:hidden">Medication Name</label>
+                  <input type="text" class="input-modern" placeholder="e.g. Amoxicillin" [(ngModel)]="med.medicine" [name]="'medicine_' + i" [disabled]="disabled" />
+               </div>
+               <div class="md:col-span-5">
+                  <label class="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1 md:hidden">Dosage</label>
+                  <input type="text" class="input-modern" placeholder="e.g. 500mg, 3 times daily" [(ngModel)]="med.doses" [name]="'doses_' + i" [disabled]="disabled" />
+               </div>
+               <div class="md:col-span-1 flex items-center justify-center">
+                  <button type="button" 
+                          (click)="removeMedication(i)" 
+                          *ngIf="medicationList.length > 1"
+                          [disabled]="disabled"
+                          class="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"
+                          title="Remove medication">
+                     <i class="fa-solid fa-trash-can text-sm"></i>
+                  </button>
+               </div>
+            </div>
+         </div>
+
+         <!-- 7. Clinical Notes -->
+         <div class="form-group">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Clinical Notes</label>
+            <textarea class="input-modern min-h-[100px]" rows="3" placeholder="Additional observations or patient instructions..." [(ngModel)]="form.notes" name="notes" [disabled]="disabled"></textarea>
+         </div>
+
+         <div class="text-sm bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 p-3 rounded-lg flex gap-2 items-start" *ngIf="infoText">
+            <i class="fa-solid fa-circle-info mt-0.5"></i>
+            <span>{{ infoText }}</span>
+         </div>
+
+         <!-- Messages -->
+         <div class="text-green-600 bg-green-50 dark:bg-green-900/20 dark:text-green-400 p-3 rounded-lg text-sm flex items-center gap-2" *ngIf="saved">
+            <i class="fa-solid fa-circle-check"></i> Medical history saved successfully.
+         </div>
+         <div class="text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 p-3 rounded-lg text-sm flex items-center gap-2" *ngIf="error">
+            <i class="fa-solid fa-circle-exclamation"></i> {{ error }}
+         </div>
+
+         <!-- Actions -->
+         <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
+            <button type="button" (click)="close.emit()" class="px-5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+               Cancel
+            </button>
+            <button type="submit" [disabled]="disabled || saving" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg shadow-blue-500/20 transition-all transform hover:scale-[1.02] disabled:opacity-70 disabled:cursor-not-allowed">
+               <span *ngIf="!saving"><i class="fa-solid fa-save mr-2"></i> Save Record</span>
+               <span *ngIf="saving"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Saving...</span>
+            </button>
+         </div>
+
+      </form>
+    </app-modal-shell>
+
+    <!-- AI Voice Dictation Modal Popup -->
+    <app-clinical-dictation
+       *ngIf="open && isDictationOpen"
+       (closeModal)="isDictationOpen = false"
+       (dictationComplete)="onDictationComplete($event)">
+    </app-clinical-dictation>
   `,
    styles: [`
     .input-modern {

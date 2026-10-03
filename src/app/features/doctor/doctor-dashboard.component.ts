@@ -14,51 +14,54 @@ import { AppointmentService, DoctorAppointmentItem } from '../../core/services/a
 import { getDoctorAppointmentEpochMs } from '../../shared/doctor-appointment-utils';
 import { PatientProfileService, PatientDto, MedicalHistoryItem, MedicalHistoryWithDoctorItem } from '../../core/services/patient-profile.service';
 import { DatePickerComponent } from '../../shared/date-picker.component';
+import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
+import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
+import { SkeletonComponent } from '../../shared/ui/skeleton.component';
 
 import { AnalyticsApiService, OverallAnalytics } from '../../core/services/analytics.service';
 import { ReportsApiService } from '../../core/services/reports.service';
 import { LeaveService, DoctorLeave } from '../../core/services/leave.service';
+import { ConfirmService } from '../../core/services/confirm.service';
 import { forkJoin } from 'rxjs';
 // Removed NotificationService imports; logic moved to dedicated component
 
 @Component({
   selector: 'app-doctor-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientDetailsModalComponent, MedicalHistoryDetailModalComponent, MedicalHistoryFormModalComponent, DoctorLayoutComponent, DoctorNotificationComponent, DatePickerComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientDetailsModalComponent, MedicalHistoryDetailModalComponent, MedicalHistoryFormModalComponent, DoctorLayoutComponent, DoctorNotificationComponent, DatePickerComponent, EmptyStateComponent, ModalShellComponent, SkeletonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-doctor-layout>
       <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
-        <!-- Header -->
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl sm:rounded-3xl p-4 sm:p-8 text-white shadow-xl relative">
-          <div class="absolute inset-0 bg-white/10 opacity-30 pattern-dots"></div>
+        <!-- Header (neutral — no colored hero strip) -->
+        <div class="ui-panel p-4 sm:p-8 relative">
           <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-4 sm:gap-6">
             <div class="flex flex-col md:flex-row items-center gap-3 sm:gap-6 text-center md:text-left">
               <div class="relative shrink-0">
-                <div class="w-14 h-14 md:w-20 md:h-20 rounded-full border-2 sm:border-4 border-white/30 shadow-lg overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center text-xl md:text-3xl font-bold">
+                <div class="w-14 h-14 md:w-20 md:h-20 rounded-full border-2 sm:border-4 border-brand/20 shadow-lg overflow-hidden bg-brand-soft flex items-center justify-center text-xl md:text-3xl font-bold text-brand">
                   <img *ngIf="profile?.profileImageUrl" [src]="profile?.profileImageUrl" class="w-full h-full object-cover" />
                   <span *ngIf="!profile?.profileImageUrl && doctorName">{{ (doctorName || 'D').charAt(0) }}</span>
-                  <div *ngIf="!doctorName" class="w-full h-full bg-white/10 animate-pulse"></div>
+                  <div *ngIf="!doctorName" class="w-full h-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
                 </div>
-                <div *ngIf="profile?.isVerified" class="absolute -bottom-1 -right-1 bg-green-500 text-white text-[8px] px-1.5 py-0.5 rounded-full border-2 border-indigo-700 shadow-md flex items-center gap-1" title="Verified">
+                <div *ngIf="profile?.isVerified" class="absolute -bottom-1 -right-1 bg-green-500 text-white text-[8px] px-1.5 py-0.5 rounded-full border-2 border-white dark:border-gray-900 shadow-md flex items-center gap-1" title="Verified">
                   <i class="fa-solid fa-check text-[7px]"></i>
                   <span class="font-black uppercase tracking-widest text-[7px]">Verified</span>
                 </div>
               </div>
               <div class="space-y-1 sm:space-y-2">
-                <h1 class="text-lg md:text-3xl font-black tracking-tight leading-tight animate-fade-in" *ngIf="doctorName">{{ doctorName === 'Doctor' ? 'Doctor' : 'Dr. ' + doctorName }}!</h1>
-                <div class="h-6 sm:h-8 w-48 bg-white/20 rounded animate-pulse my-1" *ngIf="!doctorName"></div>
-                <div class="flex flex-wrap items-center justify-center md:justify-start gap-1.5 sm:gap-3 text-blue-100/90 text-xs sm:text-lg font-medium">
-                  <span *ngIf="profile" class="px-2.5 py-0.5 bg-white/10 rounded-full backdrop-blur-sm border border-white/10 text-xs sm:text-sm animate-fade-in">{{ profile?.specialization || 'General Practitioner' }}</span>
-                  <span *ngIf="!profile" class="h-6 w-36 bg-white/20 rounded animate-pulse"></span>
-                  <span class="hidden md:block w-1.5 h-1.5 rounded-full bg-blue-300"></span>
+                <h1 class="font-display text-lg md:text-3xl font-black tracking-tight leading-tight text-gray-900 dark:text-white animate-fade-in" *ngIf="doctorName">{{ doctorName === 'Doctor' ? 'Doctor' : 'Dr. ' + doctorName }}!</h1>
+                <div class="h-6 sm:h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse my-1" *ngIf="!doctorName"></div>
+                <div class="flex flex-wrap items-center justify-center md:justify-start gap-1.5 sm:gap-3 text-gray-500 dark:text-gray-400 text-xs sm:text-lg font-medium">
+                  <span *ngIf="profile" class="px-2.5 py-0.5 bg-brand-soft text-brand rounded-full border border-brand/20 text-xs sm:text-sm animate-fade-in">{{ profile?.specialization || 'General Practitioner' }}</span>
+                  <span *ngIf="!profile" class="h-6 w-36 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></span>
+                  <span class="hidden md:block w-1.5 h-1.5 rounded-full bg-brand"></span>
                   <span class="opacity-80 text-xs sm:text-base">{{ todayISO() | date:'fullDate' }}</span>
                 </div>
               </div>
             </div>
             <div class="flex items-center gap-2 sm:gap-3">
                <app-doctor-notification></app-doctor-notification>
-               <button (click)="refreshToday()" class="bg-white text-blue-700 hover:bg-blue-50 px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl text-xs sm:text-base font-bold shadow-lg transition-all active:scale-95 flex items-center gap-1.5 sm:gap-2">
+               <button (click)="refreshToday()" class="btn-secondary px-3 sm:px-4 py-1.5 sm:py-2.5 text-xs sm:text-base" aria-label="Refresh today's appointments">
                  <i class="fa-solid fa-arrows-rotate" [class.animate-spin]="loadingAppointments"></i>
                </button>
             </div>
@@ -77,135 +80,136 @@ import { forkJoin } from 'rxjs';
             <button (click)="leaveModalOpen = true" class="text-sm underline font-bold hover:text-orange-900">Manage Leave</button>
         </div>
 
-        <!-- Stats Grid (2 per row on mobile) -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-          <!-- Total Today -->
-          <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-gray-100 dark:border-gray-700 shadow-sm flex items-center gap-2.5 sm:gap-4 hover:shadow-md transition-shadow">
-            <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm sm:text-xl shrink-0">
+        <!-- Today focus: compact stats -->
+        <div class="grid grid-cols-3 gap-2.5 sm:gap-4">
+          <div class="ui-panel p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3">
+            <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-brand-soft text-brand flex items-center justify-center text-sm sm:text-lg shrink-0">
               <i class="fa-solid fa-calendar-day"></i>
             </div>
-            <div class="min-w-0 flex-1">
-              <div class="text-[11px] sm:text-sm text-gray-500 dark:text-gray-400 font-medium truncate leading-tight">Today's Appts</div>
-              <div class="text-base sm:text-2xl font-bold text-gray-800 dark:text-white" *ngIf="!loadingAppointments">{{ (todayAppointments || []).length }}</div>
-              <div class="h-6 sm:h-8 w-12 sm:w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" *ngIf="loadingAppointments"></div>
+            <div class="min-w-0">
+              <div class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium truncate">Today</div>
+              <div class="text-base sm:text-xl font-bold text-gray-900 dark:text-white" *ngIf="!loadingAppointments">{{ (todayAppointments || []).length }}</div>
+              <div class="h-5 w-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" *ngIf="loadingAppointments"></div>
             </div>
           </div>
-
-          <!-- Confirmed Today -->
-          <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-gray-100 dark:border-gray-700 shadow-sm flex items-center gap-2.5 sm:gap-4 hover:shadow-md transition-shadow">
-            <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 flex items-center justify-center text-sm sm:text-xl shrink-0">
+          <div class="ui-panel p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3">
+            <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 flex items-center justify-center text-sm sm:text-lg shrink-0">
               <i class="fa-solid fa-check-circle"></i>
             </div>
-            <div class="min-w-0 flex-1">
-              <div class="text-[11px] sm:text-sm text-gray-500 dark:text-gray-400 font-medium truncate leading-tight">Confirmed</div>
-              <div class="text-base sm:text-2xl font-bold text-gray-800 dark:text-white" *ngIf="!loadingAppointments">{{ todayStats().CONFIRMED }}</div>
-               <div class="h-6 sm:h-8 w-12 sm:w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" *ngIf="loadingAppointments"></div>
+            <div class="min-w-0">
+              <div class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium truncate">Confirmed</div>
+              <div class="text-base sm:text-xl font-bold text-gray-900 dark:text-white" *ngIf="!loadingAppointments">{{ todayStats().CONFIRMED }}</div>
+              <div class="h-5 w-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" *ngIf="loadingAppointments"></div>
             </div>
           </div>
-
-          <!-- Pending (Scheduled) -->
-          <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-gray-100 dark:border-gray-700 shadow-sm flex items-center gap-2.5 sm:gap-4 hover:shadow-md transition-shadow">
-            <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400 flex items-center justify-center text-sm sm:text-xl shrink-0">
+          <div class="ui-panel p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3">
+            <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 flex items-center justify-center text-sm sm:text-lg shrink-0">
               <i class="fa-solid fa-clock"></i>
             </div>
-            <div class="min-w-0 flex-1">
-              <div class="text-[11px] sm:text-sm text-gray-500 dark:text-gray-400 font-medium truncate leading-tight">Pending</div>
-              <div class="text-base sm:text-2xl font-bold text-gray-900 dark:text-white" *ngIf="!loadingAppointments">{{ todayStats().BOOKED }}</div>
-               <div class="h-6 sm:h-8 w-12 sm:w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" *ngIf="loadingAppointments"></div>
-            </div>
-          </div>
-
-          <!-- Upcoming Leaves -->
-          <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-gray-100 dark:border-gray-700 shadow-sm flex items-center gap-2.5 sm:gap-4 hover:shadow-md transition-shadow cursor-pointer" (click)="leaveModalOpen = true">
-            <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 flex items-center justify-center text-sm sm:text-xl shrink-0">
-              <i class="fa-solid fa-calendar-minus"></i>
-            </div>
-            <div class="min-w-0 flex-1">
-              <div class="text-[11px] sm:text-sm text-gray-500 dark:text-gray-400 font-medium truncate leading-tight">Doctor Leaves</div>
-              <div class="text-base sm:text-2xl font-bold text-gray-900 dark:text-white">{{ upcomingLeaves.length }}</div>
+            <div class="min-w-0">
+              <div class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium truncate">Pending</div>
+              <div class="text-base sm:text-xl font-bold text-gray-900 dark:text-white" *ngIf="!loadingAppointments">{{ todayStats().BOOKED }}</div>
+              <div class="h-5 w-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" *ngIf="loadingAppointments"></div>
             </div>
           </div>
         </div>
 
-        <!-- Main Content Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          <!-- Today's Agenda (Left 2/3) -->
-          <div class="lg:col-span-2 space-y-6">
-          <!-- Up Next / Current Priority Card -->
-          <div class="lg:col-span-2 space-y-6">
-             <div class="rounded-3xl p-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 shadow-xl" *ngIf="nextAppointment as next">
-                <div class="bg-white dark:bg-gray-800 rounded-[1.3rem] p-4 sm:p-8">
-                   <div class="flex items-center justify-between mb-4 sm:mb-6">
-                      <div class="flex items-center gap-2.5 sm:gap-3">
-                         <span class="relative flex h-3.5 w-3.5 sm:h-4 sm:w-4">
-                           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                           <span class="relative inline-flex rounded-full h-3.5 w-3.5 sm:h-4 sm:w-4 bg-blue-500"></span>
-                         </span>
-                         <h2 class="text-sm sm:text-xl font-bold text-gray-900 dark:text-white uppercase tracking-wider">
-                            {{ next.status === 'IN_PROGRESS' ? 'Currently in Session' : 'Up Next' }}
-                         </h2>
-                      </div>
-                      <div class="px-3 py-1 sm:px-4 sm:py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-bold text-xs sm:text-sm">
-                        {{ next.appointmentTime }}
-                      </div>
-                   </div>
-
-                   <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center">
-                      <div class="relative shrink-0">
-                         <img [src]="next.patientProfileImageUrl || 'assets/default-profile.png'" class="w-16 h-16 sm:w-24 sm:h-24 rounded-xl sm:rounded-2xl object-cover shadow-md border-2 border-gray-100 dark:border-gray-700" onerror="this.src='assets/default-profile.png'">
-                         <div class="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center shadow-lg text-xs sm:text-sm">
-                            <i class="fa-solid fa-video"></i>
-                         </div>
-                      </div>
-                      
-                      <div class="flex-1 space-y-1 sm:space-y-2">
-                         <h3 class="text-lg sm:text-2xl font-black text-gray-900 dark:text-white leading-tight">{{ next.patientName }}</h3>
-                         <div class="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                            <span *ngIf="next.patientContactInfo"><i class="fa-solid fa-phone mr-1 opacity-70"></i> {{ next.patientContactInfo }}</span>
-                            <span *ngIf="next.reason"><i class="fa-solid fa-notes-medical mr-1 opacity-70"></i> {{ next.reason }}</span>
-                         </div>
-                      </div>
-
-                      <div class="flex flex-col gap-2 sm:gap-3 w-full sm:w-auto shrink-0">
-                         <button (click)="start(next)" class="px-5 sm:px-8 py-2.5 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-base rounded-xl shadow-lg shadow-blue-500/30 transition-all active:scale-95 flex items-center justify-center gap-2">
-                           <span>{{ next.status === 'IN_PROGRESS' ? 'Resume Consultation' : 'Start Consultation' }}</span>
-                           <i class="fa-solid fa-arrow-right"></i>
-                         </button>
-                         <button (click)="openPatient(next)" class="px-4 sm:px-6 py-2 sm:py-2.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-bold text-xs sm:text-sm hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-all">
-                           View Patient Details
-                         </button>
-                      </div>
-                   </div>
-                </div>
-             </div>
-
-             <!-- Empty State (All Caught Up) - Compact Size -->
-             <div class="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl sm:rounded-3xl p-5 sm:p-8 text-center border border-green-100 dark:border-green-800/30" *ngIf="!nextAppointment && !loadingAppointments">
-                <div class="w-12 h-12 sm:w-20 sm:h-20 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-3 text-green-500 shadow-md text-xl sm:text-3xl">
-                  <i class="fa-solid fa-mug-hot"></i>
-                </div>
-                <h3 class="text-base sm:text-xl font-bold text-gray-900 dark:text-white mb-1">All Caught Up!</h3>
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-4 max-w-sm mx-auto">You have no pending appointments right now. Enjoy your break or check your full schedule.</p>
-                <a routerLink="/doctor/schedule" class="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-white text-green-700 font-bold text-xs sm:text-sm rounded-xl transition-all shadow-sm hover:shadow-md active:scale-95 border border-green-200">
-                  <i class="fa-solid fa-calendar-day"></i>
-                  <span>View Full Schedule</span>
-                </a>
-             </div>
-          </div>
+        <!-- Primary: Up Next / Today agenda -->
+        <section class="space-y-4">
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="text-sm sm:text-base font-bold text-gray-900 dark:text-white tracking-tight">Today’s focus</h2>
+            <a routerLink="/doctor/schedule" class="text-xs sm:text-sm font-semibold text-brand hover:underline">Full schedule</a>
           </div>
 
-          <!-- Sidebar (Right 1/3) -->
-          <div class="space-y-6">
-             <!-- Quick Actions Guide - Compact Size -->
-            <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-4 sm:p-5 text-white shadow-lg overflow-hidden relative">
-              <div class="relative z-10">
-                <h3 class="font-bold text-sm sm:text-base mb-1.5">Need Help?</h3>
-                <p class="text-indigo-100 text-xs sm:text-sm mb-3">Check out our guide for doctors to manage appointments effectively.</p>
-                <button (click)="guideModalOpen = true" class="bg-white text-indigo-700 text-xs sm:text-sm font-bold py-2 px-4 rounded-xl w-full hover:bg-indigo-50 transition-all active:scale-95 shadow-lg shadow-black/10">View Guide</button>
+          <app-skeleton *ngIf="loadingAppointments" variant="focus"></app-skeleton>
+
+          <div class="rounded-2xl sm:rounded-3xl p-1 bg-gradient-to-r from-blue-600 to-indigo-600 shadow-xl" *ngIf="!loadingAppointments && nextAppointment as next">
+            <div class="bg-white dark:bg-gray-800 rounded-[0.9rem] sm:rounded-[1.3rem] p-4 sm:p-8">
+              <div class="flex items-center justify-between mb-4 sm:mb-6">
+                <div class="flex items-center gap-2.5 sm:gap-3">
+                  <span class="relative flex h-3.5 w-3.5 sm:h-4 sm:w-4">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3.5 w-3.5 sm:h-4 sm:w-4 bg-blue-500"></span>
+                  </span>
+                  <h3 class="text-sm sm:text-xl font-bold text-gray-900 dark:text-white uppercase tracking-wider">
+                    {{ next.status === 'IN_PROGRESS' ? 'Currently in Session' : 'Up Next' }}
+                  </h3>
+                </div>
+                <div class="px-3 py-1 sm:px-4 sm:py-1.5 rounded-full bg-brand-soft text-brand font-bold text-xs sm:text-sm">
+                  {{ next.appointmentTime }}
+                </div>
               </div>
-              <i class="fa-solid fa-circle-info absolute -bottom-4 -right-4 text-7xl sm:text-8xl opacity-10 rotate-12"></i>
+
+              <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center">
+                <div class="relative shrink-0">
+                  <img [src]="next.patientProfileImageUrl || 'assets/default-profile.png'" class="w-16 h-16 sm:w-24 sm:h-24 rounded-xl sm:rounded-2xl object-cover shadow-md border-2 border-gray-100 dark:border-gray-700" onerror="this.src='assets/default-profile.png'">
+                  <div class="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 bg-brand text-white rounded-lg flex items-center justify-center shadow-lg text-xs sm:text-sm">
+                    <i class="fa-solid fa-video"></i>
+                  </div>
+                </div>
+
+                <div class="flex-1 space-y-1 sm:space-y-2">
+                  <h3 class="text-lg sm:text-2xl font-black text-gray-900 dark:text-white leading-tight">{{ next.patientName }}</h3>
+                  <div class="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                    <span *ngIf="next.patientContactInfo"><i class="fa-solid fa-phone mr-1 opacity-70"></i> {{ next.patientContactInfo }}</span>
+                    <span *ngIf="next.reason"><i class="fa-solid fa-notes-medical mr-1 opacity-70"></i> {{ next.reason }}</span>
+                  </div>
+                </div>
+
+                <div class="flex flex-col gap-2 sm:gap-3 w-full sm:w-auto shrink-0">
+                  <button type="button" (click)="start(next)" class="btn-primary px-5 sm:px-8 py-2.5 sm:py-3 text-xs sm:text-base">
+                    <span>{{ next.status === 'IN_PROGRESS' ? 'Resume Consultation' : 'Start Consultation' }}</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                  </button>
+                  <button type="button" (click)="openPatient(next)" class="btn-secondary text-xs sm:text-sm">
+                    View Patient Details
+                  </button>
+                </div>
+              </div>
             </div>
+          </div>
+
+          <div class="ui-panel overflow-hidden" *ngIf="!nextAppointment && !loadingAppointments">
+            <app-empty-state
+              icon="fa-solid fa-mug-hot"
+              title="All caught up"
+              message="No pending appointments right now. Check your full schedule or manage leave when needed."
+              iconWrapClass="bg-brand-soft text-brand"
+              [hasAction]="true"
+            >
+              <a routerLink="/doctor/schedule" class="btn-primary text-sm">View schedule</a>
+            </app-empty-state>
+          </div>
+        </section>
+
+        <!-- Secondary tools (out of first-viewport focus) -->
+        <div class="ui-panel overflow-hidden">
+          <button type="button" class="w-full px-4 sm:px-5 py-3.5 flex items-center justify-between gap-3 text-left" (click)="moreToolsOpen = !moreToolsOpen" [attr.aria-expanded]="moreToolsOpen">
+            <span class="text-sm font-bold text-gray-900 dark:text-white">More tools</span>
+            <span class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
+              Leave · Guide
+              <i class="fa-solid fa-chevron-down text-[10px] transition-transform" [class.rotate-180]="moreToolsOpen"></i>
+            </span>
+          </button>
+          <div *ngIf="moreToolsOpen" class="px-4 sm:px-5 pb-4 pt-1 grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-gray-200 dark:border-gray-700/60 animate-fade-in">
+            <button type="button" (click)="leaveModalOpen = true" class="btn-secondary w-full justify-start text-left !py-3">
+              <span class="w-9 h-9 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-orange-600 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-calendar-minus"></i>
+              </span>
+              <span class="flex flex-col items-start min-w-0">
+                <span class="font-semibold text-sm">Manage leave</span>
+                <span class="text-[11px] text-gray-500 dark:text-gray-400">{{ upcomingLeaves.length }} upcoming</span>
+              </span>
+            </button>
+            <button type="button" (click)="guideModalOpen = true" class="btn-secondary w-full justify-start text-left !py-3">
+              <span class="w-9 h-9 rounded-lg bg-brand-soft text-brand flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-book-medical"></i>
+              </span>
+              <span class="flex flex-col items-start min-w-0">
+                <span class="font-semibold text-sm">Success guide</span>
+                <span class="text-[11px] text-gray-500 dark:text-gray-400">Appointment flow tips</span>
+              </span>
+            </button>
           </div>
         </div>
 
@@ -239,20 +243,20 @@ import { forkJoin } from 'rxjs';
         ></app-medical-history-form-modal>
 
         <!-- Leave Management Modal -->
-        <div *ngIf="leaveModalOpen" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div class="bg-white dark:bg-gray-800 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gray-50/50 dark:bg-gray-900/50">
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <i class="fa-solid fa-calendar-day text-blue-500"></i> Manage Leaves
-              </h3>
-              <button (click)="leaveModalOpen = false" class="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors">
-                <i class="fa-solid fa-xmark text-gray-500"></i>
-              </button>
-            </div>
-            
-            <div class="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+        <app-modal-shell
+          [open]="leaveModalOpen"
+          title="Manage Leaves"
+          icon="fa-solid fa-calendar-day"
+          iconWrapClass="bg-brand-soft text-brand"
+          maxWidthClass="max-w-2xl"
+          zIndexClass="z-[110]"
+          bodyClass="p-6 space-y-6"
+          footerClass="p-4 bg-gray-50 dark:bg-gray-900/50 text-center"
+          [hasFooter]="true"
+          (close)="leaveModalOpen = false"
+        >
               <!-- Add Leave Form -->
-              <div class="bg-blue-50/30 dark:bg-blue-900/10 p-5 rounded-2xl border border-blue-100/50 dark:border-blue-800/20">
+              <div class="bg-brand-soft/50 dark:bg-brand-soft p-5 rounded-2xl border border-blue-100/50 dark:border-blue-800/20">
                 <h4 class="font-bold text-gray-900 dark:text-white mb-4 text-sm uppercase tracking-wider">Schedule New Leave</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <app-date-picker
@@ -269,10 +273,10 @@ import { forkJoin } from 'rxjs';
                     </app-date-picker>
                 </div>
                 <div class="space-y-1.5 mb-4">
-                  <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Reason (Optional)</label>
-                  <input type="text" [(ngModel)]="leafForm.reason" placeholder="e.g., Vacation, Medical, Personal" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                  <label class="form-label">Reason (Optional)</label>
+                  <input type="text" [(ngModel)]="leafForm.reason" placeholder="e.g., Vacation, Medical, Personal" class="form-input">
                 </div>
-                <button (click)="addLeave()" [disabled]="savingLeave || !leafForm.startDate || !leafForm.endDate" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 transition-all disabled:opacity-50 disabled:shadow-none active:scale-95 flex items-center justify-center gap-2">
+                <button type="button" (click)="addLeave()" [disabled]="savingLeave || !leafForm.startDate || !leafForm.endDate" class="w-full btn-primary py-3 font-bold disabled:opacity-50 disabled:shadow-none">
                   <i class="fa-solid fa-plus" *ngIf="!savingLeave"></i>
                   <i class="fa-solid fa-spinner animate-spin" *ngIf="savingLeave"></i>
                   {{ savingLeave ? 'Adding Leave...' : 'Schedule Leave' }}
@@ -288,9 +292,9 @@ import { forkJoin } from 'rxjs';
                   <p class="text-sm">No leaves scheduled currently.</p>
                 </div>
                 <div class="space-y-3">
-                  <div *ngFor="let l of upcomingLeaves" class="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm flex items-center justify-between group hover:border-blue-200 dark:hover:border-blue-900 transition-all">
+                  <div *ngFor="let l of upcomingLeaves" class="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm flex items-center justify-between group hover:border-brand/30 transition-all">
                     <div class="flex items-center gap-4">
-                      <div class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs uppercase">
+                      <div class="w-10 h-10 rounded-full bg-brand-soft text-brand flex items-center justify-center font-bold text-xs uppercase">
                         {{ l.startDate | date:'MMM' }}
                       </div>
                       <div>
@@ -302,19 +306,15 @@ import { forkJoin } from 'rxjs';
                         </div>
                       </div>
                     </div>
-                    <button (click)="deleteLeave(l.id!)" class="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all">
+                    <button type="button" (click)="deleteLeave(l.id!)" class="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all" aria-label="Delete leave">
                       <i class="fa-solid fa-trash-can"></i>
                     </button>
                   </div>
                 </div>
               </div>
-            </div>
-            
-            <div class="p-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 text-center">
-              <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Booking slots are automatically blocked for these dates</p>
-            </div>
-          </div>
-        </div>
+
+            <p modalFooter class="text-[10px] text-gray-400 uppercase tracking-widest font-bold m-0">Booking slots are automatically blocked for these dates</p>
+        </app-modal-shell>
 
         <!-- Doctor Guide Modal -->
         <div *ngIf="guideModalOpen" class="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
@@ -322,7 +322,7 @@ import { forkJoin } from 'rxjs';
             <!-- Modal Header -->
             <div class="p-6 sm:p-8 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-900/20 dark:to-indigo-900/20">
               <div class="flex items-center gap-3 sm:gap-4">
-                <div class="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-blue-600 text-white flex items-center justify-center text-xl sm:text-2xl shadow-lg shadow-blue-500/30 shrink-0">
+                <div class="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-brand text-white flex items-center justify-center text-xl sm:text-2xl shadow-lg shadow-blue-500/30 shrink-0">
                   <i class="fa-solid fa-book-medical"></i>
                 </div>
                 <div>
@@ -408,7 +408,7 @@ import { forkJoin } from 'rxjs';
             <!-- Modal Footer -->
             <div class="p-6 sm:p-8 bg-gray-50/50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div class="flex items-center gap-2 text-gray-400 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-center sm:text-left">
-                <i class="fa-solid fa-shield-halved text-blue-500"></i> CareSync Secure Portal
+                <i class="fa-solid fa-shield-halved text-brand"></i> CareSync Secure Portal
               </div>
               <button (click)="guideModalOpen = false" class="w-full sm:w-auto px-8 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold rounded-2xl hover:scale-105 transition-all shadow-xl active:scale-95">
                 Got it, thanks!
@@ -426,7 +426,7 @@ import { forkJoin } from 'rxjs';
       background-size: 24px 24px;
     }
     .input-sm {
-      @apply py-1.5 px-3 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow dark:bg-gray-900/50 dark:border-gray-700 dark:text-white;
+      @apply py-1.5 px-3 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-shadow dark:bg-gray-900/50 dark:border-gray-700 dark:text-white;
     }
   `]
 })
@@ -439,6 +439,7 @@ export class DoctorDashboardComponent implements OnInit {
   private analyticsApi = inject(AnalyticsApiService);
   private reportsApi = inject(ReportsApiService);
   private leaveApi = inject(LeaveService);
+  private confirm = inject(ConfirmService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
   username: string | null = null;
@@ -470,6 +471,7 @@ export class DoctorDashboardComponent implements OnInit {
 
   // Guide Popup
   guideModalOpen = false;
+  moreToolsOpen = false;
 
   // Leave Management
   leaveModalOpen = false;
@@ -567,8 +569,15 @@ export class DoctorDashboardComponent implements OnInit {
     });
   }
 
-  deleteLeave(id: number) {
-    if (!confirm('Are you sure you want to delete this leave record?')) return;
+  async deleteLeave(id: number) {
+    const ok = await this.confirm.ask({
+      title: 'Delete leave',
+      message: 'Are you sure you want to delete this leave record?',
+      confirmLabel: 'Delete',
+      cancelLabel: 'Keep',
+      danger: true,
+    });
+    if (!ok) return;
     this.leaveApi.deleteLeave(id).subscribe({
       next: () => this.refreshLeaves()
     });

@@ -20,14 +20,16 @@ export interface SelectOption {
   ],
   template: `
     <div class="space-y-0.5 relative" [class.z-50]="isOpen" [id]="dropdownId">
-      <label *ngIf="label" class="block text-[9px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 ml-0.5">
+      <label *ngIf="label" class="filter-label">
         {{ label }}
       </label>
       
       <button type="button" 
               (click)="toggle($event)"
               [disabled]="disabled"
-              class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3.5 py-2.5 sm:py-2 text-xs sm:text-sm min-h-[42px] cursor-pointer relative transition-all duration-200 group flex items-center justify-between text-left font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 hover:border-gray-300 dark:hover:border-gray-600"
+              [attr.aria-expanded]="isOpen"
+              aria-haspopup="listbox"
+              class="w-full filter-control-height rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3.5 text-xs sm:text-sm cursor-pointer relative transition-all duration-200 group flex items-center justify-between text-left font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 hover:border-gray-300 dark:hover:border-gray-600"
               [class.opacity-50]="disabled"
               [class.cursor-not-allowed]="disabled">
         <span [class.text-gray-400]="!selectedValue" class="block truncate pr-5">

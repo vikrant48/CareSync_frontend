@@ -8,19 +8,21 @@ import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { EmergencyAppointmentModalComponent } from '../../shared/emergency-appointment-modal.component';
 import { SpecializationAutocompleteComponent } from '../../shared/specialization-autocomplete.component';
 import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropdown.component';
-import { SkeletonLoaderComponent } from '../../shared/skeleton.component';
+import { SkeletonComponent } from '../../shared/ui/skeleton.component';
+import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
+import { FilterBarComponent } from '../../shared/ui/filter-bar.component';
 
 @Component({
   selector: 'app-patient-book-appointment',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent, SelectDropdownComponent, SkeletonLoaderComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent, SelectDropdownComponent, SkeletonComponent, EmptyStateComponent, FilterBarComponent],
   template: `
     <app-patient-layout>
     <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6 pb-36 sm:pb-28">
       <!-- Header Section -->
       <section class="panel p-3 sm:p-6 flex flex-col md:flex-row items-center justify-between gap-3 shadow-lg">
         <div class="flex flex-col gap-0.5 w-full md:w-auto text-center md:text-left">
-          <h2 class="text-lg sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
+          <h2 class="font-display text-lg sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
              Find & Book Appointments
           </h2>
           <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Search for specialized doctors and book your slot.</p>
@@ -33,48 +35,36 @@ import { SkeletonLoaderComponent } from '../../shared/skeleton.component';
         </div>
       </section>
 
-      <!-- Filters Section -->
-      <section class="panel p-3 sm:p-6 shadow-lg relative z-30 transition-all duration-300">
-        <div class="flex items-center justify-between gap-2 cursor-pointer sm:cursor-default" (click)="toggleFilter()">
-            <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
-               <i class="fa-solid fa-sliders text-blue-500 shrink-0"></i>
-               <span class="font-bold text-sm sm:text-base text-gray-800 dark:text-gray-200 shrink-0">Filters</span>
-               <span *ngIf="activeFilterCount > 0" class="bg-blue-600 text-white text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold shrink-0 whitespace-nowrap">
-                 {{ activeFilterCount }} Active
-               </span>
-            </div>
-            
-            <div class="flex items-center gap-2 shrink-0" (click)="$event.stopPropagation()">
-               <button *ngIf="activeFilterCount > 0" 
-                       (click)="resetFilters()" 
-                       class="text-xs text-red-600 dark:text-red-400 hover:text-red-300 hover:underline flex items-center gap-1 transition-colors font-medium shrink-0 whitespace-nowrap">
-                  <i class="fa-solid fa-xmark text-xs"></i> Clear
-               </button>
-               <button (click)="toggleFilter()" class="sm:hidden text-blue-500 hover:text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-1 rounded-lg flex items-center gap-1 text-xs font-bold transition-all shrink-0 whitespace-nowrap">
-                 <i class="fa-solid fa-filter text-[10px]"></i>
-                 <span>{{ isFilterExpanded ? 'Hide' : 'Filter' }}</span>
-                 <i class="fa-solid fa-chevron-down transition-transform duration-300" [class.rotate-180]="isFilterExpanded"></i>
-               </button>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 transition-all duration-300"
-             [ngClass]="{ 'hidden sm:grid': !isFilterExpanded, 'grid mt-3': isFilterExpanded }">
-          <app-specialization-autocomplete
-            class="w-full relative"
-            [(ngModel)]="specializationFilter"
-            (ngModelChange)="onFilterChange()"
-            placeholder="Specialization..."
-            inputClass="input w-full bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
-            [allowAddNew]="false">
-          </app-specialization-autocomplete>
+      <app-filter-bar
+        class="panel shadow-lg relative z-30"
+        [(expanded)]="isFilterExpanded"
+        [activeCount]="activeFilterCount"
+        gridClass="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
+        (clear)="resetFilters()"
+      >
+          <div class="space-y-0.5">
+            <label class="filter-label">Specialization</label>
+            <app-specialization-autocomplete
+              class="w-full relative"
+              [(ngModel)]="specializationFilter"
+              (ngModelChange)="onFilterChange()"
+              placeholder="Specialization..."
+              inputClass="filter-input-search !pl-3.5"
+              [allowAddNew]="false">
+            </app-specialization-autocomplete>
+          </div>
           
-          <div class="relative">
-             <input type="text" class="input w-full bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400" placeholder="Doctor name..." [(ngModel)]="nameFilter" (ngModelChange)="onFilterChange()" />
+          <div class="space-y-0.5">
+            <label class="filter-label">Doctor Name</label>
+            <div class="relative w-full">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs sm:text-sm pointer-events-none z-10"></i>
+              <input type="text" class="filter-input-search" placeholder="Doctor name..." [(ngModel)]="nameFilter" (ngModelChange)="onFilterChange()" />
+            </div>
           </div>
 
-          <div class="relative font-medium">
+          <div class="space-y-0.5">
             <app-select-dropdown
+              label="Gender"
               [(ngModel)]="genderFilter"
               (ngModelChange)="onFilterChange()"
               [options]="genderOptions"
@@ -82,25 +72,31 @@ import { SkeletonLoaderComponent } from '../../shared/skeleton.component';
             </app-select-dropdown>
           </div>
 
-         <div class="relative">
-             <input type="text" class="input w-full bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400" placeholder="Location..." [(ngModel)]="addressFilter" (ngModelChange)="onFilterChange()" />
+          <div class="space-y-0.5">
+            <label class="filter-label">Location</label>
+            <div class="relative w-full">
+              <i class="fa-solid fa-location-dot absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs sm:text-sm pointer-events-none z-10"></i>
+              <input type="text" class="filter-input-search" placeholder="Location..." [(ngModel)]="addressFilter" (ngModelChange)="onFilterChange()" />
+            </div>
           </div>
-        </div>
-      </section>
+      </app-filter-bar>
 
-      <!-- Loading & Empty States -->
-      <app-skeleton-loader *ngIf="loadingDoctors" type="doctor-card" [count]="6"></app-skeleton-loader>
+      <app-skeleton *ngIf="loadingDoctors" variant="card" [count]="6" wrapperClass="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></app-skeleton>
 
-      <div *ngIf="!loadingDoctors && doctors.length === 0" class="flex flex-col items-center justify-center min-h-[300px] text-gray-500 animate-fade-in">
-         <i class="fa-regular fa-face-frown text-4xl mb-3 opacity-50"></i>
-         <p>No doctors found matching your criteria.</p>
-         <button class="mt-4 text-blue-400 hover:text-blue-300 text-sm hover:underline" (click)="resetFilters()">Clear Filters</button>
-      </div>
+      <app-empty-state
+        *ngIf="!loadingDoctors && doctors.length === 0"
+        icon="fa-solid fa-face-frown"
+        title="No doctors found"
+        message="No doctors found matching your criteria."
+        [hasAction]="true"
+      >
+        <button type="button" class="text-blue-500 hover:text-blue-400 text-sm hover:underline min-h-touch px-3" (click)="resetFilters()">Clear Filters</button>
+      </app-empty-state>
 
       <!-- Doctors Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in" *ngIf="!loadingDoctors && doctors.length > 0">
-        <div class="panel p-5 cursor-pointer relative group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10 border border-gray-800 hover:border-blue-500/30 flex flex-col"
-          *ngFor="let d of doctors" (click)="openDoctor(d)">
+        <div class="panel p-5 cursor-pointer relative group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10 border border-gray-800 hover:border-blue-500/30 flex flex-col focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+          *ngFor="let d of doctors" (click)="openDoctor(d)" (keydown.enter)="openDoctor(d)" (keydown.space)="$event.preventDefault(); openDoctor(d)" tabindex="0" role="button" [attr.aria-label]="'View profile for ' + formatDoctorName(d)">
           
           <!-- Rating Badge -->
           <div class="absolute top-3 right-3 text-xs font-bold bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1 border border-white/10 shadow-sm z-10" *ngIf="ratings[d.id] as r">
@@ -112,7 +108,7 @@ import { SkeletonLoaderComponent } from '../../shared/skeleton.component';
           <div class="flex items-start gap-4 mb-4">
              <div class="relative shrink-0">
                 <div class="w-16 h-16 rounded-full overflow-hidden ring-2 ring-gray-700 group-hover:ring-blue-500 transition-colors bg-gray-800 flex items-center justify-center">
-                  <img *ngIf="d.profileImageUrl" [src]="d.profileImageUrl" class="w-full h-full object-cover" (error)="d.profileImageUrl = ''" />
+                  <img *ngIf="d.profileImageUrl" [src]="d.profileImageUrl" [alt]="formatDoctorName(d) + ' profile photo'" class="w-full h-full object-cover" (error)="d.profileImageUrl = ''" />
                   <span *ngIf="!d.profileImageUrl" class="text-xl font-bold text-gray-400">{{ doctorInitial(d) }}</span>
                 </div>
                 <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[8px] px-1.5 py-0.5 rounded-full flex items-center gap-1 shadow-md border border-gray-900 group-hover:scale-105 transition-all z-20" *ngIf="d.isVerified" title="Verified">
@@ -151,7 +147,7 @@ import { SkeletonLoaderComponent } from '../../shared/skeleton.component';
 
     <!-- Fixed Bottom Pagination Bar (Constrained to Main Content Column) -->
     <div *ngIf="!loadingDoctors && totalDoctorsCount > 0"
-      class="fixed bottom-16 md:bottom-0 left-0 md:left-64 right-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 shadow-2xl px-4 sm:px-8 py-2 flex items-center justify-between transition-all">
+      class="fixed left-0 md:left-64 right-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 shadow-2xl px-4 sm:px-8 py-2 flex items-center justify-between transition-all fixed-above-mobile-nav safe-bottom">
       
       <div class="flex items-center gap-3 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
         <span class="font-medium">

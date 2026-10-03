@@ -65,13 +65,13 @@ export class SessionExpiredComponent {
   goToLogin() {
     // Clear any remaining tokens
     this.authService.logout();
-    this.router.navigate(['/auth/login']);
+    this.router.navigate(['/login']);
   }
 
   goToRegister() {
     // Clear any remaining tokens
     this.authService.logout();
-    this.router.navigate(['/auth/register']);
+    this.router.navigate(['/register']);
   }
 
   goToHome() {

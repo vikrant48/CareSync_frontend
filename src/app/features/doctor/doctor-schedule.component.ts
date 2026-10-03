@@ -12,6 +12,9 @@ import { PatientProfileService, PatientDto, MedicalHistoryItem, MedicalHistoryWi
 import { AuthService } from '../../core/services/auth.service';
 import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.component';
 import { SelectDropdownComponent } from '../../shared/select-dropdown.component';
+import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
+import { SkeletonComponent } from '../../shared/ui/skeleton.component';
+import { FilterBarComponent } from '../../shared/ui/filter-bar.component';
 
 @Component({
     selector: 'app-doctor-schedule',
@@ -26,7 +29,10 @@ import { SelectDropdownComponent } from '../../shared/select-dropdown.component'
         MedicalHistoryDetailModalComponent,
         MedicalHistoryFormModalComponent,
         SharedChatModalComponent,
-        SelectDropdownComponent
+        SelectDropdownComponent,
+        EmptyStateComponent,
+        SkeletonComponent,
+        FilterBarComponent
     ],
     template: `
     <app-doctor-layout>
@@ -35,7 +41,7 @@ import { SelectDropdownComponent } from '../../shared/select-dropdown.component'
         <!-- Header -->
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
           <div>
-            <h2 class="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">My Schedule</h2>
+            <h2 class="font-display text-lg sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">My Schedule</h2>
             <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mt-0.5">Manage your daily appointments and patient flow</p>
           </div>
           <div class="flex items-center gap-2 sm:gap-3 self-end sm:self-auto">
@@ -48,44 +54,50 @@ import { SelectDropdownComponent } from '../../shared/select-dropdown.component'
           </div>
         </div>
 
-        <!-- Toolbar (Minimized Filter Card) -->
-        <div class="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-2.5 sm:gap-4">
-           
-           <!-- Search -->
-           <div class="relative w-full sm:max-w-xs">
-             <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs sm:text-sm"></i>
-             <input type="text" [(ngModel)]="searchTerm" placeholder="Search patient..." class="w-full pl-9 pr-3 py-1.5 sm:py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+        <app-filter-bar
+          [(expanded)]="isFilterExpanded"
+          [activeCount]="scheduleFilterActiveCount"
+          gridClass="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"
+          (clear)="resetFilters()"
+        >
+           <div class="space-y-0.5">
+             <label class="filter-label">Search</label>
+             <div class="relative w-full">
+               <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs sm:text-sm pointer-events-none z-10"></i>
+               <input type="text" [(ngModel)]="searchTerm" placeholder="Search patient name..." class="filter-input-search">
+             </div>
            </div>
 
-           <!-- Filter -->
-           <div class="flex items-center gap-2 w-full sm:w-auto">
-             <label class="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider shrink-0">Filter Status:</label>
+           <div class="space-y-0.5">
              <app-select-dropdown
+               label="Status"
                [(ngModel)]="filterStatus"
                [options]="statusFilterOptions"
                (ngModelChange)="cdr.detectChanges()"
-               placeholder="All Appointments"
-               class="flex-1 sm:flex-initial sm:min-w-[160px]">
+               placeholder="All Appointments">
              </app-select-dropdown>
            </div>
-        </div>
+        </app-filter-bar>
 
-        <!-- Content -->
-        <div *ngIf="loading" class="flex flex-col items-center justify-center py-12 sm:py-20 text-gray-400 animate-in fade-in">
-           <i class="fa-solid fa-circle-notch fa-spin text-2xl sm:text-3xl mb-2 text-blue-500"></i>
-           <p class="text-xs sm:text-sm">Loading schedule...</p>
-        </div>
+        <app-skeleton *ngIf="loading" variant="card" [count]="6" wrapperClass="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></app-skeleton>
 
-        <div *ngIf="!loading && filteredAppointments().length === 0" class="flex flex-col items-center justify-center py-10 sm:py-16 text-center animate-in fade-in zoom-in duration-300">
-           <div class="w-14 h-14 sm:w-20 sm:h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-400 mb-3 shadow-inner">
-             <i class="fa-regular fa-calendar-xmark text-2xl sm:text-3xl"></i>
-           </div>
-           <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-1">No appointments found</h3>
-           <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
-             {{ filterStatus !== 'ALL' || searchTerm ? 'Try adjusting your filters or search terms.' : 'You have no appointments scheduled for today.' }}
-           </p>
-           <button *ngIf="filterStatus !== 'ALL' || searchTerm" (click)="resetFilters()" class="mt-4 text-xs sm:text-sm text-blue-600 font-bold hover:underline">Clear Filters</button>
-        </div>
+        <app-empty-state
+          *ngIf="!loading && filteredAppointments().length === 0 && (filterStatus !== 'ALL' || searchTerm)"
+          icon="fa-solid fa-calendar-xmark"
+          title="No appointments found"
+          message="Try adjusting your filters or search terms."
+          [compact]="true"
+          [hasAction]="true"
+        >
+          <button type="button" (click)="resetFilters()" class="mt-2 text-xs sm:text-sm text-blue-600 font-bold hover:underline min-h-touch px-3">Clear Filters</button>
+        </app-empty-state>
+        <app-empty-state
+          *ngIf="!loading && filteredAppointments().length === 0 && filterStatus === 'ALL' && !searchTerm"
+          icon="fa-solid fa-calendar-xmark"
+          title="No appointments found"
+          message="You have no appointments scheduled for today."
+          [compact]="true"
+        ></app-empty-state>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in slide-in-from-bottom-4 fade-in" *ngIf="!loading && filteredAppointments().length > 0">
            <doctor-appointment-card
@@ -162,6 +174,14 @@ export class DoctorScheduleComponent implements OnInit {
     statusFilterOptions: string[] = ['ALL', 'BOOKED', 'SCHEDULED', 'CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
     filterStatus: string = 'ALL';
     searchTerm: string = '';
+    isFilterExpanded = false;
+
+    get scheduleFilterActiveCount(): number {
+        let count = 0;
+        if (this.filterStatus !== 'ALL') count++;
+        if (this.searchTerm) count++;
+        return count;
+    }
 
     // Modal State
     showPatientModal = false;

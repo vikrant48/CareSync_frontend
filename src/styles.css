@@ -6,13 +6,39 @@
 @tailwind components;
 @tailwind utilities;
 
-/* App baseline styles */
+/* ============================================================
+   CareSync design tokens
+   Primary brand = blue
+   Accent = teal (secondary / success companion)
+   ============================================================ */
 :root {
   --bg: #0b1220;
   --panel: #111827;
   --text: #e5e7eb;
   --muted: #9ca3af;
-  --primary: #22c55e;
+  --border: #1f2937;
+
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-deep: #4f46e5;
+  --primary-soft: rgba(37, 99, 235, 0.12);
+  --primary-muted: rgba(37, 99, 235, 0.22);
+  --primary-fg: #ffffff;
+  --primary-shadow: rgba(37, 99, 235, 0.28);
+
+  --accent: #0d9488;
+  --accent-hover: #0f766e;
+  --accent-soft: rgba(13, 148, 136, 0.12);
+
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+  --danger-soft: rgba(239, 68, 68, 0.12);
+
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --touch-min: 44px;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
 }
 
 html,
@@ -25,28 +51,136 @@ body {
 app-root {
   display: block;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
-::-webkit-scrollbar {
-  display: none;
+/* Display titles (dashboards / page headers) */
+.font-display,
+h1,
+h2,
+.app-title {
+  font-family: Outfit, ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.02em;
 }
 
-/* Hide scrollbar for IE, Edge and Firefox */
-html,
-body {
-  -ms-overflow-style: none;
-  /* IE and Edge */
-  scrollbar-width: none;
-  /* Firefox */
+/* Prefer custom scrollbars on overflow regions; keep page chrome clean */
+.custom-scrollbar {
+  scrollbar-width: thin;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+  display: block;
+}
+
+/* Safe-area helpers for fixed mobile chrome */
+.safe-bottom {
+  padding-bottom: var(--safe-bottom);
+}
+
+.safe-pb-nav {
+  padding-bottom: calc(4rem + var(--safe-bottom));
+}
+
+/* Primary CTA pinned above mobile bottom nav (+ safe-area) */
+.sticky-cta {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(4rem + var(--safe-bottom));
+  z-index: 40;
+  padding: 0.75rem 1rem;
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -8px 24px -12px rgba(0, 0, 0, 0.35);
+}
+
+@media (min-width: 768px) {
+  .sticky-cta {
+    position: static;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    z-index: auto;
+    padding: 0;
+    background: transparent;
+    backdrop-filter: none;
+    border-top: 0;
+    box-shadow: none;
+  }
+}
+
+/* Modal footers: keep CTA visible with home-indicator safe padding */
+.modal-sticky-footer {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.touch-target {
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+}
+
+/* Icon action buttons: always visible on touch, hover-reveal on fine pointers */
+.action-reveal {
+  opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .action-reveal {
+    opacity: 0;
+  }
+
+  .group:hover .action-reveal,
+  .group:focus-within .action-reveal {
+    opacity: 1;
+  }
+}
+
+/* Brand utility helpers (usable without rewriting every Tailwind class) */
+.bg-brand {
+  background-color: var(--primary);
+}
+
+.bg-brand-soft {
+  background-color: var(--primary-soft);
+}
+
+.text-brand {
+  color: var(--primary);
+}
+
+.border-brand {
+  border-color: var(--primary);
+}
+
+.ring-brand {
+  --tw-ring-color: var(--primary);
+}
+
+.focus-brand:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--primary-muted);
+  border-color: var(--primary);
+}
+
+.bg-brand-gradient {
+  background-image: linear-gradient(135deg, var(--primary) 0%, var(--primary-deep) 100%);
+}
+
+.bg-brand-hero {
+  background-image: linear-gradient(90deg, var(--primary) 0%, var(--primary-deep) 100%);
 }
 
 /* Refined Panel for 'Clean' look */
@@ -59,12 +193,221 @@ body {
   @apply bg-gray-800/50 rounded-lg p-4 transition-all duration-300 hover:bg-gray-800 hover:shadow-md;
 }
 
-.btn-primary {
-  @apply inline-flex items-center justify-center rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-medium px-4 py-2 transition min-h-[44px] active:scale-95 shadow-lg shadow-emerald-500/20;
+/* Shared surface used across patient/doctor lists (light + dark) */
+.ui-panel {
+  @apply bg-white dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700/60 rounded-xl sm:rounded-2xl shadow-sm;
 }
 
-.btn-secondary {
-  @apply inline-flex items-center justify-center rounded-lg bg-gray-700 hover:bg-gray-600 text-white font-medium px-4 py-2 transition min-h-[44px] active:scale-95 border border-gray-600;
+.ui-panel-hover {
+  @apply bg-white dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700/60 rounded-xl sm:rounded-2xl shadow-sm transition-all duration-200;
+}
+
+.ui-panel-hover:hover {
+  border-color: color-mix(in srgb, var(--primary) 40%, transparent);
+  box-shadow: 0 10px 24px -12px var(--primary-shadow);
+}
+
+/* ---- Form field system ---- */
+.form-label {
+  @apply block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5;
+}
+
+.form-hint {
+  @apply text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-1;
+}
+
+.form-error {
+  @apply text-red-500 text-xs mt-1;
+}
+
+.form-input {
+  @apply w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 px-3.5 py-2.5 text-xs sm:text-sm min-h-[44px] transition-all outline-none;
+}
+
+.form-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-muted);
+}
+
+.form-input.is-error,
+.form-input.error {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px var(--danger-soft);
+}
+
+/* ---- Status chips (unified language) ---- */
+.status-badge {
+  @apply inline-flex items-center px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold tracking-wide uppercase border shadow-sm whitespace-nowrap;
+}
+
+.status-badge--success {
+  @apply bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25;
+}
+
+.status-badge--warning {
+  @apply bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/25;
+}
+
+.status-badge--info {
+  @apply bg-sky-500/10 text-sky-700 dark:text-sky-400 border-sky-500/25;
+}
+
+.status-badge--danger {
+  @apply bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/25;
+}
+
+.status-badge--neutral {
+  @apply bg-gray-500/10 text-gray-600 dark:text-gray-300 border-gray-500/20;
+}
+
+/* ---- Skeleton loaders ---- */
+.skeleton-line,
+.skeleton-circle {
+  @apply bg-gray-200 dark:bg-gray-700/80 rounded;
+  background-image: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.35),
+      transparent);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+body.theme-dark .skeleton-line,
+body.dark .skeleton-line,
+body.theme-dark .skeleton-circle,
+body.dark .skeleton-circle,
+.dark .skeleton-line,
+.dark .skeleton-circle {
+  background-image: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.06),
+      transparent);
+}
+
+.skeleton-circle {
+  @apply rounded-full;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ---- Motion polish ---- */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up-soft {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in-soft {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.28s ease-out both;
+}
+
+.animate-slide-up {
+  animation: slide-up-soft 0.32s ease-out both;
+}
+
+.animate-scale-in {
+  animation: scale-in-soft 0.28s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-scale-in,
+  .skeleton-line,
+  .skeleton-circle {
+    animation: none !important;
+  }
+}
+
+/* ---- Unified button system (primary = emerald brand) ---- */
+.btn-primary,
+.btn-modern-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl text-white font-semibold px-4 py-2.5 transition min-h-[44px] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  background-color: var(--primary);
+  box-shadow: 0 10px 20px -8px var(--primary-shadow);
+}
+
+.btn-primary:hover,
+.btn-modern-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-secondary,
+.btn-modern-secondary {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold px-4 py-2.5 transition min-h-[44px] active:scale-95 border;
+  background-color: rgba(55, 65, 81, 0.9);
+  color: #fff;
+  border-color: #4b5563;
+}
+
+.btn-secondary:hover,
+.btn-modern-secondary:hover {
+  background-color: #4b5563;
+}
+
+body.theme-light .btn-secondary,
+body.light .btn-secondary,
+body.theme-light .btn-modern-secondary,
+body.light .btn-modern-secondary {
+  background-color: #fff;
+  color: #374151;
+  border-color: #e5e7eb;
+}
+
+body.theme-light .btn-secondary:hover,
+body.light .btn-secondary:hover,
+body.theme-light .btn-modern-secondary:hover,
+body.light .btn-modern-secondary:hover {
+  background-color: #f9fafb;
+}
+
+.btn-danger,
+.btn-modern-danger {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold px-4 py-2 transition min-h-[44px] active:scale-95;
+  background-color: var(--danger-soft);
+  color: var(--danger);
+}
+
+.btn-danger:hover,
+.btn-modern-danger:hover {
+  background-color: rgba(239, 68, 68, 0.2);
 }
 
 .btn-sm {
@@ -72,19 +415,41 @@ body {
 }
 
 .link {
-  @apply text-emerald-400 hover:text-emerald-300 underline underline-offset-2;
+  color: var(--primary);
+  @apply underline underline-offset-2;
+}
+
+.link:hover {
+  color: var(--primary-hover);
 }
 
 .input,
 select.input {
-  @apply w-full rounded-lg border border-gray-700 bg-gray-800/60 px-3 py-2 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[44px] transition-all focus:border-emerald-500 cursor-pointer;
+  @apply w-full rounded-lg border px-3 py-2 min-h-[44px] transition-all cursor-pointer;
+  background: rgba(31, 41, 55, 0.6);
+  border-color: #374151;
+  color: #f3f4f6;
+}
+
+.input::placeholder {
+  color: #6b7280;
+}
+
+.input:focus,
+select.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-muted);
 }
 
 /* Light theme overrides */
 body.theme-light,
 body.light {
   --bg: #f8fafc;
+  --panel: #ffffff;
   --text: #111827;
+  --muted: #6b7280;
+  --border: #e5e7eb;
 }
 
 body.theme-light .input,
@@ -100,37 +465,31 @@ body.light select.input {
 body.theme-dark,
 body.dark {
   --bg: #0b1220;
+  --panel: #111827;
   --text: #e5e7eb;
+  --muted: #9ca3af;
+  --border: #1f2937;
 }
 
-/* Medical Theme - Modern UI Components */
+/* Modern inputs — now brand-aligned (was blue) */
 .input-modern,
 select.input-modern {
-  @apply block w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all duration-200 outline-none cursor-pointer;
+  @apply block w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-all duration-200 outline-none cursor-pointer;
+}
+
+.input-modern:focus,
+select.input-modern:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-soft);
 }
 
 .input-modern.error {
-  @apply border-red-500 focus:ring-red-500 focus:border-red-500;
-}
-
-.btn-modern-primary {
-  @apply px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2;
-}
-
-.btn-modern-secondary {
-  @apply px-5 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all active:scale-95 flex items-center justify-center gap-2;
-}
-
-.btn-modern-danger {
-  @apply px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-bold rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-all active:scale-95;
+  @apply border-red-500;
+  box-shadow: 0 0 0 3px var(--danger-soft);
 }
 
 .error-msg {
   @apply text-red-500 text-xs mt-1 ml-1;
-}
-
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -139,4 +498,54 @@ select.input-modern {
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
   @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+}
+
+/* Sticky pagination / fixed bars that clear mobile bottom nav + home indicator */
+.fixed-above-mobile-nav {
+  bottom: calc(4rem + var(--safe-bottom));
+}
+
+@media (min-width: 768px) {
+  .fixed-above-mobile-nav {
+    bottom: 0;
+  }
+}
+
+/* Active nav chip using brand tokens */
+.nav-active {
+  background-color: var(--primary-soft);
+  color: var(--primary);
+}
+
+/* ============================================================
+   Unified Filter Controls System (44px height & label alignment)
+   ============================================================ */
+.filter-label {
+  @apply block text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1 leading-tight;
+}
+
+.filter-control-height {
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+}
+
+.filter-input-search {
+  height: 44px !important;
+  min-height: 44px !important;
+  @apply w-full pl-10 pr-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs sm:text-sm font-medium text-gray-900 dark:text-white transition-all outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 placeholder:text-gray-400 dark:placeholder:text-gray-500 flex items-center;
+}
+
+.filter-time-range-container {
+  height: 44px !important;
+  min-height: 44px !important;
+  @apply flex items-center bg-gray-100 dark:bg-gray-800/90 p-1 rounded-xl border border-gray-200 dark:border-gray-700 w-full;
+}
+
+.filter-time-range-btn {
+  @apply flex-1 h-full flex items-center justify-center rounded-lg text-xs font-medium transition-all px-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white select-none cursor-pointer;
+}
+
+.filter-time-range-btn.is-active {
+  @apply bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm font-bold;
 }

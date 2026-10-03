@@ -5,11 +5,12 @@ import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 import { AuthService } from '../../core/services/auth.service';
 import { DoctorProfileService, DocumentItem } from '../../core/services/doctor-profile.service';
 import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropdown.component';
+import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 
 @Component({
   selector: 'app-doctor-documents',
   standalone: true,
-  imports: [CommonModule, FormsModule, DoctorLayoutComponent, SelectDropdownComponent],
+  imports: [CommonModule, FormsModule, DoctorLayoutComponent, SelectDropdownComponent, EmptyStateComponent],
   templateUrl: './doctor-document.component.html',
   styleUrl: './doctor-document.component.css'
 })

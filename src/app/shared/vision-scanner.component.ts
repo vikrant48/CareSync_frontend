@@ -2,17 +2,27 @@ import { Component, EventEmitter, Input, Output, inject, signal, ChangeDetectorR
 import { CommonModule } from '@angular/common';
 import { AiAssistantService } from '../core/services/ai-assistant.service';
 import { VisionScanResponse } from '../core/models/ai.models';
+import { ModalShellComponent } from './ui/modal-shell.component';
 
 @Component({
     selector: 'app-vision-scanner',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, ModalShellComponent],
     template: `
-    <div class="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-xl overflow-y-auto">
-      <div class="relative w-full max-w-3xl my-auto bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden text-slate-100 flex flex-col max-h-[90vh] transition-all">
-        
-        <!-- Header -->
-        <div class="px-6 py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-between text-white shrink-0 border-b border-white/10">
+    <app-modal-shell
+      [open]="true"
+      [showHeader]="false"
+      [hasFooter]="true"
+      maxWidthClass="max-w-3xl"
+      zIndexClass="z-[100]"
+      panelClass="bg-slate-900 border border-slate-800 rounded-3xl text-slate-100"
+      bodyClass="p-5 sm:p-7 space-y-6"
+      footerClass="px-6 py-4 bg-slate-900 border-t border-slate-800"
+      ariaLabel="Vision scanner"
+      backdropClass="bg-slate-950/80"
+      (close)="closeModal.emit()"
+    >
+        <div modalHeader class="px-6 py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-between text-white shrink-0 border-b border-white/10">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center text-xl shadow-inner">
               ✨
@@ -27,9 +37,6 @@ import { VisionScanResponse } from '../core/models/ai.models';
           </button>
         </div>
 
-        <!-- Body Scroll Area -->
-        <div class="p-5 sm:p-7 space-y-6 overflow-y-auto flex-1 custom-scrollbar">
-          
           <!-- Upload Dropzone (When no result and not scanning) -->
           <div *ngIf="!scanResult() && !isScanning()" 
                (dragover)="onDragOver($event)" 
@@ -139,7 +146,20 @@ import { VisionScanResponse } from '../core/models/ai.models';
               <h5 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
                 <i class="fas fa-pills text-purple-400"></i> Extracted Medications ({{ scanResult()!.medications!.length }})
               </h5>
-              <div class="overflow-x-auto rounded-2xl border border-slate-800 shadow-md">
+              <!-- Mobile cards -->
+              <div class="md:hidden space-y-2">
+                <article *ngFor="let med of scanResult()!.medications" class="rounded-xl border border-slate-800 bg-slate-900/60 p-3 space-y-2">
+                  <div class="font-bold text-purple-400 text-sm">{{ med.name }}</div>
+                  <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div><span class="text-slate-500 block text-[10px] uppercase">Dosage</span><span class="font-mono text-slate-300">{{ med.dosage || '-' }}</span></div>
+                    <div><span class="text-slate-500 block text-[10px] uppercase">Frequency</span><span class="text-slate-300">{{ med.frequency || '-' }}</span></div>
+                    <div><span class="text-slate-500 block text-[10px] uppercase">Duration</span><span class="text-slate-300">{{ med.duration || '-' }}</span></div>
+                    <div class="col-span-2"><span class="text-slate-500 block text-[10px] uppercase">Instructions</span><span class="text-slate-400 italic">{{ med.instructions || '-' }}</span></div>
+                  </div>
+                </article>
+              </div>
+              <!-- Desktop table -->
+              <div class="hidden md:block overflow-x-auto rounded-2xl border border-slate-800 shadow-md">
                 <table class="w-full text-left text-xs">
                   <thead class="bg-slate-800/90 font-semibold text-slate-300">
                     <tr>
@@ -168,7 +188,28 @@ import { VisionScanResponse } from '../core/models/ai.models';
               <h5 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
                 <i class="fas fa-microscope text-emerald-400"></i> Extracted Lab Test Metrics ({{ scanResult()!.labResults!.length }})
               </h5>
-              <div class="overflow-x-auto rounded-2xl border border-slate-800 shadow-md">
+              <!-- Mobile cards -->
+              <div class="md:hidden space-y-2">
+                <article *ngFor="let lab of scanResult()!.labResults" class="rounded-xl border border-slate-800 bg-slate-900/60 p-3 space-y-2">
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="font-medium text-slate-200 text-sm">{{ lab.testName }}</div>
+                    <span class="shrink-0 px-2.5 py-0.5 rounded text-[10px] font-bold uppercase"
+                          [ngClass]="{
+                            'bg-emerald-900/50 text-emerald-300 border border-emerald-700/50': lab.status === 'NORMAL',
+                            'bg-rose-900/50 text-rose-300 border border-rose-700/50': lab.status === 'HIGH' || lab.status === 'ABNORMAL',
+                            'bg-amber-900/50 text-amber-300 border border-amber-700/50': lab.status === 'LOW'
+                          }">
+                      {{ lab.status || 'NORMAL' }}
+                    </span>
+                  </div>
+                  <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div><span class="text-slate-500 block text-[10px] uppercase">Result</span><span class="font-bold font-mono text-slate-100">{{ lab.resultValue || '-' }}</span></div>
+                    <div><span class="text-slate-500 block text-[10px] uppercase">Reference</span><span class="font-mono text-slate-400">{{ lab.referenceRange || '-' }}</span></div>
+                  </div>
+                </article>
+              </div>
+              <!-- Desktop table -->
+              <div class="hidden md:block overflow-x-auto rounded-2xl border border-slate-800 shadow-md">
                 <table class="w-full text-left text-xs">
                   <thead class="bg-slate-800/90 font-semibold text-slate-300">
                     <tr>
@@ -200,10 +241,9 @@ import { VisionScanResponse } from '../core/models/ai.models';
             </div>
 
           </div>
-        </div>
 
         <!-- Footer Actions -->
-        <div class="px-6 py-4 bg-slate-900 border-t border-slate-800 flex items-center justify-between shrink-0">
+        <div modalFooter class="flex items-center justify-between w-full">
           <button type="button" *ngIf="scanResult()" (click)="resetScanner()" class="px-4 py-2 rounded-xl border border-slate-700 text-xs font-semibold text-slate-300 hover:bg-slate-800 transition-colors">
             <i class="fas fa-redo mr-1.5"></i> Scan Another
           </button>
@@ -218,8 +258,7 @@ import { VisionScanResponse } from '../core/models/ai.models';
           </div>
         </div>
 
-      </div>
-    </div>
+    </app-modal-shell>
   `,
     styles: [`
     @keyframes scanLaser {

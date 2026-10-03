@@ -374,13 +374,13 @@
                     <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">{{ e.yearOfCompletion }}</p>
                   </div>
                 </div>
-                <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button (click)="startEditEducation(e)"
-                    class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 flex items-center justify-center transition-colors">
+                <div class="flex gap-1 action-reveal transition-opacity">
+                  <button type="button" (click)="startEditEducation(e)" aria-label="Edit education"
+                    class="w-11 h-11 sm:w-9 sm:h-9 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 flex items-center justify-center transition-colors touch-target">
                     <i class="fa-solid fa-pen text-xs"></i>
                   </button>
-                  <button (click)="deleteEducation(e)"
-                    class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center transition-colors">
+                  <button type="button" (click)="deleteEducation(e)" aria-label="Delete education"
+                    class="w-11 h-11 sm:w-9 sm:h-9 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center transition-colors touch-target">
                     <i class="fa-solid fa-trash-can text-xs"></i>
                   </button>
                 </div>
@@ -481,13 +481,13 @@
                       Experience</p>
                   </div>
                 </div>
-                <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button (click)="startEditExperience(x)"
-                    class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center justify-center transition-colors">
+                <div class="flex gap-1 action-reveal transition-opacity">
+                  <button type="button" (click)="startEditExperience(x)" aria-label="Edit experience"
+                    class="w-11 h-11 sm:w-9 sm:h-9 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center justify-center transition-colors touch-target">
                     <i class="fa-solid fa-pen text-xs"></i>
                   </button>
-                  <button (click)="deleteExperience(x)"
-                    class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center transition-colors">
+                  <button type="button" (click)="deleteExperience(x)" aria-label="Delete experience"
+                    class="w-11 h-11 sm:w-9 sm:h-9 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center transition-colors touch-target">
                     <i class="fa-solid fa-trash-can text-xs"></i>
                   </button>
                 </div>

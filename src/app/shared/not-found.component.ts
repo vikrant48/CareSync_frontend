@@ -17,7 +17,7 @@ import { AuthService } from '../core/services/auth.service';
         
         <!-- Header Logo -->
         <div class="flex items-center justify-center gap-2 mb-2">
-          <div class="w-10 h-10 bg-emerald-500/20 border border-emerald-500/30 rounded-xl flex items-center justify-center text-emerald-400 text-lg shadow-lg shadow-emerald-500/10">
+          <div class="w-10 h-10 bg-emerald-500/20 border border-emerald-500/30 rounded-xl flex items-center justify-center text-emerald-400 text-lg shadow-lg shadow-blue-500/10">
             <i class="fa-solid fa-heart-pulse"></i>
           </div>
           <span class="text-xl font-black tracking-tight text-white uppercase">Care<span class="text-emerald-400">Sync</span></span>
@@ -28,7 +28,7 @@ import { AuthService } from '../core/services/auth.service';
           <h1 class="text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 tracking-tighter drop-shadow-2xl select-none">
             404
           </h1>
-          <div class="w-24 h-1 bg-gradient-to-r from-emerald-500 to-teal-400 mx-auto rounded-full mt-2 shadow-lg shadow-emerald-500/50"></div>
+          <div class="w-24 h-1 bg-gradient-to-r from-blue-500 to-indigo-400 mx-auto rounded-full mt-2 shadow-lg shadow-blue-500/50"></div>
         </div>
 
         <!-- Message -->
@@ -42,7 +42,7 @@ import { AuthService } from '../core/services/auth.service';
         <!-- Dynamic Action Buttons -->
         <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
           <button (click)="navigateHome()" 
-                  class="w-full sm:w-auto px-7 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-900/30 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2">
+                  class="w-full sm:w-auto px-7 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-900/30 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2">
             <i class="fa-solid fa-house text-xs"></i>
             {{ getHomeButtonText() }}
           </button>
