@@ -17,6 +17,28 @@ export interface BlockedIP {
   expiresAt?: string;
 }
 
+export interface AdminDoctorListItem {
+  id: number;
+  username: string;
+  firstName: string;
+  lastName: string;
+  name: string;
+  specialization: string;
+  isVerified: boolean;
+  isActive: boolean;
+}
+
+export interface AdminDoctorPagedResponse {
+  content: AdminDoctorListItem[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+  empty: boolean;
+  totalVerifiedCount?: number;
+  totalPendingCount?: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AdminService {
   private baseUrl = environment.apiBaseUrl;
@@ -27,8 +49,19 @@ export class AdminService {
     return this.http.get<UserSummary[]>(`${this.baseUrl}/api/admin/users`);
   }
 
-  getAllDoctors() {
-    return this.http.get<Doctor[]>(`${this.baseUrl}/api/admin/doctors`);
+  getAdminDoctors(page: number = 0, size: number = 30, search?: string, isVerified?: boolean | string) {
+    let params: string[] = [`page=${page}`, `size=${size}`];
+    if (search && search.trim()) {
+      params.push(`search=${encodeURIComponent(search.trim())}`);
+    }
+    if (isVerified !== undefined && isVerified !== null && isVerified !== 'ALL') {
+      params.push(`isVerified=${isVerified === true || isVerified === 'true'}`);
+    }
+    return this.http.get<AdminDoctorPagedResponse>(`${this.baseUrl}/api/admin/doctors?${params.join('&')}`);
+  }
+
+  getDoctorDetails(doctorId: number | string) {
+    return this.http.get<Doctor>(`${this.baseUrl}/api/admin/doctors/${doctorId}`);
   }
 
   toggleUserActiveStatus(username: string) {
@@ -69,5 +102,12 @@ export class AdminService {
       value,
       orgId
     });
+  }
+
+  changeUserPassword(userId: number, newPassword: string, confirmPassword: string) {
+    return this.http.put<{ message: string; username: string; userId: number }>(
+      `${this.baseUrl}/api/admin/users/${userId}/password`,
+      { newPassword, confirmPassword }
+    );
   }
 }

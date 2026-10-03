@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AdminService, UserSummary, BlockedIP } from '../../core/services/admin.service';
+import { AdminService, UserSummary, BlockedIP, AdminDoctorListItem } from '../../core/services/admin.service';
 import { DoctorService, Doctor } from '../../core/services/doctor.service';
 import { DoctorProfileService } from '../../core/services/doctor-profile.service';
 import { MasterDataService } from '../../core/services/master-data.service';
@@ -33,14 +33,23 @@ export class AdminDashboardComponent implements OnInit {
   selectedRoleFilter = 'ALL';
   togglingUsername: string | null = null;
 
-  doctors: Doctor[] = [];
+  doctors: AdminDoctorListItem[] = [];
   doctorSearch = '';
+  selectedDoctorVerificationFilter: 'ALL' | 'VERIFIED' | 'UNVERIFIED' = 'ALL';
+  doctorPage = 0;
+  doctorSize = 30;
+  doctorTotalElements = 0;
+  doctorTotalPages = 0;
+  totalVerifiedDoctorsCount = 0;
+  totalPendingDoctorsCount = 0;
+  private doctorSearchTimeout: any = null;
+
   loadingUsers = true;
   loadingDoctors = true;
   verifyingDoctorId: number | null = null;
 
   // Doctor Detail Modal State
-  selectedDoctor: Doctor | null = null;
+  selectedDoctor: any = null;
   selectedDoctorProfile: any = null;
   selectedDoctorExperiences: any[] = [];
   selectedDoctorEducations: any[] = [];
@@ -57,6 +66,14 @@ export class AdminDashboardComponent implements OnInit {
   // Master Data Delete Confirmation Modal State
   itemToDelete: string | null = null;
   isDeletingMaster = false;
+
+  // Password Reset Modal State
+  selectedUserForPasswordReset: UserSummary | null = null;
+  newPasswordInput = '';
+  confirmPasswordInput = '';
+  showNewPasswordText = false;
+  showConfirmPasswordText = false;
+  isSubmittingPasswordReset = false;
 
   ngOnInit() {
     this.loadUsers();
@@ -116,9 +133,17 @@ export class AdminDashboardComponent implements OnInit {
 
   loadDoctors() {
     this.loadingDoctors = true;
-    this.adminService.getAllDoctors().subscribe({
-      next: (data) => {
-        this.doctors = data;
+    let isVerFilter: boolean | string | undefined = undefined;
+    if (this.selectedDoctorVerificationFilter === 'VERIFIED') isVerFilter = true;
+    if (this.selectedDoctorVerificationFilter === 'UNVERIFIED') isVerFilter = false;
+
+    this.adminService.getAdminDoctors(this.doctorPage, this.doctorSize, this.doctorSearch, isVerFilter).subscribe({
+      next: (res) => {
+        this.doctors = res.content || [];
+        this.doctorTotalElements = res.totalElements || 0;
+        this.doctorTotalPages = res.totalPages || 0;
+        this.totalVerifiedDoctorsCount = res.totalVerifiedCount ?? 0;
+        this.totalPendingDoctorsCount = res.totalPendingCount ?? 0;
         this.loadingDoctors = false;
       },
       error: (err) => {
@@ -128,31 +153,63 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
+  onDoctorSearchChange() {
+    if (this.doctorSearchTimeout) {
+      clearTimeout(this.doctorSearchTimeout);
+    }
+    this.doctorSearchTimeout = setTimeout(() => {
+      this.doctorPage = 0;
+      this.loadDoctors();
+    }, 300);
+  }
+
+  onDoctorVerificationFilterChange() {
+    this.doctorPage = 0;
+    this.loadDoctors();
+  }
+
+  goToDoctorPage(page: number) {
+    if (page >= 0 && page < this.doctorTotalPages) {
+      this.doctorPage = page;
+      this.loadDoctors();
+    }
+  }
+
   get doctorFilterActiveCount(): number {
-    return this.doctorSearch ? 1 : 0;
+    let count = 0;
+    if (this.doctorSearch) count++;
+    if (this.selectedDoctorVerificationFilter !== 'ALL') count++;
+    return count;
   }
 
   clearDoctorFilters() {
     this.doctorSearch = '';
+    this.selectedDoctorVerificationFilter = 'ALL';
+    this.doctorPage = 0;
+    this.loadDoctors();
   }
 
-  get filteredDoctors(): Doctor[] {
-    return this.doctors.filter((d) => {
-      const q = this.doctorSearch.toLowerCase();
-      const name = `${d.firstName || ''} ${d.lastName || ''} ${d.username || ''} ${d.specialization || ''}`.toLowerCase();
-      return !q || name.includes(q);
-    });
+  get filteredDoctors(): AdminDoctorListItem[] {
+    return this.doctors;
   }
 
   get verifiedDoctorCount(): number {
-    return this.doctors.filter((d) => d.isVerified).length;
+    return this.totalVerifiedDoctorsCount;
   }
 
-  toggleDoctorVerification(doc: Doctor, verify: boolean) {
+  toggleDoctorVerification(doc: AdminDoctorListItem, verify: boolean) {
+    const prevVerified = doc.isVerified;
     this.verifyingDoctorId = doc.id;
     this.adminService.verifyDoctor(doc.id, verify).subscribe({
       next: (res) => {
         doc.isVerified = verify;
+        if (verify && !prevVerified) {
+          this.totalVerifiedDoctorsCount++;
+          this.totalPendingDoctorsCount = Math.max(0, this.totalPendingDoctorsCount - 1);
+        } else if (!verify && prevVerified) {
+          this.totalVerifiedDoctorsCount = Math.max(0, this.totalVerifiedDoctorsCount - 1);
+          this.totalPendingDoctorsCount++;
+        }
         this.verifyingDoctorId = null;
         this.toastService.showSuccess(res.message);
       },
@@ -163,47 +220,28 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  openDoctorModal(doc: Doctor) {
-    this.selectedDoctor = doc;
+  openDoctorModal(doc: AdminDoctorListItem) {
+    this.selectedDoctor = null;
     this.selectedDoctorProfile = doc;
     this.selectedDoctorExperiences = [];
     this.selectedDoctorEducations = [];
     this.selectedDoctorCertificates = [];
     this.loadingDoctorDetails = true;
 
-    if (doc.username) {
-      this.doctorProfileService.getProfile(doc.username).subscribe({
-        next: (profile) => {
-          this.selectedDoctorProfile = { ...doc, ...profile };
-        },
-        error: () => {
-          this.selectedDoctorProfile = doc;
-        }
-      });
-
-      this.doctorProfileService.getExperiences(doc.username).subscribe({
-        next: (exp) => (this.selectedDoctorExperiences = exp || []),
-        error: () => (this.selectedDoctorExperiences = [])
-      });
-
-      this.doctorProfileService.getEducations(doc.username).subscribe({
-        next: (edu) => (this.selectedDoctorEducations = edu || []),
-        error: () => (this.selectedDoctorEducations = [])
-      });
-
-      this.doctorProfileService.getCertificates(doc.username).subscribe({
-        next: (cert) => {
-          this.selectedDoctorCertificates = cert || [];
-          this.loadingDoctorDetails = false;
-        },
-        error: () => {
-          this.selectedDoctorCertificates = [];
-          this.loadingDoctorDetails = false;
-        }
-      });
-    } else {
-      this.loadingDoctorDetails = false;
-    }
+    this.adminService.getDoctorDetails(doc.id).subscribe({
+      next: (fullDoc: any) => {
+        this.selectedDoctor = fullDoc;
+        this.selectedDoctorProfile = fullDoc;
+        this.selectedDoctorExperiences = fullDoc.experiences || [];
+        this.selectedDoctorEducations = fullDoc.educations || [];
+        this.selectedDoctorCertificates = fullDoc.certificates || [];
+        this.loadingDoctorDetails = false;
+      },
+      error: (err) => {
+        this.loadingDoctorDetails = false;
+        this.toastService.showError('Failed to load doctor profile details');
+      }
+    });
   }
 
   closeDoctorModal() {
@@ -312,6 +350,74 @@ export class AdminDashboardComponent implements OnInit {
       },
       error: (err) => this.toastService.showError('Failed to unblock all IPs')
     });
+  }
+
+  openPasswordResetModal(user: UserSummary) {
+    this.selectedUserForPasswordReset = user;
+    this.newPasswordInput = '';
+    this.confirmPasswordInput = '';
+    this.showNewPasswordText = false;
+    this.showConfirmPasswordText = false;
+  }
+
+  closePasswordResetModal() {
+    this.selectedUserForPasswordReset = null;
+    this.newPasswordInput = '';
+    this.confirmPasswordInput = '';
+    this.isSubmittingPasswordReset = false;
+  }
+
+  submitPasswordReset() {
+    if (!this.selectedUserForPasswordReset) return;
+
+    if (!this.newPasswordInput || !this.confirmPasswordInput) {
+      this.toastService.showError('Please enter and confirm the new password');
+      return;
+    }
+
+    if (this.newPasswordInput !== this.confirmPasswordInput) {
+      this.toastService.showError('New password and confirm password do not match');
+      return;
+    }
+
+    const passwordRegex = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).{8,}$/;
+    if (!passwordRegex.test(this.newPasswordInput)) {
+      this.toastService.showError('Password must be at least 8 characters with 1 uppercase, 1 lowercase, 1 digit, and 1 special char');
+      return;
+    }
+
+    this.isSubmittingPasswordReset = true;
+    this.adminService.changeUserPassword(
+      this.selectedUserForPasswordReset.userId,
+      this.newPasswordInput,
+      this.confirmPasswordInput
+    ).subscribe({
+      next: (res) => {
+        this.isSubmittingPasswordReset = false;
+        this.toastService.showSuccess(res.message || 'Password changed successfully!');
+        this.closePasswordResetModal();
+      },
+      error: (err) => {
+        this.isSubmittingPasswordReset = false;
+        this.toastService.showError(err.error?.error || 'Failed to change password');
+      }
+    });
+  }
+
+  get totalUsersCount(): number {
+    return this.users.length;
+  }
+
+  get activeDoctorsCount(): number {
+    return this.totalVerifiedDoctorsCount;
+  }
+
+  get pendingDoctorsCount(): number {
+    return this.totalPendingDoctorsCount;
+  }
+
+  get blockedIPsCount(): number {
+    return this.blockedIPs.length;
   }
 
   logout() {
