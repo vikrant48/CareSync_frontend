@@ -32,14 +32,21 @@ export class ThemeService {
   private apply(theme: Theme) {
     if (!this.isBrowser) return;
     const body = document.body;
+    const html = document.documentElement;
     body.classList.remove('theme-dark', 'theme-light', 'dark', 'light');
+    html.classList.remove('theme-dark', 'theme-light', 'dark', 'light');
+
+    let resolvedDark = true;
     if (theme === 'system') {
-      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      body.classList.add(prefersDark ? 'dark' : 'light');
-      body.classList.add(prefersDark ? 'theme-dark' : 'theme-light');
+      resolvedDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     } else {
-      body.classList.add(theme === 'light' ? 'light' : 'dark');
-      body.classList.add(theme === 'light' ? 'theme-light' : 'theme-dark');
+      resolvedDark = theme !== 'light';
     }
+
+    const themeClass = resolvedDark ? 'dark' : 'light';
+    const modeClass = resolvedDark ? 'theme-dark' : 'theme-light';
+
+    body.classList.add(themeClass, modeClass);
+    html.classList.add(themeClass, modeClass);
   }
 }

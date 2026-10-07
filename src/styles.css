@@ -54,6 +54,10 @@ html.dark {
   --scrollbar-thumb-hover: rgba(156, 163, 175, 0.7);
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 html,
 body {
   height: 100%;
