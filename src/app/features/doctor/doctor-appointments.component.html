@@ -55,13 +55,8 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4"
             *ngIf="!loading && filteredAppointments().length > 0">
-            <doctor-appointment-card *ngFor="let a of filteredAppointments()" class="h-full" [appointment]="a"
-                [showStatusSelect]="true" (viewPatient)="openDetails($event)" (openHistoryForm)="openDetails($event)"
-                (schedule)="changeStatus($event, 'SCHEDULED')" (confirm)="changeStatus($event, 'CONFIRMED')"
-                (start)="startConsultation($event)" (complete)="changeStatus($event, 'COMPLETED')"
-                (cancel)="changeStatus($event, 'CANCELLED')" (joinVideo)="joinConsultation($event)"
-                (statusChange)="changeStatus($event.appointment, $event.status)"
-                (openChat)="openChat($event)"></doctor-appointment-card>
+            <app-appointment-card *ngFor="let a of filteredAppointments()" class="h-full" [appointment]="a"
+                viewerRole="DOCTOR"></app-appointment-card>
         </div>
 
         <!-- Fixed Bottom Pagination Bar -->
@@ -107,6 +102,16 @@
         <!-- History Detail Modal (Shared) -->
         <app-medical-history-detail-modal [open]="historyDetailModalOpen" [detail]="selectedHistoryDetail"
             [doctorInfo]="selectedHistoryDoctorInfo" (close)="closeHistoryDetail()"></app-medical-history-detail-modal>
+
+        <!-- Pre-Visit Intake AI Summary Modal -->
+        <app-intake-summary-modal [isOpen]="intakeModalOpen" [appointmentId]="selectedIntakeAppointmentId"
+            [summaryText]="intakeSummaryText" [intakeData]="intakeData"
+            (close)="closeIntakeModal()"></app-intake-summary-modal>
+
+        <!-- Ambient AI Scribe & SOAP Report Editor Modal -->
+        <app-soap-report-editor [isOpen]="soapModalOpen" [appointmentId]="selectedSoapAppointmentId"
+            [soapReport]="soapReportData" (close)="closeSoapModal()"
+            (reportSigned)="onSoapReportSigned($event)"></app-soap-report-editor>
 
         <!-- Shared Chat Modal -->
         <app-shared-chat-modal [isOpen]="chatOpen" [appointmentId]="chatAppointmentId"

@@ -577,7 +577,12 @@ export class VideoConsultationComponent implements OnInit, OnDestroy {
 
   goBack() {
     const role = this.auth.role()?.toLowerCase();
-    this.router.navigate([role === 'doctor' ? '/doctor' : '/patient']);
+    const aptId = this.appointmentId;
+    if (aptId) {
+      this.router.navigate([role === 'doctor' ? `/doctor/appointments/${aptId}` : `/patient/appointments/${aptId}`]);
+    } else {
+      this.router.navigate([role === 'doctor' ? '/doctor' : '/patient']);
+    }
   }
 
   cleanUp() {

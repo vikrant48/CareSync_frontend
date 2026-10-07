@@ -1,172 +1,270 @@
 <app-patient-layout>
-    <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6 pb-36 sm:pb-28">
-        <!-- Header Section -->
-        <section class="panel p-3 sm:p-6 flex flex-col md:flex-row items-center justify-between gap-3 shadow-lg">
-            <div class="flex flex-col gap-0.5 w-full md:w-auto text-center md:text-left">
-                <h2
-                    class="font-display text-lg sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
-                    Find & Book Appointments
-                </h2>
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Search for specialized doctors and book
-                    your slot.</p>
+    <div class="max-w-[1400px] mx-auto p-3 sm:p-5 space-y-4 pb-28">
+        <!-- Hero Header Section with Doctor Graphic Banner (Matching Reference Screenshot 1) -->
+        <section
+            class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-5 sm:p-6 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+            <!-- Left: Title & Tagline -->
+            <div class="flex-1 flex flex-col justify-between space-y-3 text-center md:text-left">
+                <div class="space-y-1">
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Find & Book Appointments
+                    </h1>
+                    <p class="text-xs sm:text-sm text-[#9aa3b8]">Search for specialized doctors and book your slot.</p>
+                </div>
+                <div>
+                    <button
+                        class="px-3.5 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 border border-rose-500/30 text-xs font-bold shadow-md inline-flex items-center gap-2 transition-all"
+                        (click)="openEmergencyModal()">
+                        <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                        <span>Emergency Booking</span>
+                    </button>
+                </div>
             </div>
 
-            <div class="flex flex-row items-center justify-center gap-2 w-full md:w-auto mt-1 md:mt-0">
-                <button
-                    class="btn-primary !bg-red-600/90 !hover:bg-red-600 border-none shadow-md shadow-red-900/40 text-white font-medium px-3.5 py-1.5 sm:px-5 sm:py-2.5 rounded-lg text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all hover:scale-105 active:scale-95"
-                    (click)="openEmergencyModal()">
-                    <div class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div> Emergency Booking
-                </button>
+            <!-- Right: Doctor Graphic Banner with Female Doctor Image -->
+            <div
+                class="w-full md:w-[480px] h-[115px] rounded-2xl bg-gradient-to-r from-[#0b132b] via-[#1a2b5e] to-[#253b80] border border-[#5b6cf0]/30 px-5 sm:px-6 flex items-center justify-between relative overflow-hidden shadow-2xl shrink-0">
+                <!-- Background Pattern -->
+                <div
+                    class="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:12px_12px]">
+                </div>
+
+                <!-- Banner Text -->
+                <div class="space-y-0.5 z-10 max-w-[220px]">
+                    <h3 class="text-sm sm:text-base font-black text-white leading-tight uppercase tracking-wide">
+                        Your Health<br /><span class="text-blue-200">Our Priority</span>
+                    </h3>
+                    <p class="text-[11px] text-blue-100/90 leading-tight">
+                        Book consultations with trusted & verified doctors.
+                    </p>
+                </div>
+
+                <!-- Female Doctor Asset Image -->
+                <div class="relative z-10 h-[135px] -mb-5 -mr-3 shrink-0 flex items-end">
+                    <img src="assets/female-doctor-banner.png" alt="Female Doctor"
+                        class="h-full object-contain filter drop-shadow-2xl" />
+                </div>
             </div>
         </section>
 
-        <app-filter-bar class="panel shadow-lg relative z-30" [(expanded)]="isFilterExpanded"
-            [activeCount]="activeFilterCount" gridClass="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
-            (clear)="resetFilters()">
-            <div class="space-y-0.5">
-                <label class="filter-label">Specialization</label>
-                <app-specialization-autocomplete class="w-full relative" [(ngModel)]="specializationFilter"
-                    (ngModelChange)="onFilterChange()" placeholder="Specialization..."
-                    inputClass="filter-input-search !pl-3.5" [allowAddNew]="false">
-                </app-specialization-autocomplete>
-            </div>
-
-            <div class="space-y-0.5">
-                <label class="filter-label">Doctor Name</label>
-                <div class="relative w-full">
-                    <i
-                        class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs sm:text-sm pointer-events-none z-10"></i>
-                    <input type="text" class="filter-input-search" placeholder="Doctor name..." [(ngModel)]="nameFilter"
-                        (ngModelChange)="onFilterChange()" />
+        <!-- Filter Bar (Matching Reference Screenshot 1) -->
+        <section class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-4 shadow-xl">
+            <div class="flex items-center justify-between mb-3 pb-2 border-b border-[#2a3347]">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-[#5b6cf0] text-xs"></i>
+                    <span class="text-xs font-bold text-white uppercase tracking-wider">Filters</span>
                 </div>
+                <button (click)="resetFilters()"
+                    class="text-xs text-[#5b6cf0] hover:text-indigo-300 font-semibold flex items-center gap-1 transition-colors">
+                    <i class="fa-solid fa-rotate-left text-[10px]"></i>
+                    <span>Clear Filters</span>
+                </button>
             </div>
 
-            <div class="space-y-0.5">
-                <app-select-dropdown label="Gender" [(ngModel)]="genderFilter" (ngModelChange)="onFilterChange()"
-                    [options]="genderOptions" placeholder="All Genders">
-                </app-select-dropdown>
-            </div>
-
-            <div class="space-y-0.5">
-                <label class="filter-label">Location</label>
-                <div class="relative w-full">
-                    <i
-                        class="fa-solid fa-location-dot absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs sm:text-sm pointer-events-none z-10"></i>
-                    <input type="text" class="filter-input-search" placeholder="Location..." [(ngModel)]="addressFilter"
-                        (ngModelChange)="onFilterChange()" />
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+                <!-- Specialization -->
+                <div class="space-y-1">
+                    <label
+                        class="text-[11px] font-bold text-[#9aa3b8] uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-stethoscope text-[#5b6cf0] text-[10px]"></i> Specialization
+                    </label>
+                    <app-specialization-autocomplete class="w-full relative" [(ngModel)]="specializationFilter"
+                        (ngModelChange)="onFilterChange()" placeholder="All Specializations"
+                        inputClass="w-full bg-[#0b0f1a] border border-[#2a3347] rounded-xl px-3 py-2 text-xs text-white placeholder-[#9aa3b8]/50 focus:outline-none focus:border-[#5b6cf0] transition-colors"
+                        [allowAddNew]="false">
+                    </app-specialization-autocomplete>
                 </div>
+
+                <!-- Doctor Name -->
+                <div class="space-y-1">
+                    <label
+                        class="text-[11px] font-bold text-[#9aa3b8] uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-user-doctor text-[#5b6cf0] text-[10px]"></i> Doctor Name
+                    </label>
+                    <div class="relative w-full">
+                        <i
+                            class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-[#9aa3b8] text-xs pointer-events-none"></i>
+                        <input type="text"
+                            class="w-full bg-[#0b0f1a] border border-[#2a3347] rounded-xl pl-8 pr-3 py-2 text-xs text-white placeholder-[#9aa3b8]/50 focus:outline-none focus:border-[#5b6cf0] transition-colors"
+                            placeholder="Search doctor name..." [(ngModel)]="nameFilter"
+                            (ngModelChange)="onFilterChange()" />
+                    </div>
+                </div>
+
+                <!-- Gender -->
+                <div class="space-y-1">
+                    <label
+                        class="text-[11px] font-bold text-[#9aa3b8] uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-user-group text-[#5b6cf0] text-[10px]"></i> Gender
+                    </label>
+                    <select [(ngModel)]="genderFilter" (ngModelChange)="onFilterChange()"
+                        class="w-full bg-[#0b0f1a] border border-[#2a3347] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#5b6cf0] transition-colors cursor-pointer">
+                        <option value="">All Genders</option>
+                        <option *ngFor="let g of genders" [value]="g">{{ g }}</option>
+                    </select>
+                </div>
+
+                <!-- Location -->
+                <div class="space-y-1">
+                    <label
+                        class="text-[11px] font-bold text-[#9aa3b8] uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-location-dot text-[#5b6cf0] text-[10px]"></i> Location
+                    </label>
+                    <div class="relative w-full">
+                        <i
+                            class="fa-solid fa-location-dot absolute left-3 top-1/2 -translate-y-1/2 text-[#9aa3b8] text-xs pointer-events-none"></i>
+                        <input type="text"
+                            class="w-full bg-[#0b0f1a] border border-[#2a3347] rounded-xl pl-8 pr-3 py-2 text-xs text-white placeholder-[#9aa3b8]/50 focus:outline-none focus:border-[#5b6cf0] transition-colors"
+                            placeholder="Select Location..." [(ngModel)]="addressFilter"
+                            (ngModelChange)="onFilterChange()" />
+                    </div>
+                </div>
+
+                <!-- Search Action Button -->
+                <app-button variant="primary" size="md" icon="fa-solid fa-magnifying-glass" customClass="w-full"
+                    (btnClick)="searchDoctors()">
+                    Search
+                </app-button>
             </div>
-        </app-filter-bar>
+        </section>
+
+        <!-- Doctors Found Toolbar -->
+        <div class="flex items-center justify-between py-1">
+            <div class="text-sm font-extrabold text-white flex items-center gap-2">
+                <span>{{ totalDoctorsCount }} Doctors Found</span>
+            </div>
+
+            <!-- Sort Selector -->
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-[#9aa3b8] font-medium">Sort By</span>
+                <select [(ngModel)]="sortBy" (ngModelChange)="onFilterChange()"
+                    class="bg-[#151b2b] border border-[#2a3347] rounded-xl px-3 py-1.5 text-xs text-white font-semibold focus:outline-none focus:border-[#5b6cf0] cursor-pointer">
+                    <option *ngFor="let opt of sortByOptions" [value]="opt.value">{{ opt.label }}</option>
+                </select>
+            </div>
+        </div>
 
         <app-skeleton *ngIf="loadingDoctors" variant="card" [count]="6"
-            wrapperClass="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></app-skeleton>
+            wrapperClass="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></app-skeleton>
 
         <app-empty-state *ngIf="!loadingDoctors && doctors.length === 0" icon="fa-solid fa-face-frown"
             title="No doctors found" message="No doctors found matching your criteria." [hasAction]="true">
-            <button type="button" class="text-blue-500 hover:text-blue-400 text-sm hover:underline min-h-touch px-3"
+            <button type="button" class="text-[#5b6cf0] hover:text-indigo-300 text-xs font-bold px-3 py-1"
                 (click)="resetFilters()">Clear Filters</button>
         </app-empty-state>
 
-        <!-- Doctors Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in"
-            *ngIf="!loadingDoctors && doctors.length > 0">
-            <div class="panel p-5 cursor-pointer relative group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10 border border-gray-800 hover:border-blue-500/30 flex flex-col focus:outline-none focus:ring-2 focus:ring-blue-500/40"
-                *ngFor="let d of doctors" (click)="openDoctor(d)" (keydown.enter)="openDoctor(d)"
-                (keydown.space)="$event.preventDefault(); openDoctor(d)" tabindex="0" role="button"
-                [attr.aria-label]="'View profile for ' + formatDoctorName(d)">
+        <!-- Doctors Grid (3 Columns on Desktop matching Reference Screenshot 1) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="!loadingDoctors && doctors.length > 0">
+            <div class="bg-[#151b2b] border border-[#2a3347] hover:border-[#3b4763] rounded-2xl p-4 sm:p-4.5 flex flex-col justify-between hover:shadow-2xl transition-all duration-200 relative group cursor-pointer"
+                *ngFor="let d of doctors" (click)="openDoctor(d)">
 
-                <!-- Rating Badge -->
-                <div class="absolute top-3 right-3 text-xs font-bold bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1 border border-white/10 shadow-sm z-10"
+                <!-- Rating Badge (Top Right) -->
+                <div class="absolute top-3.5 right-3.5 bg-[#1b2333] border border-[#2a3347] rounded-full px-2.5 py-0.5 text-[11px] font-bold text-white flex items-center gap-1 shadow-sm z-10"
                     *ngIf="ratings[d.id] as r">
-                    <i class="fa-solid fa-star text-yellow-400 text-[10px]"></i>
-                    <span class="text-gray-800 dark:text-gray-200">{{ r.avg.toFixed(1) }}</span>
-                    <span class="text-gray-800 dark:text-gray-200 text-[10px]">({{ r.count }})</span>
+                    <i class="fa-solid fa-star text-amber-400 text-[10px]"></i>
+                    <span>{{ r.avg.toFixed(1) }}</span>
+                    <span class="text-[#9aa3b8] font-normal text-[10px]">({{ r.count }})</span>
                 </div>
 
-                <div class="flex items-start gap-4 mb-4">
-                    <div class="relative shrink-0">
-                        <div
-                            class="w-16 h-16 rounded-full overflow-hidden ring-2 ring-gray-700 group-hover:ring-blue-500 transition-colors bg-gray-800 flex items-center justify-center">
-                            <img *ngIf="d.profileImageUrl" [src]="d.profileImageUrl"
-                                [alt]="formatDoctorName(d) + ' profile photo'" class="w-full h-full object-cover"
-                                (error)="d.profileImageUrl = ''" />
-                            <span *ngIf="!d.profileImageUrl" class="text-xl font-bold text-gray-400">{{ doctorInitial(d)
-                                }}</span>
+                <div>
+                    <!-- Top Doctor Header -->
+                    <div class="flex items-start gap-3.5 mb-3">
+                        <div class="flex flex-col items-center shrink-0">
+                            <div
+                                class="w-14 h-14 rounded-full ring-2 ring-[#2a3347] group-hover:ring-[#5b6cf0] transition-all overflow-hidden bg-[#0b0f1a] flex items-center justify-center shadow-md">
+                                <img *ngIf="d.profileImageUrl; else defaultDocAvatar" [src]="d.profileImageUrl"
+                                    [alt]="formatDoctorName(d)" class="w-full h-full object-cover"
+                                    (error)="d.profileImageUrl = ''" />
+                                <ng-template #defaultDocAvatar>
+                                    <span class="text-lg font-bold text-white">{{ doctorInitial(d) }}</span>
+                                </ng-template>
+                            </div>
+                            <!-- Verified Pill Badge under Avatar -->
+                            <span *ngIf="d.isVerified !== false"
+                                class="mt-1.5 bg-[#10e984] text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1 shadow-md">
+                                <i class="fa-solid fa-check text-[8px]"></i> 
+                            </span>
                         </div>
-                        <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[8px] px-1.5 py-0.5 rounded-full flex items-center gap-1 shadow-md border border-gray-900 group-hover:scale-105 transition-all z-20"
-                            *ngIf="d.isVerified" title="Verified">
-                            <i class="fa-solid fa-check"></i>
-                            <span class="font-black uppercase tracking-widest text-[7px]">Verified</span>
+
+                        <div class="min-w-0 flex-1 pt-0.5">
+                            <h3
+                                class="font-extrabold text-base text-white truncate group-hover:text-[#5b6cf0] transition-colors">
+                                {{ formatDoctorName(d) }}
+                            </h3>
+                            <div class="text-xs font-semibold text-[#5b6cf0] truncate mt-0.5">
+                                {{ d.specialization || 'General Practitioner' }}
+                            </div>
+                            <div class="text-[11px] text-[#9aa3b8] truncate mt-0.5" *ngIf="d.gender">
+                                <span class="capitalize">{{ d.gender }}</span> Doctor
+                            </div>
                         </div>
                     </div>
 
-                    <div class="min-w-0 flex-1 pt-1">
-                        <h3
-                            class="font-bold text-lg text-gray-800 dark:text-gray-200 truncate group-hover:text-blue-400 transition-colors">
-                            {{ formatDoctorName(d) }}</h3>
-                        <div class="text-sm text-blue-400 font-medium truncate mb-0.5">{{ d.specialization || 'General
-                            Practitioner' }}</div>
-                        <div class="text-xs text-gray-800 dark:text-gray-200 truncate" *ngIf="d.gender"><span
-                                class="capitalize">{{ d.gender }}</span> Doctor</div>
+                    <!-- Details Rows with Icons & Experience -->
+                    <div class="space-y-1.5 my-3 pt-2 border-t border-[#2a3347] text-xs">
+                        <div class="flex items-center justify-between text-[#9aa3b8]">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-money-bill-wave text-emerald-400 text-xs"></i>
+                                <span class="font-extrabold text-white">₹{{ d.consultationFees || '0'}} <span
+                                        class="text-[#9aa3b8] font-normal">/ Visit</span></span>
+                            </div>
+                            <div class="flex items-center gap-1 text-[11px] text-[#9aa3b8]">
+                                <i class="fa-solid fa-circle-info text-[#5b6cf0] text-[10px]"></i>
+                                <span>{{ formatExperience(d) }}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 text-[#9aa3b8] text-[11px] truncate">
+                            <i class="fa-solid fa-location-dot text-rose-400 text-xs shrink-0"></i>
+                            <span class="truncate">{{ formatLocation(d) }}</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Info Rows -->
-                <div class="space-y-2 mb-5 flex-1">
-                    <div class="flex items-center gap-2 text-sm text-gray-800 dark:text-gray-200"
-                        *ngIf="d.consultationFees">
-                        <div class="w-6 flex justify-center"><i
-                                class="fa-solid fa-money-bill-wave text-green-500/70"></i></div>
-                        <span>Rs. {{ d.consultationFees }} / Visit</span>
-                    </div>
-                    <div class="flex items-center gap-2 text-sm text-gray-800 dark:text-gray-200" *ngIf="d.address">
-                        <div class="w-6 flex justify-center"><i class="fa-solid fa-location-dot text-red-400/70"></i>
-                        </div>
-                        <span class="truncate">{{ d.address }}</span>
-                    </div>
-                </div>
-
-                <div class="mt-auto pt-4 border-t border-gray-800">
-                    <button
-                        class="btn-primary w-full shadow-lg shadow-blue-900/20 group-hover:shadow-blue-500/20 transition-all"
-                        (click)="goToDoctorAndBook(d); $event.stopPropagation()">
+                <!-- Full-Width Action Button -->
+                <div class="mt-3 pt-2">
+                    <app-button variant="primary" size="md" customClass="w-full"
+                        (btnClick)="goToDoctorAndBook(d); $event.stopPropagation()">
                         View & Book Appointment
-                    </button>
+                    </app-button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Fixed Bottom Pagination Bar (Constrained to Main Content Column) -->
+    <!-- Fixed Bottom Pagination Bar (Constrained to Main Content Layout) -->
     <div *ngIf="!loadingDoctors && totalDoctorsCount > 0"
-        class="fixed left-0 md:left-64 right-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 shadow-2xl px-4 sm:px-8 py-2 flex items-center justify-between transition-all fixed-above-mobile-nav safe-bottom">
+        class="fixed left-0 md:left-64 right-0 z-40 bg-[#0b0f1a]/95 backdrop-blur-md border-t border-[#2a3347] shadow-2xl px-4 sm:px-6 py-2.5 flex items-center justify-between transition-all fixed-above-mobile-nav safe-bottom">
 
-        <div class="flex items-center gap-3 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+        <div class="flex items-center gap-3 text-xs text-[#9aa3b8]">
             <span class="font-medium">
-                Showing <span class="font-bold text-gray-900 dark:text-gray-100">{{ startItemIndex }}–{{ endItemIndex
-                    }}</span> of <span class="font-bold text-blue-600 dark:text-blue-400">{{ totalDoctorsCount }}</span>
-                doctors
+                Showing <span class="font-bold text-white">{{ startItemIndex }}–{{ endItemIndex }}</span> of <span
+                    class="font-bold text-[#5b6cf0]">{{ totalDoctorsCount }}</span> doctors
             </span>
-            <span class="hidden sm:inline text-gray-300 dark:text-gray-700">|</span>
+            <span class="hidden sm:inline text-[#2a3347]">|</span>
             <span class="hidden sm:inline font-medium">
-                Page <span class="font-semibold text-gray-900 dark:text-gray-100">{{ page + 1 }}</span> of {{ totalPages
-                }}
+                Page <span class="font-semibold text-white">{{ page + 1 }}</span> of {{ totalPages }}
             </span>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5">
             <button
-                class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm"
+                class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-[#2a3347] bg-[#151b2b] text-slate-200 hover:bg-[#1b2333] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1"
                 [disabled]="page === 0" (click)="prevPage()">
                 <i class="fa-solid fa-chevron-left text-[10px]"></i> Prev
             </button>
 
-            <span class="sm:hidden text-xs font-semibold text-gray-700 dark:text-gray-300 px-1">
-                {{ page + 1 }}/{{ totalPages }}
-            </span>
+            <!-- Numbered Pages (Matching Reference Screenshot 1) -->
+            <div class="hidden sm:flex items-center gap-1">
+                <button *ngFor="let p of paginationPages" (click)="goToPage(p)" [class.!bg-[#5b6cf0]]="p === page"
+                    [class.!text-white]="p === page" [class.font-bold]="p === page" [class.bg-[#151b2b]]="p !== page"
+                    [class.text-[#9aa3b8]]="p !== page"
+                    class="w-7 h-7 rounded-lg text-xs flex items-center justify-center border border-[#2a3347] hover:border-[#5b6cf0] transition-all">
+                    {{ p + 1 }}
+                </button>
+            </div>
 
             <button
-                class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm"
+                class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-[#2a3347] bg-[#151b2b] text-slate-200 hover:bg-[#1b2333] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1"
                 [disabled]="page >= totalPages - 1" (click)="nextPage()">
                 Next <i class="fa-solid fa-chevron-right text-[10px]"></i>
             </button>

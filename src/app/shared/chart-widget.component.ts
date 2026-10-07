@@ -7,17 +7,24 @@ import { Chart, ChartType } from 'chart.js/auto';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="h-full w-full relative">
-       <!-- Title is now handled by parent card for consistent styling -->
-      <div class="!h-full w-full">
-        <canvas #canvas></canvas>
-      </div>
+    <div class="w-full h-full relative flex items-center justify-center overflow-hidden">
+      <canvas #canvas class="w-full h-full max-w-full max-h-full block"></canvas>
     </div>
   `,
+  styles: [`
+    :host {
+      display: block;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+  `]
 })
 export class ChartWidgetComponent implements AfterViewInit, OnDestroy, OnChanges {
   @Input() title: string = '';
   @Input() type: ChartType = 'bar';
+  @Input() indexAxis: 'x' | 'y' = 'x';
   @Input() labels: string[] = [];
   @Input() data: number[] = [];
   @Input() datasetLabel: string = '';
@@ -32,7 +39,8 @@ export class ChartWidgetComponent implements AfterViewInit, OnDestroy, OnChanges
 
   ngOnChanges(changes: SimpleChanges) {
     if (this.chart) {
-      this.update();
+      this.destroy();
+      this.render();
     }
   }
 
@@ -42,12 +50,18 @@ export class ChartWidgetComponent implements AfterViewInit, OnDestroy, OnChanges
 
   private render() {
     if (!this.canvas) return;
-    const background = this.colors || (this.type === 'pie' || this.type === 'doughnut' ? this.generateColors(this.data.length) : 'rgba(59,130,246,0.5)');
+    const isPieOrDoughnut = this.type === 'pie' || this.type === 'doughnut';
+    const background = this.colors || (isPieOrDoughnut ? this.generateColors(this.data.length) : 'rgba(91, 108, 240, 0.85)');
     const ds = {
       label: this.datasetLabel || this.title,
       data: this.data,
       backgroundColor: background as any,
-      borderColor: 'rgba(59,130,246,1)',
+      borderColor: isPieOrDoughnut ? '#151b2b' : '#5b6cf0',
+      borderWidth: isPieOrDoughnut ? 3 : 1,
+      borderRadius: this.type === 'bar' ? 6 : 0,
+      cutout: this.type === 'doughnut' ? '68%' : 0,
+      maxBarThickness: 36,
+      barPercentage: 0.6,
     } as any;
 
     const config = {
@@ -56,27 +70,34 @@ export class ChartWidgetComponent implements AfterViewInit, OnDestroy, OnChanges
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        indexAxis: this.indexAxis,
         plugins: {
-          legend: { display: this.type !== 'bar' || !!this.datasetLabel },
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1b2333',
+            titleColor: '#ffffff',
+            bodyColor: '#9aa3b8',
+            borderColor: '#2a3347',
+            borderWidth: 1,
+            padding: 10,
+            displayColors: isPieOrDoughnut,
+          }
         },
-        scales: this.type === 'pie' || this.type === 'doughnut' ? {} : {
-          x: { grid: { display: false } },
-          y: { grid: { color: 'rgba(255,255,255,0.08)' } },
+        scales: isPieOrDoughnut ? {} : {
+          x: {
+            grid: { display: false },
+            ticks: { color: '#9aa3b8', font: { size: 11 } },
+            border: { color: '#2a3347' }
+          },
+          y: {
+            grid: { color: 'rgba(255,255,255,0.05)' },
+            ticks: { color: '#9aa3b8', font: { size: 11 }, precision: 0 },
+            border: { color: '#2a3347' }
+          },
         },
       },
     } as any;
     this.chart = new Chart(this.canvas.nativeElement.getContext('2d')!, config);
-  }
-
-  private update() {
-    if (!this.chart) return;
-    this.chart.data.labels = this.labels;
-    if (this.chart.data.datasets?.[0]) {
-      this.chart.data.datasets[0].data = this.data;
-      this.chart.data.datasets[0].label = this.datasetLabel || this.title;
-      if (this.colors) this.chart.data.datasets[0].backgroundColor = this.colors as any;
-    }
-    this.chart.update();
   }
 
   private destroy() {
@@ -87,7 +108,7 @@ export class ChartWidgetComponent implements AfterViewInit, OnDestroy, OnChanges
   }
 
   private generateColors(n: number): string[] {
-    const palette = ['#60A5FA', '#34D399', '#F59E0B', '#F472B6', '#A78BFA', '#10B981', '#EF4444', '#93C5FD', '#FCD34D', '#C4B5FD'];
+    const palette = ['#3b82f6', '#a78bfa', '#ef4444', '#eab308', '#64748b', '#10b981', '#f43f5e', '#8b5cf6'];
     const colors: string[] = [];
     for (let i = 0; i < n; i++) colors.push(palette[i % palette.length]);
     return colors;

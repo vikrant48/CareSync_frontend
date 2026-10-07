@@ -1,3 +1,7 @@
-<span class="status-badge" [ngClass]="toneClass" [attr.title]="label">
+<span
+    class="status-badge inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold tracking-wide border transition-all"
+    [ngClass]="toneClass" [attr.title]="label">
+    <span *ngIf="normalized === 'IN_PROGRESS'" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+    <span *ngIf="normalized === 'HELD'" class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span>
     {{ label }}
 </span>

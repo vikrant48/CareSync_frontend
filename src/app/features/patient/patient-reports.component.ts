@@ -1,16 +1,20 @@
 import { Component, Input, OnInit, ChangeDetectionStrategy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router, RouterModule } from '@angular/router';
 import { ChartWidgetComponent } from '../../shared/chart-widget.component';
 import { AuthService } from '../../core/services/auth.service';
 import { ReportsApiService } from '../../core/services/reports.service';
 import { AnalyticsApiService } from '../../core/services/analytics.service';
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { DoctorService, Doctor } from '../../core/services/doctor.service';
+import { AppointmentService, PatientAppointmentItem } from '../../core/services/appointment.service';
+import { StatusBadgeComponent } from '../../shared/ui/status-badge.component';
+import { UserAvatarComponent } from '../../shared/components/user-avatar.component';
 
 @Component({
   selector: 'app-patient-reports',
   standalone: true,
-  imports: [CommonModule, ChartWidgetComponent, PatientLayoutComponent],
+  imports: [CommonModule, RouterModule, ChartWidgetComponent, PatientLayoutComponent, StatusBadgeComponent, UserAvatarComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './patient-reports.component.html',
   styleUrl: './patient-reports.component.css'
@@ -23,15 +27,29 @@ export class PatientReportsComponent implements OnInit {
   private analyticsApi = inject(AnalyticsApiService);
   private cdr = inject(ChangeDetectorRef);
   private doctorApi = inject(DoctorService);
+  private apptApi = inject(AppointmentService);
+  private router = inject(Router);
 
   patientAnalytics: any = null;
   financialStats: any = null;
+  recentAppointments: PatientAppointmentItem[] = [];
+
+  // Status chart metrics
+  statusCounts = {
+    completed: 0,
+    scheduled: 0,
+    cancelled: 0,
+    rescheduled: 0,
+    noShow: 0
+  };
+  totalStatusCount = 0;
 
   // Chart data holders
   doctorVisitLabels: string[] = [];
   doctorVisitData: number[] = [];
-  appointmentStatusLabels: string[] = ['Completed', 'Cancelled'];
-  appointmentStatusData: number[] = [];
+  appointmentStatusLabels: string[] = ['Completed', 'Scheduled', 'Cancelled', 'Rescheduled', 'No Show'];
+  appointmentStatusData: number[] = [0, 0, 0, 0, 0];
+  statusColors: string[] = ['#3b82f6', '#a78bfa', '#ef4444', '#eab308', '#64748b'];
   overviewLabels: string[] = [];
   overviewData: number[] = [];
 
@@ -48,14 +66,75 @@ export class PatientReportsComponent implements OnInit {
       const idStr = this.auth.userId();
       this.patientId = idStr ? Number(idStr) : null;
     }
-    // Determine how many async loads we will wait for
-    this.pendingLoads = this.patientId == null ? 1 : 3;
+    this.pendingLoads = this.patientId == null ? 1 : 4;
     this.loadingReports = true;
     if (this.patientId != null) {
       this.loadPatientAnalytics();
       this.loadFinancialStats();
+      this.loadMyAppointments();
     }
     this.loadDoctors();
+  }
+
+  loadMyAppointments() {
+    this.apptApi.getMyAppointments().subscribe({
+      next: (res) => {
+        this.recentAppointments = res || [];
+        this.calculateStatusCounts();
+        this.cdr.markForCheck();
+        this.completeLoad();
+      },
+      error: () => {
+        this.recentAppointments = [];
+        this.calculateStatusCounts();
+        this.cdr.markForCheck();
+        this.completeLoad();
+      }
+    });
+  }
+
+  private calculateStatusCounts() {
+    let completed = 0;
+    let scheduled = 0;
+    let cancelled = 0;
+    let rescheduled = 0;
+    let noShow = 0;
+
+    if (this.recentAppointments.length > 0) {
+      this.recentAppointments.forEach(a => {
+        const st = (a.status || '').toUpperCase();
+        if (st === 'COMPLETED') completed++;
+        else if (st === 'CANCELLED') cancelled++;
+        else if (st === 'RESCHEDULED') rescheduled++;
+        else if (st === 'NO_SHOW') noShow++;
+        else scheduled++;
+      });
+      this.totalStatusCount = this.recentAppointments.length;
+    } else if (this.patientAnalytics) {
+      completed = Number(this.patientAnalytics?.totalVisits || 0);
+      cancelled = Number(this.patientAnalytics?.cancelledAppointments || 0);
+      const total = Number(this.patientAnalytics?.totalAppointments || 0);
+      scheduled = Math.max(0, total - completed - cancelled);
+      this.totalStatusCount = total || (completed + cancelled + scheduled);
+    } else {
+      this.totalStatusCount = 0;
+    }
+
+    this.statusCounts = { completed, scheduled, cancelled, rescheduled, noShow };
+    this.appointmentStatusData = [completed, scheduled, cancelled, rescheduled, noShow];
+  }
+
+  getStatusPercent(count: number): number {
+    if (!this.totalStatusCount || this.totalStatusCount === 0) return 0;
+    return Math.round((count / this.totalStatusCount) * 100);
+  }
+
+  viewAppointment(id: number) {
+    if (id) {
+      this.router.navigate(['/patient/appointments', id]);
+    } else {
+      this.router.navigate(['/patient/my-appointments']);
+    }
   }
 
   hasData(data: number[]): boolean {
@@ -136,6 +215,20 @@ export class PatientReportsComponent implements OnInit {
       return this.doctorNameById[id] || `Doctor ${id}`;
     });
     this.doctorVisitData = ids.map((k) => Number(visits[k] || 0));
+  }
+
+  get doctorVisitList(): Array<{ doctorId: number; name: string; count: number; percent: number }> {
+    const total = this.doctorVisitData.reduce((a, b) => a + b, 0) || 1;
+    const keys = Object.keys(this.patientAnalytics?.doctorVisitCount || {});
+    return this.doctorVisitLabels.map((name, i) => {
+      const count = this.doctorVisitData[i] || 0;
+      return {
+        doctorId: Number(keys[i] || 0),
+        name,
+        count,
+        percent: Math.round((count / total) * 100)
+      };
+    });
   }
 
   private formatDoctorName(d: Doctor): string {

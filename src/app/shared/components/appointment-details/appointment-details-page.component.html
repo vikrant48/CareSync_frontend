@@ -1,0 +1,174 @@
+<ng-template #appointmentPageContent>
+    <div class="min-h-screen bg-gray-950 text-gray-100 p-4 sm:p-6 lg:p-8 space-y-6">
+
+        <!-- Back Button & Page Title Bar -->
+        <div class="flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <button type="button" (click)="goBack()"
+                    class="w-9 h-9 rounded-xl bg-gray-900 border border-gray-800 hover:bg-gray-800 text-gray-300 hover:text-white flex items-center justify-center transition-all">
+                    <i class="fa-solid fa-arrow-left text-sm"></i>
+                </button>
+                <h1 class="text-xl sm:text-2xl font-black text-gray-100 tracking-tight">
+                    Appointment Details
+                </h1>
+            </div>
+
+            <div *ngIf="appointment" class="flex items-center gap-2 text-xs font-mono text-gray-500">
+                <i class="fa-solid fa-hashtag text-cyan-400"></i>
+                <span>APT-{{ appointment.appointmentId || appointment.id }}</span>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="loading" class="space-y-6 animate-pulse">
+            <div class="h-32 bg-gray-900 rounded-2xl border border-gray-800"></div>
+            <div class="h-24 bg-gray-900 rounded-2xl border border-gray-800"></div>
+            <div class="h-64 bg-gray-900 rounded-2xl border border-gray-800"></div>
+        </div>
+
+        <!-- Error State -->
+        <div *ngIf="!loading && errorMsg"
+            class="bg-rose-500/10 border border-rose-500/30 rounded-2xl p-8 text-center space-y-4">
+            <div
+                class="w-12 h-12 rounded-full bg-rose-500/20 text-rose-400 mx-auto flex items-center justify-center text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-base font-bold text-rose-400">Unable to Load Appointment Details</h3>
+            <p class="text-xs text-gray-400 max-w-md mx-auto">{{ errorMsg }}</p>
+            <button type="button" (click)="loadAppointmentDetails()"
+                class="px-5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition-all">
+                <i class="fa-solid fa-rotate-right mr-1.5"></i> Retry
+            </button>
+        </div>
+
+        <!-- Content Container (When Loaded) -->
+        <div *ngIf="!loading && appointment" class="space-y-6">
+
+            <!-- Section 1: Fixed Header Component -->
+            <app-appointment-header [appointment]="appointment" [viewerRole]="viewerRole"></app-appointment-header>
+
+            <!-- Section 2: 7-Stage Pipeline Stepper Component -->
+            <app-status-stepper [currentStatus]="appointment.status"></app-status-stepper>
+
+            <!-- Section 3: Navigation Tabs (Overview, Process, Medical History) -->
+            <div class="space-y-6">
+                <div class="flex items-center gap-2 border-b border-gray-800 overflow-x-auto pb-1 scrollbar-thin">
+                    <button type="button" (click)="activeTab = 'OVERVIEW'"
+                        class="px-5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 relative shrink-0"
+                        [ngClass]="{
+                  'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30': activeTab === 'OVERVIEW',
+                  'text-gray-400 hover:text-gray-200 hover:bg-gray-900': activeTab !== 'OVERVIEW'
+                }">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>Overview</span>
+                    </button>
+
+                    <button type="button" (click)="activeTab = 'PROCESS'"
+                        class="px-5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 relative shrink-0"
+                        [ngClass]="{
+                  'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30': activeTab === 'PROCESS',
+                  'text-gray-400 hover:text-gray-200 hover:bg-gray-900': activeTab !== 'PROCESS'
+                }">
+                        <i class="fa-solid fa-list-check"></i>
+                        <span>Process</span>
+                    </button>
+
+                    <button type="button" (click)="activeTab = 'MEDICAL_HISTORY'"
+                        class="px-5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 relative shrink-0"
+                        [ngClass]="{
+                  'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30': activeTab === 'MEDICAL_HISTORY',
+                  'text-gray-400 hover:text-gray-200 hover:bg-gray-900': activeTab !== 'MEDICAL_HISTORY'
+                }">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        <span>Medical History</span>
+                    </button>
+                </div>
+
+                <!-- Tab Content Panels -->
+                <div [ngSwitch]="activeTab">
+                    <!-- Tab 1: Overview -->
+                    <app-appointment-overview-tab *ngSwitchCase="'OVERVIEW'" [appointment]="appointment"
+                        [viewerRole]="viewerRole">
+                    </app-appointment-overview-tab>
+
+                    <!-- Tab 2: Process -->
+                    <app-appointment-process-tab *ngSwitchCase="'PROCESS'" [appointment]="appointment"
+                        [viewerRole]="viewerRole" (actionSelected)="handleProcessAction($event)">
+                    </app-appointment-process-tab>
+
+                    <!-- Tab 3: Medical History -->
+                    <app-medical-history-tab *ngSwitchCase="'MEDICAL_HISTORY'" [patientId]="appointment.patientId"
+                        [viewerRole]="viewerRole">
+                    </app-medical-history-tab>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Modal Popups Triggered from Process Tab -->
+
+    <!-- 1. Intake Summary Modal (Doctor) -->
+    <app-intake-summary-modal *ngIf="showIntakeSummaryModal" [isOpen]="showIntakeSummaryModal"
+        [summaryText]="selectedIntakeSummary?.aiTriageSummary || ''" [intakeData]="selectedIntakeSummary"
+        (close)="showIntakeSummaryModal = false">
+    </app-intake-summary-modal>
+
+    <!-- 2. AI SOAP Report Editor Modal (Doctor) -->
+    <app-soap-report-editor *ngIf="showSoapEditorModal" [isOpen]="showSoapEditorModal"
+        [appointmentId]="selectedSoapAppointment?.appointmentId || selectedSoapAppointment?.id"
+        (close)="showSoapEditorModal = false" (reportSigned)="onSoapSaved()">
+    </app-soap-report-editor>
+
+    <!-- 3. Medical Record Form Modal (Doctor) -->
+    <app-medical-history-form-modal *ngIf="showMedicalHistoryFormModal" [open]="showMedicalHistoryFormModal"
+        [form]="medicalHistoryForm" [saving]="savingMedicalRecord" [saved]="medicalRecordSaved"
+        [error]="medicalRecordError" (close)="showMedicalHistoryFormModal = false" (submit)="saveMedicalRecordForm()">
+    </app-medical-history-form-modal>
+
+    <!-- 4. Reschedule Appointment Modal (Patient) -->
+    <reschedule-appointment-modal *ngIf="showRescheduleModal" [appointment]="appointment"
+        (close)="showRescheduleModal = false" (confirmed)="loadAppointmentDetails()">
+    </reschedule-appointment-modal>
+
+    <!-- 5. In-Consultation Chat Modal (Both) -->
+    <app-shared-chat-modal *ngIf="showChatModal" [isOpen]="showChatModal"
+        [appointmentId]="appointment?.appointmentId || appointment?.id"
+        [participantName]="viewerRole === 'PATIENT' ? appointment?.doctorName : appointment?.patientName"
+        [participantImage]="viewerRole === 'PATIENT' ? appointment?.doctorProfileImageUrl : appointment?.patientProfileImageUrl"
+        (close)="showChatModal = false">
+    </app-shared-chat-modal>
+
+    <!-- 6. Stage 7 Visit Completion Preview Modal (Doctor) -->
+    <app-visit-completion-preview-modal *ngIf="showCompletionPreviewModal" [isOpen]="showCompletionPreviewModal"
+        [appointmentId]="appointment?.appointmentId || appointment?.id" [previewData]="completionPreviewData"
+        (close)="showCompletionPreviewModal = false" (proceedToSign)="onProceedToSignFromPreview()"
+        (backToEdit)="onBackToEditFromPreview()">
+    </app-visit-completion-preview-modal>
+
+    <!-- 7. Stage 7 E-Sign Confirmation Modal (Doctor) -->
+    <app-esign-confirmation-modal *ngIf="showEsignModal" [isOpen]="showEsignModal"
+        [appointmentId]="appointment?.appointmentId || appointment?.id" [doctorName]="appointment?.doctorName || ''"
+        (close)="showEsignModal = false" (signedSuccess)="onESignSignedSuccess()">
+    </app-esign-confirmation-modal>
+</ng-template>
+
+<!-- Role-Based Sidebar & Navigation Layout -->
+<ng-container *ngIf="auth.role() === 'DOCTOR'; else patientOrNoLayout">
+    <app-doctor-layout>
+        <ng-container *ngTemplateOutlet="appointmentPageContent"></ng-container>
+    </app-doctor-layout>
+</ng-container>
+
+<ng-template #patientOrNoLayout>
+    <ng-container *ngIf="auth.role() === 'PATIENT'; else noLayout">
+        <app-patient-layout>
+            <ng-container *ngTemplateOutlet="appointmentPageContent"></ng-container>
+        </app-patient-layout>
+    </ng-container>
+</ng-template>
+
+<ng-template #noLayout>
+    <ng-container *ngTemplateOutlet="appointmentPageContent"></ng-container>
+</ng-template>

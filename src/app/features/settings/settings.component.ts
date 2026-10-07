@@ -1,9 +1,11 @@
-import { Component, inject, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, inject, Inject, OnInit, PLATFORM_ID, signal } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { ThemeService } from '../../core/services/theme.service';
 import { AuthService } from '../../core/services/auth.service';
+import { PatientProfileService, PatientDto } from '../../core/services/patient-profile.service';
+import { ToastService } from '../../core/services/toast.service';
 import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { ChangePasswordFormComponent } from '../../shared/change-password-form.component';
@@ -13,133 +15,171 @@ import { ChangePasswordFormComponent } from '../../shared/change-password-form.c
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, DoctorLayoutComponent, PatientLayoutComponent, ChangePasswordFormComponent],
   template: `
-    <!-- Template for the actual settings content to avoid duplication -->
+    <!-- Settings Main Template -->
     <ng-template #settingsContent>
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-8 space-y-4 sm:space-y-8 animate-in fade-in duration-500">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8 animate-in fade-in duration-500">
         
-        <!-- Header -->
-        <div class="mb-4 sm:mb-8">
-          <h2 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Settings</h2>
-          <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 sm:mt-2">Manage your app preferences and account security.</p>
+        <!-- Header Card Box -->
+        <div class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Settings</h2>
+            <p class="text-xs sm:text-sm text-[#9aa3b8]">Manage your app preferences and account security.</p>
+          </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-start">
           
-          <!-- Appearance & Logic Column -->
-          <div class="space-y-4 sm:space-y-8">
+          <!-- LEFT COLUMN: Appearance & Preferences -->
+          <div class="space-y-6 sm:space-y-8">
             
             <!-- Appearance Card -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-3.5 sm:p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-              <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 sm:mb-6 flex items-center gap-2">
-                <i class="fa-solid fa-palette text-indigo-500"></i> Appearance
-              </h3>
-              
-              <div class="space-y-4">
-                <div class="grid grid-cols-3 gap-2.5 sm:gap-3">
-                  <!-- Light -->
-                  <button (click)="setTheme('light')" 
-                    class="relative p-2.5 sm:p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1.5 sm:gap-2 group"
-                    [class]="currentTheme === 'light' ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'">
-                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white border shadow-sm flex items-center justify-center text-xs sm:text-sm text-yellow-500">
-                      <i class="fa-solid fa-sun"></i>
-                    </div>
-                    <span class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Light</span>
-                    <div *ngIf="currentTheme === 'light'" class="absolute top-2 right-2 w-2 h-2 rounded-full bg-indigo-500"></div>
-                  </button>
-
-                  <!-- Dark -->
-                  <button (click)="setTheme('dark')" 
-                    class="relative p-2.5 sm:p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1.5 sm:gap-2 group"
-                    [class]="currentTheme === 'dark' ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'">
-                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gray-900 border border-gray-700 shadow-sm flex items-center justify-center text-xs sm:text-sm text-indigo-400">
-                      <i class="fa-solid fa-moon"></i>
-                    </div>
-                    <span class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Dark</span>
-                    <div *ngIf="currentTheme === 'dark'" class="absolute top-2 right-2 w-2 h-2 rounded-full bg-indigo-500"></div>
-                  </button>
-
-                  <!-- System -->
-                  <button (click)="setTheme('system')" 
-                    class="relative p-2.5 sm:p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1.5 sm:gap-2 group"
-                    [class]="currentTheme === 'system' ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'">
-                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-800 border shadow-sm flex items-center justify-center text-xs sm:text-sm text-gray-500">
-                      <i class="fa-solid fa-desktop"></i>
-                    </div>
-                    <span class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">System</span>
-                    <div *ngIf="currentTheme === 'system'" class="absolute top-2 right-2 w-2 h-2 rounded-full bg-indigo-500"></div>
-                  </button>
+            <div class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[#5b6cf0]/10 text-[#5b6cf0] flex items-center justify-center text-lg shrink-0">
+                  <i class="fa-solid fa-palette"></i>
                 </div>
+                <div>
+                  <h3 class="text-base font-bold text-white">Appearance</h3>
+                  <p class="text-xs text-[#9aa3b8]">Choose your preferred theme for a comfortable experience.</p>
+                </div>
+              </div>
+              
+              <div class="grid grid-cols-3 gap-3 pt-2">
+                <!-- Light Theme Button -->
+                <button type="button" (click)="setTheme('light')" 
+                  class="relative p-3 sm:p-4 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-2 group text-center cursor-pointer"
+                  [ngClass]="currentTheme === 'light' ? 'border-[#5b6cf0] bg-[#1b2333]' : 'border-[#2a3347] bg-[#1b2333]/50 hover:border-[#3a4763]'">
+                  <div class="w-10 h-10 rounded-full bg-[#0b0f1a] border border-[#2a3347] flex items-center justify-center text-yellow-400 text-base shadow-sm">
+                    <i class="fa-solid fa-sun"></i>
+                  </div>
+                  <span class="text-xs font-bold text-white">Light</span>
+                  <span class="text-[10px] text-[#9aa3b8] leading-tight">Clean and bright for daytime use</span>
+                  <div *ngIf="currentTheme === 'light'" class="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-[#5b6cf0] text-white text-[10px] flex items-center justify-center font-bold">✓</div>
+                </button>
+
+                <!-- Dark Theme Button -->
+                <button type="button" (click)="setTheme('dark')" 
+                  class="relative p-3 sm:p-4 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-2 group text-center cursor-pointer"
+                  [ngClass]="currentTheme === 'dark' ? 'border-[#5b6cf0] bg-[#1b2333]' : 'border-[#2a3347] bg-[#1b2333]/50 hover:border-[#3a4763]'">
+                  <div class="w-10 h-10 rounded-full bg-[#0b0f1a] border border-[#2a3347] flex items-center justify-center text-[#5b6cf0] text-base shadow-sm">
+                    <i class="fa-solid fa-moon"></i>
+                  </div>
+                  <span class="text-xs font-bold text-white">Dark</span>
+                  <span class="text-[10px] text-[#9aa3b8] leading-tight">Easy on eyes for low light</span>
+                  <div *ngIf="currentTheme === 'dark'" class="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-[#5b6cf0] text-white text-[10px] flex items-center justify-center font-bold">✓</div>
+                </button>
+
+                <!-- System Theme Button -->
+                <button type="button" (click)="setTheme('system')" 
+                  class="relative p-3 sm:p-4 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-2 group text-center cursor-pointer"
+                  [ngClass]="currentTheme === 'system' ? 'border-[#5b6cf0] bg-[#1b2333]' : 'border-[#2a3347] bg-[#1b2333]/50 hover:border-[#3a4763]'">
+                  <div class="w-10 h-10 rounded-full bg-[#0b0f1a] border border-[#2a3347] flex items-center justify-center text-[#9aa3b8] text-base shadow-sm">
+                    <i class="fa-solid fa-desktop"></i>
+                  </div>
+                  <span class="text-xs font-bold text-white">System</span>
+                  <span class="text-[10px] text-[#9aa3b8] leading-tight">Follow your device settings</span>
+                  <div *ngIf="currentTheme === 'system'" class="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-[#5b6cf0] text-white text-[10px] flex items-center justify-center font-bold">✓</div>
+                </button>
               </div>
             </div>
 
             <!-- Preferences Card -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-3.5 sm:p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-              <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 sm:mb-6 flex items-center gap-2">
-                 <i class="fa-solid fa-sliders text-emerald-500"></i> Preferences
-              </h3>
+            <div class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-5 sm:p-6 shadow-sm space-y-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-lg shrink-0">
+                  <i class="fa-solid fa-sliders"></i>
+                </div>
+                <div>
+                  <h3 class="text-base font-bold text-white">Preferences</h3>
+                  <p class="text-xs text-[#9aa3b8]">Customize your experience.</p>
+                </div>
+              </div>
               
-              <div class="space-y-3 sm:space-y-4">
-                <label class="flex items-center justify-between p-2.5 sm:p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors group">
-                  <div class="flex items-center gap-2.5 sm:gap-3">
-                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-xs sm:text-base text-blue-500">
+              <div class="space-y-4 pt-1">
+                <!-- Notifications Toggle -->
+                <label class="flex items-center justify-between p-3 rounded-xl bg-[#1b2333]/40 border border-[#2a3347]/60 hover:border-[#2a3347] cursor-pointer transition-colors group">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-[#5b6cf0]/10 text-[#5b6cf0] flex items-center justify-center text-sm shrink-0">
                       <i class="fa-solid fa-bell"></i>
                     </div>
                     <div>
-                      <div class="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">Notifications</div>
-                      <div class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Receive alerts about appointments</div>
+                      <div class="text-xs sm:text-sm font-bold text-white">Notifications</div>
+                      <div class="text-[11px] text-[#9aa3b8]">Receive alerts about appointments, test reports and important updates.</div>
                     </div>
                   </div>
-                  <div class="relative inline-flex h-5 sm:h-6 w-9 sm:w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                       [class.bg-indigo-600]="notificationsEnabled"
-                       [class.bg-gray-200]="!notificationsEnabled"
-                       [class.dark:bg-gray-600]="!notificationsEnabled">
+                  <div class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0"
+                       [class.bg-[#5b6cf0]]="notificationsEnabled"
+                       [class.bg-[#2a3347]]="!notificationsEnabled">
                     <input type="checkbox" class="sr-only" [(ngModel)]="notificationsEnabled" (change)="persistPref('notifications', notificationsEnabled)">
-                    <span class="inline-block h-3.5 sm:h-4 w-3.5 sm:w-4 transform rounded-full bg-white transition-transform"
-                          [class.translate-x-4]="notificationsEnabled"
-                          [class.sm:translate-x-6]="notificationsEnabled"
+                    <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+                          [class.translate-x-6]="notificationsEnabled"
                           [class.translate-x-1]="!notificationsEnabled"></span>
                   </div>
                 </label>
 
-                <div class="h-px bg-gray-100 dark:bg-gray-700/50"></div>
-
-                <label class="flex items-center justify-between p-2.5 sm:p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors group">
-                  <div class="flex items-center gap-2.5 sm:gap-3">
-                     <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-xs sm:text-base text-purple-500">
-                      <i class="fa-solid fa-compress"></i>
+                <!-- Email Updates Toggle -->
+                <label class="flex items-center justify-between p-3 rounded-xl bg-[#1b2333]/40 border border-[#2a3347]/60 hover:border-[#2a3347] cursor-pointer transition-colors group">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-[#5b6cf0]/10 text-[#5b6cf0] flex items-center justify-center text-sm shrink-0">
+                      <i class="fa-solid fa-envelope"></i>
                     </div>
                     <div>
-                      <div class="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">Compact Density</div>
-                      <div class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Display more content on screen</div>
+                      <div class="text-xs sm:text-sm font-bold text-white">Email Updates</div>
+                      <div class="text-[11px] text-[#9aa3b8]">Receive important updates via email.</div>
                     </div>
                   </div>
-                  <div class="relative inline-flex h-5 sm:h-6 w-9 sm:w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                       [class.bg-indigo-600]="compactUI"
-                       [class.bg-gray-200]="!compactUI"
-                       [class.dark:bg-gray-600]="!compactUI">
-                    <input type="checkbox" class="sr-only" [(ngModel)]="compactUI" (change)="persistPref('ui-density', compactUI ? 'compact' : 'comfortable')">
-                    <span class="inline-block h-3.5 sm:h-4 w-3.5 sm:w-4 transform rounded-full bg-white transition-transform"
-                          [class.translate-x-4]="compactUI"
-                          [class.sm:translate-x-6]="compactUI"
-                          [class.translate-x-1]="!compactUI"></span>
+                  <div class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0"
+                       [class.bg-[#5b6cf0]]="emailUpdatesEnabled"
+                       [class.bg-[#2a3347]]="!emailUpdatesEnabled">
+                    <input type="checkbox" class="sr-only" [(ngModel)]="emailUpdatesEnabled" (change)="persistPref('email-updates', emailUpdatesEnabled)">
+                    <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+                          [class.translate-x-6]="emailUpdatesEnabled"
+                          [class.translate-x-1]="!emailUpdatesEnabled"></span>
                   </div>
                 </label>
+
+                <!-- Language Dropdown -->
+                <div class="flex items-center justify-between p-3 rounded-xl bg-[#1b2333]/40 border border-[#2a3347]/60">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-[#5b6cf0]/10 text-[#5b6cf0] flex items-center justify-center text-sm shrink-0">
+                      <i class="fa-solid fa-globe"></i>
+                    </div>
+                    <div>
+                      <div class="text-xs sm:text-sm font-bold text-white">Language</div>
+                      <div class="text-[11px] text-[#9aa3b8]">Choose your preferred language.</div>
+                    </div>
+                  </div>
+                  <select [(ngModel)]="selectedLanguage" (change)="persistPref('language', selectedLanguage)"
+                    class="bg-[#1b2333] border border-[#2a3347] text-white text-xs font-semibold px-3 py-1.5 rounded-xl outline-none cursor-pointer">
+                    <option value="English" class="bg-[#151b2b] text-white">English</option>
+                    <option value="Hindi" class="bg-[#151b2b] text-white">Hindi</option>
+                    <option value="Spanish" class="bg-[#151b2b] text-white">Spanish</option>
+                  </select>
+                </div>
               </div>
 
-               <div class="mt-4 sm:mt-8 pt-3 sm:pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end">
-                <button (click)="resetPreferences()" class="text-xs sm:text-sm text-red-500 hover:text-red-700 font-medium px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
-                   Reset to Defaults
+              <!-- Reset Action -->
+              <div class="pt-3 border-t border-[#2a3347] flex justify-end">
+                <button type="button" (click)="resetPreferences()" 
+                  class="text-xs font-bold text-rose-400 hover:text-rose-300 flex items-center gap-1.5 transition-colors cursor-pointer">
+                  <i class="fa-solid fa-rotate-right text-xs"></i>
+                  <span>Reset to Defaults</span>
                 </button>
               </div>
             </div>
+
           </div>
 
-          <!-- Security Column -->
-          <div class="space-y-4 sm:space-y-8">
+          <!-- RIGHT COLUMN: Account & Security -->
+          <div class="space-y-6 sm:space-y-8">
+            
+            <!-- Account & Security Component -->
             <app-change-password-form></app-change-password-form>
+
           </div>
-        
+
         </div>
+
       </div>
     </ng-template>
 
@@ -159,27 +199,49 @@ import { ChangePasswordFormComponent } from '../../shared/change-password-form.c
     </ng-template>
 
     <ng-template #noLayout>
-      <div class="min-h-screen bg-gray-50 dark:bg-gray-950 p-6">
+      <div class="min-h-screen bg-[#0b0f1a] p-6 text-white">
         <ng-container *ngTemplateOutlet="settingsContent"></ng-container>
       </div>
     </ng-template>
   `,
 })
-export class SettingsComponent {
+export class SettingsComponent implements OnInit {
   private theme = inject(ThemeService);
   auth = inject(AuthService);
+  private patientService = inject(PatientProfileService);
+  private toast = inject(ToastService);
+
   private isBrowser: boolean;
   currentTheme: 'dark' | 'light' | 'system' = 'dark';
-  notificationsEnabled: boolean = false;
+  notificationsEnabled: boolean = true;
   compactUI: boolean = false;
+  emailUpdatesEnabled: boolean = true;
+  selectedLanguage: string = 'English';
+
+  patientProfile = signal<PatientDto | null>(null);
 
   constructor(@Inject(PLATFORM_ID) platformId: Object) {
     this.isBrowser = isPlatformBrowser(platformId);
-    // Initialize safely in browser
     this.currentTheme = this.theme.getTheme();
     if (this.isBrowser) {
-      this.notificationsEnabled = (localStorage.getItem('notifications') === 'true');
-      this.compactUI = (localStorage.getItem('ui-density') === 'compact');
+      this.notificationsEnabled = localStorage.getItem('notifications') !== 'false';
+      this.compactUI = localStorage.getItem('ui-density') === 'compact';
+      this.emailUpdatesEnabled = localStorage.getItem('email-updates') !== 'false';
+      this.selectedLanguage = localStorage.getItem('language') || 'English';
+    }
+  }
+
+  ngOnInit() {
+    this.loadPatientProfile();
+  }
+
+  loadPatientProfile() {
+    const username = this.auth.user()?.username;
+    if (username && this.auth.role() === 'PATIENT') {
+      this.patientService.getProfile(username).subscribe({
+        next: (data) => this.patientProfile.set(data),
+        error: (err) => console.error('Error fetching patient profile in settings:', err)
+      });
     }
   }
 
@@ -198,10 +260,26 @@ export class SettingsComponent {
 
   resetPreferences() {
     if (this.isBrowser) {
-      ['notifications', 'ui-density'].forEach((k) => localStorage.removeItem(k));
+      ['notifications', 'ui-density', 'email-updates', 'language'].forEach((k) => localStorage.removeItem(k));
     }
-    this.notificationsEnabled = false;
+    this.notificationsEnabled = true;
     this.compactUI = false;
-    this.setTheme('system'); // Reset theme to system default
+    this.emailUpdatesEnabled = true;
+    this.selectedLanguage = 'English';
+    this.setTheme('system');
+    this.toast.showSuccess('Preferences reset to defaults.');
+  }
+
+  formatDateOfBirth(dob?: string): string {
+    if (!dob) return 'Oct 12, 2010';
+    try {
+      const d = new Date(dob);
+      if (isNaN(d.getTime())) return dob;
+      return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    } catch {
+      return dob;
+    }
   }
 }
+
+

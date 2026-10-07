@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { AppointmentService, PatientAppointmentItem } from '../../core/services/appointment.service';
 import { DoctorService, Doctor } from '../../core/services/doctor.service';
-import { PatientAppointmentCardComponent } from '../../shared/patient-appointment-card.component';
+import { AppointmentCardComponent } from '../../shared/components/appointment-card.component';
 import { RescheduleAppointmentModalComponent } from '../../shared/reschedule-appointment-modal.component';
 import { CancellationModalComponent } from '../../shared/cancellation-modal.component';
 import { getAppointmentEpochMs, isAppointmentToday } from '../../shared/appointment-utils';
@@ -14,14 +14,12 @@ import { MasterDataService } from '../../core/services/master-data.service';
 import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropdown.component';
 import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
-import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { SkeletonComponent } from '../../shared/ui/skeleton.component';
-import { FilterBarComponent } from '../../shared/ui/filter-bar.component';
 
 @Component({
   selector: 'app-my-appointments',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, PatientAppointmentCardComponent, RescheduleAppointmentModalComponent, CancellationModalComponent, SelectDropdownComponent, SharedChatModalComponent, EmptyStateComponent, PageHeaderComponent, SkeletonComponent, FilterBarComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, AppointmentCardComponent, RescheduleAppointmentModalComponent, CancellationModalComponent, SelectDropdownComponent, SharedChatModalComponent, EmptyStateComponent, SkeletonComponent],
   templateUrl: './my-appointments.component.html',
   styleUrl: './my-appointments.component.css'
 })

@@ -19,21 +19,30 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
 export class PatientFeedbackComponent {
   loading = false;
   items: PatientAppointmentItem[] = [];
+  selectedAppointmentId: number | null = null;
   form: Record<number, { rating: number | null; comment?: string; anonymous?: boolean }> = {};
   errors: Record<number, string | null> = {};
   maxCommentLength = 200;
 
-  // Given feedback state
-  givenVisible = false;
+  // History section & metrics state
+  givenVisible = true;
   loadingGiven = false;
   givenError: string | null = null;
   givenFeedback: PatientFeedbackItem[] = [];
+  historyFilter: string = 'ALL';
+  selectedFeedbackForDetails: PatientFeedbackItem | null = null;
 
   // Doctor mapping to resolve names when only id is present
   doctors: Doctor[] = [];
   doctorNameById: Record<number, string> = {};
 
-  constructor(private feedbackApi: FeedbackService, private router: Router, private toast: ToastService, private auth: AuthService, private doctorApi: DoctorService) {
+  constructor(
+    private feedbackApi: FeedbackService,
+    private router: Router,
+    private toast: ToastService,
+    private auth: AuthService,
+    private doctorApi: DoctorService
+  ) {
     // Preload doctors so we can resolve names from ids in feedback
     this.doctorApi.getAllForPatients(0, 50).subscribe({
       next: (res) => {
@@ -47,11 +56,13 @@ export class PatientFeedbackComponent {
           if (!Number.isNaN(id)) this.doctorNameById[id] = display || `Doctor ${id}`;
         });
         this.load();
+        this.loadGiven();
       },
       error: () => {
         this.doctors = [];
         this.doctorNameById = {};
         this.load();
+        this.loadGiven();
       },
     });
   }
@@ -65,7 +76,6 @@ export class PatientFeedbackComponent {
     this.feedbackApi.getPendingForPatient().subscribe({
       next: (res) => {
         const list = (res || []).map((a: any) => {
-          // derive doctorId and appointmentId robustly
           const doctorId = a.doctorId || a.doctorID || a.doctor_id || (a.doctor ? a.doctor.id : null);
           const appointmentId = a.appointmentId || a.appointmentID || a.appointment_id || (a.appointment ? a.appointment.id : null);
           const doctorName = a.doctorName
@@ -84,10 +94,23 @@ export class PatientFeedbackComponent {
         });
         this.items = list;
         list.forEach((a) => (this.form[a.appointmentId] = { rating: null, comment: '', anonymous: false }));
+        if (list.length > 0 && !this.selectedAppointmentId) {
+          this.selectedAppointmentId = list[0].appointmentId;
+        }
         this.loading = false;
       },
       error: () => (this.loading = false),
     });
+  }
+
+  get activeAppointment(): PatientAppointmentItem | null {
+    if (!this.items || this.items.length === 0) return null;
+    if (!this.selectedAppointmentId) return this.items[0];
+    return this.items.find(item => item.appointmentId === Number(this.selectedAppointmentId)) || this.items[0];
+  }
+
+  selectAppointment(appointmentId: number | string) {
+    this.selectedAppointmentId = Number(appointmentId);
   }
 
   setRating(appointmentId: number, rating: number) {
@@ -99,6 +122,18 @@ export class PatientFeedbackComponent {
   isStarActive(appointmentId: number, starValue: number) {
     const rating = this.form[appointmentId]?.rating || 0;
     return starValue <= rating;
+  }
+
+  getRatingLabel(rating: number | null): string {
+    if (!rating) return 'Rate your visit';
+    switch (rating) {
+      case 1: return 'Poor';
+      case 2: return 'Fair';
+      case 3: return 'Average';
+      case 4: return 'Good';
+      case 5: return 'Excellent';
+      default: return 'Rate your visit';
+    }
   }
 
   submit(a: PatientAppointmentItem) {
@@ -113,10 +148,14 @@ export class PatientFeedbackComponent {
     this.errors[a.appointmentId] = null;
     this.feedbackApi.submitFeedback(payload).subscribe({
       next: () => {
-        // remove item from list
         this.items = this.items.filter((x) => x.appointmentId !== a.appointmentId);
-        // show success toast
+        if (this.items.length > 0) {
+          this.selectedAppointmentId = this.items[0].appointmentId;
+        } else {
+          this.selectedAppointmentId = null;
+        }
         this.toast.showSuccess('Feedback submitted successfully');
+        this.loadGiven();
       },
       error: (err) => {
         const msg = (err?.error?.error as string) || 'Failed to submit feedback';
@@ -127,14 +166,11 @@ export class PatientFeedbackComponent {
   }
 
   skip(a: PatientAppointmentItem) {
-    // simply remove from view; user can revisit later
     this.items = this.items.filter((x) => x.appointmentId !== a.appointmentId);
-  }
-
-  toggleGiven() {
-    this.givenVisible = !this.givenVisible;
-    if (this.givenVisible && this.givenFeedback.length === 0) {
-      this.loadGiven();
+    if (this.items.length > 0) {
+      this.selectedAppointmentId = this.items[0].appointmentId;
+    } else {
+      this.selectedAppointmentId = null;
     }
   }
 
@@ -146,17 +182,12 @@ export class PatientFeedbackComponent {
     if (!pid || Number.isNaN(pid)) {
       this.loadingGiven = false;
       this.givenError = 'Unable to determine current patient. Please re-login.';
-      this.toast.showError(this.givenError);
       return;
     }
     this.feedbackApi.getGivenForPatient(pid).subscribe({
       next: (res) => {
         this.givenFeedback = (res || []).map((f: any) => {
-          // Robust mapping to ensure doctor name and appointment id are available
-          const appointmentId = f.appointmentId
-            || f.appointmentID
-            || f.appointment_id
-            || (f.appointment ? f.appointment.id : null);
+          const appointmentId = f.appointmentId || f.appointmentID || f.appointment_id || (f.appointment ? f.appointment.id : null);
           const doctorId = f.doctorId || f.doctorID || f.doctor_id || (f.doctor ? f.doctor.id : null);
           const doctorName = f.doctorName
             || [f.doctorFirstName, f.doctorLastName].filter(Boolean).join(' ').trim()
@@ -178,9 +209,74 @@ export class PatientFeedbackComponent {
       error: () => {
         this.loadingGiven = false;
         this.givenError = 'Failed to load your feedback.';
-        this.toast.showError(this.givenError);
       },
     });
   }
 
+  // Dynamic statistics computed directly from givenFeedback
+  get totalFeedbacksCount(): number {
+    return this.givenFeedback.length;
+  }
+
+  get averageRatingScore(): string {
+    if (this.givenFeedback.length === 0) return '0.0';
+    const sum = this.givenFeedback.reduce((acc, f) => acc + (f.rating || 0), 0);
+    return (sum / this.givenFeedback.length).toFixed(1);
+  }
+
+  get ratingDistribution(): Record<number, { count: number; percent: number }> {
+    const total = this.givenFeedback.length;
+    const dist: Record<number, { count: number; percent: number }> = {
+      5: { count: 0, percent: 0 },
+      4: { count: 0, percent: 0 },
+      3: { count: 0, percent: 0 },
+      2: { count: 0, percent: 0 },
+      1: { count: 0, percent: 0 }
+    };
+    if (total === 0) return dist;
+
+    this.givenFeedback.forEach((f) => {
+      const r = Math.min(5, Math.max(1, Math.round(f.rating || 0)));
+      if (dist[r]) dist[r].count++;
+    });
+
+    for (let i = 1; i <= 5; i++) {
+      dist[i].percent = Math.round((dist[i].count / total) * 100);
+    }
+    return dist;
+  }
+
+  // History filtering
+  get filteredGivenFeedback(): PatientFeedbackItem[] {
+    const list = [...this.givenFeedback];
+    if (this.historyFilter === '5_STAR') {
+      return list.filter(f => f.rating === 5);
+    }
+    if (this.historyFilter === 'PUBLISHED') {
+      return list.filter(f => !f.anonymous);
+    }
+    if (this.historyFilter === 'ANONYMOUS') {
+      return list.filter(f => f.anonymous);
+    }
+    return list;
+  }
+
+  openDetailsModal(feedback: PatientFeedbackItem) {
+    this.selectedFeedbackForDetails = feedback;
+  }
+
+  closeDetailsModal() {
+    this.selectedFeedbackForDetails = null;
+  }
+
+  formatDate(dateStr?: string | null): string {
+    if (!dateStr) return '-';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch {
+      return dateStr;
+    }
+  }
 }

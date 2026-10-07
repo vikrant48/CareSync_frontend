@@ -13,6 +13,16 @@ export function isAppointmentToday(a: PatientAppointmentItem): boolean {
   return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
 }
 
+export function isAppointmentFuture(a: PatientAppointmentItem): boolean {
+  if (!a.appointmentDate) return false;
+  const parts = a.appointmentDate.split('-').map(Number);
+  if (parts.length < 3) return false;
+  const apptDate = new Date(parts[0], parts[1] - 1, parts[2]);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return apptDate.getTime() > today.getTime();
+}
+
 // Status helpers for consistent chips/styles and labels
 export function getAppointmentStatusClass(status: string): Record<string, boolean> {
   const s = (status || '').trim().toUpperCase();

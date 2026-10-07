@@ -37,6 +37,17 @@
 
     <!-- Actions (doctor-specific) -->
     <div class="pt-3 border-t border-gray-200 dark:border-gray-800 mt-auto flex flex-col gap-2">
+        <div class="grid grid-cols-2 gap-2">
+            <button type="button" (click)="openIntakeSummary.emit(appointment)"
+                class="btn-secondary !py-1.5 !text-xs !bg-emerald-500/10 !text-emerald-400 !border-emerald-500/30 flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-clipboard-user"></i> Patient Intake
+            </button>
+            <button type="button" (click)="openSoapEditor.emit(appointment)"
+                class="btn-secondary !py-1.5 !text-xs !bg-purple-500/10 !text-purple-400 !border-purple-500/30 flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> AI SOAP Scribe
+            </button>
+        </div>
+
         <div class="grid grid-cols-2 gap-2" *ngIf="appointment.status === 'BOOKED'">
             <button type="button"
                 class="btn-secondary !bg-emerald-50 dark:!bg-emerald-900/10 !text-emerald-600 dark:!text-emerald-400 !border-emerald-100 dark:!border-emerald-900/30"
@@ -87,31 +98,20 @@
         </ng-container>
 
         <ng-container *ngIf="appointment.status === 'COMPLETED'">
-            <div *ngIf="hasMedicalRecord; else noRecord" class="grid grid-cols-2 gap-2">
-                <button type="button" class="btn-secondary" (click)="onCreateMedicalDescription()"
-                    [disabled]="disabled">
-                    <i class="fa-solid fa-eye"></i> Record
-                </button>
-                <button type="button" class="btn-primary !bg-emerald-600 hover:!bg-emerald-700"
-                    (click)="onDownloadPrescription()" [disabled]="disabled">
-                    <i class="fa-solid fa-file-pdf"></i> Prescription
-                </button>
-            </div>
-            <ng-template #noRecord>
-                <div
-                    class="flex items-center justify-between p-2.5 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
-                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">No record</span>
-                    <button type="button"
-                        class="btn-primary !bg-emerald-600 hover:!bg-emerald-700 !py-1.5 !min-h-0 text-xs"
-                        (click)="onDownloadPrescription()" [disabled]="disabled">
-                        <i class="fa-solid fa-file-pdf"></i> PDF Rx
-                    </button>
-                </div>
-            </ng-template>
+            <button type="button" class="btn-primary w-full !bg-emerald-600 hover:!bg-emerald-700"
+                (click)="onViewMedicalRecord()" [disabled]="disabled">
+                <i class="fa-solid fa-file-medical"></i> View Medical Record
+            </button>
         </ng-container>
 
         <button type="button" class="btn-secondary w-full" (click)="onViewPatient()" [disabled]="disabled">
             <i class="fa-solid fa-id-card"></i> View Patient Details
         </button>
     </div>
+
+    <!-- Clinical Visit Completion Preview Modal -->
+    <app-visit-completion-preview-modal [isOpen]="showPreviewModal" [appointmentId]="appointment.appointmentId"
+        [previewData]="previewModalData" [isCompleted]="appointment.status === 'COMPLETED'"
+        (close)="showPreviewModal = false" (downloadPdf)="onDownloadPrescription()">
+    </app-visit-completion-preview-modal>
 </div>

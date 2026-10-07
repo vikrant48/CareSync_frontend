@@ -1,0 +1,59 @@
+<div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
+    <!-- Terminal State Warning Banner (If Cancelled or No Show) -->
+    <div *ngIf="isTerminalState"
+        class="p-3.5 rounded-xl border flex items-center justify-between gap-3 text-xs font-bold" [ngClass]="{
+         'bg-rose-500/10 border-rose-500/30 text-rose-400': isCancelled,
+         'bg-amber-500/10 border-amber-500/30 text-amber-400': isNoShow
+       }">
+        <div class="flex items-center gap-2.5">
+            <i class="fa-solid fa-triangle-exclamation text-base"></i>
+            <span>Appointment Terminal State: {{ currentStatusLabel }}</span>
+        </div>
+        <span class="px-2 py-0.5 rounded bg-gray-900/80 text-[10px] tracking-wider uppercase">
+            {{ currentStatus }}
+        </span>
+    </div>
+
+    <!-- Stepper Pipeline Track -->
+    <div
+        class="relative flex items-center justify-between overflow-x-auto pb-2 sm:pb-0 scrollbar-thin scrollbar-thumb-gray-800">
+        <div *ngFor="let stage of stages; let i = index; let isLast = last"
+            class="flex-1 flex items-center min-w-[90px] sm:min-w-0"
+            [attr.aria-label]="stage.name + ' - ' + stage.state">
+
+            <!-- Stage Item Node -->
+            <div class="flex flex-col items-center gap-2 group w-full text-center relative z-10">
+                <!-- Circle Node -->
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition-all duration-300 shadow-md"
+                    [ngClass]="{
+               'bg-emerald-500 text-gray-950 ring-4 ring-emerald-500/20': stage.state === 'COMPLETED',
+               'bg-indigo-600 text-white ring-4 ring-indigo-500/40 animate-pulse': stage.state === 'CURRENT',
+               'bg-gray-800 text-gray-500 border border-gray-700': stage.state === 'UPCOMING',
+               'bg-rose-900/40 text-rose-400 border border-rose-700': stage.state === 'CANCELLED'
+             }">
+                    <i *ngIf="stage.state === 'COMPLETED'" class="fa-solid fa-check text-sm font-black"></i>
+                    <span *ngIf="stage.state !== 'COMPLETED'">{{ i + 1 }}</span>
+                </div>
+
+                <!-- Stage Title -->
+                <span class="text-[11px] sm:text-xs font-semibold tracking-tight transition-colors" [ngClass]="{
+                'text-emerald-400 font-bold': stage.state === 'COMPLETED',
+                'text-indigo-400 font-bold': stage.state === 'CURRENT',
+                'text-gray-500': stage.state === 'UPCOMING',
+                'text-rose-400': stage.state === 'CANCELLED'
+              }">
+                    {{ stage.name }}
+                </span>
+            </div>
+
+            <!-- Connecting Line Connector -->
+            <div *ngIf="!isLast" class="h-0.5 flex-1 -mx-2 sm:-mx-4 transition-all duration-300" [ngClass]="{
+             'bg-emerald-500': stage.state === 'COMPLETED',
+             'bg-gradient-to-r from-emerald-500 to-gray-800': stage.state === 'CURRENT',
+             'bg-gray-800': stage.state === 'UPCOMING'
+           }">
+            </div>
+
+        </div>
+    </div>
+</div>

@@ -58,12 +58,8 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in slide-in-from-bottom-4 fade-in"
             *ngIf="!loading && filteredAppointments().length > 0">
-            <doctor-appointment-card *ngFor="let a of filteredAppointments()" [appointment]="a"
-                [showStatusSelect]="true" (viewPatient)="openPatient($event)"
-                (openHistoryForm)="openHistoryForm($event)" (schedule)="schedule($event)" (confirm)="confirm($event)"
-                (start)="start($event)" (complete)="complete($event)" (cancel)="cancel($event)"
-                (joinVideo)="joinConsultation($event)" (statusChange)="changeStatus($event.appointment, $event.status)"
-                (openChat)="openChat($event)" class="h-full"></doctor-appointment-card>
+            <app-appointment-card *ngFor="let a of filteredAppointments()" [appointment]="a" viewerRole="DOCTOR"
+                class="h-full"></app-appointment-card>
         </div>
 
         <!-- Modals -->

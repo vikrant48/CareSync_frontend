@@ -5,229 +5,226 @@ import { AuthService } from '../core/services/auth.service';
 import { NotificationService, NotificationItem } from '../core/services/notification.service';
 import { EmptyStateComponent } from './ui/empty-state.component';
 
+export type NotificationTab = 'all' | 'appointments' | 'lab' | 'system';
+
 @Component({
   selector: 'app-notification-dropdown',
   standalone: true,
   imports: [CommonModule, RouterModule, EmptyStateComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="relative group">
-      <!-- Trigger Button -->
+    <div class="relative group inline-block">
+      <!-- Circular Trigger Button -->
       <button 
-        class="relative flex items-center justify-center sm:gap-2 px-3 py-2 rounded-xl transition-all duration-300
-               text-gray-400 hover:text-blue-400 hover:bg-gray-800/50 active:scale-95 border border-transparent hover:border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-        [ngClass]="notifOpen ? 'bg-blue-500/10 text-blue-400' : ''"
+        class="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300
+               bg-[#151b2b] text-gray-300 hover:text-white hover:bg-[#1b2333] active:scale-95 border border-[#2a3347] focus:outline-none shadow-sm cursor-pointer"
+        [ngClass]="notifOpen ? 'bg-[#1b2333] text-white border-[#5b6cf0] ring-2 ring-[#5b6cf0]/30' : ''"
         (click)="toggleNotif()" 
         title="Notifications" 
         aria-label="Notifications"
         [attr.aria-expanded]="notifOpen"
         aria-haspopup="true">
-        <div class="relative">
-          <i class="fa-solid fa-bell text-xl sm:text-lg"></i>
-          <span *ngIf="unreadCount > 0" class="absolute -top-1.5 -right-1.5 flex h-4 w-4">
-             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-             <span class="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-[10px] font-bold text-white items-center justify-center">
-               {{ unreadCount > 9 ? '9+' : unreadCount }}
-             </span>
-          </span>
-        </div>
-        <span class="hidden sm:inline text-sm font-medium">{{ buttonLabel }}</span>
+        <i class="fa-solid fa-bell text-base sm:text-lg text-[#9aa3b8] group-hover:text-white transition-colors"></i>
+        
+        <!-- Unread Badge (Clean Circle / Pill) -->
+        <span *ngIf="unreadCount > 0" class="absolute -top-1 -right-1 z-20 flex">
+           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+           <span class="relative inline-flex items-center justify-center rounded-full bg-rose-500 text-[10px] font-extrabold text-white shadow-md border border-[#0b0f1a] leading-none px-1.5 py-0.5 min-w-[18px] h-4.5">
+             {{ unreadCount > 9 ? '9+' : unreadCount }}
+           </span>
+        </span>
       </button>
 
-      <!-- Dropdown Panel -->
+      <!-- Dropdown Panel Template -->
       <ng-template #dropdownContent>
-        <!-- Header -->
-        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-700/50 bg-gray-900/95 sticky top-0 z-10 backdrop-blur-md">
-          <div class="flex items-center gap-2">
-            <span class="text-sm font-bold text-gray-100">Notifications</span>
-            <span *ngIf="unreadCount > 0" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/20">
-              {{ unreadCount }} New
-            </span>
-          </div>
-          <button 
-            *ngIf="unreadCount > 0"
-            (click)="markAllRead($event)"
-            class="text-[10px] text-blue-400 hover:text-blue-300 font-medium transition-colors hover:underline"
-          >
-            Mark all read
-          </button>
-        </div>
-
-        <!-- Scrollable Content -->
-        <div class="max-h-[70vh] sm:max-h-96 overflow-y-auto overflow-x-hidden custom-scrollbar">
+        <div class="w-full sm:w-[410px] bg-[#121826] border border-[#2a3347] rounded-2xl shadow-2xl overflow-hidden flex flex-col text-white text-left relative z-[9999]">
           
-          <!-- Loading/Status (Optional) -->
-          <div *ngIf="showStatus" class="px-4 py-2 text-[10px] text-gray-500 bg-gray-900/50 border-b border-gray-800/50 flex justify-between">
-             <span>Live Status</span>
-             <span [class.text-green-500]="isConnected" [class.text-red-500]="!isConnected">
-               {{ isConnected ? 'Connected' : 'Disconnected' }}
-             </span>
+          <!-- Top Arrow Pointer (Desktop) -->
+          <div class="hidden sm:block absolute -top-2 right-4 w-3.5 h-3.5 bg-[#121826] border-t border-l border-[#2a3347] rotate-45 z-20"></div>
+
+          <!-- Header -->
+          <div class="flex items-center justify-between px-4 py-3.5 border-b border-[#2a3347] bg-[#151b2b] relative z-10">
+            <div class="flex items-center gap-2.5">
+              <h3 class="text-base font-extrabold text-white tracking-tight">Notifications</h3>
+              <span *ngIf="unreadCount > 0" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#5b6cf0]/20 text-[#5b6cf0] border border-[#5b6cf0]/30">
+                {{ unreadCount }} New
+              </span>
+            </div>
+            <button 
+              *ngIf="unreadCount > 0"
+              (click)="markAllRead($event)"
+              class="text-xs text-[#5b6cf0] hover:text-[#7080f5] font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
+            >
+              <i class="fa-solid fa-circle-check text-[11px]"></i>
+              <span>Mark all as read</span>
+            </button>
           </div>
 
-          <!-- Empty State -->
-          <app-empty-state
-            *ngIf="feed.length === 0 && groupedFeedData.length === 0"
-            icon="fa-solid fa-bell-slash"
-            title="No notifications yet"
-            message="We'll let you know when something important arrives."
-            [compact]="true"
-            iconWrapClass="bg-gray-800/50 text-gray-600"
-            containerClass="px-4"
-          ></app-empty-state>
-
-          <!-- Grouped List -->
-          <ng-container *ngIf="grouped; else flatList">
-            <ng-container *ngFor="let g of groupedFeedData; trackBy: trackGroup">
-              <div class="px-4 py-1.5 text-[10px] uppercase tracking-wider font-bold text-gray-500 bg-gray-800/30 sticky top-0 backdrop-blur-sm">{{ g.label }}</div>
-              <button 
-                *ngFor="let n of g.items; trackBy: trackNotif" 
-                class="w-full text-left px-4 py-3 border-b border-gray-700/30 hover:bg-gray-700/20 transition-all duration-200 group relative overflow-hidden"
-                [ngClass]="!n.read ? 'bg-blue-500/5' : ''"
-                (click)="onNotificationClick(n)"
-              >
-                <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 transition-transform duration-300" [class.-translate-x-full]="n.read"></div>
-                
-                <div class="flex gap-3">
-                   <div class="flex-shrink-0 mt-0.5">
-                     <div class="w-8 h-8 rounded-full flex items-center justify-center" [ngClass]="getIconBgClass(n.type)">
-                       <i class="fa-solid" [ngClass]="getIconClass(n.type)"></i>
-                     </div>
-                   </div>
-                   <div class="flex-1 min-w-0">
-                      <div class="flex items-start justify-between gap-2 mb-0.5">
-                        <p class="text-sm font-semibold truncate pr-2" [class.text-gray-100]="!n.read" [class.text-gray-400]="n.read">
-                          {{ n.title }}
-                        </p>
-                        <span class="text-[10px] text-gray-500 whitespace-nowrap">{{ n.timestamp | date:'shortTime' }}</span>
-                      </div>
-                      <p class="text-xs text-gray-400 line-clamp-2 leading-relaxed" [class.text-gray-300]="!n.read">
-                        {{ n.message }}
-                      </p>
-                   </div>
-                </div>
-              </button>
-            </ng-container>
-          </ng-container>
-
-          <!-- Flat List -->
-          <ng-template #flatList>
-            <button 
-              *ngFor="let n of feed; trackBy: trackNotif" 
-              class="w-full text-left px-4 py-3 border-b border-gray-700/30 hover:bg-gray-700/20 transition-all duration-200 group relative overflow-hidden"
-              [ngClass]="!n.read ? 'bg-blue-500/5' : ''"
-              (click)="onNotificationClick(n)"
-            >
-              <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 transition-transform duration-300" [class.-translate-x-full]="n.read"></div>
-              
-              <div class="flex gap-3">
-                 <div class="flex-shrink-0 mt-0.5">
-                   <div class="w-8 h-8 rounded-full flex items-center justify-center" [ngClass]="getIconBgClass(n.type)">
-                     <i class="fa-solid" [ngClass]="getIconClass(n.type)"></i>
-                   </div>
-                 </div>
-                 <div class="flex-1 min-w-0">
-                    <div class="flex items-start justify-between gap-2 mb-0.5">
-                      <div class="text-sm font-semibold" [class.text-gray-100]="!n.read" [class.text-gray-400]="n.read">
-                        {{ n.title }}
-                      </div>
-                      <span class="text-[10px] text-gray-500 whitespace-nowrap">{{ n.timestamp | date:'MMM d, h:mm a' }}</span>
-                    </div>
-                    <p class="text-xs text-gray-400 line-clamp-2 leading-relaxed" [class.text-gray-300]="!n.read">
-                      {{ n.message }}
-                    </p>
-                 </div>
-              </div>
+          <!-- Filter Tabs Row -->
+          <div class="flex items-center gap-1 px-3 py-2 bg-[#121826] border-b border-[#2a3347] overflow-x-auto no-scrollbar text-xs">
+            <button (click)="setTab('all')"
+              class="px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+              [ngClass]="activeTab === 'all' ? 'bg-[#5b6cf0] text-white shadow-sm shadow-[#5b6cf0]/30' : 'text-[#9aa3b8] hover:text-white hover:bg-[#1b2333]'">
+              <span>All</span>
+              <span class="px-1.5 py-0.2 rounded-full text-[10px]" [ngClass]="activeTab === 'all' ? 'bg-white/20 text-white' : 'bg-[#1b2333] text-[#9aa3b8]'">{{ feed.length }}</span>
             </button>
-          </ng-template>
-        </div>
-        
-        <!-- Footer -->
-        <div class="px-4 py-2 border-t border-gray-700/50 bg-gray-900/95 backdrop-blur-md rounded-b-xl">
-           <a routerLink="/notifications" class="block text-center text-xs text-blue-400 hover:text-blue-300 hover:underline py-1 transition-colors">
-             View All Notifications
-           </a>
+
+            <button (click)="setTab('appointments')"
+              class="px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+              [ngClass]="activeTab === 'appointments' ? 'bg-[#5b6cf0] text-white shadow-sm shadow-[#5b6cf0]/30' : 'text-[#9aa3b8] hover:text-white hover:bg-[#1b2333]'">
+              <span>Appointments</span>
+              <span class="px-1.5 py-0.2 rounded-full text-[10px]" [ngClass]="activeTab === 'appointments' ? 'bg-white/20 text-white' : 'bg-[#1b2333] text-[#9aa3b8]'">{{ appointmentsCount }}</span>
+            </button>
+
+            <button (click)="setTab('lab')"
+              class="px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+              [ngClass]="activeTab === 'lab' ? 'bg-[#5b6cf0] text-white shadow-sm shadow-[#5b6cf0]/30' : 'text-[#9aa3b8] hover:text-white hover:bg-[#1b2333]'">
+              <span>Lab Tests</span>
+              <span class="px-1.5 py-0.2 rounded-full text-[10px]" [ngClass]="activeTab === 'lab' ? 'bg-white/20 text-white' : 'bg-[#1b2333] text-[#9aa3b8]'">{{ labCount }}</span>
+            </button>
+
+            <button (click)="setTab('system')"
+              class="px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+              [ngClass]="activeTab === 'system' ? 'bg-[#5b6cf0] text-white shadow-sm shadow-[#5b6cf0]/30' : 'text-[#9aa3b8] hover:text-white hover:bg-[#1b2333]'">
+              <span>System</span>
+              <span class="px-1.5 py-0.2 rounded-full text-[10px]" [ngClass]="activeTab === 'system' ? 'bg-white/20 text-white' : 'bg-[#1b2333] text-[#9aa3b8]'">{{ systemCount }}</span>
+            </button>
+          </div>
+
+          <!-- Scrollable Content Feed -->
+          <div class="max-h-[380px] overflow-y-auto p-3 space-y-2.5 custom-scrollbar bg-[#0b0f1a]/50">
+            
+            <!-- Empty State -->
+            <app-empty-state
+              *ngIf="filteredFeed.length === 0"
+              icon="fa-solid fa-bell-slash"
+              title="No notifications"
+              message="You have no notifications in this category."
+              [compact]="true"
+              iconWrapClass="bg-[#1b2333] text-[#9aa3b8]"
+              containerClass="py-8"
+            ></app-empty-state>
+
+            <!-- Card List -->
+            <div 
+              *ngFor="let n of filteredFeed; trackBy: trackNotif" 
+              (click)="onNotificationClick(n)"
+              class="bg-[#151b2b] hover:bg-[#1b2333] border border-[#2a3347] hover:border-[#3b4763] rounded-xl p-3.5 transition-all cursor-pointer group relative shadow-sm"
+              [ngClass]="!n.read ? 'ring-1 ring-[#5b6cf0]/40' : ''">
+              
+              <div class="flex items-start gap-3">
+                
+                <!-- Icon Box with Status Dot -->
+                <div class="relative shrink-0">
+                  <div class="w-10 h-10 rounded-xl flex items-center justify-center text-base" [ngClass]="getIconBgClass(n.type)">
+                    <i class="fa-solid" [ngClass]="getIconClass(n.type)"></i>
+                  </div>
+                  <!-- Corner Status Dot -->
+                  <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[#151b2b]"
+                        [ngClass]="getStatusDotClass(n.type)"></span>
+                </div>
+
+                <!-- Text & Metadata -->
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-start justify-between gap-2 mb-1">
+                    <h4 class="text-xs sm:text-sm font-bold truncate transition-colors" [class.text-white]="!n.read" [class.text-[#9aa3b8]]="n.read">
+                      {{ n.title }}
+                    </h4>
+                    <span class="text-[10px] text-[#9aa3b8] font-medium whitespace-nowrap shrink-0">
+                      {{ formatDate(n.timestamp) }}
+                    </span>
+                  </div>
+
+                  <p class="text-xs text-[#9aa3b8] line-clamp-2 leading-relaxed">
+                    {{ n.message }}
+                  </p>
+
+                  <!-- Contextual Action Buttons -->
+                  <div class="flex items-center justify-between pt-2 mt-1">
+                    <ng-container [ngSwitch]="getActionButtonType(n)">
+                      <button *ngSwitchCase="'view-report'" type="button"
+                        class="bg-[#5b6cf0]/15 hover:bg-[#5b6cf0] border border-[#5b6cf0]/30 text-[#5b6cf0] hover:text-white text-[11px] font-bold px-3 py-1 rounded-lg transition-all cursor-pointer">
+                        View Report
+                      </button>
+                      <button *ngSwitchCase="'give-feedback'" type="button"
+                        class="bg-[#5b6cf0]/15 hover:bg-[#5b6cf0] border border-[#5b6cf0]/30 text-[#5b6cf0] hover:text-white text-[11px] font-bold px-3 py-1 rounded-lg transition-all cursor-pointer">
+                        Give Feedback
+                      </button>
+                    </ng-container>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Footer -->
+          <div class="px-4 py-3 border-t border-[#2a3347] bg-[#151b2b] text-center">
+            <a routerLink="/notifications" (click)="notifOpen=false" 
+              class="inline-flex items-center justify-center gap-2 text-xs font-bold text-[#5b6cf0] hover:text-[#7080f5] transition-colors">
+              <span>View All Notifications</span>
+              <i class="fa-solid fa-arrow-right text-[11px]"></i>
+            </a>
+          </div>
+
         </div>
       </ng-template>
 
       <!-- Panel Container (Desktop) -->
       <div 
         *ngIf="notifOpen" 
-        class="hidden sm:block absolute right-0 mt-3 bg-[#111827] border border-gray-700/50 rounded-xl shadow-2xl z-[100] origin-top-right animate-in fade-in slide-in-from-top-2 duration-200 ring-1 ring-black/5" 
-        [ngClass]="widthClass"
-      >
+        class="hidden sm:block absolute right-0 top-full mt-2.5 z-[9999] origin-top-right animate-in fade-in slide-in-from-top-2 duration-200">
         <ng-container [ngTemplateOutlet]="dropdownContent"></ng-container>
       </div>
 
       <!-- Backdrop (Mobile) -->
-      <div *ngIf="notifOpen" class="sm:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" (click)="notifOpen=false"></div>
+      <div *ngIf="notifOpen" class="sm:hidden fixed inset-0 z-[9980] bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" (click)="notifOpen=false"></div>
 
       <!-- Panel Container (Mobile) -->
       <div 
         *ngIf="notifOpen" 
-        class="sm:hidden fixed inset-x-4 top-20 bg-[#111827] border border-gray-700/50 rounded-xl shadow-2xl z-50 animate-in slide-in-from-top-4 duration-300 ring-1 ring-black/5 max-h-[80vh] flex flex-col"
-      >
+        class="sm:hidden fixed inset-x-3 top-16 z-[9999] animate-in slide-in-from-top-4 duration-300">
         <ng-container [ngTemplateOutlet]="dropdownContent"></ng-container>
       </div>
     </div>
   `,
 })
 export class NotificationDropdownComponent implements OnInit, OnChanges {
-  // Inputs to customize behavior/styling
   @Input() role: 'doctor' | 'patient' = 'doctor';
   @Input() widthClass: string = 'w-80';
   @Input() grouped = false;
   @Input() cap = 200;
-  @Input() buttonLabel = 'Notifications';
+  @Input() buttonLabel = '';
   @Input() showStatus = true;
   @Input() userId: number | null = null;
 
-  // Internal state
   notifOpen = false;
   unreadCount = 0;
   feed: NotificationItem[] = [];
-  groupedFeedData: { label: 'Today' | 'Yesterday' | 'Earlier'; items: NotificationItem[] }[] = [];
-  isConnected = false;
+  activeTab: NotificationTab = 'all';
 
   private auth = inject(AuthService);
   private notifApi = inject(NotificationService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+
   constructor(private el: ElementRef) { }
 
   ngOnInit(): void {
     const uid = this.userId ?? (this.auth.userId() ? Number(this.auth.userId()) : null);
     this.refreshUnreadCount(uid);
 
-    // Subscribe to connection status
-    this.notifApi.isSocketConnected().subscribe(connected => {
-      this.isConnected = connected;
-      this.cdr.markForCheck();
-    });
-
-    // Subscribe to real-time notifications
     this.notifApi.listenForRealTimeNotifications().subscribe((notification: NotificationItem) => {
-      // Optimistically add to feed if it's for this user
-      // The backend sends to /user/queue/notifications so it should be for us
       this.unreadCount = (this.unreadCount || 0) + 1;
       this.feed = [notification, ...this.feed];
-
-      // If grouped, re-compute
-      if (this.grouped) {
-        const todayLabel = 'Today';
-        const todayGroup = this.groupedFeedData.find(g => g.label === todayLabel);
-        if (todayGroup) {
-          todayGroup.items.unshift(notification);
-        } else {
-          this.groupedFeedData.unshift({ label: 'Today', items: [notification] });
-        }
-      }
-
       this.cdr.markForCheck();
     });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    // Only refresh if userId actually changed and it's not the first change (which is handled by ngOnInit)
     if (changes['userId'] && !changes['userId'].firstChange) {
       const uid = this.userId ?? (this.auth.userId() ? Number(this.auth.userId()) : null);
       this.refreshUnreadCount(uid);
@@ -252,6 +249,45 @@ export class NotificationDropdownComponent implements OnInit, OnChanges {
     }
   }
 
+  setTab(tab: NotificationTab) {
+    this.activeTab = tab;
+  }
+
+  get filteredFeed(): NotificationItem[] {
+    if (this.activeTab === 'appointments') {
+      return this.feed.filter(n => this.isAppointmentType(n.type));
+    }
+    if (this.activeTab === 'lab') {
+      return this.feed.filter(n => this.isLabType(n.type));
+    }
+    if (this.activeTab === 'system') {
+      return this.feed.filter(n => !this.isAppointmentType(n.type) && !this.isLabType(n.type));
+    }
+    return this.feed;
+  }
+
+  get appointmentsCount(): number {
+    return this.feed.filter(n => this.isAppointmentType(n.type)).length;
+  }
+
+  get labCount(): number {
+    return this.feed.filter(n => this.isLabType(n.type)).length;
+  }
+
+  get systemCount(): number {
+    return this.feed.filter(n => !this.isAppointmentType(n.type) && !this.isLabType(n.type)).length;
+  }
+
+  private isAppointmentType(type?: string): boolean {
+    const t = (type || '').toLowerCase();
+    return t === 'appointment' || t === 'cancellation' || t === 'reschedule';
+  }
+
+  private isLabType(type?: string): boolean {
+    const t = (type || '').toLowerCase();
+    return t === 'lab' || t === 'report' || t === 'lab_report';
+  }
+
   refreshUnreadCount(userId: number | null) {
     if (userId == null) {
       this.unreadCount = 0;
@@ -272,7 +308,6 @@ export class NotificationDropdownComponent implements OnInit, OnChanges {
   fetchNotifications(userId: number | null) {
     if (userId == null) {
       this.feed = [];
-      this.groupedFeedData = [];
       this.cdr.markForCheck();
       return;
     }
@@ -281,28 +316,11 @@ export class NotificationDropdownComponent implements OnInit, OnChanges {
       : this.notifApi.getPatientFeed(userId);
     feed$.subscribe({
       next: (items) => {
-        const capped = (items || []).slice(0, this.cap);
-        this.feed = capped;
-        this.groupedFeedData = this.grouped ? this.computeGroupedFeed(capped) : [];
+        this.feed = (items || []).slice(0, this.cap);
         this.cdr.markForCheck();
       },
     });
     this.refreshUnreadCount(userId);
-  }
-
-  computeGroupedFeed(list: NotificationItem[]): { label: 'Today' | 'Yesterday' | 'Earlier'; items: NotificationItem[] }[] {
-    const groups: Record<string, NotificationItem[]> = { Today: [], Yesterday: [], Earlier: [] };
-    for (const n of list) {
-      const label = this.notifApi.getGroupLabel(n.timestamp);
-      (groups[label] ||= []).push(n);
-    }
-    return Object.entries(groups)
-      .filter(([, items]) => items.length > 0)
-      .map(([label, items]) => ({ label: label as 'Today' | 'Yesterday' | 'Earlier', items }));
-  }
-
-  trackGroup(index: number, g: { label: 'Today' | 'Yesterday' | 'Earlier'; items: NotificationItem[] }) {
-    return g.label;
   }
 
   trackNotif(index: number, n: NotificationItem) {
@@ -322,24 +340,15 @@ export class NotificationDropdownComponent implements OnInit, OnChanges {
     }
     if (n.link) {
       this.router.navigateByUrl(n.link);
-      this.notifOpen = false; // Close dropdown on navigation
+      this.notifOpen = false;
     }
   }
 
   markAllRead(event: Event) {
     event.stopPropagation();
-    // Assuming backend has an endpoint or we mark all loaded ones
-    // For now, iterate and mark locally to simulate UI update if backend API is limited
-    // Ideal: this.notifApi.markAllRead(this.userId).subscribe(...)
-
-    // Quick local update for immediate feedback
-    let marked = 0;
     this.feed.forEach(n => {
       if (!n.read) {
         n.read = true;
-        marked++;
-        // Fire and forget individual calls if bulk endpoint missing, 
-        // or just rely on refresh. Here we just simulate visual clear.
         const idNum = typeof n.id === 'string' ? Number(n.id) : (n.id as number | undefined);
         if (idNum) this.notifApi.markRead(idNum).subscribe();
       }
@@ -351,23 +360,57 @@ export class NotificationDropdownComponent implements OnInit, OnChanges {
   getIconClass(type?: string): string {
     switch ((type || '').toLowerCase()) {
       case 'appointment': return 'fa-calendar-check';
-      case 'cancellation': return 'fa-calendar-xmark text-red-400';
-      case 'bill': case 'payment': return 'fa-file-invoice-dollar';
-      case 'lab': case 'report': return 'fa-flask';
-      case 'message': return 'fa-comment-dots';
-      case 'system': return 'fa-gear';
+      case 'cancellation': return 'fa-calendar-xmark text-rose-400';
+      case 'lab': case 'report': case 'lab_report': return 'fa-flask';
+      case 'feedback': case 'message': return 'fa-comment-dots';
+      case 'system': case 'security': return 'fa-shield-halved';
       default: return 'fa-bell';
     }
   }
 
   getIconBgClass(type?: string): string {
     switch ((type || '').toLowerCase()) {
-      case 'appointment': return 'bg-blue-500/20 text-blue-400';
-      case 'cancellation': return 'bg-red-500/20 text-red-400';
-      case 'bill': case 'payment': return 'bg-green-500/20 text-green-400';
-      case 'lab': case 'report': return 'bg-purple-500/20 text-purple-400';
-      case 'message': return 'bg-yellow-500/20 text-yellow-400';
-      default: return 'bg-gray-700/50 text-gray-400';
+      case 'appointment': return 'bg-[#5b6cf0]/20 text-[#5b6cf0]';
+      case 'cancellation': return 'bg-rose-500/20 text-rose-400';
+      case 'lab': case 'report': case 'lab_report': return 'bg-purple-500/20 text-purple-400';
+      case 'feedback': case 'message': return 'bg-indigo-500/20 text-indigo-400';
+      case 'system': case 'security': return 'bg-blue-500/20 text-blue-400';
+      default: return 'bg-[#1b2333] text-[#9aa3b8]';
+    }
+  }
+
+  getStatusDotClass(type?: string): string {
+    switch ((type || '').toLowerCase()) {
+      case 'appointment': return 'bg-emerald-400';
+      case 'cancellation': return 'bg-rose-500';
+      case 'lab': case 'report': case 'lab_report': return 'bg-purple-400';
+      case 'feedback': return 'bg-indigo-400';
+      case 'system': case 'security': return 'bg-amber-400';
+      default: return 'bg-[#5b6cf0]';
+    }
+  }
+
+  getActionButtonType(n: NotificationItem): 'view-report' | 'give-feedback' | 'default' {
+    const t = (n.type || '').toLowerCase();
+    const l = (n.link || '').toLowerCase();
+    if (t.includes('lab') || t.includes('report') || l.includes('report') || l.includes('lab')) {
+      return 'view-report';
+    }
+    if (t.includes('feedback') || l.includes('feedback')) {
+      return 'give-feedback';
+    }
+    return 'default';
+  }
+
+  formatDate(ts?: string | Date): string {
+    if (!ts) return '';
+    try {
+      const d = new Date(ts);
+      if (isNaN(d.getTime())) return String(ts);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ', ' +
+        d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    } catch {
+      return String(ts);
     }
   }
 }

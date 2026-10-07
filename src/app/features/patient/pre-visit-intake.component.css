@@ -1,0 +1,4 @@
+/* Custom styling for pre-visit intake form */
+textarea {
+    resize: vertical;
+}

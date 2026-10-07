@@ -1,0 +1,133 @@
+<div class="min-h-screen bg-gray-950 text-gray-100 p-4 sm:p-8 space-y-8">
+
+    <!-- Header -->
+    <div
+        class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-gray-800 pb-6">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-3">
+                <i class="fa-solid fa-chart-line text-cyan-400"></i> Appointment Analytics & Funnel Dashboard
+            </h1>
+            <p class="text-xs sm:text-sm text-gray-400 mt-1">
+                Operational performance, completion rates, status breakdown, and lifecycle conversion metrics.
+            </p>
+        </div>
+
+        <!-- Date Range & Doctor Filter Controls -->
+        <div class="flex flex-wrap items-center gap-3 bg-gray-900 p-2 rounded-xl border border-gray-800 text-xs">
+            <div>
+                <label class="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Start Date</label>
+                <input type="date" [(ngModel)]="startDate" (change)="loadAnalytics()"
+                    class="bg-gray-950 border border-gray-800 rounded-lg p-1.5 text-xs text-gray-200 focus:outline-none focus:border-cyan-500" />
+            </div>
+            <div>
+                <label class="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">End Date</label>
+                <input type="date" [(ngModel)]="endDate" (change)="loadAnalytics()"
+                    class="bg-gray-950 border border-gray-800 rounded-lg p-1.5 text-xs text-gray-200 focus:outline-none focus:border-cyan-500" />
+            </div>
+            <div class="self-end">
+                <button (click)="resetFilters()"
+                    class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg font-semibold transition-all">
+                    Reset
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Skeleton -->
+    <div *ngIf="loading" class="py-20 text-center text-xs text-gray-400">
+        <i class="fa-solid fa-spinner fa-spin text-2xl text-cyan-400 mb-3 block"></i>
+        <span>Aggregating analytics & funnel statistics...</span>
+    </div>
+
+    <!-- Dashboard Metrics Content -->
+    <div *ngIf="!loading && analytics" class="space-y-8">
+
+        <!-- Overview Cards Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+            <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-2">
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Appointments</span>
+                <div class="text-2xl sm:text-3xl font-extrabold text-white">{{ analytics.totalAppointments }}</div>
+                <div class="text-[11px] text-gray-500 flex items-center gap-1">
+                    <i class="fa-solid fa-calendar-check text-cyan-400"></i> Recorded Volume
+                </div>
+            </div>
+
+            <div class="bg-gray-900 border border-emerald-500/30 rounded-2xl p-5 space-y-2">
+                <span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Completed Visits</span>
+                <div class="text-2xl sm:text-3xl font-extrabold text-emerald-400">{{ analytics.completedAppointments }}
+                </div>
+                <div class="text-[11px] text-emerald-500/80 font-medium">
+                    {{ analytics.completionRate | number:'1.1-1' }}% Completion Rate
+                </div>
+            </div>
+
+            <div class="bg-gray-900 border border-amber-500/30 rounded-2xl p-5 space-y-2">
+                <span class="text-xs font-semibold text-amber-400 uppercase tracking-wider">No-Shows</span>
+                <div class="text-2xl sm:text-3xl font-extrabold text-amber-400">{{ analytics.noShowAppointments }}</div>
+                <div class="text-[11px] text-amber-500/80 font-medium">
+                    {{ analytics.noShowRate | number:'1.1-1' }}% No-Show Rate
+                </div>
+            </div>
+
+            <div class="bg-gray-900 border border-rose-500/30 rounded-2xl p-5 space-y-2">
+                <span class="text-xs font-semibold text-rose-400 uppercase tracking-wider">Cancellations</span>
+                <div class="text-2xl sm:text-3xl font-extrabold text-rose-400">{{ analytics.cancelledAppointments }}
+                </div>
+                <div class="text-[11px] text-rose-500/80 font-medium">
+                    {{ analytics.cancellationRate | number:'1.1-1' }}% Cancellation Rate
+                </div>
+            </div>
+        </div>
+
+        <!-- 4-Stage Conversion Funnel -->
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-6">
+            <div class="flex items-center justify-between border-b border-gray-800 pb-4">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-100 flex items-center gap-2">
+                        <i class="fa-solid fa-filter text-indigo-400"></i> Appointment Lifecycle Conversion Funnel
+                    </h2>
+                    <p class="text-xs text-gray-400 mt-0.5">Progressive patient retention from initial slot hold to
+                        visit completion</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div *ngFor="let step of funnelSteps; let i = index"
+                    class="relative bg-gray-950 border border-gray-800 rounded-xl p-4 space-y-3">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-gray-400 font-bold uppercase tracking-wider">Stage {{ i + 1 }}</span>
+                        <span
+                            class="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 text-[10px] font-mono font-bold">
+                            {{ step.count }}
+                        </span>
+                    </div>
+                    <h3 class="text-sm font-bold text-gray-200">{{ step.name }}</h3>
+                    <div class="w-full bg-gray-900 h-2 rounded-full overflow-hidden">
+                        <div class="bg-gradient-to-r from-cyan-500 to-indigo-500 h-full rounded-full"
+                            [style.width.%]="step.conversionRate"></div>
+                    </div>
+                    <div class="flex items-center justify-between text-[11px] text-gray-400 pt-1">
+                        <span>Retained:</span>
+                        <span class="font-bold text-cyan-400">{{ step.conversionRate | number:'1.1-1' }}%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Breakdown Grid -->
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+            <h2 class="text-lg font-bold text-gray-100 flex items-center gap-2 border-b border-gray-800 pb-3">
+                <i class="fa-solid fa-cubes text-cyan-400"></i> Detailed Status Distribution
+            </h2>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                <div *ngFor="let item of statusBreakdownList"
+                    class="bg-gray-950 border border-gray-800 rounded-xl p-3 text-center space-y-1">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase truncate block">{{ item.status }}</span>
+                    <div class="text-lg font-extrabold text-gray-100 font-mono">{{ item.count }}</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

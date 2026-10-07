@@ -1,0 +1,5 @@
+<div class="rounded-full bg-brand-soft text-brand font-bold ring-2 ring-gray-200 dark:ring-gray-800 flex items-center justify-center overflow-hidden shrink-0 relative"
+    [ngClass]="sizeClass">
+    <img *ngIf="imageUrl" [src]="imageUrl" [alt]="name" class="w-full h-full object-cover" (error)="onImageError()" />
+    <span *ngIf="!imageUrl || imageFailed">{{ initials }}</span>
+</div>

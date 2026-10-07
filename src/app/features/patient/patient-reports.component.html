@@ -1,230 +1,483 @@
 <app-patient-layout>
-    <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
-        <!-- Header -->
+    <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
+        <!-- Top Page Header -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">Analytics & Insights</h2>
-                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Track your health journey and appointment
-                    history.</p>
+                <h2 class="text-2xl font-extrabold text-white tracking-tight">Analytics & Insights</h2>
+                <p class="text-xs text-[#9aa3b8] mt-1">Track your health journey and appointment history.</p>
             </div>
-            <div
-                class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-                <i class="fa-regular fa-calendar"></i>
-                <span>Last 12 Months</span>
+            <div class="flex items-center gap-2">
+                <button type="button"
+                    class="bg-[#151b2b] hover:bg-[#1b2333] border border-[#2a3347] text-xs font-semibold text-white px-3.5 py-2 rounded-xl flex items-center gap-2.5 transition-colors shadow-sm">
+                    <i class="fa-regular fa-calendar text-[#9aa3b8]"></i>
+                    <span>Last 12 Months</span>
+                    <i class="fa-solid fa-chevron-down text-[10px] text-[#9aa3b8] ml-1"></i>
+                </button>
             </div>
         </div>
 
-        <!-- content -->
-        <div *ngIf="!loadingReports; else loadingTpl" class="space-y-8 animate-in fade-in duration-500">
+        <!-- Main Content -->
+        <div *ngIf="!loadingReports; else loadingTpl" class="space-y-6 animate-in fade-in duration-300">
 
-            <!-- Summary Stats Cards -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <!-- KPI Cards Row 1 (4 Columns) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <!-- Total Appointments -->
                 <div
-                    class="bg-white dark:bg-gray-800 p-3.5 sm:p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
-                    <div
-                        class="absolute right-0 top-0 w-16 h-16 sm:w-24 sm:h-24 bg-blue-50 dark:bg-blue-900/20 rounded-full -mr-6 -mt-6 sm:-mr-8 sm:-mt-8 transition-transform group-hover:scale-110">
-                    </div>
-                    <div class="relative z-10">
-                        <div class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium mb-1 truncate">Total
-                            Appointments</div>
-                        <div class="text-xl sm:text-3xl font-bold text-gray-800 dark:text-white">{{
-                            patientAnalytics?.totalAppointments || 0 }}</div>
-                        <div
-                            class="mt-1.5 sm:mt-2 text-[10px] sm:text-xs text-blue-600 dark:text-blue-400 font-medium flex items-center gap-1">
-                            <i class="fa-solid fa-arrow-up"></i>
-                            <span>All time</span>
+                    class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-4 relative overflow-hidden flex flex-col justify-between group hover:border-[#374151] transition-all shadow-sm">
+                    <div class="flex items-start justify-between relative z-10">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-[#1b2333] border border-[#2a3347] flex items-center justify-center text-[#5b6cf0]">
+                                <i class="fa-regular fa-calendar-check text-base"></i>
+                            </div>
+                            <div>
+                                <span class="text-xs text-[#9aa3b8] font-medium block">Total Appointments</span>
+                                <span class="text-2xl font-extrabold text-white leading-tight block mt-0.5">
+                                    {{ patientAnalytics?.totalAppointments || 0 }}
+                                </span>
+                            </div>
                         </div>
                     </div>
+                    <div class="flex items-center justify-between mt-3 pt-2 relative z-10">
+                        <div class="text-[11px] font-medium text-[#5b6cf0] flex items-center gap-1.5">
+                            <i class="fa-solid fa-calendar text-[10px]"></i>
+                            <span>All time record</span>
+                        </div>
+                    </div>
+                    <!-- Wave Sparkline SVG -->
+                    <svg class="absolute right-2 bottom-2 w-28 h-12 text-[#5b6cf0]/20 group-hover:text-[#5b6cf0]/30 transition-colors pointer-events-none"
+                        viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M0,30 Q20,10 40,25 T80,12 T100,5" stroke-linecap="round" />
+                    </svg>
                 </div>
 
-                <!-- Avg Visits -->
+                <!-- Avg. Visits / Month -->
                 <div
-                    class="bg-white dark:bg-gray-800 p-3.5 sm:p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
-                    <div
-                        class="absolute right-0 top-0 w-16 h-16 sm:w-24 sm:h-24 bg-emerald-50 dark:bg-emerald-900/20 rounded-full -mr-6 -mt-6 sm:-mr-8 sm:-mt-8 transition-transform group-hover:scale-110">
+                    class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-4 relative overflow-hidden flex flex-col justify-between group hover:border-[#374151] transition-all shadow-sm">
+                    <div class="flex items-start justify-between relative z-10">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-[#1b2333] border border-[#2a3347] flex items-center justify-center text-emerald-400">
+                                <i class="fa-solid fa-user-group text-base"></i>
+                            </div>
+                            <div>
+                                <span class="text-xs text-[#9aa3b8] font-medium block">Avg. Visits / Month</span>
+                                <span class="text-2xl font-extrabold text-white leading-tight block mt-0.5">
+                                    {{ patientAnalytics?.averageVisitsPerMonth || 0 }}
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="relative z-10">
-                        <div class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium mb-1 truncate">Avg.
-                            Visits / Month</div>
-                        <div class="text-xl sm:text-3xl font-bold text-gray-800 dark:text-white">{{
-                            patientAnalytics?.averageVisitsPerMonth || 0 }}</div>
-                        <div
-                            class="mt-1.5 sm:mt-2 text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
-                            <i class="fa-solid fa-chart-line"></i>
+                    <div class="flex items-center justify-between mt-3 pt-2 relative z-10">
+                        <div class="text-[11px] font-medium text-emerald-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-chart-line text-[10px]"></i>
                             <span>Activity Level</span>
                         </div>
                     </div>
+                    <!-- Wave Sparkline SVG -->
+                    <svg class="absolute right-2 bottom-2 w-28 h-12 text-emerald-500/20 group-hover:text-emerald-500/30 transition-colors pointer-events-none"
+                        viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M0,28 Q25,35 50,15 T100,8" stroke-linecap="round" />
+                    </svg>
                 </div>
 
-                <!-- Cancelled (Derived) -->
+                <!-- Cancelled -->
                 <div
-                    class="bg-white dark:bg-gray-800 p-3.5 sm:p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
-                    <div
-                        class="absolute right-0 top-0 w-16 h-16 sm:w-24 sm:h-24 bg-rose-50 dark:bg-rose-900/20 rounded-full -mr-6 -mt-6 sm:-mr-8 sm:-mt-8 transition-transform group-hover:scale-110">
-                    </div>
-                    <div class="relative z-10">
-                        <div class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium mb-1 truncate">
-                            Cancelled</div>
-                        <div class="text-xl sm:text-3xl font-bold text-gray-800 dark:text-white">{{
-                            patientAnalytics?.cancelledAppointments || 0 }}</div>
-                        <div
-                            class="mt-1.5 sm:mt-2 text-[10px] sm:text-xs text-rose-600 dark:text-rose-400 font-medium flex items-center gap-1">
-                            <i class="fa-solid fa-ban"></i>
-                            <span>Missed</span>
+                    class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-4 relative overflow-hidden flex flex-col justify-between group hover:border-[#374151] transition-all shadow-sm">
+                    <div class="flex items-start justify-between relative z-10">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-[#1b2333] border border-[#2a3347] flex items-center justify-center text-rose-400">
+                                <i class="fa-solid fa-circle-xmark text-base"></i>
+                            </div>
+                            <div>
+                                <span class="text-xs text-[#9aa3b8] font-medium block">Cancelled</span>
+                                <span class="text-2xl font-extrabold text-white leading-tight block mt-0.5">
+                                    {{ patientAnalytics?.cancelledAppointments || 0 }}
+                                </span>
+                            </div>
                         </div>
                     </div>
+                    <div class="flex items-center justify-between mt-3 pt-2 relative z-10">
+                        <div class="text-[11px] font-medium text-rose-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-ban text-[10px]"></i>
+                            <span>Missed consultations</span>
+                        </div>
+                    </div>
+                    <!-- Flat Line SVG -->
+                    <svg class="absolute right-2 bottom-2 w-28 h-12 text-rose-500/20 group-hover:text-rose-500/30 transition-colors pointer-events-none"
+                        viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="0" y1="20" x2="100" y2="20" stroke-linecap="round" />
+                    </svg>
                 </div>
 
-                <!-- Completed (Derived) -->
+                <!-- Completed -->
                 <div
-                    class="bg-white dark:bg-gray-800 p-3.5 sm:p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
-                    <div
-                        class="absolute right-0 top-0 w-16 h-16 sm:w-24 sm:h-24 bg-indigo-50 dark:bg-indigo-900/20 rounded-full -mr-6 -mt-6 sm:-mr-8 sm:-mt-8 transition-transform group-hover:scale-110">
-                    </div>
-                    <div class="relative z-10">
-                        <div class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium mb-1 truncate">
-                            Completed</div>
-                        <div class="text-xl sm:text-3xl font-bold text-gray-800 dark:text-white">{{
-                            patientAnalytics?.totalVisits || 0 }}</div>
-                        <div
-                            class="mt-1.5 sm:mt-2 text-[10px] sm:text-xs text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-1">
-                            <i class="fa-solid fa-check-double"></i>
-                            <span>Successful</span>
+                    class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-4 relative overflow-hidden flex flex-col justify-between group hover:border-[#374151] transition-all shadow-sm">
+                    <div class="flex items-start justify-between relative z-10">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-[#1b2333] border border-[#2a3347] flex items-center justify-center text-emerald-400">
+                                <i class="fa-solid fa-circle-check text-base"></i>
+                            </div>
+                            <div>
+                                <span class="text-xs text-[#9aa3b8] font-medium block">Completed</span>
+                                <span class="text-2xl font-extrabold text-white leading-tight block mt-0.5">
+                                    {{ patientAnalytics?.totalVisits || 0 }}
+                                </span>
+                            </div>
                         </div>
                     </div>
+                    <div class="flex items-center justify-between mt-3 pt-2 relative z-10">
+                        <div class="text-[11px] font-medium text-emerald-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-check-double text-[10px]"></i>
+                            <span>Successful visits</span>
+                        </div>
+                    </div>
+                    <!-- Wave Sparkline SVG -->
+                    <svg class="absolute right-2 bottom-2 w-28 h-12 text-indigo-500/20 group-hover:text-indigo-500/30 transition-colors pointer-events-none"
+                        viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M0,32 Q30,20 60,30 T100,6" stroke-linecap="round" />
+                    </svg>
                 </div>
             </div>
 
-            <!-- Financial Stats Cards -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+            <!-- KPI Cards Row 2 (3 Columns) -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <!-- Total Spend -->
                 <div
-                    class="col-span-2 sm:col-span-1 bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
-                    <div
-                        class="absolute right-0 top-0 w-20 h-20 sm:w-24 sm:h-24 bg-amber-50 dark:bg-amber-900/20 rounded-full -mr-6 -mt-6 sm:-mr-8 sm:-mt-8 transition-transform group-hover:scale-110">
-                    </div>
-                    <div class="relative z-10">
-                        <div class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium mb-1">Total Spend
-                        </div>
-                        <div class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white">₹{{
-                            financialStats?.totalSpend || 0 }}</div>
+                    class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-4 relative overflow-hidden flex flex-col justify-between group hover:border-[#374151] transition-all shadow-sm">
+                    <div class="flex items-center gap-3 relative z-10">
                         <div
-                            class="mt-1.5 sm:mt-2 text-[10px] sm:text-xs text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
-                            <i class="fa-solid fa-wallet"></i>
-                            <span>Lifetime</span>
+                            class="w-10 h-10 rounded-xl bg-[#1b2333] border border-[#2a3347] flex items-center justify-center text-amber-400">
+                            <i class="fa-solid fa-wallet text-base"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-[#9aa3b8] font-medium block">Total Spend</span>
+                            <span class="text-2xl font-extrabold text-white leading-tight block mt-0.5">
+                                ₹{{ financialStats?.totalSpend || 0 }}
+                            </span>
                         </div>
                     </div>
+                    <div class="flex items-center justify-between mt-3 pt-2 relative z-10">
+                        <div class="text-[11px] font-medium text-amber-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-coins text-[10px]"></i>
+                            <span>Lifetime spending</span>
+                        </div>
+                    </div>
+                    <!-- Wave Sparkline SVG -->
+                    <svg class="absolute right-2 bottom-2 w-32 h-12 text-amber-500/20 group-hover:text-amber-500/30 transition-colors pointer-events-none"
+                        viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M0,30 Q30,35 60,15 T100,10" stroke-linecap="round" />
+                    </svg>
                 </div>
 
                 <!-- Appointment Spend -->
                 <div
-                    class="col-span-1 bg-white dark:bg-gray-800 p-3.5 sm:p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
-                    <div
-                        class="absolute right-0 top-0 w-16 h-16 sm:w-24 sm:h-24 bg-cyan-50 dark:bg-cyan-900/20 rounded-full -mr-6 -mt-6 sm:-mr-8 sm:-mt-8 transition-transform group-hover:scale-110">
-                    </div>
-                    <div class="relative z-10">
-                        <div class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium mb-1 truncate">
-                            Appointment Spend</div>
-                        <div class="text-xl sm:text-3xl font-bold text-gray-800 dark:text-white">₹{{
-                            financialStats?.totalAppointmentSpend || 0 }}</div>
+                    class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-4 relative overflow-hidden flex flex-col justify-between group hover:border-[#374151] transition-all shadow-sm">
+                    <div class="flex items-center gap-3 relative z-10">
                         <div
-                            class="mt-1.5 sm:mt-2 text-[10px] sm:text-xs text-cyan-600 dark:text-cyan-400 font-medium flex items-center gap-1">
-                            <i class="fa-solid fa-user-doctor"></i>
-                            <span class="truncate">Consultations</span>
+                            class="w-10 h-10 rounded-xl bg-[#1b2333] border border-[#2a3347] flex items-center justify-center text-[#5b6cf0]">
+                            <i class="fa-solid fa-user-doctor text-base"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-[#9aa3b8] font-medium block">Appointment Spend</span>
+                            <span class="text-2xl font-extrabold text-white leading-tight block mt-0.5">
+                                ₹{{ financialStats?.totalAppointmentSpend || 0 }}
+                            </span>
                         </div>
                     </div>
+                    <div class="flex items-center justify-between mt-3 pt-2 relative z-10">
+                        <div class="text-[11px] font-medium text-[#5b6cf0] flex items-center gap-1.5">
+                            <i class="fa-solid fa-user-doctor text-[10px]"></i>
+                            <span>Doctor consultations</span>
+                        </div>
+                    </div>
+                    <!-- Wave Sparkline SVG -->
+                    <svg class="absolute right-2 bottom-2 w-32 h-12 text-blue-500/20 group-hover:text-blue-500/30 transition-colors pointer-events-none"
+                        viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M0,25 Q40,35 70,12 T100,8" stroke-linecap="round" />
+                    </svg>
                 </div>
 
                 <!-- Lab Test Spend -->
                 <div
-                    class="col-span-1 bg-white dark:bg-gray-800 p-3.5 sm:p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
-                    <div
-                        class="absolute right-0 top-0 w-16 h-16 sm:w-24 sm:h-24 bg-purple-50 dark:bg-purple-900/20 rounded-full -mr-6 -mt-6 sm:-mr-8 sm:-mt-8 transition-transform group-hover:scale-110">
-                    </div>
-                    <div class="relative z-10">
-                        <div class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium mb-1 truncate">Lab
-                            Test Spend</div>
-                        <div class="text-xl sm:text-3xl font-bold text-gray-800 dark:text-white">₹{{
-                            financialStats?.totalLabTestSpend || 0 }}</div>
+                    class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-4 relative overflow-hidden flex flex-col justify-between group hover:border-[#374151] transition-all shadow-sm">
+                    <div class="flex items-center gap-3 relative z-10">
                         <div
-                            class="mt-1.5 sm:mt-2 text-[10px] sm:text-xs text-purple-600 dark:text-purple-400 font-medium flex items-center gap-1">
-                            <i class="fa-solid fa-flask"></i>
-                            <span class="truncate">Tests & Diagnostics</span>
+                            class="w-10 h-10 rounded-xl bg-[#1b2333] border border-[#2a3347] flex items-center justify-center text-purple-400">
+                            <i class="fa-solid fa-flask text-base"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-[#9aa3b8] font-medium block">Lab Test Spend</span>
+                            <span class="text-2xl font-extrabold text-white leading-tight block mt-0.5">
+                                ₹{{ financialStats?.totalLabTestSpend || 0 }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between mt-3 pt-2 relative z-10">
+                        <div class="text-[11px] font-medium text-purple-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-flask text-[10px]"></i>
+                            <span>Tests & Diagnostics</span>
+                        </div>
+                    </div>
+                    <!-- Wave Sparkline SVG -->
+                    <svg class="absolute right-2 bottom-2 w-32 h-12 text-purple-500/20 group-hover:text-purple-500/30 transition-colors pointer-events-none"
+                        viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M0,28 Q35,15 70,25 T100,5" stroke-linecap="round" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Charts Section (2 Columns) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Doctor Visits Chart (7 Cols) -->
+                <div class="lg:col-span-7 bg-[#151b2b] border border-[#2a3347] rounded-2xl p-5 flex flex-col shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-user-doctor text-[#5b6cf0] text-sm"></i>
+                            <h3 class="text-sm font-bold text-white tracking-wide">Visits by Doctor</h3>
+                        </div>
+                        <a routerLink="/patient/my-appointments"
+                            class="text-xs font-semibold text-[#5b6cf0] hover:text-indigo-300 transition-colors">View
+                            All</a>
+                    </div>
+
+                    <div *ngIf="doctorVisitLabels.length > 0; else noDataDocs"
+                        class="flex-1 flex flex-col justify-between gap-4">
+                        <!-- Horizontal Bar Chart -->
+                        <div class="h-44 w-full relative">
+                            <app-chart-widget [type]="'bar'" [indexAxis]="'y'" [labels]="doctorVisitLabels"
+                                [data]="doctorVisitData"></app-chart-widget>
+                        </div>
+
+                        <!-- Doctor Breakdown List -->
+                        <div class="space-y-2.5 pt-3 border-t border-[#2a3347]/60">
+                            <div *ngFor="let doc of doctorVisitList"
+                                class="flex items-center justify-between text-xs gap-3">
+                                <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                                    <app-user-avatar [name]="doc.name" [size]="'sm'"></app-user-avatar>
+                                    <span class="font-semibold text-white truncate">{{ doc.name }}</span>
+                                </div>
+                                <div class="flex items-center gap-3 flex-shrink-0">
+                                    <div
+                                        class="w-24 sm:w-32 h-2 bg-[#1b2333] rounded-full overflow-hidden border border-[#2a3347]">
+                                        <div class="h-full bg-gradient-to-r from-[#5b6cf0] to-indigo-400 rounded-full"
+                                            [style.width.%]="doc.percent"></div>
+                                    </div>
+                                    <span class="font-extrabold text-white text-xs min-w-[48px] text-right">{{ doc.count
+                                        }} <span class="text-[#9aa3b8] font-normal text-[11px]">({{ doc.percent
+                                            }}%)</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ng-template #noDataDocs>
+                        <div class="h-56 flex flex-col items-center justify-center text-[#9aa3b8]">
+                            <i class="fa-solid fa-user-doctor text-3xl mb-2 opacity-30"></i>
+                            <p class="text-xs">No doctor visit records found</p>
+                        </div>
+                    </ng-template>
+                </div>
+
+                <!-- Appointment Status Donut Chart (5 Cols) -->
+                <div class="lg:col-span-5 bg-[#151b2b] border border-[#2a3347] rounded-2xl p-5 flex flex-col shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-chart-pie text-[#5b6cf0] text-sm"></i>
+                            <h3 class="text-sm font-bold text-white tracking-wide">Appointment Status</h3>
+                        </div>
+                        <a routerLink="/patient/my-appointments"
+                            class="text-xs font-semibold text-[#5b6cf0] hover:text-indigo-300 transition-colors">View
+                            All</a>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-center justify-between flex-1 gap-6 py-2">
+                        <!-- Strictly Bounded Donut Canvas Container -->
+                        <div
+                            class="relative w-36 h-36 flex-shrink-0 flex items-center justify-center mx-auto sm:mx-0 overflow-hidden">
+                            <app-chart-widget [type]="'doughnut'" [labels]="appointmentStatusLabels"
+                                [data]="appointmentStatusData" [colors]="statusColors"></app-chart-widget>
+                            <!-- Center Text -->
+                            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                <span class="text-xl font-extrabold text-white leading-none">{{ totalStatusCount
+                                    }}</span>
+                                <span
+                                    class="text-[10px] font-bold text-[#9aa3b8] uppercase tracking-wider mt-0.5">Total</span>
+                            </div>
+                        </div>
+
+                        <!-- Custom Legend List with Dynamic Percentages -->
+                        <div class="w-full sm:flex-1 space-y-2.5 text-xs">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-[#3b82f6] flex-shrink-0"></span>
+                                    <span class="text-white font-medium">Completed</span>
+                                </div>
+                                <span class="text-white font-bold">{{ statusCounts.completed }} <span
+                                        class="text-[#9aa3b8] font-normal text-[11px]">({{
+                                        getStatusPercent(statusCounts.completed) }}%)</span></span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-[#a78bfa] flex-shrink-0"></span>
+                                    <span class="text-white font-medium">Scheduled</span>
+                                </div>
+                                <span class="text-white font-bold">{{ statusCounts.scheduled }} <span
+                                        class="text-[#9aa3b8] font-normal text-[11px]">({{
+                                        getStatusPercent(statusCounts.scheduled) }}%)</span></span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-[#ef4444] flex-shrink-0"></span>
+                                    <span class="text-white font-medium">Cancelled</span>
+                                </div>
+                                <span class="text-white font-bold">{{ statusCounts.cancelled }} <span
+                                        class="text-[#9aa3b8] font-normal text-[11px]">({{
+                                        getStatusPercent(statusCounts.cancelled) }}%)</span></span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-[#eab308] flex-shrink-0"></span>
+                                    <span class="text-white font-medium">Rescheduled</span>
+                                </div>
+                                <span class="text-white font-bold">{{ statusCounts.rescheduled }} <span
+                                        class="text-[#9aa3b8] font-normal text-[11px]">({{
+                                        getStatusPercent(statusCounts.rescheduled) }}%)</span></span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-[#64748b] flex-shrink-0"></span>
+                                    <span class="text-white font-medium">No Show</span>
+                                </div>
+                                <span class="text-white font-bold">{{ statusCounts.noShow }} <span
+                                        class="text-[#9aa3b8] font-normal text-[11px]">({{
+                                        getStatusPercent(statusCounts.noShow) }}%)</span></span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Charts Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Doctor Visits Chart -->
-                <div
-                    class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-6">Visits by Doctor</h3>
-                    <div class="flex-1 min-h-[300px]">
-                        <app-chart-widget *ngIf="doctorVisitLabels.length > 0; else noDataDocs" [type]="'bar'"
-                            [labels]="doctorVisitLabels" [data]="doctorVisitData"></app-chart-widget>
-                        <ng-template #noDataDocs>
-                            <div
-                                class="h-full flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
-                                <i class="fa-solid fa-user-doctor text-4xl mb-3 opacity-20"></i>
-                                <p>No doctor visit data available</p>
-                            </div>
-                        </ng-template>
+            <!-- Recent Activity Table Section -->
+            <div class="bg-[#151b2b] border border-[#2a3347] rounded-2xl overflow-hidden shadow-sm">
+                <!-- Header -->
+                <div class="p-4 sm:px-5 sm:py-4 flex items-center justify-between border-b border-[#2a3347]">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-regular fa-clock text-[#5b6cf0] text-sm"></i>
+                        <h3 class="text-sm font-bold text-white tracking-wide">Recent Activity</h3>
                     </div>
+                    <a routerLink="/patient/my-appointments"
+                        class="text-xs font-semibold text-[#5b6cf0] hover:text-indigo-300 transition-colors">View
+                        All</a>
                 </div>
 
-                <!-- Appointment Status Chart -->
-                <div
-                    class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-6">Appointment Status</h3>
-                    <div class="flex-1 min-h-[300px]">
-                        <app-chart-widget
-                            *ngIf="appointmentStatusData.length > 0 && hasData(appointmentStatusData); else noDataStatus"
-                            [type]="'pie'" [labels]="appointmentStatusLabels"
-                            [data]="appointmentStatusData"></app-chart-widget>
-                        <ng-template #noDataStatus>
-                            <div
-                                class="h-full flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
-                                <i class="fa-regular fa-calendar-xmark text-4xl mb-3 opacity-20"></i>
-                                <p>No appointment status data</p>
-                            </div>
-                        </ng-template>
-                    </div>
-                </div>
+                <!-- Table Container -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[700px]">
+                        <thead>
+                            <tr
+                                class="bg-[#1b2333]/70 text-[11px] font-bold text-[#9aa3b8] uppercase tracking-wider border-b border-[#2a3347]">
+                                <th class="py-3 px-5">DATE</th>
+                                <th class="py-3 px-5">DOCTOR</th>
+                                <th class="py-3 px-5">TYPE</th>
+                                <th class="py-3 px-5">AMOUNT</th>
+                                <th class="py-3 px-5">STATUS</th>
+                                <th class="py-3 px-5 text-right">ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[#2a3347] text-xs">
+                            <tr *ngFor="let a of recentAppointments.slice(0, 5)"
+                                class="hover:bg-[#1b2333]/40 transition-colors group">
+                                <!-- Date & Time -->
+                                <td class="py-3.5 px-5 whitespace-nowrap">
+                                    <span class="font-bold text-white block">{{ a.appointmentDate | date:'dd MMM yyyy'
+                                        }}</span>
+                                    <span class="text-[11px] text-[#9aa3b8] font-medium block mt-0.5">{{
+                                        a.appointmentTime || '15:00 - 15:30' }}</span>
+                                </td>
 
-                <!-- Overview Bar Chart (Full Width) -->
-                <div
-                    class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-6">Appointment Overview</h3>
-                    <div class="flex-1 min-h-[300px]">
-                        <app-chart-widget *ngIf="overviewData.length > 0; else noDataOverview" [type]="'bar'"
-                            [labels]="overviewLabels" [data]="overviewData"></app-chart-widget>
-                        <ng-template #noDataOverview>
-                            <div
-                                class="h-full flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
-                                <i class="fa-solid fa-chart-simple text-4xl mb-3 opacity-20"></i>
-                                <p>No overview data available</p>
-                            </div>
-                        </ng-template>
-                    </div>
+                                <!-- Doctor Info -->
+                                <td class="py-3.5 px-5 whitespace-nowrap">
+                                    <div class="flex items-center gap-3">
+                                        <app-user-avatar [name]="a.doctorName" [imageUrl]="a.doctorProfileImageUrl"
+                                            [size]="'sm'"></app-user-avatar>
+                                        <div>
+                                            <span class="font-bold text-white block">{{ a.doctorName }}</span>
+                                            <span class="text-[11px] text-[#9aa3b8] block mt-0.5">{{
+                                                a.doctorSpecialization || 'General Consultation' }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Type -->
+                                <td class="py-3.5 px-5 whitespace-nowrap">
+                                    <div class="flex items-center gap-2">
+                                        <div
+                                            class="w-7 h-7 rounded-lg bg-[#1b2333] border border-[#2a3347] flex items-center justify-center text-[#9aa3b8]">
+                                            <i class="fa-solid fa-briefcase-medical text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <span class="font-medium text-white block">Consultation</span>
+                                            <span class="text-[11px] text-[#9aa3b8] block">In-clinic</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Amount -->
+                                <td class="py-3.5 px-5 whitespace-nowrap">
+                                    <span class="font-extrabold text-white">₹{{ a.consultationFees || 0 }}</span>
+                                </td>
+
+                                <!-- Status Badge -->
+                                <td class="py-3.5 px-5 whitespace-nowrap">
+                                    <app-status-badge [status]="a.status || 'BOOKED'"></app-status-badge>
+                                </td>
+
+                                <!-- Action -->
+                                <td class="py-3.5 px-5 whitespace-nowrap text-right">
+                                    <div class="inline-flex items-center gap-2">
+                                        <button (click)="viewAppointment(a.appointmentId)"
+                                            class="bg-[#1b2333] hover:bg-[#253047] text-white border border-[#2a3347] px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors">
+                                            <span>View Details</span>
+                                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                                        </button>
+                                        <button type="button"
+                                            class="w-7 h-7 rounded-lg hover:bg-[#1b2333] text-[#9aa3b8] hover:text-white flex items-center justify-center transition-colors">
+                                            <i class="fa-solid fa-ellipsis-vertical text-xs"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Clean Empty State if no recent appointments -->
+                            <tr *ngIf="recentAppointments.length === 0">
+                                <td colspan="6" class="py-10 text-center text-[#9aa3b8]">
+                                    <div class="flex flex-col items-center justify-center gap-2">
+                                        <i class="fa-regular fa-calendar-xmark text-2xl opacity-40"></i>
+                                        <p class="text-xs font-medium">No recent appointment activity found</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
         </div>
 
+        <!-- Skeleton Loading State -->
         <ng-template #loadingTpl>
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 animate-pulse">
-                <div class="h-32 bg-gray-200 dark:bg-gray-700 rounded-2xl" *ngFor="let i of [1,2,3,4]"></div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
+                <div class="h-28 bg-[#151b2b] border border-[#2a3347] rounded-2xl" *ngFor="let i of [1,2,3,4]"></div>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 animate-pulse">
-                <div class="h-32 bg-gray-200 dark:bg-gray-700 rounded-2xl" *ngFor="let i of [1,2,3]"></div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 animate-pulse">
+                <div class="h-28 bg-[#151b2b] border border-[#2a3347] rounded-2xl" *ngFor="let i of [1,2,3]"></div>
             </div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8 animate-pulse">
-                <div class="h-80 bg-gray-200 dark:bg-gray-700 rounded-2xl"></div>
-                <div class="h-80 bg-gray-200 dark:bg-gray-700 rounded-2xl"></div>
-                <div class="h-80 bg-gray-200 dark:bg-gray-700 rounded-2xl lg:col-span-2"></div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6 animate-pulse">
+                <div class="h-80 bg-[#151b2b] border border-[#2a3347] rounded-2xl lg:col-span-7"></div>
+                <div class="h-80 bg-[#151b2b] border border-[#2a3347] rounded-2xl lg:col-span-5"></div>
             </div>
         </ng-template>
     </div>

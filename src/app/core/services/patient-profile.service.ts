@@ -128,6 +128,11 @@ export class PatientProfileService {
     return this.http.get<MedicalHistoryItem>(`${this.baseUrl}/api/medical-history/${historyId}`);
   }
 
+  /** Get medical history by appointment id */
+  getMedicalHistoryByAppointment(appointmentId: number | string) {
+    return this.http.get<MedicalHistoryItem>(`${this.baseUrl}/api/medical-history/appointment/${appointmentId}`);
+  }
+
   addMedicalHistoryWithDoctor(
     patientId: number | string,
     doctorId: number | string,

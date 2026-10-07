@@ -1,0 +1,37 @@
+<div class="stepper-container bg-gray-900/60 border border-gray-800 rounded-xl p-4 sm:p-6 backdrop-blur-md">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-semibold text-gray-300 uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-timeline text-emerald-400"></i> Appointment Lifecycle
+        </h3>
+        <app-status-badge [status]="currentStatus"></app-status-badge>
+    </div>
+
+    <!-- Stepper Track -->
+    <div class="relative flex items-center justify-between w-full my-6">
+        <div class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-gray-800 w-full rounded-full z-0"></div>
+        <div class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full z-0 transition-all duration-500"
+            [style.width.%]="progressPercentage"></div>
+
+        <div *ngFor="let step of steps; let i = index"
+            class="relative z-10 flex flex-col items-center group cursor-default">
+            <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs border-2 transition-all duration-300"
+                [ngClass]="getStepClass(i)">
+                <i *ngIf="isCompletedStep(i)" class="fa-solid fa-check text-xs"></i>
+                <span *ngIf="!isCompletedStep(i)">{{ i + 1 }}</span>
+            </div>
+            <span class="mt-2 text-[11px] font-medium tracking-tight text-center transition-colors max-w-[80px]"
+                [ngClass]="isCurrentStep(i) ? 'text-emerald-400 font-semibold' : (isCompletedStep(i) ? 'text-gray-300' : 'text-gray-500')">
+                {{ step.label }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Active Status Description & Actions Banner -->
+    <div
+        class="mt-4 pt-4 border-t border-gray-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-gray-400">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-circle-info text-cyan-400 text-sm"></i>
+            <span>{{ getStatusDescription() }}</span>
+        </div>
+    </div>
+</div>

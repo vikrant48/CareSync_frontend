@@ -16,126 +16,225 @@ import { DatePickerComponent } from './date-picker.component';
   imports: [CommonModule, FormsModule, RouterModule, PatientLayoutComponent, SelectDropdownComponent, DatePickerComponent],
   template: `
     <app-patient-layout>
-      <div class="max-w-7xl mx-auto space-y-4 sm:space-y-6 p-3.5 sm:p-6">
+      <div class="max-w-7xl mx-auto space-y-6 p-4 sm:p-6 lg:p-8 animate-in fade-in duration-500">
         
-        <!-- Header -->
-        <div class="flex flex-row items-center justify-between gap-3 sm:gap-4">
-          <h2 class="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Edit Profile</h2>
-          <a class="btn-secondary !py-1.5 sm:!py-2 text-xs sm:text-sm flex items-center" [routerLink]="backLink">
-            <i class="fa-solid fa-arrow-left mr-1.5 sm:mr-2"></i> Back
-          </a>
+        <!-- Header Row -->
+        <div class="space-y-1 sm:space-y-2 mb-6">
+          <div class="flex items-center gap-3">
+            <a [routerLink]="backLink"
+               class="bg-[#151b2b] hover:bg-[#1b2333] border border-[#2a3347] hover:border-[#3a4763] text-white text-xs sm:text-sm font-bold px-3.5 py-2 rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm">
+              <i class="fa-solid fa-arrow-left text-xs"></i>
+              <span>Back</span>
+            </a>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Edit Profile</h2>
+          </div>
+          <p class="text-xs sm:text-sm text-[#9aa3b8] pl-0.5">
+            Update your personal information and keep your profile up to date.
+          </p>
         </div>
 
-        <section class="panel p-3.5 sm:p-8 space-y-4 sm:space-y-8 animate-fade-in">
-          
-          <!-- Identity Section -->
-          <div class="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-6 pb-4 sm:pb-6 border-b border-gray-200 dark:border-gray-800">
-            <div class="relative group">
-              <div class="w-16 h-16 sm:w-28 sm:h-28 rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden ring-2 sm:ring-4 ring-white dark:ring-gray-800 shadow-md sm:shadow-xl flex items-center justify-center text-gray-400 dark:text-white text-xl sm:text-3xl font-bold">
-                <img *ngIf="editableProfile?.profileImageUrl; else initials" [src]="editableProfile?.profileImageUrl" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" (error)="onImageError()" />
+        <!-- Top Profile Summary Header Card -->
+        <div class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
+          <!-- Left Identity Info -->
+          <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 text-center sm:text-left w-full md:w-auto">
+            <div class="relative shrink-0">
+              <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#1b2333] border-2 border-[#2a3347] overflow-hidden flex items-center justify-center text-white text-2xl font-bold shadow-md">
+                <img *ngIf="editableProfile?.profileImageUrl; else initials" [src]="editableProfile?.profileImageUrl" class="w-full h-full object-cover" (error)="onImageError()" />
                 <ng-template #initials>
                   <span>{{ initialsFromName(editableProfile) }}</span>
                 </ng-template>
               </div>
-              <label class="absolute bottom-0 right-0 p-1.5 sm:p-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full cursor-pointer shadow-lg transition-transform hover:scale-105" title="Change Photo">
+              <label class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-[#5b6cf0] hover:bg-[#4a5be0] text-white flex items-center justify-center cursor-pointer shadow-lg transition-transform hover:scale-105" title="Change Photo">
                 <input #profileFileInput type="file" class="hidden" (change)="onFileChange($event)" />
-                <i class="fa-solid fa-camera text-xs sm:text-sm"></i>
+                <i class="fa-solid fa-camera text-xs"></i>
               </label>
             </div>
-            
-            <div class="text-center sm:text-left space-y-0.5 sm:space-y-1 flex-1">
-              <h3 class="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">{{ fullName(editableProfile) }}</h3>
-              <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                <span class="bg-gray-100 dark:bg-gray-800 px-2 py-0.5 sm:py-1 rounded text-gray-600 dark:text-gray-300">ID: {{ editableProfile?.id ?? '—' }}</span>
-                <span>{{ editableProfile?.email || '—' }}</span>
+
+            <div class="space-y-1.5 min-w-0">
+              <h3 class="text-xl sm:text-2xl font-extrabold text-white truncate">{{ fullName(editableProfile) }}</h3>
+              <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 text-xs text-[#9aa3b8]">
+                <span class="bg-[#1b2333] border border-[#2a3347] px-2.5 py-1 rounded-lg font-medium text-gray-300">ID: {{ editableProfile?.id ?? 'NA' }}</span>
+                <span class="flex items-center gap-1.5"><i class="fa-regular fa-envelope text-[#5b6cf0]"></i> {{ editableProfile?.email || 'NA' }}</span>
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-phone text-[#5b6cf0]"></i> {{ editableProfile?.contactInfo || 'NA' }}</span>
               </div>
-              
-              <div class="pt-2 sm:pt-3" *ngIf="file">
-                 <button type="button" class="btn-primary text-xs sm:text-sm py-1.5 px-3" (click)="uploadImage()" [disabled]="uploading">
-                   <i class="fa-solid fa-cloud-arrow-up mr-1.5 sm:mr-2"></i>
-                   {{ uploading ? 'Uploading...' : 'Confirm Upload' }}
-                 </button>
+
+              <div class="pt-1" *ngIf="file">
+                <button type="button" class="bg-[#5b6cf0] hover:bg-[#4a5be0] text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5" (click)="uploadImage()" [disabled]="uploading">
+                  <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
+                  {{ uploading ? 'Uploading...' : 'Confirm Upload' }}
+                </button>
               </div>
             </div>
           </div>
 
-          <!-- Edit Form -->
-          <form class="space-y-4 sm:space-y-6" (ngSubmit)="save()">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
-              
-              <div class="space-y-1 sm:space-y-2">
-                <label class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-400">First Name</label>
-                <input class="input text-xs sm:text-sm bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white" [(ngModel)]="form.firstName" name="firstName" placeholder="John" />
+          <!-- Right Profile Completion Status -->
+          <div class="w-full md:w-72 bg-[#121724]/60 border border-[#2a3347]/60 rounded-xl p-4 space-y-2 shrink-0">
+            <div class="flex items-center justify-between text-xs font-semibold">
+              <span class="text-[#9aa3b8]">Profile Completion</span>
+              <span class="text-[#5b6cf0] font-bold">{{ completionPercentage }}%</span>
+            </div>
+            <div class="w-full h-2 bg-[#1b2333] rounded-full overflow-hidden border border-[#2a3347]/40">
+              <div class="h-full bg-[#5b6cf0] rounded-full transition-all duration-500" [style.width.%]="completionPercentage"></div>
+            </div>
+            <div class="flex items-center gap-1.5 text-[11px] font-medium text-emerald-400 pt-0.5">
+              <i class="fa-solid fa-circle-check text-xs"></i>
+              <span>{{ completionPercentage >= 80 ? 'Great! Your profile is almost complete.' : 'Complete your profile details.' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Edit Form Card Box -->
+        <form (ngSubmit)="save()" class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-5 sm:p-6 shadow-xl space-y-8">
+          
+          <!-- Personal Information Section -->
+          <div class="space-y-5">
+            <div class="flex items-center gap-2.5 pb-3 border-b border-[#2a3347]">
+              <div class="w-7 h-7 rounded-lg bg-[#5b6cf0]/10 text-[#5b6cf0] flex items-center justify-center text-sm shrink-0">
+                <i class="fa-solid fa-user"></i>
+              </div>
+              <h3 class="text-base font-bold text-white">Personal Information</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+              <!-- First Name -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-[#9aa3b8] uppercase tracking-wider">
+                  FIRST NAME <span class="text-rose-500">*</span>
+                </label>
+                <input class="w-full bg-[#1b2333] border border-[#2a3347] focus:border-[#5b6cf0] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-[#5a657d] outline-none transition-colors"
+                       [(ngModel)]="form.firstName" name="firstName" placeholder="Enter first name" />
               </div>
 
-              <div class="space-y-1 sm:space-y-2">
-                <label class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-400">Last Name</label>
-                <input class="input text-xs sm:text-sm bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white" [(ngModel)]="form.lastName" name="lastName" placeholder="Doe" />
+              <!-- Last Name -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-[#9aa3b8] uppercase tracking-wider">
+                  LAST NAME <span class="text-rose-500">*</span>
+                </label>
+                <input class="w-full bg-[#1b2333] border border-[#2a3347] focus:border-[#5b6cf0] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-[#5a657d] outline-none transition-colors"
+                       [(ngModel)]="form.lastName" name="lastName" placeholder="Enter last name" />
               </div>
 
-              <div class="space-y-1 sm:space-y-2">
-                <label class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-400">Email Address</label>
-                <input class="input text-xs sm:text-sm bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white" [(ngModel)]="form.email" name="email" type="email" placeholder="john@example.com" />
+              <!-- Email Address -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-[#9aa3b8] uppercase tracking-wider">
+                  EMAIL ADDRESS <span class="text-rose-500">*</span>
+                </label>
+                <div class="relative flex items-center">
+                  <div class="absolute left-3.5 text-[#5b6cf0] pointer-events-none text-xs sm:text-sm">
+                    <i class="fa-regular fa-envelope"></i>
+                  </div>
+                  <input class="w-full bg-[#1b2333] border border-[#2a3347] focus:border-[#5b6cf0] rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white placeholder-[#5a657d] outline-none transition-colors"
+                         [(ngModel)]="form.email" name="email" type="email" placeholder="email@example.com" />
+                </div>
               </div>
 
-              <div class="space-y-1 sm:space-y-2">
-                <label class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-400">Contact Number</label>
-                <input class="input text-xs sm:text-sm bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white" [(ngModel)]="form.contactInfo" name="contactInfo" placeholder="+1 (555) 000-0000" />
+              <!-- Contact Number -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-[#9aa3b8] uppercase tracking-wider">
+                  CONTACT NUMBER <span class="text-rose-500">*</span>
+                </label>
+                <div class="relative flex items-center">
+                  <div class="absolute left-3.5 text-[#5b6cf0] pointer-events-none text-xs sm:text-sm">
+                    <i class="fa-solid fa-phone"></i>
+                  </div>
+                  <input class="w-full bg-[#1b2333] border border-[#2a3347] focus:border-[#5b6cf0] rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white placeholder-[#5a657d] outline-none transition-colors"
+                         [(ngModel)]="form.contactInfo" name="contactInfo" placeholder="+91 0000000000" />
+                </div>
               </div>
 
-              <app-date-picker
-                [(ngModel)]="form.dateOfBirth"
-                name="dateOfBirth"
-                label="Date of Birth"
-                placeholder="Select Date">
-              </app-date-picker>
+              <!-- Date of Birth -->
+              <div class="space-y-1.5">
+                <app-date-picker
+                  [(ngModel)]="form.dateOfBirth"
+                  name="dateOfBirth"
+                  label="DATE OF BIRTH *"
+                  placeholder="DD-MM-YYYY">
+                </app-date-picker>
+              </div>
 
+              <!-- Gender -->
+              <div class="space-y-1.5">
                 <app-select-dropdown 
-                   label="Gender" 
+                   label="GENDER *" 
                    [options]="genders" 
                    placeholder="Select Gender"
                    [(ngModel)]="form.gender" 
                    name="gender">
                 </app-select-dropdown>
+              </div>
 
+              <!-- Blood Group -->
+              <div class="space-y-1.5 md:col-span-1">
                 <app-select-dropdown 
-                   label="Blood Group" 
+                   label="BLOOD GROUP *" 
                    [options]="bloodGroups" 
                    placeholder="Select Blood Group"
                    [autoCapitalize]="false"
                    [(ngModel)]="form.bloodGroup" 
                    name="bloodGroup">
                 </app-select-dropdown>
+              </div>
+            </div>
+          </div>
 
+          <!-- Medical Information Section -->
+          <div class="space-y-5">
+            <div class="flex items-center gap-2.5 pb-3 border-b border-[#2a3347]">
+              <div class="w-7 h-7 rounded-lg bg-[#5b6cf0]/10 text-[#5b6cf0] flex items-center justify-center text-sm shrink-0">
+                <i class="fa-solid fa-file-lines"></i>
+              </div>
+              <h3 class="text-base font-bold text-white">Medical Information</h3>
             </div>
 
-            <div class="space-y-1 sm:space-y-2">
-              <label class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-400">Medical History / Illness Details</label>
-              <textarea class="input min-h-[70px] sm:min-h-[100px] text-xs sm:text-sm bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white" rows="3" [(ngModel)]="form.illnessDetails" name="illnessDetails" placeholder="Any existing conditions..."></textarea>
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-[#9aa3b8] uppercase tracking-wider">
+                MEDICAL HISTORY / ILLNESS DETAILS
+              </label>
+              <div class="relative">
+                <textarea class="w-full bg-[#1b2333] border border-[#2a3347] focus:border-[#5b6cf0] rounded-xl p-3.5 text-xs sm:text-sm text-white placeholder-[#5a657d] outline-none transition-colors min-h-[110px]"
+                          rows="4" [(ngModel)]="form.illnessDetails" name="illnessDetails"
+                          placeholder="Any existing conditions, allergies, or relevant medical history..."></textarea>
+                <div class="text-[10px] text-[#5a657d] font-semibold text-right pt-1">
+                  {{ illnessDetailsCharCount }}/500
+                </div>
+              </div>
             </div>
+          </div>
 
-            <div class="pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-800 flex items-center justify-end gap-2 sm:gap-3">
-              <button type="button" class="btn-secondary !py-1.5 sm:!py-2.5 text-xs sm:text-sm" (click)="reset()" [disabled]="saving">Reset Changes</button>
-              <button type="submit" class="btn-primary !py-1.5 sm:!py-2.5 text-xs sm:text-sm min-w-[100px] sm:min-w-[120px]" [disabled]="saving">
-                <i class="fa-solid fa-save mr-1.5 sm:mr-2" *ngIf="!saving"></i>
-                <i class="fa-solid fa-circle-notch animate-spin mr-1.5 sm:mr-2" *ngIf="saving"></i>
-                {{ saving ? 'Saving...' : 'Save Changes' }}
+          <!-- Status Messages -->
+          <div *ngIf="error" class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 flex items-center gap-3">
+            <i class="fa-solid fa-circle-exclamation text-lg shrink-0"></i>
+            <span class="text-xs sm:text-sm font-medium">{{ error }}</span>
+          </div>
+          
+          <div *ngIf="success" class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center gap-3">
+            <i class="fa-solid fa-circle-check text-lg shrink-0"></i>
+            <span class="text-xs sm:text-sm font-medium">Profile updated successfully!</span>
+          </div>
+
+          <!-- Form Actions Footer -->
+          <div class="pt-5 border-t border-[#2a3347] flex flex-wrap items-center justify-between gap-4">
+            <button type="button" (click)="reset()" [disabled]="saving"
+                    class="text-xs font-bold text-[#9aa3b8] hover:text-white flex items-center gap-2 transition-colors cursor-pointer bg-transparent border-0 p-0">
+              <i class="fa-solid fa-rotate-right text-xs text-[#5b6cf0]"></i>
+              <span>Reset Changes</span>
+            </button>
+
+            <div class="flex items-center gap-3 ml-auto">
+              <a [routerLink]="backLink"
+                 class="bg-[#1b2333] hover:bg-[#253047] border border-[#2a3347] text-white text-xs sm:text-sm font-bold px-5 py-2.5 rounded-xl transition-all cursor-pointer">
+                Cancel
+              </a>
+              <button type="submit" [disabled]="saving"
+                      class="bg-[#5b6cf0] hover:bg-[#4a5be0] text-white text-xs sm:text-sm font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-[#5b6cf0]/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50">
+                <i class="fa-solid fa-floppy-disk text-xs" *ngIf="!saving"></i>
+                <i class="fa-solid fa-circle-notch animate-spin text-xs" *ngIf="saving"></i>
+                <span>{{ saving ? 'Saving...' : 'Save Changes' }}</span>
               </button>
             </div>
+          </div>
 
-            <!-- Status Messages -->
-            <div *ngIf="error" class="p-4 rounded-lg bg-red-900/20 border border-red-500/30 text-red-400 flex items-center gap-3 animate-fade-in">
-              <i class="fa-solid fa-circle-exclamation text-xl"></i>
-              <span>{{ error }}</span>
-            </div>
-            
-            <div *ngIf="success" class="p-4 rounded-lg bg-emerald-900/20 border border-emerald-500/30 text-emerald-400 flex items-center gap-3 animate-fade-in">
-              <i class="fa-solid fa-circle-check text-xl"></i>
-              <span>Profile updated successfully!</span>
-            </div>
-            
-          </form>
-        </section>
+        </form>
       </div>
     </app-patient-layout>
   `,
@@ -158,7 +257,6 @@ export class PatientEditPageComponent implements OnInit {
   saving = false;
   error: string | null = null;
   success = false;
-  // Ref to reset file input after successful upload
   profileFileInput?: HTMLInputElement;
 
   genders: string[] = [];
@@ -204,6 +302,27 @@ export class PatientEditPageComponent implements OnInit {
         };
       },
     });
+  }
+
+  get completionPercentage(): number {
+    if (!this.editableProfile) return 0;
+    const fields = [
+      this.form.firstName,
+      this.form.lastName,
+      this.form.email,
+      this.form.contactInfo,
+      this.form.dateOfBirth,
+      this.form.gender,
+      this.form.bloodGroup,
+      this.form.illnessDetails,
+      this.editableProfile.profileImageUrl
+    ];
+    const filled = fields.filter(f => f && String(f).trim().length > 0).length;
+    return Math.round((filled / fields.length) * 100);
+  }
+
+  get illnessDetailsCharCount(): number {
+    return this.form.illnessDetails ? this.form.illnessDetails.length : 0;
   }
 
   fullName(p?: PatientDto | null) {
@@ -254,11 +373,8 @@ export class PatientEditPageComponent implements OnInit {
     this.uploading = true;
     this.svc.uploadProfileImage(id, this.file!).subscribe({
       next: (res) => {
-        // Prefer Cloudinary URL to avoid saving internal /api/files/view/* URLs
         const imageUrl = res?.cloudinaryUrl || res?.imageUrl || res?.url || '';
         if (imageUrl) {
-          // Backend already updates patient profile image to cloudinaryUrl in upload endpoint
-          // Update UI immediately and optionally refresh profile
           if (this.editableProfile) {
             this.editableProfile = { ...this.editableProfile, profileImageUrl: imageUrl } as PatientDto;
           }
@@ -271,7 +387,6 @@ export class PatientEditPageComponent implements OnInit {
               error: () => { },
             });
           }
-          // Reset file input and selection
           this.file = null;
           this.profileFileInput && (this.profileFileInput.value = '');
         } else {
@@ -320,8 +435,6 @@ export class PatientEditPageComponent implements OnInit {
         this.router.navigate([this.backLink]);
       },
       error: (e) => {
-        // Handle network interruption cases (status 0 / chunked encoding),
-        // confirm via GET that data was actually updated, then treat as success.
         if (e && e.status === 0) {
           const uname = this.auth.username();
           if (uname) {

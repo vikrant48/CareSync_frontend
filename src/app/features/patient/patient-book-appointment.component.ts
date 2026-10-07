@@ -7,15 +7,15 @@ import { MasterDataService } from '../../core/services/master-data.service';
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { EmergencyAppointmentModalComponent } from '../../shared/emergency-appointment-modal.component';
 import { SpecializationAutocompleteComponent } from '../../shared/specialization-autocomplete.component';
-import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropdown.component';
+import { SelectOption } from '../../shared/select-dropdown.component';
 import { SkeletonComponent } from '../../shared/ui/skeleton.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
-import { FilterBarComponent } from '../../shared/ui/filter-bar.component';
+import { ButtonComponent } from '../../shared/components';
 
 @Component({
   selector: 'app-patient-book-appointment',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent, SelectDropdownComponent, SkeletonComponent, EmptyStateComponent, FilterBarComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent, SkeletonComponent, EmptyStateComponent, ButtonComponent],
   templateUrl: './patient-book-appointment.component.html',
   styleUrl: './patient-book-appointment.component.css'
 })
@@ -30,8 +30,17 @@ export class PatientBookAppointmentComponent {
 
   // Pagination & Search state
   page = 0;
-  size = 50;
+  size = 12;
   totalDoctorsCount = 0;
+  sortBy = 'relevance';
+
+  sortByOptions: SelectOption[] = [
+    { value: 'relevance', label: 'Relevance' },
+    { value: 'rating', label: 'Rating' },
+    { value: 'experience', label: 'Experience' },
+    { value: 'feeAsc', label: 'Fee: Low to High' },
+    { value: 'feeDesc', label: 'Fee: High to Low' }
+  ];
 
   isFilterExpanded = false;
 
@@ -82,7 +91,8 @@ export class PatientBookAppointmentComponent {
       location: this.addressFilter || undefined,
       gender: this.genderFilter || undefined,
       page: this.page,
-      size: this.size
+      size: this.size,
+      sortBy: this.sortBy !== 'relevance' ? this.sortBy : undefined
     };
 
     // Fetch doctors for current page
@@ -119,6 +129,30 @@ export class PatientBookAppointmentComponent {
     return Math.max(1, Math.ceil(this.totalDoctorsCount / this.size));
   }
 
+  get paginationPages(): number[] {
+    const total = this.totalPages;
+    const pages: number[] = [];
+    const maxVisible = 5;
+    let start = Math.max(0, this.page - Math.floor(maxVisible / 2));
+    let end = Math.min(total, start + maxVisible);
+
+    if (end - start < maxVisible) {
+      start = Math.max(0, end - maxVisible);
+    }
+
+    for (let i = start; i < end; i++) {
+      pages.push(i);
+    }
+    return pages;
+  }
+
+  goToPage(p: number) {
+    if (p >= 0 && p < this.totalPages) {
+      this.page = p;
+      this.searchDoctors();
+    }
+  }
+
   onFilterChange() {
     this.page = 0;
     this.searchDoctors();
@@ -145,13 +179,28 @@ export class PatientBookAppointmentComponent {
   formatDoctorName(d: Doctor) {
     const base = (d.name || `${d.firstName || ''} ${d.lastName || ''}`).trim();
     const hasPrefix = /^dr\.?\s/i.test(base);
-    return hasPrefix ? base : `Dr ${base}`;
+    return hasPrefix ? base : `Dr. ${base}`;
   }
 
   doctorInitial(d: Doctor) {
     const base = (d.name || `${d.firstName || ''} ${d.lastName || ''}`).trim();
     const stripped = base.replace(/^dr\.?\s+/i, '');
     return stripped.charAt(0) || '?';
+  }
+
+  formatExperience(d: Doctor): string {
+    if (d.experiences && d.experiences.length > 0) {
+      return `${d.experiences.length}+ years`;
+    }
+    const expYears = 0;
+    return `${expYears}+ years`;
+  }
+
+  formatLocation(d: Doctor): string {
+    if (d.address && d.address.trim()) {
+      return d.address;
+    }
+    return 'Location not specified';
   }
 
   goToDoctorAndBook(d: Doctor) {
@@ -171,6 +220,7 @@ export class PatientBookAppointmentComponent {
     this.nameFilter = '';
     this.genderFilter = '';
     this.addressFilter = '';
+    this.sortBy = 'relevance';
     this.page = 0;
     this.searchDoctors();
   }

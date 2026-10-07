@@ -202,4 +202,23 @@ export class AppointmentService {
   cancelAppointment(id: number) {
     return this.http.put<DoctorAppointmentItem>(`${this.baseUrl}/api/appointments/doctor/${id}/cancel`, {});
   }
+
+  getReadiness(appointmentId: number) {
+    return this.http.get<import('../models/appointment.models').RecordReadiness>(
+      `${this.baseUrl}/api/appointments/${appointmentId}/readiness`
+    );
+  }
+
+  getCompletionPreview(appointmentId: number) {
+    return this.http.get<import('../models/appointment.models').CompletionPreview>(
+      `${this.baseUrl}/api/appointments/${appointmentId}/completion-preview`
+    );
+  }
+
+  eSignAndComplete(appointmentId: number, request: import('../models/appointment.models').ESignCompletionRequest) {
+    return this.http.post<import('../models/appointment.models').ESignCompletionResponse>(
+      `${this.baseUrl}/api/appointments/${appointmentId}/esign-and-complete`,
+      request
+    );
+  }
 }

@@ -2,7 +2,7 @@
 <app-confirm-dialog></app-confirm-dialog>
 <div class="min-h-screen w-full bg-[var(--bg)] text-[var(--text)]">
   <header
-    class="fixed top-0 left-0 right-0 z-50 h-14 backdrop-blur border-b bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+    class="fixed top-0 left-0 right-0 z-[100] h-14 backdrop-blur border-b bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 overflow-visible">
     <div class="container h-full px-3 sm:px-4 flex items-center justify-between text-gray-900 dark:text-gray-100">
       <a [routerLink]="auth.isAuthenticated() ? (auth.role() === 'DOCTOR' ? '/doctor' : (auth.role() === 'PATIENT' ? '/patient' : '/register')) : '/register'"
         class="flex items-center gap-1.5 sm:gap-2 text-base sm:text-lg font-semibold group shrink-0" title="Home">
@@ -13,7 +13,16 @@
         <span
           class="font-display bg-gradient-to-r from-emerald-500 via-teal-500 to-blue-600 bg-clip-text text-transparent text-base sm:text-lg font-bold tracking-tight">CareSync</span>
       </a>
-      <nav class="flex items-center gap-1.5 sm:gap-2 flex-nowrap shrink-0">
+      <!-- Center Search Bar (matching reference UI) -->
+      <div class="hidden md:flex items-center flex-1 max-w-md mx-6">
+        <div class="relative w-full">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-gray-400"></i>
+          <input type="text" placeholder="Search patients, appointments, records..."
+            class="w-full pl-9 pr-4 py-1.5 text-xs bg-gray-100 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/80 rounded-lg text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all" />
+        </div>
+      </div>
+
+      <nav class="flex items-center gap-2 flex-nowrap shrink-0">
         <!-- Git Repos Dropdown Button -->
         <div class="relative git-repo-dropdown-container">
           <button type="button" (click)="toggleGitDropdown($event)"

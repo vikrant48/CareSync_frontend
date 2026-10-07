@@ -1,65 +1,108 @@
 <app-patient-layout>
-    <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
+    <div class="max-w-[1400px] mx-auto p-3 sm:p-5 space-y-4 pb-28">
 
-        <app-page-header title="My Appointments"
-            subtitle="Manage and track your scheduled consultations"></app-page-header>
+        <!-- Hero Header Banner (Matching Reference Screenshot 1) -->
+        <section
+            class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-5 sm:p-6 shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="space-y-1">
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">My Appointments</h1>
+                <p class="text-xs sm:text-sm text-[#9aa3b8]">Manage and track your scheduled consultations</p>
+            </div>
+            <a routerLink="/patient/book-appointment"
+                class="px-4 py-2.5 rounded-xl bg-[#5b6cf0] hover:bg-[#4c5ce0] text-white text-xs font-bold shadow-lg shadow-[#5b6cf0]/25 inline-flex items-center gap-2 transition-all shrink-0">
+                <i class="fa-solid fa-circle-plus text-xs"></i>
+                <span>Book New Appointment</span>
+            </a>
+        </section>
 
-        <app-filter-bar [(expanded)]="isFilterExpanded" [activeCount]="activeFilterCount" [hasSummary]="true"
-            (clear)="clearFilters()">
-            <div class="space-y-0.5">
-                <app-select-dropdown label="Status" [(ngModel)]="statusFilter" [options]="statusOptions"
-                    placeholder="All Statuses">
-                </app-select-dropdown>
+        <!-- Filter Bar (Matching Reference Screenshot 1) -->
+        <section class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-4 shadow-xl">
+            <div class="flex items-center justify-between mb-3 pb-2 border-b border-[#2a3347]">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-[#5b6cf0] text-xs"></i>
+                    <span class="text-xs font-bold text-white uppercase tracking-wider">Filters</span>
+                </div>
+                <button (click)="clearFilters()"
+                    class="text-xs text-[#5b6cf0] hover:text-indigo-300 font-semibold flex items-center gap-1 transition-colors">
+                    <i class="fa-solid fa-rotate-left text-[10px]"></i>
+                    <span>Clear Filters</span>
+                </button>
             </div>
 
-            <div class="space-y-0.5">
-                <label class="filter-label">Specialization</label>
-                <div class="relative w-full">
-                    <i
-                        class="fa-solid fa-stethoscope absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs sm:text-sm pointer-events-none z-10"></i>
-                    <input type="text" class="filter-input-search" [(ngModel)]="specializationFilter"
-                        placeholder="e.g. Cardiology..." />
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                <!-- Status -->
+                <div class="space-y-0.5">
+                    <app-select-dropdown label="Status" [(ngModel)]="statusFilter" [options]="statusOptions"
+                        placeholder="All Statuses">
+                    </app-select-dropdown>
+                </div>
+
+                <!-- Specialization -->
+                <div class="space-y-0.5">
+                    <label class="filter-label">Specialization</label>
+                    <div class="relative w-full">
+                        <i
+                            class="fa-solid fa-stethoscope absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs sm:text-sm pointer-events-none z-10"></i>
+                        <input type="text" class="filter-input-search" [(ngModel)]="specializationFilter"
+                            placeholder="e.g. Cardiology..." />
+                    </div>
+                </div>
+
+                <!-- Date Range -->
+                <div class="space-y-0.5">
+                    <app-select-dropdown label="Date Range" [(ngModel)]="rangeFilter" [options]="rangeOptions"
+                        placeholder="All Time">
+                    </app-select-dropdown>
                 </div>
             </div>
+        </section>
 
-            <div class="space-y-0.5">
-                <app-select-dropdown label="Time Range" [(ngModel)]="rangeFilter" [options]="rangeOptions"
-                    placeholder="All Time">
-                </app-select-dropdown>
+        <!-- Summary & Sort Toolbar -->
+        <div class="flex items-center justify-between py-1">
+            <div class="text-xs font-medium text-[#9aa3b8]">
+                Showing <span class="font-bold text-white">{{ filtered().length }}</span> of <span
+                    class="font-bold text-[#5b6cf0]">{{ appointments.length }}</span> appointments
             </div>
 
-            <div filterSummary class="text-xs text-gray-500 dark:text-gray-400">
-                Showing <span class="font-bold text-gray-800 dark:text-gray-200">{{ filtered().length }}</span> of {{
-                appointments.length }} appointments
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-[#9aa3b8] font-medium">Sort by</span>
+                <select
+                    class="bg-[#151b2b] border border-[#2a3347] rounded-xl px-3 py-1.5 text-xs text-white font-semibold focus:outline-none focus:border-[#5b6cf0] cursor-pointer">
+                    <option value="upcoming">Upcoming First</option>
+                    <option value="recent">Most Recent</option>
+                </select>
             </div>
-        </app-filter-bar>
+        </div>
 
         <app-skeleton *ngIf="loading" variant="card" [count]="3"
-            wrapperClass="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></app-skeleton>
+            wrapperClass="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></app-skeleton>
 
         <!-- Empty State -->
         <app-empty-state *ngIf="!loading && filtered().length === 0 && appointments.length === 0"
             icon="fa-solid fa-calendar-xmark" title="No Appointments Found"
             message="You haven't booked any appointments yet."
-            containerClass="bg-gray-50 dark:bg-gray-800/20 rounded-2xl border border-gray-200 dark:border-gray-800 border-dashed px-4"
+            containerClass="bg-[#151b2b] rounded-2xl border border-[#2a3347] border-dashed px-4 py-8"
             [hasAction]="true">
-            <a routerLink="/patient/book-appointment" class="btn-primary">Book Now</a>
+            <a routerLink="/patient/book-appointment"
+                class="px-4 py-2 rounded-xl bg-[#5b6cf0] hover:bg-[#4c5ce0] text-white text-xs font-bold shadow-md transition-all">Book
+                Now</a>
         </app-empty-state>
+
         <app-empty-state *ngIf="!loading && filtered().length === 0 && appointments.length > 0"
             icon="fa-solid fa-calendar-xmark" title="No Appointments Found"
             message="No appointments match your current filters."
-            containerClass="bg-gray-50 dark:bg-gray-800/20 rounded-2xl border border-gray-200 dark:border-gray-800 border-dashed px-4"
+            containerClass="bg-[#151b2b] rounded-2xl border border-[#2a3347] border-dashed px-4 py-8"
             [hasAction]="true">
-            <button type="button" (click)="clearFilters()" class="btn-secondary">Clear Filters</button>
+            <button type="button" (click)="clearFilters()"
+                class="px-4 py-2 rounded-xl bg-[#1b2333] hover:bg-[#2a3347] text-[#5b6cf0] text-xs font-bold border border-[#2a3347] transition-all">Clear
+                Filters</button>
         </app-empty-state>
 
-        <!-- Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in"
+        <!-- Appointments Grid (3 Columns on Desktop matching Reference Screenshot 1) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in"
             *ngIf="!loading && filtered().length > 0">
-            <patient-appointment-card *ngFor="let a of filtered()" [appointment]="a" [disabled]="loading"
-                (reschedule)="startReschedule($event)" (cancel)="cancelAppointment($event)"
-                (viewDoctor)="viewDoctorFromAppointment($event)" (joinVideo)="joinConsultation($event)"
-                (openChat)="openChat($event)" class="h-full"></patient-appointment-card>
+            <app-appointment-card *ngFor="let a of filtered()" [appointment]="a" viewerRole="PATIENT"
+                class="h-full"></app-appointment-card>
         </div>
 
         <!-- Reschedule Modal (shared) -->

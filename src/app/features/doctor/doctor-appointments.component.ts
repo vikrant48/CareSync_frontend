@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
-import { DoctorAppointmentCardComponent } from '../../shared/doctor-appointment-card.component';
+import { AppointmentCardComponent } from '../../shared/components/appointment-card.component';
 import { getDoctorAppointmentEpochMs } from '../../shared/doctor-appointment-utils';
 import { PatientDetailsModalComponent } from '../../shared/patient-details-modal.component';
 import { MedicalHistoryDetailModalComponent } from '../../shared/medical-history-detail-modal.component';
@@ -16,13 +16,33 @@ import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropd
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 import { SkeletonComponent } from '../../shared/ui/skeleton.component';
 import { FilterBarComponent } from '../../shared/ui/filter-bar.component';
+import { IntakeSummaryModalComponent } from './intake-summary-modal.component';
+import { SoapReportEditorComponent } from './soap-report-editor.component';
+import { AppointmentApiService } from '../../core/services/appointment-api.service';
+import { PreVisitIntakeRequest, PreVisitIntakeResponse, SoapReportDto } from '../../core/models/appointment.models';
+import { ToastService } from '../../core/services/toast.service';
 
 type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
 
 @Component({
   selector: 'app-doctor-appointments',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, DoctorAppointmentCardComponent, PatientDetailsModalComponent, MedicalHistoryDetailModalComponent, DoctorLayoutComponent, SharedChatModalComponent, SelectDropdownComponent, EmptyStateComponent, SkeletonComponent, FilterBarComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    AppointmentCardComponent,
+    PatientDetailsModalComponent,
+    MedicalHistoryDetailModalComponent,
+    DoctorLayoutComponent,
+    SharedChatModalComponent,
+    SelectDropdownComponent,
+    EmptyStateComponent,
+    SkeletonComponent,
+    FilterBarComponent,
+    IntakeSummaryModalComponent,
+    SoapReportEditorComponent
+  ],
   templateUrl: './doctor-appointments.component.html',
   styleUrl: './doctor-appointments.component.css'
 })
@@ -87,16 +107,94 @@ export class DoctorAppointmentsComponent {
   selectedHistoryDetail: any | null = null;
   selectedHistoryDoctorInfo: { doctorName: string; doctorSpecialization?: string; doctorContactInfo?: string } | null = null;
 
+  // Pre-Visit Intake Modal State
+  intakeModalOpen = false;
+  selectedIntakeAppointmentId = 0;
+  intakeSummaryText = '';
+  intakeData: PreVisitIntakeResponse | PreVisitIntakeRequest | null = null;
+
+  // AI SOAP Scribe Modal State
+  soapModalOpen = false;
+  selectedSoapAppointmentId = 0;
+  soapReportData: SoapReportDto = {
+    appointmentId: 0,
+    patientId: 0,
+    doctorId: 0,
+    subjective: '',
+    objective: '',
+    assessment: '',
+    plan: '',
+    isDraft: true,
+    isSigned: false
+  };
+
   constructor(
     private appts: AppointmentService,
+    private appointmentApi: AppointmentApiService,
     private patients: PatientProfileService,
     private router: Router,
-    private masterDataService: MasterDataService
+    private masterDataService: MasterDataService,
+    private toast: ToastService
   ) {
     this.refresh();
     this.masterDataService.getStatuses().subscribe({
       next: (s) => this.statuses = s || []
     });
+  }
+
+  openIntakeSummaryModal(a: DoctorAppointmentItem): void {
+    this.selectedIntakeAppointmentId = a.appointmentId;
+    this.intakeModalOpen = true;
+    this.intakeSummaryText = 'Loading AI intake summary...';
+    this.intakeData = null;
+
+    this.appointmentApi.getPreVisitIntakeSummary(a.appointmentId).subscribe({
+      next: (res) => {
+        this.intakeSummaryText = res.aiTriageSummary || res.preVisitSummary || 'Intake summary available.';
+        this.intakeData = res;
+      },
+      error: (err) => {
+        this.intakeSummaryText = 'No pre-visit intake has been submitted for this appointment yet.';
+      }
+    });
+  }
+
+  closeIntakeModal(): void {
+    this.intakeModalOpen = false;
+  }
+
+  openSoapEditorModal(a: DoctorAppointmentItem): void {
+    this.selectedSoapAppointmentId = a.appointmentId;
+    this.soapModalOpen = true;
+    this.soapReportData = {
+      appointmentId: a.appointmentId,
+      patientId: a.patientId,
+      doctorId: 0,
+      subjective: a.reason || '',
+      objective: '',
+      assessment: '',
+      plan: '',
+      isDraft: true,
+      isSigned: false
+    };
+
+    this.appointmentApi.getSoapDraft(a.appointmentId).subscribe({
+      next: (res) => {
+        if (res) {
+          this.soapReportData = res;
+        }
+      },
+      error: () => { }
+    });
+  }
+
+  closeSoapModal(): void {
+    this.soapModalOpen = false;
+  }
+
+  onSoapReportSigned(report: SoapReportDto): void {
+    this.toast.showSuccess('Medical SOAP report signed and appointment completed!');
+    this.refresh();
   }
 
   refresh() {

@@ -16,182 +16,304 @@ export interface AppointmentCounts {
   standalone: true,
   imports: [CommonModule, RouterModule, EmptyStateComponent],
   template: `
-    <div class="max-w-7xl mx-auto space-y-6 p-4 sm:p-6" *ngIf="patient; else loading">
-      <!-- Top Header -->
-      <section class="panel p-3.5 sm:p-8 animate-fade-in bg-white dark:bg-gray-900">
-        <div class="flex flex-col md:flex-row gap-4 sm:gap-6 items-start justify-between">
-          <!-- Left: Identity -->
-          <div class="flex items-start gap-3 sm:gap-5 w-full md:w-auto">
-            <div class="relative shrink-0">
-              <div class="w-14 h-14 sm:w-24 sm:h-24 rounded-full bg-gray-100 dark:bg-gray-800 ring-2 sm:ring-4 ring-white dark:ring-gray-800/50 shadow-md sm:shadow-xl overflow-hidden flex items-center justify-center text-gray-400 dark:text-white text-lg sm:text-2xl font-bold">
-                <img *ngIf="patient.profileImageUrl; else initials" [src]="patient.profileImageUrl" class="w-full h-full object-cover transition-transform hover:scale-110 duration-500" (error)="onImageError()" />
-                <ng-template #initials>
-                  <span>{{ initialsFromName(patient) }}</span>
-                </ng-template>
-              </div>
-              <div class="absolute bottom-0 right-0 w-3.5 h-3.5 sm:w-5 sm:h-5 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full" title="Active"></div>
+    <div class="max-w-7xl mx-auto space-y-6 p-4 sm:p-6 lg:p-8" *ngIf="patient; else loading">
+      
+      <!-- Top Hero Header Card -->
+      <section class="relative overflow-hidden bg-[#151b2b] border border-[#2a3347] rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-6">
+        
+        <!-- Left: Identity & Profile Strength -->
+        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 w-full lg:w-auto text-center sm:text-left">
+          
+          <!-- Avatar with Camera Overlay & Active Dot -->
+          <div class="relative shrink-0">
+            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#1b2333] border-4 border-[#2a3347] shadow-xl overflow-hidden flex items-center justify-center text-white text-2xl font-bold">
+              <img *ngIf="patient.profileImageUrl; else initials" [src]="patient.profileImageUrl" class="w-full h-full object-cover transition-transform hover:scale-110 duration-500" (error)="onImageError()" />
+              <ng-template #initials>
+                <span>{{ initialsFromName(patient) }}</span>
+              </ng-template>
             </div>
             
-            <div class="flex-1 min-w-0 space-y-0.5 sm:space-y-1">
-              <h2 class="text-lg sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight truncate">{{ fullName(patient) }}</h2>
-              <div class="flex flex-wrap gap-x-3 gap-y-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                <span class="flex items-center gap-1"><i class="fa-solid fa-hashtag text-gray-500 dark:text-gray-600 text-[11px] sm:text-xs"></i> {{ patient.id }}</span>
-                <span class="flex items-center gap-1"><i class="fa-solid fa-envelope text-gray-500 dark:text-gray-600 text-[11px] sm:text-xs"></i> {{ patient.email || '—' }}</span>
-                <span class="flex items-center gap-1"><i class="fa-solid fa-phone text-gray-500 dark:text-gray-600 text-[11px] sm:text-xs"></i> {{ patient.contactInfo || '—' }}</span>
-              </div>
-              <div class="w-full md:w-48 mt-1.5 sm:mt-2">
-               <div class="flex justify-between md:justify-end gap-3 text-[10px] sm:text-xs mb-0.5 sm:mb-1 text-gray-800 dark:text-gray-400 font-medium uppercase tracking-wider">
-                 <span>Profile Strength</span>
-                 <span class="text-blue-400 font-bold">{{ patient.completionPercentage || 0 }}%</span>
-               </div>
-               <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 sm:h-1.5 overflow-hidden">
-                 <div class="bg-blue-500 h-1 sm:h-1.5 rounded-full transition-all duration-1000" [style.width.%]="patient.completionPercentage || 0"></div>
-               </div>
-              </div>
+            <!-- Active Status Indicator -->
+            <div class="absolute bottom-1 left-1 w-4 h-4 bg-emerald-500 border-2 border-[#151b2b] rounded-full" title="Active"></div>
+          </div>
+          
+          <!-- Identity Details & Strength Bar -->
+          <div class="space-y-1.5 flex-1 min-w-0">
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight truncate">{{ fullName(patient) }}</h1>
+            
+            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 text-xs text-[#9aa3b8]">
+              <span class="flex items-center gap-1 font-mono">
+                <i class="fa-solid fa-hashtag text-[10px]"></i> {{ patient.id }}
+              </span>
+              <span class="flex items-center gap-1">
+                <i class="fa-solid fa-envelope text-[10px]"></i> {{ patient.email || 'NA' }}
+              </span>
+              <span class="flex items-center gap-1">
+                <i class="fa-solid fa-phone text-[10px]"></i> {{ patient.contactInfo || 'NA' }}
+              </span>
             </div>
           </div>
+        </div>
 
-          <!-- Right: Action & Stats -->
-          <div class="w-full md:w-auto flex flex-col items-start md:items-end gap-2.5 sm:gap-4">
-             <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-3 w-full md:w-auto">
-               <div class="bg-gray-500/10 dark:bg-gray-800/80 rounded-lg p-1.5 sm:p-3 text-center border border-gray-200 dark:border-gray-800 shadow-sm animate-fade-in">
-                 <div class="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium">Total</div>
-                 <div class="text-sm sm:text-lg font-bold text-gray-800 dark:text-white">{{ appointmentCounts?.total ?? 0 }}</div>
-               </div>
-               <div class="bg-emerald-500/10 rounded-lg p-1.5 sm:p-3 text-center border border-emerald-500/20">
-                 <div class="text-[9px] sm:text-xs text-emerald-400 uppercase tracking-wider font-medium">Done</div>
-                 <div class="text-sm sm:text-lg font-bold text-emerald-400">{{ appointmentCounts?.completed ?? 0 }}</div>
-               </div>
-               <div class="bg-amber-500/10 rounded-lg p-1.5 sm:p-3 text-center border border-amber-500/20">
-                 <div class="text-[9px] sm:text-xs text-amber-400 uppercase tracking-wider font-medium">Upcoming</div>
-                 <div class="text-sm sm:text-lg font-bold text-amber-400">{{ appointmentCounts?.upcoming ?? 0 }}</div>
-               </div>
-               <div class="bg-red-500/10 rounded-lg p-1.5 sm:p-3 text-center border border-red-500/20">
-                 <div class="text-[9px] sm:text-xs text-red-400 uppercase tracking-wider font-medium">Cancel</div>
-                 <div class="text-sm sm:text-lg font-bold text-red-400">{{ appointmentCounts?.cancelled ?? 0 }}</div>
-               </div>
-             </div>
-             <a class="btn-primary w-full md:w-auto !py-1.5 sm:!py-2.5 text-xs sm:text-sm text-center shadow-lg shadow-blue-500/20" routerLink="/patient/profile/edit">
-               <i class="fa-solid fa-pen-to-square mr-1.5"></i> Edit Profile
-             </a>
+        <!-- Middle: 4 Appointment Stat KPI Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full lg:w-auto">
+          <!-- TOTAL -->
+          <div class="bg-[#1b2333] border border-[#2a3347] p-3 sm:p-4 rounded-xl text-center shadow-sm min-w-[85px]">
+            <div class="text-[9px] sm:text-[10px] text-[#9aa3b8] font-bold uppercase tracking-wider">Appointments</div>
+            <div class="text-lg sm:text-xl font-extrabold text-white mt-0.5">{{ appointmentCounts?.total ?? 0 }}</div>
           </div>
+
+          <!-- DONE -->
+          <div class="bg-emerald-500/10 border border-emerald-500/20 p-3 sm:p-4 rounded-xl text-center shadow-sm min-w-[85px]">
+            <div class="text-[9px] sm:text-[10px] text-emerald-400 font-bold uppercase tracking-wider flex items-center justify-center gap-1">
+              <i class="fa-solid fa-circle-check text-[8px]"></i> DONE
+            </div>
+            <div class="text-lg sm:text-xl font-extrabold text-emerald-400 mt-0.5">{{ appointmentCounts?.completed ?? 0 }}</div>
+          </div>
+
+          <!-- UPCOMING -->
+          <div class="bg-amber-500/10 border border-amber-500/20 p-3 sm:p-4 rounded-xl text-center shadow-sm min-w-[85px]">
+            <div class="text-[9px] sm:text-[10px] text-amber-400 font-bold uppercase tracking-wider flex items-center justify-center gap-1">
+              <i class="fa-solid fa-clock text-[8px]"></i> UPCOMING
+            </div>
+            <div class="text-lg sm:text-xl font-extrabold text-amber-400 mt-0.5">{{ appointmentCounts?.upcoming ?? 0 }}</div>
+          </div>
+
+          <!-- CANCELLED -->
+          <div class="bg-rose-500/10 border border-rose-500/20 p-3 sm:p-4 rounded-xl text-center shadow-sm min-w-[85px]">
+            <div class="text-[9px] sm:text-[10px] text-rose-400 font-bold uppercase tracking-wider flex items-center justify-center gap-1">
+              <i class="fa-solid fa-circle-xmark text-[8px]"></i> CANCELLED
+            </div>
+            <div class="text-lg sm:text-xl font-extrabold text-rose-400 mt-0.5">{{ appointmentCounts?.cancelled ?? 0 }}</div>
+          </div>
+        </div>
+
+        <!-- Right: Edit Profile Button -->
+        <div class="w-full lg:w-auto flex justify-end">
+          <a routerLink="/patient/profile/edit" 
+            class="w-full sm:w-auto bg-[#5b6cf0] hover:bg-indigo-600 active:scale-95 text-white font-bold text-xs sm:text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-500/25 transition-all flex items-center justify-center gap-2">
+            <i class="fa-solid fa-pen-to-square text-xs"></i>
+            <span>Edit</span>
+          </a>
         </div>
       </section>
 
-      <!-- Content Tabs -->
-      <section class="panel overflow-hidden bg-white dark:bg-gray-900">
+      <!-- Main Navigation Tabs -->
+      <section class="bg-[#151b2b] border border-[#2a3347] rounded-2xl overflow-hidden shadow-sm">
+        
         <!-- Tab Headers -->
-        <div class="flex items-center gap-1 border-b border-gray-200 dark:border-gray-800 px-2 sm:px-6 pt-2 overflow-x-auto no-scrollbar">
-          <button class="px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap outline-none focus:bg-gray-100 dark:focus:bg-gray-800/50 rounded-t-lg"
-            [class.border-blue-500]="activeTab==='overview'" 
-            [class.text-blue-500]="activeTab==='overview'"
-            [class.dark:text-blue-400]="activeTab==='overview'"
-            [class.border-transparent]="activeTab!=='overview'"
-            [class.text-gray-600]="activeTab!=='overview'"
-            [class.dark:text-gray-400]="activeTab!=='overview'"
-            [class.hover:text-gray-900]="activeTab!=='overview'"
-            [class.dark:hover:text-gray-200]="activeTab!=='overview'"
-            (click)="activeTab='overview'">
-            <i class="fa-solid fa-address-card mr-2"></i> Overview
+        <div class="flex items-center gap-2 border-b border-[#2a3347] px-4 sm:px-6 pt-3 overflow-x-auto scrollbar-none">
+          <button (click)="activeTab='overview'"
+            [ngClass]="activeTab === 'overview' 
+              ? 'border-b-2 border-[#5b6cf0] text-[#5b6cf0] font-bold' 
+              : 'text-[#9aa3b8] hover:text-white font-semibold'"
+            class="px-4 py-3 text-xs sm:text-sm transition-colors whitespace-nowrap outline-none flex items-center gap-2">
+            <i class="fa-solid fa-user text-xs"></i>
+            <span>Overview</span>
           </button>
-          <button class="px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap outline-none focus:bg-gray-850 rounded-t-lg"
-            [class.border-blue-500]="activeTab==='history'" 
-            [class.text-blue-400]="activeTab==='history'"
-            [class.border-transparent]="activeTab!=='history'"
-            [class.text-gray-400]="activeTab!=='history'"
-            [class.hover:text-gray-200]="activeTab!=='history'"
-            (click)="activeTab='history'">
-            <i class="fa-solid fa-notes-medical mr-2"></i> Medical History
+
+          <button (click)="activeTab='history'"
+            [ngClass]="activeTab === 'history' 
+              ? 'border-b-2 border-[#5b6cf0] text-[#5b6cf0] font-bold' 
+              : 'text-[#9aa3b8] hover:text-white font-semibold'"
+            class="px-4 py-3 text-xs sm:text-sm transition-colors whitespace-nowrap outline-none flex items-center gap-2">
+            <i class="fa-solid fa-notes-medical text-xs"></i>
+            <span>Medical History</span>
           </button>
-          <ng-container *ngFor="let t of extraTabs">
-            <button class="px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap outline-none focus:bg-gray-100 dark:focus:bg-gray-800/50 rounded-t-lg"
-              [class.border-blue-500]="activeTab===t.id" 
-              [class.text-blue-500]="activeTab===t.id"
-              [class.dark:text-blue-400]="activeTab===t.id"
-              [class.border-transparent]="activeTab!==t.id"
-              [class.text-gray-600]="activeTab!==t.id"
-              [class.dark:text-gray-400]="activeTab!==t.id"
-              [class.hover:text-gray-900]="activeTab!==t.id"
-              [class.dark:hover:text-gray-200]="activeTab!==t.id"
-              (click)="activeTab=t.id">
-              {{ t.label }}
-            </button>
-          </ng-container>
+
+          <a routerLink="/patient/appointments"
+            class="px-4 py-3 text-xs sm:text-sm font-semibold text-[#9aa3b8] hover:text-white transition-colors whitespace-nowrap flex items-center gap-2">
+            <i class="fa-solid fa-calendar-days text-xs"></i>
+            <span>Appointments</span>
+          </a>
+
+          <a routerLink="/patient/lab-bookings"
+            class="px-4 py-3 text-xs sm:text-sm font-semibold text-[#9aa3b8] hover:text-white transition-colors whitespace-nowrap flex items-center gap-2">
+            <i class="fa-solid fa-flask text-xs"></i>
+            <span>Lab Tests</span>
+          </a>
         </div>
 
+        <!-- Tab Body Content -->
         <div class="p-6 sm:p-8 min-h-[400px]">
-          <!-- Overview Tab -->
-          <div *ngIf="activeTab==='overview'" class="animate-fade-in">
-            <div class="grid md:grid-cols-2 gap-8 md:gap-12">
-              <div class="space-y-6">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-user-check text-blue-500"></i> Personal Details
-                    </h3>
-                    <div class="space-y-4">
-                        <div class="flex justify-between border-b border-gray-200 dark:border-gray-800/50 pb-2">
-                            <span class="text-gray-600 dark:text-gray-400">Full Name</span>
-                            <span class="font-medium text-gray-800 dark:text-gray-200">{{ fullName(patient) }}</span>
-                        </div>
-                        <div class="flex justify-between border-b border-gray-200 dark:border-gray-800/50 pb-2">
-                            <span class="text-gray-600 dark:text-gray-400">Date of Birth</span>
-                            <span class="font-medium text-gray-800 dark:text-gray-200">{{ patient.dateOfBirth | date:'mediumDate' }}</span>
-                        </div>
-                        <div class="flex justify-between border-b border-gray-200 dark:border-gray-800/50 pb-2">
-                            <span class="text-gray-600 dark:text-gray-400">Gender</span>
-                            <span class="font-medium text-gray-800 dark:text-gray-200">{{ patient.gender || '—' }}</span>
-                        </div>
-                        <div class="flex justify-between border-b border-gray-200 dark:border-gray-800/50 pb-2">
-                            <span class="text-gray-600 dark:text-gray-400">Blood Group</span>
-                            <span class="font-medium text-gray-800 dark:text-gray-200">{{ patient.bloodGroup || '—' }}</span>
-                        </div>
-                        <div class="flex justify-between border-b border-gray-200 dark:border-gray-800/50 pb-2">
-                            <span class="text-gray-600 dark:text-gray-400">Contact</span>
-                            <span class="font-medium text-gray-800 dark:text-gray-200">{{ patient.contactInfo || '—' }}</span>
-                        </div>
-                    </div>
+          
+          <!-- OVERVIEW TAB -->
+          <div *ngIf="activeTab==='overview'" class="animate-in fade-in duration-200 space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              
+              <!-- Left 6-col: Personal Details Card -->
+              <div class="lg:col-span-6 bg-[#151b2b] border border-[#2a3347] rounded-2xl p-5 sm:p-6 space-y-5 shadow-sm">
+                <div class="flex items-center justify-between border-b border-[#2a3347] pb-4">
+                  <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-user text-[#5b6cf0] text-sm"></i>
+                    <h2 class="text-base font-bold text-white tracking-tight">Personal Details</h2>
+                  </div>
                 </div>
-                
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                         <i class="fa-solid fa-file-medical text-red-500"></i> Critical Info
-                    </h3>
-                    <div class="bg-red-50 dark:bg-red-500/5 border border-red-200 dark:border-red-500/10 rounded-lg p-4">
-                        <div class="text-xs text-red-600 dark:text-red-300 font-bold uppercase tracking-wider mb-1">Illness Details</div>
-                        <p class="text-gray-800 dark:text-gray-300 leading-relaxed">{{ patient.illnessDetails || 'No critical illness details recorded.' }}</p>
-                    </div>
+
+                <div class="space-y-3.5 text-xs sm:text-sm">
+                  <div class="flex justify-between border-b border-[#2a3347]/60 pb-2.5">
+                    <span class="text-[#9aa3b8]">Full Name</span>
+                    <span class="font-bold text-white">{{ fullName(patient) }}</span>
+                  </div>
+
+                  <div class="flex justify-between border-b border-[#2a3347]/60 pb-2.5">
+                    <span class="text-[#9aa3b8]">Email</span>
+                    <span class="font-bold text-white">{{ patient.email || 'NA' }}</span>
+                  </div>
+
+                  <div class="flex justify-between border-b border-[#2a3347]/60 pb-2.5">
+                    <span class="text-[#9aa3b8]">Date of Birth</span>
+                    <span class="font-bold text-white">{{ formatDateOfBirth(patient.dateOfBirth) }}</span>
+                  </div>
+
+                  <div class="flex justify-between border-b border-[#2a3347]/60 pb-2.5">
+                    <span class="text-[#9aa3b8]">Gender</span>
+                    <span class="font-bold text-white">{{ patient.gender || 'NA' }}</span>
+                  </div>
+
+                  <div class="flex justify-between border-b border-[#2a3347]/60 pb-2.5">
+                    <span class="text-[#9aa3b8]">Blood Group</span>
+                    <span class="font-bold text-white">{{ patient.bloodGroup || 'NA' }}</span>
+                  </div>
+
+                  <div class="flex justify-between border-b border-[#2a3347]/60 pb-2.5">
+                    <span class="text-[#9aa3b8]">Contact Number</span>
+                    <span class="font-bold text-white font-mono">{{ patient.contactInfo || 'NA' }}</span>
+                  </div>
                 </div>
               </div>
 
-              <div class="space-y-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-shield-halved text-emerald-500"></i> Account Status
-                </h3>
-                <div class="bg-white dark:bg-gray-800/30 rounded-xl p-6 border border-gray-200 dark:border-gray-800 space-y-4 shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <span class="text-gray-600 dark:text-gray-400">Username</span>
-                        <span class="font-mono text-sm bg-gray-100 dark:bg-gray-900 px-2 py-1 rounded text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800">{{ patient.username || '—' }}</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-gray-600 dark:text-gray-400">Email Preference</span>
-                        <span class="font-medium text-gray-800 dark:text-gray-200">{{ patient.email || '—' }}</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-gray-400">Account Status</span>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800" *ngIf="patient.isActive">
-                            Active
-                        </span>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800" *ngIf="!patient.isActive">
-                            Inactive
-                        </span>
-                    </div>
+              <!-- Right 6-col: Account Status Card -->
+              <div class="lg:col-span-6 bg-[#151b2b] border border-[#2a3347] rounded-2xl p-5 sm:p-6 space-y-5 shadow-sm">
+                <div class="flex items-center justify-between border-b border-[#2a3347] pb-4">
+                  <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-shield-halved text-emerald-400 text-sm"></i>
+                    <h2 class="text-base font-bold text-white tracking-tight">Account Status</h2>
+                  </div>
+                  <span class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-check text-[10px]"></i>
+                    <span>Active(to be added)</span>
+                  </span>
+                </div>
+
+                            <!-- Profile Strength Progress Bar -->
+            <div class="w-full sm:w-64 pt-2">
+              <div class="flex justify-between items-center text-[10px] font-bold text-[#9aa3b8] uppercase tracking-wider mb-1">
+                <span>PROFILE STRENGTH</span>
+                <span class="text-[#5b6cf0] font-mono">{{ patient.completionPercentage }}%</span>
+              </div>
+              <div class="w-full bg-[#1b2333] border border-[#2a3347] rounded-full h-2 overflow-hidden">
+                <div class="bg-[#5b6cf0] h-full rounded-full transition-all duration-1000" [style.width.%]="patient.completionPercentage"></div>
+              </div>
+            </div>
+
+                <div class="bg-[#1b2333] border border-[#2a3347] rounded-xl p-4 space-y-3.5 text-xs sm:text-sm">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[#9aa3b8]">Username</span>
+                    <span class="font-mono text-xs bg-[#0b0f1a] px-2.5 py-1 rounded border border-[#2a3347] text-white">
+                      {{ patient.username || 'username' }}
+                    </span>
+                  </div>
+
+                  <div class="flex items-center justify-between">
+                    <span class="text-[#9aa3b8]">Email Preference</span>
+                    <span class="font-medium text-white">{{ patient.email || 'shruti@gmail.com' }}</span>
+                  </div>
+
+                  <div class="flex items-center justify-between">
+                    <span class="text-[#9aa3b8]">Account Status</span>
+                    <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                      Active(to be added)
+                    </span>
+                  </div>
+
+                  <div class="flex items-center justify-between">
+                    <span class="text-[#9aa3b8]">Member Since</span>
+                    <span class="font-medium text-white">15 Jan 2024(to be added)</span>
+                  </div>
+
+                  <div class="flex items-center justify-between">
+                    <span class="text-[#9aa3b8]">Last Login</span>
+                    <span class="font-medium text-white">04 Oct 2026, 10:24 AM(to be added)</span>
+                  </div>
                 </div>
               </div>
+
+              <!-- Row 2 Left (6-col): Critical Info Card -->
+              <div class="lg:col-span-6 bg-[#151b2b] border border-[#2a3347] rounded-2xl p-5 sm:p-6 space-y-4 shadow-sm">
+                <div class="flex items-center justify-between border-b border-[#2a3347] pb-4">
+                  <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-file-medical text-rose-500 text-sm"></i>
+                    <h2 class="text-base font-bold text-white tracking-tight">Critical Info</h2>
+                  </div>
+                </div>
+
+                <div class="bg-rose-500/5 border border-rose-500/20 rounded-xl p-4 space-y-1">
+                  <div class="text-[10px] font-bold uppercase text-rose-400 tracking-wider">ILLNESS DETAILS</div>
+                  <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                    {{ patient.illnessDetails || 'No critical illness details recorded.' }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Row 2 Right (6-col): Quick Actions Card -->
+              <div class="lg:col-span-6 bg-[#151b2b] border border-[#2a3347] rounded-2xl p-5 sm:p-6 space-y-4 shadow-sm">
+                <div class="flex items-center gap-2.5 border-b border-[#2a3347] pb-4">
+                  <i class="fa-solid fa-bolt text-amber-400 text-sm"></i>
+                  <h2 class="text-base font-bold text-white tracking-tight">Quick Actions</h2>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <!-- Action 1: Change Password -->
+                  <a routerLink="/patient/change-password" 
+                    class="bg-[#1b2333] hover:bg-[#253047] border border-[#2a3347] rounded-xl p-3.5 transition-all group flex flex-col justify-between space-y-3">
+                    <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-[#5b6cf0]">
+                      <i class="fa-solid fa-lock text-xs"></i>
+                    </div>
+                    <div>
+                      <div class="text-xs font-bold text-white group-hover:text-[#5b6cf0] transition-colors flex items-center justify-between">
+                        <span>Change Password</span>
+                        <i class="fa-solid fa-chevron-right text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                      </div>
+                      <p class="text-[10px] text-[#9aa3b8] mt-0.5 line-clamp-1">Update your account password</p>
+                    </div>
+                  </a>
+
+                  <!-- Action 2: Notification Settings -->
+                  <div class="bg-[#1b2333] hover:bg-[#253047] border border-[#2a3347] rounded-xl p-3.5 transition-all group flex flex-col justify-between space-y-3 cursor-pointer">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                      <i class="fa-solid fa-bell text-xs"></i>
+                    </div>
+                    <div>
+                      <div class="text-xs font-bold text-white group-hover:text-indigo-400 transition-colors flex items-center justify-between">
+                        <span>Notification</span>
+                        <i class="fa-solid fa-chevron-right text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                      </div>
+                      <p class="text-[10px] text-[#9aa3b8] mt-0.5 line-clamp-1">Manage your preferences</p>
+                    </div>
+                  </div>
+
+                  <!-- Action 3: Privacy Settings -->
+                  <div class="bg-[#1b2333] hover:bg-[#253047] border border-[#2a3347] rounded-xl p-3.5 transition-all group flex flex-col justify-between space-y-3 cursor-pointer">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                      <i class="fa-solid fa-shield-halved text-xs"></i>
+                    </div>
+                    <div>
+                      <div class="text-xs font-bold text-white group-hover:text-emerald-400 transition-colors flex items-center justify-between">
+                        <span>Privacy Settings</span>
+                        <i class="fa-solid fa-chevron-right text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                      </div>
+                      <p class="text-[10px] text-[#9aa3b8] mt-0.5 line-clamp-1">Control your data & privacy</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
 
-          <!-- Medical History Tab -->
-          <div *ngIf="activeTab==='history'" class="animate-fade-in space-y-4">
+          <!-- MEDICAL HISTORY TAB -->
+          <div *ngIf="activeTab==='history'" class="animate-in fade-in duration-200 space-y-4">
             <app-empty-state
               *ngIf="(medicalHistory || []).length===0"
               icon="fa-solid fa-folder-open"
@@ -199,86 +321,44 @@ export interface AppointmentCounts {
             ></app-empty-state>
             
             <div class="grid gap-4" *ngIf="(medicalHistory || []).length > 0">
-              <div *ngFor="let m of sortedHistory()" class="bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-blue-400/30 dark:hover:border-gray-600 transition-colors shadow-sm">
+              <div *ngFor="let m of sortedHistory()" class="bg-[#151b2b] border border-[#2a3347] rounded-xl p-5 hover:border-[#5b6cf0]/50 transition-colors shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
                    <div class="flex items-center gap-3">
-                       <div class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center text-blue-500 dark:text-blue-400">
+                       <div class="w-10 h-10 rounded-full bg-[#5b6cf0]/10 border border-[#5b6cf0]/20 flex items-center justify-center text-[#5b6cf0]">
                            <i class="fa-solid fa-stethoscope"></i>
                        </div>
                        <div>
-                           <div class="font-semibold text-gray-800 dark:text-gray-200">Visit Date: {{ m.visitDate | date:'mediumDate' }}</div>
-                           <div class="text-xs text-gray-500">Record ID: #{{ m.id }}</div>
+                           <div class="font-bold text-white text-sm">Visit Date: {{ m.visitDate | date:'mediumDate' }}</div>
+                           <div class="text-xs text-[#9aa3b8]">Record ID: #{{ m.id }}</div>
                        </div>
                    </div>
                 </div>
                 
-                <div class="grid md:grid-cols-2 gap-6 text-sm">
+                <div class="grid md:grid-cols-2 gap-6 text-xs sm:text-sm">
                    <div class="space-y-3">
-                       <div><span class="block text-xs uppercase tracking-wider text-gray-500 mb-1">Diagnosis</span> <span class="text-gray-800 dark:text-gray-200 font-medium">{{ m.diagnosis || '—' }}</span></div>
-                       <div><span class="block text-xs uppercase tracking-wider text-gray-500 mb-1">Symptoms</span> <span class="text-gray-700 dark:text-gray-300">{{ m.symptoms || '—' }}</span></div>
-                       <div><span class="block text-xs uppercase tracking-wider text-gray-500 mb-1">Treatment</span> <span class="text-gray-700 dark:text-gray-300">{{ m.treatment || '—' }}</span></div>
+                       <div><span class="block text-[10px] font-bold uppercase text-[#9aa3b8] mb-1">Diagnosis</span> <span class="text-white font-medium">{{ m.diagnosis || '—' }}</span></div>
+                       <div><span class="block text-[10px] font-bold uppercase text-[#9aa3b8] mb-1">Symptoms</span> <span class="text-slate-300">{{ m.symptoms || '—' }}</span></div>
+                       <div><span class="block text-[10px] font-bold uppercase text-[#9aa3b8] mb-1">Treatment</span> <span class="text-slate-300">{{ m.treatment || '—' }}</span></div>
                    </div>
                    <div class="space-y-3">
-                       <div><span class="block text-xs uppercase tracking-wider text-gray-500 mb-1">Medicine</span> <span class="text-gray-700 dark:text-gray-300 font-mono">{{ m.medicine || '—' }}</span></div>
-                       <div><span class="block text-xs uppercase tracking-wider text-gray-500 mb-1">Doses</span> <span class="text-gray-700 dark:text-gray-300">{{ m.doses || '—' }}</span></div>
-                       <div><span class="block text-xs uppercase tracking-wider text-gray-500 mb-1">Notes</span> <span class="text-gray-600 dark:text-gray-400 italic">{{ m.notes || '—' }}</span></div>
+                       <div><span class="block text-[10px] font-bold uppercase text-[#9aa3b8] mb-1">Medicine</span> <span class="text-emerald-400 font-mono">{{ m.medicine || '—' }}</span></div>
+                       <div><span class="block text-[10px] font-bold uppercase text-[#9aa3b8] mb-1">Doses</span> <span class="text-slate-300">{{ m.doses || '—' }}</span></div>
+                       <div><span class="block text-[10px] font-bold uppercase text-[#9aa3b8] mb-1">Notes</span> <span class="text-[#9aa3b8] italic">{{ m.notes || '—' }}</span></div>
                    </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <ng-container *ngFor="let t of extraTabs">
-            <div *ngIf="activeTab===t.id" class="animate-fade-in">
-              <ng-container *ngTemplateOutlet="t.content"></ng-container>
-            </div>
-          </ng-container>
         </div>
       </section>
     </div>
 
+    <!-- Loading Skeleton -->
     <ng-template #loading>
       <div class="max-w-7xl mx-auto space-y-6 p-4 sm:p-6 animate-pulse">
-        <!-- Header Skeleton -->
-        <div class="bg-white dark:bg-gray-900 rounded-xl p-6 sm:p-8 border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row gap-6 items-start justify-between">
-          <div class="flex items-start gap-5 w-full md:w-auto">
-            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gray-200 dark:bg-gray-800"></div>
-            <div class="space-y-3 flex-1 min-w-[200px] mt-2">
-              <div class="h-8 w-44 bg-gray-200 dark:bg-gray-800 rounded"></div>
-              <div class="flex flex-wrap gap-4 mt-2">
-                <div class="h-4 w-24 bg-gray-200 dark:bg-gray-800 rounded"></div>
-                <div class="h-4 w-36 bg-gray-200 dark:bg-gray-800 rounded"></div>
-                <div class="h-4 w-32 bg-gray-200 dark:bg-gray-800 rounded"></div>
-              </div>
-            </div>
-          </div>
-          <div class="w-full md:w-auto flex flex-col items-start md:items-end gap-3">
-             <div class="h-10 w-48 bg-gray-200 dark:bg-gray-800 rounded"></div>
-             <div class="h-10 w-28 bg-gray-200 dark:bg-gray-800 rounded"></div>
-          </div>
-        </div>
-
-        <!-- Content Area Skeleton -->
-        <div class="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-100 dark:border-gray-800 space-y-6">
-          <div class="flex gap-4 border-b border-gray-100 dark:border-gray-800 pb-2">
-            <div class="h-8 w-24 bg-gray-200 dark:bg-gray-800 rounded"></div>
-            <div class="h-8 w-32 bg-gray-200 dark:bg-gray-800 rounded"></div>
-          </div>
-          <div class="grid md:grid-cols-2 gap-8 mt-4">
-            <div class="space-y-4">
-              <div class="h-6 w-36 bg-gray-200 dark:bg-gray-800 rounded mb-2"></div>
-              <div class="space-y-3">
-                 <div class="h-10 w-full bg-gray-100 dark:bg-gray-800/40 rounded"></div>
-                 <div class="h-10 w-full bg-gray-100 dark:bg-gray-800/40 rounded"></div>
-                 <div class="h-10 w-full bg-gray-100 dark:bg-gray-800/40 rounded"></div>
-              </div>
-            </div>
-            <div class="space-y-4">
-              <div class="h-6 w-36 bg-gray-200 dark:bg-gray-800 rounded mb-2"></div>
-              <div class="h-40 w-full bg-gray-100 dark:bg-gray-800/40 rounded"></div>
-            </div>
-          </div>
-        </div>
+        <div class="bg-[#151b2b] rounded-2xl p-6 border border-[#2a3347] h-40"></div>
+        <div class="bg-[#151b2b] rounded-2xl p-6 border border-[#2a3347] h-96"></div>
       </div>
     </ng-template>
   `,
@@ -305,6 +385,19 @@ export class PatientProfilePageComponent {
   initialsFromName(p?: PatientDto | null) {
     const n = this.fullName(p);
     return n?.charAt(0) || 'P';
+  }
+
+  formatDateOfBirth(dob?: string | Date): string {
+    if (!dob) return 'Oct 12, 2010 (15 years)';
+    try {
+      const d = new Date(dob);
+      if (isNaN(d.getTime())) return String(dob);
+      const dateFormatted = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const age = new Date().getFullYear() - d.getFullYear();
+      return `${dateFormatted} (${age} years)`;
+    } catch {
+      return String(dob);
+    }
   }
 
   onImageError() {

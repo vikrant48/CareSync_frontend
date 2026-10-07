@@ -31,7 +31,11 @@ import { VideoConsultationComponent } from './shared/video-consultation.componen
 import { VitalsTrackingComponent } from './features/patient/patient-vitals.component';
 
 import { AdminDashboardComponent } from './features/admin/admin-dashboard.component';
+import { AppointmentAnalyticsDashboardComponent } from './features/admin/appointment-analytics-dashboard.component';
 import { NotFoundComponent } from './shared/not-found.component';
+
+import { PreVisitIntakeComponent } from './features/patient/pre-visit-intake.component';
+import { AppointmentDetailsPageComponent } from './shared/components/appointment-details/appointment-details-page.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'register', pathMatch: 'full' },
@@ -44,6 +48,12 @@ export const routes: Routes = [
   {
     path: 'admin',
     component: AdminDashboardComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ADMIN'] }
+  },
+  {
+    path: 'admin/appointment-analytics',
+    component: AppointmentAnalyticsDashboardComponent,
     canActivate: [authGuard, roleGuard],
     data: { roles: ['ADMIN'] }
   },
@@ -62,6 +72,12 @@ export const routes: Routes = [
   {
     path: 'doctor/appointments',
     component: DoctorAppointmentsComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['DOCTOR'] }
+  },
+  {
+    path: 'doctor/appointments/:id',
+    component: AppointmentDetailsPageComponent,
     canActivate: [authGuard, roleGuard],
     data: { roles: ['DOCTOR'] }
   },
@@ -146,6 +162,18 @@ export const routes: Routes = [
   {
     path: 'patient/appointments',
     component: MyAppointmentsComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['PATIENT'] }
+  },
+  {
+    path: 'patient/appointments/:id',
+    component: AppointmentDetailsPageComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['PATIENT'] }
+  },
+  {
+    path: 'patient/intake/:id',
+    component: PreVisitIntakeComponent,
     canActivate: [authGuard, roleGuard],
     data: { roles: ['PATIENT'] }
   },

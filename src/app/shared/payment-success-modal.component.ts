@@ -9,103 +9,138 @@ import { PdfService, PaymentReceiptData } from '../core/services/pdf.service';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div *ngIf="isVisible" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+    <div *ngIf="isVisible" class="fixed inset-0 z-[110] flex items-center justify-center p-4">
       <!-- Backdrop -->
-      <div class="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity animate-in fade-in duration-300" (click)="closeModal()"></div>
+      <div class="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity animate-in fade-in duration-300" (click)="closeModal()"></div>
 
       <!-- Modal Card -->
-      <div #modalContent class="relative w-full max-w-md bg-white text-gray-900 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-5 duration-300 flex flex-col max-h-[90vh]">
+      <div #modalContent class="relative w-full max-w-lg bg-[#121826] border border-[#2a3347] text-white rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col z-10">
         
-        <!-- Decorative Header -->
-        <div class="relative h-32 bg-emerald-500 overflow-hidden shrink-0">
-          <div class="absolute inset-0 bg-gradient-to-br from-emerald-600 to-teal-500"></div>
-          <!-- Abstract Circles -->
-          <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-          <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-black/5 rounded-full blur-xl"></div>
+        <!-- Top Right Close Button -->
+        <button 
+          type="button" 
+          (click)="closeModal()"
+          class="absolute top-5 right-5 text-[#9aa3b8] hover:text-white hover:bg-[#1b2333] p-2 rounded-full transition-colors focus:outline-none flex items-center justify-center cursor-pointer z-20"
+          aria-label="Close modal"
+        >
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+
+        <!-- Top Success Icon & Glowing Particles -->
+        <div class="relative flex items-center justify-center my-4">
+          <div class="w-2.5 h-2.5 bg-emerald-400 rounded-sm absolute -top-2 left-1/3 animate-ping"></div>
+          <div class="w-2 h-2 bg-[#5b6cf0] rounded-sm absolute -top-1 right-1/3"></div>
+          <div class="w-2 h-2 bg-indigo-400 rounded-sm absolute bottom-0 left-1/4"></div>
+          <div class="w-2 h-2 bg-emerald-300 rounded-sm absolute bottom-1 right-1/4"></div>
+
+          <div class="w-20 h-20 rounded-full bg-[#0d2822] border border-[#10b981]/40 flex items-center justify-center relative shadow-lg shadow-[#10b981]/20">
+            <div class="w-14 h-14 rounded-full bg-emerald-500 flex items-center justify-center text-white text-2xl font-black shadow-inner">
+              <i class="fa-solid fa-check"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Header Text -->
+        <div class="text-center mb-6">
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-1 tracking-tight">Payment Successful!</h2>
+          <p class="text-xs sm:text-sm text-[#9aa3b8]">Your transaction has been processed securely.</p>
+        </div>
+
+        <!-- Summary Details Card Box -->
+        <div class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-4 sm:p-5 mb-6 space-y-3.5 shadow-inner">
           
-          <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/20 to-transparent"></div>
-
-          <!-- Icon Badge -->
-          <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 w-20 h-20 bg-white rounded-full p-2 shadow-xl ring-4 ring-emerald-500/20 z-10 flex items-center justify-center">
-             <div class="w-full h-full bg-emerald-100 rounded-full flex items-center justify-center group">
-               <!-- SVG Checkmark -->
-               <svg class="w-10 h-10 text-emerald-600 drop-shadow-sm transform transition-all duration-700 ease-out group-hover:scale-110" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24">
-                 <path stroke-linecap="round" 
-                       stroke-linejoin="round" 
-                       stroke-width="3" 
-                       d="M5 13l4 4L19 7"
-                       class="animate-[draw_0.6s_ease-out_forwards]"
-                       style="stroke-dasharray: 24; stroke-dashoffset: 24; animation-delay: 200ms;">
-                 </path>
-               </svg>
-             </div>
-          </div>
-        </div>
-
-        <!-- Content -->
-        <div class="pt-12 pb-8 px-6 sm:px-8 text-center flex-1 overflow-y-auto">
-          <h2 class="text-2xl font-bold text-gray-900 mb-1">Payment Successful!</h2>
-          <p class="text-gray-500 text-sm mb-8">Your transaction has been processed securely.</p>
-
-          <!-- Receipt Card -->
-          <div class="bg-gray-50 border border-gray-200 rounded-2xl p-5 mb-8 text-left space-y-4 relative">
-             <!-- Ticket/Receipt cutouts -->
-             <div class="absolute top-1/2 -left-2.5 w-5 h-5 bg-white rounded-full border-r border-gray-200"></div>
-             <div class="absolute top-1/2 -right-2.5 w-5 h-5 bg-white rounded-full border-l border-gray-200"></div>
-
-             <div class="flex justify-between items-center text-sm">
-                <span class="text-gray-500">Amount Paid</span>
-                <span class="text-xl font-bold text-gray-900">₹{{ paymentDetails?.amount | number:'1.2-2' }}</span>
-             </div>
-             
-             <div class="h-px bg-gray-200 border-t border-dashed border-gray-300 my-2"></div>
-
-             <div class="space-y-3">
-               <div class="flex justify-between items-center text-sm">
-                  <span class="text-gray-500">Transaction ID</span>
-                  <div class="flex items-center gap-2">
-                    <span class="text-gray-900 font-mono text-xs">{{ paymentDetails?.transactionId }}</span>
-                    <button (click)="copyTransactionId()" class="text-emerald-600 hover:text-emerald-700 p-1 rounded hover:bg-emerald-50" title="Copy ID">
-                       <i class="fas fa-copy"></i>
-                    </button>
-                  </div>
-               </div>
-               <div class="flex justify-between items-center text-sm">
-                  <span class="text-gray-500">Date</span>
-                  <span class="text-gray-900 font-medium">{{ getCurrentDateTime() }}</span>
-               </div>
-               <div class="flex justify-between items-center text-sm">
-                  <span class="text-gray-500">Payment Method</span>
-                  <span class="text-gray-900 font-medium">{{ getPaymentMethodDisplay() }}</span>
-               </div>
-               <div class="flex justify-between items-center text-sm">
-                  <span class="text-gray-500">Paid to</span>
-                  <span class="text-gray-900 font-medium truncate max-w-[150px]" [title]="recipientUpiId">{{ recipientUpiId }}</span>
-               </div>
-             </div>
+          <!-- Amount Paid -->
+          <div class="flex items-center justify-between gap-3 text-xs sm:text-sm">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-[#5b6cf0]/10 text-[#5b6cf0] flex items-center justify-center text-sm shrink-0">
+                <i class="fa-solid fa-indian-rupee-sign"></i>
+              </div>
+              <span class="text-[#9aa3b8] font-semibold">Amount Paid</span>
+            </div>
+            <span class="text-emerald-400 font-extrabold text-lg sm:text-xl">₹{{ paymentDetails?.amount | number:'1.2-2' }}</span>
           </div>
 
-          <!-- Actions -->
-          <div class="grid grid-cols-2 gap-3">
-            <button 
-              (click)="downloadPDF()"
-              class="flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300">
-              <i class="fas fa-download"></i> Receipt
-            </button>
-            <button 
-              (click)="closeModal()"
-              class="flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-500/30 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
-              Done
-            </button>
+          <div class="h-px bg-[#2a3347]"></div>
+
+          <!-- Transaction ID -->
+          <div class="flex items-center justify-between gap-3 text-xs sm:text-sm">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-[#5b6cf0]/10 text-[#5b6cf0] flex items-center justify-center text-sm shrink-0">
+                <i class="fa-regular fa-file-lines"></i>
+              </div>
+              <span class="text-[#9aa3b8] font-semibold">Transaction ID</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-white font-mono text-xs font-semibold truncate max-w-[160px] sm:max-w-[200px]" [title]="paymentDetails?.transactionId">{{ paymentDetails?.transactionId }}</span>
+              <button (click)="copyTransactionId()" class="text-[#5b6cf0] hover:text-indigo-300 p-1 rounded-lg hover:bg-[#1b2333] transition-colors cursor-pointer" title="Copy ID">
+                <i class="fa-regular fa-copy text-xs"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Date & Time -->
+          <div class="flex items-center justify-between gap-3 text-xs sm:text-sm">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-[#5b6cf0]/10 text-[#5b6cf0] flex items-center justify-center text-sm shrink-0">
+                <i class="fa-regular fa-calendar-days"></i>
+              </div>
+              <span class="text-[#9aa3b8] font-semibold">Date & Time</span>
+            </div>
+            <span class="text-white font-semibold text-xs sm:text-sm">{{ getCurrentDateTime() }}</span>
+          </div>
+
+          <!-- Payment Method -->
+          <div class="flex items-center justify-between gap-3 text-xs sm:text-sm">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-[#5b6cf0]/10 text-[#5b6cf0] flex items-center justify-center text-sm shrink-0">
+                <i class="fa-regular fa-credit-card"></i>
+              </div>
+              <span class="text-[#9aa3b8] font-semibold">Payment Method</span>
+            </div>
+            <span class="text-white font-semibold uppercase text-xs sm:text-sm">{{ getPaymentMethodDisplay() }}</span>
+          </div>
+
+          <!-- Paid to -->
+          <div class="flex items-center justify-between gap-3 text-xs sm:text-sm">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-[#5b6cf0]/10 text-[#5b6cf0] flex items-center justify-center text-sm shrink-0">
+                <i class="fa-regular fa-user"></i>
+              </div>
+              <span class="text-[#9aa3b8] font-semibold">Paid to</span>
+            </div>
+            <div class="text-right">
+              <div class="text-white font-bold text-xs sm:text-sm">{{ recipientUpiId }}</div>
+              <span class="text-gray-900 font-medium truncate max-w-[150px]" [title]="recipientUpiId">{{ recipientUpiId }}</span>
+            </div>
           </div>
 
         </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-2 gap-3">
+          <button 
+            type="button"
+            (click)="downloadPDF()"
+            class="bg-[#1b2333] hover:bg-[#253047] border border-[#2a3347] text-white font-bold text-xs sm:text-sm py-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
+          >
+            <i class="fa-solid fa-download text-xs"></i>
+            <span>Download Receipt</span>
+          </button>
+
+          <button 
+            type="button"
+            (click)="closeModal()"
+            class="bg-[#5b6cf0] hover:bg-[#4a5be0] text-white font-bold text-xs sm:text-sm py-3 rounded-xl shadow-lg shadow-[#5b6cf0]/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
+          >
+            <span>Done</span>
+            <i class="fa-solid fa-arrow-right text-xs"></i>
+          </button>
+        </div>
+
       </div>
     </div>
-  `
+  `,
+  styles: []
 })
 export class PaymentSuccessModalComponent {
   @Input() isVisible = false;
@@ -120,7 +155,7 @@ export class PaymentSuccessModalComponent {
   private pdfService = inject(PdfService);
 
   getPaymentMethodDisplay(): string {
-    if (!this.paymentDetails) return '';
+    if (!this.paymentDetails) return 'UPI';
 
     switch (this.paymentDetails.method) {
       case 'upi':
@@ -128,14 +163,14 @@ export class PaymentSuccessModalComponent {
       case 'card':
         return 'Card';
       case 'qr':
-        return 'QR Scan';
+        return 'Scan QR';
       default:
-        return this.paymentDetails.method;
+        return String(this.paymentDetails.method).toUpperCase();
     }
   }
 
   getCurrentDateTime(): string {
-    return new Date().toLocaleString('en-IN', {
+    return new Date().toLocaleString('en-GB', {
       day: '2-digit', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit', hour12: true
     });

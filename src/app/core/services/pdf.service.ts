@@ -55,6 +55,13 @@ export interface PrescriptionPdfData {
     duration?: string;
     instructions?: string;
   }>;
+  soapReport?: {
+    subjective?: string;
+    objective?: string;
+    assessment?: string;
+    plan?: string;
+    notes?: string;
+  };
   verificationUrl?: string;
 }
 
@@ -695,7 +702,88 @@ export class PdfService {
       y += boxHeight + 8;
     }
 
-    // 6. Footer & Digital Signature
+    // 7. Page 2: AI-Assisted Clinical SOAP Summary (If available)
+    const hasSoapData = data.soapReport && (
+      data.soapReport.subjective ||
+      data.soapReport.objective ||
+      data.soapReport.assessment ||
+      data.soapReport.plan
+    );
+
+    if (hasSoapData) {
+      doc.addPage();
+      let pageY = 48;
+
+      // Page Header Banner
+      doc.setFillColor(headerBg[0], headerBg[1], headerBg[2]);
+      doc.rect(0, 0, 210, 36, 'F');
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(22);
+      doc.setFont('helvetica', 'bold');
+      doc.text('CareSync', 16, 22);
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text('AI-ASSISTED CLINICAL SOAP SUMMARY', 16, 29);
+
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Rx Ref: #${data.appointmentId}`, 150, 22);
+
+      // Subtitle & AI Badge
+      doc.setFillColor(239, 246, 255); // soft blue background
+      doc.roundedRect(16, 42, 178, 12, 3, 3, 'F');
+      doc.setDrawColor(191, 219, 254);
+      doc.roundedRect(16, 42, 178, 12, 3, 3, 'D');
+
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(37, 99, 235);
+      doc.text('AI-ASSISTED CLINICAL DOCUMENTATION', 22, 50);
+      doc.setFont('helvetica', 'italic');
+      doc.setTextColor(71, 85, 105);
+      doc.text('| Reviewed and electronically signed by attending physician', 95, 50);
+
+      pageY = 62;
+
+      const renderSoapBlock = (title: string, content?: string) => {
+        if (!content || !content.trim()) return;
+
+        if (pageY > 240) {
+          doc.addPage();
+          pageY = 20;
+        }
+
+        doc.setFontSize(10.5);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(37, 99, 235);
+        doc.text(title, 16, pageY);
+        pageY += 5;
+
+        const splitText = doc.splitTextToSize(content.trim(), 170);
+        const blockHeight = Math.max(14, splitText.length * 5 + 6);
+
+        doc.setFillColor(248, 250, 252);
+        doc.roundedRect(16, pageY, 178, blockHeight, 2, 2, 'F');
+        doc.setDrawColor(226, 232, 240);
+        doc.roundedRect(16, pageY, 178, blockHeight, 2, 2, 'D');
+
+        doc.setFontSize(9.5);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(30, 41, 59);
+        doc.text(splitText, 22, pageY + 6);
+
+        pageY += blockHeight + 8;
+      };
+
+      renderSoapBlock('Subjective (S) - Patient History & Complaints', data.soapReport?.subjective);
+      renderSoapBlock('Objective (O) - Clinical Observations & Findings', data.soapReport?.objective);
+      renderSoapBlock('Assessment (A) - Clinical Synthesis & Diagnosis', data.soapReport?.assessment);
+      renderSoapBlock('Plan (P) - Treatment Strategy & Follow-up', data.soapReport?.plan);
+    }
+
+    // 8. Footer & Digital Signature (Rendered on final page)
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(30, 41, 59);

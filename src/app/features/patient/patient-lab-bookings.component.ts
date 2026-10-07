@@ -9,7 +9,6 @@ import { PaymentService } from '../../core/services/payment.service';
 import { PaymentPopupComponent, PaymentDetails } from '../../shared/payment-popup.component';
 import { ToastService } from '../../core/services/toast.service';
 import { ConfirmService } from '../../core/services/confirm.service';
-import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { SkeletonComponent } from '../../shared/ui/skeleton.component';
 import { StatusBadgeComponent } from '../../shared/ui/status-badge.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
@@ -18,7 +17,7 @@ import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 @Component({
   selector: 'app-patient-lab-bookings',
   standalone: true,
-  imports: [CommonModule, PatientLayoutComponent, PaymentPopupComponent, PageHeaderComponent, SkeletonComponent, StatusBadgeComponent, EmptyStateComponent, ModalShellComponent],
+  imports: [CommonModule, PatientLayoutComponent, PaymentPopupComponent, SkeletonComponent, StatusBadgeComponent, EmptyStateComponent, ModalShellComponent],
   templateUrl: './patient-lab-bookings.component.html',
   styleUrl: './patient-lab-bookings.component.css'
 })
@@ -39,9 +38,74 @@ export class PatientLabBookingsComponent implements OnInit {
   showPaymentPopup = signal<boolean>(false);
   paymentBooking = signal<BookingResponse | null>(null);
 
+  // Filter & Sort signals
+  statusFilter = signal<'ALL' | 'UPCOMING' | 'COMPLETED' | 'CANCELLED'>('ALL');
+  sortOption = signal<'latest' | 'oldest' | 'amount-high' | 'amount-low'>('latest');
+
   // File upload signals
   isUploading = signal<boolean>(false);
   uploadBookingId = signal<number | null>(null);
+
+  // Computed counts
+  get totalCount(): number {
+    return this.bookings().length;
+  }
+
+  get upcomingCount(): number {
+    return this.bookings().filter(b => {
+      const s = (b.status || '').toUpperCase();
+      return s === 'UPCOMING' || s === 'PENDING' || s === 'SCHEDULED';
+    }).length;
+  }
+
+  get completedCount(): number {
+    return this.bookings().filter(b => (b.status || '').toUpperCase() === 'COMPLETED').length;
+  }
+
+  get cancelledCount(): number {
+    return this.bookings().filter(b => (b.status || '').toUpperCase() === 'CANCELLED').length;
+  }
+
+  // Filtered & Sorted Bookings
+  get filteredBookings(): BookingResponse[] {
+    let list = [...this.bookings()];
+
+    // Apply Status Filter
+    const sf = this.statusFilter();
+    if (sf === 'UPCOMING') {
+      list = list.filter(b => {
+        const s = (b.status || '').toUpperCase();
+        return s === 'UPCOMING' || s === 'PENDING' || s === 'SCHEDULED';
+      });
+    } else if (sf === 'COMPLETED') {
+      list = list.filter(b => (b.status || '').toUpperCase() === 'COMPLETED');
+    } else if (sf === 'CANCELLED') {
+      list = list.filter(b => (b.status || '').toUpperCase() === 'CANCELLED');
+    }
+
+    // Apply Sorting
+    const sort = this.sortOption();
+    if (sort === 'latest') {
+      list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } else if (sort === 'oldest') {
+      list.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    } else if (sort === 'amount-high') {
+      list.sort((a, b) => (b.totalPrice || 0) - (a.totalPrice || 0));
+    } else if (sort === 'amount-low') {
+      list.sort((a, b) => (a.totalPrice || 0) - (b.totalPrice || 0));
+    }
+
+    return list;
+  }
+
+  setStatusFilter(filter: 'ALL' | 'UPCOMING' | 'COMPLETED' | 'CANCELLED') {
+    this.statusFilter.set(filter);
+  }
+
+  onSortChange(event: Event) {
+    const value = (event.target as HTMLSelectElement).value as any;
+    this.sortOption.set(value);
+  }
 
   ngOnInit() {
     this.loadBookings();

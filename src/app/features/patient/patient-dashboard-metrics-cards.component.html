@@ -1,77 +1,87 @@
-<section class="mt-4 sm:mt-6">
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+<section class="mt-3">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <!-- Pending Feedback Card -->
-        <div
-            class="panel p-3 sm:p-5 flex flex-col items-center justify-between transition-transform hover:scale-[1.02] shadow-lg">
-            <div class="w-full flex items-center justify-between gap-1 mb-1 sm:mb-2">
-                <span class="font-bold text-xs sm:text-base text-gray-800 dark:text-gray-200 truncate">Pending
-                    Feedback</span>
-                <button class="text-blue-400 hover:text-blue-300 text-xs sm:text-sm font-medium shrink-0"
-                    (click)="openFeedback.emit()">View All</button>
+        <div (click)="openFeedback.emit()"
+            class="bg-[#111A36] dark:bg-gray-800 border border-gray-800 p-3 rounded-xl flex items-center justify-between cursor-pointer transition-all hover:scale-[1.01] shadow-md hover:border-purple-500/40 group">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <div
+                    class="w-9 h-9 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center text-base shrink-0 group-hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-file-signature"></i>
+                </div>
+                <div class="min-w-0">
+                    <div class="text-[11px] font-semibold text-gray-400 truncate">Pending Feedback</div>
+                    <div *ngIf="loadingPending"
+                        class="animate-spin h-3.5 w-3.5 border-2 border-purple-500 border-t-transparent rounded-full mt-0.5">
+                    </div>
+                    <div *ngIf="!loadingPending" class="text-xl font-bold text-white leading-none mt-0.5">{{
+                        pendingFeedbackCount }}</div>
+                </div>
             </div>
-            <div class="flex-1 flex flex-col items-center justify-center py-1 sm:py-2">
-                <div class="hidden sm:block text-3xl sm:text-4xl mb-1 sm:mb-2">📝</div>
-                <div *ngIf="loadingPending"
-                    class="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                <div *ngIf="!loadingPending"
-                    class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white py-0.5 sm:py-0">{{
-                    pendingFeedbackCount }}</div>
-            </div>
+            <i
+                class="fa-solid fa-chevron-right text-gray-500 text-xs group-hover:text-purple-400 group-hover:translate-x-0.5 transition-all"></i>
         </div>
 
         <!-- My Appointments Card -->
-        <div
-            class="panel p-3 sm:p-5 flex flex-col items-center justify-between transition-transform hover:scale-[1.02] shadow-lg">
-            <div class="w-full flex items-center justify-between gap-1 mb-1 sm:mb-2">
-                <span class="font-bold text-xs sm:text-base text-gray-800 dark:text-gray-200 truncate">My
-                    Appointments</span>
-                <button class="text-blue-400 hover:text-blue-300 text-xs sm:text-sm font-medium shrink-0"
-                    (click)="openMyAppointments.emit()">View All</button>
+        <div (click)="openMyAppointments.emit()"
+            class="bg-[#111A36] dark:bg-gray-800 border border-gray-800 p-3 rounded-xl flex items-center justify-between cursor-pointer transition-all hover:scale-[1.01] shadow-md hover:border-blue-500/40 group">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <div
+                    class="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center text-base shrink-0 group-hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-calendar-days"></i>
+                </div>
+                <div class="min-w-0">
+                    <div class="text-[11px] font-semibold text-gray-400 truncate">My Appointments</div>
+                    <div *ngIf="loadingAppointments"
+                        class="animate-spin h-3.5 w-3.5 border-2 border-blue-500 border-t-transparent rounded-full mt-0.5">
+                    </div>
+                    <div *ngIf="!loadingAppointments" class="text-xl font-bold text-white leading-none mt-0.5">{{
+                        (appointments || []).length }}</div>
+                </div>
             </div>
-            <div class="flex-1 flex flex-col items-center justify-center py-1 sm:py-2">
-                <div class="hidden sm:block text-3xl sm:text-4xl mb-1 sm:mb-2">📅</div>
-                <div *ngIf="loadingAppointments"
-                    class="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                <div *ngIf="!loadingAppointments"
-                    class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white py-0.5 sm:py-0">{{ (appointments
-                    || []).length }}</div>
-            </div>
+            <i
+                class="fa-solid fa-chevron-right text-gray-500 text-xs group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all"></i>
         </div>
 
         <!-- Today Appointments Card -->
-        <div
-            class="panel p-3 sm:p-5 flex flex-col items-center justify-between transition-transform hover:scale-[1.02] shadow-lg">
-            <div class="w-full flex items-center justify-between gap-1 mb-1 sm:mb-2">
-                <span class="font-bold text-xs sm:text-base text-gray-800 dark:text-gray-200 truncate">Today</span>
-                <button class="text-blue-400 hover:text-blue-300 text-xs sm:text-sm font-medium shrink-0"
-                    (click)="openTodayAppointments.emit()">View All</button>
+        <div (click)="openTodayAppointments.emit()"
+            class="bg-[#111A36] dark:bg-gray-800 border border-gray-800 p-3 rounded-xl flex items-center justify-between cursor-pointer transition-all hover:scale-[1.01] shadow-md hover:border-amber-500/40 group">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <div
+                    class="w-9 h-9 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-base shrink-0 group-hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-calendar-day"></i>
+                </div>
+                <div class="min-w-0">
+                    <div class="text-[11px] font-semibold text-gray-400 truncate">Today</div>
+                    <div *ngIf="loadingAppointments"
+                        class="animate-spin h-3.5 w-3.5 border-2 border-amber-500 border-t-transparent rounded-full mt-0.5">
+                    </div>
+                    <div *ngIf="!loadingAppointments" class="text-xl font-bold text-white leading-none mt-0.5">{{
+                        todayAppointmentsCount }}</div>
+                </div>
             </div>
-            <div class="flex-1 flex flex-col items-center justify-center py-1 sm:py-2">
-                <div class="hidden sm:block text-3xl sm:text-4xl mb-1 sm:mb-2">📆</div>
-                <div *ngIf="loadingAppointments"
-                    class="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                <div *ngIf="!loadingAppointments"
-                    class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white py-0.5 sm:py-0">{{
-                    todayAppointmentsCount }}</div>
-            </div>
+            <i
+                class="fa-solid fa-chevron-right text-gray-500 text-xs group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all"></i>
         </div>
 
         <!-- Lab Tests Card -->
-        <div
-            class="panel p-3 sm:p-5 flex flex-col items-center justify-between transition-transform hover:scale-[1.02] shadow-lg">
-            <div class="w-full flex items-center justify-between gap-1 mb-1 sm:mb-2">
-                <span class="font-bold text-xs sm:text-base text-gray-800 dark:text-gray-200 truncate">Lab Tests</span>
-                <button class="text-blue-400 hover:text-blue-300 text-xs sm:text-sm font-medium shrink-0"
-                    (click)="openLabTests.emit()">View All</button>
+        <div (click)="openLabTests.emit()"
+            class="bg-[#111A36] dark:bg-gray-800 border border-gray-800 p-3 rounded-xl flex items-center justify-between cursor-pointer transition-all hover:scale-[1.01] shadow-md hover:border-emerald-500/40 group">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <div
+                    class="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-base shrink-0 group-hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-vial-virus"></i>
+                </div>
+                <div class="min-w-0">
+                    <div class="text-[11px] font-semibold text-gray-400 truncate">Lab Tests</div>
+                    <div *ngIf="loadingLabTests"
+                        class="animate-spin h-3.5 w-3.5 border-2 border-emerald-500 border-t-transparent rounded-full mt-0.5">
+                    </div>
+                    <div *ngIf="!loadingLabTests" class="text-xl font-bold text-white leading-none mt-0.5">{{
+                        labTestCount }}</div>
+                </div>
             </div>
-            <div class="flex-1 flex flex-col items-center justify-center py-1 sm:py-2">
-                <div class="hidden sm:block text-3xl sm:text-4xl mb-1 sm:mb-2">🧪</div>
-                <div *ngIf="loadingLabTests"
-                    class="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                <div *ngIf="!loadingLabTests"
-                    class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white py-0.5 sm:py-0">{{ labTestCount
-                    }}</div>
-            </div>
+            <i
+                class="fa-solid fa-chevron-right text-gray-500 text-xs group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all"></i>
         </div>
     </div>
 </section>

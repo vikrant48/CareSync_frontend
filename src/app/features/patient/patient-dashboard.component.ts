@@ -14,20 +14,19 @@ import { ReportsApiService } from '../../core/services/reports.service';
 import { AnalyticsApiService } from '../../core/services/analytics.service';
 import { RescheduleAppointmentModalComponent } from '../../shared/reschedule-appointment-modal.component';
 import { MedicalHistoryDetailModalComponent } from '../../shared/medical-history-detail-modal.component';
-import { PatientAppointmentCardComponent } from '../../shared/patient-appointment-card.component';
+import { AppointmentCardComponent } from '../../shared/components/appointment-card.component';
 import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.component';
-import { getAppointmentEpochMs, isAppointmentToday } from '../../shared/appointment-utils';
-// ChartWidget moved into PatientReportsComponent
+import { getAppointmentEpochMs, isAppointmentToday, isAppointmentFuture } from '../../shared/appointment-utils';
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { PatientNotificationComponent } from './patient-notification.component';
 import { PatientDashboardMetricsCardsComponent } from './patient-dashboard-metrics-cards.component';
 import { PatientMyHealthComponent } from './patient-my-health.component';
-import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
+import { ButtonComponent, StatusBadgeComponent } from '../../shared/components';
 
 @Component({
   selector: 'app-patient-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, PatientAppointmentCardComponent, RescheduleAppointmentModalComponent, PatientNotificationComponent, MedicalHistoryDetailModalComponent, PatientDashboardMetricsCardsComponent, PatientMyHealthComponent, SharedChatModalComponent, EmptyStateComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, RescheduleAppointmentModalComponent, PatientNotificationComponent, MedicalHistoryDetailModalComponent, PatientDashboardMetricsCardsComponent, PatientMyHealthComponent, SharedChatModalComponent, ButtonComponent, StatusBadgeComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './patient-dashboard.component.html',
   styleUrl: './patient-dashboard.component.css'
@@ -171,6 +170,14 @@ export class PatientDashboardComponent {
     return s.sort((x, y) => getAppointmentEpochMs(x) - getAppointmentEpochMs(y));
   }
 
+  upcomingAppointments() {
+    const list = (this.appointments || []).filter((a) => {
+      const s = (a.status || '').toUpperCase();
+      return s !== 'CANCELLED' && s !== 'COMPLETED' && isAppointmentFuture(a);
+    });
+    return list.sort((x, y) => getAppointmentEpochMs(x) - getAppointmentEpochMs(y)).slice(0, 4);
+  }
+
 
   openDoctor(d: Doctor) {
     this.router.navigate(['/patient/doctor', d.username]);
@@ -182,6 +189,14 @@ export class PatientDashboardComponent {
 
   goToMyAppointments() {
     this.router.navigate(['/patient/appointments']);
+  }
+
+  goToAppointmentDetail(appointmentId: number) {
+    if (appointmentId) {
+      this.router.navigate(['/patient/appointments', appointmentId]);
+    } else {
+      this.goToMyAppointments();
+    }
   }
 
   goToFeedbackPage() {

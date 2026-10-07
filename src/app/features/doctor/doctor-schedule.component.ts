@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
-import { DoctorAppointmentCardComponent } from '../../shared/doctor-appointment-card.component';
+import { AppointmentCardComponent } from '../../shared/components/appointment-card.component';
 import { PatientDetailsModalComponent } from '../../shared/patient-details-modal.component';
 import { MedicalHistoryDetailModalComponent } from '../../shared/medical-history-detail-modal.component';
 import { MedicalHistoryFormModalComponent } from '../../shared/medical-history-form-modal.component';
@@ -24,7 +24,7 @@ import { FilterBarComponent } from '../../shared/ui/filter-bar.component';
         FormsModule,
         RouterModule,
         DoctorLayoutComponent,
-        DoctorAppointmentCardComponent,
+        AppointmentCardComponent,
         PatientDetailsModalComponent,
         MedicalHistoryDetailModalComponent,
         MedicalHistoryFormModalComponent,

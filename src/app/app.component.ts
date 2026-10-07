@@ -7,6 +7,7 @@ import { ThemeService } from './core/services/theme.service';
 import { BackendStatusService } from './core/services/backend-status.service';
 import { OfflineBannerComponent } from './shared/offline-banner.component';
 import { ConfirmDialogComponent } from './shared/ui/confirm-dialog.component';
+import { PatientNotificationComponent } from './features/patient/patient-notification.component';
 
 @Component({
   selector: 'app-root',
