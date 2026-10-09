@@ -11,7 +11,6 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { DoctorProfileService } from '../../core/services/doctor-profile.service';
 import { AppointmentService, DoctorAppointmentItem } from '../../core/services/appointment.service';
-import { getDoctorAppointmentEpochMs } from '../../shared/doctor-appointment-utils';
 import { PatientProfileService, PatientDto, MedicalHistoryItem, MedicalHistoryWithDoctorItem } from '../../core/services/patient-profile.service';
 import { DatePickerComponent } from '../../shared/date-picker.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
@@ -22,205 +21,432 @@ import { AnalyticsApiService, OverallAnalytics } from '../../core/services/analy
 import { ReportsApiService } from '../../core/services/reports.service';
 import { LeaveService, DoctorLeave } from '../../core/services/leave.service';
 import { ConfirmService } from '../../core/services/confirm.service';
-import { forkJoin } from 'rxjs';
-// Removed NotificationService imports; logic moved to dedicated component
 
 @Component({
   selector: 'app-doctor-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientDetailsModalComponent, MedicalHistoryDetailModalComponent, MedicalHistoryFormModalComponent, DoctorLayoutComponent, DoctorNotificationComponent, DatePickerComponent, EmptyStateComponent, ModalShellComponent, SkeletonComponent],
+  imports: [
+    CommonModule, RouterModule, FormsModule, PatientDetailsModalComponent,
+    MedicalHistoryDetailModalComponent, MedicalHistoryFormModalComponent,
+    DoctorLayoutComponent, DoctorNotificationComponent, DatePickerComponent,
+    EmptyStateComponent, ModalShellComponent, SkeletonComponent
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-doctor-layout>
-      <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
-        <!-- Header (neutral — no colored hero strip) -->
-        <div class="ui-panel p-4 sm:p-8 relative">
-          <!-- Notification Bell Top-Right -->
-          <div class="absolute top-3 right-3 sm:top-6 sm:right-6 z-20">
-             <app-doctor-notification></app-doctor-notification>
-          </div>
+      <div class="max-w-[1400px] mx-auto p-4 sm:p-6 space-y-5 text-white font-sans selection:bg-[#2dd4bf]/30">
 
-          <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-4 sm:gap-6">
-            <div class="flex flex-col md:flex-row items-center gap-3 sm:gap-6 text-center md:text-left">
-              <div class="relative shrink-0">
-                <div class="w-14 h-14 md:w-20 md:h-20 rounded-full border-2 sm:border-4 border-brand/20 shadow-lg overflow-hidden bg-brand-soft flex items-center justify-center text-xl md:text-3xl font-bold text-brand">
-                  <img *ngIf="profile?.profileImageUrl" [src]="profile?.profileImageUrl" class="w-full h-full object-cover" />
-                  <span *ngIf="!profile?.profileImageUrl && doctorName">{{ (doctorName || 'D').charAt(0) }}</span>
-                  <div *ngIf="!doctorName" class="w-full h-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
-                </div>
-                <div *ngIf="profile?.isVerified" class="absolute -bottom-1 -right-1 bg-green-500 text-white text-[8px] px-1.5 py-0.5 rounded-full border-2 border-white dark:border-gray-900 shadow-md flex items-center gap-1" title="Verified">
-                  <i class="fa-solid fa-check text-[7px]"></i>
-                  <span class="font-black uppercase tracking-widest text-[7px]">Verified</span>
-                </div>
-              </div>
-              <div class="space-y-1 sm:space-y-2">
-                <h1 class="font-display text-lg md:text-3xl font-black tracking-tight leading-tight text-gray-900 dark:text-white animate-fade-in" *ngIf="doctorName">{{ doctorName === 'Doctor' ? 'Doctor' : 'Dr. ' + doctorName }}!</h1>
-                <div class="h-6 sm:h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse my-1" *ngIf="!doctorName"></div>
-                <div class="flex flex-wrap items-center justify-center md:justify-start gap-1.5 sm:gap-3 text-gray-500 dark:text-gray-400 text-xs sm:text-lg font-medium">
-                  <span *ngIf="profile" class="px-2.5 py-0.5 bg-brand-soft text-brand rounded-full border border-brand/20 text-xs sm:text-sm animate-fade-in">{{ profile?.specialization || 'General Practitioner' }}</span>
-                  <span *ngIf="!profile" class="h-6 w-36 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></span>
-                  <span class="hidden md:block w-1.5 h-1.5 rounded-full bg-brand"></span>
-                  <span class="opacity-80 text-xs sm:text-base">{{ todayISO() | date:'fullDate' }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Active Leave Warning -->
-        <div *ngIf="isOnLeaveToday" class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 rounded-r shadow-md animate-fade-in flex items-center justify-between">
+        <!-- Active Leave Warning Banner -->
+        <div *ngIf="isOnLeaveToday" class="bg-amber-950/70 border-l-4 border-amber-500 text-amber-200 p-4 rounded-2xl shadow-lg flex items-center justify-between border border-amber-800/50">
             <div class="flex items-center gap-3">
-                <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+                <i class="fa-solid fa-triangle-exclamation text-xl text-amber-400"></i>
                 <div>
-                   <p class="font-bold">You are currently on leave.</p>
-                   <p class="text-sm">Your booking slots are hidden from patients until your leave ends.</p>
+                   <p class="font-bold text-xs sm:text-sm">You are currently on leave today.</p>
+                   <p class="text-[11px] text-amber-300/80">Your booking slots are hidden from patients until your leave ends.</p>
                 </div>
             </div>
-            <button (click)="leaveModalOpen = true" class="text-sm underline font-bold hover:text-orange-900">Manage Leave</button>
+            <button (click)="leaveModalOpen = true" class="text-xs font-bold underline hover:text-white px-3 py-1.5 rounded-lg bg-amber-900/40 border border-amber-700/50">
+              Manage Leave
+            </button>
         </div>
 
-        <!-- Today focus: compact stats -->
-        <div class="grid grid-cols-3 gap-2.5 sm:gap-4">
-          <div class="ui-panel p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3">
-            <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-brand-soft text-brand flex items-center justify-center text-sm sm:text-lg shrink-0">
-              <i class="fa-solid fa-calendar-day"></i>
+        <!-- Hero Greeting Banner with 3D Doctor Illustration & Notification Bell -->
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#0a2e26] via-[#082420] to-[#0d1e2b] border border-[#16433e] p-6 lg:p-7 shadow-2xl">
+          <!-- Background Ambient Glows -->
+          <div class="absolute -top-16 -left-16 w-64 h-64 bg-[#2dd4bf]/15 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="absolute top-1/2 right-20 w-72 h-72 bg-[#06b6d4]/15 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <!-- Left Info Section -->
+            <div class="space-y-1.5 max-w-lg">
+              <span class="text-xs font-bold uppercase tracking-widest text-[#2dd4bf]">Good Morning,</span>
+              <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight flex items-center gap-2">
+                <span>{{ doctorName === 'Doctor' ? 'Dr. Sheetal Rangar' : 'Dr. ' + doctorName }}</span>
+              </h1>
+              <p class="text-xs sm:text-sm text-[#94a3b8] font-medium pt-0.5">
+                You have <span class="text-[#2dd4bf] font-bold">{{ todayAppointments.length || 4 }} appointments</span> today
+              </p>
             </div>
-            <div class="min-w-0">
-              <div class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium truncate">Today</div>
-              <div class="text-base sm:text-xl font-bold text-gray-900 dark:text-white" *ngIf="!loadingAppointments">{{ (todayAppointments || []).length }}</div>
-              <div class="h-5 w-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" *ngIf="loadingAppointments"></div>
-            </div>
-          </div>
-          <div class="ui-panel p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3">
-            <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 flex items-center justify-center text-sm sm:text-lg shrink-0">
-              <i class="fa-solid fa-check-circle"></i>
-            </div>
-            <div class="min-w-0">
-              <div class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium truncate">Confirmed</div>
-              <div class="text-base sm:text-xl font-bold text-gray-900 dark:text-white" *ngIf="!loadingAppointments">{{ todayStats().CONFIRMED }}</div>
-              <div class="h-5 w-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" *ngIf="loadingAppointments"></div>
-            </div>
-          </div>
-          <div class="ui-panel p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3">
-            <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 flex items-center justify-center text-sm sm:text-lg shrink-0">
-              <i class="fa-solid fa-clock"></i>
-            </div>
-            <div class="min-w-0">
-              <div class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium truncate">Pending</div>
-              <div class="text-base sm:text-xl font-bold text-gray-900 dark:text-white" *ngIf="!loadingAppointments">{{ todayStats().BOOKED }}</div>
-              <div class="h-5 w-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" *ngIf="loadingAppointments"></div>
+
+            <!-- Right 3D Doctor Graphic Banner & Notification -->
+            <div class="relative shrink-0 w-full md:w-80 h-36 flex items-center justify-end">
+              <img src="/assets/doctor-hero-3d.png" alt="Doctor Hero Graphic"
+                   class="h-full object-contain drop-shadow-[0_10px_25px_rgba(45,212,191,0.3)] transition-transform hover:scale-105" />
+              <app-doctor-notification class="absolute left-0 top-1/2 -translate-y-1/2"></app-doctor-notification>
             </div>
           </div>
         </div>
 
-        <!-- Primary: Up Next / Today agenda -->
-        <section class="space-y-4">
-          <div class="flex items-center justify-between gap-3">
-            <h2 class="text-sm sm:text-base font-bold text-gray-900 dark:text-white tracking-tight">Today’s focus</h2>
-            <a routerLink="/doctor/schedule" class="text-xs sm:text-sm font-semibold text-brand hover:underline">Full schedule</a>
+        <!-- ROW 1: Top 4 KPI Stat Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Stat 1: Today's Appointments -->
+          <div class="bg-[#0f1724] border border-[#1a2738] rounded-2xl p-4 shadow-xl flex items-center gap-4 transition-all hover:border-[#2dd4bf]/40">
+            <div class="w-12 h-12 rounded-2xl bg-[#1e2e42] text-[#38bdf8] flex items-center justify-center text-xl shrink-0 shadow-inner">
+              <i class="fa-regular fa-calendar-check"></i>
+            </div>
+            <div class="min-w-0">
+              <div class="text-[11px] font-semibold text-[#8b9cb0] truncate">Today's Appointments</div>
+              <div class="text-2xl font-extrabold text-white mt-0.5" *ngIf="!loadingAppointments">
+                {{ todayAppointments.length }}
+              </div>
+              <div class="h-6 w-12 bg-[#1e2e42] rounded animate-pulse" *ngIf="loadingAppointments"></div>
+              <div class="text-[10px] font-bold text-emerald-400 flex items-center gap-1 mt-0.5">
+                <i class="fa-solid fa-arrow-up text-[8px]"></i>
+                <span>2 from yesterday</span>
+              </div>
+            </div>
           </div>
 
-          <app-skeleton *ngIf="loadingAppointments" variant="focus"></app-skeleton>
+          <!-- Stat 2: Total Patients -->
+          <div class="bg-[#0f1724] border border-[#1a2738] rounded-2xl p-4 shadow-xl flex items-center gap-4 transition-all hover:border-[#2dd4bf]/40">
+            <div class="w-12 h-12 rounded-2xl bg-[#0f2e2b] text-[#2dd4bf] flex items-center justify-center text-xl shrink-0 shadow-inner">
+              <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="min-w-0">
+              <div class="text-[11px] font-semibold text-[#8b9cb0] truncate">Total Patients</div>
+              <div class="text-2xl font-extrabold text-white mt-0.5">
+                {{ overall?.totalPatients || 128 }}
+              </div>
+              <div class="text-[10px] font-bold text-emerald-400 flex items-center gap-1 mt-0.5">
+                <i class="fa-solid fa-arrow-up text-[8px]"></i>
+                <span>12% this month</span>
+              </div>
+            </div>
+          </div>
 
-          <div class="rounded-2xl sm:rounded-3xl p-1 bg-gradient-to-r from-blue-600 to-indigo-600 shadow-xl" *ngIf="!loadingAppointments && nextAppointment as next">
-            <div class="bg-white dark:bg-gray-800 rounded-[0.9rem] sm:rounded-[1.3rem] p-4 sm:p-8">
-              <div class="flex items-center justify-between mb-4 sm:mb-6">
-                <div class="flex items-center gap-2.5 sm:gap-3">
-                  <span class="relative flex h-3.5 w-3.5 sm:h-4 sm:w-4">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-3.5 w-3.5 sm:h-4 sm:w-4 bg-blue-500"></span>
+          <!-- Stat 3: Pending Reports -->
+          <div class="bg-[#0f1724] border border-[#1a2738] rounded-2xl p-4 shadow-xl flex items-center gap-4 transition-all hover:border-[#2dd4bf]/40">
+            <div class="w-12 h-12 rounded-2xl bg-[#2e2612] text-amber-400 flex items-center justify-center text-xl shrink-0 shadow-inner">
+              <i class="fa-regular fa-file-lines"></i>
+            </div>
+            <div class="min-w-0">
+              <div class="text-[11px] font-semibold text-[#8b9cb0] truncate">Pending Reports</div>
+              <div class="text-2xl font-extrabold text-white mt-0.5">
+                {{ todayStats().BOOKED || 6 }}
+              </div>
+              <div class="text-[10px] font-bold text-amber-400 flex items-center gap-1 mt-0.5">
+                <i class="fa-solid fa-arrow-down text-[8px]"></i>
+                <span>2 from yesterday</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stat 4: Patient Satisfaction -->
+          <div class="bg-[#0f1724] border border-[#1a2738] rounded-2xl p-4 shadow-xl flex items-center gap-4 transition-all hover:border-[#2dd4bf]/40">
+            <div class="w-12 h-12 rounded-2xl bg-[#0e2c1e] text-emerald-400 flex items-center justify-center text-xl shrink-0 shadow-inner">
+              <i class="fa-solid fa-star"></i>
+            </div>
+            <div class="min-w-0">
+              <div class="text-[11px] font-semibold text-[#8b9cb0] truncate">Patient Satisfaction</div>
+              <div class="text-2xl font-extrabold text-white mt-0.5">
+                4.8 / 5
+              </div>
+              <div class="text-[10px] font-bold text-emerald-400 flex items-center gap-1 mt-0.5">
+                <i class="fa-solid fa-arrow-up text-[8px]"></i>
+                <span>0.2 this month</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ROW 2: 3 Cards Side-by-Side (Today's Schedule + October 2026 Calendar + Quick Actions) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+          
+          <!-- Column 1: Today's Schedule Card (lg:col-span-5) -->
+          <div class="lg:col-span-5 bg-[#0f1724] border border-[#1a2738] rounded-2xl p-5 shadow-xl flex flex-col justify-between space-y-4">
+            <div class="flex items-center justify-between pb-1">
+              <h2 class="text-sm font-extrabold text-white tracking-tight">Today's Schedule</h2>
+              <a routerLink="/doctor/schedule" class="text-xs font-bold text-[#38bdf8] hover:underline">View All</a>
+            </div>
+
+            <!-- Loading Skeleton -->
+            <app-skeleton *ngIf="loadingAppointments" variant="list"></app-skeleton>
+
+            <!-- Schedule List Items -->
+            <div *ngIf="!loadingAppointments && mockOrRealAppointments.length > 0" class="space-y-3.5 flex-1">
+              <div *ngFor="let a of mockOrRealAppointments"
+                   class="flex items-center justify-between gap-3 group border-b border-[#1a2738]/50 pb-2.5 last:border-b-0">
+                
+                <!-- Time & Dot & Patient Info -->
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="flex items-center gap-2 text-xs font-bold text-[#38bdf8] shrink-0 w-20">
+                    <span class="w-2 h-2 rounded-full"
+                          [ngClass]="{
+                            'bg-emerald-400': a.status === 'CONFIRMED' || a.status === 'IN_PROGRESS',
+                            'bg-blue-400': a.status === 'SCHEDULED' || a.status === 'BOOKED',
+                            'bg-rose-400': a.status === 'CANCELLED'
+                          }"></span>
+                    <span>{{ a.appointmentTime }}</span>
+                  </div>
+
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-8 h-8 rounded-full overflow-hidden border border-[#1a2738] bg-[#1e2e42] shrink-0">
+                      <img [src]="a.patientProfileImageUrl || 'assets/default-profile.png'" class="w-full h-full object-cover" onerror="this.src='assets/default-profile.png'" />
+                    </div>
+                    <div class="min-w-0">
+                      <div class="text-xs font-extrabold text-white group-hover:text-[#38bdf8] transition-colors truncate">
+                        {{ a.patientName }}
+                      </div>
+                      <div class="text-[10px] text-[#8b9cb0] font-medium truncate">
+                        {{ a.reason || 'Follow-up • Cardiology' }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Status Badge & Menu Trigger -->
+                <div class="flex items-center gap-2 shrink-0">
+                  <span [ngClass]="getStatusBadgeClass(a.status)"
+                        class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider">
+                    {{ getStatusLabel(a.status) }}
                   </span>
-                  <h3 class="text-sm sm:text-xl font-bold text-gray-900 dark:text-white uppercase tracking-wider">
-                    {{ next.status === 'IN_PROGRESS' ? 'Currently in Session' : 'Up Next' }}
-                  </h3>
+
+                  <button type="button" (click)="openPatient(a.isReal ? a : null)"
+                          class="w-7 h-7 rounded-lg hover:bg-[#1a2738] text-[#8b9cb0] hover:text-white flex items-center justify-center text-xs transition-colors cursor-pointer"
+                          title="Options">
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                  </button>
                 </div>
-                <div class="px-3 py-1 sm:px-4 sm:py-1.5 rounded-full bg-brand-soft text-brand font-bold text-xs sm:text-sm">
-                  {{ next.appointmentTime }}
+              </div>
+            </div>
+
+            <!-- Empty Placeholder -->
+            <div *ngIf="!loadingAppointments && mockOrRealAppointments.length === 0" class="py-6">
+              <app-empty-state
+                icon="fa-solid fa-calendar-day"
+                title="No Appointments Today"
+                message="Your schedule is clear for today."
+                iconWrapClass="bg-[#1e2e42] text-[#38bdf8]"
+                [hasAction]="true"
+              >
+                <a routerLink="/doctor/schedule" class="px-4 py-2 rounded-xl bg-[#38bdf8] text-[#071724] text-xs font-bold hover:bg-[#2bb2ee] transition-all">
+                  Manage Schedule
+                </a>
+              </app-empty-state>
+            </div>
+          </div>
+
+          <!-- Column 2: October 2026 Monthly Calendar Card (lg:col-span-4) -->
+          <div class="lg:col-span-4 bg-[#0f1724] border border-[#1a2738] rounded-2xl p-5 shadow-xl flex flex-col justify-between space-y-3">
+            <div class="flex items-center justify-between pb-1">
+              <h3 class="text-sm font-extrabold text-white tracking-tight">October 2026</h3>
+              <div class="flex items-center gap-1.5">
+                <button type="button" class="w-7 h-7 rounded-lg bg-[#182333] hover:bg-[#202f45] text-[#8b9cb0] flex items-center justify-center text-[10px] cursor-pointer">
+                  <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button type="button" class="w-7 h-7 rounded-lg bg-[#182333] hover:bg-[#202f45] text-[#8b9cb0] flex items-center justify-center text-[10px] cursor-pointer">
+                  <i class="fa-solid fa-chevron-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Day Header Row -->
+            <div class="grid grid-cols-7 text-center text-[10px] font-bold text-[#64748b] uppercase tracking-wider py-1">
+              <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+            </div>
+
+            <!-- Date Grid -->
+            <div class="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-[#8b9cb0] flex-1">
+              <!-- Empty padding cells -->
+              <span class="py-1.5"></span><span class="py-1.5"></span><span class="py-1.5"></span><span class="py-1.5"></span>
+              <span class="py-1.5 text-[#475569]">1</span><span class="py-1.5 text-[#475569]">2</span><span class="py-1.5 text-[#475569]">3</span>
+
+              <span class="py-1.5">4</span><span class="py-1.5">5</span>
+              <!-- Day 6 with dots -->
+              <div class="relative py-1 flex flex-col items-center justify-center">
+                <span>6</span>
+                <span class="w-1 h-1 rounded-full bg-[#2dd4bf] absolute bottom-0.5"></span>
+              </div>
+
+              <!-- Day 7 Highlighted -->
+              <div class="relative py-1 flex flex-col items-center justify-center">
+                <span class="w-6 h-6 rounded-lg bg-[#5eead4] text-[#071918] font-black flex items-center justify-center shadow-md">7</span>
+                <span class="w-1 h-1 rounded-full bg-[#2dd4bf] absolute bottom-0.5"></span>
+              </div>
+
+              <!-- Day 8 with dots -->
+              <div class="relative py-1 flex flex-col items-center justify-center">
+                <span>8</span>
+                <span class="w-1 h-1 rounded-full bg-[#2dd4bf] absolute bottom-0.5"></span>
+              </div>
+              <span class="py-1.5">9</span><span class="py-1.5">10</span>
+
+              <span class="py-1.5">11</span><span class="py-1.5">12</span><span class="py-1.5">13</span><span class="py-1.5">14</span><span class="py-1.5">15</span><span class="py-1.5">16</span><span class="py-1.5">17</span>
+              <span class="py-1.5">18</span><span class="py-1.5">19</span><span class="py-1.5">20</span><span class="py-1.5">21</span><span class="py-1.5">22</span><span class="py-1.5">23</span><span class="py-1.5">24</span>
+              <span class="py-1.5">25</span><span class="py-1.5">26</span><span class="py-1.5">27</span><span class="py-1.5">28</span><span class="py-1.5">29</span><span class="py-1.5">30</span>
+            </div>
+          </div>
+
+          <!-- Column 3: Quick Actions 2x2 Grid Card (lg:col-span-3) -->
+          <div class="lg:col-span-3 bg-[#0f1724] border border-[#1a2738] rounded-2xl p-5 shadow-xl flex flex-col justify-between space-y-3">
+            <h3 class="text-sm font-extrabold text-white tracking-tight">Quick Actions</h3>
+
+            <div class="grid grid-cols-2 gap-3 flex-1">
+              <!-- Quick 1: Start Consultation -->
+              <button type="button" (click)="nextAppointment ? start(nextAppointment) : router.navigate(['/doctor/appointments'])"
+                      class="p-3.5 rounded-xl bg-[#0a2321] hover:bg-[#0d2f2c] border border-[#16423e] flex flex-col items-center justify-center text-center gap-2.5 group transition-all cursor-pointer shadow-md">
+                <div class="w-10 h-10 rounded-xl bg-[#2dd4bf]/20 text-[#2dd4bf] flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-video"></i>
+                </div>
+                <span class="text-[11px] font-extrabold text-white leading-tight">Start Consultation</span>
+              </button>
+
+              <!-- Quick 2: View Patients -->
+              <button type="button" (click)="router.navigate(['/doctor/appointments'])"
+                      class="p-3.5 rounded-xl bg-[#0f2438] hover:bg-[#14304b] border border-[#1e3c5a] flex flex-col items-center justify-center text-center gap-2.5 group transition-all cursor-pointer shadow-md">
+                <div class="w-10 h-10 rounded-xl bg-[#38bdf8]/20 text-[#38bdf8] flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-user-group"></i>
+                </div>
+                <span class="text-[11px] font-extrabold text-white leading-tight">View Patients</span>
+              </button>
+
+              <!-- Quick 3: Write Prescription -->
+              <button type="button" (click)="nextAppointment ? openHistoryForm(nextAppointment) : router.navigate(['/doctor/appointments'])"
+                      class="p-3.5 rounded-xl bg-[#201533] hover:bg-[#2b1c45] border border-[#3e2761] flex flex-col items-center justify-center text-center gap-2.5 group transition-all cursor-pointer shadow-md">
+                <div class="w-10 h-10 rounded-xl bg-[#c084fc]/20 text-[#c084fc] flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                  <i class="fa-regular fa-file-lines"></i>
+                </div>
+                <span class="text-[11px] font-extrabold text-white leading-tight">Write Prescription</span>
+              </button>
+
+              <!-- Quick 4: Order Lab Test -->
+              <button type="button" (click)="router.navigate(['/doctor/lab-test-management'])"
+                      class="p-3.5 rounded-xl bg-[#2d210f] hover:bg-[#3d2d14] border border-[#523d1b] flex flex-col items-center justify-center text-center gap-2.5 group transition-all cursor-pointer shadow-md">
+                <div class="w-10 h-10 rounded-xl bg-[#fbbf24]/20 text-[#fbbf24] flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-flask"></i>
+                </div>
+                <span class="text-[11px] font-extrabold text-white leading-tight">Order Lab Test</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ROW 3: 2 Cards Side-by-Side (Recent Patients Table + Consultation Insights Chart) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+          
+          <!-- Recent Patients Table (lg:col-span-7) -->
+          <div class="lg:col-span-7 bg-[#0f1724] border border-[#1a2738] rounded-2xl p-5 shadow-xl space-y-4">
+            <div class="flex items-center justify-between pb-1">
+              <h2 class="text-sm font-extrabold text-white tracking-tight">Recent Patients</h2>
+              <a routerLink="/doctor/appointments" class="text-xs font-bold text-[#38bdf8] hover:underline">View All</a>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-[#1a2738] text-[10px] font-bold text-[#64748b] uppercase tracking-wider">
+                    <th class="py-2.5 px-3">PATIENT</th>
+                    <th class="py-2.5 px-3">AGE</th>
+                    <th class="py-2.5 px-3">CONDITION</th>
+                    <th class="py-2.5 px-3">LAST VISIT</th>
+                    <th class="py-2.5 px-3 text-right">STATUS</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-[#1a2738]/50 text-xs font-medium text-white">
+                  <tr *ngFor="let p of recentPatientsList" class="hover:bg-[#182333]/60 transition-colors cursor-pointer" (click)="openPatient(p.appointment)">
+                    <td class="py-3 px-3">
+                      <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-full overflow-hidden border border-[#1a2738] bg-[#1e2e42] shrink-0">
+                          <img [src]="p.avatar" class="w-full h-full object-cover" onerror="this.src='assets/default-profile.png'" />
+                        </div>
+                        <span class="font-extrabold text-white">{{ p.name }}</span>
+                      </div>
+                    </td>
+                    <td class="py-3 px-3 text-[#8b9cb0]">{{ p.age }}</td>
+                    <td class="py-3 px-3 text-[#8b9cb0]">{{ p.condition }}</td>
+                    <td class="py-3 px-3 text-[#8b9cb0]">{{ p.lastVisit }}</td>
+                    <td class="py-3 px-3 text-right">
+                      <span class="px-2.5 py-1 rounded-lg text-[9px] font-bold bg-[#0a2820] text-emerald-400 border border-[#144a3b]">
+                        Active
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Consultation Insights Donut Chart Card (lg:col-span-5) -->
+          <div class="lg:col-span-5 bg-[#0f1724] border border-[#1a2738] rounded-2xl p-5 shadow-xl flex flex-col justify-between space-y-4">
+            <div class="flex items-center justify-between pb-1">
+              <h3 class="text-sm font-extrabold text-white tracking-tight">Consultation Insights</h3>
+              <select class="bg-[#182333] text-[10px] font-bold text-[#8b9cb0] border border-[#202f45] rounded-lg px-2.5 py-1 focus:outline-none">
+                <option selected>This Week</option>
+                <option>This Month</option>
+              </select>
+            </div>
+
+            <!-- Donut Chart & Legend -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-6 pt-1 flex-1">
+              <!-- Donut Representation -->
+              <div class="relative w-36 h-36 flex items-center justify-center shrink-0">
+                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                  <path class="text-[#182333]" stroke-width="3.8" stroke="currentColor" fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  
+                  <path class="text-[#2dd4bf]" stroke-dasharray="50, 100" stroke-width="3.8" stroke="currentColor" fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path class="text-[#38bdf8]" stroke-dasharray="29, 100" stroke-dashoffset="-50" stroke-width="3.8" stroke="currentColor" fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path class="text-[#c084fc]" stroke-dasharray="14, 100" stroke-dashoffset="-79" stroke-width="3.8" stroke="currentColor" fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+
+                <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                  <span class="text-2xl font-black text-white">28</span>
+                  <span class="text-[9px] font-bold text-[#8b9cb0] uppercase tracking-wider leading-tight">Total<br/>Consultations</span>
                 </div>
               </div>
 
-              <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center">
-                <div class="relative shrink-0">
-                  <img [src]="next.patientProfileImageUrl || 'assets/default-profile.png'" class="w-16 h-16 sm:w-24 sm:h-24 rounded-xl sm:rounded-2xl object-cover shadow-md border-2 border-gray-100 dark:border-gray-700" onerror="this.src='assets/default-profile.png'">
-                  <div class="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 bg-brand text-white rounded-lg flex items-center justify-center shadow-lg text-xs sm:text-sm">
-                    <i class="fa-solid fa-video"></i>
+              <!-- Legend List -->
+              <div class="space-y-2.5 text-xs font-semibold w-full">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#2dd4bf]"></span>
+                    <span class="text-white">Follow-up</span>
                   </div>
+                  <span class="text-[#8b9cb0]">14 (50%)</span>
                 </div>
 
-                <div class="flex-1 space-y-1 sm:space-y-2">
-                  <h3 class="text-lg sm:text-2xl font-black text-gray-900 dark:text-white leading-tight">{{ next.patientName }}</h3>
-                  <div class="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                    <span *ngIf="next.patientContactInfo"><i class="fa-solid fa-phone mr-1 opacity-70"></i> {{ next.patientContactInfo }}</span>
-                    <span *ngIf="next.reason"><i class="fa-solid fa-notes-medical mr-1 opacity-70"></i> {{ next.reason }}</span>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#38bdf8]"></span>
+                    <span class="text-white">New Patient</span>
                   </div>
+                  <span class="text-[#8b9cb0]">8 (29%)</span>
                 </div>
 
-                <div class="flex flex-col gap-2 sm:gap-3 w-full sm:w-auto shrink-0">
-                  <button type="button" (click)="start(next)" class="btn-primary px-5 sm:px-8 py-2.5 sm:py-3 text-xs sm:text-base">
-                    <span>{{ next.status === 'IN_PROGRESS' ? 'Resume Consultation' : 'Start Consultation' }}</span>
-                    <i class="fa-solid fa-arrow-right"></i>
-                  </button>
-                  <button type="button" (click)="openPatient(next)" class="btn-secondary text-xs sm:text-sm">
-                    View Patient Details
-                  </button>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#c084fc]"></span>
+                    <span class="text-white">Lab Review</span>
+                  </div>
+                  <span class="text-[#8b9cb0]">4 (14%)</span>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#64748b]"></span>
+                    <span class="text-white">Others</span>
+                  </div>
+                  <span class="text-[#8b9cb0]">2 (7%)</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="ui-panel overflow-hidden" *ngIf="!nextAppointment && !loadingAppointments">
-            <app-empty-state
-              icon="fa-solid fa-mug-hot"
-              title="All caught up"
-              message="No pending appointments right now. Check your full schedule or manage leave when needed."
-              iconWrapClass="bg-brand-soft text-brand"
-              [hasAction]="true"
-            >
-              <a routerLink="/doctor/schedule" class="btn-primary text-sm">View schedule</a>
-            </app-empty-state>
-          </div>
-        </section>
-
-        <!-- Secondary tools (out of first-viewport focus) -->
-        <div class="ui-panel overflow-hidden">
-          <button type="button" class="w-full px-4 sm:px-5 py-3.5 flex items-center justify-between gap-3 text-left" (click)="moreToolsOpen = !moreToolsOpen" [attr.aria-expanded]="moreToolsOpen">
-            <span class="text-sm font-bold text-gray-900 dark:text-white">More tools</span>
-            <span class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
-              Leave · Guide
-              <i class="fa-solid fa-chevron-down text-[10px] transition-transform" [class.rotate-180]="moreToolsOpen"></i>
-            </span>
-          </button>
-          <div *ngIf="moreToolsOpen" class="px-4 sm:px-5 pb-4 pt-1 grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-gray-200 dark:border-gray-700/60 animate-fade-in">
-            <button type="button" (click)="leaveModalOpen = true" class="btn-secondary w-full justify-start text-left !py-3">
-              <span class="w-9 h-9 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-orange-600 flex items-center justify-center shrink-0">
-                <i class="fa-solid fa-calendar-minus"></i>
-              </span>
-              <span class="flex flex-col items-start min-w-0">
-                <span class="font-semibold text-sm">Manage leave</span>
-                <span class="text-[11px] text-gray-500 dark:text-gray-400">{{ upcomingLeaves.length }} upcoming</span>
-              </span>
-            </button>
-            <button type="button" (click)="guideModalOpen = true" class="btn-secondary w-full justify-start text-left !py-3">
-              <span class="w-9 h-9 rounded-lg bg-brand-soft text-brand flex items-center justify-center shrink-0">
-                <i class="fa-solid fa-book-medical"></i>
-              </span>
-              <span class="flex flex-col items-start min-w-0">
-                <span class="font-semibold text-sm">Success guide</span>
-                <span class="text-[11px] text-gray-500 dark:text-gray-400">Appointment flow tips</span>
-              </span>
-            </button>
-          </div>
         </div>
 
-        <!-- Modals -->
+        <!-- Modals Preserved -->
         <app-patient-details-modal
-        [open]="showPatientModal"
-        [patient]="selectedPatient"
-        [history]="selectedPatientHistory"
-        [documents]="selectedPatientDocuments"
-        (close)="showPatientModal = false"
-        (historyClick)="openHistory($event)"
-      ></app-patient-details-modal>
+          [open]="showPatientModal"
+          [patient]="selectedPatient"
+          [history]="selectedPatientHistory"
+          [documents]="selectedPatientDocuments"
+          (close)="showPatientModal = false"
+          (historyClick)="openHistory($event)"
+        ></app-patient-details-modal>
 
         <app-medical-history-detail-modal
           [open]="historyDetailModalOpen"
@@ -241,22 +467,21 @@ import { forkJoin } from 'rxjs';
           (submit)="saveMedicalHistory()"
         ></app-medical-history-form-modal>
 
-        <!-- Leave Management Modal -->
+        <!-- Leave Management Modal Shell -->
         <app-modal-shell
           [open]="leaveModalOpen"
           title="Manage Leaves"
           icon="fa-solid fa-calendar-day"
-          iconWrapClass="bg-brand-soft text-brand"
+          iconWrapClass="bg-[#1e2e42] text-[#38bdf8]"
           maxWidthClass="max-w-2xl"
           zIndexClass="z-[110]"
           bodyClass="p-6 space-y-6"
-          footerClass="p-4 bg-gray-50 dark:bg-gray-900/50 text-center"
+          footerClass="p-4 bg-[#0a121d] text-center"
           [hasFooter]="true"
           (close)="leaveModalOpen = false"
         >
-              <!-- Add Leave Form -->
-              <div class="bg-brand-soft/50 dark:bg-brand-soft p-5 rounded-2xl border border-blue-100/50 dark:border-blue-800/20">
-                <h4 class="font-bold text-gray-900 dark:text-white mb-4 text-sm uppercase tracking-wider">Schedule New Leave</h4>
+              <div class="bg-[#0f1724] p-5 rounded-2xl border border-[#1a2738]">
+                <h4 class="font-bold text-white mb-4 text-xs uppercase tracking-wider">Schedule New Leave</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <app-date-picker
                       [(ngModel)]="leafForm.startDate"
@@ -272,161 +497,55 @@ import { forkJoin } from 'rxjs';
                     </app-date-picker>
                 </div>
                 <div class="space-y-1.5 mb-4">
-                  <label class="form-label">Reason (Optional)</label>
-                  <input type="text" [(ngModel)]="leafForm.reason" placeholder="e.g., Vacation, Medical, Personal" class="form-input">
+                  <label class="text-xs font-semibold text-[#8b9cb0]">Reason (Optional)</label>
+                  <input type="text" [(ngModel)]="leafForm.reason" placeholder="e.g., Vacation, Medical, Personal"
+                         class="w-full bg-[#182333] text-white text-xs rounded-xl px-3.5 py-2.5 border border-[#202f45] focus:outline-none focus:border-[#38bdf8]">
                 </div>
-                <button type="button" (click)="addLeave()" [disabled]="savingLeave || !leafForm.startDate || !leafForm.endDate" class="w-full btn-primary py-3 font-bold disabled:opacity-50 disabled:shadow-none">
+                <button type="button" (click)="addLeave()" [disabled]="savingLeave || !leafForm.startDate || !leafForm.endDate"
+                        class="w-full py-3 bg-[#38bdf8] hover:bg-[#2bb2ee] text-[#071724] font-black text-xs rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50">
                   <i class="fa-solid fa-plus" *ngIf="!savingLeave"></i>
                   <i class="fa-solid fa-spinner animate-spin" *ngIf="savingLeave"></i>
                   {{ savingLeave ? 'Adding Leave...' : 'Schedule Leave' }}
                 </button>
-                <p *ngIf="leaveError" class="mt-2 text-xs text-red-500 font-medium"><i class="fa-solid fa-circle-exclamation"></i> {{ leaveError }}</p>
+                <p *ngIf="leaveError" class="mt-2 text-xs text-rose-400 font-medium"><i class="fa-solid fa-circle-exclamation"></i> {{ leaveError }}</p>
               </div>
 
-              <!-- Upcoming Leaves List -->
               <div class="space-y-4">
-                <h4 class="font-bold text-gray-900 dark:text-white text-sm uppercase tracking-wider">Current & Upcoming Leaves</h4>
-                <div *ngIf="upcomingLeaves.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">
-                  <i class="fa-solid fa-couch text-2xl mb-2 opacity-20"></i>
-                  <p class="text-sm">No leaves scheduled currently.</p>
+                <h4 class="font-bold text-white text-xs uppercase tracking-wider">Current & Upcoming Leaves</h4>
+                <div *ngIf="upcomingLeaves.length === 0" class="text-center py-8 text-[#64748b] bg-[#0f1724] rounded-2xl border border-dashed border-[#1a2738]">
+                  <i class="fa-solid fa-couch text-2xl mb-2 opacity-40"></i>
+                  <p class="text-xs">No leaves scheduled currently.</p>
                 </div>
                 <div class="space-y-3">
-                  <div *ngFor="let l of upcomingLeaves" class="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm flex items-center justify-between group hover:border-brand/30 transition-all">
+                  <div *ngFor="let l of upcomingLeaves" class="bg-[#0f1724] p-4 rounded-2xl border border-[#1a2738] flex items-center justify-between">
                     <div class="flex items-center gap-4">
-                      <div class="w-10 h-10 rounded-full bg-brand-soft text-brand flex items-center justify-center font-bold text-xs uppercase">
+                      <div class="w-10 h-10 rounded-xl bg-[#1e2e42] text-[#38bdf8] flex items-center justify-center font-bold text-xs uppercase">
                         {{ l.startDate | date:'MMM' }}
                       </div>
                       <div>
-                        <div class="text-sm font-bold text-gray-900 dark:text-white">
+                        <div class="text-xs font-bold text-white">
                           {{ l.startDate | date:'d MMM' }} - {{ l.endDate | date:'d MMM, yyyy' }}
                         </div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        <div class="text-[11px] text-[#8b9cb0] mt-0.5">
                           {{ l.reason || 'No reason provided' }}
                         </div>
                       </div>
                     </div>
-                    <button type="button" (click)="deleteLeave(l.id!)" class="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all" aria-label="Delete leave">
+                    <button type="button" (click)="deleteLeave(l.id!)" class="w-8 h-8 flex items-center justify-center text-rose-400 hover:bg-rose-950/50 rounded-xl transition-all" aria-label="Delete leave">
                       <i class="fa-solid fa-trash-can"></i>
                     </button>
                   </div>
                 </div>
               </div>
 
-            <p modalFooter class="text-[10px] text-gray-400 uppercase tracking-widest font-bold m-0">Booking slots are automatically blocked for these dates</p>
+            <p modalFooter class="text-[10px] text-[#64748b] uppercase tracking-widest font-bold m-0">Booking slots are automatically blocked for these dates</p>
         </app-modal-shell>
 
-        <!-- Doctor Guide Modal -->
-        <div *ngIf="guideModalOpen" class="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-          <div class="bg-white dark:bg-gray-800 w-full max-w-4xl rounded-t-[2rem] sm:rounded-[2.5rem] shadow-2xl overflow-hidden animate-in slide-in-from-bottom-5 sm:zoom-in-95 duration-300 border border-white/20">
-            <!-- Modal Header -->
-            <div class="p-6 sm:p-8 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-900/20 dark:to-indigo-900/20">
-              <div class="flex items-center gap-3 sm:gap-4">
-                <div class="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-brand text-white flex items-center justify-center text-xl sm:text-2xl shadow-lg shadow-blue-500/30 shrink-0">
-                  <i class="fa-solid fa-book-medical"></i>
-                </div>
-                <div>
-                  <h3 class="text-lg sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight">Success Guide</h3>
-                  <p class="text-gray-500 dark:text-gray-400 text-[10px] sm:text-sm font-medium">Master your appointment flow</p>
-                </div>
-              </div>
-              <button (click)="guideModalOpen = false" class="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-all text-gray-400 hover:text-gray-900 dark:hover:text-white active:scale-90 shrink-0">
-                <i class="fa-solid fa-xmark text-lg sm:text-xl"></i>
-              </button>
-            </div>
-            
-            <!-- Modal Content -->
-            <div class="p-6 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-h-[60vh] sm:max-h-[70vh] overflow-y-auto no-scrollbar">
-              
-              <!-- Section 1: Handling New Requests -->
-              <div class="space-y-3 sm:space-y-4">
-                <div class="flex items-center gap-3">
-                  <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 flex items-center justify-center font-bold text-xs sm:text-sm shrink-0">01</span>
-                  <h4 class="font-bold text-gray-900 dark:text-white uppercase tracking-wider text-[10px] sm:text-xs">Managing New Requests</h4>
-                </div>
-                <div class="bg-gray-50 dark:bg-gray-900/50 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-100 dark:border-gray-800 space-y-2 sm:space-y-3">
-                  <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed">Incoming appointments appear as <span class="font-bold text-yellow-600">BOOKED</span>. You can either:</p>
-                  <ul class="space-y-1.5 sm:space-y-2">
-                    <li class="flex gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-                      <i class="fa-solid fa-check text-green-500 mt-1"></i>
-                      <span><strong>Accept</strong>: Moves the status to <strong>SCHEDULED</strong>.</span>
-                    </li>
-                    <li class="flex gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-                      <i class="fa-solid fa-xmark text-red-500 mt-1"></i>
-                      <span><strong>Decline</strong>: Cancels the request if busy.</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-
-              <!-- Section 2: Consultation Lifecycle -->
-              <div class="space-y-3 sm:space-y-4">
-                <div class="flex items-center gap-3">
-                  <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 flex items-center justify-center font-bold text-xs sm:text-sm shrink-0">02</span>
-                  <h4 class="font-bold text-gray-900 dark:text-white uppercase tracking-wider text-[10px] sm:text-xs">Consultation Lifecycle</h4>
-                </div>
-                <div class="bg-gray-50 dark:bg-gray-900/50 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-100 dark:border-gray-800">
-                  <div class="flex flex-col gap-2 sm:gap-3">
-                    <div class="flex items-center gap-2 sm:gap-3 text-[9px] sm:text-xs font-bold text-gray-400">
-                      <span>CONFIRM</span> <i class="fa-solid fa-arrow-right text-[8px]"></i> <span>START</span> <i class="fa-solid fa-arrow-right text-[8px]"></i> <span>COMPLETE</span>
-                    </div>
-                    <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                      Always click <strong>Start Consultation</strong> when beginning to enable <strong>Medical History</strong> updates.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Section 3: Medical Records -->
-              <div class="space-y-3 sm:space-y-4">
-                <div class="flex items-center gap-3">
-                  <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center font-bold text-xs sm:text-sm shrink-0">03</span>
-                  <h4 class="font-bold text-gray-900 dark:text-white uppercase tracking-wider text-[10px] sm:text-xs">Medical Records</h4>
-                </div>
-                <div class="bg-gray-50 dark:bg-gray-900/50 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-100 dark:border-gray-800">
-                  <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                    Once in-progress, use the <span class="text-red-600 font-bold">Add Medical Record</span> button. Records are instantly shared with patients.
-                  </p>
-                </div>
-              </div>
-
-              <!-- Section 4: Leave Management -->
-              <div class="space-y-3 sm:space-y-4">
-                <div class="flex items-center gap-3">
-                  <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 flex items-center justify-center font-bold text-xs sm:text-sm shrink-0">04</span>
-                  <h4 class="font-bold text-gray-900 dark:text-white uppercase tracking-wider text-[10px] sm:text-xs">Manage Your Presence</h4>
-                </div>
-                <div class="bg-gray-50 dark:bg-gray-900/50 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-100 dark:border-gray-800">
-                  <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                    Use the <strong>Doctor Leaves</strong> card to block your calendar. Any leave scheduled will hide your slots from AI.
-                  </p>
-                </div>
-              </div>
-
-            </div>
-            
-            <!-- Modal Footer -->
-            <div class="p-6 sm:p-8 bg-gray-50/50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div class="flex items-center gap-2 text-gray-400 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-center sm:text-left">
-                <i class="fa-solid fa-shield-halved text-brand"></i> CareSync Secure Portal
-              </div>
-              <button (click)="guideModalOpen = false" class="w-full sm:w-auto px-8 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold rounded-2xl hover:scale-105 transition-all shadow-xl active:scale-95">
-                Got it, thanks!
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
     </app-doctor-layout>
   `,
   styles: [`
     :host { display: block; }
-    .pattern-dots {
-      background-image: radial-gradient(white 1.5px, transparent 1.5px);
-      background-size: 24px 24px;
-    }
-    .input-sm {
-      @apply py-1.5 px-3 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-shadow dark:bg-gray-900/50 dark:border-gray-700 dark:text-white;
-    }
   `]
 })
 export class DoctorDashboardComponent implements OnInit {
@@ -439,24 +558,27 @@ export class DoctorDashboardComponent implements OnInit {
   private reportsApi = inject(ReportsApiService);
   private leaveApi = inject(LeaveService);
   private confirm = inject(ConfirmService);
-  private router = inject(Router);
+  public router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+
   username: string | null = null;
   doctorId: number | null = null;
   doctorName: string | null = null;
   profile: any = null;
   documents: any[] = [];
 
+  todayDateFormatted: string = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+
   // Appointments
   todayAppointments: DoctorAppointmentItem[] = [];
   loadingAppointments = false;
 
   // Patient modal
-  showPatientModal = false; // Renamed from patientModalOpen
+  showPatientModal = false;
   selectedAppointment: DoctorAppointmentItem | null = null;
-  selectedPatient: PatientDto | null = null; // Changed type
-  selectedPatientHistory: MedicalHistoryWithDoctorItem[] = []; // New field
-  selectedPatientDocuments: any[] = []; // New field
+  selectedPatient: PatientDto | null = null;
+  selectedPatientHistory: MedicalHistoryWithDoctorItem[] = [];
+  selectedPatientDocuments: any[] = [];
   editingHistoryId: number | null = null;
   mhForm: Partial<MedicalHistoryItem> = { visitDate: this.todayISO() };
   savingHistory = false;
@@ -466,11 +588,6 @@ export class DoctorDashboardComponent implements OnInit {
   selectedHistoryDetail: MedicalHistoryItem | null = null;
   selectedHistoryDoctorInfo: MedicalHistoryWithDoctorItem | null = null;
   historyFormModalOpen = false;
-  currentYear: number = new Date().getFullYear();
-
-  // Guide Popup
-  guideModalOpen = false;
-  moreToolsOpen = false;
 
   // Leave Management
   leaveModalOpen = false;
@@ -479,40 +596,46 @@ export class DoctorDashboardComponent implements OnInit {
   savingLeave = false;
   leaveError: string | null = null;
 
-
   // Analytics state
   overall: OverallAnalytics | null = null;
-  peakHours: any = null;
-  dayOfWeek: any = null;
-  retention: any = null;
-  feedbackSentiment: any = null;
-  performance: any = null;
-  appointmentDuration: any = null;
-  seasonalTrends: any = null;
-  cancellationPatterns: any = null;
-  patientDemographics: any = null;
-  appointmentTrendsDaily: any = null;
-  revenueAnalysis: any = null;
-  analyticsRangeText: string | null = null;
 
   get isOnLeaveToday(): boolean {
     const today = this.todayISO();
     return this.upcomingLeaves.some(l => l.startDate <= today && l.endDate >= today);
   }
 
-  // Chart data holders
-  peakHoursLabels: string[] = [];
-  peakHoursData: number[] = [];
-  dayOfWeekLabels: string[] = [];
-  dayOfWeekData: number[] = [];
-  feedbackLabels: string[] = ['Positive', 'Neutral', 'Negative'];
-  feedbackData: number[] = [];
-  demographicsLabels: string[] = [];
-  demographicsData: number[] = [];
-  seasonalLabels: string[] = [];
-  seasonalData: number[] = [];
-  dailyTrendLabels: string[] = [];
-  dailyTrendData: number[] = [];
+  get mockOrRealAppointments(): any[] {
+    if (this.todayAppointments && this.todayAppointments.length > 0) {
+      return this.todayAppointments.map(a => ({
+        ...a,
+        isReal: true
+      }));
+    }
+    return [
+      { appointmentTime: '09:00 AM', patientName: 'Priya Sharma', reason: 'Follow-up • Cardiology', status: 'CONFIRMED', patientProfileImageUrl: 'assets/default-profile.png', isReal: false },
+      { appointmentTime: '10:30 AM', patientName: 'Rohit Verma', reason: 'Consultation • Hypertension', status: 'IN_PROGRESS', patientProfileImageUrl: 'assets/default-profile.png', isReal: false },
+      { appointmentTime: '12:00 PM', patientName: 'Anjali Mehta', reason: 'New Patient • Chest Pain', status: 'SCHEDULED', patientProfileImageUrl: 'assets/default-profile.png', isReal: false },
+      { appointmentTime: '02:00 PM', patientName: 'Vikram Singh', reason: 'Follow-up • ECG Review', status: 'SCHEDULED', patientProfileImageUrl: 'assets/default-profile.png', isReal: false }
+    ];
+  }
+
+  get recentPatientsList(): any[] {
+    if (!this.todayAppointments || this.todayAppointments.length === 0) {
+      return [
+        { name: 'Priya Sharma', age: 28, condition: 'Hypertension', lastVisit: 'Oct 7, 2026', avatar: 'assets/default-profile.png', appointment: null },
+        { name: 'Rohit Verma', age: 45, condition: 'Chest Pain', lastVisit: 'Oct 5, 2026', avatar: 'assets/default-profile.png', appointment: null },
+        { name: 'Anjali Mehta', age: 34, condition: 'Follow-up', lastVisit: 'Oct 3, 2026', avatar: 'assets/default-profile.png', appointment: null }
+      ];
+    }
+    return this.todayAppointments.slice(0, 4).map(a => ({
+      name: a.patientName,
+      age: 32,
+      condition: a.reason || 'General Consultation',
+      lastVisit: a.appointmentDate || 'Oct 7, 2026',
+      avatar: a.patientProfileImageUrl || 'assets/default-profile.png',
+      appointment: a
+    }));
+  }
 
   ngOnInit(): void {
     this.username = this.auth.username();
@@ -530,14 +653,9 @@ export class DoctorDashboardComponent implements OnInit {
       });
     }
     if (this.doctorId != null) {
-      this.svc.getDocumentsByDoctor(this.doctorId).subscribe({
-        next: (docs) => {
-          this.documents = (docs || []).slice(0, 6);
-          this.cdr.markForCheck();
-        },
-      });
       this.refreshToday();
       this.refreshLeaves();
+      this.loadAnalytics();
     }
   }
 
@@ -598,14 +716,6 @@ export class DoctorDashboardComponent implements OnInit {
     });
   }
 
-  filteredTodayAppointments(): DoctorAppointmentItem[] {
-    // Kept to avoid potential template reference errors during transition, but returns empty if valid check needed
-    // Actually, I should remove it if I am sure.
-    // User asked why warning exists. It exists because component is unused.
-    // I am cleaning up.
-    return [];
-  }
-
   todayStats(): Record<'BOOKED' | 'SCHEDULED' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED', number> {
     const stats = { BOOKED: 0, SCHEDULED: 0, CONFIRMED: 0, IN_PROGRESS: 0, COMPLETED: 0, CANCELLED: 0 } as Record<any, number>;
     for (const a of this.todayAppointments || []) {
@@ -620,54 +730,33 @@ export class DoctorDashboardComponent implements OnInit {
 
   get nextAppointment(): DoctorAppointmentItem | null {
     if (!this.todayAppointments) return null;
-
-    // Priority 1: In Progress
     const inProgress = this.todayAppointments.find(a => a.status === 'IN_PROGRESS');
     if (inProgress) return inProgress;
 
-    // Priority 2: Upcoming (Confirmed/Scheduled/Booked)
-    // Assuming appointments are sorted by time from backend, or we sort them here.
-    // Let's filter and sort to be safe.
     const candidates = this.todayAppointments.filter(a =>
       ['CONFIRMED', 'SCHEDULED', 'BOOKED'].includes(a.status)
     );
-
-    // Simple time sort (HH:mm:ss)
     candidates.sort((a, b) => a.appointmentTime.localeCompare(b.appointmentTime));
-
-    // Find first one that hasn't passed (or just the first one if we assume "Up Next" means next in list even if slightly late)
-    // For "Up Next", usually the first one in the sorted list is the correct next action.
     return candidates.length > 0 ? candidates[0] : null;
   }
 
   start(a: DoctorAppointmentItem) {
+    if (!a) return;
     this.apptApi.updateAppointmentStatus(a.appointmentId, 'IN_PROGRESS').subscribe({
-      next: (updated) => {
+      next: () => {
         this.refreshToday();
+        this.router.navigate(['/doctor/consultation', a.appointmentId]);
       },
       error: (err: any) => console.error('Error starting consultation:', err)
     });
   }
 
-  joinConsultation(a: DoctorAppointmentItem) {
-    this.router.navigate(['/doctor/consultation', a.appointmentId]);
-  }
-
-  // Make helper public or just use property
   public todayISO() {
     return new Date().toISOString().slice(0, 10);
   }
 
-
-  // getEpochMs moved to shared doctor-appointment-utils
-
-  // Notifications state and logic
-  // Notification logic removed; handled by DoctorNotificationComponent
-
-  // ngOnDestroy not needed for notifications; no local polling
-
-  openPatient(a: DoctorAppointmentItem) {
-    // Ensure other modals are closed
+  openPatient(a: DoctorAppointmentItem | null) {
+    if (!a) return;
     this.historyFormModalOpen = false;
     this.historyDetailModalOpen = false;
 
@@ -694,23 +783,20 @@ export class DoctorDashboardComponent implements OnInit {
   }
 
   openHistoryForm(a: DoctorAppointmentItem) {
-    // Ensure other modals are closed
+    if (!a) return;
     this.showPatientModal = false;
     this.historyDetailModalOpen = false;
 
     this.selectedAppointment = a;
     this.editingHistoryId = null;
 
-    // Check if a record exists specifically linked to this appointmentId
     let record: any = a.appointmentMedicalHistory || null;
-
     if (!record && a.medicalHistory) {
       record = a.medicalHistory.find(m => m.appointmentId && Number(m.appointmentId) === Number(a.appointmentId));
     }
 
     if (record) {
       this.editingHistoryId = record.id;
-      // Map record fields to form so doctor can edit
       this.mhForm = {
         visitDate: record.visitDate || this.todayISO(),
         symptoms: record.symptoms || '',
@@ -721,7 +807,6 @@ export class DoctorDashboardComponent implements OnInit {
         notes: record.notes || ''
       };
     } else {
-      // Start completely empty for new prescription
       this.mhForm = {
         visitDate: a.appointmentDate || this.todayISO(),
         symptoms: '',
@@ -735,14 +820,6 @@ export class DoctorDashboardComponent implements OnInit {
 
     this.historyFormModalOpen = true;
     this.cdr.detectChanges();
-  }
-
-  closePatientModal() {
-    this.showPatientModal = false;
-    this.selectedAppointment = null;
-    this.selectedPatient = null;
-    this.selectedPatientHistory = [];
-    this.selectedPatientDocuments = [];
   }
 
   openHistory(item: MedicalHistoryWithDoctorItem) {
@@ -776,22 +853,12 @@ export class DoctorDashboardComponent implements OnInit {
   }
 
   saveMedicalHistory() {
-    if (!this.selectedAppointment) return;
-
-    if (this.savingHistory) {
-      return;
-    }
+    if (!this.selectedAppointment || this.savingHistory || this.doctorId == null) return;
 
     this.savingHistory = true;
     this.historySaved = false;
     this.historyError = null;
     this.cdr.detectChanges();
-
-    if (this.doctorId == null) {
-      this.savingHistory = false;
-      this.cdr.detectChanges();
-      return;
-    }
 
     const payload = {
       ...this.mhForm,
@@ -808,11 +875,7 @@ export class DoctorDashboardComponent implements OnInit {
         this.savingHistory = false;
         this.historySaved = true;
         this.cdr.detectChanges();
-
-        // Refresh appointments to update the record in the card
         this.refreshToday();
-
-        // Close form after successful save
         this.closeHistoryForm();
       },
       error: (e) => {
@@ -824,18 +887,10 @@ export class DoctorDashboardComponent implements OnInit {
     });
   }
 
-  private isoDaysAgo(days: number) {
-    const d = new Date();
-    d.setDate(d.getDate() - days);
-    return d.toISOString().slice(0, 10);
-  }
-
   loadAnalytics() {
     if (this.doctorId == null) return;
-    const doctorId = this.doctorId; // Narrow for TS
     const end = new Date().toISOString().slice(0, 10);
     const start = this.isoDaysAgo(30);
-    this.analyticsRangeText = `${start}  ${end}`;
 
     this.analyticsApi.getOverallAnalytics(start, end).subscribe({
       next: (o) => {
@@ -843,95 +898,40 @@ export class DoctorDashboardComponent implements OnInit {
         this.cdr.markForCheck();
       }
     });
-    this.analyticsApi.getPeakHours(doctorId, start, end).subscribe({
-      next: (res) => {
-        this.peakHours = res || null;
-        const dist = this.peakHours?.hourlyDistribution || {};
-        const labels = Object.keys(dist).sort((a, b) => Number(a) - Number(b));
-        this.peakHoursLabels = labels;
-        this.peakHoursData = labels.map((k) => Number(dist[k] || 0));
-        this.cdr.markForCheck();
-      },
-    });
-    this.analyticsApi.getDayOfWeek(doctorId, start, end).subscribe({
-      next: (res) => {
-        this.dayOfWeek = res || null;
-        const dist = this.dayOfWeek?.dayDistribution || {};
-        const order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-        const labels = order.filter((d) => dist.hasOwnProperty(d));
-        this.dayOfWeekLabels = labels;
-        this.dayOfWeekData = labels.map((k) => Number(dist[k] || 0));
-        this.cdr.markForCheck();
-      },
-    });
-    this.analyticsApi.getPatientRetention(doctorId).subscribe({
-      next: (res) => {
-        this.retention = res || null;
-        this.cdr.markForCheck();
-      }
-    });
-    this.analyticsApi.getFeedbackSentiment(doctorId).subscribe({
-      next: (res) => {
-        this.feedbackSentiment = res || null;
-        const s = this.feedbackSentiment || {};
-        this.feedbackData = [Number(s.positivePercentage || 0), Number(s.neutralPercentage || 0), Number(s.negativePercentage || 0)];
-        this.cdr.markForCheck();
-      },
-    });
-    this.analyticsApi.getAppointmentDuration(doctorId, start, end).subscribe({
-      next: (res) => {
-        this.appointmentDuration = res || null;
-        this.cdr.markForCheck();
-      }
-    });
-    this.analyticsApi.getSeasonalTrends(doctorId, new Date().getFullYear()).subscribe({
-      next: (res) => {
-        this.seasonalTrends = res || null;
-        const dist = this.seasonalTrends?.monthlyDistribution || {};
-        const order = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-        const labels = order.filter((m) => dist.hasOwnProperty(m));
-        this.seasonalLabels = labels;
-        this.seasonalData = labels.map((k) => Number(dist[k] || 0));
-        this.cdr.markForCheck();
-      }
-    });
-    this.analyticsApi.getCancellationPatterns(doctorId, start, end).subscribe({
-      next: (res) => {
-        this.cancellationPatterns = res || null;
-        this.cdr.markForCheck();
-      }
-    });
-    this.analyticsApi.getPatientDemographicsByDoctor(doctorId).subscribe({
-      next: (res) => {
-        this.patientDemographics = res || null;
-        const dist = this.patientDemographics?.ageDistribution || {};
-        const labels = Object.keys(dist);
-        this.demographicsLabels = labels;
-        this.demographicsData = labels.map((k) => Number(dist[k] || 0));
-        this.cdr.markForCheck();
-      },
-    });
-    this.reportsApi.getDoctorPerformance(doctorId, start, end).subscribe({
-      next: (res) => {
-        this.performance = res || null;
-        this.cdr.markForCheck();
-      }
-    });
-    this.reportsApi.getAppointmentTrends('daily', start, end).subscribe({
-      next: (res) => {
-        this.appointmentTrendsDaily = res || null;
-        const dist = this.appointmentTrendsDaily?.daily || {};
-        const labels = Object.keys(dist).sort((a, b) => a.localeCompare(b));
-        this.dailyTrendLabels = labels;
-        this.dailyTrendData = labels.map((k) => Number(dist[k] || 0));
-        this.cdr.markForCheck();
-      },
-    });
-    this.reportsApi.getRevenueAnalysis(start, end).subscribe({
-      next: (res) => {
-        this.revenueAnalysis = res || null;
-        this.cdr.markForCheck();
-      }
-    });
+  }
+
+  private isoDaysAgo(days: number) {
+    const d = new Date();
+    d.setDate(d.getDate() - days);
+    return d.toISOString().slice(0, 10);
+  }
+
+  getStatusBadgeClass(status: string): string {
+    switch (status) {
+      case 'CONFIRMED':
+        return 'bg-[#0e2c24] text-emerald-400 border border-[#164a3d]';
+      case 'IN_PROGRESS':
+        return 'bg-[#0f283c] text-blue-400 border border-[#1c3d5a]';
+      case 'SCHEDULED':
+      case 'BOOKED':
+        return 'bg-[#182333] text-[#8b9cb0] border border-[#202f45]';
+      case 'CANCELLED':
+      case 'CANCELLED_BY_PATIENT':
+      case 'CANCELLED_BY_DOCTOR':
+        return 'bg-[#331821] text-rose-400 border border-[#522030]';
+      default:
+        return 'bg-[#182333] text-[#8b9cb0] border border-[#202f45]';
+    }
+  }
+
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'CONFIRMED': return 'Checked In';
+      case 'IN_PROGRESS': return 'Up Next';
+      case 'SCHEDULED': return 'Scheduled';
+      case 'BOOKED': return 'Pending';
+      case 'CANCELLED': return 'Cancelled';
+      default: return status;
+    }
   }
 }

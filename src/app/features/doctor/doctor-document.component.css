@@ -1,27 +1,26 @@
-/* Modern Input Styles */
-.input-modern {
-    @apply block w-full rounded-xl border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-blue-500 hover:bg-white dark:hover:bg-gray-700 transition-all duration-200;
+/* Custom Thin Scrollbar for Document Cards & Drop Zones */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
 }
 
-.input-filter {
-    @apply block w-full rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 cursor-pointer;
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #111c1f;
 }
 
-/* Button Styles */
-.btn-primary {
-    @apply px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl shadow-lg shadow-blue-500/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-blue-500/40 active:scale-95;
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #1f3236;
+    border-radius: 9999px;
 }
 
-.btn-danger {
-    @apply bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 px-3 py-2 rounded-lg transition-colors duration-200;
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #14b8a6;
 }
 
-/* Card Styles */
-.card-doc {
-    @apply bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-4 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-200 flex flex-col h-full relative cursor-default;
-}
-
-/* Utilities */
-.link {
-    @apply text-blue-500 hover:text-blue-600 font-medium underline decoration-transparent hover:decoration-blue-500 transition-all duration-200;
+/* Line Clamp Utilities */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }

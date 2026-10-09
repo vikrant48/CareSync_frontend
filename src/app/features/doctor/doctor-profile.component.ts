@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { DoctorProfileService, UpdateDoctorRequest, CreateEducationRequest, CreateExperienceRequest, CreateCertificateRequest } from '../../core/services/doctor-profile.service';
 import { forkJoin } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
@@ -10,11 +11,12 @@ import { ToastService } from '../../core/services/toast.service';
 import { MasterDataService } from '../../core/services/master-data.service';
 import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropdown.component';
 import { DatePickerComponent } from '../../shared/date-picker.component';
+import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 
 @Component({
   selector: 'app-doctor-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, DoctorLayoutComponent, SpecializationAutocompleteComponent, SelectDropdownComponent, DatePickerComponent],
+  imports: [CommonModule, FormsModule, DoctorLayoutComponent, SpecializationAutocompleteComponent, SelectDropdownComponent, DatePickerComponent, EmptyStateComponent],
   templateUrl: './doctor-profile.component.html',
   styleUrls: ['./doctor-profile.component.css']
 })
@@ -23,6 +25,7 @@ export class DoctorProfileComponent implements OnInit {
   auth = inject(AuthService);
   private toast = inject(ToastService);
   private masterDataService = inject(MasterDataService);
+  private router = inject(Router);
 
   loading = signal<boolean>(true);
   error = signal<string | null>(null);
@@ -51,7 +54,6 @@ export class DoctorProfileComponent implements OnInit {
   educations: any[] = [];
   newEducation: CreateEducationRequest = { degree: '', institution: '', yearOfCompletion: new Date().getFullYear(), details: '' };
   editingEducationId: number | null = null;
-  // Dropdown options and custom entries for Education
   degreeOptions: string[] = [];
   institutionOptions: string[] = [];
   customDegree: string = '';
@@ -61,7 +63,6 @@ export class DoctorProfileComponent implements OnInit {
   experiences: any[] = [];
   newExperience: CreateExperienceRequest = { hospitalName: '', position: '', yearsOfService: 1, details: '' };
   editingExperienceId: number | null = null;
-  // Dropdown options and custom entries for Experience
   hospitalOptions: string[] = [];
   positionOptions: string[] = [];
   customHospital: string = '';
@@ -76,7 +77,6 @@ export class DoctorProfileComponent implements OnInit {
   lastUploadedCertId: number | null = null;
   @ViewChild('certFileInput') certFileInputRef?: ElementRef<HTMLInputElement>;
   @ViewChild('profileImageInput') profileImageInputRef?: ElementRef<HTMLInputElement>;
-
 
   // Profile image selection & preview
   selectedProfileImage?: File;
@@ -94,9 +94,6 @@ export class DoctorProfileComponent implements OnInit {
   editingCertificatesMode = false;
   genders: string[] = [];
 
-  // Toasts are used for messaging; container is mounted in DoctorLayout
-
-  // Computed display helpers
   displayName(): string {
     const first = this.profile?.firstName || '';
     const last = this.profile?.lastName || '';
@@ -105,12 +102,10 @@ export class DoctorProfileComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Add "Other" options to master data for dropdowns
     this.masterDataService.getAllMasterData().subscribe({
       next: (data) => {
         if (data.genders) this.genders = data.genders;
         if (data.languages) this.languageOptions = data.languages;
-        
         if (data.degrees) this.degreeOptions = [...data.degrees, '__other__'];
         if (data.institutions) this.institutionOptions = [...data.institutions, '__other__'];
         if (data.hospitals) this.hospitalOptions = [...data.hospitals, '__other__'];
@@ -132,7 +127,6 @@ export class DoctorProfileComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
     const u = this.username!;
-    const id = this.doctorId;
 
     forkJoin({
       profile: this.svc.getProfile(u),
@@ -157,7 +151,6 @@ export class DoctorProfileComponent implements OnInit {
         this.educations = educations || [];
         this.experiences = experiences || [];
         this.certificates = certificates || [];
-        // Initialize certificate edit state to ensure ngModel writes work
         this.initCertEdit();
         this.loading.set(false);
       },
@@ -168,11 +161,9 @@ export class DoctorProfileComponent implements OnInit {
     });
   }
 
-  // Initialize edit buffer for certificates
   private initCertEdit() {
     this.certEdit = {};
     for (const c of this.certificates) {
-      // Prepopulate with existing values to allow editing
       this.certEdit[c.id] = {
         name: c.name,
         url: c.url,
@@ -186,7 +177,6 @@ export class DoctorProfileComponent implements OnInit {
     }
   }
 
-  // Profile update
   saveProfile() {
     if (!this.username) return;
     this.svc.updateProfile(this.username, this.profileForm).subscribe({
@@ -199,7 +189,6 @@ export class DoctorProfileComponent implements OnInit {
     });
   }
 
-  // Helpers for languages normalization and toggling
   normalizeLanguages(value: any): string[] {
     if (!value) return [];
     if (Array.isArray(value)) return value.filter((x) => !!x);
@@ -218,13 +207,11 @@ export class DoctorProfileComponent implements OnInit {
     this.profileForm.languages = Array.from(set);
   }
 
-  // Profile image upload
   onProfileImageSelected(ev: Event) {
     const input = ev.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
     this.selectedProfileImage = file;
-    // Create a local preview URL for the selected image
     if (this.profileImagePreviewUrl) {
       URL.revokeObjectURL(this.profileImagePreviewUrl);
     }
@@ -266,10 +253,8 @@ export class DoctorProfileComponent implements OnInit {
     this.profileImageInputRef?.nativeElement.click();
   }
 
-  // Education CRUD
   addEducation() {
     if (!this.username) return;
-    // Prevent saving sentinel values if user chose to add new but didn't confirm
     if (this.newEducation.degree === '__other__') {
       this.toast.showError('Please add a custom degree before saving');
       return;
@@ -299,7 +284,6 @@ export class DoctorProfileComponent implements OnInit {
       yearOfCompletion: item?.yearOfCompletion || new Date().getFullYear(),
       details: item?.details || '',
     };
-    // Ensure existing values appear in dropdowns
     if (item?.degree && !this.degreeOptions.includes(item.degree)) {
       this.degreeOptions.push(item.degree);
     }
@@ -316,12 +300,10 @@ export class DoctorProfileComponent implements OnInit {
 
   submitEducation() {
     if (!this.username) return;
-    // Add new when not editing
     if (this.editingEducationId == null) {
       this.addEducation();
       return;
     }
-    // Update existing
     if (this.newEducation.degree === '__other__') {
       this.toast.showError('Please add a custom degree before updating');
       return;
@@ -349,7 +331,6 @@ export class DoctorProfileComponent implements OnInit {
     });
   }
 
-  // Helpers for adding custom Degree/Institution
   addCustomDegree() {
     const val = (this.customDegree || '').trim();
     if (!val) {
@@ -386,10 +367,8 @@ export class DoctorProfileComponent implements OnInit {
     });
   }
 
-  // Experience CRUD
   addExperience() {
     if (!this.username) return;
-    // Prevent saving sentinel values if user chose to add new but didn't confirm
     if (this.newExperience.hospitalName === '__other__') {
       this.toast.showError('Please add a custom hospital before saving');
       return;
@@ -419,7 +398,6 @@ export class DoctorProfileComponent implements OnInit {
       yearsOfService: item?.yearsOfService || 1,
       details: item?.details || '',
     };
-    // Ensure existing values appear in dropdowns
     if (item?.hospitalName && !this.hospitalOptions.includes(item.hospitalName)) {
       this.hospitalOptions.push(item.hospitalName);
     }
@@ -440,7 +418,6 @@ export class DoctorProfileComponent implements OnInit {
       this.addExperience();
       return;
     }
-    // Validate sentinel values in update
     if (this.newExperience.hospitalName === '__other__') {
       this.toast.showError('Please add a custom hospital before updating');
       return;
@@ -468,7 +445,6 @@ export class DoctorProfileComponent implements OnInit {
     });
   }
 
-  // Helpers for adding custom Hospital/Position
   addCustomHospital() {
     const val = (this.customHospital || '').trim();
     if (!val) {
@@ -505,7 +481,6 @@ export class DoctorProfileComponent implements OnInit {
     });
   }
 
-  // Certificates
   onCertFileSelected(ev: Event) {
     const input = ev.target as HTMLInputElement;
     this.certFile = input.files?.[0] || undefined;
@@ -518,10 +493,8 @@ export class DoctorProfileComponent implements OnInit {
     this.certUploadDetails = null;
     this.svc.uploadCertificateFile(this.certFile, this.doctorId, this.certDescription).subscribe({
       next: (resp) => {
-        // Create metadata update payload using returned cloudinary URL
         const certificateId = resp?.certificateId;
         const cloudinaryUrl = resp?.cloudinaryUrl;
-        // Show success message from backend
         this.certUploadMessage = resp?.message || 'Uploaded successfully';
         this.certUploadDetails = {
           cloudinaryUrl: resp?.cloudinaryUrl,
@@ -547,7 +520,6 @@ export class DoctorProfileComponent implements OnInit {
         }
         this.certFile = undefined;
         this.certDescription = '';
-        // Clear the <input type="file"> element to show "No file chosen"
         if (this.certFileInputRef?.nativeElement) {
           this.certFileInputRef.nativeElement.value = '';
         }
@@ -614,7 +586,6 @@ export class DoctorProfileComponent implements OnInit {
       next: (updated) => {
         const idx = this.certificates.findIndex((c) => c.id === item.id);
         if (idx >= 0) this.certificates[idx] = updated;
-        // Refresh edit buffer for this item
         this.certEdit[item.id] = {
           name: updated.name,
           url: updated.url,
@@ -625,11 +596,9 @@ export class DoctorProfileComponent implements OnInit {
           credentialId: updated.credentialId,
           credentialUrl: updated.credentialUrl,
         };
-        // Close any open edit panel
         if (this.editingCertId === item.id) {
           this.editingCertId = null;
         }
-        // Close post-upload form if it was for this certificate
         if (this.lastUploadedCertId === item.id) {
           this.lastUploadedCertId = null;
         }
@@ -659,17 +628,14 @@ export class DoctorProfileComponent implements OnInit {
     this.editingCertId = null;
   }
 
-  // Helper: find certificate by id for templates
   findCert(id: number) {
     return this.certificates.find((c) => c.id === id);
   }
 
-  // Cancel the post-upload metadata form
   cancelNewCertMeta() {
     this.lastUploadedCertId = null;
   }
 
-  // Convenience toggles for starting and canceling add/edit flows
   startEditOverview() { this.editingOverview = true; }
   startAddEducation() { this.editingEducationMode = true; this.editingEducationId = null; this.newEducation = { degree: '', institution: '', yearOfCompletion: new Date().getFullYear(), details: '' }; }
   startAddExperience() { this.editingExperienceMode = true; this.editingExperienceId = null; this.newExperience = { hospitalName: '', position: '', yearsOfService: 1, details: '' }; }
@@ -686,12 +652,51 @@ export class DoctorProfileComponent implements OnInit {
     });
   }
 
-  // Refresh profile to update completion percentage without full reload
   private refreshProfileStats() {
     if (this.username) {
       this.svc.getProfile(this.username).subscribe((p) => (this.profile = p));
     }
   }
 
+  // Quick Action Navigation Handler
+  onQuickAction(action: string) {
+    switch (action) {
+      case 'personal':
+        this.startEditOverview();
+        break;
+      case 'education':
+        this.activeTab = 'education';
+        this.startAddEducation();
+        break;
+      case 'experience':
+        this.activeTab = 'experience';
+        this.startAddExperience();
+        break;
+      case 'certificates':
+        this.activeTab = 'certificates';
+        this.startAddCertificate();
+        break;
+      case 'documents':
+        this.router.navigate(['/doctor/documents']);
+        break;
+      case 'password':
+        this.startEditOverview();
+        break;
+    }
+  }
 
+  // Years of Experience Calculator
+  getTotalExperienceYears(): string {
+    if (!this.experiences || this.experiences.length === 0) return '4+ Years';
+    const total = this.experiences.reduce((sum, exp) => sum + (exp.yearsOfService || 1), 0);
+    return `${total}+ Years`;
+  }
+
+  // Hospital Name Helper
+  getPrimaryHospitalName(): string {
+    if (this.experiences && this.experiences.length > 0) {
+      return this.experiences[0].hospitalName || 'CareSync Multi-Speciality Hospital';
+    }
+    return 'CareSync Multi-Speciality Hospital';
+  }
 }

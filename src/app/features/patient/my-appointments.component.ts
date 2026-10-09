@@ -15,11 +15,12 @@ import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropd
 import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 import { SkeletonComponent } from '../../shared/ui/skeleton.component';
+import { FilterBarComponent, FilterConfig } from '../../shared/components';
 
 @Component({
   selector: 'app-my-appointments',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, AppointmentCardComponent, RescheduleAppointmentModalComponent, CancellationModalComponent, SelectDropdownComponent, SharedChatModalComponent, EmptyStateComponent, SkeletonComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, AppointmentCardComponent, RescheduleAppointmentModalComponent, CancellationModalComponent, SelectDropdownComponent, SharedChatModalComponent, EmptyStateComponent, SkeletonComponent, FilterBarComponent],
   templateUrl: './my-appointments.component.html',
   styleUrl: './my-appointments.component.css'
 })
@@ -58,6 +59,50 @@ export class MyAppointmentsComponent {
       { value: 'upcoming', label: 'Upcoming' },
       { value: 'past', label: 'Past' }
     ];
+  }
+
+  get patientFilterConfigs(): FilterConfig[] {
+    return [
+      {
+        type: 'select',
+        key: 'statusFilter',
+        label: 'Status',
+        placeholder: 'All Statuses',
+        options: this.statusOptions
+      },
+      {
+        type: 'search',
+        key: 'specializationFilter',
+        label: 'Specialization',
+        placeholder: 'Search specialization...'
+      },
+      {
+        type: 'radio',
+        key: 'rangeFilter',
+        label: 'Date Range',
+        defaultValue: '',
+        options: [
+          { label: 'Today', value: 'today' },
+          { label: 'Upcoming', value: 'upcoming' },
+          { label: 'Past', value: 'past' },
+          { label: 'All', value: '' }
+        ]
+      }
+    ];
+  }
+
+  get patientFilterValues(): Record<string, any> {
+    return {
+      statusFilter: this.statusFilter,
+      specializationFilter: this.specializationFilter,
+      rangeFilter: this.rangeFilter
+    };
+  }
+
+  onFilterBarChange(values: Record<string, any>) {
+    this.statusFilter = values['statusFilter'] || '';
+    this.specializationFilter = values['specializationFilter'] || '';
+    this.rangeFilter = values['rangeFilter'] || '';
   }
 
   rescheduleTarget: PatientAppointmentItem | null = null;

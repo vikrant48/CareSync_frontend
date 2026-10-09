@@ -1,96 +1,76 @@
 <app-doctor-layout>
-    <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
-        <!-- Header -->
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-            <div>
-                <h2 class="font-display text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
-                    Appointments</h2>
-                <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mt-0.5">Manage your patient appointments
-                    and schedules</p>
+    <div class="max-w-[1400px] mx-auto p-4 sm:p-6 space-y-6 text-white font-sans selection:bg-[#2dd4bf]/30 pb-20">
+
+        <!-- Page Header with Ambient Graphic Wave -->
+        <div
+            class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#0a1e2b] via-[#081724] to-[#0d1724] border border-[#162a3d] p-6 shadow-2xl">
+            <!-- Ambient Backdrop Graphic -->
+            <div class="absolute -top-12 -right-12 w-64 h-64 bg-[#2dd4bf]/10 rounded-full blur-3xl pointer-events-none">
+            </div>
+
+            <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">Appointments</h1>
+                    <p class="text-xs sm:text-sm text-[#8b9cb0] font-medium mt-1">Manage your patient appointments and
+                        schedules</p>
+                </div>
             </div>
         </div>
 
-        <app-filter-bar [(expanded)]="isFilterExpanded" [activeCount]="appointmentFilterActiveCount"
-            gridClass="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-5" (clear)="clearAppointmentFilters()">
-            <div class="space-y-0.5">
-                <app-select-dropdown label="Status" [(ngModel)]="statusFilter" [options]="statusOptions"
-                    (ngModelChange)="onFilterChange()" placeholder="All Statuses">
-                </app-select-dropdown>
-            </div>
-
-            <div class="space-y-0.5">
-                <label class="filter-label">Search</label>
-                <div class="relative w-full">
-                    <i
-                        class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs sm:text-sm pointer-events-none z-10"></i>
-                    <input type="text" class="filter-input-search" [(ngModel)]="searchTerm" (input)="onFilterChange()"
-                        placeholder="Search patient name or ID..." />
-                </div>
-            </div>
-
-            <div class="space-y-0.5">
-                <label class="filter-label">Time Range</label>
-                <div class="filter-time-range-container gap-1">
-                    <button type="button" class="filter-time-range-btn" [class.is-active]="range==='TODAY'"
-                        (click)="setRange('TODAY')">Today</button>
-                    <button type="button" class="filter-time-range-btn" [class.is-active]="range==='UPCOMING'"
-                        (click)="setRange('UPCOMING')">Upcoming</button>
-                    <button type="button" class="filter-time-range-btn" [class.is-active]="range==='PAST'"
-                        (click)="setRange('PAST')">Past</button>
-                    <button type="button" class="filter-time-range-btn" [class.is-active]="range==='ALL'"
-                        (click)="setRange('ALL')">All</button>
-                </div>
-            </div>
+        <!-- Filters Section Container -->
+        <app-filter-bar [filters]="appointmentFilterConfigs" [values]="appointmentFilterValues" [theme]="'doctor'"
+            (filterChange)="onFilterBarChange($event)">
         </app-filter-bar>
 
+        <!-- Loading Skeleton -->
         <app-skeleton *ngIf="loading" variant="card" [count]="6"
             wrapperClass="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></app-skeleton>
 
+        <!-- Empty State -->
         <app-empty-state *ngIf="!loading && filteredAppointments().length === 0" icon="fa-solid fa-calendar-xmark"
             title="No appointments found"
             message="Try adjusting your filters or search terms to find what you're looking for." [hasAction]="true">
-            <button type="button" class="btn-secondary"
-                (click)="statusFilter='ALL'; range='ALL'; searchTerm=''; refresh()">Clear Filters</button>
+            <button type="button" class="mt-2 text-xs font-bold text-[#2dd4bf] hover:underline px-3 py-1"
+                (click)="clearAppointmentFilters()">Clear Filters</button>
         </app-empty-state>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4"
+        <!-- Appointment Cards Grid (Preserved Untouched) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             *ngIf="!loading && filteredAppointments().length > 0">
             <app-appointment-card *ngFor="let a of filteredAppointments()" class="h-full" [appointment]="a"
                 viewerRole="DOCTOR"></app-appointment-card>
         </div>
 
         <!-- Fixed Bottom Pagination Bar -->
-        <div *ngIf="!loading && totalAppointmentsCount > 0"
-            class="fixed left-0 md:left-64 right-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 shadow-2xl px-4 sm:px-8 py-2 flex items-center justify-between transition-all fixed-above-mobile-nav safe-bottom">
+        <div *ngIf="!loading && (totalAppointmentsCount > 0 || appointments.length > 0)"
+            class="fixed left-0 md:left-64 right-0 bottom-0 z-50 bg-[#0f1724]/95 backdrop-blur-md border-t border-[#1a2738] px-4 sm:px-8 py-1.5 flex items-center justify-between shadow-2xl">
 
-            <div class="flex items-center gap-3 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+            <div class="flex items-center gap-3 text-xs text-[#8b9cb0]">
                 <span class="font-medium">
-                    Showing <span class="font-bold text-gray-900 dark:text-gray-100">{{ startItemIndex }}–{{
-                        endItemIndex }}</span> of <span class="font-bold text-blue-600 dark:text-blue-400">{{
-                        totalAppointmentsCount }}</span> appointments
-                </span>
-                <span class="hidden sm:inline text-gray-300 dark:text-gray-700">|</span>
-                <span class="hidden sm:inline font-medium">
-                    Page <span class="font-semibold text-gray-900 dark:text-gray-100">{{ page + 1 }}</span> of {{
-                    totalPages }}
+                    Showing <span class="font-bold text-white">{{ startItemIndex }}–{{ endItemIndex }}</span> of <span
+                        class="font-bold text-[#2dd4bf]">{{ totalAppointmentsCount }}</span> appointments
                 </span>
             </div>
 
-            <div class="flex items-center gap-2">
-                <button
-                    class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm"
+            <div class="flex items-center gap-1">
+                <button type="button"
+                    class="px-2.5 py-1 text-[11px] font-bold rounded-md border border-[#202f45] bg-[#182333] text-white hover:bg-[#202f45] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1 cursor-pointer"
                     [disabled]="page === 0" (click)="prevPage()">
-                    <i class="fa-solid fa-chevron-left text-[10px]"></i> Prev
+                    <i class="fa-solid fa-chevron-left text-[8px]"></i> Prev
                 </button>
 
-                <span class="sm:hidden text-xs font-semibold text-gray-700 dark:text-gray-300 px-1">
-                    {{ page + 1 }}/{{ totalPages }}
-                </span>
+                <div class="flex items-center gap-1">
+                    <button *ngFor="let p of pageNumbers" type="button" (click)="goToPage(p)"
+                        [class]="p === page ? 'bg-[#2dd4bf] text-[#071918] font-black' : 'bg-[#182333] border border-[#202f45] text-[#8b9cb0] hover:text-white font-bold'"
+                        class="w-6 h-6 text-[11px] rounded-md transition-all flex items-center justify-center cursor-pointer">
+                        {{ p + 1 }}
+                    </button>
+                </div>
 
-                <button
-                    class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm"
+                <button type="button"
+                    class="px-2.5 py-1 text-[11px] font-bold rounded-md border border-[#202f45] bg-[#182333] text-white hover:bg-[#202f45] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1 cursor-pointer"
                     [disabled]="page >= totalPages - 1" (click)="nextPage()">
-                    Next <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    Next <i class="fa-solid fa-chevron-right text-[8px]"></i>
                 </button>
             </div>
         </div>

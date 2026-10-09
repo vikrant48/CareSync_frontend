@@ -1,0 +1,145 @@
+<div [ngClass]="[
+  'w-full flex flex-wrap items-end gap-3.5 p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 shadow-xl',
+  theme === 'doctor'
+    ? 'bg-[#0d171a] border-[#1f3236] text-white'
+    : 'bg-[#111726] border-[#222c40] text-white',
+  containerClass
+]">
+
+    <!-- Loop through configured filters -->
+    <ng-container *ngFor="let config of filters">
+        <div *ngIf="!config.hidden" [ngClass]="[
+           'flex flex-col space-y-1.5 transition-all duration-200',
+           config.width ? config.width : 'flex-1 min-w-[170px]',
+           config.colSpan ? config.colSpan : ''
+         ]">
+
+            <!-- Label -->
+            <label *ngIf="config.label" [ngClass]="theme === 'doctor' ? 'text-[#8b9cb0]' : 'text-[#9aa3b8]'"
+                class="text-xs font-bold flex items-center gap-1.5 uppercase tracking-wider select-none">
+                <i *ngIf="config.icon" [class]="config.icon" class="text-xs text-[#14b8a6]"></i>
+                <span>{{ config.label }}</span>
+            </label>
+
+            <!-- TYPE 1: Search Input -->
+            <div *ngIf="config.type === 'search'" class="relative flex items-center">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 text-xs text-[#14b8a6]"></i>
+                <input type="text" [(ngModel)]="filterValues[config.key]" (input)="onTextInputChange()"
+                    [placeholder]="config.placeholder || 'Search...'" [disabled]="!!config.disabled" [ngClass]="[
+                 'w-full text-xs font-medium rounded-xl pl-9 pr-3.5 py-2.5 border transition-all focus:outline-none shadow-inner',
+                 theme === 'doctor'
+                   ? 'bg-[#142125] text-white border-[#1f3236] placeholder-[#8b9cb0]/50 focus:border-[#14b8a6] focus:ring-1 focus:ring-[#14b8a6]/30'
+                   : 'bg-[#151b2b] text-white border-[#2a3347] placeholder-[#9aa3b8]/50 focus:border-[#5b6cf0] focus:ring-1 focus:ring-[#5b6cf0]/30',
+                 config.disabled ? 'opacity-50 cursor-not-allowed' : ''
+               ]" />
+                <button *ngIf="filterValues[config.key]" type="button" (click)="onImmediateChange(config.key, null)"
+                    class="absolute right-3 text-xs text-[#8b9cb0] hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- TYPE 2: Text Input -->
+            <div *ngIf="config.type === 'text'" class="relative flex items-center">
+                <input type="text" [(ngModel)]="filterValues[config.key]" (input)="onTextInputChange()"
+                    [placeholder]="config.placeholder || 'Enter text...'" [disabled]="!!config.disabled" [ngClass]="[
+                 'w-full text-xs font-medium rounded-xl px-3.5 py-2.5 border transition-all focus:outline-none shadow-inner',
+                 theme === 'doctor'
+                   ? 'bg-[#142125] text-white border-[#1f3236] placeholder-[#8b9cb0]/50 focus:border-[#14b8a6]'
+                   : 'bg-[#151b2b] text-white border-[#2a3347] placeholder-[#9aa3b8]/50 focus:border-[#5b6cf0]',
+                 config.disabled ? 'opacity-50 cursor-not-allowed' : ''
+               ]" />
+            </div>
+
+            <!-- TYPE 3: Single Select -->
+            <app-select *ngIf="config.type === 'select'" [options]="getSelectOptions(config.options)"
+                [ngModel]="filterValues[config.key]" (selectionChange)="onImmediateChange(config.key, $event)"
+                [placeholder]="config.placeholder || 'Select option'" [disabled]="!!config.disabled">
+            </app-select>
+
+            <!-- TYPE 4: Searchable Select -->
+            <app-searchable-select *ngIf="config.type === 'searchable-select'"
+                [options]="getSearchableOptions(config.options)" [ngModel]="filterValues[config.key]"
+                (selectionChange)="onImmediateChange(config.key, $event)"
+                [placeholder]="config.placeholder || 'Search & select...'" [disabled]="!!config.disabled">
+            </app-searchable-select>
+
+            <!-- TYPE 5: Radio / Segmented Pill Control -->
+            <div *ngIf="config.type === 'radio'"
+                [ngClass]="theme === 'doctor' ? 'bg-[#142125] border-[#1f3236]' : 'bg-[#151b2b] border-[#2a3347]'"
+                class="flex items-center p-1 rounded-xl border space-x-1 overflow-x-auto custom-scrollbar">
+                <button *ngFor="let opt of getRadioOptions(config.options)" type="button"
+                    (click)="selectRadioOption(config.key, opt.value)" [disabled]="!!config.disabled || !!opt.disabled"
+                    [ngClass]="[
+                  'px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 select-none cursor-pointer',
+                  filterValues[config.key] === opt.value
+                    ? (theme === 'doctor' ? 'bg-[#14b8a6] text-[#071918] shadow-md' : 'bg-[#5b6cf0] text-white shadow-md')
+                    : (theme === 'doctor' ? 'text-[#8b9cb0] hover:text-white hover:bg-[#18262a]' : 'text-[#9aa3b8] hover:text-white hover:bg-[#1b2333]')
+                ]">
+                    <i *ngIf="opt.icon" [class]="opt.icon" class="text-[11px]"></i>
+                    <span>{{ opt.label }}</span>
+                </button>
+            </div>
+
+            <!-- TYPE 6: Date Picker -->
+            <app-date-picker *ngIf="config.type === 'date'" [ngModel]="filterValues[config.key]"
+                (dateChange)="onImmediateChange(config.key, $event)" [placeholder]="config.placeholder || 'YYYY-MM-DD'"
+                [disabled]="!!config.disabled">
+            </app-date-picker>
+
+            <!-- TYPE 7: Date Range Picker -->
+            <app-date-range-picker *ngIf="config.type === 'date-range'" [ngModel]="filterValues[config.key]"
+                (rangeChange)="onImmediateChange(config.key, $event)"
+                [placeholder]="config.placeholder || 'Select date range'" [disabled]="!!config.disabled">
+            </app-date-range-picker>
+
+            <!-- TYPE 8: Number Range (Min - Max) -->
+            <div *ngIf="config.type === 'number-range'" class="flex items-center gap-1.5">
+                <input type="number" [(ngModel)]="filterValues[config.minKey || (config.key + '_min')]"
+                    (input)="onNumberRangeChange(config)" [placeholder]="config.minPlaceholder || 'Min'"
+                    [disabled]="!!config.disabled" [ngClass]="[
+                 'w-full text-xs font-medium rounded-xl px-2.5 py-2.5 border transition-all focus:outline-none',
+                 theme === 'doctor' ? 'bg-[#142125] text-white border-[#1f3236] focus:border-[#14b8a6]' : 'bg-[#151b2b] text-white border-[#2a3347] focus:border-[#5b6cf0]'
+               ]" />
+                <span class="text-xs text-[#8b9cb0] font-bold">-</span>
+                <input type="number" [(ngModel)]="filterValues[config.maxKey || (config.key + '_max')]"
+                    (input)="onNumberRangeChange(config)" [placeholder]="config.maxPlaceholder || 'Max'"
+                    [disabled]="!!config.disabled" [ngClass]="[
+                 'w-full text-xs font-medium rounded-xl px-2.5 py-2.5 border transition-all focus:outline-none',
+                 theme === 'doctor' ? 'bg-[#142125] text-white border-[#1f3236] focus:border-[#14b8a6]' : 'bg-[#151b2b] text-white border-[#2a3347] focus:border-[#5b6cf0]'
+               ]" />
+            </div>
+
+            <!-- TYPE 9: Button / Action -->
+            <div *ngIf="config.type === 'button'">
+                <button type="button" (click)="handleButtonClick(config, $event)" [disabled]="!!config.disabled"
+                    [ngClass]="[
+                  'w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md',
+                  config.buttonClass ? config.buttonClass : (theme === 'doctor' ? 'bg-[#142125] hover:bg-[#18262a] border border-[#1f3236] text-[#14b8a6]' : 'bg-[#151b2b] hover:bg-[#1b2333] border border-[#2a3347] text-[#5b6cf0]'),
+                  config.disabled ? 'opacity-50 cursor-not-allowed' : ''
+                ]">
+                    <i *ngIf="config.buttonIcon" [class]="config.buttonIcon" class="text-xs"></i>
+                    <span>{{ config.buttonLabel || config.label || 'Action' }}</span>
+                </button>
+            </div>
+
+            <!-- TYPE 10: Custom Slot / Template -->
+            <div *ngIf="config.type === 'custom' && config.customTemplate">
+                <ng-container
+                    *ngTemplateOutlet="config.customTemplate; context: { $implicit: filterValues, config: config }"></ng-container>
+            </div>
+
+        </div>
+    </ng-container>
+
+    <!-- Clear Filters Action (Rendered only when activeFilterCount > 0) -->
+    <div *ngIf="showClearAll && activeFilterCount > 0"
+        class="flex items-center ml-auto shrink-0 animate-in fade-in duration-200">
+        <button type="button" (click)="clearAllFilters()"
+            [ngClass]="theme === 'doctor' ? 'text-[#14b8a6] hover:text-[#0d9488]' : 'text-[#5b6cf0] hover:text-[#4c5ad4]'"
+            class="text-xs font-bold flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-white/5 transition-all cursor-pointer select-none">
+            <i class="fa-solid fa-circle-xmark text-sm"></i>
+            <span>Clear filters ({{ activeFilterCount }})</span>
+        </button>
+    </div>
+
+</div>

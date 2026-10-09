@@ -1,7 +1,18 @@
-:host {
-    display: block;
+/* Custom Thin Scrollbar for Table & Lists */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
 }
 
-.input-modern {
-    @apply block w-full rounded-xl border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 hover:bg-white dark:hover:bg-gray-700 transition-all duration-200 text-sm py-2.5 px-3;
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #111c1f;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #1f3236;
+    border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #14b8a6;
 }

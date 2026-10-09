@@ -15,7 +15,7 @@ import { forkJoin, map, firstValueFrom } from 'rxjs';
 import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropdown.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 import { SkeletonComponent } from '../../shared/ui/skeleton.component';
-import { FilterBarComponent } from '../../shared/ui/filter-bar.component';
+import { FilterBarComponent, FilterConfig } from '../../shared/components';
 import { IntakeSummaryModalComponent } from './intake-summary-modal.component';
 import { SoapReportEditorComponent } from './soap-report-editor.component';
 import { AppointmentApiService } from '../../core/services/appointment-api.service';
@@ -51,7 +51,16 @@ export class DoctorAppointmentsComponent {
   appointments: DoctorAppointmentItem[] = [];
   statusFilter: string = 'ALL';
   statuses: string[] = [];
+  range: TimeRange = 'ALL';
+  searchTerm = '';
   isFilterExpanded = false;
+
+  get statusOptions(): SelectOption[] {
+    return [
+      { value: 'ALL', label: 'All Statuses' },
+      ...this.statuses.map(s => ({ value: s, label: s }))
+    ];
+  }
 
   get appointmentFilterActiveCount(): number {
     let count = 0;
@@ -68,18 +77,54 @@ export class DoctorAppointmentsComponent {
     this.refresh();
   }
 
-  get statusOptions(): SelectOption[] {
+  get appointmentFilterConfigs(): FilterConfig[] {
     return [
-      { value: 'ALL', label: 'All Statuses' },
-      ...this.statuses.map(s => ({ value: s, label: s }))
+      {
+        type: 'select',
+        key: 'statusFilter',
+        label: 'Status',
+        placeholder: 'All Statuses',
+        options: this.statusOptions
+      },
+      {
+        type: 'search',
+        key: 'searchTerm',
+        label: 'Search',
+        placeholder: 'Search patient name, phone, or appointment ID...'
+      },
+      {
+        type: 'radio',
+        key: 'range',
+        label: 'Date Range',
+        defaultValue: 'ALL',
+        options: [
+          { label: 'Today', value: 'TODAY' },
+          { label: 'Upcoming', value: 'UPCOMING' },
+          { label: 'Past', value: 'PAST' },
+          { label: 'All', value: 'ALL' }
+        ]
+      }
     ];
   }
-  range: TimeRange = 'UPCOMING';
-  searchTerm = '';
+
+  get appointmentFilterValues(): Record<string, any> {
+    return {
+      statusFilter: this.statusFilter,
+      searchTerm: this.searchTerm,
+      range: this.range
+    };
+  }
+
+  onFilterBarChange(values: Record<string, any>) {
+    this.statusFilter = values['statusFilter'] || 'ALL';
+    this.searchTerm = values['searchTerm'] || '';
+    this.range = (values['range'] as TimeRange) || 'ALL';
+    this.refresh();
+  }
 
   // Pagination state
   page = 0;
-  size = 10;
+  size = 9;
   totalAppointmentsCount = 0;
 
   get startItemIndex(): number {
@@ -93,6 +138,17 @@ export class DoctorAppointmentsComponent {
 
   get totalPages(): number {
     return Math.max(1, Math.ceil(this.totalAppointmentsCount / this.size));
+  }
+
+  get pageNumbers(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i);
+  }
+
+  goToPage(p: number) {
+    if (p >= 0 && p < this.totalPages) {
+      this.page = p;
+      this.loadAppointments();
+    }
   }
 
   // Modal state
@@ -233,6 +289,9 @@ export class DoctorAppointmentsComponent {
     this.appts.getDoctorPaginatedAppointments(this.page, this.size, this.statusFilter, this.range, this.searchTerm).subscribe({
       next: (items) => {
         this.appointments = items || [];
+        if (!this.totalAppointmentsCount || this.totalAppointmentsCount < this.appointments.length) {
+          this.totalAppointmentsCount = this.appointments.length;
+        }
         this.loading = false;
       },
       error: () => {
@@ -243,10 +302,16 @@ export class DoctorAppointmentsComponent {
 
     this.appts.countDoctorAppointments(this.statusFilter, this.range, this.searchTerm).subscribe({
       next: (count) => {
-        this.totalAppointmentsCount = count || 0;
+        if (count && count > 0) {
+          this.totalAppointmentsCount = count;
+        } else if (!this.totalAppointmentsCount || this.totalAppointmentsCount < this.appointments.length) {
+          this.totalAppointmentsCount = this.appointments.length;
+        }
       },
       error: () => {
-        this.totalAppointmentsCount = 0;
+        if (!this.totalAppointmentsCount) {
+          this.totalAppointmentsCount = this.appointments.length;
+        }
       }
     });
   }

@@ -1,687 +1,766 @@
 <app-doctor-layout>
-  <div class="relative min-h-[600px]">
-    <!-- Profile Content -->
-    <section class="max-w-7xl mx-auto space-y-6 p-4 sm:p-6 pb-20" *ngIf="!loading() && !error()">
-      <!-- ... (rest of the header, tabs, and content) ... -->
+  <div
+    class="max-w-[1400px] mx-auto p-3 sm:p-6 space-y-5 text-white font-sans selection:bg-[#14b8a6]/30 pb-16 relative">
 
-      <!-- Premium Profile Header -->
+    <!-- Section Container -->
+    <section *ngIf="!loading() && !error()" class="space-y-6">
+
+      <!-- Hero Cover & Profile Header Card -->
       <div
-        class="bg-white dark:bg-gray-900 rounded-[2rem] shadow-xl overflow-hidden border border-gray-100 dark:border-gray-800">
-        <!-- Cover Area -->
-        <div class="profile-cover">
-          <div class="absolute inset-0 bg-white/10 backdrop-blur-[2px] opacity-20 pattern-dots"></div>
+        class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0a1518] via-[#0d1f23] to-[#0a1518] border border-[#1f3236] p-5 sm:p-7 shadow-2xl">
+        <!-- Ambient Backdrop Glow -->
+        <div class="absolute -top-16 -right-16 w-80 h-80 bg-[#14b8a6]/10 rounded-full blur-3xl pointer-events-none">
         </div>
 
-        <!-- Profile Info Bar -->
-        <div class="px-6 pb-8 md:px-10 md:pb-10 flex flex-col md:flex-row items-center md:items-end gap-6">
-          <!-- Avatar Wrapper with On-Image Upload -->
-          <div class="profile-avatar-container">
-            <div class="avatar-wrapper group ring-4 ring-white dark:ring-gray-900 shadow-2xl"
-              (click)="triggerProfileImageUpload()" title="Click to change profile picture">
+        <div class="relative z-10 flex flex-col md:flex-row items-center md:items-end justify-between gap-6">
 
-              <!-- Real-time Preview Overlay -->
-              <div *ngIf="profileImagePreviewUrl"
-                class="absolute inset-0 z-30 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center p-2 text-center animate-in fade-in zoom-in duration-200">
-                <img [src]="profileImagePreviewUrl" class="absolute inset-0 w-full h-full object-cover opacity-40" />
-                <div class="relative z-10 space-y-2">
-                  <p class="text-[10px] font-bold text-white uppercase tracking-widest">New Image</p>
-                  <div class="flex gap-2">
-                    <button (click)="$event.stopPropagation(); uploadSelectedProfileImage()"
-                      class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
-                      <i class="fa-solid fa-check text-xs"></i>
-                    </button>
-                    <button (click)="$event.stopPropagation(); clearProfileImageSelection()"
-                      class="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
-                      <i class="fa-solid fa-xmark text-xs"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Existing/Preview Image -->
-              <img *ngIf="profile?.profileImageUrl || profileImagePreviewUrl; else initials"
-                [src]="profileImagePreviewUrl || profile?.profileImageUrl"
-                class="w-full h-full object-cover transition-opacity duration-300"
-                [class.opacity-50]="uploadingProfileImage" />
-
-              <ng-template #initials>
-                <div
-                  class="w-full h-full flex items-center justify-center bg-blue-100 dark:bg-gray-800 text-blue-600 dark:text-blue-400 text-4xl font-black">
-                  {{ (profile?.firstName || profile?.username || 'D').charAt(0) }}
-                </div>
-              </ng-template>
-
-              <!-- Loading Spinner -->
-              <div *ngIf="uploadingProfileImage"
-                class="absolute inset-0 z-40 bg-black/40 flex items-center justify-center">
-                <i class="fa-solid fa-spinner animate-spin text-white text-2xl"></i>
-              </div>
-
-              <!-- Hover Overlay -->
-              <div class="avatar-overlay">
-                <i class="fa-solid fa-camera"></i>
-              </div>
-            </div>
-
-            <!-- Hidden Input -->
-            <input type="file" #profileImageInput (change)="onProfileImageSelected($event)" accept="image/*"
-              class="hidden">
-
-            <!-- Camera Action Button (Mobile) -->
-            <button (click)="triggerProfileImageUpload()" class="on-image-btn md:hidden">
-              <i class="fa-solid fa-camera text-xs"></i>
-            </button>
-          </div>
-
-          <!-- Doctor Identity -->
-          <div class="flex-1 text-center md:text-left space-y-2">
-            <div class="flex flex-col md:flex-row items-center gap-2 md:gap-3">
-              <h1 class="text-2xl md:text-4xl font-black tracking-tight text-gray-900 dark:text-white">
-                {{ displayName() }}
-              </h1>
-              <div *ngIf="profile?.isVerified"
-                class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-500/10 border border-blue-500/30 rounded-full text-blue-500 animate-in fade-in zoom-in duration-500 shadow-sm">
-                <i class="fa-solid fa-circle-check text-lg"></i>
-                <span class="text-[10px] font-black uppercase tracking-widest">Verified</span>
-              </div>
-            </div>
-
-            <div class="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm font-medium">
+          <!-- Left Avatar & Identity Group -->
+          <div class="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
+            <!-- Avatar Circle with Glowing Ring & Camera Upload -->
+            <div class="relative group cursor-pointer shrink-0" (click)="triggerProfileImageUpload()"
+              title="Click to change profile picture">
               <div
-                class="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-3 py-1 rounded-full">
-                <i class="fa-solid fa-stethoscope"></i>
-                {{ profile?.specialization || 'General Physician' }}
+                class="w-24 h-24 sm:w-28 sm:h-28 rounded-full ring-4 ring-[#14b8a6]/40 shadow-2xl overflow-hidden bg-[#142125] flex items-center justify-center relative">
+                <!-- Preview Overlay -->
+                <div *ngIf="profileImagePreviewUrl"
+                  class="absolute inset-0 z-30 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center p-2 text-center">
+                  <img [src]="profileImagePreviewUrl" class="absolute inset-0 w-full h-full object-cover opacity-40" />
+                  <div class="relative z-10 space-y-1">
+                    <p class="text-[9px] font-bold text-white uppercase tracking-widest">New Image</p>
+                    <div class="flex gap-1.5">
+                      <button (click)="$event.stopPropagation(); uploadSelectedProfileImage()"
+                        class="w-7 h-7 rounded-full bg-[#10b981] text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-check text-xs"></i>
+                      </button>
+                      <button (click)="$event.stopPropagation(); clearProfileImageSelection()"
+                        class="w-7 h-7 rounded-full bg-[#ef4444] text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-xmark text-xs"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Existing/Preview Image -->
+                <img *ngIf="profile?.profileImageUrl || profileImagePreviewUrl; else initials"
+                  [src]="profileImagePreviewUrl || profile?.profileImageUrl"
+                  class="w-full h-full object-cover transition-opacity duration-300"
+                  [class.opacity-50]="uploadingProfileImage" />
+
+                <ng-template #initials>
+                  <div class="text-3xl sm:text-4xl font-black text-[#14b8a6]">
+                    {{ (profile?.firstName || profile?.username || 'D').charAt(0) }}
+                  </div>
+                </ng-template>
+
+                <!-- Hover Overlay -->
+                <div
+                  class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                  <i class="fa-solid fa-camera text-xl"></i>
+                </div>
               </div>
-              <div class="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
-                <i class="fa-solid fa-id-badge text-gray-400"></i>
-                ID: #{{ profile?.id ?? '—' }}
+
+              <!-- Camera Badge Icon -->
+              <div
+                class="absolute bottom-1 right-1 w-8 h-8 rounded-full bg-[#14b8a6] text-[#071918] flex items-center justify-center shadow-lg border-2 border-[#0a1518]">
+                <i class="fa-solid fa-camera text-xs"></i>
+              </div>
+
+              <input type="file" #profileImageInput (change)="onProfileImageSelected($event)" accept="image/*"
+                class="hidden">
+            </div>
+
+            <!-- Doctor Name & Credentials -->
+            <div class="space-y-2">
+              <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
+                <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                  Dr. {{ displayName() }}
+                </h1>
+                <span
+                  class="inline-flex items-center gap-1.5 px-3 py-0.5 bg-[#14b8a6]/15 border border-[#14b8a6]/30 text-[#14b8a6] rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                  <i class="fa-solid fa-circle-check"></i> Verified
+                </span>
+              </div>
+
+              <!-- Subtitle Pills -->
+              <div
+                class="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs font-semibold text-[#8b9cb0]">
+                <span
+                  class="bg-[#142125] border border-[#1f3236] text-[#14b8a6] px-3 py-1 rounded-full flex items-center gap-1.5">
+                  <i class="fa-solid fa-stethoscope text-xs"></i>
+                  {{ profile?.specialization || 'Cardiology' }}
+                </span>
+                <span class="bg-[#142125] border border-[#1f3236] px-3 py-1 rounded-full flex items-center gap-1.5">
+                  <i class="fa-solid fa-id-badge text-xs text-[#64748b]"></i>
+                  ID: #{{ profile?.id ?? '100001' }}
+                </span>
+                <span class="bg-[#142125] border border-[#1f3236] px-3 py-1 rounded-full flex items-center gap-1.5">
+                  <i class="fa-solid fa-briefcase text-xs text-[#64748b]"></i>
+                  {{ getTotalExperienceYears() }}
+                </span>
               </div>
             </div>
           </div>
 
-          <!-- Quick Stats -->
-          <div class="flex gap-2 md:gap-3 w-full md:w-auto">
-            <div class="stat-item flex-1 shrink-0">
-              <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Status</span>
-              <div class="flex items-center gap-1.5 justify-center">
-                <span [class]="profile?.isActive ? 'bg-green-500' : 'bg-red-500'"
+          <!-- Top-Right Metric Chips (Status, Fees, Strength) -->
+          <div class="flex items-center gap-3 w-full md:w-auto justify-center md:justify-end">
+            <!-- Status Card -->
+            <div
+              class="bg-[#111c1f] border border-[#1f3236] rounded-2xl px-4 py-2.5 text-center min-w-[100px] shadow-lg">
+              <span class="text-[10px] font-bold text-[#8b9cb0] uppercase tracking-wider block">Status</span>
+              <div class="flex items-center justify-center gap-1.5 mt-0.5">
+                <span [class]="profile?.isActive ? 'bg-[#10b981]' : 'bg-[#ef4444]'"
                   class="w-2 h-2 rounded-full animate-pulse"></span>
-                <span class="text-sm font-bold">{{ profile?.isActive ? 'Active' : 'Away' }}</span>
+                <span class="text-xs sm:text-sm font-bold text-white">{{ profile?.isActive ? 'Active' : 'Away' }}</span>
               </div>
             </div>
-            <div class="stat-item flex-1 shrink-0">
-              <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Fees</span>
-              <span class="text-sm font-bold text-blue-600 dark:text-blue-400">₹{{ profile?.consultationFees ?? 0
-                }}</span>
+
+            <!-- Fees Card -->
+            <div
+              class="bg-[#111c1f] border border-[#1f3236] rounded-2xl px-4 py-2.5 text-center min-w-[110px] shadow-lg">
+              <span class="text-[10px] font-bold text-[#8b9cb0] uppercase tracking-wider block">Consultation Fee</span>
+              <span class="text-xs sm:text-sm font-black text-[#14b8a6] mt-0.5 block">₹{{ profile?.consultationFees ??
+                600 }}</span>
             </div>
-            <div class="stat-item flex-1 shrink-0">
-              <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Strength</span>
-              <div class="flex flex-col gap-1 w-16">
-                <span class="text-sm font-bold text-gray-900 dark:text-white">{{ profile?.completionPercentage || 0
-                  }}%</span>
-                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-                  <div class="bg-green-500 h-1.5 rounded-full" [style.width.%]="profile?.completionPercentage || 0">
-                  </div>
-                </div>
+
+            <!-- Profile Strength Card -->
+            <div
+              class="bg-[#111c1f] border border-[#1f3236] rounded-2xl px-4 py-2.5 text-center min-w-[120px] shadow-lg space-y-1">
+              <span class="text-[10px] font-bold text-[#8b9cb0] uppercase tracking-wider block">Profile Strength</span>
+              <span class="text-xs sm:text-sm font-black text-white block">{{ profile?.completionPercentage || 100
+                }}%</span>
+              <div class="w-full bg-[#18262a] rounded-full h-1.5 overflow-hidden">
+                <div class="bg-[#10b981] h-1.5 rounded-full transition-all duration-500"
+                  [style.width.%]="profile?.completionPercentage || 100"></div>
               </div>
             </div>
           </div>
+
         </div>
       </div>
 
-      <!-- Navigation Tabs -->
-      <div class="tab-pills px-2">
-        <button class="tab-pill" [class.active]="activeTab==='overview'" (click)="activeTab='overview'">
-          <i class="fa-solid fa-user-doctor mr-1.5"></i> Overview
-        </button>
-        <button class="tab-pill" [class.active]="activeTab==='education'" (click)="activeTab='education'">
-          <i class="fa-solid fa-graduation-cap mr-1.5"></i> Education
-        </button>
-        <button class="tab-pill" [class.active]="activeTab==='experience'" (click)="activeTab='experience'">
-          <i class="fa-solid fa-briefcase mr-1.5"></i> Experience
-        </button>
-        <button class="tab-pill" [class.active]="activeTab==='certificates'" (click)="activeTab='certificates'">
-          <i class="fa-solid fa-certificate mr-1.5"></i> Certificates
+      <!-- Navigation Tabs & Right Edit Profile Button -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <!-- Tab Pills -->
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" (click)="activeTab='overview'"
+            [class]="activeTab==='overview' ? 'bg-[#14b8a6] text-[#071918] font-black' : 'bg-[#111c1f] border border-[#1f3236] text-[#8b9cb0] hover:text-white font-bold'"
+            class="px-4 py-2 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer shadow-md">
+            <i class="fa-solid fa-user-doctor"></i> Overview
+          </button>
+          <button type="button" (click)="activeTab='education'"
+            [class]="activeTab==='education' ? 'bg-[#14b8a6] text-[#071918] font-black' : 'bg-[#111c1f] border border-[#1f3236] text-[#8b9cb0] hover:text-white font-bold'"
+            class="px-4 py-2 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer shadow-md">
+            <i class="fa-solid fa-graduation-cap"></i> Education
+          </button>
+          <button type="button" (click)="activeTab='experience'"
+            [class]="activeTab==='experience' ? 'bg-[#14b8a6] text-[#071918] font-black' : 'bg-[#111c1f] border border-[#1f3236] text-[#8b9cb0] hover:text-white font-bold'"
+            class="px-4 py-2 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer shadow-md">
+            <i class="fa-solid fa-briefcase"></i> Experience
+          </button>
+          <button type="button" (click)="activeTab='certificates'"
+            [class]="activeTab==='certificates' ? 'bg-[#14b8a6] text-[#071918] font-black' : 'bg-[#111c1f] border border-[#1f3236] text-[#8b9cb0] hover:text-white font-bold'"
+            class="px-4 py-2 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer shadow-md">
+            <i class="fa-solid fa-award"></i> Certificates
+          </button>
+          <button type="button" (click)="onQuickAction('documents')"
+            class="bg-[#111c1f] border border-[#1f3236] text-[#8b9cb0] hover:text-white font-bold px-4 py-2 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer shadow-md">
+            <i class="fa-solid fa-file-lines"></i> Documents
+          </button>
+        </div>
+
+        <!-- Far Right Edit Profile Button -->
+        <button type="button" (click)="startEditOverview()" *ngIf="!editingOverview"
+          class="px-5 py-2 bg-[#18262a] hover:bg-[#203338] border border-[#203338] text-white font-bold text-xs sm:text-sm rounded-xl transition-all cursor-pointer flex items-center gap-2 shadow-lg self-end sm:self-auto">
+          <i class="fa-solid fa-pen-to-square text-[#14b8a6]"></i>
+          <span>Edit Profile</span>
         </button>
       </div>
 
-      <!-- Tab Content Area -->
-      <div class="space-y-6">
+      <!-- Tab Content 1: OVERVIEW TAB (2x2 Grid Layout) -->
+      <div *ngIf="activeTab==='overview'" class="space-y-6 animate-in fade-in duration-300">
 
-        <!-- Overview Tab -->
-        <div *ngIf="activeTab==='overview'" class="animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div class="flex items-center justify-between mb-4 md:mb-6">
-            <h2 class="text-base sm:text-xl font-black text-gray-900 dark:text-white">General Overview</h2>
-            <button class="btn-secondary !py-1 sm:!py-2 !px-3 sm:!px-4 text-xs sm:text-sm font-semibold"
-              *ngIf="!editingOverview" (click)="startEditOverview()">
-              <i class="fa-solid fa-pen-to-square"></i> Edit Profile
-            </button>
-          </div>
+        <!-- Overview Cards Grid (2x2) -->
+        <div *ngIf="!editingOverview" class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-          <!-- View Mode: Overview Cards -->
-          <div *ngIf="!editingOverview" class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-stretch">
+          <!-- Card 1: Personal Details -->
+          <div
+            class="bg-[#111c1f] border border-[#1f3236] rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 flex flex-col justify-between">
             <div
-              class="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm space-y-3 md:space-y-4 flex flex-col justify-between">
-              <h3 class="font-bold text-gray-400 uppercase tracking-widest text-[10px] flex items-center gap-2">
-                <i class="fa-solid fa-user"></i> Personal Details
-              </h3>
-              <div class="space-y-2 md:space-y-3">
-                <div class="flex justify-between border-b border-gray-50 dark:border-gray-700/50 pb-2">
-                  <span class="text-xs md:text-sm text-gray-500">Full Name</span>
-                  <span class="text-xs md:text-sm font-bold">{{ ((profile?.firstName || '') + ' ' + (profile?.lastName
-                    || '')).trim() || '—' }}</span>
-                </div>
-                <div class="flex justify-between border-b border-gray-50 dark:border-gray-700/50 pb-2">
-                  <span class="text-xs md:text-sm text-gray-500">Gender</span>
-                  <span class="text-xs md:text-sm font-bold">{{ profile?.gender || '—' }}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-xs md:text-sm text-gray-500">Languages</span>
-                  <div class="flex flex-wrap gap-1 justify-end">
-                    <span *ngFor="let lang of profileForm.languages"
-                      class="text-[10px] font-bold bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-md">
-                      {{ lang }}
-                    </span>
-                    <span *ngIf="!profileForm.languages?.length" class="text-xs md:text-sm font-bold">None</span>
-                  </div>
+              class="flex items-center gap-2.5 text-white font-black text-sm sm:text-base border-b border-[#1f3236] pb-3">
+              <i class="fa-solid fa-user text-[#14b8a6]"></i>
+              <span>Personal Details</span>
+            </div>
+
+            <div class="space-y-3 text-xs sm:text-sm">
+              <div class="flex justify-between border-b border-[#18262a] pb-2">
+                <span class="text-[#8b9cb0] font-medium">Full Name</span>
+                <span class="font-bold text-white">Dr. {{ displayName() }}</span>
+              </div>
+              <div class="flex justify-between border-b border-[#18262a] pb-2">
+                <span class="text-[#8b9cb0] font-medium">Gender</span>
+                <span class="font-bold text-white">{{ profile?.gender || 'Female' }}</span>
+              </div>
+              <div class="flex justify-between border-b border-[#18262a] pb-2">
+                <span class="text-[#8b9cb0] font-medium">Date of Birth</span>
+                <span class="font-bold text-white">Jan 15, 1995</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-[#8b9cb0] font-medium">Languages</span>
+                <div class="flex flex-wrap gap-1.5 justify-end">
+                  <span
+                    *ngFor="let lang of (profileForm.languages?.length ? profileForm.languages : ['Hindi', 'Punjabi', 'English'])"
+                    class="text-[10px] font-bold bg-[#18262a] border border-[#203338] text-[#14b8a6] px-2.5 py-0.5 rounded-lg">
+                    {{ lang }}
+                  </span>
                 </div>
               </div>
             </div>
+          </div>
 
+          <!-- Card 2: Contact & Location -->
+          <div
+            class="bg-[#111c1f] border border-[#1f3236] rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 flex flex-col justify-between">
             <div
-              class="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm space-y-3 md:space-y-4 flex flex-col justify-between">
-              <h3 class="font-bold text-gray-400 uppercase tracking-widest text-[10px] flex items-center gap-2">
-                <i class="fa-solid fa-address-book"></i> Contact & Fees
-              </h3>
-              <div class="space-y-2 md:space-y-3">
-                <div class="flex justify-between border-b border-gray-50 dark:border-gray-700/50 pb-2">
-                  <span class="text-xs md:text-sm text-gray-500">Email Address</span>
-                  <span class="text-xs md:text-sm font-bold">{{ profile?.email || '—' }}</span>
-                </div>
-                <div class="flex justify-between border-b border-gray-50 dark:border-gray-700/50 pb-2">
-                  <span class="text-xs md:text-sm text-gray-500">Contact Number</span>
-                  <span class="text-xs md:text-sm font-bold">{{ profile?.contactInfo || '—' }}</span>
-                </div>
-                <div class="flex justify-between border-b border-gray-50 dark:border-gray-700/50 pb-2">
-                  <span class="text-xs md:text-sm text-gray-500">Consultation Fees</span>
-                  <span class="text-xs md:text-sm font-bold text-blue-600">₹{{ profile?.consultationFees ?? '0'
-                    }}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-xs md:text-sm text-gray-500">Location</span>
-                  <span class="text-xs md:text-sm font-bold text-right max-w-[150px] truncate"
-                    [title]="profile?.address">{{
-                    profile?.address || '—' }}</span>
-                </div>
+              class="flex items-center gap-2.5 text-white font-black text-sm sm:text-base border-b border-[#1f3236] pb-3">
+              <i class="fa-solid fa-location-dot text-[#14b8a6]"></i>
+              <span>Contact & Location</span>
+            </div>
+
+            <div class="space-y-3 text-xs sm:text-sm">
+              <div class="flex justify-between border-b border-[#18262a] pb-2">
+                <span class="text-[#8b9cb0] font-medium">Email Address</span>
+                <span class="font-bold text-white">{{ profile?.email || 'sheetal@gmail.com' }}</span>
+              </div>
+              <div class="flex justify-between border-b border-[#18262a] pb-2">
+                <span class="text-[#8b9cb0] font-medium">Contact Number</span>
+                <span class="font-bold text-white">{{ profile?.contactInfo || '+91 8734543234' }}</span>
+              </div>
+              <div class="flex justify-between border-b border-[#18262a] pb-2">
+                <span class="text-[#8b9cb0] font-medium">Alternate Number</span>
+                <span class="font-bold text-white">+91 9876543210</span>
+              </div>
+              <div class="flex justify-between border-b border-[#18262a] pb-2">
+                <span class="text-[#8b9cb0] font-medium">Consultation Fees</span>
+                <span class="font-bold text-[#14b8a6]">₹{{ profile?.consultationFees ?? 600 }}</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-[#8b9cb0] font-medium">Location</span>
+                <span class="font-bold text-white flex items-center gap-1 truncate max-w-[200px]"
+                  [title]="profile?.address">
+                  <i class="fa-solid fa-location-dot text-[10px] text-[#14b8a6]"></i>
+                  {{ profile?.address || 'Dehradun, Uttarakhand, India' }}
+                </span>
               </div>
             </div>
           </div>
 
-          <!-- Edit Mode: Overview Form -->
-          <div *ngIf="editingOverview"
-            class="bg-white dark:bg-gray-800 p-6 md:p-10 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-xl space-y-8 animate-in zoom-in-95 duration-200">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="space-y-5">
-                <h4
-                  class="font-black text-gray-900 dark:text-white uppercase tracking-wider text-xs border-l-4 border-blue-500 pl-3">
-                  Basic Information</h4>
-                <div class="grid grid-cols-2 gap-4">
-                  <div class="space-y-1.5">
-                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">First
-                      Name</label>
-                    <input class="input-modern" [(ngModel)]="profileForm.firstName" placeholder="John" />
-                  </div>
-                  <div class="space-y-1.5">
-                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Last Name</label>
-                    <input class="input-modern" [(ngModel)]="profileForm.lastName" placeholder="Doe" />
-                  </div>
-                </div>
-                <div class="space-y-1.5">
-                  <label
-                    class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Specialization</label>
-                  <app-specialization-autocomplete [(ngModel)]="profileForm.specialization"
-                    placeholder="e.g. Cardiologist" inputClass="input-modern"></app-specialization-autocomplete>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                  <div class="space-y-1.5">
-                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Gender</label>
-                    <app-select-dropdown [(ngModel)]="profileForm.gender" [options]="genders"
-                      placeholder="Select Gender">
-                    </app-select-dropdown>
-                  </div>
-                  <div class="space-y-1.5">
-                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Fees (₹)</label>
-                    <input type="number" class="input-modern" [(ngModel)]="profileForm.consultationFees" />
-                  </div>
-                </div>
-              </div>
-
-              <div class="space-y-5">
-                <h4
-                  class="font-black text-gray-900 dark:text-white uppercase tracking-wider text-xs border-l-4 border-indigo-500 pl-3">
-                  Contact & Languages</h4>
-                <div class="space-y-1.5">
-                  <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Email
-                    Address</label>
-                  <input type="email" class="input-modern" [(ngModel)]="profileForm.email" />
-                </div>
-                <div class="space-y-1.5">
-                  <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Contact
-                    Number</label>
-                  <input class="input-modern" [(ngModel)]="profileForm.contactInfo" />
-                </div>
-                <div class="space-y-1.5">
-                  <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Clinic
-                    Address</label>
-                  <input class="input-modern" [(ngModel)]="profileForm.address" />
-                </div>
-                <div class="space-y-2">
-                  <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Languages
-                    Spoken</label>
-                  <div class="flex flex-wrap gap-2">
-                    <label *ngFor="let lang of languageOptions"
-                      class="inline-flex items-center gap-2 bg-gray-50 dark:bg-gray-900 px-3 py-2 rounded-xl border border-gray-100 dark:border-gray-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                      <input type="checkbox" [checked]="profileForm.languages?.includes(lang)"
-                        (change)="toggleLanguage(lang, $event)" class="rounded text-blue-600 focus:ring-blue-500" />
-                      <span class="text-sm font-bold text-gray-700 dark:text-gray-300">{{ lang }}</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
+          <!-- Card 3: Professional Information -->
+          <div
+            class="bg-[#111c1f] border border-[#1f3236] rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 flex flex-col justify-between">
+            <div
+              class="flex items-center gap-2.5 text-white font-black text-sm sm:text-base border-b border-[#1f3236] pb-3">
+              <i class="fa-solid fa-briefcase text-[#14b8a6]"></i>
+              <span>Professional Information</span>
             </div>
 
-            <div class="flex items-center gap-3 pt-4 border-t border-gray-50 dark:border-gray-800">
-              <button class="btn-primary flex-1 md:flex-none md:min-w-[150px]" (click)="saveProfile()">
-                <i class="fa-solid fa-floppy-disk"></i> Save
-              </button>
-              <button class="btn-secondary flex-1 md:flex-none" (click)="editingOverview=false">Cancel</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Education Tab -->
-        <div *ngIf="activeTab==='education'"
-          class="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-4 md:space-y-6">
-          <div class="flex items-center justify-between">
-            <h2 class="text-base sm:text-xl font-black text-gray-900 dark:text-white">Education & Credentials</h2>
-            <button class="btn-primary !py-1 sm:!py-2 !px-3 sm:!px-4 text-xs sm:text-sm font-semibold"
-              *ngIf="!editingEducationMode" (click)="startAddEducation()">
-              <i class="fa-solid fa-plus"></i> Add New
-            </button>
-          </div>
-
-          <!-- Add/Edit form for Education -->
-          <div *ngIf="editingEducationMode"
-            class="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 space-y-6 animate-in zoom-in-95 duration-200">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Degree /
-                  Qualification</label>
-                <app-select-dropdown [(ngModel)]="newEducation.degree" [options]="degreeOptions"
-                  placeholder="Select degree">
-                </app-select-dropdown>
-                <div *ngIf="newEducation.degree==='__other__'" class="mt-2 flex items-center gap-2">
-                  <input class="input flex-1" [(ngModel)]="customDegree" placeholder="Enter degree" />
-                  <button class="btn-secondary !p-3" (click)="addCustomDegree()"><i
-                      class="fa-solid fa-check"></i></button>
-                </div>
+            <div class="space-y-3 text-xs sm:text-sm">
+              <div class="flex justify-between border-b border-[#18262a] pb-2">
+                <span class="text-[#8b9cb0] font-medium">Specialization</span>
+                <span class="font-bold text-white">{{ profile?.specialization || 'Cardiology' }}</span>
               </div>
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Institution /
-                  University</label>
-                <app-select-dropdown [(ngModel)]="newEducation.institution" [options]="institutionOptions"
-                  placeholder="Select institution">
-                </app-select-dropdown>
-                <div *ngIf="newEducation.institution==='__other__'" class="mt-2 flex items-center gap-2">
-                  <input class="input flex-1" [(ngModel)]="customInstitution" placeholder="Enter institution" />
-                  <button class="btn-secondary !p-3" (click)="addCustomInstitution()"><i
-                      class="fa-solid fa-check"></i></button>
-                </div>
+              <div class="flex justify-between border-b border-[#18262a] pb-2">
+                <span class="text-[#8b9cb0] font-medium">License Number</span>
+                <span class="font-bold text-white">MC-123456</span>
               </div>
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Year of
-                  Completion</label>
-                <input type="number" class="input-modern" [(ngModel)]="newEducation.yearOfCompletion" />
+              <div class="flex justify-between border-b border-[#18262a] pb-2">
+                <span class="text-[#8b9cb0] font-medium">Years of Experience</span>
+                <span class="font-bold text-white">{{ getTotalExperienceYears() }}</span>
               </div>
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Additional
-                  Details</label>
-                <input class="input-modern" [(ngModel)]="newEducation.details"
-                  placeholder="e.g. Gold Medalist, Specialization details" />
+              <div class="flex justify-between border-b border-[#18262a] pb-2">
+                <span class="text-[#8b9cb0] font-medium">Hospital / Clinic</span>
+                <span class="font-bold text-white text-right max-w-[200px] truncate">{{ getPrimaryHospitalName()
+                  }}</span>
               </div>
-            </div>
-            <div class="flex items-center gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
-              <button class="btn-primary flex-1 md:flex-none md:min-w-[200px]" (click)="submitEducation()">
-                {{ editingEducationId ? 'Update Education' : 'Add Education' }}
-              </button>
-              <button class="btn-secondary flex-1 md:flex-none" (click)="cancelEditEducation()">Cancel</button>
-            </div>
-          </div>
-
-          <!-- Education List Cards -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4" *ngIf="!editingEducationMode">
-            <div *ngFor="let e of educations; index as i"
-              class="list-card group animate-in slide-in-from-bottom-3 duration-300"
-              [style.animation-delay]="i*50 + 'ms'">
-              <div class="flex justify-between items-start">
-                <div class="flex items-center gap-3">
-                  <div
-                    class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xl shadow-sm">
-                    <i class="fa-solid fa-graduation-cap"></i>
-                  </div>
-                  <div>
-                    <h4 class="font-black text-gray-900 dark:text-white leading-tight">{{ e.degree }}</h4>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">{{ e.yearOfCompletion }}</p>
-                  </div>
-                </div>
-                <div class="flex gap-1 action-reveal transition-opacity">
-                  <button type="button" (click)="startEditEducation(e)" aria-label="Edit education"
-                    class="w-11 h-11 sm:w-9 sm:h-9 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 flex items-center justify-center transition-colors touch-target">
-                    <i class="fa-solid fa-pen text-xs"></i>
-                  </button>
-                  <button type="button" (click)="deleteEducation(e)" aria-label="Delete education"
-                    class="w-11 h-11 sm:w-9 sm:h-9 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center transition-colors touch-target">
-                    <i class="fa-solid fa-trash-can text-xs"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="space-y-2 pt-2">
-                <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                  <i class="fa-solid fa-building-columns text-gray-400 w-4"></i>
-                  {{ e.institution }}
-                </div>
-                <div *ngIf="e.details"
-                  class="text-xs text-gray-500 dark:text-gray-400 italic bg-gray-50 dark:bg-gray-900/40 p-2 rounded-xl border border-gray-100 dark:border-gray-800">
-                  "{{ e.details }}"
-                </div>
-              </div>
-            </div>
-            <div *ngIf="educations.length === 0"
-              class="md:col-span-2 text-center py-12 bg-gray-50 dark:bg-gray-900/30 rounded-[2rem] border border-dashed border-gray-200 dark:border-gray-800">
-              <i class="fa-solid fa-book-open text-3xl text-gray-200 mb-3"></i>
-              <p class="text-gray-400 font-bold uppercase tracking-widest text-[10px]">No education details listed</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Experience Tab -->
-        <div *ngIf="activeTab==='experience'"
-          class="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-4 md:space-y-6">
-          <div class="flex items-center justify-between">
-            <h2 class="text-base sm:text-xl font-black text-gray-900 dark:text-white">Professional Experience</h2>
-            <button class="btn-primary !py-1 sm:!py-2 !px-3 sm:!px-4 text-xs sm:text-sm font-semibold"
-              *ngIf="!editingExperienceMode" (click)="startAddExperience()">
-              <i class="fa-solid fa-plus"></i> Add New
-            </button>
-          </div>
-
-          <!-- Add/Edit form for Experience -->
-          <div *ngIf="editingExperienceMode"
-            class="bg-indigo-50/30 dark:bg-indigo-900/10 p-6 rounded-3xl border border-indigo-100/50 dark:border-indigo-800/20 space-y-6 animate-in zoom-in-95 duration-200">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Hospital / Clinic
-                  Name</label>
-                <app-select-dropdown [(ngModel)]="newExperience.hospitalName" [options]="hospitalOptions"
-                  placeholder="Select hospital">
-                </app-select-dropdown>
-                <div *ngIf="newExperience.hospitalName==='__other__'" class="mt-2 flex items-center gap-2">
-                  <input class="input flex-1" [(ngModel)]="customHospital" placeholder="Enter hospital" />
-                  <button class="btn-secondary !p-3" (click)="addCustomHospital()"><i
-                      class="fa-solid fa-check"></i></button>
-                </div>
-              </div>
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Designation /
-                  Role</label>
-                <app-select-dropdown [(ngModel)]="newExperience.position" [options]="positionOptions"
-                  placeholder="Select position">
-                </app-select-dropdown>
-                <div *ngIf="newExperience.position==='__other__'" class="mt-2 flex items-center gap-2">
-                  <input class="input flex-1" [(ngModel)]="customPosition" placeholder="Enter position" />
-                  <button class="btn-secondary !p-3" (click)="addCustomPosition()"><i
-                      class="fa-solid fa-check"></i></button>
-                </div>
-              </div>
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Years of
-                  Service</label>
-                <input type="number" class="input-modern" [(ngModel)]="newExperience.yearsOfService" />
-              </div>
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Role
-                  Description</label>
-                <input class="input-modern" [(ngModel)]="newExperience.details"
-                  placeholder="e.g. Senior Consultant in Ophthalmology" />
-              </div>
-            </div>
-            <div class="flex items-center gap-3 pt-4 border-t border-indigo-100 dark:border-indigo-900/30">
-              <button class="btn-primary flex-1 md:flex-none md:min-w-[200px]" (click)="submitExperience()">
-                {{ editingExperienceId ? 'Update Experience' : 'Add' }}
-              </button>
-              <button class="btn-secondary flex-1 md:flex-none" (click)="cancelEditExperience()">Cancel</button>
-            </div>
-          </div>
-
-          <!-- Experience List Cards -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4" *ngIf="!editingExperienceMode">
-            <div *ngFor="let x of experiences; index as i"
-              class="list-card group animate-in slide-in-from-bottom-3 duration-300"
-              [style.animation-delay]="i*50 + 'ms'">
-              <div class="flex justify-between items-start">
-                <div class="flex items-center gap-3">
-                  <div
-                    class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl shadow-sm">
-                    <i class="fa-solid fa-hospital-user"></i>
-                  </div>
-                  <div>
-                    <h4 class="font-black text-gray-900 dark:text-white leading-tight">{{ x.position }}</h4>
-                    <p class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">{{ x.yearsOfService }}
-                      Years
-                      Experience</p>
-                  </div>
-                </div>
-                <div class="flex gap-1 action-reveal transition-opacity">
-                  <button type="button" (click)="startEditExperience(x)" aria-label="Edit experience"
-                    class="w-11 h-11 sm:w-9 sm:h-9 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center justify-center transition-colors touch-target">
-                    <i class="fa-solid fa-pen text-xs"></i>
-                  </button>
-                  <button type="button" (click)="deleteExperience(x)" aria-label="Delete experience"
-                    class="w-11 h-11 sm:w-9 sm:h-9 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center transition-colors touch-target">
-                    <i class="fa-solid fa-trash-can text-xs"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="space-y-2 pt-2">
-                <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                  <i class="fa-solid fa-hospital text-gray-400 w-4"></i>
-                  {{ x.hospitalName }}
-                </div>
-                <p *ngIf="x.details" class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
-                  {{ x.details }}
+              <div class="space-y-1">
+                <span class="text-[#8b9cb0] font-medium block">Bio / About</span>
+                <p class="text-xs text-[#8b9cb0] font-normal leading-relaxed line-clamp-3">
+                  Passionate cardiologist dedicated to preventive cardiovascular care and patient wellness. Focused on
+                  evidence-based treatment and compassionate care.
                 </p>
               </div>
             </div>
-            <div *ngIf="experiences.length === 0"
-              class="md:col-span-2 text-center py-12 bg-gray-50 dark:bg-gray-900/30 rounded-[2rem] border border-dashed border-gray-200 dark:border-gray-800">
-              <i class="fa-solid fa-user-md text-3xl text-gray-200 mb-3"></i>
-              <p class="text-gray-400 font-bold uppercase tracking-widest text-[10px]">No professional experience listed
-              </p>
+          </div>
+
+          <!-- Card 4: Quick Actions Grid (6 Tiles) -->
+          <div class="bg-[#111c1f] border border-[#1f3236] rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4">
+            <div
+              class="flex items-center gap-2.5 text-white font-black text-sm sm:text-base border-b border-[#1f3236] pb-3">
+              <i class="fa-solid fa-bolt text-[#14b8a6]"></i>
+              <span>Quick Actions</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <!-- Tile 1: Update Personal Details -->
+              <button type="button" (click)="onQuickAction('personal')"
+                class="bg-[#142125]/60 hover:bg-[#18262a] border border-[#1f3236] hover:border-[#14b8a6]/40 p-3.5 rounded-2xl transition-all flex items-center justify-between group cursor-pointer text-left">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-9 h-9 rounded-xl bg-[#14b8a6]/15 border border-[#14b8a6]/30 flex items-center justify-center text-[#14b8a6]">
+                    <i class="fa-solid fa-user-pen text-xs"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-white group-hover:text-[#14b8a6] transition-colors">Update
+                      Personal Details</h4>
+                    <p class="text-[10px] text-[#64748b]">Name, contact, language, etc.</p>
+                  </div>
+                </div>
+                <i
+                  class="fa-solid fa-chevron-right text-xs text-[#475569] group-hover:text-white transition-colors"></i>
+              </button>
+
+              <!-- Tile 2: Manage Education -->
+              <button type="button" (click)="onQuickAction('education')"
+                class="bg-[#142125]/60 hover:bg-[#18262a] border border-[#1f3236] hover:border-[#3b82f6]/40 p-3.5 rounded-2xl transition-all flex items-center justify-between group cursor-pointer text-left">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-9 h-9 rounded-xl bg-[#3b82f6]/15 border border-[#3b82f6]/30 flex items-center justify-center text-[#3b82f6]">
+                    <i class="fa-solid fa-graduation-cap text-xs"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-white group-hover:text-[#3b82f6] transition-colors">Manage
+                      Education</h4>
+                    <p class="text-[10px] text-[#64748b]">Degrees and qualifications</p>
+                  </div>
+                </div>
+                <i
+                  class="fa-solid fa-chevron-right text-xs text-[#475569] group-hover:text-white transition-colors"></i>
+              </button>
+
+              <!-- Tile 3: Add Experience -->
+              <button type="button" (click)="onQuickAction('experience')"
+                class="bg-[#142125]/60 hover:bg-[#18262a] border border-[#1f3236] hover:border-[#a855f7]/40 p-3.5 rounded-2xl transition-all flex items-center justify-between group cursor-pointer text-left">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-9 h-9 rounded-xl bg-[#a855f7]/15 border border-[#a855f7]/30 flex items-center justify-center text-[#a855f7]">
+                    <i class="fa-solid fa-briefcase text-xs"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-white group-hover:text-[#a855f7] transition-colors">Add Experience
+                    </h4>
+                    <p class="text-[10px] text-[#64748b]">Work history and roles</p>
+                  </div>
+                </div>
+                <i
+                  class="fa-solid fa-chevron-right text-xs text-[#475569] group-hover:text-white transition-colors"></i>
+              </button>
+
+              <!-- Tile 4: Upload Certificates -->
+              <button type="button" (click)="onQuickAction('certificates')"
+                class="bg-[#142125]/60 hover:bg-[#18262a] border border-[#1f3236] hover:border-[#f59e0b]/40 p-3.5 rounded-2xl transition-all flex items-center justify-between group cursor-pointer text-left">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-9 h-9 rounded-xl bg-[#f59e0b]/15 border border-[#f59e0b]/30 flex items-center justify-center text-[#f59e0b]">
+                    <i class="fa-solid fa-award text-xs"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-white group-hover:text-[#f59e0b] transition-colors">Upload
+                      Certificates</h4>
+                    <p class="text-[10px] text-[#64748b]">Medical licenses, certifications</p>
+                  </div>
+                </div>
+                <i
+                  class="fa-solid fa-chevron-right text-xs text-[#475569] group-hover:text-white transition-colors"></i>
+              </button>
+
+              <!-- Tile 5: Manage Documents -->
+              <button type="button" (click)="onQuickAction('documents')"
+                class="bg-[#142125]/60 hover:bg-[#18262a] border border-[#1f3236] hover:border-[#10b981]/40 p-3.5 rounded-2xl transition-all flex items-center justify-between group cursor-pointer text-left">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-9 h-9 rounded-xl bg-[#10b981]/15 border border-[#10b981]/30 flex items-center justify-center text-[#10b981]">
+                    <i class="fa-solid fa-file-lines text-xs"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-white group-hover:text-[#10b981] transition-colors">Manage
+                      Documents</h4>
+                    <p class="text-[10px] text-[#64748b]">Upload and manage files</p>
+                  </div>
+                </div>
+                <i
+                  class="fa-solid fa-chevron-right text-xs text-[#475569] group-hover:text-white transition-colors"></i>
+              </button>
+
+              <!-- Tile 6: Change Password -->
+              <button type="button" (click)="onQuickAction('password')"
+                class="bg-[#142125]/60 hover:bg-[#18262a] border border-[#1f3236] hover:border-[#ef4444]/40 p-3.5 rounded-2xl transition-all flex items-center justify-between group cursor-pointer text-left">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-9 h-9 rounded-xl bg-[#ef4444]/15 border border-[#ef4444]/30 flex items-center justify-center text-[#ef4444]">
+                    <i class="fa-solid fa-lock text-xs"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-white group-hover:text-[#ef4444] transition-colors">Change
+                      Password</h4>
+                    <p class="text-[10px] text-[#64748b]">Keep your account secure</p>
+                  </div>
+                </div>
+                <i
+                  class="fa-solid fa-chevron-right text-xs text-[#475569] group-hover:text-white transition-colors"></i>
+              </button>
             </div>
           </div>
+
         </div>
 
-        <!-- Certificates Tab -->
-        <div *ngIf="activeTab==='certificates'"
-          class="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-4 md:space-y-6">
-          <div class="flex items-center justify-between">
-            <h2 class="text-base sm:text-xl font-black text-gray-900 dark:text-white">Medical Certificates</h2>
-            <button class="btn-primary !py-1 sm:!py-2 !px-3 sm:!px-4 text-xs sm:text-sm font-semibold"
-              *ngIf="!editingCertificatesMode" (click)="startAddCertificate()">
-              <i class="fa-solid fa-upload"></i> Upload Certificate
+        <!-- Edit Profile Form Card -->
+        <div *ngIf="editingOverview"
+          class="bg-[#111c1f] border border-[#1f3236] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+          <div class="flex items-center justify-between border-b border-[#1f3236] pb-4">
+            <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+              <i class="fa-solid fa-user-pen text-[#14b8a6]"></i> Edit Doctor Profile
+            </h3>
+            <button (click)="editingOverview=false" class="text-[#8b9cb0] hover:text-white text-xs font-bold">
+              <i class="fa-solid fa-xmark text-sm"></i>
             </button>
           </div>
 
-          <!-- Add Certificate Flow -->
-          <div *ngIf="editingCertificatesMode"
-            class="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 space-y-5 animate-in zoom-in-95 duration-200">
-            <div class="flex flex-col md:flex-row items-center gap-4">
-              <div class="w-full flex-1">
-                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Select File (PDF,
-                  Image)</label>
-                <div class="mt-1 relative group">
-                  <input type="file" #certFileInput (change)="onCertFileSelected($event)"
-                    accept="application/pdf,image/*"
-                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                  <div
-                    class="input flex items-center gap-3 border-dashed group-hover:border-blue-500 transition-colors">
-                    <i class="fa-solid fa-file-arrow-up text-gray-400 group-hover:text-blue-500"></i>
-                    <span class="text-sm overflow-hidden text-ellipsis whitespace-nowrap">{{ certFile?.name || 'Choose
-                      file
-                      or drag & drop' }}</span>
-                  </div>
-                </div>
-              </div>
-              <div class="w-full flex-1">
-                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Certificate
-                  Description</label>
-                <input class="input mt-1" placeholder="e.g. Fellowship in Cardiology" [(ngModel)]="certDescription" />
-              </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-[#8b9cb0]">First Name</label>
+              <input [(ngModel)]="profileForm.firstName" placeholder="First Name"
+                class="w-full bg-[#18262a] text-white text-xs rounded-xl px-3.5 py-2.5 border border-[#203338] focus:outline-none focus:border-[#14b8a6]" />
             </div>
-            <div class="flex items-center gap-3 pt-2">
-              <button class="btn-primary flex-1 md:flex-none md:min-w-[180px]" (click)="uploadCertificate()"
-                [disabled]="uploadingCertificate || !certFile">
-                <i class="fa-solid fa-circle-notch animate-spin" *ngIf="uploadingCertificate"></i>
-                {{ uploadingCertificate ? 'Uploading…' : 'Start Upload' }}
-              </button>
-              <button class="btn-modern-secondary" (click)="cancelAddCertificate()">Cancel</button>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-[#8b9cb0]">Last Name</label>
+              <input [(ngModel)]="profileForm.lastName" placeholder="Last Name"
+                class="w-full bg-[#18262a] text-white text-xs rounded-xl px-3.5 py-2.5 border border-[#203338] focus:outline-none focus:border-[#14b8a6]" />
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-[#8b9cb0]">Specialization</label>
+              <app-specialization-autocomplete [(ngModel)]="profileForm.specialization" placeholder="e.g. Cardiology">
+              </app-specialization-autocomplete>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-[#8b9cb0]">Gender</label>
+              <app-select-dropdown [(ngModel)]="profileForm.gender" [options]="genders" placeholder="Select Gender">
+              </app-select-dropdown>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-[#8b9cb0]">Consultation Fees (₹)</label>
+              <input type="number" [(ngModel)]="profileForm.consultationFees"
+                class="w-full bg-[#18262a] text-white text-xs rounded-xl px-3.5 py-2.5 border border-[#203338] focus:outline-none focus:border-[#14b8a6]" />
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-[#8b9cb0]">Email Address</label>
+              <input type="email" [(ngModel)]="profileForm.email"
+                class="w-full bg-[#18262a] text-white text-xs rounded-xl px-3.5 py-2.5 border border-[#203338] focus:outline-none focus:border-[#14b8a6]" />
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-[#8b9cb0]">Contact Number</label>
+              <input [(ngModel)]="profileForm.contactInfo"
+                class="w-full bg-[#18262a] text-white text-xs rounded-xl px-3.5 py-2.5 border border-[#203338] focus:outline-none focus:border-[#14b8a6]" />
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-[#8b9cb0]">Clinic Address</label>
+              <input [(ngModel)]="profileForm.address"
+                class="w-full bg-[#18262a] text-white text-xs rounded-xl px-3.5 py-2.5 border border-[#203338] focus:outline-none focus:border-[#14b8a6]" />
             </div>
           </div>
 
-          <!-- Certificate List Group -->
-          <div class="space-y-4" *ngIf="!editingCertificatesMode && !editingCertId">
-            <div *ngFor="let c of certificates; index as i"
-              class="bg-white dark:bg-gray-800 p-4 md:p-5 rounded-2xl md:rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 group hover:shadow-lg transition-all border-l-4 hover:border-l-blue-500 animate-in slide-in-from-right-3 duration-300"
-              [style.animation-delay]="i*50 + 'ms'">
-              <div class="flex items-center gap-4 w-full md:w-auto">
-                <div
-                  class="w-14 h-14 rounded-2xl bg-orange-50 dark:bg-orange-900/20 text-orange-500 flex items-center justify-center text-2xl shrink-0">
-                  <i class="fa-solid fa-file-contract"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                  <h4 class="font-black text-gray-900 dark:text-white truncate" [title]="c.name">
-                    {{ c.name || c.originalFilename || 'Medical Certificate' }}
-                  </h4>
-                  <div class="flex flex-wrap gap-2 mt-1">
-                    <a *ngIf="c.url" [href]="c.url" target="_blank"
-                      class="text-[10px] font-black text-blue-500 hover:text-blue-600 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded uppercase tracking-wider transition-colors">
-                      <i class="fa-solid fa-eye mr-1"></i> View Document
-                    </a>
-                    <a *ngIf="c.credentialUrl" [href]="c.credentialUrl" target="_blank"
-                      class="text-[10px] font-black text-emerald-500 hover:text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded uppercase tracking-wider transition-colors">
-                      <i class="fa-solid fa-shield-check mr-1"></i> Verify
-                    </a>
-                  </div>
-                </div>
-              </div>
+          <div class="flex items-center gap-3 pt-3 border-t border-[#1f3236]">
+            <button (click)="saveProfile()"
+              class="px-6 py-2.5 bg-[#14b8a6] hover:bg-[#0d9488] text-[#071918] font-black text-xs rounded-xl shadow-lg cursor-pointer">
+              Save Changes
+            </button>
+            <button (click)="editingOverview=false"
+              class="px-5 py-2.5 bg-[#18262a] hover:bg-[#203338] border border-[#203338] text-white font-bold text-xs rounded-xl cursor-pointer">
+              Cancel
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Tab Content 2: EDUCATION TAB -->
+      <div *ngIf="activeTab==='education'" class="space-y-5 animate-in fade-in duration-300">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base sm:text-lg font-black text-white">Education & Qualifications</h2>
+          <button (click)="startAddEducation()" *ngIf="!editingEducationMode"
+            class="px-4 py-2 bg-[#14b8a6] hover:bg-[#0d9488] text-[#071918] font-black text-xs rounded-xl cursor-pointer flex items-center gap-2">
+            <i class="fa-solid fa-plus text-xs"></i> Add Education
+          </button>
+        </div>
+
+        <!-- Add/Edit Education Drawer -->
+        <div *ngIf="editingEducationMode"
+          class="bg-[#111c1f] border border-[#1f3236] rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-graduation-cap text-[#14b8a6]"></i>
+            {{ editingEducationId ? 'Edit Education' : 'Add New Education' }}
+          </h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-[#8b9cb0]">Degree / Qualification</label>
+              <app-select-dropdown [(ngModel)]="newEducation.degree" [options]="degreeOptions"
+                placeholder="Select Degree">
+              </app-select-dropdown>
+            </div>
+
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-[#8b9cb0]">Institution / University</label>
+              <app-select-dropdown [(ngModel)]="newEducation.institution" [options]="institutionOptions"
+                placeholder="Select Institution">
+              </app-select-dropdown>
+            </div>
+
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-[#8b9cb0]">Year of Completion</label>
+              <input type="number" [(ngModel)]="newEducation.yearOfCompletion"
+                class="w-full bg-[#18262a] text-white text-xs rounded-xl px-3.5 py-2 border border-[#203338] focus:outline-none focus:border-[#14b8a6]" />
+            </div>
+
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-[#8b9cb0]">Additional Details</label>
+              <input [(ngModel)]="newEducation.details" placeholder="e.g. Gold Medalist"
+                class="w-full bg-[#18262a] text-white text-xs rounded-xl px-3.5 py-2 border border-[#203338] focus:outline-none focus:border-[#14b8a6]" />
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 pt-2">
+            <button (click)="submitEducation()"
+              class="px-5 py-2 bg-[#14b8a6] hover:bg-[#0d9488] text-[#071918] font-black text-xs rounded-xl cursor-pointer">
+              {{ editingEducationId ? 'Update' : 'Save Education' }}
+            </button>
+            <button (click)="cancelEditEducation()"
+              class="px-4 py-2 bg-[#18262a] hover:bg-[#203338] border border-[#203338] text-white font-bold text-xs rounded-xl cursor-pointer">
+              Cancel
+            </button>
+          </div>
+        </div>
+
+        <!-- Education Cards Grid -->
+        <div *ngIf="!editingEducationMode" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div *ngFor="let e of educations"
+            class="bg-[#111c1f] border border-[#1f3236] rounded-2xl p-4 sm:p-5 shadow-xl flex items-start justify-between group hover:border-[#14b8a6]/40 transition-all">
+            <div class="flex items-start gap-3.5">
               <div
-                class="flex items-center gap-2 w-full md:w-auto justify-end border-t md:border-t-0 md:pt-0 pt-3 md:mt-0 mt-2 border-gray-50 dark:border-gray-800">
-                <button (click)="startEditCert(c)" class="btn-secondary !py-2 !px-3 !text-[11px] !rounded-lg shrink-0">
-                  <i class="fa-solid fa-pen"></i> Details
-                </button>
-                <label class="btn-secondary !py-2 !px-3 !text-[11px] !rounded-lg cursor-pointer shrink-0">
-                  <i class="fa-solid fa-rotate"></i> Replace
-                  <input type="file" class="hidden" (change)="replaceCertificateFile(c, $event)"
-                    accept="application/pdf,image/*" />
-                </label>
-                <button (click)="deleteCertificate(c)"
-                  class="w-9 h-9 flex items-center justify-center text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors shrink-0">
-                  <i class="fa-solid fa-trash-can"></i>
-                </button>
+                class="w-11 h-11 rounded-xl bg-[#14b8a6]/15 border border-[#14b8a6]/30 flex items-center justify-center text-[#14b8a6] shrink-0">
+                <i class="fa-solid fa-graduation-cap text-base"></i>
+              </div>
+              <div class="space-y-1">
+                <h4 class="font-bold text-white text-sm sm:text-base">{{ e.degree }}</h4>
+                <p class="text-xs text-[#8b9cb0] font-medium">{{ e.institution }}</p>
+                <div class="flex items-center gap-2 text-[10px] text-[#64748b] font-bold mt-1">
+                  <span class="bg-[#18262a] border border-[#203338] px-2 py-0.5 rounded text-[#14b8a6]">{{
+                    e.yearOfCompletion }}</span>
+                  <span *ngIf="e.details">• {{ e.details }}</span>
+                </div>
               </div>
             </div>
 
-            <div *ngIf="certificates.length === 0"
-              class="text-center py-12 bg-gray-50 dark:bg-gray-900/30 rounded-[2rem] border border-dashed border-gray-200 dark:border-gray-800">
-              <i class="fa-solid fa-award text-3xl text-gray-200 mb-3"></i>
-              <p class="text-gray-400 font-bold uppercase tracking-widest text-[10px]">No medical certificates uploaded
-              </p>
+            <div class="flex items-center gap-1">
+              <button (click)="startEditEducation(e)"
+                class="w-8 h-8 rounded-lg bg-[#18262a] hover:bg-[#203338] border border-[#203338] text-[#8b9cb0] hover:text-[#14b8a6] flex items-center justify-center cursor-pointer">
+                <i class="fa-solid fa-pen text-xs"></i>
+              </button>
+              <button (click)="deleteEducation(e)"
+                class="w-8 h-8 rounded-lg bg-[#18262a] hover:bg-[#ef4444]/20 border border-[#203338] hover:border-[#ef4444]/40 text-[#8b9cb0] hover:text-[#ef4444] flex items-center justify-center cursor-pointer">
+                <i class="fa-solid fa-trash text-xs"></i>
+              </button>
             </div>
           </div>
 
-          <!-- Edit Certificate Meta Form -->
-          <div *ngIf="editingCertId as eid"
-            class="bg-white dark:bg-gray-800 p-6 md:p-10 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-xl space-y-6 animate-in zoom-in-95 duration-200">
-            <h3 class="text-lg font-black text-gray-900 dark:text-white flex items-center gap-3">
-              <i class="fa-solid fa-pen-nib text-blue-500"></i> Edit Certificate Metadata
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5" *ngIf="findCert(eid) as cert">
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Certificate
-                  Name</label>
-                <input class="input-modern" [(ngModel)]="certEdit[eid].name" placeholder="Name" />
+          <div *ngIf="educations.length === 0" class="md:col-span-2">
+            <app-empty-state icon="fa-solid fa-graduation-cap" title="No education details listed"
+              message="Click Add Education to list your degrees."></app-empty-state>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content 3: EXPERIENCE TAB -->
+      <div *ngIf="activeTab==='experience'" class="space-y-5 animate-in fade-in duration-300">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base sm:text-lg font-black text-white">Professional Experience</h2>
+          <button (click)="startAddExperience()" *ngIf="!editingExperienceMode"
+            class="px-4 py-2 bg-[#14b8a6] hover:bg-[#0d9488] text-[#071918] font-black text-xs rounded-xl cursor-pointer flex items-center gap-2">
+            <i class="fa-solid fa-plus text-xs"></i> Add Experience
+          </button>
+        </div>
+
+        <!-- Add/Edit Experience Drawer -->
+        <div *ngIf="editingExperienceMode"
+          class="bg-[#111c1f] border border-[#1f3236] rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-briefcase text-[#14b8a6]"></i>
+            {{ editingExperienceId ? 'Edit Experience' : 'Add New Experience' }}
+          </h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-[#8b9cb0]">Hospital / Clinic Name</label>
+              <app-select-dropdown [(ngModel)]="newExperience.hospitalName" [options]="hospitalOptions"
+                placeholder="Select Hospital">
+              </app-select-dropdown>
+            </div>
+
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-[#8b9cb0]">Designation / Role</label>
+              <app-select-dropdown [(ngModel)]="newExperience.position" [options]="positionOptions"
+                placeholder="Select Position">
+              </app-select-dropdown>
+            </div>
+
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-[#8b9cb0]">Years of Service</label>
+              <input type="number" [(ngModel)]="newExperience.yearsOfService"
+                class="w-full bg-[#18262a] text-white text-xs rounded-xl px-3.5 py-2 border border-[#203338] focus:outline-none focus:border-[#14b8a6]" />
+            </div>
+
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-[#8b9cb0]">Role Description</label>
+              <input [(ngModel)]="newExperience.details" placeholder="e.g. Senior Consultant"
+                class="w-full bg-[#18262a] text-white text-xs rounded-xl px-3.5 py-2 border border-[#203338] focus:outline-none focus:border-[#14b8a6]" />
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 pt-2">
+            <button (click)="submitExperience()"
+              class="px-5 py-2 bg-[#14b8a6] hover:bg-[#0d9488] text-[#071918] font-black text-xs rounded-xl cursor-pointer">
+              {{ editingExperienceId ? 'Update' : 'Save Experience' }}
+            </button>
+            <button (click)="cancelEditExperience()"
+              class="px-4 py-2 bg-[#18262a] hover:bg-[#203338] border border-[#203338] text-white font-bold text-xs rounded-xl cursor-pointer">
+              Cancel
+            </button>
+          </div>
+        </div>
+
+        <!-- Experience Cards Grid -->
+        <div *ngIf="!editingExperienceMode" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div *ngFor="let x of experiences"
+            class="bg-[#111c1f] border border-[#1f3236] rounded-2xl p-4 sm:p-5 shadow-xl flex items-start justify-between group hover:border-[#14b8a6]/40 transition-all">
+            <div class="flex items-start gap-3.5">
+              <div
+                class="w-11 h-11 rounded-xl bg-[#a855f7]/15 border border-[#a855f7]/30 flex items-center justify-center text-[#a855f7] shrink-0">
+                <i class="fa-solid fa-hospital-user text-base"></i>
               </div>
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Issuing
-                  Organization</label>
-                <input class="input-modern" [(ngModel)]="certEdit[eid].issuingOrganization" placeholder="Institution" />
-              </div>
-              <div class="space-y-1.5">
-                <app-date-picker [(ngModel)]="certEdit[eid].issueDate" label="Issue Date" placeholder="Select Date">
-                </app-date-picker>
-              </div>
-              <div class="space-y-1.5">
-                <app-date-picker [(ngModel)]="certEdit[eid].expiryDate" label="Expiry Date" placeholder="Select Date">
-                </app-date-picker>
-              </div>
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Credential ID
-                  (Optional)</label>
-                <input class="input-modern" [(ngModel)]="certEdit[eid].credentialId" placeholder="ID" />
-              </div>
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Verification URL
-                  (Optional)</label>
-                <input class="input-modern" [(ngModel)]="certEdit[eid].credentialUrl" placeholder="https://..." />
-              </div>
-              <div class="space-y-1.5 md:col-span-2">
-                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Additional
-                  Details</label>
-                <textarea class="input min-h-[100px]" [(ngModel)]="certEdit[eid].details"
-                  placeholder="Describe this certification..."></textarea>
+              <div class="space-y-1">
+                <h4 class="font-bold text-white text-sm sm:text-base">{{ x.position }}</h4>
+                <p class="text-xs text-[#8b9cb0] font-medium">{{ x.hospitalName }}</p>
+                <div class="flex items-center gap-2 text-[10px] text-[#64748b] font-bold mt-1">
+                  <span class="bg-[#18262a] border border-[#203338] px-2 py-0.5 rounded text-[#a855f7]">{{
+                    x.yearsOfService }} Years</span>
+                  <span *ngIf="x.details">• {{ x.details }}</span>
+                </div>
               </div>
             </div>
-            <div class="flex items-center gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
-              <button class="btn-primary flex-1 md:flex-none md:min-w-[150px]"
-                (click)="saveCertificateMeta(findCert(eid))">
-                <i class="fa-solid fa-check"></i> Save Details
+
+            <div class="flex items-center gap-1">
+              <button (click)="startEditExperience(x)"
+                class="w-8 h-8 rounded-lg bg-[#18262a] hover:bg-[#203338] border border-[#203338] text-[#8b9cb0] hover:text-[#14b8a6] flex items-center justify-center cursor-pointer">
+                <i class="fa-solid fa-pen text-xs"></i>
               </button>
-              <button class="btn-secondary !px-8" (click)="cancelEditCert()">Cancel</button>
+              <button (click)="deleteExperience(x)"
+                class="w-8 h-8 rounded-lg bg-[#18262a] hover:bg-[#ef4444]/20 border border-[#203338] hover:border-[#ef4444]/40 text-[#8b9cb0] hover:text-[#ef4444] flex items-center justify-center cursor-pointer">
+                <i class="fa-solid fa-trash text-xs"></i>
+              </button>
             </div>
+          </div>
+
+          <div *ngIf="experiences.length === 0" class="md:col-span-2">
+            <app-empty-state icon="fa-solid fa-briefcase" title="No experience listed"
+              message="Click Add Experience to record your medical roles."></app-empty-state>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content 4: CERTIFICATES TAB -->
+      <div *ngIf="activeTab==='certificates'" class="space-y-5 animate-in fade-in duration-300">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base sm:text-lg font-black text-white">Medical Certificates</h2>
+          <button (click)="startAddCertificate()" *ngIf="!editingCertificatesMode"
+            class="px-4 py-2 bg-[#14b8a6] hover:bg-[#0d9488] text-[#071918] font-black text-xs rounded-xl cursor-pointer flex items-center gap-2">
+            <i class="fa-solid fa-upload text-xs"></i> Upload Certificate
+          </button>
+        </div>
+
+        <!-- Add Certificate Form -->
+        <div *ngIf="editingCertificatesMode"
+          class="bg-[#111c1f] border border-[#1f3236] rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-award text-[#14b8a6]"></i> Upload Certificate File
+          </h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-[#8b9cb0]">Select File (PDF, Image)</label>
+              <input type="file" #certFileInput (change)="onCertFileSelected($event)" accept="application/pdf,image/*"
+                class="w-full bg-[#18262a] text-white text-xs rounded-xl px-3 py-2 border border-[#203338]" />
+            </div>
+
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-[#8b9cb0]">Description</label>
+              <input [(ngModel)]="certDescription" placeholder="e.g. Fellowship Certificate"
+                class="w-full bg-[#18262a] text-white text-xs rounded-xl px-3.5 py-2 border border-[#203338] focus:outline-none focus:border-[#14b8a6]" />
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 pt-2">
+            <button (click)="uploadCertificate()" [disabled]="uploadingCertificate || !certFile"
+              class="px-5 py-2 bg-[#14b8a6] hover:bg-[#0d9488] text-[#071918] font-black text-xs rounded-xl cursor-pointer disabled:opacity-40">
+              {{ uploadingCertificate ? 'Uploading...' : 'Start Upload' }}
+            </button>
+            <button (click)="cancelAddCertificate()"
+              class="px-4 py-2 bg-[#18262a] hover:bg-[#203338] border border-[#203338] text-white font-bold text-xs rounded-xl cursor-pointer">
+              Cancel
+            </button>
+          </div>
+        </div>
+
+        <!-- Certificate Cards List -->
+        <div *ngIf="!editingCertificatesMode" class="space-y-3">
+          <div *ngFor="let c of certificates"
+            class="bg-[#111c1f] border border-[#1f3236] rounded-2xl p-4 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4 group hover:border-[#14b8a6]/40 transition-all">
+            <div class="flex items-center gap-3.5 w-full sm:w-auto">
+              <div
+                class="w-11 h-11 rounded-xl bg-[#f59e0b]/15 border border-[#f59e0b]/30 flex items-center justify-center text-[#f59e0b] shrink-0">
+                <i class="fa-solid fa-file-contract text-base"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-white text-sm truncate max-w-xs">{{ c.name || c.originalFilename || 'Medical
+                  Certificate' }}</h4>
+                <p class="text-xs text-[#8b9cb0] font-medium mt-0.5">{{ c.details || 'Verified Credential' }}</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 self-end sm:self-auto">
+              <a *ngIf="c.url" [href]="c.url" target="_blank"
+                class="px-3 py-1.5 rounded-lg bg-[#18262a] hover:bg-[#203338] border border-[#203338] text-[#14b8a6] text-xs font-bold transition-all flex items-center gap-1.5">
+                <i class="fa-solid fa-eye text-xs"></i> View
+              </a>
+              <button (click)="deleteCertificate(c)"
+                class="w-8 h-8 rounded-lg bg-[#18262a] hover:bg-[#ef4444]/20 border border-[#203338] hover:border-[#ef4444]/40 text-[#8b9cb0] hover:text-[#ef4444] flex items-center justify-center cursor-pointer">
+                <i class="fa-solid fa-trash text-xs"></i>
+              </button>
+            </div>
+          </div>
+
+          <div *ngIf="certificates.length === 0">
+            <app-empty-state icon="fa-solid fa-award" title="No certificates uploaded"
+              message="Upload your medical licenses and certifications."></app-empty-state>
           </div>
         </div>
       </div>
 
     </section>
 
-    <!-- Loading & States -->
-    <div *ngIf="loading()"
-      class="absolute inset-0 z-50 bg-white/60 dark:bg-gray-950/60 backdrop-blur-md flex flex-col items-center justify-center rounded-[2rem]">
-      <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-      <p class="text-gray-500 font-bold uppercase tracking-widest text-xs">Accessing Medical Profile...</p>
-    </div>
-
-    <div *ngIf="error()"
-      class="absolute inset-0 z-50 bg-white dark:bg-gray-950 flex flex-col items-center justify-center p-10 text-center animate-in fade-in duration-300 rounded-[2rem]">
-      <div
-        class="w-20 h-20 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
-        <i class="fa-solid fa-circle-exclamation"></i>
-      </div>
-      <h3 class="text-xl font-black text-gray-900 dark:text-white mb-2">Something went wrong</h3>
-      <p class="text-gray-500 dark:text-gray-400 mb-6">{{ error() }}</p>
-      <button class="btn-primary mx-auto" (click)="loadAll()">
-        <i class="fa-solid fa-rotate"></i> Try Again
-      </button>
-    </div>
   </div>
 </app-doctor-layout>

@@ -2,11 +2,34 @@
     display: block;
 }
 
-.pattern-dots {
-    background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
-    background-size: 24px 24px;
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
 }
 
-:host-context(.dark) .pattern-dots {
-    background-image: radial-gradient(#374151 1.5px, transparent 1.5px);
+.animate-slide-in-right {
+    animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Custom Thin Scrollbar for Drawer */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #203338;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #14b8a6;
 }

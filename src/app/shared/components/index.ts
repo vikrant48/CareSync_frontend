@@ -8,3 +8,5 @@ export * from './date-range-picker/date-range-picker.component';
 export * from './status-badge/status-badge.component';
 export * from './card/card.component';
 export * from './modal/modal.component';
+export * from './filter-bar/filter-bar.component';
+

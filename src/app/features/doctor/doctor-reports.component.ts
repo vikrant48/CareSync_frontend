@@ -49,6 +49,7 @@ export class DoctorReportsComponent implements OnInit {
   seasonalData: number[] = [];
   dailyTrendLabels: string[] = [];
   dailyTrendData: number[] = [];
+  selectedTimeRange: string = 'THIS_MONTH';
 
   // Per-card loading flags
   loadingOverall = true;
@@ -63,6 +64,10 @@ export class DoctorReportsComponent implements OnInit {
   loadingSeasonalTrends = true;
   loadingAppointmentTrendsDaily = true;
   loadingRevenueAnalysis = true;
+
+  exportReport() {
+    window.print();
+  }
 
   ngOnInit(): void {
     if (this.doctorId == null) {

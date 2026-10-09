@@ -60,6 +60,22 @@ export class DoctorScheduleComponent implements OnInit {
         return count;
     }
 
+    get totalCount(): number {
+        return this.todayAppointments.length;
+    }
+
+    get confirmedCount(): number {
+        return this.todayAppointments.filter(a => a.status === 'CONFIRMED' || a.status === 'IN_PROGRESS' || a.status === 'COMPLETED').length;
+    }
+
+    get pendingCount(): number {
+        return this.todayAppointments.filter(a => a.status === 'BOOKED' || a.status === 'SCHEDULED').length;
+    }
+
+    get cancelledCount(): number {
+        return this.todayAppointments.filter(a => a.status === 'CANCELLED' || a.status === 'CANCELLED_BY_PATIENT' || a.status === 'CANCELLED_BY_DOCTOR').length;
+    }
+
     // Modal State
     showPatientModal = false;
     selectedAppointment: DoctorAppointmentItem | null = null;

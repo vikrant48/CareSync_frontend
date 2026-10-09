@@ -1,0 +1,18 @@
+/* Thin Custom Scrollbars */
+.custom-scrollbar::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #1f3236;
+    border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #14b8a6;
+}

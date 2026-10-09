@@ -15,47 +15,10 @@
             </a>
         </section>
 
-        <!-- Filter Bar (Matching Reference Screenshot 1) -->
-        <section class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-4 shadow-xl">
-            <div class="flex items-center justify-between mb-3 pb-2 border-b border-[#2a3347]">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-sliders text-[#5b6cf0] text-xs"></i>
-                    <span class="text-xs font-bold text-white uppercase tracking-wider">Filters</span>
-                </div>
-                <button (click)="clearFilters()"
-                    class="text-xs text-[#5b6cf0] hover:text-indigo-300 font-semibold flex items-center gap-1 transition-colors">
-                    <i class="fa-solid fa-rotate-left text-[10px]"></i>
-                    <span>Clear Filters</span>
-                </button>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
-                <!-- Status -->
-                <div class="space-y-0.5">
-                    <app-select-dropdown label="Status" [(ngModel)]="statusFilter" [options]="statusOptions"
-                        placeholder="All Statuses">
-                    </app-select-dropdown>
-                </div>
-
-                <!-- Specialization -->
-                <div class="space-y-0.5">
-                    <label class="filter-label">Specialization</label>
-                    <div class="relative w-full">
-                        <i
-                            class="fa-solid fa-stethoscope absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs sm:text-sm pointer-events-none z-10"></i>
-                        <input type="text" class="filter-input-search" [(ngModel)]="specializationFilter"
-                            placeholder="e.g. Cardiology..." />
-                    </div>
-                </div>
-
-                <!-- Date Range -->
-                <div class="space-y-0.5">
-                    <app-select-dropdown label="Date Range" [(ngModel)]="rangeFilter" [options]="rangeOptions"
-                        placeholder="All Time">
-                    </app-select-dropdown>
-                </div>
-            </div>
-        </section>
+        <!-- Filter Bar -->
+        <app-filter-bar [filters]="patientFilterConfigs" [values]="patientFilterValues" [theme]="'patient'"
+            (filterChange)="onFilterBarChange($event)">
+        </app-filter-bar>
 
         <!-- Summary & Sort Toolbar -->
         <div class="flex items-center justify-between py-1">

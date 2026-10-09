@@ -6,11 +6,12 @@ import { AuthService } from '../../core/services/auth.service';
 import { DoctorProfileService, DocumentItem } from '../../core/services/doctor-profile.service';
 import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropdown.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
+import { FilterBarComponent, FilterConfig } from '../../shared/components';
 
 @Component({
   selector: 'app-doctor-documents',
   standalone: true,
-  imports: [CommonModule, FormsModule, DoctorLayoutComponent, SelectDropdownComponent, EmptyStateComponent],
+  imports: [CommonModule, FormsModule, DoctorLayoutComponent, SelectDropdownComponent, EmptyStateComponent, FilterBarComponent],
   templateUrl: './doctor-document.component.html',
   styleUrl: './doctor-document.component.css'
 })
@@ -35,6 +36,7 @@ export class DoctorDocumentsComponent implements OnInit {
   successMessage: string | null = null;
 
   // Filter state
+  searchTerm = signal<string>('');
   filterType: string = 'ALL';
   filterCategory: 'ALL' | 'Education' | 'Experience' | 'Other' = 'ALL';
   filterEducationSubtype: string = 'ALL';
@@ -94,6 +96,46 @@ export class DoctorDocumentsComponent implements OnInit {
     ...this.educationSubtypes.map(s => ({ value: s, label: s }))
   ];
 
+  get documentFilterConfigs(): FilterConfig[] {
+    return [
+      {
+        type: 'search',
+        key: 'searchTerm',
+        label: 'Search',
+        placeholder: 'Search by file name or description...'
+      },
+      {
+        type: 'select',
+        key: 'filterType',
+        label: 'Type',
+        placeholder: 'All Types',
+        options: this.typeFilterOptions
+      },
+      {
+        type: 'select',
+        key: 'filterCategory',
+        label: 'Category',
+        placeholder: 'All Categories',
+        options: this.categoryFilterOptions
+      }
+    ];
+  }
+
+  get documentFilterValues(): Record<string, any> {
+    return {
+      searchTerm: this.searchTerm(),
+      filterType: this.filterType,
+      filterCategory: this.filterCategory
+    };
+  }
+
+  onFilterBarChange(values: Record<string, any>) {
+    this.searchTerm.set(values['searchTerm'] || '');
+    this.filterType = values['filterType'] || 'ALL';
+    this.filterCategory = values['filterCategory'] || 'ALL';
+    this.applyFilters();
+  }
+
   ngOnInit(): void {
     const idStr = this.auth.userId();
     this.doctorId = idStr ? Number(idStr) : null;
@@ -127,6 +169,7 @@ export class DoctorDocumentsComponent implements OnInit {
     this.svc.deleteDocument(doc.id).subscribe({
       next: () => {
         this.documents = this.documents.filter((d) => d.id !== doc.id);
+        this.applyFilters();
       },
     });
   }
@@ -158,7 +201,6 @@ export class DoctorDocumentsComponent implements OnInit {
 
     this.svc.uploadDoctorDocument(this.selectedFile, this.doctorId, type, description).subscribe({
       next: (resp) => {
-        // Optimistically add to list (normalize to DocumentItem shape if needed)
         const newDoc: DocumentItem = {
           id: resp?.id,
           originalFilename: resp?.filename || this.selectedFile!.name,
@@ -194,6 +236,14 @@ export class DoctorDocumentsComponent implements OnInit {
 
   applyFilters() {
     let list = this.documents || [];
+    const query = (this.searchTerm() || '').trim().toLowerCase();
+    if (query) {
+      list = list.filter((d) =>
+        (d.originalFilename || '').toLowerCase().includes(query) ||
+        (d.description || '').toLowerCase().includes(query) ||
+        (d.documentType || '').toLowerCase().includes(query)
+      );
+    }
     if (this.filterType && this.filterType !== 'ALL') {
       list = list.filter((d) => (d.documentType || '').toUpperCase() === this.filterType.toUpperCase());
     }
@@ -211,9 +261,57 @@ export class DoctorDocumentsComponent implements OnInit {
   }
 
   clearFilters() {
+    this.searchTerm.set('');
     this.filterType = 'ALL';
     this.filterCategory = 'ALL';
     this.filterEducationSubtype = 'ALL';
     this.applyFilters();
+  }
+
+  getFileExtension(doc: DocumentItem): string {
+    if (!doc?.originalFilename) return 'FILE';
+    const parts = doc.originalFilename.split('.');
+    return parts.length > 1 ? parts[parts.length - 1].toUpperCase() : 'PDF';
+  }
+
+  getDocIconClass(doc: DocumentItem): string {
+    const type = (doc?.contentType || doc?.originalFilename || '').toLowerCase();
+    if (type.includes('pdf')) return 'fa-file-pdf text-[#ef4444]';
+    if (type.includes('image') || type.includes('jpg') || type.includes('png') || type.includes('jpeg')) return 'fa-file-image text-[#10b981]';
+    return 'fa-file-lines text-[#a855f7]';
+  }
+
+  getDocIconBgClass(doc: DocumentItem): string {
+    const type = (doc?.contentType || doc?.originalFilename || '').toLowerCase();
+    if (type.includes('pdf')) return 'bg-[#ef4444]/15 border border-[#ef4444]/30';
+    if (type.includes('image') || type.includes('jpg') || type.includes('png') || type.includes('jpeg')) return 'bg-[#10b981]/15 border border-[#10b981]/30';
+    return 'bg-[#a855f7]/15 border border-[#a855f7]/30';
+  }
+
+  getStatusBadge(doc: DocumentItem): { text: string; isVerified: boolean } {
+    const docType = (doc?.documentType || '').toUpperCase();
+    if (docType === 'CERTIFICATE' || docType === 'IDENTIFICATION' || docType === 'MEDICAL_DOCUMENT') {
+      return { text: 'Verified', isVerified: true };
+    }
+    return { text: 'Active', isVerified: false };
+  }
+
+  formatDate(dateStr: string): string {
+    if (!dateStr) return 'Oct 7, 2026';
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch {
+      return dateStr;
+    }
+  }
+
+  downloadDocument(doc: DocumentItem) {
+    if (!doc?.filePath) return;
+    window.open(doc.filePath, '_blank');
+  }
+
+  trackByDocId(_index: number, doc: DocumentItem): number {
+    return doc.id;
   }
 }

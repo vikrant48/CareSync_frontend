@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
@@ -29,7 +29,16 @@ export class LabTestManagementComponent implements OnInit {
   isLoading = signal<boolean>(false);
   isSubmitting = signal<boolean>(false);
   editingTest = signal<LabTest | null>(null);
-  showAddForm = false;
+  drawerOpen = signal<boolean>(false);
+
+  // Filters
+  searchTerm = signal<string>('');
+  statusFilter = signal<string>('ALL');
+  categoryFilter = signal<string>('ALL');
+  priceRangeFilter = signal<string>('ALL');
+  sortOrder = signal<string>('RECENTLY_ADDED');
+  viewMode = signal<'GRID' | 'LIST'>('GRID');
+
   protected readonly window = window;
 
   // Form
@@ -42,6 +51,13 @@ export class LabTestManagementComponent implements OnInit {
       description: ['', [Validators.maxLength(500)]],
       isActive: [true]
     });
+  }
+
+  @HostListener('document:keydown.escape')
+  handleEscapeKey() {
+    if (this.drawerOpen() && !this.isSubmitting()) {
+      this.closeDrawer();
+    }
   }
 
   ngOnInit() {
@@ -63,6 +79,59 @@ export class LabTestManagementComponent implements OnInit {
     });
   }
 
+  filteredLabTests(): LabTest[] {
+    let list = this.labTests();
+
+    // Search term
+    const search = this.searchTerm().trim().toLowerCase();
+    if (search) {
+      list = list.filter(t =>
+        t.testName.toLowerCase().includes(search) ||
+        (t.description && t.description.toLowerCase().includes(search))
+      );
+    }
+
+    // Status filter
+    const status = this.statusFilter();
+    if (status === 'ACTIVE') {
+      list = list.filter(t => t.isActive);
+    } else if (status === 'INACTIVE') {
+      list = list.filter(t => !t.isActive);
+    }
+
+    return list;
+  }
+
+  openAddDrawer() {
+    this.editingTest.set(null);
+    this.labTestForm.reset({ isActive: true });
+    this.drawerOpen.set(true);
+  }
+
+  openEditDrawer(test: LabTest) {
+    this.editingTest.set(test);
+    this.labTestForm.patchValue({
+      testName: test.testName,
+      price: test.price,
+      description: test.description || '',
+      isActive: test.isActive
+    });
+    this.drawerOpen.set(true);
+  }
+
+  closeDrawer() {
+    if (this.isSubmitting()) return;
+    this.drawerOpen.set(false);
+    this.editingTest.set(null);
+    this.labTestForm.reset({ isActive: true });
+  }
+
+  onBackdropClick(event: MouseEvent) {
+    if ((event.target as HTMLElement).classList.contains('backdrop-overlay')) {
+      this.closeDrawer();
+    }
+  }
+
   onSubmit() {
     if (this.labTestForm.valid) {
       this.isSubmitting.set(true);
@@ -73,15 +142,14 @@ export class LabTestManagementComponent implements OnInit {
         : this.labTestService.createLabTest(formData);
 
       request$.subscribe({
-        next: (response) => {
+        next: () => {
           const message = this.editingTest()
             ? 'Lab test updated successfully!'
-            : 'Lab test created successfully!';
+            : 'Lab test created successfully.';
           this.toast.showSuccess(message);
-          this.labTestForm.reset({ isActive: true });
-          this.editingTest.set(null);
-          this.loadAllLabTests();
           this.isSubmitting.set(false);
+          this.closeDrawer();
+          this.loadAllLabTests();
         },
         error: (error) => {
           console.error('Error saving lab test:', error);
@@ -91,23 +159,6 @@ export class LabTestManagementComponent implements OnInit {
         }
       });
     }
-  }
-
-  editTest(test: LabTest) {
-    this.editingTest.set(test);
-    this.labTestForm.patchValue({
-      testName: test.testName,
-      price: test.price,
-      description: test.description || '',
-      isActive: test.isActive
-    });
-    // Scroll to form
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  cancelEdit() {
-    this.editingTest.set(null);
-    this.labTestForm.reset({ isActive: true });
   }
 
   toggleTestStatus(test: LabTest) {
@@ -129,6 +180,13 @@ export class LabTestManagementComponent implements OnInit {
         this.toast.showError('Failed to update test status. Please try again.');
       }
     });
+  }
+
+  clearFilters() {
+    this.searchTerm.set('');
+    this.statusFilter.set('ALL');
+    this.categoryFilter.set('ALL');
+    this.priceRangeFilter.set('ALL');
   }
 
   clearMessages() {
