@@ -44,7 +44,7 @@ export class AppointmentProcessTabComponent implements OnChanges {
         { name: 'Completed', state: 'UPCOMING', description: 'Consultation completed & record locked' }
     ];
 
-    @HostListener('document:click', ['$event'])
+    @HostListener('document:click')
     onDocumentClick(): void {
         this.openDropdownIndex = null;
     }

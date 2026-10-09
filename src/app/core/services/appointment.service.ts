@@ -31,6 +31,7 @@ export interface PatientAppointmentItem {
   transactionId?: string;
   appointmentMedicalHistory?: any;
   medicalHistory?: any[];
+  feedbackSubmitted?: boolean;
 }
 
 export interface DoctorAppointmentItem {
