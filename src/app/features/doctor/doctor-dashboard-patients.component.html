@@ -1,0 +1,45 @@
+<div class="h-full w-full surface p-5 shadow-sm flex flex-col space-y-4">
+  <div class="flex items-center justify-between gap-3 pb-1">
+    <h2 class="text-sm font-extrabold text-[var(--text)] tracking-tight min-w-0">Recent Patients</h2>
+    <a routerLink="/doctor/appointments" class="shrink-0 whitespace-nowrap text-xs font-bold text-[var(--primary)] hover:underline">View All</a>
+  </div>
+
+  <div *ngIf="patients.length === 0" class="flex-1 flex flex-col items-center justify-center text-center py-8">
+    <div class="w-14 h-14 rounded-full bg-[var(--bg)] text-[var(--primary)] flex items-center justify-center mb-3">
+      <i class="fa-solid fa-user-group" aria-hidden="true"></i>
+    </div>
+    <p class="text-sm font-bold text-[var(--text)]">No recent patients</p>
+    <p class="text-xs text-muted mt-1">Patients from today's appointments will show up here.</p>
+  </div>
+  <div *ngIf="patients.length > 0" class="overflow-x-auto">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="border-b border-[var(--border)] text-[10px] font-bold text-muted uppercase tracking-wider">
+          <th class="py-2.5 px-3">PATIENT</th>
+          <th *ngIf="showAge" class="py-2.5 px-3">AGE</th>
+          <th class="py-2.5 px-3">CONDITION</th>
+          <th class="py-2.5 px-3">LAST VISIT</th>
+          <th class="py-2.5 px-3 text-right">STATUS</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-[var(--border)] text-xs font-medium text-[var(--text)]">
+        <tr *ngFor="let p of patients; trackBy: trackPatient" class="hover:bg-[var(--bg)] transition-colors cursor-pointer" (click)="openPatient.emit(p.appointment)">
+          <td class="py-3 px-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-full overflow-hidden border border-[var(--border)] bg-[var(--bg)] shrink-0">
+                <img [src]="p.avatar" class="w-full h-full object-cover" onerror="this.src='assets/default-profile.png'" />
+              </div>
+              <span class="font-extrabold text-[var(--text)]">{{ p.name }}</span>
+            </div>
+          </td>
+          <td *ngIf="showAge" class="py-3 px-3 text-muted">{{ p.age }}</td>
+          <td class="py-3 px-3 text-muted">{{ p.condition }}</td>
+          <td class="py-3 px-3 text-muted">{{ p.lastVisit }}</td>
+          <td class="py-3 px-3 text-right">
+            <app-status-badge *ngIf="p.status" [status]="p.status" size="sm"></app-status-badge>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

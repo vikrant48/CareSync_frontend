@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { LabTestService, BookingResponse } from '../../core/services/lab-test.service';
@@ -13,11 +13,12 @@ import { SkeletonComponent } from '../../shared/ui/skeleton.component';
 import { StatusBadgeComponent } from '../../shared/ui/status-badge.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
+import { FilterBarComponent, FilterConfig } from '../../shared/components';
 
 @Component({
   selector: 'app-patient-lab-bookings',
   standalone: true,
-  imports: [CommonModule, PatientLayoutComponent, PaymentPopupComponent, SkeletonComponent, StatusBadgeComponent, EmptyStateComponent, ModalShellComponent],
+  imports: [CommonModule, PatientLayoutComponent, PaymentPopupComponent, SkeletonComponent, StatusBadgeComponent, EmptyStateComponent, ModalShellComponent, FilterBarComponent],
   templateUrl: './patient-lab-bookings.component.html',
   styleUrl: './patient-lab-bookings.component.css'
 })
@@ -41,6 +42,41 @@ export class PatientLabBookingsComponent implements OnInit {
   // Filter & Sort signals
   statusFilter = signal<'ALL' | 'UPCOMING' | 'COMPLETED' | 'CANCELLED'>('ALL');
   sortOption = signal<'latest' | 'oldest' | 'amount-high' | 'amount-low'>('latest');
+
+  readonly bookingFilterConfigs: FilterConfig[] = [
+    {
+      type: 'radio',
+      key: 'statusFilter',
+      label: 'Status',
+      defaultValue: 'ALL',
+      width: 'w-full',
+      options: [
+        { label: 'All', value: 'ALL' },
+        { label: 'Upcoming', value: 'UPCOMING' },
+        { label: 'Completed', value: 'COMPLETED' },
+        { label: 'Cancelled', value: 'CANCELLED' }
+      ]
+    },
+    {
+      type: 'select',
+      key: 'sortOption',
+      label: 'Sort',
+      defaultValue: 'latest',
+      width: 'w-full sm:w-56',
+      clearable: false,
+      options: [
+        { label: 'Latest', value: 'latest' },
+        { label: 'Oldest', value: 'oldest' },
+        { label: 'Price: High to Low', value: 'amount-high' },
+        { label: 'Price: Low to High', value: 'amount-low' }
+      ]
+    }
+  ];
+
+  bookingFilterValues: Record<string, string> = {
+    statusFilter: 'ALL',
+    sortOption: 'latest'
+  };
 
   // File upload signals
   isUploading = signal<boolean>(false);
@@ -96,6 +132,30 @@ export class PatientLabBookingsComponent implements OnInit {
     }
 
     return list;
+  }
+
+  constructor() {
+    effect(() => {
+      const status = this.bookingFilterConfigs.find((c) => c.key === 'statusFilter');
+      if (!status) return;
+      status.options = [
+        { label: `All (${this.totalCount})`, value: 'ALL' },
+        { label: `Upcoming (${this.upcomingCount})`, value: 'UPCOMING' },
+        { label: `Completed (${this.completedCount})`, value: 'COMPLETED' },
+        { label: `Cancelled (${this.cancelledCount})`, value: 'CANCELLED' }
+      ];
+    });
+  }
+
+  onBookingFilterChange(values: Record<string, string>) {
+    const status = values['statusFilter'] || 'ALL';
+    if (status === 'UPCOMING' || status === 'COMPLETED' || status === 'CANCELLED' || status === 'ALL') {
+      this.statusFilter.set(status);
+    }
+    const sort = values['sortOption'] || 'latest';
+    if (sort === 'latest' || sort === 'oldest' || sort === 'amount-high' || sort === 'amount-low') {
+      this.sortOption.set(sort);
+    }
   }
 
   setStatusFilter(filter: 'ALL' | 'UPCOMING' | 'COMPLETED' | 'CANCELLED') {

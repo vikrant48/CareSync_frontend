@@ -6,13 +6,13 @@ import { CommonModule } from '@angular/common';
  * Project filter fields as default content; optional [filterSummary] slot.
  */
 @Component({
-  selector: 'app-filter-bar',
+  selector: 'app-filter-panel',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './filter-bar.component.html',
   styleUrl: './filter-bar.component.css'
 })
-export class FilterBarComponent {
+export class FilterPanelComponent {
   @Input() title = 'Filters';
   @Input() activeCount = 0;
   @Input() showClear = true;

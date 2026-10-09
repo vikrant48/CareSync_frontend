@@ -12,13 +12,13 @@ export interface SearchableOption {
 }
 
 @Component({
-  selector: 'app-searchable-select',
+  selector: 'app-searchable-select-field',
   standalone: true,
   imports: [CommonModule, FormsModule],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => SearchableSelectComponent),
+      useExisting: forwardRef(() => SearchableSelectFieldComponent),
       multi: true
     }
   ],
@@ -155,7 +155,7 @@ export interface SearchableOption {
     </div>
   `
 })
-export class SearchableSelectComponent implements ControlValueAccessor {
+export class SearchableSelectFieldComponent implements ControlValueAccessor {
   @Input() label?: string;
   @Input() placeholder = 'Search and select option...';
   @Input() options: SearchableOption[] = [];

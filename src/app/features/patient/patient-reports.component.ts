@@ -8,13 +8,13 @@ import { AnalyticsApiService } from '../../core/services/analytics.service';
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { DoctorService, Doctor } from '../../core/services/doctor.service';
 import { AppointmentService, PatientAppointmentItem } from '../../core/services/appointment.service';
-import { StatusBadgeComponent } from '../../shared/ui/status-badge.component';
 import { UserAvatarComponent } from '../../shared/components/user-avatar.component';
+import { PatientReportsActivityComponent } from './patient-reports-activity.component';
 
 @Component({
   selector: 'app-patient-reports',
   standalone: true,
-  imports: [CommonModule, RouterModule, ChartWidgetComponent, PatientLayoutComponent, StatusBadgeComponent, UserAvatarComponent],
+  imports: [CommonModule, RouterModule, ChartWidgetComponent, PatientLayoutComponent, UserAvatarComponent, PatientReportsActivityComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './patient-reports.component.html',
   styleUrl: './patient-reports.component.css'
@@ -129,11 +129,19 @@ export class PatientReportsComponent implements OnInit {
     return Math.round((count / this.totalStatusCount) * 100);
   }
 
+  trackDoctor(_index: number, doc: { doctorId: number; name: string }): string {
+    return `${doc.doctorId}-${doc.name}`;
+  }
+
+  trackIndex(index: number): number {
+    return index;
+  }
+
   viewAppointment(id: number) {
     if (id) {
       this.router.navigate(['/patient/appointments', id]);
     } else {
-      this.router.navigate(['/patient/my-appointments']);
+      this.router.navigate(['/patient/appointments']);
     }
   }
 

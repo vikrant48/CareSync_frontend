@@ -1,20 +1,21 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AdminService, UserSummary, BlockedIP, AdminDoctorListItem } from '../../core/services/admin.service';
 import { DoctorService, Doctor } from '../../core/services/doctor.service';
 import { DoctorProfileService } from '../../core/services/doctor-profile.service';
 import { MasterDataService } from '../../core/services/master-data.service';
 import { ToastService } from '../../core/services/toast.service';
-import { AuthService } from '../../core/services/auth.service';
 import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 import { SkeletonComponent } from '../../shared/ui/skeleton.component';
-import { FilterBarComponent } from '../../shared/ui/filter-bar.component';
+import { FilterBarComponent, FilterConfig } from '../../shared/components';
+import { AdminChromeComponent, AdminSection } from './admin-chrome.component';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ModalShellComponent, SkeletonComponent, FilterBarComponent],
+  imports: [CommonModule, FormsModule, ModalShellComponent, SkeletonComponent, FilterBarComponent, AdminChromeComponent],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.css'
 })
@@ -24,7 +25,8 @@ export class AdminDashboardComponent implements OnInit {
   doctorProfileService = inject(DoctorProfileService);
   masterService = inject(MasterDataService);
   toastService = inject(ToastService);
-  authService = inject(AuthService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   activeTab: 'users' | 'doctors' | 'master' | 'security' = 'users';
 
@@ -33,16 +35,70 @@ export class AdminDashboardComponent implements OnInit {
   selectedRoleFilter = 'ALL';
   togglingUsername: string | null = null;
 
+  readonly userFilterConfigs: FilterConfig[] = [
+    {
+      type: 'search',
+      key: 'userSearch',
+      label: 'Search',
+      placeholder: 'Search username...',
+      defaultValue: ''
+    },
+    {
+      type: 'select',
+      key: 'role',
+      label: 'Role',
+      defaultValue: 'ALL',
+      width: 'w-full sm:w-56',
+      options: [
+        { label: 'All Roles', value: 'ALL' },
+        { label: 'DOCTOR', value: 'DOCTOR' },
+        { label: 'PATIENT', value: 'PATIENT' },
+        { label: 'ADMIN', value: 'ADMIN' }
+      ]
+    }
+  ];
+
+  userFilterValues: Record<string, string> = {
+    userSearch: '',
+    role: 'ALL'
+  };
+
   doctors: AdminDoctorListItem[] = [];
   doctorSearch = '';
   selectedDoctorVerificationFilter: 'ALL' | 'VERIFIED' | 'UNVERIFIED' = 'ALL';
+
+  readonly doctorFilterConfigs: FilterConfig[] = [
+    {
+      type: 'search',
+      key: 'doctorSearch',
+      label: 'Search',
+      placeholder: 'Search doctor name or spec...',
+      defaultValue: ''
+    },
+    {
+      type: 'select',
+      key: 'verification',
+      label: 'Verification',
+      defaultValue: 'ALL',
+      width: 'w-full sm:w-64',
+      options: [
+        { label: 'All Verification Status', value: 'ALL' },
+        { label: 'Verified Only', value: 'VERIFIED' },
+        { label: 'Pending / Unverified Only', value: 'UNVERIFIED' }
+      ]
+    }
+  ];
+
+  doctorFilterValues: Record<string, string> = {
+    doctorSearch: '',
+    verification: 'ALL'
+  };
   doctorPage = 0;
   doctorSize = 30;
   doctorTotalElements = 0;
   doctorTotalPages = 0;
   totalVerifiedDoctorsCount = 0;
   totalPendingDoctorsCount = 0;
-  private doctorSearchTimeout: any = null;
 
   loadingUsers = true;
   loadingDoctors = true;
@@ -76,10 +132,34 @@ export class AdminDashboardComponent implements OnInit {
   isSubmittingPasswordReset = false;
 
   ngOnInit() {
+    this.route.queryParamMap.subscribe((params) => {
+      const tab = params.get('tab');
+      if (tab === 'users' || tab === 'doctors' || tab === 'master' || tab === 'security') {
+        this.activeTab = tab;
+      }
+    });
     this.loadUsers();
     this.loadDoctors();
     this.loadBlockedIPs();
     this.loadCurrentMasterItems();
+  }
+
+  openSection(tab: AdminSection, verification?: 'ALL' | 'VERIFIED' | 'UNVERIFIED') {
+    if (tab === 'analytics') {
+      this.router.navigate(['/admin/appointment-analytics']);
+      return;
+    }
+    if (tab === 'doctors' && verification) {
+      this.selectedDoctorVerificationFilter = verification;
+      this.doctorFilterValues = {
+        doctorSearch: this.doctorSearch,
+        verification
+      };
+      this.doctorPage = 0;
+      this.loadDoctors();
+    }
+    this.activeTab = tab;
+    this.router.navigate(['/admin'], { queryParams: { tab } });
   }
 
   loadUsers() {
@@ -96,16 +176,9 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  get userFilterActiveCount(): number {
-    let count = 0;
-    if (this.userSearch) count++;
-    if (this.selectedRoleFilter !== 'ALL') count++;
-    return count;
-  }
-
-  clearUserFilters() {
-    this.userSearch = '';
-    this.selectedRoleFilter = 'ALL';
+  onUserFilterChange(values: Record<string, string>) {
+    this.userSearch = values['userSearch'] || '';
+    this.selectedRoleFilter = values['role'] || 'ALL';
   }
 
   get filteredUsers(): UserSummary[] {
@@ -153,19 +226,19 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  onDoctorSearchChange() {
-    if (this.doctorSearchTimeout) {
-      clearTimeout(this.doctorSearchTimeout);
+  onDoctorFilterChange(values: Record<string, string>) {
+    const search = values['doctorSearch'] || '';
+    const verification = values['verification'] || 'ALL';
+    const verificationChanged = verification !== this.selectedDoctorVerificationFilter;
+    const searchChanged = search !== this.doctorSearch;
+    this.doctorSearch = search;
+    if (verification === 'VERIFIED' || verification === 'UNVERIFIED' || verification === 'ALL') {
+      this.selectedDoctorVerificationFilter = verification;
     }
-    this.doctorSearchTimeout = setTimeout(() => {
+    if (searchChanged || verificationChanged) {
       this.doctorPage = 0;
       this.loadDoctors();
-    }, 300);
-  }
-
-  onDoctorVerificationFilterChange() {
-    this.doctorPage = 0;
-    this.loadDoctors();
+    }
   }
 
   goToDoctorPage(page: number) {
@@ -173,20 +246,6 @@ export class AdminDashboardComponent implements OnInit {
       this.doctorPage = page;
       this.loadDoctors();
     }
-  }
-
-  get doctorFilterActiveCount(): number {
-    let count = 0;
-    if (this.doctorSearch) count++;
-    if (this.selectedDoctorVerificationFilter !== 'ALL') count++;
-    return count;
-  }
-
-  clearDoctorFilters() {
-    this.doctorSearch = '';
-    this.selectedDoctorVerificationFilter = 'ALL';
-    this.doctorPage = 0;
-    this.loadDoctors();
   }
 
   get filteredDoctors(): AdminDoctorListItem[] {
@@ -418,9 +477,5 @@ export class AdminDashboardComponent implements OnInit {
 
   get blockedIPsCount(): number {
     return this.blockedIPs.length;
-  }
-
-  logout() {
-    this.authService.logout();
   }
 }

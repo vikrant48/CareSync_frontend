@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 export type AppointmentStatusType = 'BOOKED' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'PENDING' | string;
 
 @Component({
-    selector: 'app-status-badge',
+    selector: 'app-status-badge-legacy',
     standalone: true,
     imports: [CommonModule],
     template: `
@@ -33,7 +33,7 @@ export type AppointmentStatusType = 'BOOKED' | 'CONFIRMED' | 'IN_PROGRESS' | 'CO
     </span>
   `
 })
-export class StatusBadgeComponent {
+export class LegacyStatusBadgeComponent {
     @Input() status: AppointmentStatusType = 'PENDING';
     @Input() label?: string;
     @Input() showDot = true;

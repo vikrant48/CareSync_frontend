@@ -96,38 +96,34 @@ export class DoctorDocumentsComponent implements OnInit {
     ...this.educationSubtypes.map(s => ({ value: s, label: s }))
   ];
 
-  get documentFilterConfigs(): FilterConfig[] {
-    return [
-      {
-        type: 'search',
-        key: 'searchTerm',
-        label: 'Search',
-        placeholder: 'Search by file name or description...'
-      },
-      {
-        type: 'select',
-        key: 'filterType',
-        label: 'Type',
-        placeholder: 'All Types',
-        options: this.typeFilterOptions
-      },
-      {
-        type: 'select',
-        key: 'filterCategory',
-        label: 'Category',
-        placeholder: 'All Categories',
-        options: this.categoryFilterOptions
-      }
-    ];
-  }
+  readonly documentFilterConfigs: FilterConfig[] = [
+    {
+      type: 'search',
+      key: 'searchTerm',
+      label: 'Search',
+      placeholder: 'Search by file name or description...'
+    },
+    {
+      type: 'select',
+      key: 'filterType',
+      label: 'Type',
+      placeholder: 'All Types',
+      options: this.typeFilterOptions
+    },
+    {
+      type: 'select',
+      key: 'filterCategory',
+      label: 'Category',
+      placeholder: 'All Categories',
+      options: this.categoryFilterOptions
+    }
+  ];
 
-  get documentFilterValues(): Record<string, any> {
-    return {
-      searchTerm: this.searchTerm(),
-      filterType: this.filterType,
-      filterCategory: this.filterCategory
-    };
-  }
+  documentFilterValues: Record<string, any> = {
+    searchTerm: '',
+    filterType: 'ALL',
+    filterCategory: 'ALL'
+  };
 
   onFilterBarChange(values: Record<string, any>) {
     this.searchTerm.set(values['searchTerm'] || '');
@@ -265,6 +261,11 @@ export class DoctorDocumentsComponent implements OnInit {
     this.filterType = 'ALL';
     this.filterCategory = 'ALL';
     this.filterEducationSubtype = 'ALL';
+    this.documentFilterValues = {
+      searchTerm: '',
+      filterType: 'ALL',
+      filterCategory: 'ALL'
+    };
     this.applyFilters();
   }
 

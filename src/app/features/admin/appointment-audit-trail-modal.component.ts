@@ -2,11 +2,12 @@ import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, injec
 import { CommonModule } from '@angular/common';
 import { AppointmentApiService } from '../../core/services/appointment-api.service';
 import { AppointmentStatusLogDto } from '../../core/models/appointment.models';
+import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 
 @Component({
     selector: 'app-appointment-audit-trail-modal',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, ModalShellComponent],
     templateUrl: './appointment-audit-trail-modal.component.html',
     styleUrl: './appointment-audit-trail-modal.component.css'
 })
@@ -42,5 +43,9 @@ export class AppointmentAuditTrailModalComponent implements OnChanges {
 
     closeModal(): void {
         this.close.emit();
+    }
+
+    trackLog(_index: number, log: AppointmentStatusLogDto): number {
+        return log.id;
     }
 }

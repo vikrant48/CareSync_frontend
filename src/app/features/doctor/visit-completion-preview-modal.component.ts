@@ -1,166 +1,131 @@
 import { Component, Input, Output, EventEmitter, ElementRef, inject, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 import { CompletionPreview } from '../../core/models/appointment.models';
 
 @Component({
   selector: 'app-visit-completion-preview-modal',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ModalShellComponent],
   template: `
-    <div *ngIf="isOpen" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-gray-950/85 backdrop-blur-md animate-fade-in">
-      <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-4xl w-full p-6 shadow-2xl space-y-6 overflow-hidden max-h-[90vh] flex flex-col">
-        
-        <!-- Header -->
-        <div class="flex items-center justify-between border-b border-gray-800 pb-4 shrink-0">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
-              <i class="fa-solid fa-clipboard-check text-lg"></i>
-            </div>
-            <div>
-              <h2 class="text-lg font-bold text-gray-100 flex items-center gap-2">
-                <span *ngIf="!isCompleted">Stage 7: Visit Completion & Clinical Document Preview</span>
-                <span *ngIf="isCompleted">Visit Clinical Record & Prescription Preview</span>
-              </h2>
-              <p class="text-xs text-gray-400" *ngIf="!isCompleted">Appointment #{{ appointmentId }} &bull; Review all clinical entries prior to binding e-signature</p>
-              <p class="text-xs text-gray-400" *ngIf="isCompleted">Appointment #{{ appointmentId }} &bull; Signed & Finalized Clinical Record</p>
-            </div>
-          </div>
-          <button (click)="closeModal()" class="p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800 rounded-xl transition-colors">
-            <i class="fa-solid fa-xmark text-lg"></i>
-          </button>
-        </div>
+    <app-modal-shell [open]="isOpen" [title]="dialogTitle" [subtitle]="dialogSubtitle" titleId="visit-preview-title"
+      icon="fa-solid fa-clipboard-check" iconWrapClass="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
+      maxWidthClass="max-w-4xl" zIndexClass="z-[9999]" bodyClass="p-4 sm:p-6 space-y-4"
+      footerClass="p-4" [hasFooter]="true" (close)="closeModal()">
 
-        <!-- Readiness Banner -->
-        <div *ngIf="previewData" class="shrink-0 p-3.5 rounded-xl border flex items-center justify-between"
-             [ngClass]="(isCompleted || isReady) ? 'bg-emerald-950/30 border-emerald-500/30 text-emerald-300' : 'bg-amber-950/30 border-amber-500/30 text-amber-300'">
-          <div class="flex items-center gap-3 text-xs">
-            <i [class]="(isCompleted || isReady) ? 'fa-solid fa-circle-check text-emerald-400 text-base' : 'fa-solid fa-triangle-exclamation text-amber-400 text-base'"></i>
-            <div>
-              <div class="font-bold text-sm">
-                {{ isCompleted ? 'Consultation completed and electronically signed.' : (isReady ? 'All mandatory clinical records are saved and verified.' : 'Record validation check incomplete.') }}
-              </div>
-              <div class="text-[11px] opacity-80">
-                {{ isCompleted ? 'Viewing verified medical record and AI SOAP summary.' : (isReady ? 'Review the summary below and proceed to legal e-signature.' : (previewData.readinessReasons.join(', ') || 'Validation pending')) }}
-              </div>
+      <div *ngIf="previewData" class="p-3.5 rounded-xl border"
+           [ngClass]="(isCompleted || isReady) ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-500/30 text-emerald-900 dark:text-emerald-100' : 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-500/30 text-amber-900 dark:text-amber-100'">
+        <div class="flex items-start gap-3 text-xs">
+          <i [class]="(isCompleted || isReady) ? 'fa-solid fa-circle-check text-base mt-0.5' : 'fa-solid fa-triangle-exclamation text-base mt-0.5'"></i>
+          <div>
+            <div class="font-bold text-sm">
+              {{ isCompleted ? 'Consultation completed and electronically signed.' : (isReady ? 'All mandatory clinical records are saved and verified.' : 'Record validation check incomplete.') }}
+            </div>
+            <div class="text-[11px] mt-0.5">
+              {{ isCompleted ? 'Viewing verified medical record and AI SOAP summary.' : (isReady ? 'Review the summary below and proceed to legal e-signature.' : (previewData.readinessReasons.join(', ') || 'Validation pending')) }}
             </div>
           </div>
         </div>
-
-        <!-- Scrollable Content Body -->
-        <div *ngIf="previewData" class="overflow-y-auto pr-1 flex-1 space-y-6">
-
-          <!-- Patient Header Badge -->
-          <div class="bg-gray-950/60 border border-gray-800 rounded-xl p-4 flex items-center justify-between">
-            <div>
-              <div class="text-xs text-gray-400 font-medium">Patient Name</div>
-              <div class="text-base font-bold text-white">{{ previewData.patientName }}</div>
-            </div>
-            <div class="flex items-center gap-6 text-xs text-gray-400">
-              <div *ngIf="previewData.patientAge">Age: <span class="text-gray-200 font-semibold">{{ previewData.patientAge }} yrs</span></div>
-              <div *ngIf="previewData.patientGender">Gender: <span class="text-gray-200 font-semibold">{{ previewData.patientGender }}</span></div>
-            </div>
-          </div>
-
-          <!-- 1. Patient Intake Summary -->
-          <div class="bg-gray-950/50 border border-gray-800 rounded-xl p-4 space-y-3">
-            <div class="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
-              <i class="fa-solid fa-user-pen"></i> Stage 3: Patient Intake & AI Triage Summary
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-              <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-800">
-                <div class="text-gray-400 font-semibold mb-1">Chief Complaint:</div>
-                <div class="text-gray-200">{{ previewData.intake?.chiefComplaint || 'Not specified' }}</div>
-              </div>
-              <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-800">
-                <div class="text-gray-400 font-semibold mb-1">Symptoms & Duration:</div>
-                <div class="text-gray-200">{{ previewData.intake?.symptoms || 'N/A' }} ({{ previewData.intake?.duration || 'N/A' }})</div>
-              </div>
-            </div>
-            <div *ngIf="previewData.intake?.aiTriageSummary" class="bg-cyan-950/20 border border-cyan-500/20 rounded-lg p-3 text-xs text-cyan-200">
-              <span class="font-bold text-cyan-400">AI Intake Triage Summary:</span> {{ previewData.intake.aiTriageSummary }}
-            </div>
-          </div>
-
-          <!-- 2. AI SOAP Note -->
-          <div class="bg-gray-950/50 border border-gray-800 rounded-xl p-4 space-y-3">
-            <div class="text-xs font-bold text-purple-400 uppercase tracking-wider flex items-center gap-2">
-              <i class="fa-solid fa-notes-medical"></i> Stage 6: AI SOAP Clinical Notes
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-              <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-800 space-y-1">
-                <div class="text-blue-400 font-bold">Subjective:</div>
-                <p class="text-gray-300 whitespace-pre-wrap">{{ previewData.soapReport?.subjective || 'None' }}</p>
-              </div>
-              <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-800 space-y-1">
-                <div class="text-emerald-400 font-bold">Objective:</div>
-                <p class="text-gray-300 whitespace-pre-wrap">{{ previewData.soapReport?.objective || 'None' }}</p>
-              </div>
-              <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-800 space-y-1">
-                <div class="text-amber-400 font-bold">Assessment:</div>
-                <p class="text-gray-300 whitespace-pre-wrap">{{ previewData.soapReport?.assessment || 'None' }}</p>
-              </div>
-              <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-800 space-y-1">
-                <div class="text-purple-400 font-bold">Plan:</div>
-                <p class="text-gray-300 whitespace-pre-wrap">{{ previewData.soapReport?.plan || 'None' }}</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- 3. Final Medical Record -->
-          <div class="bg-gray-950/50 border border-gray-800 rounded-xl p-4 space-y-3">
-            <div class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
-              <i class="fa-solid fa-file-prescription"></i> Medical Record & Prescriptions
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-              <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-800">
-                <div class="text-gray-400 font-semibold mb-1">Primary Diagnosis:</div>
-                <div class="text-emerald-300 font-bold">{{ previewData.medicalHistory?.diagnosis || 'Not entered' }}</div>
-              </div>
-              <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-800">
-                <div class="text-gray-400 font-semibold mb-1">Treatment Plan:</div>
-                <div class="text-gray-200">{{ previewData.medicalHistory?.treatment || 'N/A' }}</div>
-              </div>
-              <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-800">
-                <div class="text-gray-400 font-semibold mb-1">Prescribed Medicines:</div>
-                <div class="text-gray-200">{{ previewData.medicalHistory?.medicine || 'None' }}</div>
-              </div>
-              <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-800">
-                <div class="text-gray-400 font-semibold mb-1">Dosage & Frequency:</div>
-                <div class="text-gray-200">{{ previewData.medicalHistory?.doses || 'N/A' }}</div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Modal Footer Actions -->
-        <div class="flex items-center justify-between border-t border-gray-800 pt-4 shrink-0">
-          <button *ngIf="!isCompleted" (click)="onBackToEdit()"
-                  class="px-4 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-semibold transition-all flex items-center gap-2">
-            <i class="fa-solid fa-arrow-left"></i>
-            <span>Back to Edit (Medical Record)</span>
-          </button>
-          <div *ngIf="isCompleted"></div>
-
-          <div class="flex items-center gap-3">
-            <button (click)="closeModal()" class="px-4 py-2.5 rounded-xl bg-gray-900 hover:bg-gray-800 text-gray-400 text-xs font-semibold transition-all">
-              Close
-            </button>
-            <button *ngIf="!isCompleted" (click)="onProceedToSign()" [disabled]="!isReady"
-                    class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 disabled:opacity-50 text-gray-950 font-bold text-xs transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
-              <i class="fa-solid fa-file-signature"></i>
-              <span>Proceed to Electronic Signature & Complete</span>
-            </button>
-            <button *ngIf="isCompleted" (click)="onDownloadPdf()"
-                    class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all shadow-lg shadow-emerald-600/20 flex items-center gap-2">
-              <i class="fa-solid fa-file-pdf"></i>
-              <span>Download Rx PDF</span>
-            </button>
-          </div>
-        </div>
-
       </div>
-    </div>
+
+      <ng-container *ngIf="previewData">
+        <div class="bg-[var(--bg)] border border-[var(--border)] rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <div class="text-xs text-muted font-medium">Patient Name</div>
+            <div class="text-base font-bold text-[var(--text)]">{{ previewData.patientName }}</div>
+          </div>
+          <div class="flex items-center gap-6 text-xs text-muted">
+            <div *ngIf="previewData.patientAge">Age: <span class="text-[var(--text)] font-semibold">{{ previewData.patientAge }} yrs</span></div>
+            <div *ngIf="previewData.patientGender">Gender: <span class="text-[var(--text)] font-semibold">{{ previewData.patientGender }}</span></div>
+          </div>
+        </div>
+
+        <div class="bg-[var(--bg)] border border-[var(--border)] rounded-xl p-4 space-y-3">
+          <div class="text-xs font-bold text-cyan-700 dark:text-cyan-300 uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-user-pen"></i> Stage 3: Patient Intake & AI Triage Summary
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            <div class="bg-[var(--panel)] p-3 rounded-lg border border-[var(--border)]">
+              <div class="text-muted font-semibold mb-1">Chief Complaint:</div>
+              <div class="text-[var(--text)]">{{ previewData.intake?.chiefComplaint || 'Not specified' }}</div>
+            </div>
+            <div class="bg-[var(--panel)] p-3 rounded-lg border border-[var(--border)]">
+              <div class="text-muted font-semibold mb-1">Symptoms & Duration:</div>
+              <div class="text-[var(--text)]">{{ previewData.intake?.symptoms || 'N/A' }} ({{ previewData.intake?.duration || 'N/A' }})</div>
+            </div>
+          </div>
+          <div *ngIf="previewData.intake?.aiTriageSummary" class="bg-cyan-50 dark:bg-cyan-950/30 border border-cyan-200 dark:border-cyan-500/30 rounded-lg p-3 text-xs text-cyan-900 dark:text-cyan-100">
+            <span class="font-bold">AI Intake Triage Summary:</span> {{ previewData.intake.aiTriageSummary }}
+          </div>
+        </div>
+
+        <div class="bg-[var(--bg)] border border-[var(--border)] rounded-xl p-4 space-y-3">
+          <div class="text-xs font-bold text-purple-700 dark:text-purple-300 uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-notes-medical"></i> Stage 6: AI SOAP Clinical Notes
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            <div class="bg-[var(--panel)] p-3 rounded-lg border border-[var(--border)] space-y-1">
+              <div class="text-blue-700 dark:text-blue-300 font-bold">Subjective:</div>
+              <p class="text-[var(--text)] whitespace-pre-wrap">{{ previewData.soapReport?.subjective || 'None' }}</p>
+            </div>
+            <div class="bg-[var(--panel)] p-3 rounded-lg border border-[var(--border)] space-y-1">
+              <div class="text-emerald-700 dark:text-emerald-300 font-bold">Objective:</div>
+              <p class="text-[var(--text)] whitespace-pre-wrap">{{ previewData.soapReport?.objective || 'None' }}</p>
+            </div>
+            <div class="bg-[var(--panel)] p-3 rounded-lg border border-[var(--border)] space-y-1">
+              <div class="text-amber-700 dark:text-amber-300 font-bold">Assessment:</div>
+              <p class="text-[var(--text)] whitespace-pre-wrap">{{ previewData.soapReport?.assessment || 'None' }}</p>
+            </div>
+            <div class="bg-[var(--panel)] p-3 rounded-lg border border-[var(--border)] space-y-1">
+              <div class="text-purple-700 dark:text-purple-300 font-bold">Plan:</div>
+              <p class="text-[var(--text)] whitespace-pre-wrap">{{ previewData.soapReport?.plan || 'None' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-[var(--bg)] border border-[var(--border)] rounded-xl p-4 space-y-3">
+          <div class="text-xs font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-file-prescription"></i> Medical Record & Prescriptions
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            <div class="bg-[var(--panel)] p-3 rounded-lg border border-[var(--border)]">
+              <div class="text-muted font-semibold mb-1">Primary Diagnosis:</div>
+              <div class="text-emerald-700 dark:text-emerald-300 font-bold">{{ previewData.medicalHistory?.diagnosis || 'Not entered' }}</div>
+            </div>
+            <div class="bg-[var(--panel)] p-3 rounded-lg border border-[var(--border)]">
+              <div class="text-muted font-semibold mb-1">Treatment Plan:</div>
+              <div class="text-[var(--text)]">{{ previewData.medicalHistory?.treatment || 'N/A' }}</div>
+            </div>
+            <div class="bg-[var(--panel)] p-3 rounded-lg border border-[var(--border)]">
+              <div class="text-muted font-semibold mb-1">Prescribed Medicines:</div>
+              <div class="text-[var(--text)]">{{ previewData.medicalHistory?.medicine || 'None' }}</div>
+            </div>
+            <div class="bg-[var(--panel)] p-3 rounded-lg border border-[var(--border)]">
+              <div class="text-muted font-semibold mb-1">Dosage & Frequency:</div>
+              <div class="text-[var(--text)]">{{ previewData.medicalHistory?.doses || 'N/A' }}</div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <div modalFooter class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 w-full">
+        <button *ngIf="!isCompleted" type="button" (click)="onBackToEdit()" class="btn-secondary">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>Back to Edit</span>
+        </button>
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:ml-auto">
+          <button type="button" (click)="closeModal()" class="btn-secondary">Close</button>
+          <button *ngIf="!isCompleted" type="button" (click)="onProceedToSign()" [disabled]="!isReady" class="btn-primary">
+            <i class="fa-solid fa-file-signature"></i>
+            <span>Proceed to Electronic Signature</span>
+          </button>
+          <button *ngIf="isCompleted" type="button" (click)="onDownloadPdf()" class="btn-primary">
+            <i class="fa-solid fa-file-pdf"></i>
+            <span>Download Rx PDF</span>
+          </button>
+        </div>
+      </div>
+    </app-modal-shell>
   `
 })
 export class VisitCompletionPreviewModalComponent implements OnChanges, OnDestroy {
@@ -192,6 +157,18 @@ export class VisitCompletionPreviewModalComponent implements OnChanges, OnDestro
     if (this.elementRef.nativeElement.parentNode) {
       this.elementRef.nativeElement.parentNode.removeChild(this.elementRef.nativeElement);
     }
+  }
+
+  get dialogTitle(): string {
+    return this.isCompleted
+      ? 'Visit Clinical Record & Prescription Preview'
+      : 'Stage 7: Visit Completion & Clinical Document Preview';
+  }
+
+  get dialogSubtitle(): string {
+    return this.isCompleted
+      ? `Appointment #${this.appointmentId} • Signed & Finalized Clinical Record`
+      : `Appointment #${this.appointmentId} • Review all clinical entries prior to binding e-signature`;
   }
 
   get isReady(): boolean {

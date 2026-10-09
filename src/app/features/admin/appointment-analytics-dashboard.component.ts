@@ -1,8 +1,9 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { AppointmentApiService } from '../../core/services/appointment-api.service';
 import { AppointmentAnalyticsResponse } from '../../core/models/appointment.models';
+import { AdminChromeComponent } from './admin-chrome.component';
+import { FilterBarComponent, FilterConfig } from '../../shared/components';
 
 interface FunnelStep {
     name: string;
@@ -18,7 +19,7 @@ interface StatusCountItem {
 @Component({
     selector: 'app-appointment-analytics-dashboard',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, AdminChromeComponent, FilterBarComponent],
     templateUrl: './appointment-analytics-dashboard.component.html',
     styleUrl: './appointment-analytics-dashboard.component.css'
 })
@@ -27,6 +28,39 @@ export class AppointmentAnalyticsDashboardComponent implements OnInit {
 
     startDate: string = '';
     endDate: string = '';
+
+    readonly analyticsFilterConfigs: FilterConfig[] = [
+        {
+            type: 'date',
+            key: 'startDate',
+            label: 'Start Date',
+            placeholder: 'Start date',
+            defaultValue: '',
+            width: 'w-full sm:w-56'
+        },
+        {
+            type: 'date',
+            key: 'endDate',
+            label: 'End Date',
+            placeholder: 'End date',
+            defaultValue: '',
+            width: 'w-full sm:w-56'
+        },
+        {
+            type: 'button',
+            key: 'reset',
+            buttonLabel: 'Reset',
+            buttonIcon: 'fa-solid fa-rotate-left',
+            clearable: false,
+            width: 'w-full sm:w-auto',
+            onClick: () => this.resetFilters()
+        }
+    ];
+
+    analyticsFilterValues: Record<string, string> = {
+        startDate: '',
+        endDate: ''
+    };
     loading: boolean = false;
     analytics: AppointmentAnalyticsResponse | null = null;
     funnelSteps: FunnelStep[] = [];
@@ -51,9 +85,19 @@ export class AppointmentAnalyticsDashboardComponent implements OnInit {
         });
     }
 
+    onAnalyticsFilterChange(values: Record<string, string>): void {
+        this.startDate = values['startDate'] || '';
+        this.endDate = values['endDate'] || '';
+        this.loadAnalytics();
+    }
+
     resetFilters(): void {
         this.startDate = '';
         this.endDate = '';
+        this.analyticsFilterValues = {
+            startDate: '',
+            endDate: ''
+        };
         this.loadAnalytics();
     }
 

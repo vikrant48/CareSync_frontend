@@ -1,9 +1,11 @@
-import { Component, OnInit, inject, signal, HostListener } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
+import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 import { LabTestService, LabTest } from '../../core/services/lab-test.service';
 import { ToastService } from '../../core/services/toast.service';
+import { FilterBarComponent, FilterConfig } from '../../shared/components';
 
 interface CreateLabTestRequest {
   testName: string;
@@ -15,7 +17,7 @@ interface CreateLabTestRequest {
 @Component({
   selector: 'app-lab-test-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, DoctorLayoutComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, DoctorLayoutComponent, ModalShellComponent, FilterBarComponent],
   templateUrl: './lab-test-management.component.html',
   styleUrl: './lab-test-management.component.css'
 })
@@ -36,6 +38,39 @@ export class LabTestManagementComponent implements OnInit {
   statusFilter = signal<string>('ALL');
   categoryFilter = signal<string>('ALL');
   priceRangeFilter = signal<string>('ALL');
+
+  readonly testFilterConfigs: FilterConfig[] = [
+    {
+      type: 'search',
+      key: 'searchTerm',
+      label: 'Search',
+      placeholder: 'Search test name or description...',
+      defaultValue: ''
+    },
+    {
+      type: 'select',
+      key: 'statusFilter',
+      label: 'Status',
+      placeholder: 'All Statuses',
+      defaultValue: 'ALL',
+      width: 'w-full sm:w-56',
+      options: [
+        { label: 'All Statuses', value: 'ALL' },
+        { label: 'Active', value: 'ACTIVE' },
+        { label: 'Inactive', value: 'INACTIVE' }
+      ]
+    }
+  ];
+
+  testFilterValues: Record<string, string> = {
+    searchTerm: '',
+    statusFilter: 'ALL'
+  };
+
+  onFilterBarChange(values: Record<string, string>) {
+    this.searchTerm.set(values['searchTerm'] || '');
+    this.statusFilter.set(values['statusFilter'] || 'ALL');
+  }
   sortOrder = signal<string>('RECENTLY_ADDED');
   viewMode = signal<'GRID' | 'LIST'>('GRID');
 
@@ -51,13 +86,6 @@ export class LabTestManagementComponent implements OnInit {
       description: ['', [Validators.maxLength(500)]],
       isActive: [true]
     });
-  }
-
-  @HostListener('document:keydown.escape')
-  handleEscapeKey() {
-    if (this.drawerOpen() && !this.isSubmitting()) {
-      this.closeDrawer();
-    }
   }
 
   ngOnInit() {
@@ -126,12 +154,6 @@ export class LabTestManagementComponent implements OnInit {
     this.labTestForm.reset({ isActive: true });
   }
 
-  onBackdropClick(event: MouseEvent) {
-    if ((event.target as HTMLElement).classList.contains('backdrop-overlay')) {
-      this.closeDrawer();
-    }
-  }
-
   onSubmit() {
     if (this.labTestForm.valid) {
       this.isSubmitting.set(true);
@@ -187,6 +209,10 @@ export class LabTestManagementComponent implements OnInit {
     this.statusFilter.set('ALL');
     this.categoryFilter.set('ALL');
     this.priceRangeFilter.set('ALL');
+    this.testFilterValues = {
+      searchTerm: '',
+      statusFilter: 'ALL'
+    };
   }
 
   clearMessages() {

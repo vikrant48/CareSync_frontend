@@ -47,6 +47,7 @@ export const routes: Routes = [
   { path: 'settings', component: SettingsComponent, canActivate: [authGuard] },
   {
     path: 'admin',
+    pathMatch: 'full',
     component: AdminDashboardComponent,
     canActivate: [authGuard, roleGuard],
     data: { roles: ['ADMIN'] }

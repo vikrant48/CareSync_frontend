@@ -17,11 +17,12 @@
 <!-- Header Banner Template -->
 <ng-template #labTestsHeader>
   <header
-    class="relative overflow-hidden bg-[#151b2b] border border-[#2a3347] rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-6">
+    class="relative overflow-hidden border border-[var(--border)] rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-6"
+    [ngClass]="currentRole() === 'DOCTOR' ? 'bg-gradient-to-r from-[var(--accent-soft)] via-[var(--panel)] to-[var(--primary-soft)]' : 'bg-[var(--panel)]'">
     <!-- Left Banner Info -->
     <div class="relative z-10 space-y-1">
-      <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Lab Tests Booking</h1>
-      <p class="text-xs sm:text-sm text-[#9aa3b8] max-w-xl">
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">Lab Tests Booking</h1>
+      <p class="text-xs sm:text-sm text-[var(--muted)] max-w-xl">
         Select and book your lab tests online with instant digital report generation.
       </p>
     </div>
@@ -29,8 +30,8 @@
     <!-- Right Action Button -->
     <div class="relative z-10 flex items-center gap-3">
       <button (click)="navigateToBooking()"
-        class="bg-[#1b2333] hover:bg-[#253047] border border-[#2a3347] text-white font-semibold text-xs sm:text-sm px-4 sm:px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2">
-        <i class="fa-regular fa-calendar-check text-[#5b6cf0] text-sm"></i>
+        class="bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] font-semibold text-xs sm:text-sm px-4 sm:px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2">
+        <i class="fa-regular fa-calendar-check text-[var(--primary)] text-sm"></i>
         <span>View My Bookings</span>
       </button>
     </div>
@@ -39,7 +40,7 @@
     <div
       class="absolute right-4 top-1/2 -translate-y-1/2 w-48 h-32 opacity-20 pointer-events-none hidden md:flex items-center justify-center">
       <div class="relative w-24 h-24 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-400 blur-2xl"></div>
-      <i class="fa-solid fa-flask-vial text-7xl text-[#5b6cf0] absolute"></i>
+      <i class="fa-solid fa-flask-vial text-7xl text-[var(--primary)] absolute"></i>
     </div>
   </header>
 </ng-template>
@@ -50,15 +51,15 @@
   <!-- Loading State -->
   <div *ngIf="isLoading()" class="flex flex-col items-center justify-center py-16 text-center space-y-3">
     <div
-      class="w-12 h-12 rounded-full bg-[#1b2333] border border-[#2a3347] flex items-center justify-center text-[#5b6cf0]">
+      class="w-12 h-12 rounded-full bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-[var(--primary)]">
       <i class="fa-solid fa-spinner fa-spin text-xl"></i>
     </div>
-    <p class="text-xs sm:text-sm text-[#9aa3b8]">Loading available lab tests...</p>
+    <p class="text-xs sm:text-sm text-[var(--muted)]">Loading available lab tests...</p>
   </div>
 
   <!-- Patient Selection for Doctors -->
   <div *ngIf="currentRole() === 'DOCTOR' && !isLoading()"
-    class="mb-6 p-4 bg-[#151b2b] border border-[#2a3347] rounded-2xl shadow-sm">
+    class="mb-6 p-4 bg-[var(--panel)] border border-[var(--border)] rounded-2xl shadow-sm">
     <app-searchable-select label="Select Patient for Booking"
       placeholder="Search and select a patient by name, email, or contact..."
       searchPlaceholder="Type patient name, email, or contact..." [options]="patients()" [value]="selectedPatientId()"
@@ -72,62 +73,27 @@
   <!-- Main Container -->
   <div *ngIf="!isLoading()" class="pb-32 space-y-6">
 
-    <!-- Category Filter Pills Bar (Matching Reference Screenshot 1) -->
-    <div class="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-none">
-      <button *ngFor="let tab of categoryTabs()" (click)="selectedCategory.set(tab.id)" [ngClass]="selectedCategory() === tab.id 
-                    ? 'bg-[#5b6cf0] text-white shadow-lg shadow-indigo-500/25 border-[#5b6cf0]' 
-                    : 'bg-[#151b2b] hover:bg-[#1b2333] text-[#9aa3b8] border-[#2a3347]'"
-        class="border font-semibold text-xs px-4 py-2.5 rounded-xl transition-all whitespace-nowrap flex items-center gap-2 shrink-0">
-        <i class="fa-solid" [ngClass]="tab.icon"></i>
-        <span>{{ tab.label }}</span>
-        <span [ngClass]="selectedCategory() === tab.id ? 'bg-white/20 text-white' : 'bg-[#1b2333] text-[#9aa3b8]'"
-          class="text-[10px] px-1.5 py-0.5 rounded-full font-bold min-w-5 text-center">
-          {{ tab.count }}
-        </span>
-      </button>
-    </div>
-
-    <!-- Search & Sort Bar -->
-    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-
-      <!-- Search Bar -->
-      <div class="relative w-full sm:flex-1">
-        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9aa3b8] text-xs"></i>
-        <input type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)"
-          placeholder="Search lab tests..."
-          class="w-full bg-[#151b2b] border border-[#2a3347] text-white text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-4 focus:outline-none focus:border-[#5b6cf0] transition-colors placeholder:text-slate-500" />
-      </div>
-
-      <!-- Sort Dropdown -->
-      <div class="flex items-center gap-2 self-end sm:self-auto w-full sm:w-auto">
-        <span class="text-xs text-[#9aa3b8] whitespace-nowrap hidden sm:inline">Sort by:</span>
-        <select [ngModel]="sortBy()" (ngModelChange)="sortBy.set($event)"
-          class="w-full sm:w-auto bg-[#151b2b] border border-[#2a3347] text-white text-xs rounded-xl px-4 py-2.5 focus:outline-none focus:border-[#5b6cf0]">
-          <option value="popular">Popular</option>
-          <option value="price_asc">Price: Low to High</option>
-          <option value="price_desc">Price: High to Low</option>
-          <option value="name_asc">Name: A to Z</option>
-        </select>
-      </div>
-    </div>
+    <app-filter-bar [filters]="labFilterConfigs" [values]="labFilterValues"
+      [theme]="currentRole() === 'DOCTOR' ? 'doctor' : 'patient'" (filterChange)="onLabFilterChange($event)">
+    </app-filter-bar>
 
     <!-- Table Control Header Bar (Full Body Checkup radio toggle & Unselect All) -->
-    <div class="bg-[#151b2b] border border-[#2a3347] rounded-xl px-4 py-3 flex items-center justify-between text-xs">
+    <div class="bg-[var(--panel)] border border-[var(--border)] rounded-xl px-4 py-3 flex items-center justify-between text-xs">
 
       <!-- Left Controls: Selection Checkbox & Full Body Checkup Radio -->
       <div class="flex items-center gap-4">
         <button (click)="toggleFullBodyCheckup()" class="flex items-center gap-2.5 group cursor-pointer select-none">
           <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all"
-            [ngClass]="isFullBodyCheckup() ? 'border-[#5b6cf0] bg-[#5b6cf0]' : 'border-[#2a3347] group-hover:border-slate-400'">
+            [ngClass]="isFullBodyCheckup() ? 'border-[var(--primary)] bg-[var(--primary)]' : 'border-[var(--border)] group-hover:border-slate-400'">
             <div class="w-1.5 h-1.5 rounded-full bg-white transition-transform"
               [ngClass]="isFullBodyCheckup() ? 'scale-100' : 'scale-0'"></div>
           </div>
-          <span class="font-semibold text-white flex items-center gap-2">
-            <i class="fa-solid fa-user-doctor text-[#5b6cf0] text-xs"></i>
+          <span class="font-semibold text-[var(--text)] flex items-center gap-2">
+            <i class="fa-solid fa-user-doctor text-[var(--primary)] text-xs"></i>
             <span>Full Body Checkup</span>
           </span>
           <span
-            class="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-bold px-2 py-0.5 rounded-full">
+            class="bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 text-[10px] font-bold px-2 py-0.5 rounded-full">
             Popular
           </span>
         </button>
@@ -136,7 +102,7 @@
       <!-- Right Controls: Unselect All Action -->
       <div *ngIf="selectedCount() > 0">
         <button (click)="unselectAllTests()"
-          class="text-[#5b6cf0] hover:text-indigo-300 font-semibold text-xs transition-colors flex items-center gap-1.5">
+          class="text-[var(--primary)] hover:text-indigo-300 font-semibold text-xs transition-colors flex items-center gap-1.5">
           <i class="fa-regular fa-circle-xmark text-xs"></i>
           <span>Unselect All</span>
         </button>
@@ -147,7 +113,7 @@
     <div class="space-y-3" *ngIf="filteredLabTests().length > 0">
 
       <!-- Table Headers (Desktop) -->
-      <div class="hidden md:grid grid-cols-12 gap-4 px-5 text-[10px] font-bold text-[#9aa3b8] uppercase tracking-wider">
+      <div class="hidden md:grid grid-cols-12 gap-4 px-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider">
         <div class="col-span-5 flex items-center gap-3">
           <div class="w-5"></div>
           <span>TEST NAME</span>
@@ -160,16 +126,16 @@
       <!-- Test Item Cards / Rows -->
       <div *ngFor="let test of filteredLabTests(); trackBy: trackByTestId" (click)="toggleTestSelection(test.id)"
         [ngClass]="isTestSelected(test.id) 
-                    ? 'bg-[#1b2333] border-[#5b6cf0] ring-1 ring-[#5b6cf0]' 
-                    : 'bg-[#151b2b] border-[#2a3347] hover:border-[#5b6cf0]/50'"
+                    ? 'bg-[var(--bg)] border-[var(--primary)] ring-1 ring-[var(--primary)]' 
+                    : 'bg-[var(--panel)] border-[var(--border)] hover:border-[var(--primary)]/50'"
         class="group border rounded-2xl p-4 sm:p-5 transition-all duration-200 cursor-pointer shadow-sm flex flex-col md:grid md:grid-cols-12 gap-4 items-center">
 
         <!-- Left: Checkbox, Icon, Test Name -->
         <div class="md:col-span-5 flex items-center gap-3.5 w-full">
           <!-- Checkbox -->
           <div class="w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center shrink-0"
-            [ngClass]="isTestSelected(test.id) ? 'bg-[#5b6cf0] border-[#5b6cf0]' : 'border-[#2a3347] group-hover:border-slate-400'">
-            <i class="fa-solid fa-check text-white text-[10px] transition-transform"
+            [ngClass]="isTestSelected(test.id) ? 'bg-[var(--primary)] border-[var(--primary)]' : 'border-[var(--border)] group-hover:border-slate-400'">
+            <i class="fa-solid fa-check text-[var(--text)] text-[10px] transition-transform"
               [ngClass]="isTestSelected(test.id) ? 'scale-100' : 'scale-0'"></i>
           </div>
 
@@ -178,15 +144,15 @@
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 flex-wrap">
               <h3
-                class="text-sm sm:text-base font-bold text-white group-hover:text-[#5b6cf0] transition-colors truncate">
+                class="text-sm sm:text-base font-bold text-[var(--text)] group-hover:text-[var(--primary)] transition-colors truncate">
                 {{ test.testName }}
               </h3>
               <span *ngIf="getTestCategoryInfo(test).isPopular"
-                class="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                class="bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 text-[10px] font-bold px-2 py-0.5 rounded-full">
                 Popular
               </span>
             </div>
-            <p class="text-xs text-[#9aa3b8] md:hidden mt-1 line-clamp-2" *ngIf="test.description">
+            <p class="text-xs text-[var(--muted)] md:hidden mt-1 line-clamp-2" *ngIf="test.description">
               {{ test.description }}
             </p>
           </div>
@@ -195,14 +161,14 @@
         <!-- Category Badge (Desktop) -->
         <div class="md:col-span-2 hidden md:flex items-center">
           <span
-            class="text-xs font-semibold text-[#5b6cf0] bg-[#5b6cf0]/10 border border-[#5b6cf0]/20 px-2.5 py-1 rounded-lg">
+            class="text-xs font-semibold text-[var(--primary)] bg-[var(--primary)]/10 border border-[var(--primary)]/20 px-2.5 py-1 rounded-lg">
             {{ getTestCategoryInfo(test).category }}
           </span>
         </div>
 
         <!-- Description (Desktop) -->
         <div class="md:col-span-3 hidden md:flex items-center">
-          <p class="text-xs text-[#9aa3b8] line-clamp-2" *ngIf="test.description">
+          <p class="text-xs text-[var(--muted)] line-clamp-2" *ngIf="test.description">
             {{ test.description }}
           </p>
         </div>
@@ -210,13 +176,13 @@
         <!-- Price & View Details -->
         <div class="md:col-span-2 flex items-center justify-between md:justify-end gap-3 w-full md:w-auto">
           <div class="text-right">
-            <div class="text-base sm:text-lg font-extrabold text-emerald-400 font-mono tracking-tight">
+            <div class="text-base sm:text-lg font-extrabold text-emerald-700 dark:text-emerald-400 font-mono tracking-tight">
               {{ formatPrice(test.price) }}
             </div>
           </div>
 
           <button (click)="openTestDetails(test, $event)"
-            class="text-xs font-semibold text-[#5b6cf0] hover:text-indigo-300 transition-colors flex items-center gap-1 shrink-0">
+            class="text-xs font-semibold text-[var(--primary)] hover:text-indigo-300 transition-colors flex items-center gap-1 shrink-0">
             <span>View Details</span>
             <i class="fa-solid fa-chevron-right text-[10px]"></i>
           </button>
@@ -226,16 +192,16 @@
 
     <!-- Empty State -->
     <div *ngIf="filteredLabTests().length === 0 && !isLoading()"
-      class="text-center py-16 bg-[#151b2b] border border-[#2a3347] rounded-2xl p-8 space-y-4">
+      class="text-center py-16 bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-8 space-y-4">
       <div
-        class="w-12 h-12 rounded-full bg-[#1b2333] border border-[#2a3347] flex items-center justify-center mx-auto text-[#9aa3b8]">
+        class="w-12 h-12 rounded-full bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center mx-auto text-[var(--muted)]">
         <i class="fa-solid fa-flask-vial text-xl opacity-40"></i>
       </div>
-      <h3 class="text-base font-bold text-white">No Lab Tests Found</h3>
-      <p class="text-xs text-[#9aa3b8] max-w-sm mx-auto">No tests match your selected filter or search query. Try
+      <h3 class="text-base font-bold text-[var(--text)]">No Lab Tests Found</h3>
+      <p class="text-xs text-[var(--muted)] max-w-sm mx-auto">No tests match your selected filter or search query. Try
         clearing search keywords.</p>
-      <button (click)="searchTerm.set(''); selectedCategory.set('ALL')"
-        class="bg-[#5b6cf0] text-white text-xs font-semibold px-4 py-2 rounded-xl">
+      <button (click)="clearLabFilters()"
+        class="bg-[var(--primary)] text-white text-xs font-semibold px-4 py-2 rounded-xl">
         Reset Filters
       </button>
     </div>
@@ -244,7 +210,7 @@
 
   <!-- Fixed Floating Bottom Cart Summary Bar (Matching Reference Screenshot 1) -->
   <div *ngIf="!isLoading() && labTests().length > 0"
-    class="fixed left-0 right-0 md:left-64 bottom-0 bg-[#0d1322]/95 backdrop-blur-xl border-t border-[#2a3347] py-3.5 px-4 sm:px-8 shadow-2xl z-40 transition-all duration-300">
+    class="fixed left-0 right-0 md:left-64 bottom-0 bg-[var(--bg)]/95 backdrop-blur-xl border-t border-[var(--border)] py-3.5 px-4 sm:px-8 shadow-2xl z-40 transition-all duration-300">
 
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
 
@@ -253,23 +219,23 @@
 
         <!-- Blue Cart Box Icon -->
         <div
-          class="w-12 h-12 rounded-2xl bg-[#5b6cf0] flex items-center justify-center text-white text-lg shadow-lg shadow-indigo-500/25 shrink-0">
+          class="w-12 h-12 rounded-2xl bg-[var(--primary)] flex items-center justify-center text-white text-lg shadow-lg shadow-indigo-500/25 shrink-0">
           <i class="fa-solid fa-cart-shopping"></i>
         </div>
 
         <!-- Text Details -->
         <div>
-          <div class="text-xs font-extrabold text-white">
+          <div class="text-xs font-extrabold text-[var(--text)]">
             {{ selectedCount() }} test{{ selectedCount() === 1 ? '' : 's' }} selected
           </div>
-          <div class="text-[11px] text-[#9aa3b8]">
+          <div class="text-[11px] text-[var(--muted)]">
             Total amount (incl. taxes)
           </div>
         </div>
 
         <!-- Green Price (Mobile right / Desktop middle) -->
         <div class="sm:ml-8 text-right sm:text-left">
-          <div class="text-xl sm:text-2xl font-extrabold text-emerald-400 font-mono tracking-tight">
+          <div class="text-xl sm:text-2xl font-extrabold text-emerald-700 dark:text-emerald-400 font-mono tracking-tight">
             {{ formatPrice(totalPrice()) }}
           </div>
         </div>
@@ -278,13 +244,13 @@
       <!-- Right Buttons: Clear All & Proceed to Book -->
       <div class="flex items-center gap-3 w-full sm:w-auto">
         <button (click)="clearSelections()" [disabled]="selectedCount() === 0 || isBooking()"
-          class="flex-1 sm:flex-none bg-[#1b2333] hover:bg-rose-500/10 text-slate-300 hover:text-rose-400 border border-[#2a3347] font-semibold text-xs sm:text-sm px-4 py-2.5 rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+          class="flex-1 sm:flex-none bg-[var(--bg)] hover:bg-rose-500/10 text-slate-300 hover:text-rose-700 dark:text-rose-400 border border-[var(--border)] font-semibold text-xs sm:text-sm px-4 py-2.5 rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
           <i class="fa-regular fa-trash-can text-xs"></i>
           <span>Clear All</span>
         </button>
 
         <button (click)="bookTests()" [disabled]="selectedCount() === 0 || isBooking()"
-          class="flex-1 sm:flex-none bg-[#5b6cf0] hover:bg-indigo-600 active:scale-95 text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl shadow-lg shadow-indigo-500/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+          class="flex-1 sm:flex-none bg-[var(--primary)] hover:bg-indigo-600 active:scale-95 text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl shadow-lg shadow-indigo-500/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
           <span *ngIf="isBooking()" class="animate-spin text-xs">●</span>
           <span>{{ isBooking() ? 'Processing...' : (currentRole() === 'PATIENT' ? 'Proceed to Book' : 'Book Tests')
             }}</span>
@@ -294,49 +260,28 @@
     </div>
   </div>
 
-  <!-- Test Details Modal -->
-  <div *ngIf="selectedTestForDetails()"
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-    <div class="bg-[#151b2b] border border-[#2a3347] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 relative">
-      <div class="flex items-center justify-between border-b border-[#2a3347] pb-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl border flex items-center justify-center shrink-0"
-            [ngClass]="getTestCategoryInfo(selectedTestForDetails()!).iconBg">
-            <i class="fa-solid text-base" [ngClass]="getTestCategoryInfo(selectedTestForDetails()!).icon"></i>
-          </div>
-          <div>
-            <h2 class="text-base font-bold text-white tracking-wide">{{ selectedTestForDetails()?.testName }}</h2>
-            <span class="text-xs text-[#5b6cf0] font-medium">{{ getTestCategoryInfo(selectedTestForDetails()!).category
-              }}</span>
-          </div>
-        </div>
-        <button (click)="closeTestDetails()" class="text-[#9aa3b8] hover:text-white">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
+  <app-modal-shell [open]="!!selectedTestForDetails()" [title]="selectedTestForDetails()?.testName || 'Test details'"
+    titleId="lab-test-details-title" maxWidthClass="max-w-md" [hasFooter]="true"
+    footerClass="p-4 flex justify-end" (close)="closeTestDetails()">
+    <p *ngIf="selectedTestForDetails() as test" modalHeaderExtra class="text-xs text-[var(--primary)] font-medium">
+      {{ getTestCategoryInfo(test).category }}
+    </p>
+    <div *ngIf="selectedTestForDetails() as test" class="space-y-3 text-xs text-[var(--muted)]">
+      <div class="w-10 h-10 rounded-xl border flex items-center justify-center shrink-0"
+        [ngClass]="getTestCategoryInfo(test).iconBg">
+        <i class="fa-solid text-base" [ngClass]="getTestCategoryInfo(test).icon"></i>
       </div>
-
-      <div class="space-y-3 text-xs text-[#9aa3b8]">
-        <div>
-          <label class="text-[10px] font-bold uppercase text-slate-400">Description</label>
-          <p class="text-white mt-1 leading-relaxed">{{ selectedTestForDetails()?.description || 'No detailed
-            description available.' }}</p>
-        </div>
-
-        <div class="pt-3 border-t border-[#2a3347] flex items-center justify-between">
-          <span class="text-xs font-bold text-white">Test Fee:</span>
-          <span class="text-lg font-extrabold text-emerald-400 font-mono">{{ formatPrice(selectedTestForDetails()?.price
-            || 0) }}</span>
-        </div>
+      <div>
+        <label class="form-label">Description</label>
+        <p class="text-[var(--text)] mt-1 leading-relaxed">{{ test.description || 'No detailed description available.' }}</p>
       </div>
-
-      <div class="flex justify-end pt-3 border-t border-[#2a3347]">
-        <button (click)="closeTestDetails()"
-          class="bg-[#5b6cf0] text-white text-xs font-semibold px-5 py-2.5 rounded-xl">
-          Close
-        </button>
+      <div class="pt-3 border-t border-[var(--border)] flex items-center justify-between">
+        <span class="text-xs font-bold text-[var(--text)]">Test Fee:</span>
+        <span class="text-lg font-extrabold text-emerald-700 dark:text-emerald-400 font-mono">{{ formatPrice(test.price || 0) }}</span>
       </div>
     </div>
-  </div>
+    <button modalFooter type="button" (click)="closeTestDetails()" class="btn-primary">Close</button>
+  </app-modal-shell>
 
 </ng-template>
 

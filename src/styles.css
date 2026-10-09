@@ -31,9 +31,10 @@
   --primary-fg: #ffffff;
   --primary-shadow: rgba(37, 99, 235, 0.28);
 
-  --accent: #0d9488;
-  --accent-hover: #0f766e;
-  --accent-soft: rgba(13, 148, 136, 0.12);
+  --accent: #2dd4bf;
+  --accent-hover: #14b8a6;
+  --accent-soft: rgba(45, 212, 191, 0.16);
+  --accent-fg: #042f2e;
 
   --danger: #ef4444;
   --danger-hover: #dc2626;
@@ -227,6 +228,13 @@ h2,
   border-color: var(--primary);
 }
 
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
 .bg-brand-gradient {
   background-image: linear-gradient(135deg, var(--primary) 0%, var(--primary-deep) 100%);
 }
@@ -257,6 +265,44 @@ h2,
 .ui-panel-hover:hover {
   border-color: color-mix(in srgb, var(--primary) 40%, transparent);
   box-shadow: 0 10px 24px -12px var(--primary-shadow);
+}
+
+/* ============================================================
+   Semantic theme utilities
+   Mapped to existing tokens (--panel, --text, --muted, --border,
+   --radius-xl). Pages opt in one area at a time.
+   Light and dark values follow body.theme-light / body.theme-dark.
+   ============================================================ */
+.surface {
+  background-color: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+}
+
+.text-muted {
+  color: var(--muted);
+}
+
+.heading {
+  font-family: Outfit, ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.surface-hover {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.surface-hover:hover {
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+}
+
+.inset-surface {
+  background-color: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
 }
 
 /* ---- Form field system ---- */
@@ -502,6 +548,10 @@ body.light {
   --text: #111827;
   --muted: #6b7280;
   --border: #e5e7eb;
+  --accent: #0f766e;
+  --accent-hover: #115e59;
+  --accent-soft: rgba(15, 118, 110, 0.12);
+  --accent-fg: #ffffff;
 }
 
 body.theme-light .input,
@@ -521,6 +571,10 @@ body.dark {
   --text: #e5e7eb;
   --muted: #9ca3af;
   --border: #1f2937;
+  --accent: #2dd4bf;
+  --accent-hover: #14b8a6;
+  --accent-soft: rgba(45, 212, 191, 0.16);
+  --accent-fg: #042f2e;
 }
 
 /* Modern inputs — now brand-aligned (was blue) */

@@ -27,6 +27,9 @@ export class AppointmentCardComponent {
     @Output() viewRecord = new EventEmitter<any>();
     @Output() viewPrescription = new EventEmitter<any>();
     @Output() giveFeedback = new EventEmitter<any>();
+    @Output() reschedule = new EventEmitter<any>();
+    @Output() cancel = new EventEmitter<any>();
+    @Output() openChat = new EventEmitter<any>();
 
     showPreviewModal = false;
     previewModalData: CompletionPreview | null = null;
@@ -129,6 +132,39 @@ export class AppointmentCardComponent {
                 console.error('Fallback preview failed', e);
             }
         });
+    }
+
+    private appointmentStatus(): string {
+        return String(this.appointment?.status || '').toUpperCase();
+    }
+
+    get canPatientReschedule(): boolean {
+        const s = this.appointmentStatus();
+        return s === 'BOOKED' || s === 'CONFIRMED' || s === 'SCHEDULED';
+    }
+
+    get canPatientCancel(): boolean {
+        const s = this.appointmentStatus();
+        return s === 'BOOKED' || s === 'CONFIRMED' || s === 'SCHEDULED' || s === 'INTAKE_COMPLETED';
+    }
+
+    get canOpenChat(): boolean {
+        return this.appointmentStatus() === 'IN_PROGRESS';
+    }
+
+    onReschedule(event: Event): void {
+        event.stopPropagation();
+        this.reschedule.emit(this.appointment);
+    }
+
+    onCancel(event: Event): void {
+        event.stopPropagation();
+        this.cancel.emit(this.appointment);
+    }
+
+    onOpenChat(event: Event): void {
+        event.stopPropagation();
+        this.openChat.emit(this.appointment);
     }
 
     onGiveFeedback(event: Event): void {

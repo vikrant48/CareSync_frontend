@@ -8,69 +8,52 @@ import { AuthService } from '../core/services/auth.service';
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <div class="min-h-screen bg-gray-950 flex items-center justify-center p-4 relative overflow-hidden font-sans">
-      <!-- Animated Background Glows -->
+    <div class="min-h-[calc(100dvh-3.5rem)] bg-[var(--bg)] text-[var(--text)] flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
       <div class="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse"></div>
       <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
 
-      <div class="max-w-lg w-full text-center space-y-8 relative z-10 animate-fade-in px-4">
-        
-        <!-- Header Logo -->
+      <div class="max-w-lg w-full text-center space-y-8 relative z-10 animate-fade-in px-1 sm:px-4">
+
         <div class="flex items-center justify-center gap-2 mb-2">
-          <div class="w-10 h-10 bg-emerald-500/20 border border-emerald-500/30 rounded-xl flex items-center justify-center text-emerald-400 text-lg shadow-lg shadow-blue-500/10">
-            <i class="fa-solid fa-heart-pulse"></i>
+          <div class="w-11 h-11 bg-brand-soft border border-brand rounded-xl flex items-center justify-center text-brand text-lg">
+            <i class="fa-solid fa-heart-pulse" aria-hidden="true"></i>
           </div>
-          <span class="text-xl font-black tracking-tight text-white uppercase">Care<span class="text-emerald-400">Sync</span></span>
+          <span class="heading text-xl font-bold tracking-tight uppercase">Care<span class="text-brand">Sync</span></span>
         </div>
 
-        <!-- 404 Visual -->
-        <div class="relative py-4">
-          <h1 class="text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 tracking-tighter drop-shadow-2xl select-none">
+        <div class="relative py-2 sm:py-4">
+          <p class="text-7xl sm:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 tracking-tighter select-none" aria-hidden="true">
             404
-          </h1>
-          <div class="w-24 h-1 bg-gradient-to-r from-blue-500 to-indigo-400 mx-auto rounded-full mt-2 shadow-lg shadow-blue-500/50"></div>
+          </p>
+          <div class="w-24 h-1 bg-brand-gradient mx-auto rounded-full mt-2"></div>
         </div>
 
-        <!-- Message -->
         <div class="space-y-3">
-          <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight">Page Not Found</h2>
-          <p class="text-gray-400 text-sm sm:text-base max-w-md mx-auto leading-relaxed">
+          <h1 class="heading text-2xl sm:text-3xl font-bold">Page Not Found</h1>
+          <p class="text-muted text-sm sm:text-base max-w-md mx-auto leading-relaxed">
             The page or medical record you are searching for doesn't exist, has been removed, or is temporarily unavailable.
           </p>
         </div>
 
-        <!-- Dynamic Action Buttons -->
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-          <button (click)="navigateHome()" 
-                  class="w-full sm:w-auto px-7 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-900/30 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2">
-            <i class="fa-solid fa-house text-xs"></i>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 pt-2">
+          <button type="button" (click)="navigateHome()" class="btn-primary w-full sm:w-auto">
+            <i class="fa-solid fa-house text-xs" aria-hidden="true"></i>
             {{ getHomeButtonText() }}
           </button>
 
-          <button (click)="goBack()" 
-                  class="w-full sm:w-auto px-7 py-3 bg-gray-900 hover:bg-gray-800 text-gray-300 font-bold text-sm rounded-xl border border-gray-800 hover:border-gray-700 transition-all duration-300 flex items-center justify-center gap-2">
-            <i class="fa-solid fa-arrow-left text-xs"></i>
+          <button type="button" (click)="goBack()" class="btn-secondary w-full sm:w-auto">
+            <i class="fa-solid fa-arrow-left text-xs" aria-hidden="true"></i>
             Go Back
           </button>
         </div>
 
-        <!-- Footer -->
-        <div class="pt-8 border-t border-gray-900 text-xs text-gray-600">
-          Need assistance? <a routerLink="/login" class="text-emerald-500 hover:underline">Contact Support</a>
+        <div class="pt-8 border-t border-[var(--border)] text-xs sm:text-sm text-muted">
+          Need assistance? <a routerLink="/login" class="link">Contact Support</a>
         </div>
 
       </div>
     </div>
-  `,
-  styles: [`
-    .animate-fade-in {
-      animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(16px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-  `]
+  `
 })
 export class NotFoundComponent {
   private authService = inject(AuthService);

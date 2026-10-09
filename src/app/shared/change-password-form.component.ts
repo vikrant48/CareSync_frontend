@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, Input, OnInit, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -9,96 +9,113 @@ import { ToastService } from '../core/services/toast.service';
   selector: 'app-change-password-form',
   standalone: true,
   imports: [CommonModule, FormsModule],
+  styles: [`
+    .pwd-input {
+      padding-right: 3rem;
+    }
+    .pwd-toggle {
+      color: var(--muted);
+    }
+    .pwd-toggle:hover {
+      color: var(--text);
+    }
+    .pwd-toggle:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px var(--primary-muted);
+      border-radius: 0.75rem;
+    }
+    .form-section.is-divided {
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+  `],
   template: `
-    <div class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-5 sm:p-6 shadow-sm space-y-6">
-      
-      <!-- Card Header -->
-      <div class="flex items-center justify-between gap-4">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-lg bg-[#5b6cf0]/10 text-[#5b6cf0] flex items-center justify-center text-xs shrink-0">
-            <i class="fa-solid fa-lock"></i>
-          </div>
-          <div>
-            <h4 class="text-sm font-bold text-white">Change Password</h4>
-            <p class="text-xs text-[#9aa3b8]">Ensure your account is secure by using a strong password.</p>
-          </div>
+    <div class="surface p-5 sm:p-6 shadow-sm space-y-6">
+
+      <div *ngIf="showIntro" class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-xl bg-brand-soft text-brand flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-lock" aria-hidden="true"></i>
+        </div>
+        <div class="min-w-0">
+          <h2 class="heading text-base font-bold">Change Password</h2>
+          <p class="text-xs sm:text-sm text-muted">Ensure your account is secure by using a strong password.</p>
         </div>
       </div>
 
-      <!-- Change Password Section -->
-      <div class="pt-4 border-t border-[#2a3347] space-y-5">
+      <div class="form-section space-y-5" [class.is-divided]="showIntro">
 
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
-          
-          <!-- Form Fields (Left 7 cols) -->
+
           <div class="xl:col-span-7 space-y-3.5">
-            
-            <!-- Current Password -->
+
             <div>
-              <label class="block text-xs font-bold text-white mb-1.5">Current Password</label>
+              <label for="current-password" class="form-label">Current Password</label>
               <div class="relative">
-                <input [type]="showCurrent ? 'text' : 'password'" [(ngModel)]="form.currentPassword"
+                <input id="current-password" [type]="showCurrent ? 'text' : 'password'" [(ngModel)]="form.currentPassword"
                   name="current_user_pass_field" autocomplete="new-password" placeholder="••••••••"
-                  class="w-full bg-[#1b2333] border border-[#2a3347] rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 outline-none focus:border-[#5b6cf0] transition-colors pr-10">
+                  class="form-input pwd-input text-xs sm:text-sm">
                 <button type="button" (click)="toggleCurrent()"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#9aa3b8] hover:text-white transition-colors">
-                  <i [class]="showCurrent ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                  class="pwd-toggle touch-target absolute right-1 top-1/2 -translate-y-1/2"
+                  [attr.aria-label]="showCurrent ? 'Hide current password' : 'Show current password'"
+                  [attr.aria-pressed]="showCurrent">
+                  <i [class]="showCurrent ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" aria-hidden="true"></i>
                 </button>
               </div>
             </div>
 
-            <!-- New Password -->
             <div>
-              <label class="block text-xs font-bold text-white mb-1.5">New Password</label>
+              <label for="new-password" class="form-label">New Password</label>
               <div class="relative">
-                <input [type]="showNew ? 'text' : 'password'" [(ngModel)]="form.newPassword"
+                <input id="new-password" [type]="showNew ? 'text' : 'password'" [(ngModel)]="form.newPassword"
                   name="new_user_pass_field" autocomplete="new-password" placeholder="Enter new password"
-                  class="w-full bg-[#1b2333] border border-[#2a3347] rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 outline-none focus:border-[#5b6cf0] transition-colors pr-10">
+                  class="form-input pwd-input text-xs sm:text-sm">
                 <button type="button" (click)="toggleNew()"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#9aa3b8] hover:text-white transition-colors">
-                  <i [class]="showNew ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                  class="pwd-toggle touch-target absolute right-1 top-1/2 -translate-y-1/2"
+                  [attr.aria-label]="showNew ? 'Hide new password' : 'Show new password'"
+                  [attr.aria-pressed]="showNew">
+                  <i [class]="showNew ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" aria-hidden="true"></i>
                 </button>
               </div>
             </div>
 
-            <!-- Confirm New Password -->
             <div>
-              <label class="block text-xs font-bold text-white mb-1.5">Confirm New Password</label>
+              <label for="confirm-password" class="form-label">Confirm New Password</label>
               <div class="relative">
-                <input [type]="showConfirm ? 'text' : 'password'" [(ngModel)]="form.confirmPassword"
+                <input id="confirm-password" [type]="showConfirm ? 'text' : 'password'" [(ngModel)]="form.confirmPassword"
                   name="confirm_user_pass_field" autocomplete="new-password" placeholder="Confirm new password"
-                  class="w-full bg-[#1b2333] border border-[#2a3347] rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 outline-none focus:border-[#5b6cf0] transition-colors pr-10">
+                  class="form-input pwd-input text-xs sm:text-sm">
                 <button type="button" (click)="toggleConfirm()"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#9aa3b8] hover:text-white transition-colors">
-                  <i [class]="showConfirm ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                  class="pwd-toggle touch-target absolute right-1 top-1/2 -translate-y-1/2"
+                  [attr.aria-label]="showConfirm ? 'Hide password confirmation' : 'Show password confirmation'"
+                  [attr.aria-pressed]="showConfirm">
+                  <i [class]="showConfirm ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" aria-hidden="true"></i>
                 </button>
               </div>
             </div>
 
           </div>
 
-          <!-- Password Requirements (Right 5 cols) -->
-          <div class="xl:col-span-5 bg-[#1b2333]/80 border border-[#2a3347] rounded-xl p-4 space-y-2.5">
-            <h5 class="text-xs font-bold text-white">Password Requirements</h5>
-            <div class="space-y-1.5 text-[11px]">
-              <div class="flex items-center gap-2" [ngClass]="form.newPassword.length >= 8 ? 'text-emerald-400 font-semibold' : 'text-[#9aa3b8]'">
-                <i class="fa-solid fa-circle-check text-[10px]"></i>
+          <div class="xl:col-span-5 bg-[var(--bg)] border border-[var(--border)] rounded-xl p-4 space-y-2.5">
+            <h3 class="text-sm font-bold">Password Requirements</h3>
+            <div class="space-y-1.5 text-xs">
+              <div class="flex items-center gap-2" [ngClass]="form.newPassword.length >= 8 ? 'text-emerald-700 dark:text-emerald-400 font-semibold' : 'text-muted'">
+                <i class="fa-solid fa-circle-check text-xs" aria-hidden="true"></i>
                 <span>At least 8 characters</span>
               </div>
-              <div class="flex items-center gap-2" [ngClass]="hasUppercase(form.newPassword) ? 'text-emerald-400 font-semibold' : 'text-[#9aa3b8]'">
-                <i class="fa-solid fa-circle-check text-[10px]"></i>
+              <div class="flex items-center gap-2" [ngClass]="hasUppercase(form.newPassword) ? 'text-emerald-700 dark:text-emerald-400 font-semibold' : 'text-muted'">
+                <i class="fa-solid fa-circle-check text-xs" aria-hidden="true"></i>
                 <span>One uppercase letter</span>
               </div>
-              <div class="flex items-center gap-2" [ngClass]="hasLowercase(form.newPassword) ? 'text-emerald-400 font-semibold' : 'text-[#9aa3b8]'">
-                <i class="fa-solid fa-circle-check text-[10px]"></i>
+              <div class="flex items-center gap-2" [ngClass]="hasLowercase(form.newPassword) ? 'text-emerald-700 dark:text-emerald-400 font-semibold' : 'text-muted'">
+                <i class="fa-solid fa-circle-check text-xs" aria-hidden="true"></i>
                 <span>One lowercase letter</span>
               </div>
-              <div class="flex items-center gap-2" [ngClass]="hasNumber(form.newPassword) ? 'text-emerald-400 font-semibold' : 'text-[#9aa3b8]'">
-                <i class="fa-solid fa-circle-check text-[10px]"></i>
+              <div class="flex items-center gap-2" [ngClass]="hasNumber(form.newPassword) ? 'text-emerald-700 dark:text-emerald-400 font-semibold' : 'text-muted'">
+                <i class="fa-solid fa-circle-check text-xs" aria-hidden="true"></i>
                 <span>One number</span>
               </div>
-              <div class="flex items-center gap-2" [ngClass]="hasSpecial(form.newPassword) ? 'text-emerald-400 font-semibold' : 'text-[#9aa3b8]'">
-                <i class="fa-solid fa-circle-check text-[10px]"></i>
+              <div class="flex items-center gap-2" [ngClass]="hasSpecial(form.newPassword) ? 'text-emerald-700 dark:text-emerald-400 font-semibold' : 'text-muted'">
+                <i class="fa-solid fa-circle-check text-xs" aria-hidden="true"></i>
                 <span>One special character</span>
               </div>
             </div>
@@ -106,11 +123,10 @@ import { ToastService } from '../core/services/toast.service';
 
         </div>
 
-        <!-- Update Password Action -->
-        <div class="flex justify-end pt-2">
+        <div class="flex justify-stretch sm:justify-end pt-2">
           <button type="button" (click)="submit()" [disabled]="loading || !isValid()"
-            class="bg-[#5b6cf0] hover:bg-[#4c5ce0] disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-2 cursor-pointer">
-            <i *ngIf="loading" class="fa-solid fa-circle-notch fa-spin text-xs"></i>
+            class="btn-primary w-full sm:w-auto">
+            <i *ngIf="loading" class="fa-solid fa-circle-notch fa-spin text-xs" aria-hidden="true"></i>
             <span>{{ loading ? 'Updating...' : 'Update Password' }}</span>
           </button>
         </div>
@@ -121,6 +137,8 @@ import { ToastService } from '../core/services/toast.service';
   `,
 })
 export class ChangePasswordFormComponent implements OnInit, AfterViewInit {
+  /** Settings already shows this title inside the card. Dedicated pages use the page header instead. */
+  @Input() showIntro = true;
   form = { currentPassword: '', newPassword: '', confirmPassword: '' };
   loading = false;
   showCurrent = false;
@@ -142,7 +160,18 @@ export class ChangePasswordFormComponent implements OnInit, AfterViewInit {
   }
 
   isValid(): boolean {
-    return !!(this.form.currentPassword && this.form.newPassword && this.form.confirmPassword);
+    const next = this.form.newPassword;
+    return !!(
+      this.form.currentPassword &&
+      next &&
+      this.form.confirmPassword &&
+      next.length >= 8 &&
+      this.hasUppercase(next) &&
+      this.hasLowercase(next) &&
+      this.hasNumber(next) &&
+      this.hasSpecial(next) &&
+      next === this.form.confirmPassword
+    );
   }
 
   hasUppercase(str: string): boolean { return /[A-Z]/.test(str); }
@@ -151,12 +180,16 @@ export class ChangePasswordFormComponent implements OnInit, AfterViewInit {
   hasSpecial(str: string): boolean { return /[^A-Za-z0-9]/.test(str); }
 
   submit() {
-    if (!this.isValid()) {
+    if (!this.form.currentPassword || !this.form.newPassword || !this.form.confirmPassword) {
       this.toast.showError('All fields are required.');
       return;
     }
     if (this.form.newPassword !== this.form.confirmPassword) {
       this.toast.showError('New password and confirmation do not match.');
+      return;
+    }
+    if (!this.isValid()) {
+      this.toast.showError('Password does not meet the requirements.');
       return;
     }
 

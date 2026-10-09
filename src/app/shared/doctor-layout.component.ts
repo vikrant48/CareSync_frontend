@@ -1,217 +1,126 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
-import { ToastContainerComponent } from './toast-container.component';
-import { AiAssistantWidgetComponent } from './ai-assistant-widget.component';
+import { DoctorProfileService } from '../core/services/doctor-profile.service';
+import { AppShellComponent, AppShellLink, AppShellTab } from './app-shell.component';
 
 @Component({
   selector: 'app-doctor-layout',
   standalone: true,
   host: { class: 'block h-full w-full' },
-  imports: [CommonModule, RouterModule, ToastContainerComponent, AiAssistantWidgetComponent],
+  imports: [CommonModule, AppShellComponent],
   template: `
-    <div class="min-h-[calc(100vh-3.5rem)] w-full bg-[var(--bg)] text-[var(--text)] transition-colors duration-300">
-      
-      <!-- Fixed Sidebar (Desktop) -->
-      <aside class="hidden md:flex fixed top-14 left-0 bottom-0 w-64 flex-col bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 z-30 overflow-hidden">
-        <div class="px-4 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-          <div class="text-lg font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-100">
-            <i class="fa-solid fa-user-doctor"></i>
-            <span>Doctor</span>
+    <app-shell variant="doctor" [sidebarLinks]="sidebarLinks" [tabs]="tabs" [menuLinks]="menuLinks"
+               [assistantInside]="true" (logout)="onLogout()">
+      <div shellHeader class="px-4 py-3.5 border-b border-gray-200 dark:border-gray-700 flex-shrink-0 bg-gray-100/50 dark:bg-gray-800/60">
+        <div class="flex items-center gap-3">
+          <img *ngIf="profileImageUrl; else defaultAvatar" [src]="profileImageUrl" alt="Doctor profile photo"
+               class="w-10 h-10 rounded-full ring-2 ring-[var(--accent)]/40 object-cover shrink-0" />
+          <ng-template #defaultAvatar>
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[var(--accent)] to-[var(--primary)] text-white font-bold flex items-center justify-center text-sm shadow-sm shrink-0">
+              {{ doctorInitial }}
+            </div>
+          </ng-template>
+          <div class="flex flex-col min-w-0">
+            <span class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate leading-snug">{{ displayName }}</span>
+            <span class="text-xs text-gray-500 dark:text-gray-400 font-medium flex items-center gap-1 mt-0.5">
+              <i class="fa-solid fa-circle text-[6px] text-emerald-500"></i> Doctor
+            </span>
           </div>
         </div>
-
-        <!-- Navigation Links -->
-        <nav class="flex-1 px-3 py-3 space-y-1 overflow-y-auto custom-scrollbar">
-          <a routerLink="/doctor" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" [routerLinkActiveOptions]="{ exact: true }" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
-            <i class="fa-solid fa-gauge w-5 text-center"></i>
-            <span>Dashboard</span>
-          </a>
-
-          <a routerLink="/doctor/schedule" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
-            <i class="fa-solid fa-calendar-day w-5 text-center"></i>
-            <span>My Schedule</span>
-          </a>
-
-          <a routerLink="/doctor/appointments" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
-            <i class="fa-solid fa-calendar-check w-5 text-center"></i>
-            <span>Appointments</span>
-          </a>
-          <a routerLink="/doctor/reports" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
-            <i class="fa-solid fa-chart-line w-5 text-center"></i>
-            <span>Reports</span>
-          </a>
-
-           <a routerLink="/lab-tests" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
-            <i class="fa-solid fa-flask w-5 text-center"></i>
-            <span>Lab Tests</span>
-          </a>
-          <a routerLink="/doctor/lab-test-management" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
-            <i class="fa-solid fa-flask-vial w-5 text-center"></i>
-            <span>Manage Tests</span>
-          </a>
-          <a routerLink="/doctor/documents" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
-             <i class="fa-solid fa-folder-open w-5 text-center"></i>
-             <span>Documents</span>
-          </a>
-
-          <a routerLink="/doctor/profile" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
-            <i class="fa-solid fa-user-doctor w-5 text-center"></i>
-            <span>Profile</span>
-          </a>
-          <a routerLink="/doctor/leaves" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
-            <i class="fa-solid fa-calendar-minus w-5 text-center"></i>
-            <span>Leave Management</span>
-          </a>
-
-          <div class="pt-2 my-2 border-t border-gray-200 dark:border-gray-700/60"></div>
-
-          <a routerLink="/settings" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
-             <i class="fa-solid fa-gear w-5 text-center"></i>
-            <span>Settings</span>
-          </a>
-          <a routerLink="/doctor/change-password" routerLinkActive="!bg-gray-200 dark:!bg-gray-700" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
-            <i class="fa-solid fa-key w-5 text-center"></i>
-            <span>Change Password</span>
-          </a>
-          <button (click)="onLogout()" class="w-full text-left flex items-center gap-3 px-3 py-2 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 transition-colors">
-            <i class="fa-solid fa-right-from-bracket w-5 text-center"></i>
-            <span>Sign Out</span>
-          </button>
-        </nav>
-
-        <!-- Copyright Footer -->
-        <div class="mt-auto px-4 py-3 border-t border-gray-200 dark:border-gray-700/80 flex-shrink-0 text-xs text-gray-500 dark:text-gray-400">
-          © 2026 CareSync. All rights reserved.
-        </div>
-      </aside>
-
-      <!-- Main Content Area -->
-      <main class="md:pl-64 w-full min-h-[calc(100vh-3.5rem)]">
-        <div class="pb-[calc(8rem+env(safe-area-inset-bottom,0px))] md:pb-8">
-             <ng-content></ng-content>
-        </div>
-        <app-toast-container></app-toast-container>
-        <app-ai-assistant-widget></app-ai-assistant-widget>
-      </main>
-
-       <!-- Mobile Bottom Navigation - Standard Fixed Bar -->
-      <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] overflow-hidden safe-bottom" style="min-height: calc(4rem + env(safe-area-inset-bottom, 0px));">
-        <div class="grid grid-cols-5 items-center h-16">
-          <a routerLink="/doctor" routerLinkActive="nav-active" [routerLinkActiveOptions]="{ exact: true }" class="flex flex-col items-center justify-center h-full min-h-touch text-gray-500 dark:text-gray-400 hover:text-brand transition-colors">
-            <i class="fa-solid fa-house text-lg mb-1"></i>
-            <span class="text-[10px] font-medium">Home</span>
-          </a>
-          <a routerLink="/doctor/schedule" routerLinkActive="nav-active" class="flex flex-col items-center justify-center h-full min-h-touch text-gray-500 dark:text-gray-400 hover:text-brand transition-colors">
-            <i class="fa-solid fa-calendar-day text-lg mb-1"></i>
-            <span class="text-[10px] font-medium">Today</span>
-          </a>
-          <a routerLink="/doctor/appointments" routerLinkActive="nav-active" class="flex flex-col items-center justify-center h-full min-h-touch text-gray-500 dark:text-gray-400 hover:text-brand transition-colors">
-            <i class="fa-solid fa-calendar-check text-lg mb-1"></i>
-            <span class="text-[10px] font-medium">Appts</span>
-          </a>
-          <a routerLink="/doctor/profile" routerLinkActive="nav-active" class="flex flex-col items-center justify-center h-full min-h-touch text-gray-500 dark:text-gray-400 hover:text-brand transition-colors">
-            <i class="fa-solid fa-user-doctor text-lg mb-1"></i>
-            <span class="text-[10px] font-medium">Profile</span>
-          </a>
-          <button type="button" (click)="menuOpen = !menuOpen" [attr.aria-expanded]="menuOpen" aria-label="Open menu" [class.text-brand]="menuOpen" class="flex flex-col items-center justify-center h-full min-h-touch text-gray-500 dark:text-gray-400 hover:text-brand transition-colors">
-            <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-1 transition-transform" [class.rotate-90]="menuOpen">
-               <i class="fa-solid" [class.fa-bars]="!menuOpen" [class.fa-xmark]="menuOpen"></i>
-            </div>
-            <span class="text-[10px] font-medium">Menu</span>
-          </button>
-        </div>
-      </nav>
-
-      <!-- Mobile Menu Overlay -->
-       <!-- Backdrop -->
-      <div *ngIf="menuOpen" class="md:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity" (click)="menuOpen = false" aria-hidden="true"></div>
-      
-      <!-- Menu Sheet -->
-      <div class="md:hidden fixed inset-x-0 bottom-0 z-40 bg-white dark:bg-gray-900 rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.12)] transform transition-transform duration-300 ease-out max-h-[75vh] overflow-y-auto"
-           [class.translate-y-0]="menuOpen" [class.translate-y-full]="!menuOpen">
-           
-         <div class="sticky top-0 bg-white dark:bg-gray-900 z-10 px-6 py-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
-            <span class="bg-gray-200 dark:bg-gray-700 w-12 h-1.5 rounded-full absolute top-2 left-1/2 -translate-x-1/2"></span>
-           <h3 class="font-bold text-lg dark:text-white mt-2">More Options</h3>
-           <button type="button" (click)="menuOpen = false" aria-label="Close menu" class="w-11 h-11 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 mt-2 touch-target">
-             <i class="fa-solid fa-xmark"></i>
-           </button>
-         </div>
-
-         <div class="p-6 grid grid-cols-2 gap-3">
-             <a routerLink="/doctor/documents" (click)="menuOpen=false" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-orange-50 dark:bg-orange-900/10 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/20 transition-colors">
-               <i class="fa-solid fa-folder-open text-2xl mb-2"></i>
-               <span class="text-sm font-medium">Documents</span>
-             </a>
-             <a routerLink="/doctor/reports" (click)="menuOpen=false" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-purple-50 dark:bg-purple-900/10 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/20 transition-colors">
-               <i class="fa-solid fa-chart-line text-2xl mb-2"></i>
-               <span class="text-sm font-medium">Reports</span>
-             </a>
-             <a routerLink="/lab-tests" (click)="menuOpen=false" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-cyan-50 dark:bg-cyan-900/10 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-100 dark:hover:bg-cyan-900/20 transition-colors">
-               <i class="fa-solid fa-flask text-2xl mb-2"></i>
-               <span class="text-sm font-medium">Lab Tests</span>
-             </a>
-             <a routerLink="/doctor/lab-test-management" (click)="menuOpen=false" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-teal-50 dark:bg-teal-900/10 text-teal-600 dark:text-teal-400 hover:bg-teal-100 dark:hover:bg-teal-900/20 transition-colors">
-               <i class="fa-solid fa-flask-vial text-2xl mb-2"></i>
-               <span class="text-sm font-medium text-center">Manage Tests</span>
-             </a>
-             <a routerLink="/doctor/change-password" (click)="menuOpen=false" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-yellow-50 dark:bg-yellow-900/10 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-900/20 transition-colors">
-               <i class="fa-solid fa-key text-2xl mb-2"></i>
-               <span class="text-sm font-medium text-center">Change Password</span>
-             </a>
-             <a routerLink="/doctor/leaves" (click)="menuOpen=false" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-brand-soft text-brand hover:brightness-95 transition-colors">
-               <i class="fa-solid fa-calendar-minus text-2xl mb-2"></i>
-               <span class="text-sm font-medium text-center">Leaves</span>
-             </a>
-             <a routerLink="/settings" (click)="menuOpen=false" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-               <i class="fa-solid fa-gear text-2xl mb-2"></i>
-               <span class="text-sm font-medium">Settings</span>
-             </a>
-             <button (click)="onLogout(); menuOpen=false" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors">
-               <i class="fa-solid fa-right-from-bracket text-2xl mb-2"></i>
-               <span class="text-sm font-medium">Log Out</span>
-             </button>
-         </div>
-         <!-- Spacer for bottom safe area + nav -->
-         <div class="h-8 safe-bottom" style="height: calc(2rem + env(safe-area-inset-bottom, 0px));"></div>
       </div>
-
-    </div>
+      <ng-content></ng-content>
+    </app-shell>
   `,
-  styles: [`
-    .nav-item {
-      @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 select-none;
-    }
-    .active-nav {
-      background-color: var(--primary-soft);
-      color: var(--primary);
-      font-weight: 600;
-      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    }
-    .active-nav .icon-box {
-      background-color: rgba(16, 185, 129, 0.1);
-      color: var(--primary);
-    }
-    .icon-box {
-      @apply w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-200;
-    }
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      @apply bg-gray-200 dark:bg-gray-700 rounded-full;
-    }
-  `]
 })
-export class DoctorLayoutComponent {
+export class DoctorLayoutComponent implements OnInit {
   private auth = inject(AuthService);
-  menuOpen = false;
+  private doctorApi = inject(DoctorProfileService);
+
+  doctorName: string | null = typeof localStorage !== 'undefined' ? localStorage.getItem('caresync_doctor_name') : null;
+  profileImageUrl: string | null = typeof localStorage !== 'undefined' ? localStorage.getItem('caresync_doctor_avatar') : null;
+
+  get displayName(): string {
+    const name = (this.doctorName || this.auth.username() || 'Doctor').trim();
+    if (!name || name === 'Doctor') return 'Doctor';
+    return name.toLowerCase().startsWith('dr.') ? name : `Dr. ${name}`;
+  }
+
+  get doctorInitial(): string {
+    const raw = (this.doctorName || this.auth.username() || 'D').replace(/^dr\.?\s+/i, '').trim();
+    return (raw.charAt(0) || 'D').toUpperCase();
+  }
+
+  readonly sidebarLinks: AppShellLink[] = [
+    { label: 'Dashboard', icon: 'fa-solid fa-gauge', link: '/doctor', exact: true },
+    { label: 'My Schedule', icon: 'fa-solid fa-calendar-day', link: '/doctor/schedule' },
+    { label: 'Appointments', icon: 'fa-solid fa-calendar-check', link: '/doctor/appointments' },
+    { label: 'Reports', icon: 'fa-solid fa-chart-line', link: '/doctor/reports' },
+    { label: 'Lab Tests', icon: 'fa-solid fa-flask', link: '/lab-tests' },
+    { label: 'Manage Tests', icon: 'fa-solid fa-flask-vial', link: '/doctor/lab-test-management' },
+    { label: 'Documents', icon: 'fa-solid fa-folder-open', link: '/doctor/documents' },
+    { label: 'Profile', icon: 'fa-solid fa-user-doctor', link: '/doctor/profile' },
+    { label: 'Leave Management', icon: 'fa-solid fa-calendar-minus', link: '/doctor/leaves' },
+    { divider: true, label: '', icon: '' },
+    { label: 'Settings', icon: 'fa-solid fa-gear', link: '/settings' },
+    { label: 'Change Password', icon: 'fa-solid fa-key', link: '/doctor/change-password' },
+    { label: 'Sign Out', icon: 'fa-solid fa-right-from-bracket', logout: true },
+  ];
+
+  readonly tabs: AppShellTab[] = [
+    { label: 'Home', icon: 'fa-solid fa-house', link: '/doctor', exact: true },
+    { label: 'Today', icon: 'fa-solid fa-calendar-day', link: '/doctor/schedule' },
+    { label: 'Appts', icon: 'fa-solid fa-calendar-check', link: '/doctor/appointments' },
+    { label: 'Profile', icon: 'fa-solid fa-user-doctor', link: '/doctor/profile' },
+    { label: 'Menu', icon: 'fa-solid fa-bars', opensMenu: true },
+  ];
+
+  readonly menuLinks: AppShellLink[] = [
+    { label: 'Documents', icon: 'fa-solid fa-folder-open', link: '/doctor/documents', tileClass: 'flex flex-col items-center justify-center p-4 rounded-2xl bg-orange-50 dark:bg-orange-900/10 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/20 transition-colors' },
+    { label: 'Reports', icon: 'fa-solid fa-chart-line', link: '/doctor/reports', tileClass: 'flex flex-col items-center justify-center p-4 rounded-2xl bg-purple-50 dark:bg-purple-900/10 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/20 transition-colors' },
+    { label: 'Lab Tests', icon: 'fa-solid fa-flask', link: '/lab-tests', tileClass: 'flex flex-col items-center justify-center p-4 rounded-2xl bg-cyan-50 dark:bg-cyan-900/10 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-100 dark:hover:bg-cyan-900/20 transition-colors' },
+    { label: 'Manage Tests', icon: 'fa-solid fa-flask-vial', link: '/doctor/lab-test-management', labelClass: 'text-sm font-medium text-center', tileClass: 'flex flex-col items-center justify-center p-4 rounded-2xl bg-teal-50 dark:bg-teal-900/10 text-teal-600 dark:text-teal-400 hover:bg-teal-100 dark:hover:bg-teal-900/20 transition-colors' },
+    { label: 'Change Password', icon: 'fa-solid fa-key', link: '/doctor/change-password', labelClass: 'text-sm font-medium text-center', tileClass: 'flex flex-col items-center justify-center p-4 rounded-2xl bg-yellow-50 dark:bg-yellow-900/10 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-900/20 transition-colors' },
+    { label: 'Leaves', icon: 'fa-solid fa-calendar-minus', link: '/doctor/leaves', labelClass: 'text-sm font-medium text-center', tileClass: 'flex flex-col items-center justify-center p-4 rounded-2xl bg-brand-soft text-brand hover:brightness-95 transition-colors' },
+    { label: 'Settings', icon: 'fa-solid fa-gear', link: '/settings', tileClass: 'flex flex-col items-center justify-center p-4 rounded-2xl bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors' },
+    { label: 'Log Out', icon: 'fa-solid fa-right-from-bracket', logout: true, tileClass: 'flex flex-col items-center justify-center p-4 rounded-2xl bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors' },
+  ];
+
+  ngOnInit() {
+    if (typeof localStorage !== 'undefined') {
+      const cachedName = localStorage.getItem('caresync_doctor_name');
+      const cachedImage = localStorage.getItem('caresync_doctor_avatar');
+      if (cachedName) this.doctorName = cachedName;
+      if (cachedImage) this.profileImageUrl = cachedImage;
+    }
+    this.loadDoctorProfile();
+  }
+
+  loadDoctorProfile() {
+    const uname = this.auth.username();
+    if (!uname) return;
+    this.doctorApi.getProfile(uname).subscribe({
+      next: (p) => {
+        const name = [p?.firstName, p?.lastName].filter(Boolean).join(' ').trim();
+        const finalName = name || p?.username || uname;
+        const finalImage = p?.profileImageUrl || null;
+        this.doctorName = finalName;
+        this.profileImageUrl = finalImage;
+        if (typeof localStorage !== 'undefined') {
+          if (finalName) localStorage.setItem('caresync_doctor_name', finalName);
+          if (finalImage) localStorage.setItem('caresync_doctor_avatar', finalImage);
+          else localStorage.removeItem('caresync_doctor_avatar');
+        }
+      },
+      error: () => { }
+    });
+  }
+
   onLogout() {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('caresync_doctor_name');
+      localStorage.removeItem('caresync_doctor_avatar');
+    }
     this.auth.logout();
   }
 }

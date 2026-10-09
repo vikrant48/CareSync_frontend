@@ -6,11 +6,12 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { ToastService } from '../../core/services/toast.service';
 import { ToastContainerComponent } from '../../shared/toast-container.component';
+import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ToastContainerComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ToastContainerComponent, ModalShellComponent],
   templateUrl: './reset-password.component.html',
   styleUrl: './reset-password.component.css'
 })

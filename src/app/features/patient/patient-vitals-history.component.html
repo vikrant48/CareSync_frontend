@@ -1,0 +1,167 @@
+        <div class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
+
+            <!-- Table Header -->
+            <div class="p-5 flex items-center justify-between border-b border-[var(--border)]">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-[var(--primary)]/10 flex items-center justify-center">
+                        <i class="fa-regular fa-clock text-[var(--primary)] text-sm"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-[var(--text)] tracking-wide">Recent Vitals Readings</h3>
+                </div>
+
+                <button (click)="logReading.emit()"
+                    class="text-xs font-semibold text-[var(--primary)] hover:text-indigo-300 transition-colors">
+                    Log Reading
+                </button>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="vitals.length === 0"
+                class="p-12 text-center text-xs text-[var(--muted)] flex flex-col items-center justify-center space-y-3">
+                <div
+                    class="w-12 h-12 rounded-full bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center">
+                    <i class="fa-solid fa-notes-medical text-lg opacity-40"></i>
+                </div>
+                <p>No vitals readings recorded yet.</p>
+                <button (click)="logReading.emit()" class="bg-[var(--primary)] text-white text-xs px-4 py-2 rounded-xl">
+                    Log Your First Reading
+                </button>
+            </div>
+
+            <!-- Desktop Table View -->
+            <div *ngIf="vitals.length > 0" class="hidden md:block overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr
+                            class="bg-[var(--bg)]/80 border-b border-[var(--border)] text-[var(--muted)] font-bold tracking-wider uppercase text-[10px]">
+                            <th class="py-3.5 px-5">DATE & TIME</th>
+                            <th class="py-3.5 px-5">BLOOD PRESSURE</th>
+                            <th class="py-3.5 px-5">SUGAR LEVEL</th>
+                            <th class="py-3.5 px-5">WEIGHT</th>
+                            <th class="py-3.5 px-5">TEMPERATURE</th>
+                            <th class="py-3.5 px-5 text-right">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[var(--border)]/60 text-slate-300">
+                        <tr *ngFor="let vital of vitals; trackBy: trackVital" class="hover:bg-[var(--bg)]/40 transition-colors group">
+
+                            <!-- Date & Time -->
+                            <td class="py-4 px-5 font-semibold text-[var(--text)]">
+                                {{ vital.recordedAt | date:'dd MMM yyyy, hh:mm a' }}
+                            </td>
+
+                            <!-- Blood Pressure -->
+                            <td class="py-4 px-5">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-[var(--text)]">
+                                        {{ vital.systolicBP ? (vital.systolicBP + '/' + vital.diastolicBP + ' mmHg') :
+                                        '--' }}
+                                    </span>
+                                    <span [ngClass]="getBPStatus(vital.systolicBP, vital.diastolicBP).class"
+                                        class="px-2 py-0.5 rounded text-[10px] font-semibold border inline-flex items-center gap-1">
+                                        <i class="fa-solid"
+                                            [ngClass]="getBPStatus(vital.systolicBP, vital.diastolicBP).icon"></i>
+                                        {{ getBPStatus(vital.systolicBP, vital.diastolicBP).label }}
+                                    </span>
+                                </div>
+                            </td>
+
+                            <!-- Sugar Level -->
+                            <td class="py-4 px-5">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-[var(--text)]">
+                                        {{ vital.sugarLevel ? (vital.sugarLevel + ' mg/dL') : '--' }}
+                                    </span>
+                                    <span [ngClass]="getSugarStatus(vital.sugarLevel).class"
+                                        class="px-2 py-0.5 rounded text-[10px] font-semibold border inline-flex items-center gap-1">
+                                        <i class="fa-solid" [ngClass]="getSugarStatus(vital.sugarLevel).icon"></i>
+                                        {{ getSugarStatus(vital.sugarLevel).label }}
+                                    </span>
+                                </div>
+                            </td>
+
+                            <!-- Weight -->
+                            <td class="py-4 px-5">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-[var(--text)]">
+                                        {{ vital.weight ? (vital.weight + ' kg') : '--' }}
+                                    </span>
+                                    <span [ngClass]="getWeightStatus(vital.weight).class"
+                                        class="px-2 py-0.5 rounded text-[10px] font-semibold border inline-flex items-center gap-1">
+                                        <i class="fa-solid" [ngClass]="getWeightStatus(vital.weight).icon"></i>
+                                        {{ getWeightStatus(vital.weight).label }}
+                                    </span>
+                                </div>
+                            </td>
+
+                            <!-- Temperature -->
+                            <td class="py-4 px-5">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-[var(--text)]">
+                                        {{ vital.temperature ? (vital.temperature + ' °F') : '--' }}
+                                    </span>
+                                    <span [ngClass]="getTempStatus(vital.temperature).class"
+                                        class="px-2 py-0.5 rounded text-[10px] font-semibold border inline-flex items-center gap-1">
+                                        <i class="fa-solid" [ngClass]="getTempStatus(vital.temperature).icon"></i>
+                                        {{ getTempStatus(vital.temperature).label }}
+                                    </span>
+                                </div>
+                            </td>
+
+                            <!-- Action -->
+                            <td class="py-4 px-5 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button (click)="view.emit(vital)"
+                                        class="bg-[var(--bg)] hover:bg-[var(--bg)] text-[var(--text)] border border-[var(--border)] font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors inline-flex items-center gap-1.5">
+                                        <span>View Details</span>
+                                        <i class="fa-solid fa-chevron-right text-[10px] text-[var(--muted)]"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile Cards View -->
+            <div *ngIf="vitals.length > 0" class="md:hidden p-4 space-y-3">
+                <div *ngFor="let vital of vitals; trackBy: trackVital"
+                    class="bg-[var(--bg)]/70 border border-[var(--border)] rounded-xl p-4 space-y-3">
+                    <div class="flex items-center justify-between text-xs border-b border-[var(--border)] pb-2">
+                        <span class="font-bold text-[var(--text)]">{{ vital.recordedAt | date:'dd MMM yyyy, hh:mm a' }}</span>
+                        <button (click)="view.emit(vital)"
+                            class="text-[var(--primary)] font-semibold text-xs flex items-center gap-1">
+                            <span>Details</span>
+                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="bg-[var(--panel)] p-2.5 rounded-lg border border-[var(--border)]">
+                            <div class="text-[10px] text-[var(--muted)] uppercase font-bold mb-0.5">BP</div>
+                            <div class="font-extrabold text-[var(--text)]">{{ vital.systolicBP ? (vital.systolicBP + '/' +
+                                vital.diastolicBP) : '--' }} <span
+                                    class="text-[10px] font-normal text-[var(--muted)]">mmHg</span></div>
+                        </div>
+
+                        <div class="bg-[var(--panel)] p-2.5 rounded-lg border border-[var(--border)]">
+                            <div class="text-[10px] text-[var(--muted)] uppercase font-bold mb-0.5">Sugar</div>
+                            <div class="font-extrabold text-[var(--text)]">{{ vital.sugarLevel || '--' }} <span
+                                    class="text-[10px] font-normal text-[var(--muted)]">mg/dL</span></div>
+                        </div>
+
+                        <div class="bg-[var(--panel)] p-2.5 rounded-lg border border-[var(--border)]">
+                            <div class="text-[10px] text-[var(--muted)] uppercase font-bold mb-0.5">Weight</div>
+                            <div class="font-extrabold text-[var(--text)]">{{ vital.weight || '--' }} <span
+                                    class="text-[10px] font-normal text-[var(--muted)]">kg</span></div>
+                        </div>
+
+                        <div class="bg-[var(--panel)] p-2.5 rounded-lg border border-[var(--border)]">
+                            <div class="text-[10px] text-[var(--muted)] uppercase font-bold mb-0.5">Temp</div>
+                            <div class="font-extrabold text-[var(--text)]">{{ vital.temperature || '--' }} <span
+                                    class="text-[10px] font-normal text-[var(--muted)]">°F</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>

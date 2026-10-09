@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { VitalsService, VitalLog } from '../../core/services/vitals.service';
@@ -6,17 +6,20 @@ import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Chart, registerables } from 'chart.js';
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
+import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
+import { PatientVitalsHistoryComponent } from './patient-vitals-history.component';
+import { getBPStatus as bpStatus, getSugarStatus as sugarStatus, getTempStatus as tempStatus, getWeightStatus as weightStatus } from './vitals-status';
 
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-patient-vitals',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, PatientLayoutComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, PatientLayoutComponent, PatientVitalsHistoryComponent, ModalShellComponent],
   templateUrl: './patient-vitals.component.html',
   styleUrl: './patient-vitals.component.css'
 })
-export class VitalsTrackingComponent implements OnInit {
+export class VitalsTrackingComponent implements OnInit, OnDestroy {
   @ViewChild('bpChart') bpChartRef!: ElementRef;
   @ViewChild('sugarChart') sugarChartRef!: ElementRef;
   @ViewChild('weightChart') weightChartRef!: ElementRef;
@@ -37,6 +40,8 @@ export class VitalsTrackingComponent implements OnInit {
 
   selectedTimeframe: string = '7_days';
   selectedVitalDetails: VitalLog | null = null;
+  private themeObserver: MutationObserver | null = null;
+  private chartRenderId = 0;
 
   constructor() {
     this.vitalsForm = this.fb.group({
@@ -51,6 +56,22 @@ export class VitalsTrackingComponent implements OnInit {
 
   ngOnInit() {
     this.loadVitals();
+    if (typeof MutationObserver !== 'undefined') {
+      this.themeObserver = new MutationObserver(() => {
+        this.updateCharts([...this.vitalsHistory].reverse());
+      });
+      this.themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    }
+  }
+
+  ngOnDestroy() {
+    this.themeObserver?.disconnect();
+    this.destroyCharts();
+  }
+
+  private token(name: string, fallback: string): string {
+    if (typeof document === 'undefined') return fallback;
+    return getComputedStyle(document.body).getPropertyValue(name).trim() || fallback;
   }
 
   loadVitals() {
@@ -136,8 +157,10 @@ export class VitalsTrackingComponent implements OnInit {
     });
 
     this.destroyCharts();
+    const renderId = ++this.chartRenderId;
 
     setTimeout(() => {
+      if (renderId !== this.chartRenderId) return;
       this.charts.push(this.createChart(this.bpChartRef, 'Blood Pressure', [
         {
           label: 'Systolic (mmHg)',
@@ -214,6 +237,10 @@ export class VitalsTrackingComponent implements OnInit {
 
   createChart(ref: ElementRef, title: string, datasets: any[], labels: string[]) {
     if (!ref || !ref.nativeElement) return null;
+    const panel = this.token('--panel', '#111827');
+    const text = this.token('--text', '#e5e7eb');
+    const muted = this.token('--muted', '#9ca3af');
+    const border = this.token('--border', '#1f2937');
     return new Chart(ref.nativeElement, {
       type: 'line',
       data: { labels, datasets },
@@ -225,7 +252,7 @@ export class VitalsTrackingComponent implements OnInit {
             display: true,
             position: 'bottom',
             labels: {
-              color: '#9aa3b8',
+              color: muted,
               usePointStyle: true,
               boxWidth: 8,
               boxHeight: 8,
@@ -234,10 +261,10 @@ export class VitalsTrackingComponent implements OnInit {
             }
           },
           tooltip: {
-            backgroundColor: '#1b2333',
-            titleColor: '#ffffff',
-            bodyColor: '#9aa3b8',
-            borderColor: '#2a3347',
+            backgroundColor: panel,
+            titleColor: text,
+            bodyColor: muted,
+            borderColor: border,
             borderWidth: 1,
             padding: 10,
             displayColors: true,
@@ -245,14 +272,14 @@ export class VitalsTrackingComponent implements OnInit {
         },
         scales: {
           x: {
-            grid: { color: 'rgba(255, 255, 255, 0.04)' },
-            ticks: { color: '#9aa3b8', font: { size: 11 } },
-            border: { color: '#2a3347' }
+            grid: { color: border },
+            ticks: { color: muted, font: { size: 11 } },
+            border: { color: border }
           },
           y: {
-            grid: { color: 'rgba(255, 255, 255, 0.04)' },
-            ticks: { color: '#9aa3b8', font: { size: 11 } },
-            border: { color: '#2a3347' }
+            grid: { color: border },
+            ticks: { color: muted, font: { size: 11 } },
+            border: { color: border }
           }
         }
       }
@@ -264,49 +291,10 @@ export class VitalsTrackingComponent implements OnInit {
     this.charts = [];
   }
 
-  // Dynamic clinical status helpers
-  getBPStatus(systolic?: number, diastolic?: number) {
-    if (!systolic || !diastolic) {
-      return { label: 'No Data', class: 'text-slate-400 bg-slate-500/10 border-slate-500/20', icon: 'fa-minus' };
-    }
-    if (systolic <= 120 && diastolic <= 80) {
-      return { label: 'Normal', class: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', icon: 'fa-arrow-down' };
-    }
-    if (systolic <= 130 && diastolic <= 85) {
-      return { label: 'Elevated', class: 'text-amber-400 bg-amber-500/10 border-amber-500/20', icon: 'fa-arrow-up' };
-    }
-    return { label: 'High', class: 'text-rose-400 bg-rose-500/10 border-rose-500/20', icon: 'fa-arrow-up' };
-  }
-
-  getSugarStatus(level?: number) {
-    if (!level) {
-      return { label: 'No Data', class: 'text-slate-400 bg-slate-500/10 border-slate-500/20', icon: 'fa-minus' };
-    }
-    if (level <= 100) {
-      return { label: 'Normal', class: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', icon: 'fa-arrow-down' };
-    }
-    if (level <= 125) {
-      return { label: 'Elevated', class: 'text-amber-400 bg-amber-500/10 border-amber-500/20', icon: 'fa-arrow-up' };
-    }
-    return { label: 'High', class: 'text-rose-400 bg-rose-500/10 border-rose-500/20', icon: 'fa-arrow-up' };
-  }
-
-  getWeightStatus(weight?: number) {
-    if (!weight) {
-      return { label: 'No Data', class: 'text-slate-400 bg-slate-500/10 border-slate-500/20', icon: 'fa-minus' };
-    }
-    return { label: 'Stable', class: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', icon: 'fa-arrow-down' };
-  }
-
-  getTempStatus(temp?: number) {
-    if (!temp) {
-      return { label: 'No Data', class: 'text-slate-400 bg-slate-500/10 border-slate-500/20', icon: 'fa-minus' };
-    }
-    if (temp <= 99.0) {
-      return { label: 'Normal', class: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', icon: 'fa-minus' };
-    }
-    return { label: 'Fever', class: 'text-rose-400 bg-rose-500/10 border-rose-500/20', icon: 'fa-arrow-up' };
-  }
+  getBPStatus = bpStatus;
+  getSugarStatus = sugarStatus;
+  getWeightStatus = weightStatus;
+  getTempStatus = tempStatus;
 
   openDetailsModal(vital: VitalLog) {
     this.selectedVitalDetails = vital;

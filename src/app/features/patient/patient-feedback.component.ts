@@ -7,12 +7,13 @@ import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { PatientAppointmentItem } from '../../core/services/appointment.service';
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
+import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 import { DoctorService, Doctor } from '../../core/services/doctor.service';
 
 @Component({
   selector: 'app-patient-feedback',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, PatientLayoutComponent],
+  imports: [CommonModule, FormsModule, RouterModule, PatientLayoutComponent, ModalShellComponent],
   templateUrl: './patient-feedback.component.html',
   styleUrl: './patient-feedback.component.css'
 })
@@ -263,6 +264,10 @@ export class PatientFeedbackComponent {
 
   openDetailsModal(feedback: PatientFeedbackItem) {
     this.selectedFeedbackForDetails = feedback;
+  }
+
+  trackStar(_index: number, star: number): number {
+    return star;
   }
 
   closeDetailsModal() {

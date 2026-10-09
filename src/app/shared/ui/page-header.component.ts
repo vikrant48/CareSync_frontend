@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-page-header',
   standalone: true,
+  host: { class: 'block w-full' },
   imports: [CommonModule],
   templateUrl: './page-header.component.html',
   styleUrl: './page-header.component.css'

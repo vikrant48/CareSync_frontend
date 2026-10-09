@@ -22,44 +22,44 @@ import { DatePickerComponent } from './date-picker.component';
         <div class="space-y-1 sm:space-y-2 mb-6">
           <div class="flex items-center gap-3">
             <a [routerLink]="backLink"
-               class="bg-[#151b2b] hover:bg-[#1b2333] border border-[#2a3347] hover:border-[#3a4763] text-white text-xs sm:text-sm font-bold px-3.5 py-2 rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm">
+               class="bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--border)] text-[var(--text)] text-xs sm:text-sm font-bold px-3.5 py-2 rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm">
               <i class="fa-solid fa-arrow-left text-xs"></i>
               <span>Back</span>
             </a>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Edit Profile</h2>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">Edit Profile</h2>
           </div>
-          <p class="text-xs sm:text-sm text-[#9aa3b8] pl-0.5">
+          <p class="text-xs sm:text-sm text-[var(--muted)] pl-0.5">
             Update your personal information and keep your profile up to date.
           </p>
         </div>
 
         <!-- Top Profile Summary Header Card -->
-        <div class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
+        <div class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
           <!-- Left Identity Info -->
           <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 text-center sm:text-left w-full md:w-auto">
             <div class="relative shrink-0">
-              <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#1b2333] border-2 border-[#2a3347] overflow-hidden flex items-center justify-center text-white text-2xl font-bold shadow-md">
+              <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[var(--bg)] border-2 border-[var(--border)] overflow-hidden flex items-center justify-center text-[var(--text)] text-2xl font-bold shadow-md">
                 <img *ngIf="editableProfile?.profileImageUrl; else initials" [src]="editableProfile?.profileImageUrl" class="w-full h-full object-cover" (error)="onImageError()" />
                 <ng-template #initials>
                   <span>{{ initialsFromName(editableProfile) }}</span>
                 </ng-template>
               </div>
-              <label class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-[#5b6cf0] hover:bg-[#4a5be0] text-white flex items-center justify-center cursor-pointer shadow-lg transition-transform hover:scale-105" title="Change Photo">
+              <label class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white flex items-center justify-center cursor-pointer shadow-lg transition-transform hover:scale-105" title="Change Photo">
                 <input #profileFileInput type="file" class="hidden" (change)="onFileChange($event)" />
                 <i class="fa-solid fa-camera text-xs"></i>
               </label>
             </div>
 
             <div class="space-y-1.5 min-w-0">
-              <h3 class="text-xl sm:text-2xl font-extrabold text-white truncate">{{ fullName(editableProfile) }}</h3>
-              <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 text-xs text-[#9aa3b8]">
-                <span class="bg-[#1b2333] border border-[#2a3347] px-2.5 py-1 rounded-lg font-medium text-gray-300">ID: {{ editableProfile?.id ?? 'NA' }}</span>
-                <span class="flex items-center gap-1.5"><i class="fa-regular fa-envelope text-[#5b6cf0]"></i> {{ editableProfile?.email || 'NA' }}</span>
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-phone text-[#5b6cf0]"></i> {{ editableProfile?.contactInfo || 'NA' }}</span>
+              <h3 class="text-xl sm:text-2xl font-extrabold text-[var(--text)] truncate">{{ fullName(editableProfile) }}</h3>
+              <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 text-xs text-[var(--muted)]">
+                <span class="bg-[var(--bg)] border border-[var(--border)] px-2.5 py-1 rounded-lg font-medium text-gray-300">ID: {{ editableProfile?.id ?? 'NA' }}</span>
+                <span class="flex items-center gap-1.5"><i class="fa-regular fa-envelope text-[var(--primary)]"></i> {{ editableProfile?.email || 'NA' }}</span>
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-phone text-[var(--primary)]"></i> {{ editableProfile?.contactInfo || 'NA' }}</span>
               </div>
 
               <div class="pt-1" *ngIf="file">
-                <button type="button" class="bg-[#5b6cf0] hover:bg-[#4a5be0] text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5" (click)="uploadImage()" [disabled]="uploading">
+                <button type="button" class="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5" (click)="uploadImage()" [disabled]="uploading">
                   <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
                   {{ uploading ? 'Uploading...' : 'Confirm Upload' }}
                 </button>
@@ -68,15 +68,15 @@ import { DatePickerComponent } from './date-picker.component';
           </div>
 
           <!-- Right Profile Completion Status -->
-          <div class="w-full md:w-72 bg-[#121724]/60 border border-[#2a3347]/60 rounded-xl p-4 space-y-2 shrink-0">
+          <div class="w-full md:w-72 bg-[var(--panel)]/60 border border-[var(--border)]/60 rounded-xl p-4 space-y-2 shrink-0">
             <div class="flex items-center justify-between text-xs font-semibold">
-              <span class="text-[#9aa3b8]">Profile Completion</span>
-              <span class="text-[#5b6cf0] font-bold">{{ completionPercentage }}%</span>
+              <span class="text-[var(--muted)]">Profile Completion</span>
+              <span class="text-[var(--primary)] font-bold">{{ completionPercentage }}%</span>
             </div>
-            <div class="w-full h-2 bg-[#1b2333] rounded-full overflow-hidden border border-[#2a3347]/40">
-              <div class="h-full bg-[#5b6cf0] rounded-full transition-all duration-500" [style.width.%]="completionPercentage"></div>
+            <div class="w-full h-2 bg-[var(--bg)] rounded-full overflow-hidden border border-[var(--border)]/40">
+              <div class="h-full bg-[var(--primary)] rounded-full transition-all duration-500" [style.width.%]="completionPercentage"></div>
             </div>
-            <div class="flex items-center gap-1.5 text-[11px] font-medium text-emerald-400 pt-0.5">
+            <div class="flex items-center gap-1.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400 pt-0.5">
               <i class="fa-solid fa-circle-check text-xs"></i>
               <span>{{ completionPercentage >= 80 ? 'Great! Your profile is almost complete.' : 'Complete your profile details.' }}</span>
             </div>
@@ -84,60 +84,60 @@ import { DatePickerComponent } from './date-picker.component';
         </div>
 
         <!-- Main Edit Form Card Box -->
-        <form (ngSubmit)="save()" class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-5 sm:p-6 shadow-xl space-y-8">
+        <form (ngSubmit)="save()" class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-xl space-y-8">
           
           <!-- Personal Information Section -->
           <div class="space-y-5">
-            <div class="flex items-center gap-2.5 pb-3 border-b border-[#2a3347]">
-              <div class="w-7 h-7 rounded-lg bg-[#5b6cf0]/10 text-[#5b6cf0] flex items-center justify-center text-sm shrink-0">
+            <div class="flex items-center gap-2.5 pb-3 border-b border-[var(--border)]">
+              <div class="w-7 h-7 rounded-lg bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center text-sm shrink-0">
                 <i class="fa-solid fa-user"></i>
               </div>
-              <h3 class="text-base font-bold text-white">Personal Information</h3>
+              <h3 class="text-base font-bold text-[var(--text)]">Personal Information</h3>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
               <!-- First Name -->
               <div class="space-y-1.5">
-                <label class="block text-xs font-bold text-[#9aa3b8] uppercase tracking-wider">
+                <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider">
                   FIRST NAME <span class="text-rose-500">*</span>
                 </label>
-                <input class="w-full bg-[#1b2333] border border-[#2a3347] focus:border-[#5b6cf0] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-[#5a657d] outline-none transition-colors"
+                <input class="w-full bg-[var(--bg)] border border-[var(--border)] focus:border-[var(--primary)] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-[var(--text)] placeholder-[var(--muted)] outline-none transition-colors"
                        [(ngModel)]="form.firstName" name="firstName" placeholder="Enter first name" />
               </div>
 
               <!-- Last Name -->
               <div class="space-y-1.5">
-                <label class="block text-xs font-bold text-[#9aa3b8] uppercase tracking-wider">
+                <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider">
                   LAST NAME <span class="text-rose-500">*</span>
                 </label>
-                <input class="w-full bg-[#1b2333] border border-[#2a3347] focus:border-[#5b6cf0] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-[#5a657d] outline-none transition-colors"
+                <input class="w-full bg-[var(--bg)] border border-[var(--border)] focus:border-[var(--primary)] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-[var(--text)] placeholder-[var(--muted)] outline-none transition-colors"
                        [(ngModel)]="form.lastName" name="lastName" placeholder="Enter last name" />
               </div>
 
               <!-- Email Address -->
               <div class="space-y-1.5">
-                <label class="block text-xs font-bold text-[#9aa3b8] uppercase tracking-wider">
+                <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider">
                   EMAIL ADDRESS <span class="text-rose-500">*</span>
                 </label>
                 <div class="relative flex items-center">
-                  <div class="absolute left-3.5 text-[#5b6cf0] pointer-events-none text-xs sm:text-sm">
+                  <div class="absolute left-3.5 text-[var(--primary)] pointer-events-none text-xs sm:text-sm">
                     <i class="fa-regular fa-envelope"></i>
                   </div>
-                  <input class="w-full bg-[#1b2333] border border-[#2a3347] focus:border-[#5b6cf0] rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white placeholder-[#5a657d] outline-none transition-colors"
+                  <input class="w-full bg-[var(--bg)] border border-[var(--border)] focus:border-[var(--primary)] rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-[var(--text)] placeholder-[var(--muted)] outline-none transition-colors"
                          [(ngModel)]="form.email" name="email" type="email" placeholder="email@example.com" />
                 </div>
               </div>
 
               <!-- Contact Number -->
               <div class="space-y-1.5">
-                <label class="block text-xs font-bold text-[#9aa3b8] uppercase tracking-wider">
+                <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider">
                   CONTACT NUMBER <span class="text-rose-500">*</span>
                 </label>
                 <div class="relative flex items-center">
-                  <div class="absolute left-3.5 text-[#5b6cf0] pointer-events-none text-xs sm:text-sm">
+                  <div class="absolute left-3.5 text-[var(--primary)] pointer-events-none text-xs sm:text-sm">
                     <i class="fa-solid fa-phone"></i>
                   </div>
-                  <input class="w-full bg-[#1b2333] border border-[#2a3347] focus:border-[#5b6cf0] rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white placeholder-[#5a657d] outline-none transition-colors"
+                  <input class="w-full bg-[var(--bg)] border border-[var(--border)] focus:border-[var(--primary)] rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-[var(--text)] placeholder-[var(--muted)] outline-none transition-colors"
                          [(ngModel)]="form.contactInfo" name="contactInfo" placeholder="+91 0000000000" />
                 </div>
               </div>
@@ -179,22 +179,22 @@ import { DatePickerComponent } from './date-picker.component';
 
           <!-- Medical Information Section -->
           <div class="space-y-5">
-            <div class="flex items-center gap-2.5 pb-3 border-b border-[#2a3347]">
-              <div class="w-7 h-7 rounded-lg bg-[#5b6cf0]/10 text-[#5b6cf0] flex items-center justify-center text-sm shrink-0">
+            <div class="flex items-center gap-2.5 pb-3 border-b border-[var(--border)]">
+              <div class="w-7 h-7 rounded-lg bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center text-sm shrink-0">
                 <i class="fa-solid fa-file-lines"></i>
               </div>
-              <h3 class="text-base font-bold text-white">Medical Information</h3>
+              <h3 class="text-base font-bold text-[var(--text)]">Medical Information</h3>
             </div>
 
             <div class="space-y-1.5">
-              <label class="block text-xs font-bold text-[#9aa3b8] uppercase tracking-wider">
+              <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider">
                 MEDICAL HISTORY / ILLNESS DETAILS
               </label>
               <div class="relative">
-                <textarea class="w-full bg-[#1b2333] border border-[#2a3347] focus:border-[#5b6cf0] rounded-xl p-3.5 text-xs sm:text-sm text-white placeholder-[#5a657d] outline-none transition-colors min-h-[110px]"
+                <textarea class="w-full bg-[var(--bg)] border border-[var(--border)] focus:border-[var(--primary)] rounded-xl p-3.5 text-xs sm:text-sm text-[var(--text)] placeholder-[var(--muted)] outline-none transition-colors min-h-[110px]"
                           rows="4" [(ngModel)]="form.illnessDetails" name="illnessDetails"
                           placeholder="Any existing conditions, allergies, or relevant medical history..."></textarea>
-                <div class="text-[10px] text-[#5a657d] font-semibold text-right pt-1">
+                <div class="text-[10px] text-[var(--muted)] font-semibold text-right pt-1">
                   {{ illnessDetailsCharCount }}/500
                 </div>
               </div>
@@ -202,31 +202,31 @@ import { DatePickerComponent } from './date-picker.component';
           </div>
 
           <!-- Status Messages -->
-          <div *ngIf="error" class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 flex items-center gap-3">
+          <div *ngIf="error" class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-400 flex items-center gap-3">
             <i class="fa-solid fa-circle-exclamation text-lg shrink-0"></i>
             <span class="text-xs sm:text-sm font-medium">{{ error }}</span>
           </div>
           
-          <div *ngIf="success" class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center gap-3">
+          <div *ngIf="success" class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 flex items-center gap-3">
             <i class="fa-solid fa-circle-check text-lg shrink-0"></i>
             <span class="text-xs sm:text-sm font-medium">Profile updated successfully!</span>
           </div>
 
           <!-- Form Actions Footer -->
-          <div class="pt-5 border-t border-[#2a3347] flex flex-wrap items-center justify-between gap-4">
+          <div class="pt-5 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-4">
             <button type="button" (click)="reset()" [disabled]="saving"
-                    class="text-xs font-bold text-[#9aa3b8] hover:text-white flex items-center gap-2 transition-colors cursor-pointer bg-transparent border-0 p-0">
-              <i class="fa-solid fa-rotate-right text-xs text-[#5b6cf0]"></i>
+                    class="text-xs font-bold text-[var(--muted)] hover:text-[var(--text)] flex items-center gap-2 transition-colors cursor-pointer bg-transparent border-0 p-0">
+              <i class="fa-solid fa-rotate-right text-xs text-[var(--primary)]"></i>
               <span>Reset Changes</span>
             </button>
 
             <div class="flex items-center gap-3 ml-auto">
               <a [routerLink]="backLink"
-                 class="bg-[#1b2333] hover:bg-[#253047] border border-[#2a3347] text-white text-xs sm:text-sm font-bold px-5 py-2.5 rounded-xl transition-all cursor-pointer">
+                 class="bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs sm:text-sm font-bold px-5 py-2.5 rounded-xl transition-all cursor-pointer">
                 Cancel
               </a>
               <button type="submit" [disabled]="saving"
-                      class="bg-[#5b6cf0] hover:bg-[#4a5be0] text-white text-xs sm:text-sm font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-[#5b6cf0]/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50">
+                      class="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white text-xs sm:text-sm font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-[var(--primary)]/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50">
                 <i class="fa-solid fa-floppy-disk text-xs" *ngIf="!saving"></i>
                 <i class="fa-solid fa-circle-notch animate-spin text-xs" *ngIf="saving"></i>
                 <span>{{ saving ? 'Saving...' : 'Save Changes' }}</span>

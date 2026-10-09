@@ -1,27 +1,27 @@
 <app-doctor-layout>
-    <div class="max-w-[1400px] mx-auto p-4 sm:p-6 space-y-6 text-white font-sans selection:bg-[#2dd4bf]/30">
+    <div class="max-w-[1400px] mx-auto p-4 sm:p-6 space-y-6 text-[var(--text)] font-sans selection:bg-[var(--accent)]/30">
 
         <!-- Page Header with Ambient Graphic Wave -->
         <div
-            class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#0a1e2b] via-[#081724] to-[#0d1724] border border-[#162a3d] p-6 shadow-2xl">
+            class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--accent-soft)] via-[var(--panel)] to-[var(--primary-soft)] border border-[var(--border)] p-6 shadow-2xl">
             <!-- Ambient Backdrop Graphic -->
-            <div class="absolute -top-12 -right-12 w-64 h-64 bg-[#38bdf8]/10 rounded-full blur-3xl pointer-events-none">
+            <div class="absolute -top-12 -right-12 w-64 h-64 bg-[var(--primary)]/10 rounded-full blur-3xl pointer-events-none">
             </div>
 
             <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                    <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">My Schedule</h1>
-                    <p class="text-xs sm:text-sm text-[#8b9cb0] font-medium mt-1">Manage your daily appointments and
+                    <h1 class="text-2xl sm:text-3xl font-black text-[var(--text)] tracking-tight">My Schedule</h1>
+                    <p class="text-xs sm:text-sm text-[var(--muted)] font-medium mt-1">Manage your daily appointments and
                         patient flow</p>
                 </div>
 
                 <div class="flex items-center gap-3 self-end sm:self-auto">
                     <div
-                        class="bg-[#132435] text-[#38bdf8] border border-[#1e3c54] px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm shadow-sm">
+                        class="bg-[var(--bg)] text-[var(--primary)] border border-[var(--bg)] px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm shadow-sm">
                         {{ todayDate | date:'EEEE, MMMM d, yyyy' }}
                     </div>
                     <button type="button" (click)="refreshToday()"
-                        class="w-10 h-10 rounded-xl bg-[#132435] hover:bg-[#1c364f] border border-[#1e3c54] text-[#38bdf8] flex items-center justify-center text-sm transition-all cursor-pointer shadow-sm"
+                        class="w-10 h-10 rounded-xl bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--primary)] flex items-center justify-center text-sm transition-all cursor-pointer shadow-sm"
                         title="Refresh Schedule">
                         <i class="fa-solid fa-rotate" [class.animate-spin]="loading"></i>
                     </button>
@@ -29,76 +29,38 @@
             </div>
         </div>
 
-        <!-- Filters Section Container -->
-        <div class="bg-[#0f1724] border border-[#1a2738] rounded-2xl p-5 shadow-xl space-y-4">
-            <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#8b9cb0]">
-                <i class="fa-solid fa-sliders text-[#2dd4bf]"></i>
-                <span>Filters</span>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-                <!-- Search Input -->
-                <div class="space-y-1.5">
-                    <label class="text-xs font-semibold text-[#8b9cb0]">Search</label>
-                    <div class="relative w-full">
-                        <i
-                            class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748b] text-xs pointer-events-none"></i>
-                        <input type="text" [(ngModel)]="searchTerm"
-                            placeholder="Search patient name, phone, or appointment ID..."
-                            class="w-full bg-[#182333] text-white text-xs rounded-xl pl-9 pr-3 py-2.5 border border-[#202f45] focus:outline-none focus:border-[#2dd4bf] placeholder:text-[#475569]">
-                    </div>
-                </div>
-
-                <!-- Status Filter Dropdown -->
-                <div class="space-y-1.5">
-                    <label class="text-xs font-semibold text-[#8b9cb0]">Status</label>
-                    <app-select-dropdown [(ngModel)]="filterStatus" [options]="statusFilterOptions"
-                        (ngModelChange)="cdr.detectChanges()" placeholder="All">
-                    </app-select-dropdown>
-                </div>
-
-                <!-- Filter Actions Row -->
-                <div class="flex items-center justify-end gap-2.5">
-                    <button type="button" (click)="resetFilters()"
-                        class="px-4 py-2.5 bg-[#182333] hover:bg-[#202f45] border border-[#202f45] text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer">
-                        Clear
-                    </button>
-                    <button type="button" (click)="cdr.detectChanges()"
-                        class="px-5 py-2.5 bg-[#2dd4bf] hover:bg-[#26b8a5] text-[#071918] font-black text-xs rounded-xl shadow-md transition-all cursor-pointer">
-                        Apply Filters
-                    </button>
-                </div>
-            </div>
-        </div>
+        <app-filter-bar [filters]="scheduleFilterConfigs" [values]="scheduleFilterValues" [theme]="'doctor'"
+            (filterChange)="onFilterBarChange($event)">
+        </app-filter-bar>
 
         <!-- 4 KPI Stat Cards Row -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <!-- Stat 1: Total Appointments -->
             <div
-                class="bg-[#0f1724] border border-[#1a2738] rounded-2xl p-4 shadow-xl flex items-center gap-4 transition-all hover:border-[#2dd4bf]/40">
+                class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 shadow-xl flex items-center gap-4 transition-all hover:border-[var(--accent)]/40">
                 <div
-                    class="w-12 h-12 rounded-2xl bg-[#1e2e42] text-[#38bdf8] flex items-center justify-center text-xl shrink-0 shadow-inner">
+                    class="w-12 h-12 rounded-2xl bg-[var(--bg)] text-[var(--primary)] flex items-center justify-center text-xl shrink-0 shadow-inner">
                     <i class="fa-regular fa-calendar-check"></i>
                 </div>
                 <div class="min-w-0">
-                    <div class="text-[11px] font-semibold text-[#8b9cb0] truncate">Total Appointments</div>
-                    <div class="text-2xl font-extrabold text-white mt-0.5" *ngIf="!loading">
+                    <div class="text-[11px] font-semibold text-[var(--muted)] truncate">Total Appointments</div>
+                    <div class="text-2xl font-extrabold text-[var(--text)] mt-0.5" *ngIf="!loading">
                         {{ totalCount }}
                     </div>
-                    <div class="h-6 w-12 bg-[#1e2e42] rounded animate-pulse" *ngIf="loading"></div>
+                    <div class="h-6 w-12 bg-[var(--bg)] rounded animate-pulse" *ngIf="loading"></div>
                 </div>
             </div>
 
             <!-- Stat 2: Confirmed -->
             <div
-                class="bg-[#0f1724] border border-[#1a2738] rounded-2xl p-4 shadow-xl flex items-center gap-4 transition-all hover:border-[#2dd4bf]/40">
+                class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 shadow-xl flex items-center gap-4 transition-all hover:border-[var(--accent)]/40">
                 <div
-                    class="w-12 h-12 rounded-2xl bg-[#0f2e2b] text-[#2dd4bf] flex items-center justify-center text-xl shrink-0 shadow-inner">
+                    class="w-12 h-12 rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center text-xl shrink-0 shadow-inner">
                     <i class="fa-solid fa-circle-check"></i>
                 </div>
                 <div class="min-w-0">
-                    <div class="text-[11px] font-semibold text-[#8b9cb0] truncate">Confirmed</div>
-                    <div class="text-2xl font-extrabold text-white mt-0.5">
+                    <div class="text-[11px] font-semibold text-[var(--muted)] truncate">Confirmed</div>
+                    <div class="text-2xl font-extrabold text-[var(--text)] mt-0.5">
                         {{ confirmedCount }}
                     </div>
                 </div>
@@ -106,14 +68,14 @@
 
             <!-- Stat 3: Pending -->
             <div
-                class="bg-[#0f1724] border border-[#1a2738] rounded-2xl p-4 shadow-xl flex items-center gap-4 transition-all hover:border-[#2dd4bf]/40">
+                class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 shadow-xl flex items-center gap-4 transition-all hover:border-[var(--accent)]/40">
                 <div
-                    class="w-12 h-12 rounded-2xl bg-[#2e2612] text-amber-400 flex items-center justify-center text-xl shrink-0 shadow-inner">
+                    class="w-12 h-12 rounded-2xl bg-[var(--accent-soft)] text-amber-700 dark:text-amber-400 flex items-center justify-center text-xl shrink-0 shadow-inner">
                     <i class="fa-regular fa-clock"></i>
                 </div>
                 <div class="min-w-0">
-                    <div class="text-[11px] font-semibold text-[#8b9cb0] truncate">Booked</div>
-                    <div class="text-2xl font-extrabold text-white mt-0.5">
+                    <div class="text-[11px] font-semibold text-[var(--muted)] truncate">Booked</div>
+                    <div class="text-2xl font-extrabold text-[var(--text)] mt-0.5">
                         {{ pendingCount }}
                     </div>
                 </div>
@@ -121,14 +83,14 @@
 
             <!-- Stat 4: Cancelled -->
             <div
-                class="bg-[#0f1724] border border-[#1a2738] rounded-2xl p-4 shadow-xl flex items-center gap-4 transition-all hover:border-[#2dd4bf]/40">
+                class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 shadow-xl flex items-center gap-4 transition-all hover:border-[var(--accent)]/40">
                 <div
-                    class="w-12 h-12 rounded-2xl bg-[#331821] text-rose-400 flex items-center justify-center text-xl shrink-0 shadow-inner">
+                    class="w-12 h-12 rounded-2xl bg-[var(--danger-soft)] text-rose-700 dark:text-rose-400 flex items-center justify-center text-xl shrink-0 shadow-inner">
                     <i class="fa-solid fa-circle-xmark"></i>
                 </div>
                 <div class="min-w-0">
-                    <div class="text-[11px] font-semibold text-[#8b9cb0] truncate">Cancelled</div>
-                    <div class="text-2xl font-extrabold text-white mt-0.5">
+                    <div class="text-[11px] font-semibold text-[var(--muted)] truncate">Cancelled</div>
+                    <div class="text-2xl font-extrabold text-[var(--text)] mt-0.5">
                         {{ cancelledCount }}
                     </div>
                 </div>
@@ -145,7 +107,7 @@
             icon="fa-solid fa-calendar-xmark" title="No appointments found"
             message="Try adjusting your filters or search terms." [compact]="true" [hasAction]="true">
             <button type="button" (click)="resetFilters()"
-                class="mt-2 text-xs font-bold text-[#2dd4bf] hover:underline px-3 py-1">Clear Filters</button>
+                class="mt-2 text-xs font-bold text-[var(--accent)] hover:underline px-3 py-1">Clear Filters</button>
         </app-empty-state>
         <app-empty-state
             *ngIf="!loading && filteredAppointments().length === 0 && filterStatus === 'ALL' && !searchTerm"

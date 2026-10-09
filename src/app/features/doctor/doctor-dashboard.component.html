@@ -1,0 +1,396 @@
+    <app-doctor-layout>
+      <div class="max-w-[1400px] mx-auto p-4 sm:p-6 space-y-5 text-[var(--text)] font-sans selection:bg-[var(--accent)]/30">
+
+        <!-- Active Leave Warning Banner -->
+        <div *ngIf="isOnLeaveToday" class="bg-amber-50 dark:bg-amber-950/70 border-l-4 border-amber-500 text-amber-900 dark:text-amber-200 p-4 rounded-2xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-amber-200 dark:border-amber-800/50">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-triangle-exclamation text-xl text-amber-500"></i>
+                <div>
+                   <p class="font-bold text-xs sm:text-sm">You are currently on leave today.</p>
+                   <p class="text-[11px] text-amber-800/80 dark:text-amber-300/80">Your booking slots are hidden from patients until your leave ends.</p>
+                </div>
+            </div>
+            <button (click)="leaveModalOpen = true" class="text-xs font-bold underline min-h-[44px] px-3 rounded-lg bg-amber-100 dark:bg-amber-900/40 border border-amber-300 dark:border-amber-700/50 text-amber-900 dark:text-amber-100">
+              Manage Leave
+            </button>
+        </div>
+
+        <!-- Hero Greeting Banner with 3D Doctor Illustration & Notification Bell -->
+        <div class="surface relative overflow-hidden bg-gradient-to-r from-[var(--accent-soft)] via-[var(--panel)] to-[var(--primary-soft)] p-6 lg:p-7 shadow-sm">
+          <!-- Background Ambient Glows -->
+          <div class="absolute -top-16 -left-16 w-64 h-64 bg-[var(--accent)]/15 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="absolute top-1/2 right-20 w-72 h-72 bg-[var(--primary)]/15 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <!-- Left Info Section -->
+            <div class="space-y-1.5 max-w-lg">
+              <span class="text-xs font-bold uppercase tracking-widest text-[var(--accent)]">Good Morning,</span>
+              <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-[var(--text)] tracking-tight leading-tight flex items-center gap-2">
+                <span>{{ doctorName && doctorName !== 'Doctor' ? 'Dr. ' + doctorName : 'Doctor' }}</span>
+              </h1>
+              <p class="text-xs sm:text-sm text-muted font-medium pt-0.5">
+                You have <span class="text-[var(--accent)] font-bold">{{ todayAppointments.length }} appointments</span> today
+              </p>
+            </div>
+
+            <!-- Right 3D Doctor Graphic Banner & Notification -->
+            <div class="relative shrink-0 w-full md:w-80 h-36 flex items-center justify-end">
+              <img src="/assets/doctor-hero-3d.png" alt="Doctor Hero Graphic"
+                   class="h-full object-contain drop-shadow-[0_10px_25px_rgba(45,212,191,0.3)] transition-transform hover:scale-105" />
+              <app-doctor-notification class="absolute left-0 top-1/2 -translate-y-1/2"></app-doctor-notification>
+            </div>
+          </div>
+        </div>
+
+        <!-- ROW 1: Top 4 KPI Stat Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Stat 1: Today's Appointments -->
+          <div class="surface p-4 shadow-sm flex items-center gap-4 transition-all surface-hover">
+            <div class="w-12 h-12 rounded-2xl bg-[var(--bg)] text-[var(--primary)] flex items-center justify-center text-xl shrink-0 shadow-inner">
+              <i class="fa-regular fa-calendar-check"></i>
+            </div>
+            <div class="min-w-0">
+              <div class="text-[11px] font-semibold text-muted truncate">Today's Appointments</div>
+              <div class="text-2xl font-extrabold text-[var(--text)] mt-0.5" *ngIf="!loadingAppointments">
+                {{ todayAppointments.length }}
+              </div>
+              <div class="h-6 w-12 bg-[var(--bg)] rounded animate-pulse" *ngIf="loadingAppointments"></div>
+              <div class="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1 mt-0.5">
+                <i class="fa-solid fa-arrow-up text-[8px]"></i>
+                <span>2 from yesterday</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stat 2: Total Patients -->
+          <div class="surface p-4 shadow-sm flex items-center gap-4 transition-all surface-hover">
+            <div class="w-12 h-12 rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center text-xl shrink-0 shadow-inner">
+              <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="min-w-0">
+              <div class="text-[11px] font-semibold text-muted truncate">Total Patients</div>
+              <div class="text-2xl font-extrabold text-[var(--text)] mt-0.5">
+                {{ overall?.totalPatients || 128 }}
+              </div>
+              <div class="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1 mt-0.5">
+                <i class="fa-solid fa-arrow-up text-[8px]"></i>
+                <span>12% this month</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stat 3: Pending Reports -->
+          <div class="surface p-4 shadow-sm flex items-center gap-4 transition-all surface-hover">
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center text-xl shrink-0 shadow-inner">
+              <i class="fa-regular fa-file-lines"></i>
+            </div>
+            <div class="min-w-0">
+              <div class="text-[11px] font-semibold text-muted truncate">Pending Reports</div>
+              <div class="text-2xl font-extrabold text-[var(--text)] mt-0.5">
+                {{ todayStats().BOOKED || 6 }}
+              </div>
+              <div class="text-[10px] font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1 mt-0.5">
+                <i class="fa-solid fa-arrow-down text-[8px]"></i>
+                <span>2 from yesterday</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stat 4: Patient Satisfaction -->
+          <div class="surface p-4 shadow-sm flex items-center gap-4 transition-all surface-hover">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-xl shrink-0 shadow-inner">
+              <i class="fa-solid fa-star"></i>
+            </div>
+            <div class="min-w-0">
+              <div class="text-[11px] font-semibold text-muted truncate">Patient Satisfaction</div>
+              <div class="text-2xl font-extrabold text-[var(--text)] mt-0.5">
+                4.8 / 5
+              </div>
+              <div class="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1 mt-0.5">
+                <i class="fa-solid fa-arrow-up text-[8px]"></i>
+                <span>0.2 this month</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ROW 2: 3 Cards Side-by-Side (Today's Schedule + October 2026 Calendar + Quick Actions) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+          
+          <app-doctor-dashboard-schedule
+            class="lg:col-span-5 min-w-0 h-full"
+            [loading]="loadingAppointments"
+            [appointments]="mockOrRealAppointments"
+            (openPatient)="openPatient($event)">
+          </app-doctor-dashboard-schedule>
+
+          <div class="lg:col-span-4 surface p-5 shadow-sm flex flex-col justify-between space-y-3">
+            <div class="flex items-center justify-between pb-1">
+              <h3 class="text-sm font-extrabold text-[var(--text)] tracking-tight">{{ calendarTitle }}</h3>
+              <div class="flex items-center gap-1.5">
+                <button type="button" (click)="shiftCalendar(-1)" aria-label="Previous month" class="min-w-[44px] min-h-[44px] rounded-lg bg-[var(--bg)] hover:bg-[var(--border)] text-muted flex items-center justify-center text-xs cursor-pointer">
+                  <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                </button>
+                <button type="button" (click)="shiftCalendar(1)" aria-label="Next month" class="min-w-[44px] min-h-[44px] rounded-lg bg-[var(--bg)] hover:bg-[var(--border)] text-muted flex items-center justify-center text-xs cursor-pointer">
+                  <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+            <div class="grid grid-cols-7 text-center text-[10px] font-bold text-muted uppercase tracking-wider py-1">
+              <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+            </div>
+            <div class="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-[var(--text)]">
+              <ng-container *ngFor="let cell of calendarCells; trackBy: trackCalendarCell">
+                <span *ngIf="!cell.label"></span>
+                <button *ngIf="cell.label" type="button" (click)="selectCalendarDay(cell.key)"
+                  class="py-1.5 rounded-lg flex flex-col items-center justify-center gap-0.5 min-h-[36px]"
+                  [ngClass]="{'text-[var(--accent)] font-black': cell.today, 'bg-[var(--accent-soft)]': cell.key === selectedCalendarDay}"
+                  [attr.aria-pressed]="cell.key === selectedCalendarDay"
+                  [attr.aria-label]="calendarDayLabel(cell)">
+                  <span>{{ cell.label }}</span>
+                  <span *ngIf="cell.hasAppointment" class="w-1 h-1 rounded-full bg-[var(--accent)]" aria-hidden="true"></span>
+                </button>
+              </ng-container>
+            </div>
+            <div *ngIf="selectedCalendarDay" class="space-y-1 border-t border-[var(--border)] pt-2">
+              <p class="text-[10px] font-bold uppercase tracking-wider text-muted">{{ selectedDayTitle }}</p>
+              <p *ngIf="selectedDayAppointments.length === 0" class="text-xs text-muted py-1">No appointments</p>
+              <button *ngFor="let visit of selectedDayAppointments" type="button" (click)="openPatient(visit)"
+                class="w-full text-left rounded-lg px-2 py-1.5 hover:bg-[var(--bg)] flex items-center justify-between gap-2"
+                [attr.aria-label]="'Open ' + visit.patientName">
+                <span class="text-xs font-semibold text-[var(--text)] truncate">{{ visit.patientName }}</span>
+                <span class="text-[11px] text-muted shrink-0">{{ visit.appointmentTime }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Column 3: Quick Actions 2x2 Grid Card (lg:col-span-3) -->
+          <div class="lg:col-span-3 surface p-5 shadow-sm flex flex-col justify-between space-y-3">
+            <h3 class="text-sm font-extrabold text-[var(--text)] tracking-tight">Quick Actions</h3>
+
+            <div class="grid grid-cols-2 gap-3 flex-1">
+              <!-- Quick 1: Start Consultation -->
+              <button type="button" (click)="nextAppointment ? start(nextAppointment) : router.navigate(['/doctor/appointments'])"
+                      class="p-3.5 rounded-xl bg-[var(--accent-soft)] border border-[var(--border)] flex flex-col items-center justify-center text-center gap-2.5 group transition-all cursor-pointer min-h-[44px]">
+                <div class="w-10 h-10 rounded-xl bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-video"></i>
+                </div>
+                <span class="text-[11px] font-extrabold text-[var(--text)] leading-tight">Start Consultation</span>
+              </button>
+
+              <!-- Quick 2: View Patients -->
+              <button type="button" (click)="router.navigate(['/doctor/appointments'])"
+                      class="p-3.5 rounded-xl bg-[var(--primary-soft)] border border-[var(--border)] flex flex-col items-center justify-center text-center gap-2.5 group transition-all cursor-pointer min-h-[44px]">
+                <div class="w-10 h-10 rounded-xl bg-[var(--primary-soft)] text-[var(--primary)] flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-user-group"></i>
+                </div>
+                <span class="text-[11px] font-extrabold text-[var(--text)] leading-tight">View Patients</span>
+              </button>
+
+              <!-- Quick 3: Write Prescription -->
+              <button type="button" (click)="nextAppointment ? openHistoryForm(nextAppointment) : router.navigate(['/doctor/appointments'])"
+                      class="p-3.5 rounded-xl bg-purple-500/10 border border-[var(--border)] flex flex-col items-center justify-center text-center gap-2.5 group transition-all cursor-pointer min-h-[44px]">
+                <div class="w-10 h-10 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-300 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                  <i class="fa-regular fa-file-lines"></i>
+                </div>
+                <span class="text-[11px] font-extrabold text-[var(--text)] leading-tight">Write Prescription</span>
+              </button>
+
+              <!-- Quick 4: Order Lab Test -->
+              <button type="button" (click)="router.navigate(['/doctor/lab-test-management'])"
+                      class="p-3.5 rounded-xl bg-amber-500/10 border border-[var(--border)] flex flex-col items-center justify-center text-center gap-2.5 group transition-all cursor-pointer min-h-[44px]">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-300 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-flask"></i>
+                </div>
+                <span class="text-[11px] font-extrabold text-[var(--text)] leading-tight">Order Lab Test</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ROW 3: 2 Cards Side-by-Side (Recent Patients Table + Consultation Insights Chart) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+          
+          <app-doctor-dashboard-patients
+            class="lg:col-span-7 min-w-0 h-full"
+            [patients]="recentPatientsList"
+            (openPatient)="openPatient($event)">
+          </app-doctor-dashboard-patients>
+
+          <!-- Consultation Insights Donut Chart Card (lg:col-span-5) -->
+          <div class="lg:col-span-5 surface p-5 shadow-sm flex flex-col justify-between space-y-4">
+            <div class="flex items-center justify-between pb-1">
+              <h3 class="text-sm font-extrabold text-[var(--text)] tracking-tight">Consultation Insights</h3>
+              <select class="bg-[var(--bg)] text-xs font-bold text-[var(--text)] border border-[var(--border)] rounded-lg px-2.5 min-h-[44px] focus:outline-none focus:border-[var(--primary)]">
+                <option selected>This Week</option>
+                <option>This Month</option>
+              </select>
+            </div>
+
+            <!-- Donut Chart & Legend -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-6 pt-1 flex-1">
+              <!-- Donut Representation -->
+              <div class="relative w-36 h-36 flex items-center justify-center shrink-0">
+                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                  <path class="text-[var(--border)]" stroke-width="3.8" stroke="currentColor" fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  
+                  <path class="text-[var(--accent)]" stroke-dasharray="50, 100" stroke-width="3.8" stroke="currentColor" fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path class="text-[var(--primary)]" stroke-dasharray="29, 100" stroke-dashoffset="-50" stroke-width="3.8" stroke="currentColor" fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path class="text-purple-500" stroke-dasharray="14, 100" stroke-dashoffset="-79" stroke-width="3.8" stroke="currentColor" fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+
+                <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                  <span class="text-2xl font-black text-[var(--text)]">28</span>
+                  <span class="text-[9px] font-bold text-muted uppercase tracking-wider leading-tight">Total<br/>Consultations</span>
+                </div>
+              </div>
+
+              <!-- Legend List -->
+              <div class="space-y-2.5 text-xs font-semibold w-full">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[var(--accent)]"></span>
+                    <span class="text-[var(--text)]">Follow-up</span>
+                  </div>
+                  <span class="text-muted">14 (50%)</span>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[var(--primary)]"></span>
+                    <span class="text-[var(--text)]">New Patient</span>
+                  </div>
+                  <span class="text-muted">8 (29%)</span>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+                    <span class="text-[var(--text)]">Lab Review</span>
+                  </div>
+                  <span class="text-muted">4 (14%)</span>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[var(--muted)]"></span>
+                    <span class="text-[var(--text)]">Others</span>
+                  </div>
+                  <span class="text-muted">2 (7%)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Modals Preserved -->
+        <app-patient-details-modal
+          [open]="showPatientModal"
+          [patient]="selectedPatient"
+          [history]="selectedPatientHistory"
+          [documents]="selectedPatientDocuments"
+          (close)="showPatientModal = false"
+          (historyClick)="openHistory($event)"
+        ></app-patient-details-modal>
+
+        <app-medical-history-detail-modal
+          [open]="historyDetailModalOpen"
+          [detail]="selectedHistoryDetail"
+          [doctorInfo]="selectedHistoryDoctorInfo"
+          (close)="closeHistoryDetail()"
+        ></app-medical-history-detail-modal>
+
+        <app-medical-history-form-modal
+          [open]="historyFormModalOpen"
+          [form]="mhForm"
+          [disabled]="selectedAppointment?.status !== 'IN_PROGRESS'"
+          [saving]="savingHistory"
+          [saved]="historySaved"
+          [error]="historyError"
+          [infoText]="selectedAppointment?.status === 'COMPLETED' ? 'This medical record is finalized and cannot be modified.' : (selectedAppointment?.status !== 'IN_PROGRESS' ? 'Form available only for in-progress appointments.' : null)"
+          (close)="closeHistoryForm()"
+          (submit)="saveMedicalHistory()"
+        ></app-medical-history-form-modal>
+
+        <!-- Leave Management Modal Shell -->
+        <app-modal-shell
+          [open]="leaveModalOpen"
+          title="Manage Leaves"
+          icon="fa-solid fa-calendar-day"
+          iconWrapClass="bg-[var(--bg)] text-[var(--primary)]"
+          maxWidthClass="max-w-2xl"
+          zIndexClass="z-[110]"
+          bodyClass="p-6 space-y-6"
+          footerClass="p-4 bg-[var(--bg)] text-center"
+          [hasFooter]="true"
+          (close)="leaveModalOpen = false"
+        >
+              <div class="bg-[var(--panel)] p-5 rounded-2xl border border-[var(--border)]">
+                <h4 class="font-bold text-[var(--text)] mb-4 text-xs uppercase tracking-wider">Schedule New Leave</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <app-date-picker
+                      [(ngModel)]="leafForm.startDate"
+                      label="Start Date"
+                      placeholder="Select Date"
+                      [minDate]="'today'">
+                    </app-date-picker>
+                    <app-date-picker
+                      [(ngModel)]="leafForm.endDate"
+                      label="End Date"
+                      placeholder="Select Date"
+                      [minDate]="leafForm.startDate || 'today'">
+                    </app-date-picker>
+                </div>
+                <div class="space-y-1.5 mb-4">
+                  <label class="text-xs font-semibold text-muted">Reason (Optional)</label>
+                  <input type="text" [(ngModel)]="leafForm.reason" placeholder="e.g., Vacation, Medical, Personal"
+                         class="form-input">
+                </div>
+                <button type="button" (click)="addLeave()" [disabled]="savingLeave || !leafForm.startDate || !leafForm.endDate"
+                        class="w-full min-h-[44px] bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-[var(--primary-fg)] font-black text-xs rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50">
+                  <i class="fa-solid fa-plus" *ngIf="!savingLeave"></i>
+                  <i class="fa-solid fa-spinner animate-spin" *ngIf="savingLeave"></i>
+                  {{ savingLeave ? 'Adding Leave...' : 'Schedule Leave' }}
+                </button>
+                <p *ngIf="leaveError" class="mt-2 text-xs text-rose-400 font-medium"><i class="fa-solid fa-circle-exclamation"></i> {{ leaveError }}</p>
+              </div>
+
+              <div class="space-y-4">
+                <h4 class="font-bold text-[var(--text)] text-xs uppercase tracking-wider">Current & Upcoming Leaves</h4>
+                <div *ngIf="upcomingLeaves.length === 0" class="text-center py-8 text-muted bg-[var(--panel)] rounded-2xl border border-dashed border-[var(--border)]">
+                  <i class="fa-solid fa-couch text-2xl mb-2 opacity-40"></i>
+                  <p class="text-xs">No leaves scheduled currently.</p>
+                </div>
+                <div class="space-y-3">
+                  <div *ngFor="let l of upcomingLeaves; trackBy: trackLeave" class="bg-[var(--panel)] p-4 rounded-2xl border border-[var(--border)] flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                      <div class="w-10 h-10 rounded-xl bg-[var(--bg)] text-[var(--primary)] flex items-center justify-center font-bold text-xs uppercase">
+                        {{ l.startDate | date:'MMM' }}
+                      </div>
+                      <div>
+                        <div class="text-xs font-bold text-[var(--text)]">
+                          {{ l.startDate | date:'d MMM' }} - {{ l.endDate | date:'d MMM, yyyy' }}
+                        </div>
+                        <div class="text-[11px] text-muted mt-0.5">
+                          {{ l.reason || 'No reason provided' }}
+                        </div>
+                      </div>
+                    </div>
+                    <button type="button" (click)="deleteLeave(l.id!)" class="w-8 h-8 flex items-center justify-center text-rose-400 hover:bg-rose-950/50 rounded-xl transition-all" aria-label="Delete leave">
+                      <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+            <p modalFooter class="text-[10px] text-muted uppercase tracking-widest font-bold m-0">Booking slots are automatically blocked for these dates</p>
+        </app-modal-shell>
+
+      </div>
+    </app-doctor-layout>

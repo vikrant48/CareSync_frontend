@@ -3,13 +3,13 @@
 
         <!-- Hero Header Banner (Matching Reference Screenshot 1) -->
         <section
-            class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-5 sm:p-6 shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div class="space-y-1">
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">My Appointments</h1>
-                <p class="text-xs sm:text-sm text-[#9aa3b8]">Manage and track your scheduled consultations</p>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">My Appointments</h1>
+                <p class="text-xs sm:text-sm text-[var(--muted)]">Manage and track your scheduled consultations</p>
             </div>
             <a routerLink="/patient/book-appointment"
-                class="px-4 py-2.5 rounded-xl bg-[#5b6cf0] hover:bg-[#4c5ce0] text-white text-xs font-bold shadow-lg shadow-[#5b6cf0]/25 inline-flex items-center gap-2 transition-all shrink-0">
+                class="px-4 py-2.5 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white text-xs font-bold shadow-lg shadow-[var(--primary)]/25 inline-flex items-center gap-2 transition-all shrink-0">
                 <i class="fa-solid fa-circle-plus text-xs"></i>
                 <span>Book New Appointment</span>
             </a>
@@ -22,15 +22,15 @@
 
         <!-- Summary & Sort Toolbar -->
         <div class="flex items-center justify-between py-1">
-            <div class="text-xs font-medium text-[#9aa3b8]">
-                Showing <span class="font-bold text-white">{{ filtered().length }}</span> of <span
-                    class="font-bold text-[#5b6cf0]">{{ appointments.length }}</span> appointments
+            <div class="text-xs font-medium text-[var(--muted)]">
+                Showing <span class="font-bold text-[var(--text)]">{{ filtered().length }}</span> of <span
+                    class="font-bold text-[var(--primary)]">{{ appointments.length }}</span> appointments
             </div>
 
             <div class="flex items-center gap-2">
-                <span class="text-xs text-[#9aa3b8] font-medium">Sort by</span>
+                <span class="text-xs text-[var(--muted)] font-medium">Sort by</span>
                 <select
-                    class="bg-[#151b2b] border border-[#2a3347] rounded-xl px-3 py-1.5 text-xs text-white font-semibold focus:outline-none focus:border-[#5b6cf0] cursor-pointer">
+                    class="bg-[var(--panel)] border border-[var(--border)] rounded-xl px-3 py-1.5 text-xs text-[var(--text)] font-semibold focus:outline-none focus:border-[var(--primary)] cursor-pointer">
                     <option value="upcoming">Upcoming First</option>
                     <option value="recent">Most Recent</option>
                 </select>
@@ -44,20 +44,20 @@
         <app-empty-state *ngIf="!loading && filtered().length === 0 && appointments.length === 0"
             icon="fa-solid fa-calendar-xmark" title="No Appointments Found"
             message="You haven't booked any appointments yet."
-            containerClass="bg-[#151b2b] rounded-2xl border border-[#2a3347] border-dashed px-4 py-8"
+            containerClass="bg-[var(--panel)] rounded-2xl border border-[var(--border)] border-dashed px-4 py-8"
             [hasAction]="true">
             <a routerLink="/patient/book-appointment"
-                class="px-4 py-2 rounded-xl bg-[#5b6cf0] hover:bg-[#4c5ce0] text-white text-xs font-bold shadow-md transition-all">Book
+                class="px-4 py-2 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white text-xs font-bold shadow-md transition-all">Book
                 Now</a>
         </app-empty-state>
 
         <app-empty-state *ngIf="!loading && filtered().length === 0 && appointments.length > 0"
             icon="fa-solid fa-calendar-xmark" title="No Appointments Found"
             message="No appointments match your current filters."
-            containerClass="bg-[#151b2b] rounded-2xl border border-[#2a3347] border-dashed px-4 py-8"
+            containerClass="bg-[var(--panel)] rounded-2xl border border-[var(--border)] border-dashed px-4 py-8"
             [hasAction]="true">
             <button type="button" (click)="clearFilters()"
-                class="px-4 py-2 rounded-xl bg-[#1b2333] hover:bg-[#2a3347] text-[#5b6cf0] text-xs font-bold border border-[#2a3347] transition-all">Clear
+                class="px-4 py-2 rounded-xl bg-[var(--bg)] hover:bg-[var(--border)] text-[var(--primary)] text-xs font-bold border border-[var(--border)] transition-all">Clear
                 Filters</button>
         </app-empty-state>
 
@@ -65,7 +65,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in"
             *ngIf="!loading && filtered().length > 0">
             <app-appointment-card *ngFor="let a of filtered()" [appointment]="a" viewerRole="PATIENT"
-                class="h-full"></app-appointment-card>
+                class="h-full" (reschedule)="startReschedule($event)" (cancel)="cancelAppointment($event)"
+                (openChat)="openChat($event)"></app-appointment-card>
         </div>
 
         <!-- Reschedule Modal (shared) -->

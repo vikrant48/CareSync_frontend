@@ -14,19 +14,19 @@ import { ReportsApiService } from '../../core/services/reports.service';
 import { AnalyticsApiService } from '../../core/services/analytics.service';
 import { RescheduleAppointmentModalComponent } from '../../shared/reschedule-appointment-modal.component';
 import { MedicalHistoryDetailModalComponent } from '../../shared/medical-history-detail-modal.component';
-import { AppointmentCardComponent } from '../../shared/components/appointment-card.component';
 import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.component';
 import { getAppointmentEpochMs, isAppointmentToday, isAppointmentFuture } from '../../shared/appointment-utils';
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { PatientNotificationComponent } from './patient-notification.component';
 import { PatientDashboardMetricsCardsComponent } from './patient-dashboard-metrics-cards.component';
 import { PatientMyHealthComponent } from './patient-my-health.component';
-import { ButtonComponent, StatusBadgeComponent } from '../../shared/components';
+import { PatientDashboardAppointmentListComponent } from './patient-dashboard-appointment-list.component';
+import { ButtonComponent } from '../../shared/components';
 
 @Component({
   selector: 'app-patient-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, RescheduleAppointmentModalComponent, PatientNotificationComponent, MedicalHistoryDetailModalComponent, PatientDashboardMetricsCardsComponent, PatientMyHealthComponent, SharedChatModalComponent, ButtonComponent, StatusBadgeComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, RescheduleAppointmentModalComponent, PatientNotificationComponent, MedicalHistoryDetailModalComponent, PatientDashboardMetricsCardsComponent, PatientMyHealthComponent, PatientDashboardAppointmentListComponent, SharedChatModalComponent, ButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './patient-dashboard.component.html',
   styleUrl: './patient-dashboard.component.css'

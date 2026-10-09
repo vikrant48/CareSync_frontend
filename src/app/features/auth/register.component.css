@@ -1,11 +1,27 @@
 :host {
     display: block;
-    min-height: 100vh;
 }
 
-@media (min-width: 1024px) {
-    :host {
-        height: 100vh;
-        overflow: hidden;
-    }
+:host ::ng-deep app-date-picker label {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 600;
+    letter-spacing: normal;
+    text-transform: none;
+    color: rgb(55 65 81);
+    margin-bottom: 0.25rem;
+}
+
+:host-context(.dark) ::ng-deep app-date-picker label,
+:host-context(.theme-dark) ::ng-deep app-date-picker label {
+    color: rgb(209 213 219);
+}
+
+:host ::ng-deep app-date-picker input.input-modern,
+:host ::ng-deep app-date-picker input.flatpickr-input {
+    min-height: 40px !important;
+    height: auto !important;
+    font-size: 0.875rem !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
 }

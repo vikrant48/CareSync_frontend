@@ -1,117 +1,44 @@
 <app-doctor-layout>
-    <div class="max-w-[1400px] mx-auto p-4 sm:p-6 space-y-6 text-white font-sans selection:bg-[#2dd4bf]/30 pb-16">
+    <div class="max-w-[1400px] mx-auto p-4 sm:p-6 space-y-6 text-[var(--text)] font-sans selection:bg-[var(--accent)]/30 pb-16">
 
         <!-- Page Header -->
         <div
-            class="bg-[#0f1724] border border-[#1a2738] p-5 sm:p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+            class="relative overflow-hidden bg-gradient-to-r from-[var(--accent-soft)] via-[var(--panel)] to-[var(--primary-soft)] border border-[var(--border)] p-5 sm:p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
             <div>
-                <h1 class="text-xl sm:text-2xl font-black text-white tracking-tight">Analytics & Insights</h1>
-                <p class="text-xs sm:text-sm text-[#8b9cb0] mt-0.5 font-medium">Track your performance and patient
+                <h1 class="text-xl sm:text-2xl font-black text-[var(--text)] tracking-tight">Analytics & Insights</h1>
+                <p class="text-xs sm:text-sm text-[var(--muted)] mt-0.5 font-medium">Track your performance and patient
                     engagement metrics</p>
             </div>
 
             <div class="flex items-center gap-3 self-end sm:self-auto">
                 <div
-                    class="bg-[#182333] border border-[#202f45] rounded-xl px-3 py-2 text-xs font-semibold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-calendar-days text-[#2dd4bf]"></i>
+                    class="bg-[var(--bg)] border border-[var(--bg)] rounded-xl px-3 py-2 text-xs font-semibold text-[var(--text)] flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-days text-[var(--accent)]"></i>
                     <span>This Month</span>
-                    <i class="fa-solid fa-chevron-down text-[10px] text-[#64748b]"></i>
+                    <i class="fa-solid fa-chevron-down text-[10px] text-[var(--muted)]"></i>
                 </div>
 
                 <button type="button" (click)="exportReport()"
-                    class="px-4 py-2 bg-[#182333] hover:bg-[#202f45] border border-[#202f45] text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-2 shadow-sm">
-                    <i class="fa-solid fa-download text-[#2dd4bf]"></i>
+                    class="px-4 py-2 bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--text)] font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-download text-[var(--accent)]"></i>
                     <span>Export Report</span>
                 </button>
             </div>
         </div>
 
-        <!-- Row 1: Top 4 KPI Stat Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-            <!-- Stat 1: Total Appointments -->
-            <div
-                class="bg-[#0f1724] border border-[#1a2738] rounded-2xl p-5 shadow-xl relative overflow-hidden group hover:border-[#2dd4bf]/40 transition-all flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-[#8b9cb0]">Total Appointments</span>
-                        <div
-                            class="w-10 h-10 rounded-xl bg-[#10b981]/15 border border-[#10b981]/30 flex items-center justify-center text-[#10b981]">
-                            <i class="fa-solid fa-calendar-check text-sm"></i>
-                        </div>
-                    </div>
-                    <div class="mt-2 text-2xl sm:text-3xl font-black text-white tracking-tight">
-                        {{ overall?.totalAppointments ?? 00 }}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Stat 2: Total Revenue -->
-            <div
-                class="bg-[#0f1724] border border-[#1a2738] rounded-2xl p-5 shadow-xl relative overflow-hidden group hover:border-[#2dd4bf]/40 transition-all flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-[#8b9cb0]">Total Revenue</span>
-                        <div
-                            class="w-10 h-10 rounded-xl bg-[#10b981]/15 border border-[#10b981]/30 flex items-center justify-center text-[#10b981]">
-                            <i class="fa-solid fa-sack-dollar text-sm"></i>
-                        </div>
-                    </div>
-                    <div class="mt-2 text-2xl sm:text-3xl font-black text-white tracking-tight">
-                        ₹ {{ (overall?.totalRevenue ?? 00) | number }}
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Stat 3: Average Rating -->
-            <div
-                class="bg-[#0f1724] border border-[#1a2738] rounded-2xl p-5 shadow-xl relative overflow-hidden group hover:border-[#2dd4bf]/40 transition-all flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-[#8b9cb0]">Average Rating</span>
-                        <div
-                            class="w-10 h-10 rounded-xl bg-[#f59e0b]/15 border border-[#f59e0b]/30 flex items-center justify-center text-[#f59e0b]">
-                            <i class="fa-solid fa-star text-sm"></i>
-                        </div>
-                    </div>
-                    <div
-                        class="mt-2 text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-1.5">
-                        <span>{{ overall?.avgRating ?? 00 }}</span>
-                        <i class="fa-solid fa-star text-[#f59e0b] text-xl"></i>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Stat 4: Consultation Rate -->
-            <div
-                class="bg-[#0f1724] border border-[#1a2738] rounded-2xl p-5 shadow-xl relative overflow-hidden group hover:border-[#2dd4bf]/40 transition-all flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-[#8b9cb0]">Consultation Rate</span>
-                        <div
-                            class="w-10 h-10 rounded-xl bg-[#2dd4bf]/15 border border-[#2dd4bf]/30 flex items-center justify-center text-[#2dd4bf]">
-                            <i class="fa-solid fa-users text-sm"></i>
-                        </div>
-                    </div>
-                    <div class="mt-2 text-2xl sm:text-3xl font-black text-white tracking-tight">
-                        {{ retention?.retentionRate ?? 00 }}%
-                    </div>
-                </div>
-            </div>
-        </div>
+        <app-doctor-reports-summary [overall]="overall" [retention]="retention"></app-doctor-reports-summary>
 
         <!-- Row 2: Appointments Overview Stacked Bar & Patient Visits Trend -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- Left Col (7): Appointments Overview -->
-            <div class="lg:col-span-7 bg-[#0f1724] border border-[#1a2738] rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
+            <div class="lg:col-span-7 bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h3 class="font-black text-white text-base">Appointments Overview</h3>
-                        <p class="text-xs text-[#8b9cb0] font-medium mt-0.5">Total {{ overall?.totalAppointments ?? 00 }} appointments</p>
+                        <h3 class="font-black text-[var(--text)] text-base">Appointments Overview</h3>
+                        <p class="text-xs text-[var(--muted)] font-medium mt-0.5">Total {{ overall?.totalAppointments ?? 00 }} appointments</p>
                     </div>
                     <div
-                        class="bg-[#182333] border border-[#202f45] rounded-xl px-3 py-1.5 text-xs font-semibold text-[#8b9cb0] flex items-center gap-2 cursor-pointer">
+                        class="bg-[var(--bg)] border border-[var(--bg)] rounded-xl px-3 py-1.5 text-xs font-semibold text-[var(--muted)] flex items-center gap-2 cursor-pointer">
                         <span>Monthly</span>
                         <i class="fa-solid fa-chevron-down text-[10px]"></i>
                     </div>
@@ -119,11 +46,11 @@
 
                 <!-- Interactive Legend -->
                 <div class="flex items-center gap-4 text-xs font-semibold pt-1">
-                    <span class="flex items-center gap-1.5 text-[#2dd4bf]">
-                        <span class="w-2.5 h-2.5 rounded-full bg-[#2dd4bf]"></span> Consultation
+                    <span class="flex items-center gap-1.5 text-[var(--accent)]">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[var(--accent)]"></span> Consultation
                     </span>
-                    <span class="flex items-center gap-1.5 text-[#3b82f6]">
-                        <span class="w-2.5 h-2.5 rounded-full bg-[#3b82f6]"></span> Follow-up
+                    <span class="flex items-center gap-1.5 text-[var(--primary)]">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[var(--primary)]"></span> Follow-up
                     </span>
                     <span class="flex items-center gap-1.5 text-[#a855f7]">
                         <span class="w-2.5 h-2.5 rounded-full bg-[#a855f7]"></span> Procedure
@@ -139,14 +66,14 @@
             </div>
 
             <!-- Right Col (5): Patient Visits Trend -->
-            <div class="lg:col-span-5 bg-[#0f1724] border border-[#1a2738] rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
+            <div class="lg:col-span-5 bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h3 class="font-black text-white text-base">Patient Visits Trend</h3>
-                        <p class="text-xs text-[#8b9cb0] font-medium mt-0.5">Last 6 months</p>
+                        <h3 class="font-black text-[var(--text)] text-base">Patient Visits Trend</h3>
+                        <p class="text-xs text-[var(--muted)] font-medium mt-0.5">Last 6 months</p>
                     </div>
                     <div
-                        class="bg-[#182333] border border-[#202f45] rounded-xl px-3 py-1.5 text-xs font-semibold text-[#8b9cb0] flex items-center gap-2 cursor-pointer">
+                        class="bg-[var(--bg)] border border-[var(--bg)] rounded-xl px-3 py-1.5 text-xs font-semibold text-[var(--muted)] flex items-center gap-2 cursor-pointer">
                         <span>Last 6 Months</span>
                         <i class="fa-solid fa-chevron-down text-[10px]"></i>
                     </div>
@@ -154,8 +81,8 @@
 
                 <!-- Dual Line Legend -->
                 <div class="flex items-center gap-4 text-xs font-semibold pt-1">
-                    <span class="flex items-center gap-1.5 text-[#38bdf8]">
-                        <span class="w-2.5 h-2.5 rounded-full bg-[#38bdf8]"></span> New Patients
+                    <span class="flex items-center gap-1.5 text-[var(--primary)]">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[var(--primary)]"></span> New Patients
                     </span>
                     <span class="flex items-center gap-1.5 text-[#4ade80]">
                         <span class="w-2.5 h-2.5 rounded-full bg-[#4ade80]"></span> Follow-up Patients
@@ -173,19 +100,19 @@
         <!-- Row 3: Focus Widgets (Patient Satisfaction & Patient Demographics) -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- Patient Satisfaction Widget -->
-            <div class="lg:col-span-6 bg-[#0f1724] border border-[#1a2738] rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
+            <div class="lg:col-span-6 bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
                 <div>
-                    <h3 class="font-black text-white text-base">Patient Satisfaction</h3>
-                    <p class="text-xs text-[#8b9cb0] font-medium mt-0.5">Based on to be added reviews</p>
+                    <h3 class="font-black text-[var(--text)] text-base">Patient Satisfaction</h3>
+                    <p class="text-xs text-[var(--muted)] font-medium mt-0.5">Based on to be added reviews</p>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center pt-2">
                     <!-- Left Circular Rating Score -->
                     <div
-                        class="sm:col-span-5 flex flex-col items-center justify-center p-6 bg-[#182333]/60 border border-[#202f45] rounded-2xl text-center">
+                        class="sm:col-span-5 flex flex-col items-center justify-center p-6 bg-[var(--bg)]/60 border border-[var(--bg)] rounded-2xl text-center">
                         <div
-                            class="w-24 h-24 rounded-full border-4 border-[#2dd4bf] flex flex-col items-center justify-center shadow-lg bg-[#0f1724]">
-                            <span class="text-3xl font-black text-white">{{overall?.avgRating ?? 0.0}}</span>
+                            class="w-24 h-24 rounded-full border-4 border-[var(--accent)] flex flex-col items-center justify-center shadow-lg bg-[var(--panel)]">
+                            <span class="text-3xl font-black text-[var(--text)]">{{overall?.avgRating ?? 0.0}}</span>
                             <div class="flex gap-0.5 text-xs text-[#f59e0b] mt-0.5">
                                 <i class="fa-solid fa-star"></i>
                                 <i class="fa-solid fa-star"></i>
@@ -200,48 +127,48 @@
                     <div class="sm:col-span-7 space-y-3">
                         <div class="space-y-1">
                             <div class="flex justify-between text-xs font-semibold">
-                                <span class="text-[#8b9cb0] flex items-center gap-1.5">
+                                <span class="text-[var(--muted)] flex items-center gap-1.5">
                                     <i class="fa-solid fa-face-smile text-[#10b981]"></i> Excellent
                                 </span>
-                                <span class="text-white">72%</span>
+                                <span class="text-[var(--text)]">72%</span>
                             </div>
-                            <div class="w-full bg-[#182333] h-2 rounded-full overflow-hidden">
+                            <div class="w-full bg-[var(--bg)] h-2 rounded-full overflow-hidden">
                                 <div class="bg-[#10b981] h-full rounded-full" style="width: 72%"></div>
                             </div>
                         </div>
 
                         <div class="space-y-1">
                             <div class="flex justify-between text-xs font-semibold">
-                                <span class="text-[#8b9cb0] flex items-center gap-1.5">
-                                    <i class="fa-solid fa-face-meh text-[#3b82f6]"></i> Good
+                                <span class="text-[var(--muted)] flex items-center gap-1.5">
+                                    <i class="fa-solid fa-face-meh text-[var(--primary)]"></i> Good
                                 </span>
-                                <span class="text-white">20%</span>
+                                <span class="text-[var(--text)]">20%</span>
                             </div>
-                            <div class="w-full bg-[#182333] h-2 rounded-full overflow-hidden">
-                                <div class="bg-[#3b82f6] h-full rounded-full" style="width: 20%"></div>
+                            <div class="w-full bg-[var(--bg)] h-2 rounded-full overflow-hidden">
+                                <div class="bg-[var(--primary)] h-full rounded-full" style="width: 20%"></div>
                             </div>
                         </div>
 
                         <div class="space-y-1">
                             <div class="flex justify-between text-xs font-semibold">
-                                <span class="text-[#8b9cb0] flex items-center gap-1.5">
+                                <span class="text-[var(--muted)] flex items-center gap-1.5">
                                     <i class="fa-solid fa-face-frown text-[#f59e0b]"></i> Average
                                 </span>
-                                <span class="text-white">6%</span>
+                                <span class="text-[var(--text)]">6%</span>
                             </div>
-                            <div class="w-full bg-[#182333] h-2 rounded-full overflow-hidden">
+                            <div class="w-full bg-[var(--bg)] h-2 rounded-full overflow-hidden">
                                 <div class="bg-[#f59e0b] h-full rounded-full" style="width: 6%"></div>
                             </div>
                         </div>
 
                         <div class="space-y-1">
                             <div class="flex justify-between text-xs font-semibold">
-                                <span class="text-[#8b9cb0] flex items-center gap-1.5">
+                                <span class="text-[var(--muted)] flex items-center gap-1.5">
                                     <i class="fa-solid fa-face-angry text-[#ef4444]"></i> Poor
                                 </span>
-                                <span class="text-white">2%</span>
+                                <span class="text-[var(--text)]">2%</span>
                             </div>
-                            <div class="w-full bg-[#182333] h-2 rounded-full overflow-hidden">
+                            <div class="w-full bg-[var(--bg)] h-2 rounded-full overflow-hidden">
                                 <div class="bg-[#ef4444] h-full rounded-full" style="width: 2%"></div>
                             </div>
                         </div>
@@ -250,10 +177,10 @@
             </div>
 
             <!-- Patient Demographics Widget -->
-            <div class="lg:col-span-6 bg-[#0f1724] border border-[#1a2738] rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
+            <div class="lg:col-span-6 bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
                 <div>
-                    <h3 class="font-black text-white text-base">Patient Demographics</h3>
-                    <p class="text-xs text-[#8b9cb0] font-medium mt-0.5">Total 128 patients</p>
+                    <h3 class="font-black text-[var(--text)] text-base">Patient Demographics</h3>
+                    <p class="text-xs text-[var(--muted)] font-medium mt-0.5">Total 128 patients</p>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center pt-2">
@@ -266,32 +193,32 @@
                     <!-- Right Legend Details -->
                     <div class="sm:col-span-6 space-y-3">
                         <div
-                            class="flex items-center justify-between text-xs font-semibold p-2.5 bg-[#182333]/50 rounded-xl">
+                            class="flex items-center justify-between text-xs font-semibold p-2.5 bg-[var(--bg)]/50 rounded-xl">
                             <span class="flex items-center gap-2 text-[#a855f7]">
                                 <span class="w-3 h-3 rounded-full bg-[#a855f7]"></span> 18-25
                             </span>
-                            <span class="text-white font-bold">12%</span>
+                            <span class="text-[var(--text)] font-bold">12%</span>
                         </div>
                         <div
-                            class="flex items-center justify-between text-xs font-semibold p-2.5 bg-[#182333]/50 rounded-xl">
-                            <span class="flex items-center gap-2 text-[#3b82f6]">
-                                <span class="w-3 h-3 rounded-full bg-[#3b82f6]"></span> 26-35
+                            class="flex items-center justify-between text-xs font-semibold p-2.5 bg-[var(--bg)]/50 rounded-xl">
+                            <span class="flex items-center gap-2 text-[var(--primary)]">
+                                <span class="w-3 h-3 rounded-full bg-[var(--primary)]"></span> 26-35
                             </span>
-                            <span class="text-white font-bold">28%</span>
+                            <span class="text-[var(--text)] font-bold">28%</span>
                         </div>
                         <div
-                            class="flex items-center justify-between text-xs font-semibold p-2.5 bg-[#182333]/50 rounded-xl">
-                            <span class="flex items-center gap-2 text-[#2dd4bf]">
-                                <span class="w-3 h-3 rounded-full bg-[#2dd4bf]"></span> 36-50
+                            class="flex items-center justify-between text-xs font-semibold p-2.5 bg-[var(--bg)]/50 rounded-xl">
+                            <span class="flex items-center gap-2 text-[var(--accent)]">
+                                <span class="w-3 h-3 rounded-full bg-[var(--accent)]"></span> 36-50
                             </span>
-                            <span class="text-white font-bold">40%</span>
+                            <span class="text-[var(--text)] font-bold">40%</span>
                         </div>
                         <div
-                            class="flex items-center justify-between text-xs font-semibold p-2.5 bg-[#182333]/50 rounded-xl">
+                            class="flex items-center justify-between text-xs font-semibold p-2.5 bg-[var(--bg)]/50 rounded-xl">
                             <span class="flex items-center gap-2 text-[#f59e0b]">
                                 <span class="w-3 h-3 rounded-full bg-[#f59e0b]"></span> 51+
                             </span>
-                            <span class="text-white font-bold">20%</span>
+                            <span class="text-[var(--text)] font-bold">20%</span>
                         </div>
                     </div>
                 </div>
@@ -302,70 +229,70 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Card 1: Appointment Types -->
             <div
-                class="bg-[#0f1724] border border-[#1a2738] rounded-2xl p-5 sm:p-6 shadow-xl space-y-4 flex flex-col justify-between">
+                class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-xl space-y-4 flex flex-col justify-between">
                 <div>
-                    <h3 class="font-black text-white text-base">Appointment Types</h3>
-                    <p class="text-xs text-[#8b9cb0] font-medium mt-0.5">Distribution of appointment types</p>
+                    <h3 class="font-black text-[var(--text)] text-base">Appointment Types</h3>
+                    <p class="text-xs text-[var(--muted)] font-medium mt-0.5">Distribution of appointment types</p>
                 </div>
 
                 <div class="space-y-3.5 pt-2">
                     <div class="space-y-1.5">
                         <div class="flex justify-between text-xs font-semibold">
-                            <span class="text-[#8b9cb0] flex items-center gap-2">
-                                <i class="fa-solid fa-user-doctor text-[#2dd4bf] text-xs"></i> Consultation
+                            <span class="text-[var(--muted)] flex items-center gap-2">
+                                <i class="fa-solid fa-user-doctor text-[var(--accent)] text-xs"></i> Consultation
                             </span>
-                            <span class="text-white">48 (38%)</span>
+                            <span class="text-[var(--text)]">48 (38%)</span>
                         </div>
-                        <div class="w-full bg-[#182333] h-2 rounded-full overflow-hidden">
-                            <div class="bg-[#2dd4bf] h-full rounded-full" style="width: 38%"></div>
+                        <div class="w-full bg-[var(--bg)] h-2 rounded-full overflow-hidden">
+                            <div class="bg-[var(--accent)] h-full rounded-full" style="width: 38%"></div>
                         </div>
                     </div>
 
                     <div class="space-y-1.5">
                         <div class="flex justify-between text-xs font-semibold">
-                            <span class="text-[#8b9cb0] flex items-center gap-2">
-                                <i class="fa-solid fa-rotate text-[#38bdf8] text-xs"></i> Follow-up
+                            <span class="text-[var(--muted)] flex items-center gap-2">
+                                <i class="fa-solid fa-rotate text-[var(--primary)] text-xs"></i> Follow-up
                             </span>
-                            <span class="text-white">36 (28%)</span>
+                            <span class="text-[var(--text)]">36 (28%)</span>
                         </div>
-                        <div class="w-full bg-[#182333] h-2 rounded-full overflow-hidden">
-                            <div class="bg-[#38bdf8] h-full rounded-full" style="width: 28%"></div>
+                        <div class="w-full bg-[var(--bg)] h-2 rounded-full overflow-hidden">
+                            <div class="bg-[var(--primary)] h-full rounded-full" style="width: 28%"></div>
                         </div>
                     </div>
 
                     <div class="space-y-1.5">
                         <div class="flex justify-between text-xs font-semibold">
-                            <span class="text-[#8b9cb0] flex items-center gap-2">
+                            <span class="text-[var(--muted)] flex items-center gap-2">
                                 <i class="fa-solid fa-[#000] fa-heart-pulse text-[#a855f7] text-xs"></i> ECG Review
                             </span>
-                            <span class="text-white">18 (14%)</span>
+                            <span class="text-[var(--text)]">18 (14%)</span>
                         </div>
-                        <div class="w-full bg-[#182333] h-2 rounded-full overflow-hidden">
+                        <div class="w-full bg-[var(--bg)] h-2 rounded-full overflow-hidden">
                             <div class="bg-[#a855f7] h-full rounded-full" style="width: 14%"></div>
                         </div>
                     </div>
 
                     <div class="space-y-1.5">
                         <div class="flex justify-between text-xs font-semibold">
-                            <span class="text-[#8b9cb0] flex items-center gap-2">
+                            <span class="text-[var(--muted)] flex items-center gap-2">
                                 <i class="fa-solid fa-flask text-[#f59e0b] text-xs"></i> Lab Discussion
                             </span>
-                            <span class="text-white">12 (9%)</span>
+                            <span class="text-[var(--text)]">12 (9%)</span>
                         </div>
-                        <div class="w-full bg-[#182333] h-2 rounded-full overflow-hidden">
+                        <div class="w-full bg-[var(--bg)] h-2 rounded-full overflow-hidden">
                             <div class="bg-[#f59e0b] h-full rounded-full" style="width: 9%"></div>
                         </div>
                     </div>
 
                     <div class="space-y-1.5">
                         <div class="flex justify-between text-xs font-semibold">
-                            <span class="text-[#8b9cb0] flex items-center gap-2">
-                                <i class="fa-solid fa-[#000] fa-briefcase-medical text-[#64748b] text-xs"></i> Others
+                            <span class="text-[var(--muted)] flex items-center gap-2">
+                                <i class="fa-solid fa-[#000] fa-briefcase-medical text-[var(--muted)] text-xs"></i> Others
                             </span>
-                            <span class="text-white">14 (11%)</span>
+                            <span class="text-[var(--text)]">14 (11%)</span>
                         </div>
-                        <div class="w-full bg-[#182333] h-2 rounded-full overflow-hidden">
-                            <div class="bg-[#64748b] h-full rounded-full" style="width: 11%"></div>
+                        <div class="w-full bg-[var(--bg)] h-2 rounded-full overflow-hidden">
+                            <div class="bg-[var(--muted)] h-full rounded-full" style="width: 11%"></div>
                         </div>
                     </div>
                 </div>
@@ -373,10 +300,10 @@
 
             <!-- Card 2: Weekly Activity -->
             <div
-                class="bg-[#0f1724] border border-[#1a2738] rounded-2xl p-5 sm:p-6 shadow-xl space-y-4 flex flex-col justify-between">
+                class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-xl space-y-4 flex flex-col justify-between">
                 <div>
-                    <h3 class="font-black text-white text-base">Weekly Activity</h3>
-                    <p class="text-xs text-[#8b9cb0] font-medium mt-0.5">Appointments per day</p>
+                    <h3 class="font-black text-[var(--text)] text-base">Weekly Activity</h3>
+                    <p class="text-xs text-[var(--muted)] font-medium mt-0.5">Appointments per day</p>
                 </div>
 
                 <div class="h-56 w-full pt-2">
@@ -387,13 +314,13 @@
 
             <!-- Card 3: Cancellation Insights -->
             <div
-                class="bg-[#0f1724] border border-[#1a2738] rounded-2xl p-5 sm:p-6 shadow-xl space-y-4 flex flex-col justify-between">
+                class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-xl space-y-4 flex flex-col justify-between">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h3 class="font-black text-white text-base">Cancellation Insights</h3>
+                        <h3 class="font-black text-[var(--text)] text-base">Cancellation Insights</h3>
                     </div>
                     <div
-                        class="bg-[#182333] border border-[#202f45] rounded-xl px-2.5 py-1 text-xs font-semibold text-[#8b9cb0] flex items-center gap-2 cursor-pointer">
+                        class="bg-[var(--bg)] border border-[var(--bg)] rounded-xl px-2.5 py-1 text-xs font-semibold text-[var(--muted)] flex items-center gap-2 cursor-pointer">
                         <span>This Month</span>
                         <i class="fa-solid fa-chevron-down text-[10px]"></i>
                     </div>
@@ -403,9 +330,9 @@
                     <!-- Left Donut Gauge -->
                     <div class="sm:col-span-5 flex flex-col items-center justify-center p-4">
                         <div
-                            class="w-20 h-20 rounded-full border-4 border-[#ef4444] flex flex-col items-center justify-center bg-[#182333]/80 shadow-md">
-                            <span class="text-lg font-black text-white">8%</span>
-                            <span class="text-[9px] text-[#8b9cb0] font-semibold">Cancellation</span>
+                            class="w-20 h-20 rounded-full border-4 border-[#ef4444] flex flex-col items-center justify-center bg-[var(--bg)]/80 shadow-md">
+                            <span class="text-lg font-black text-[var(--text)]">8%</span>
+                            <span class="text-[9px] text-[var(--muted)] font-semibold">Cancellation</span>
                         </div>
                     </div>
 
@@ -415,19 +342,19 @@
                             <span class="flex items-center gap-1.5 text-[#ef4444]">
                                 <span class="w-2 h-2 rounded-full bg-[#ef4444]"></span> Patient Cancelled
                             </span>
-                            <span class="text-white">6 (75%)</span>
+                            <span class="text-[var(--text)]">6 (75%)</span>
                         </div>
                         <div class="flex items-center justify-between text-xs font-semibold">
                             <span class="flex items-center gap-1.5 text-[#f59e0b]">
                                 <span class="w-2 h-2 rounded-full bg-[#f59e0b]"></span> Rescheduled
                             </span>
-                            <span class="text-white">2 (25%)</span>
+                            <span class="text-[var(--text)]">2 (25%)</span>
                         </div>
                         <div class="flex items-center justify-between text-xs font-semibold">
-                            <span class="flex items-center gap-1.5 text-[#3b82f6]">
-                                <span class="w-2 h-2 rounded-full bg-[#3b82f6]"></span> Doctor Cancelled
+                            <span class="flex items-center gap-1.5 text-[var(--primary)]">
+                                <span class="w-2 h-2 rounded-full bg-[var(--primary)]"></span> Doctor Cancelled
                             </span>
-                            <span class="text-white">0 (0%)</span>
+                            <span class="text-[var(--text)]">0 (0%)</span>
                         </div>
                     </div>
                 </div>

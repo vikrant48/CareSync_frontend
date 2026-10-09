@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -12,6 +12,8 @@ import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { PaymentPopupComponent, PaymentDetails } from '../../shared/payment-popup.component';
 import { SearchableSelectComponent } from '../../shared/searchable-select.component';
 import { ToastService } from '../../core/services/toast.service';
+import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
+import { FilterBarComponent, FilterConfig } from '../../shared/components';
 
 export interface CategoryTab {
   id: string;
@@ -24,7 +26,7 @@ export interface CategoryTab {
 @Component({
   selector: 'app-lab-tests',
   standalone: true,
-  imports: [CommonModule, FormsModule, DoctorLayoutComponent, PatientLayoutComponent, PaymentPopupComponent, SearchableSelectComponent],
+  imports: [CommonModule, FormsModule, DoctorLayoutComponent, PatientLayoutComponent, PaymentPopupComponent, SearchableSelectComponent, ModalShellComponent, FilterBarComponent],
   templateUrl: './lab-tests.component.html'
 })
 export class LabTestsComponent implements OnInit {
@@ -47,6 +49,44 @@ export class LabTestsComponent implements OnInit {
   searchTerm = signal<string>('');
   selectedCategory = signal<string>('ALL');
   sortBy = signal<string>('popular');
+
+  readonly labFilterConfigs: FilterConfig[] = [
+    {
+      type: 'radio',
+      key: 'category',
+      label: 'Category',
+      defaultValue: 'ALL',
+      width: 'w-full',
+      options: [{ label: 'All Tests', value: 'ALL', icon: 'fa-solid fa-table-cells-large' }]
+    },
+    {
+      type: 'search',
+      key: 'searchTerm',
+      label: 'Search',
+      placeholder: 'Search lab tests...',
+      defaultValue: ''
+    },
+    {
+      type: 'select',
+      key: 'sortBy',
+      label: 'Sort',
+      defaultValue: 'popular',
+      width: 'w-full sm:w-56',
+      clearable: false,
+      options: [
+        { label: 'Popular', value: 'popular' },
+        { label: 'Price: Low to High', value: 'price_asc' },
+        { label: 'Price: High to Low', value: 'price_desc' },
+        { label: 'Name: A to Z', value: 'name_asc' }
+      ]
+    }
+  ];
+
+  labFilterValues: Record<string, string> = {
+    category: 'ALL',
+    searchTerm: '',
+    sortBy: 'popular'
+  };
   selectedTestForDetails = signal<LabTest | null>(null);
 
   // Payment-related signals
@@ -186,6 +226,36 @@ export class LabTestsComponent implements OnInit {
   currentRole = computed(() => this.authService.role());
   currentUser = computed(() => this.authService.user());
   currentUsername = computed(() => this.authService.username());
+
+  constructor() {
+    effect(() => {
+      const tabs = this.categoryTabs();
+      const category = this.labFilterConfigs.find((c) => c.key === 'category');
+      if (!category) return;
+      category.options = tabs.map((tab) => ({
+        label: `${tab.label} (${tab.count})`,
+        value: tab.id,
+        icon: `fa-solid ${tab.icon.split(' ')[0]}`
+      }));
+    });
+  }
+
+  onLabFilterChange(values: Record<string, string>) {
+    this.searchTerm.set(values['searchTerm'] || '');
+    this.selectedCategory.set(values['category'] || 'ALL');
+    this.sortBy.set(values['sortBy'] || 'popular');
+  }
+
+  clearLabFilters() {
+    this.searchTerm.set('');
+    this.selectedCategory.set('ALL');
+    this.sortBy.set('popular');
+    this.labFilterValues = {
+      category: 'ALL',
+      searchTerm: '',
+      sortBy: 'popular'
+    };
+  }
 
   ngOnInit() {
     this.loadLabTests();

@@ -11,11 +11,9 @@ import { AppointmentService, DoctorAppointmentItem } from '../../core/services/a
 import { PatientProfileService, PatientDto, MedicalHistoryItem, MedicalHistoryWithDoctorItem } from '../../core/services/patient-profile.service';
 import { AuthService } from '../../core/services/auth.service';
 import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.component';
-import { SelectDropdownComponent } from '../../shared/select-dropdown.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
+import { FilterBarComponent, FilterConfig } from '../../shared/components';
 import { SkeletonComponent } from '../../shared/ui/skeleton.component';
-import { FilterBarComponent } from '../../shared/ui/filter-bar.component';
-
 @Component({
     selector: 'app-doctor-schedule',
     standalone: true,
@@ -29,10 +27,9 @@ import { FilterBarComponent } from '../../shared/ui/filter-bar.component';
         MedicalHistoryDetailModalComponent,
         MedicalHistoryFormModalComponent,
         SharedChatModalComponent,
-        SelectDropdownComponent,
         EmptyStateComponent,
-        SkeletonComponent,
-        FilterBarComponent
+        FilterBarComponent,
+        SkeletonComponent
     ],
     templateUrl: './doctor-schedule.component.html',
     styleUrl: './doctor-schedule.component.css'
@@ -48,16 +45,44 @@ export class DoctorScheduleComponent implements OnInit {
     todayAppointments: DoctorAppointmentItem[] = [];
     loading = false;
 
-    statusFilterOptions: string[] = ['ALL', 'BOOKED', 'SCHEDULED', 'CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
-    filterStatus: string = 'ALL';
-    searchTerm: string = '';
-    isFilterExpanded = false;
+    filterStatus = 'ALL';
+    searchTerm = '';
 
-    get scheduleFilterActiveCount(): number {
-        let count = 0;
-        if (this.filterStatus !== 'ALL') count++;
-        if (this.searchTerm) count++;
-        return count;
+    readonly scheduleFilterConfigs: FilterConfig[] = [
+        {
+            type: 'search',
+            key: 'searchTerm',
+            label: 'Search',
+            placeholder: 'Search patient name, phone, or appointment ID...',
+            defaultValue: ''
+        },
+        {
+            type: 'select',
+            key: 'filterStatus',
+            label: 'Status',
+            placeholder: 'All',
+            defaultValue: 'ALL',
+            width: 'w-full sm:w-56',
+            options: [
+                { label: 'All', value: 'ALL' },
+                { label: 'Booked', value: 'BOOKED' },
+                { label: 'Scheduled', value: 'SCHEDULED' },
+                { label: 'Confirmed', value: 'CONFIRMED' },
+                { label: 'In progress', value: 'IN_PROGRESS' },
+                { label: 'Completed', value: 'COMPLETED' },
+                { label: 'Cancelled', value: 'CANCELLED' }
+            ]
+        }
+    ];
+
+    scheduleFilterValues: Record<string, string> = {
+        searchTerm: '',
+        filterStatus: 'ALL'
+    };
+
+    onFilterBarChange(values: Record<string, string>) {
+        this.searchTerm = values['searchTerm'] || '';
+        this.filterStatus = values['filterStatus'] || 'ALL';
     }
 
     get totalCount(): number {
@@ -125,6 +150,10 @@ export class DoctorScheduleComponent implements OnInit {
     resetFilters() {
         this.filterStatus = 'ALL';
         this.searchTerm = '';
+        this.scheduleFilterValues = {
+            searchTerm: '',
+            filterStatus: 'ALL'
+        };
     }
 
     // Actions

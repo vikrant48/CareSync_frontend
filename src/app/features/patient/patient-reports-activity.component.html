@@ -1,0 +1,107 @@
+<div class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
+    <div class="p-4 sm:px-5 sm:py-4 flex items-center justify-between border-b border-[var(--border)]">
+        <div class="flex items-center gap-2">
+            <i class="fa-regular fa-clock text-[var(--primary)] text-sm"></i>
+            <h3 class="text-sm font-bold text-[var(--text)] tracking-wide">Recent Activity</h3>
+        </div>
+        <a routerLink="/patient/appointments"
+            class="text-xs font-semibold text-[var(--primary)] hover:text-indigo-300 transition-colors">View
+            All</a>
+    </div>
+
+    <div *ngIf="appointments.length === 0" class="py-10 text-center text-[var(--muted)]">
+        <div class="flex flex-col items-center justify-center gap-2">
+            <i class="fa-regular fa-calendar-xmark text-2xl opacity-40"></i>
+            <p class="text-xs font-medium">No recent appointment activity found</p>
+        </div>
+    </div>
+
+    <div *ngIf="appointments.length > 0" class="hidden md:block overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr
+                    class="bg-[var(--bg)]/70 text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider border-b border-[var(--border)]">
+                    <th class="py-3 px-5">DATE</th>
+                    <th class="py-3 px-5">DOCTOR</th>
+                    <th class="py-3 px-5">TYPE</th>
+                    <th class="py-3 px-5">AMOUNT</th>
+                    <th class="py-3 px-5">STATUS</th>
+                    <th class="py-3 px-5 text-right">ACTION</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-[var(--border)] text-xs">
+                <tr *ngFor="let a of visibleAppointments; trackBy: trackAppointment"
+                    class="hover:bg-[var(--bg)]/40 transition-colors group">
+                    <td class="py-3.5 px-5 align-top">
+                        <span class="font-bold text-[var(--text)] block">{{ a.appointmentDate | date:'dd MMM yyyy' }}</span>
+                        <span *ngIf="a.appointmentTime" class="text-[11px] text-[var(--muted)] font-medium block mt-0.5">{{ a.appointmentTime }}</span>
+                    </td>
+                    <td class="py-3.5 px-5 align-top">
+                        <div class="flex items-center gap-3">
+                            <app-user-avatar [name]="a.doctorName" [imageUrl]="a.doctorProfileImageUrl" [size]="'sm'"></app-user-avatar>
+                            <div>
+                                <span class="font-bold text-[var(--text)] block">{{ a.doctorName }}</span>
+                                <span *ngIf="a.doctorSpecialization" class="text-[11px] text-[var(--muted)] block mt-0.5">{{ a.doctorSpecialization }}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3.5 px-5 align-top">
+                        <span *ngIf="a.reason" class="font-medium text-[var(--text)] block">{{ a.reason }}</span>
+                        <span *ngIf="visitLabel(a)" class="text-[11px] text-[var(--muted)] block">{{ visitLabel(a) }}</span>
+                    </td>
+                    <td class="py-3.5 px-5 align-top">
+                        <span *ngIf="a.consultationFees != null" class="font-extrabold text-[var(--text)]">₹{{ a.consultationFees }}</span>
+                    </td>
+                    <td class="py-3.5 px-5 align-top">
+                        <app-status-badge *ngIf="a.status" [status]="a.status"></app-status-badge>
+                    </td>
+                    <td class="py-3.5 px-5 align-top text-right">
+                        <div class="inline-flex items-center gap-2">
+                            <button type="button" (click)="view.emit(a.appointmentId)"
+                                class="bg-[var(--bg)] hover:bg-[var(--bg)] text-[var(--text)] border border-[var(--border)] px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors">
+                                <span>View Details</span>
+                                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                            </button>
+                            <button type="button" aria-label="More actions"
+                                class="w-7 h-7 rounded-lg hover:bg-[var(--bg)] text-[var(--muted)] hover:text-[var(--text)] flex items-center justify-center transition-colors">
+                                <i class="fa-solid fa-ellipsis-vertical text-xs" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div *ngIf="appointments.length > 0" class="md:hidden divide-y divide-[var(--border)]">
+        <article *ngFor="let a of visibleAppointments; trackBy: trackAppointment" class="p-4 space-y-3">
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <app-user-avatar [name]="a.doctorName" [imageUrl]="a.doctorProfileImageUrl" [size]="'sm'"></app-user-avatar>
+                    <div class="min-w-0">
+                        <p class="font-bold text-sm text-[var(--text)] truncate">{{ a.doctorName }}</p>
+                        <p *ngIf="a.doctorSpecialization" class="text-[11px] text-[var(--muted)] truncate">{{ a.doctorSpecialization }}</p>
+                    </div>
+                </div>
+                <app-status-badge *ngIf="a.status" [status]="a.status"></app-status-badge>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">Date</p>
+                    <p class="font-semibold text-[var(--text)]">{{ a.appointmentDate | date:'dd MMM yyyy' }}</p>
+                    <p *ngIf="a.appointmentTime" class="text-[11px] text-[var(--muted)]">{{ a.appointmentTime }}</p>
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">Amount</p>
+                    <p *ngIf="a.consultationFees != null" class="font-extrabold text-[var(--text)]">₹{{ a.consultationFees }}</p>
+                    <p *ngIf="a.reason || visitLabel(a)" class="text-[11px] text-[var(--muted)]">{{ a.reason }}<span *ngIf="a.reason && visitLabel(a)"> · </span>{{ visitLabel(a) }}</p>
+                </div>
+            </div>
+            <button type="button" (click)="view.emit(a.appointmentId)" aria-label="View appointment details"
+                class="w-full min-h-[44px] bg-[var(--bg)] text-[var(--text)] border border-[var(--border)] px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5">
+                <span>View Details</span>
+                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+            </button>
+        </article>
+    </div>
+</div>

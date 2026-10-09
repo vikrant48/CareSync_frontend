@@ -16,12 +16,11 @@ import { debounceTime } from 'rxjs/operators';
 import {
     SelectComponent,
     SelectOption,
-    SearchableSelectComponent,
-    SearchableOption,
-    DatePickerComponent,
     DateRangePickerComponent,
     DateRange
 } from '../index';
+import { DatePickerComponent } from '../../date-picker.component';
+import { SearchableSelectComponent } from '../../searchable-select.component';
 
 export type FilterType =
     | 'text'
@@ -255,17 +254,16 @@ export class FilterBarComponent implements OnInit, OnChanges, OnDestroy {
         });
     }
 
-    /** Normalize searchable options to SearchableOption[] */
-    getSearchableOptions(options?: (FilterOption | string)[]): SearchableOption[] {
+    /** Normalize searchable options for the shared searchable select (value + label). */
+    getSearchableOptions(options?: (FilterOption | string)[]): { value: any; label: string }[] {
         if (!options) return [];
         return options.map(opt => {
             if (typeof opt === 'string') {
-                return { id: opt, label: opt };
+                return { value: opt, label: opt };
             }
             return {
-                id: opt.value,
-                label: opt.label,
-                icon: opt.icon
+                value: opt.value,
+                label: opt.label
             };
         });
     }

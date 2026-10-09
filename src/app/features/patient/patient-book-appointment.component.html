@@ -2,17 +2,17 @@
     <div class="max-w-[1400px] mx-auto p-3 sm:p-5 space-y-4 pb-28">
         <!-- Hero Header Section with Doctor Graphic Banner (Matching Reference Screenshot 1) -->
         <section
-            class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-5 sm:p-6 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+            class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
             <!-- Left: Title & Tagline -->
             <div class="flex-1 flex flex-col justify-between space-y-3 text-center md:text-left">
                 <div class="space-y-1">
-                    <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Find & Book Appointments
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">Find & Book Appointments
                     </h1>
-                    <p class="text-xs sm:text-sm text-[#9aa3b8]">Search for specialized doctors and book your slot.</p>
+                    <p class="text-xs sm:text-sm text-[var(--muted)]">Search for specialized doctors and book your slot.</p>
                 </div>
                 <div>
                     <button
-                        class="px-3.5 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 border border-rose-500/30 text-xs font-bold shadow-md inline-flex items-center gap-2 transition-all"
+                        class="px-3.5 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-700 dark:text-rose-400 border border-rose-500/30 text-xs font-bold shadow-md inline-flex items-center gap-2 transition-all"
                         (click)="openEmergencyModal()">
                         <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
                         <span>Emergency Booking</span>
@@ -22,7 +22,7 @@
 
             <!-- Right: Doctor Graphic Banner with Female Doctor Image -->
             <div
-                class="w-full md:w-[480px] h-[115px] rounded-2xl bg-gradient-to-r from-[#0b132b] via-[#1a2b5e] to-[#253b80] border border-[#5b6cf0]/30 px-5 sm:px-6 flex items-center justify-between relative overflow-hidden shadow-2xl shrink-0">
+                class="w-full md:w-[480px] h-[115px] rounded-2xl bg-gradient-to-r from-[var(--primary)] to-indigo-600 border border-[var(--primary)]/30 px-5 sm:px-6 flex items-center justify-between relative overflow-hidden shadow-xl shrink-0">
                 <!-- Background Pattern -->
                 <div
                     class="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:12px_12px]">
@@ -31,9 +31,9 @@
                 <!-- Banner Text -->
                 <div class="space-y-0.5 z-10 max-w-[220px]">
                     <h3 class="text-sm sm:text-base font-black text-white leading-tight uppercase tracking-wide">
-                        Your Health<br /><span class="text-blue-200">Our Priority</span>
+                        Your Health<br /><span class="text-white">Our Priority</span>
                     </h3>
-                    <p class="text-[11px] text-blue-100/90 leading-tight">
+                    <p class="text-[11px] text-white/80 leading-tight">
                         Book consultations with trusted & verified doctors.
                     </p>
                 </div>
@@ -46,98 +46,29 @@
             </div>
         </section>
 
-        <!-- Filter Bar (Matching Reference Screenshot 1) -->
-        <section class="bg-[#151b2b] border border-[#2a3347] rounded-2xl p-4 shadow-xl">
-            <div class="flex items-center justify-between mb-3 pb-2 border-b border-[#2a3347]">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-sliders text-[#5b6cf0] text-xs"></i>
-                    <span class="text-xs font-bold text-white uppercase tracking-wider">Filters</span>
-                </div>
-                <button (click)="resetFilters()"
-                    class="text-xs text-[#5b6cf0] hover:text-indigo-300 font-semibold flex items-center gap-1 transition-colors">
-                    <i class="fa-solid fa-rotate-left text-[10px]"></i>
-                    <span>Clear Filters</span>
-                </button>
-            </div>
+        <ng-template #specializationTpl>
+            <app-specialization-autocomplete class="block w-full" [(ngModel)]="specializationFilter"
+                (ngModelChange)="onSpecializationChange($event)" placeholder="All Specializations"
+                inputClass="w-full text-xs font-medium rounded-xl px-3.5 py-2.5 pr-8 border bg-[var(--panel)] text-[var(--text)] border-[var(--border)] placeholder-[var(--muted)]/50 focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]/30"
+                [allowAddNew]="false">
+            </app-specialization-autocomplete>
+        </ng-template>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
-                <!-- Specialization -->
-                <div class="space-y-1">
-                    <label
-                        class="text-[11px] font-bold text-[#9aa3b8] uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-stethoscope text-[#5b6cf0] text-[10px]"></i> Specialization
-                    </label>
-                    <app-specialization-autocomplete class="w-full relative" [(ngModel)]="specializationFilter"
-                        (ngModelChange)="onFilterChange()" placeholder="All Specializations"
-                        inputClass="w-full bg-[#0b0f1a] border border-[#2a3347] rounded-xl px-3 py-2 text-xs text-white placeholder-[#9aa3b8]/50 focus:outline-none focus:border-[#5b6cf0] transition-colors"
-                        [allowAddNew]="false">
-                    </app-specialization-autocomplete>
-                </div>
-
-                <!-- Doctor Name -->
-                <div class="space-y-1">
-                    <label
-                        class="text-[11px] font-bold text-[#9aa3b8] uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-user-doctor text-[#5b6cf0] text-[10px]"></i> Doctor Name
-                    </label>
-                    <div class="relative w-full">
-                        <i
-                            class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-[#9aa3b8] text-xs pointer-events-none"></i>
-                        <input type="text"
-                            class="w-full bg-[#0b0f1a] border border-[#2a3347] rounded-xl pl-8 pr-3 py-2 text-xs text-white placeholder-[#9aa3b8]/50 focus:outline-none focus:border-[#5b6cf0] transition-colors"
-                            placeholder="Search doctor name..." [(ngModel)]="nameFilter"
-                            (ngModelChange)="onFilterChange()" />
-                    </div>
-                </div>
-
-                <!-- Gender -->
-                <div class="space-y-1">
-                    <label
-                        class="text-[11px] font-bold text-[#9aa3b8] uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-user-group text-[#5b6cf0] text-[10px]"></i> Gender
-                    </label>
-                    <select [(ngModel)]="genderFilter" (ngModelChange)="onFilterChange()"
-                        class="w-full bg-[#0b0f1a] border border-[#2a3347] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#5b6cf0] transition-colors cursor-pointer">
-                        <option value="">All Genders</option>
-                        <option *ngFor="let g of genders" [value]="g">{{ g }}</option>
-                    </select>
-                </div>
-
-                <!-- Location -->
-                <div class="space-y-1">
-                    <label
-                        class="text-[11px] font-bold text-[#9aa3b8] uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-location-dot text-[#5b6cf0] text-[10px]"></i> Location
-                    </label>
-                    <div class="relative w-full">
-                        <i
-                            class="fa-solid fa-location-dot absolute left-3 top-1/2 -translate-y-1/2 text-[#9aa3b8] text-xs pointer-events-none"></i>
-                        <input type="text"
-                            class="w-full bg-[#0b0f1a] border border-[#2a3347] rounded-xl pl-8 pr-3 py-2 text-xs text-white placeholder-[#9aa3b8]/50 focus:outline-none focus:border-[#5b6cf0] transition-colors"
-                            placeholder="Select Location..." [(ngModel)]="addressFilter"
-                            (ngModelChange)="onFilterChange()" />
-                    </div>
-                </div>
-
-                <!-- Search Action Button -->
-                <app-button variant="primary" size="md" icon="fa-solid fa-magnifying-glass" customClass="w-full"
-                    (btnClick)="searchDoctors()">
-                    Search
-                </app-button>
-            </div>
-        </section>
+        <app-filter-bar [filters]="bookFilterConfigs" [values]="bookFilterValues" [theme]="'patient'"
+            (filterChange)="onFilterBarChange($event)">
+        </app-filter-bar>
 
         <!-- Doctors Found Toolbar -->
         <div class="flex items-center justify-between py-1">
-            <div class="text-sm font-extrabold text-white flex items-center gap-2">
+            <div class="text-sm font-extrabold text-[var(--text)] flex items-center gap-2">
                 <span>{{ totalDoctorsCount }} Doctors Found</span>
             </div>
 
             <!-- Sort Selector -->
             <div class="flex items-center gap-2">
-                <span class="text-xs text-[#9aa3b8] font-medium">Sort By</span>
+                <span class="text-xs text-[var(--muted)] font-medium">Sort By</span>
                 <select [(ngModel)]="sortBy" (ngModelChange)="onFilterChange()"
-                    class="bg-[#151b2b] border border-[#2a3347] rounded-xl px-3 py-1.5 text-xs text-white font-semibold focus:outline-none focus:border-[#5b6cf0] cursor-pointer">
+                    class="bg-[var(--panel)] border border-[var(--border)] rounded-xl px-3 py-1.5 text-xs text-[var(--text)] font-semibold focus:outline-none focus:border-[var(--primary)] cursor-pointer">
                     <option *ngFor="let opt of sortByOptions" [value]="opt.value">{{ opt.label }}</option>
                 </select>
             </div>
@@ -148,21 +79,21 @@
 
         <app-empty-state *ngIf="!loadingDoctors && doctors.length === 0" icon="fa-solid fa-face-frown"
             title="No doctors found" message="No doctors found matching your criteria." [hasAction]="true">
-            <button type="button" class="text-[#5b6cf0] hover:text-indigo-300 text-xs font-bold px-3 py-1"
+            <button type="button" class="text-[var(--primary)] hover:text-indigo-300 text-xs font-bold px-3 py-1"
                 (click)="resetFilters()">Clear Filters</button>
         </app-empty-state>
 
         <!-- Doctors Grid (3 Columns on Desktop matching Reference Screenshot 1) -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="!loadingDoctors && doctors.length > 0">
-            <div class="bg-[#151b2b] border border-[#2a3347] hover:border-[#3b4763] rounded-2xl p-4 sm:p-4.5 flex flex-col justify-between hover:shadow-2xl transition-all duration-200 relative group cursor-pointer"
+            <div class="bg-[var(--panel)] border border-[var(--border)] hover:border-[var(--border)] rounded-2xl p-4 sm:p-4.5 flex flex-col justify-between hover:shadow-2xl transition-all duration-200 relative group cursor-pointer"
                 *ngFor="let d of doctors" (click)="openDoctor(d)">
 
                 <!-- Rating Badge (Top Right) -->
-                <div class="absolute top-3.5 right-3.5 bg-[#1b2333] border border-[#2a3347] rounded-full px-2.5 py-0.5 text-[11px] font-bold text-white flex items-center gap-1 shadow-sm z-10"
+                <div class="absolute top-3.5 right-3.5 bg-[var(--bg)] border border-[var(--border)] rounded-full px-2.5 py-0.5 text-[11px] font-bold text-[var(--text)] flex items-center gap-1 shadow-sm z-10"
                     *ngIf="ratings[d.id] as r">
-                    <i class="fa-solid fa-star text-amber-400 text-[10px]"></i>
+                    <i class="fa-solid fa-star text-amber-700 dark:text-amber-400 text-[10px]"></i>
                     <span>{{ r.avg.toFixed(1) }}</span>
-                    <span class="text-[#9aa3b8] font-normal text-[10px]">({{ r.count }})</span>
+                    <span class="text-[var(--muted)] font-normal text-[10px]">({{ r.count }})</span>
                 </div>
 
                 <div>
@@ -170,51 +101,51 @@
                     <div class="flex items-start gap-3.5 mb-3">
                         <div class="flex flex-col items-center shrink-0">
                             <div
-                                class="w-14 h-14 rounded-full ring-2 ring-[#2a3347] group-hover:ring-[#5b6cf0] transition-all overflow-hidden bg-[#0b0f1a] flex items-center justify-center shadow-md">
+                                class="w-14 h-14 rounded-full ring-2 ring-[var(--border)] group-hover:ring-[var(--primary)] transition-all overflow-hidden bg-[var(--bg)] flex items-center justify-center shadow-md">
                                 <img *ngIf="d.profileImageUrl; else defaultDocAvatar" [src]="d.profileImageUrl"
                                     [alt]="formatDoctorName(d)" class="w-full h-full object-cover"
                                     (error)="d.profileImageUrl = ''" />
                                 <ng-template #defaultDocAvatar>
-                                    <span class="text-lg font-bold text-white">{{ doctorInitial(d) }}</span>
+                                    <span class="text-lg font-bold text-[var(--text)]">{{ doctorInitial(d) }}</span>
                                 </ng-template>
                             </div>
                             <!-- Verified Pill Badge under Avatar -->
                             <span *ngIf="d.isVerified !== false"
-                                class="mt-1.5 bg-[#10e984] text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1 shadow-md">
+                                class="mt-1.5 bg-[#10e984] text-[var(--text)] text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1 shadow-md">
                                 <i class="fa-solid fa-check text-[8px]"></i> 
                             </span>
                         </div>
 
                         <div class="min-w-0 flex-1 pt-0.5">
                             <h3
-                                class="font-extrabold text-base text-white truncate group-hover:text-[#5b6cf0] transition-colors">
+                                class="font-extrabold text-base text-[var(--text)] truncate group-hover:text-[var(--primary)] transition-colors">
                                 {{ formatDoctorName(d) }}
                             </h3>
-                            <div class="text-xs font-semibold text-[#5b6cf0] truncate mt-0.5">
+                            <div class="text-xs font-semibold text-[var(--primary)] truncate mt-0.5">
                                 {{ d.specialization || 'General Practitioner' }}
                             </div>
-                            <div class="text-[11px] text-[#9aa3b8] truncate mt-0.5" *ngIf="d.gender">
+                            <div class="text-[11px] text-[var(--muted)] truncate mt-0.5" *ngIf="d.gender">
                                 <span class="capitalize">{{ d.gender }}</span> Doctor
                             </div>
                         </div>
                     </div>
 
                     <!-- Details Rows with Icons & Experience -->
-                    <div class="space-y-1.5 my-3 pt-2 border-t border-[#2a3347] text-xs">
-                        <div class="flex items-center justify-between text-[#9aa3b8]">
+                    <div class="space-y-1.5 my-3 pt-2 border-t border-[var(--border)] text-xs">
+                        <div class="flex items-center justify-between text-[var(--muted)]">
                             <div class="flex items-center gap-2">
-                                <i class="fa-solid fa-money-bill-wave text-emerald-400 text-xs"></i>
-                                <span class="font-extrabold text-white">₹{{ d.consultationFees || '0'}} <span
-                                        class="text-[#9aa3b8] font-normal">/ Visit</span></span>
+                                <i class="fa-solid fa-money-bill-wave text-emerald-700 dark:text-emerald-400 text-xs"></i>
+                                <span class="font-extrabold text-[var(--text)]">₹{{ d.consultationFees || '0'}} <span
+                                        class="text-[var(--muted)] font-normal">/ Visit</span></span>
                             </div>
-                            <div class="flex items-center gap-1 text-[11px] text-[#9aa3b8]">
-                                <i class="fa-solid fa-circle-info text-[#5b6cf0] text-[10px]"></i>
+                            <div class="flex items-center gap-1 text-[11px] text-[var(--muted)]">
+                                <i class="fa-solid fa-circle-info text-[var(--primary)] text-[10px]"></i>
                                 <span>{{ formatExperience(d) }}</span>
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-2 text-[#9aa3b8] text-[11px] truncate">
-                            <i class="fa-solid fa-location-dot text-rose-400 text-xs shrink-0"></i>
+                        <div class="flex items-center gap-2 text-[var(--muted)] text-[11px] truncate">
+                            <i class="fa-solid fa-location-dot text-rose-700 dark:text-rose-400 text-xs shrink-0"></i>
                             <span class="truncate">{{ formatLocation(d) }}</span>
                         </div>
                     </div>
@@ -233,38 +164,38 @@
 
     <!-- Fixed Bottom Pagination Bar (Constrained to Main Content Layout) -->
     <div *ngIf="!loadingDoctors && totalDoctorsCount > 0"
-        class="fixed left-0 md:left-64 right-0 z-40 bg-[#0b0f1a]/95 backdrop-blur-md border-t border-[#2a3347] shadow-2xl px-4 sm:px-6 py-2.5 flex items-center justify-between transition-all fixed-above-mobile-nav safe-bottom">
+        class="fixed left-0 md:left-64 right-0 z-40 bg-[var(--bg)]/95 backdrop-blur-md border-t border-[var(--border)] shadow-2xl px-4 sm:px-6 py-2.5 flex items-center justify-between transition-all fixed-above-mobile-nav safe-bottom">
 
-        <div class="flex items-center gap-3 text-xs text-[#9aa3b8]">
+        <div class="flex items-center gap-3 text-xs text-[var(--muted)]">
             <span class="font-medium">
-                Showing <span class="font-bold text-white">{{ startItemIndex }}–{{ endItemIndex }}</span> of <span
-                    class="font-bold text-[#5b6cf0]">{{ totalDoctorsCount }}</span> doctors
+                Showing <span class="font-bold text-[var(--text)]">{{ startItemIndex }}–{{ endItemIndex }}</span> of <span
+                    class="font-bold text-[var(--primary)]">{{ totalDoctorsCount }}</span> doctors
             </span>
-            <span class="hidden sm:inline text-[#2a3347]">|</span>
+            <span class="hidden sm:inline text-[var(--border)]">|</span>
             <span class="hidden sm:inline font-medium">
-                Page <span class="font-semibold text-white">{{ page + 1 }}</span> of {{ totalPages }}
+                Page <span class="font-semibold text-[var(--text)]">{{ page + 1 }}</span> of {{ totalPages }}
             </span>
         </div>
 
         <div class="flex items-center gap-1.5">
             <button
-                class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-[#2a3347] bg-[#151b2b] text-slate-200 hover:bg-[#1b2333] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1"
+                class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-[var(--border)] bg-[var(--panel)] text-slate-200 hover:bg-[var(--bg)] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1"
                 [disabled]="page === 0" (click)="prevPage()">
                 <i class="fa-solid fa-chevron-left text-[10px]"></i> Prev
             </button>
 
             <!-- Numbered Pages (Matching Reference Screenshot 1) -->
             <div class="hidden sm:flex items-center gap-1">
-                <button *ngFor="let p of paginationPages" (click)="goToPage(p)" [class.!bg-[#5b6cf0]]="p === page"
-                    [class.!text-white]="p === page" [class.font-bold]="p === page" [class.bg-[#151b2b]]="p !== page"
-                    [class.text-[#9aa3b8]]="p !== page"
-                    class="w-7 h-7 rounded-lg text-xs flex items-center justify-center border border-[#2a3347] hover:border-[#5b6cf0] transition-all">
+                <button *ngFor="let p of paginationPages" (click)="goToPage(p)" [class.!bg-[var(--primary)]]="p === page"
+                    [class.!text-[var(--text)]]="p === page" [class.font-bold]="p === page" [class.bg-[var(--panel)]]="p !== page"
+                    [class.text-[var(--muted)]]="p !== page"
+                    class="w-7 h-7 rounded-lg text-xs flex items-center justify-center border border-[var(--border)] hover:border-[var(--primary)] transition-all">
                     {{ p + 1 }}
                 </button>
             </div>
 
             <button
-                class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-[#2a3347] bg-[#151b2b] text-slate-200 hover:bg-[#1b2333] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1"
+                class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-[var(--border)] bg-[var(--panel)] text-slate-200 hover:bg-[var(--bg)] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1"
                 [disabled]="page >= totalPages - 1" (click)="nextPage()">
                 Next <i class="fa-solid fa-chevron-right text-[10px]"></i>
             </button>

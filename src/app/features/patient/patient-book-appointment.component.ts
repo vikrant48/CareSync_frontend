@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -10,20 +10,79 @@ import { SpecializationAutocompleteComponent } from '../../shared/specialization
 import { SelectOption } from '../../shared/select-dropdown.component';
 import { SkeletonComponent } from '../../shared/ui/skeleton.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
-import { ButtonComponent } from '../../shared/components';
+import { ButtonComponent, FilterBarComponent, FilterConfig } from '../../shared/components';
 
 @Component({
   selector: 'app-patient-book-appointment',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent, SkeletonComponent, EmptyStateComponent, ButtonComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent, SkeletonComponent, EmptyStateComponent, ButtonComponent, FilterBarComponent],
   templateUrl: './patient-book-appointment.component.html',
   styleUrl: './patient-book-appointment.component.css'
 })
 export class PatientBookAppointmentComponent {
+  @ViewChild('specializationTpl')
+  set specializationTpl(tpl: TemplateRef<unknown> | undefined) {
+    const spec = this.bookFilterConfigs.find((c) => c.key === 'specializationFilter');
+    if (spec && tpl) spec.customTemplate = tpl;
+  }
+
   specializationFilter = '';
   nameFilter = '';
   genderFilter = '';
   addressFilter = '';
+
+  readonly bookFilterConfigs: FilterConfig[] = [
+    {
+      type: 'custom',
+      key: 'specializationFilter',
+      label: 'Specialization',
+      icon: 'fa-solid fa-stethoscope',
+      defaultValue: ''
+    },
+    {
+      type: 'search',
+      key: 'nameFilter',
+      label: 'Doctor Name',
+      icon: 'fa-solid fa-user-doctor',
+      placeholder: 'Search doctor name...',
+      defaultValue: ''
+    },
+    {
+      type: 'select',
+      key: 'genderFilter',
+      label: 'Gender',
+      icon: 'fa-solid fa-user-group',
+      placeholder: 'All Genders',
+      defaultValue: '',
+      width: 'w-full sm:w-48',
+      options: [{ label: 'All Genders', value: '' }]
+    },
+    {
+      type: 'text',
+      key: 'addressFilter',
+      label: 'Location',
+      icon: 'fa-solid fa-location-dot',
+      placeholder: 'Select location...',
+      defaultValue: ''
+    },
+    {
+      type: 'button',
+      key: 'search',
+      buttonLabel: 'Search',
+      buttonIcon: 'fa-solid fa-magnifying-glass',
+      clearable: false,
+      width: 'w-full sm:w-36',
+      buttonClass: 'bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white border border-transparent',
+      onClick: () => this.searchDoctors()
+    }
+  ];
+
+  bookFilterValues: Record<string, string> = {
+    specializationFilter: '',
+    nameFilter: '',
+    genderFilter: '',
+    addressFilter: ''
+  };
   loadingDoctors = false;
   showEmergencyModal = false;
   genders: string[] = [];
@@ -74,7 +133,11 @@ export class PatientBookAppointmentComponent {
   ) {
     this.searchDoctors();
     this.masterDataService.getGenders().subscribe({
-      next: (g) => this.genders = g || this.genders
+      next: (g) => {
+        this.genders = g || [];
+        const gender = this.bookFilterConfigs.find((c) => c.key === 'genderFilter');
+        if (gender) gender.options = this.genderOptions;
+      }
     });
   }
 
@@ -158,6 +221,23 @@ export class PatientBookAppointmentComponent {
     this.searchDoctors();
   }
 
+  onSpecializationChange(value: string) {
+    this.specializationFilter = value || '';
+    this.bookFilterValues = {
+      ...this.bookFilterValues,
+      specializationFilter: this.specializationFilter
+    };
+    this.onFilterChange();
+  }
+
+  onFilterBarChange(values: Record<string, string>) {
+    this.specializationFilter = values['specializationFilter'] || '';
+    this.nameFilter = values['nameFilter'] || '';
+    this.genderFilter = values['genderFilter'] || '';
+    this.addressFilter = values['addressFilter'] || '';
+    this.onFilterChange();
+  }
+
   nextPage() {
     if (this.page < this.totalPages - 1) {
       this.page++;
@@ -220,6 +300,12 @@ export class PatientBookAppointmentComponent {
     this.nameFilter = '';
     this.genderFilter = '';
     this.addressFilter = '';
+    this.bookFilterValues = {
+      specializationFilter: '',
+      nameFilter: '',
+      genderFilter: '',
+      addressFilter: ''
+    };
     this.sortBy = 'relevance';
     this.page = 0;
     this.searchDoctors();

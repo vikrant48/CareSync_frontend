@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 import { ChangePasswordFormComponent } from '../../shared/change-password-form.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 
 @Component({
   selector: 'app-doctor-change-password',
   standalone: true,
-  imports: [CommonModule, RouterModule, DoctorLayoutComponent, ChangePasswordFormComponent],
+  imports: [CommonModule, RouterModule, DoctorLayoutComponent, ChangePasswordFormComponent, PageHeaderComponent],
   templateUrl: './doctor-change-password.component.html',
   styleUrl: './doctor-change-password.component.css'
 })

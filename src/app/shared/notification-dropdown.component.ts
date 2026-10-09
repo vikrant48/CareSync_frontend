@@ -17,19 +17,19 @@ export type NotificationTab = 'all' | 'appointments' | 'lab' | 'system';
       <!-- Circular Trigger Button -->
       <button 
         class="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300
-               bg-[#151b2b] text-gray-300 hover:text-white hover:bg-[#1b2333] active:scale-95 border border-[#2a3347] focus:outline-none shadow-sm cursor-pointer"
-        [ngClass]="notifOpen ? 'bg-[#1b2333] text-white border-[#5b6cf0] ring-2 ring-[#5b6cf0]/30' : ''"
+               bg-[var(--panel)] text-gray-300 hover:text-[var(--text)] hover:bg-[var(--bg)] active:scale-95 border border-[var(--border)] focus:outline-none shadow-sm cursor-pointer"
+        [ngClass]="notifOpen ? 'bg-[var(--bg)] text-[var(--text)] border-[var(--primary)] ring-2 ring-[var(--primary)]/30' : ''"
         (click)="toggleNotif()" 
         title="Notifications" 
         aria-label="Notifications"
         [attr.aria-expanded]="notifOpen"
         aria-haspopup="true">
-        <i class="fa-solid fa-bell text-base sm:text-lg text-[#9aa3b8] group-hover:text-white transition-colors"></i>
+        <i class="fa-solid fa-bell text-base sm:text-lg text-[var(--muted)] group-hover:text-[var(--text)] transition-colors"></i>
         
         <!-- Unread Badge (Clean Circle / Pill) -->
         <span *ngIf="unreadCount > 0" class="absolute -top-1 -right-1 z-20 flex">
            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-           <span class="relative inline-flex items-center justify-center rounded-full bg-rose-500 text-[10px] font-extrabold text-white shadow-md border border-[#0b0f1a] leading-none px-1.5 py-0.5 min-w-[18px] h-4.5">
+           <span class="relative inline-flex items-center justify-center rounded-full bg-rose-500 text-[10px] font-extrabold text-white shadow-md border border-[var(--bg)] leading-none px-1.5 py-0.5 min-w-[18px] h-4.5">
              {{ unreadCount > 9 ? '9+' : unreadCount }}
            </span>
         </span>
@@ -37,23 +37,23 @@ export type NotificationTab = 'all' | 'appointments' | 'lab' | 'system';
 
       <!-- Dropdown Panel Template -->
       <ng-template #dropdownContent>
-        <div class="w-full sm:w-[410px] bg-[#121826] border border-[#2a3347] rounded-2xl shadow-2xl overflow-hidden flex flex-col text-white text-left relative z-[9999]">
+        <div class="w-full sm:w-[410px] bg-[var(--panel)] border border-[var(--border)] rounded-2xl shadow-2xl overflow-hidden flex flex-col text-[var(--text)] text-left relative z-[9999]">
           
           <!-- Top Arrow Pointer (Desktop) -->
-          <div class="hidden sm:block absolute -top-2 right-4 w-3.5 h-3.5 bg-[#121826] border-t border-l border-[#2a3347] rotate-45 z-20"></div>
+          <div class="hidden sm:block absolute -top-2 right-4 w-3.5 h-3.5 bg-[var(--panel)] border-t border-l border-[var(--border)] rotate-45 z-20"></div>
 
           <!-- Header -->
-          <div class="flex items-center justify-between px-4 py-3.5 border-b border-[#2a3347] bg-[#151b2b] relative z-10">
+          <div class="flex items-center justify-between px-4 py-3.5 border-b border-[var(--border)] bg-[var(--panel)] relative z-10">
             <div class="flex items-center gap-2.5">
-              <h3 class="text-base font-extrabold text-white tracking-tight">Notifications</h3>
-              <span *ngIf="unreadCount > 0" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#5b6cf0]/20 text-[#5b6cf0] border border-[#5b6cf0]/30">
+              <h3 class="text-base font-extrabold text-[var(--text)] tracking-tight">Notifications</h3>
+              <span *ngIf="unreadCount > 0" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[var(--primary)]/20 text-[var(--primary)] border border-[var(--primary)]/30">
                 {{ unreadCount }} New
               </span>
             </div>
             <button 
               *ngIf="unreadCount > 0"
               (click)="markAllRead($event)"
-              class="text-xs text-[#5b6cf0] hover:text-[#7080f5] font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
+              class="text-xs text-[var(--primary)] hover:text-[var(--primary-hover)] font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <i class="fa-solid fa-circle-check text-[11px]"></i>
               <span>Mark all as read</span>
@@ -61,38 +61,38 @@ export type NotificationTab = 'all' | 'appointments' | 'lab' | 'system';
           </div>
 
           <!-- Filter Tabs Row -->
-          <div class="flex items-center gap-1 px-3 py-2 bg-[#121826] border-b border-[#2a3347] overflow-x-auto no-scrollbar text-xs">
+          <div class="flex items-center gap-1 px-3 py-2 bg-[var(--panel)] border-b border-[var(--border)] overflow-x-auto no-scrollbar text-xs">
             <button (click)="setTab('all')"
               class="px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
-              [ngClass]="activeTab === 'all' ? 'bg-[#5b6cf0] text-white shadow-sm shadow-[#5b6cf0]/30' : 'text-[#9aa3b8] hover:text-white hover:bg-[#1b2333]'">
+              [ngClass]="activeTab === 'all' ? 'bg-[var(--primary)] text-white shadow-sm shadow-[var(--primary)]/30' : 'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--bg)]'">
               <span>All</span>
-              <span class="px-1.5 py-0.2 rounded-full text-[10px]" [ngClass]="activeTab === 'all' ? 'bg-white/20 text-white' : 'bg-[#1b2333] text-[#9aa3b8]'">{{ feed.length }}</span>
+              <span class="px-1.5 py-0.2 rounded-full text-[10px]" [ngClass]="activeTab === 'all' ? 'bg-white/20 text-[var(--text)]' : 'bg-[var(--bg)] text-[var(--muted)]'">{{ feed.length }}</span>
             </button>
 
             <button (click)="setTab('appointments')"
               class="px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
-              [ngClass]="activeTab === 'appointments' ? 'bg-[#5b6cf0] text-white shadow-sm shadow-[#5b6cf0]/30' : 'text-[#9aa3b8] hover:text-white hover:bg-[#1b2333]'">
+              [ngClass]="activeTab === 'appointments' ? 'bg-[var(--primary)] text-white shadow-sm shadow-[var(--primary)]/30' : 'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--bg)]'">
               <span>Appointments</span>
-              <span class="px-1.5 py-0.2 rounded-full text-[10px]" [ngClass]="activeTab === 'appointments' ? 'bg-white/20 text-white' : 'bg-[#1b2333] text-[#9aa3b8]'">{{ appointmentsCount }}</span>
+              <span class="px-1.5 py-0.2 rounded-full text-[10px]" [ngClass]="activeTab === 'appointments' ? 'bg-white/20 text-[var(--text)]' : 'bg-[var(--bg)] text-[var(--muted)]'">{{ appointmentsCount }}</span>
             </button>
 
             <button (click)="setTab('lab')"
               class="px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
-              [ngClass]="activeTab === 'lab' ? 'bg-[#5b6cf0] text-white shadow-sm shadow-[#5b6cf0]/30' : 'text-[#9aa3b8] hover:text-white hover:bg-[#1b2333]'">
+              [ngClass]="activeTab === 'lab' ? 'bg-[var(--primary)] text-white shadow-sm shadow-[var(--primary)]/30' : 'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--bg)]'">
               <span>Lab Tests</span>
-              <span class="px-1.5 py-0.2 rounded-full text-[10px]" [ngClass]="activeTab === 'lab' ? 'bg-white/20 text-white' : 'bg-[#1b2333] text-[#9aa3b8]'">{{ labCount }}</span>
+              <span class="px-1.5 py-0.2 rounded-full text-[10px]" [ngClass]="activeTab === 'lab' ? 'bg-white/20 text-[var(--text)]' : 'bg-[var(--bg)] text-[var(--muted)]'">{{ labCount }}</span>
             </button>
 
             <button (click)="setTab('system')"
               class="px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
-              [ngClass]="activeTab === 'system' ? 'bg-[#5b6cf0] text-white shadow-sm shadow-[#5b6cf0]/30' : 'text-[#9aa3b8] hover:text-white hover:bg-[#1b2333]'">
+              [ngClass]="activeTab === 'system' ? 'bg-[var(--primary)] text-white shadow-sm shadow-[var(--primary)]/30' : 'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--bg)]'">
               <span>System</span>
-              <span class="px-1.5 py-0.2 rounded-full text-[10px]" [ngClass]="activeTab === 'system' ? 'bg-white/20 text-white' : 'bg-[#1b2333] text-[#9aa3b8]'">{{ systemCount }}</span>
+              <span class="px-1.5 py-0.2 rounded-full text-[10px]" [ngClass]="activeTab === 'system' ? 'bg-white/20 text-[var(--text)]' : 'bg-[var(--bg)] text-[var(--muted)]'">{{ systemCount }}</span>
             </button>
           </div>
 
           <!-- Scrollable Content Feed -->
-          <div class="max-h-[380px] overflow-y-auto p-3 space-y-2.5 custom-scrollbar bg-[#0b0f1a]/50">
+          <div class="max-h-[380px] overflow-y-auto p-3 space-y-2.5 custom-scrollbar bg-[var(--bg)]/50">
             
             <!-- Empty State -->
             <app-empty-state
@@ -101,7 +101,7 @@ export type NotificationTab = 'all' | 'appointments' | 'lab' | 'system';
               title="No notifications"
               message="You have no notifications in this category."
               [compact]="true"
-              iconWrapClass="bg-[#1b2333] text-[#9aa3b8]"
+              iconWrapClass="bg-[var(--bg)] text-[var(--muted)]"
               containerClass="py-8"
             ></app-empty-state>
 
@@ -109,8 +109,8 @@ export type NotificationTab = 'all' | 'appointments' | 'lab' | 'system';
             <div 
               *ngFor="let n of filteredFeed; trackBy: trackNotif" 
               (click)="onNotificationClick(n)"
-              class="bg-[#151b2b] hover:bg-[#1b2333] border border-[#2a3347] hover:border-[#3b4763] rounded-xl p-3.5 transition-all cursor-pointer group relative shadow-sm"
-              [ngClass]="!n.read ? 'ring-1 ring-[#5b6cf0]/40' : ''">
+              class="bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--border)] rounded-xl p-3.5 transition-all cursor-pointer group relative shadow-sm"
+              [ngClass]="!n.read ? 'ring-1 ring-[var(--primary)]/40' : ''">
               
               <div class="flex items-start gap-3">
                 
@@ -120,22 +120,22 @@ export type NotificationTab = 'all' | 'appointments' | 'lab' | 'system';
                     <i class="fa-solid" [ngClass]="getIconClass(n.type)"></i>
                   </div>
                   <!-- Corner Status Dot -->
-                  <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[#151b2b]"
+                  <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[var(--panel)]"
                         [ngClass]="getStatusDotClass(n.type)"></span>
                 </div>
 
                 <!-- Text & Metadata -->
                 <div class="flex-1 min-w-0">
                   <div class="flex items-start justify-between gap-2 mb-1">
-                    <h4 class="text-xs sm:text-sm font-bold truncate transition-colors" [class.text-white]="!n.read" [class.text-[#9aa3b8]]="n.read">
+                    <h4 class="text-xs sm:text-sm font-bold truncate transition-colors" [class.text-[var(--text)]]="!n.read" [class.text-[var(--muted)]]="n.read">
                       {{ n.title }}
                     </h4>
-                    <span class="text-[10px] text-[#9aa3b8] font-medium whitespace-nowrap shrink-0">
+                    <span class="text-[10px] text-[var(--muted)] font-medium whitespace-nowrap shrink-0">
                       {{ formatDate(n.timestamp) }}
                     </span>
                   </div>
 
-                  <p class="text-xs text-[#9aa3b8] line-clamp-2 leading-relaxed">
+                  <p class="text-xs text-[var(--muted)] line-clamp-2 leading-relaxed">
                     {{ n.message }}
                   </p>
 
@@ -143,11 +143,11 @@ export type NotificationTab = 'all' | 'appointments' | 'lab' | 'system';
                   <div class="flex items-center justify-between pt-2 mt-1">
                     <ng-container [ngSwitch]="getActionButtonType(n)">
                       <button *ngSwitchCase="'view-report'" type="button"
-                        class="bg-[#5b6cf0]/15 hover:bg-[#5b6cf0] border border-[#5b6cf0]/30 text-[#5b6cf0] hover:text-white text-[11px] font-bold px-3 py-1 rounded-lg transition-all cursor-pointer">
+                        class="bg-[var(--primary)]/15 hover:bg-[var(--primary)] border border-[var(--primary)]/30 text-[var(--primary)] hover:text-white text-[11px] font-bold px-3 py-1 rounded-lg transition-all cursor-pointer">
                         View Report
                       </button>
                       <button *ngSwitchCase="'give-feedback'" type="button"
-                        class="bg-[#5b6cf0]/15 hover:bg-[#5b6cf0] border border-[#5b6cf0]/30 text-[#5b6cf0] hover:text-white text-[11px] font-bold px-3 py-1 rounded-lg transition-all cursor-pointer">
+                        class="bg-[var(--primary)]/15 hover:bg-[var(--primary)] border border-[var(--primary)]/30 text-[var(--primary)] hover:text-white text-[11px] font-bold px-3 py-1 rounded-lg transition-all cursor-pointer">
                         Give Feedback
                       </button>
                     </ng-container>
@@ -162,9 +162,9 @@ export type NotificationTab = 'all' | 'appointments' | 'lab' | 'system';
           </div>
 
           <!-- Footer -->
-          <div class="px-4 py-3 border-t border-[#2a3347] bg-[#151b2b] text-center">
+          <div class="px-4 py-3 border-t border-[var(--border)] bg-[var(--panel)] text-center">
             <a routerLink="/notifications" (click)="notifOpen=false" 
-              class="inline-flex items-center justify-center gap-2 text-xs font-bold text-[#5b6cf0] hover:text-[#7080f5] transition-colors">
+              class="inline-flex items-center justify-center gap-2 text-xs font-bold text-[var(--primary)] hover:text-[var(--primary-hover)] transition-colors">
               <span>View All Notifications</span>
               <i class="fa-solid fa-arrow-right text-[11px]"></i>
             </a>
@@ -360,7 +360,7 @@ export class NotificationDropdownComponent implements OnInit, OnChanges {
   getIconClass(type?: string): string {
     switch ((type || '').toLowerCase()) {
       case 'appointment': return 'fa-calendar-check';
-      case 'cancellation': return 'fa-calendar-xmark text-rose-400';
+      case 'cancellation': return 'fa-calendar-xmark text-rose-700 dark:text-rose-400';
       case 'lab': case 'report': case 'lab_report': return 'fa-flask';
       case 'feedback': case 'message': return 'fa-comment-dots';
       case 'system': case 'security': return 'fa-shield-halved';
@@ -370,12 +370,12 @@ export class NotificationDropdownComponent implements OnInit, OnChanges {
 
   getIconBgClass(type?: string): string {
     switch ((type || '').toLowerCase()) {
-      case 'appointment': return 'bg-[#5b6cf0]/20 text-[#5b6cf0]';
-      case 'cancellation': return 'bg-rose-500/20 text-rose-400';
-      case 'lab': case 'report': case 'lab_report': return 'bg-purple-500/20 text-purple-400';
+      case 'appointment': return 'bg-[var(--primary)]/20 text-[var(--primary)]';
+      case 'cancellation': return 'bg-rose-500/20 text-rose-700 dark:text-rose-400';
+      case 'lab': case 'report': case 'lab_report': return 'bg-purple-500/20 text-purple-700 dark:text-purple-400';
       case 'feedback': case 'message': return 'bg-indigo-500/20 text-indigo-400';
-      case 'system': case 'security': return 'bg-blue-500/20 text-blue-400';
-      default: return 'bg-[#1b2333] text-[#9aa3b8]';
+      case 'system': case 'security': return 'bg-blue-500/20 text-blue-700 dark:text-blue-400';
+      default: return 'bg-[var(--bg)] text-[var(--muted)]';
     }
   }
 
@@ -386,7 +386,7 @@ export class NotificationDropdownComponent implements OnInit, OnChanges {
       case 'lab': case 'report': case 'lab_report': return 'bg-purple-400';
       case 'feedback': return 'bg-indigo-400';
       case 'system': case 'security': return 'bg-amber-400';
-      default: return 'bg-[#5b6cf0]';
+      default: return 'bg-[var(--primary)]';
     }
   }
 

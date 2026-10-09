@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-skeleton',
   standalone: true,
   imports: [CommonModule],
+  host: { class: 'block' },
   templateUrl: './skeleton.component.html',
   styleUrl: './skeleton.component.css'
 })

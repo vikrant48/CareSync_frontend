@@ -1,11 +1,12 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 import { PreVisitIntakeRequest, PreVisitIntakeResponse } from '../../core/models/appointment.models';
 
 @Component({
     selector: 'app-intake-summary-modal',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, ModalShellComponent],
     templateUrl: './intake-summary-modal.component.html',
     styleUrl: './intake-summary-modal.component.css'
 })

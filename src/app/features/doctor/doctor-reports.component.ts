@@ -5,11 +5,12 @@ import { AuthService } from '../../core/services/auth.service';
 import { AnalyticsApiService, OverallAnalytics } from '../../core/services/analytics.service';
 import { ReportsApiService } from '../../core/services/reports.service';
 import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
+import { DoctorReportsSummaryComponent } from './doctor-reports-summary.component';
 
 @Component({
   selector: 'app-doctor-reports',
   standalone: true,
-  imports: [CommonModule, ChartWidgetComponent, DoctorLayoutComponent],
+  imports: [CommonModule, ChartWidgetComponent, DoctorLayoutComponent, DoctorReportsSummaryComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './doctor-reports.component.html',
   styleUrl: './doctor-reports.component.css'

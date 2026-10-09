@@ -11,7 +11,7 @@ import { getAppointmentEpochMs, isAppointmentToday } from '../../shared/appointm
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { ToastService } from '../../core/services/toast.service';
 import { MasterDataService } from '../../core/services/master-data.service';
-import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropdown.component';
+import { SelectOption } from '../../shared/select-dropdown.component';
 import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 import { SkeletonComponent } from '../../shared/ui/skeleton.component';
@@ -20,7 +20,7 @@ import { FilterBarComponent, FilterConfig } from '../../shared/components';
 @Component({
   selector: 'app-my-appointments',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, AppointmentCardComponent, RescheduleAppointmentModalComponent, CancellationModalComponent, SelectDropdownComponent, SharedChatModalComponent, EmptyStateComponent, SkeletonComponent, FilterBarComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, AppointmentCardComponent, RescheduleAppointmentModalComponent, CancellationModalComponent, SharedChatModalComponent, EmptyStateComponent, SkeletonComponent, FilterBarComponent],
   templateUrl: './my-appointments.component.html',
   styleUrl: './my-appointments.component.css'
 })
@@ -61,43 +61,39 @@ export class MyAppointmentsComponent {
     ];
   }
 
-  get patientFilterConfigs(): FilterConfig[] {
-    return [
-      {
-        type: 'select',
-        key: 'statusFilter',
-        label: 'Status',
-        placeholder: 'All Statuses',
-        options: this.statusOptions
-      },
-      {
-        type: 'search',
-        key: 'specializationFilter',
-        label: 'Specialization',
-        placeholder: 'Search specialization...'
-      },
-      {
-        type: 'radio',
-        key: 'rangeFilter',
-        label: 'Date Range',
-        defaultValue: '',
-        options: [
-          { label: 'Today', value: 'today' },
-          { label: 'Upcoming', value: 'upcoming' },
-          { label: 'Past', value: 'past' },
-          { label: 'All', value: '' }
-        ]
-      }
-    ];
-  }
+  readonly patientFilterConfigs: FilterConfig[] = [
+    {
+      type: 'select',
+      key: 'statusFilter',
+      label: 'Status',
+      placeholder: 'All Statuses',
+      options: [{ value: '', label: 'All Statuses' }]
+    },
+    {
+      type: 'search',
+      key: 'specializationFilter',
+      label: 'Specialization',
+      placeholder: 'Search specialization...'
+    },
+    {
+      type: 'radio',
+      key: 'rangeFilter',
+      label: 'Date Range',
+      defaultValue: '',
+      options: [
+        { label: 'Today', value: 'today' },
+        { label: 'Upcoming', value: 'upcoming' },
+        { label: 'Past', value: 'past' },
+        { label: 'All', value: '' }
+      ]
+    }
+  ];
 
-  get patientFilterValues(): Record<string, any> {
-    return {
-      statusFilter: this.statusFilter,
-      specializationFilter: this.specializationFilter,
-      rangeFilter: this.rangeFilter
-    };
-  }
+  patientFilterValues: Record<string, any> = {
+    statusFilter: '',
+    specializationFilter: '',
+    rangeFilter: ''
+  };
 
   onFilterBarChange(values: Record<string, any>) {
     this.statusFilter = values['statusFilter'] || '';
@@ -122,7 +118,11 @@ export class MyAppointmentsComponent {
   ) {
     this.refresh();
     this.masterDataService.getStatuses().subscribe({
-      next: (s) => this.statuses = s || []
+      next: (s) => {
+        this.statuses = s || [];
+        const statusFilter = this.patientFilterConfigs.find((c) => c.key === 'statusFilter');
+        if (statusFilter) statusFilter.options = this.statusOptions;
+      }
     });
     // Apply default filters from query params if provided
     const qp = this.route.snapshot.queryParamMap;
@@ -141,6 +141,11 @@ export class MyAppointmentsComponent {
     else if (rangeParam === 'UPCOMING') this.rangeFilter = 'upcoming';
     else if (rangeParam === 'PAST') this.rangeFilter = 'past';
     else this.rangeFilter = '';
+    this.patientFilterValues = {
+      statusFilter: this.statusFilter,
+      specializationFilter: this.specializationFilter,
+      rangeFilter: this.rangeFilter
+    };
     // Preload doctors list to enable navigation to doctor profile from appointments
     this.doctorApi.getAllForPatients(0, 50).subscribe({
       next: (res) => {
@@ -187,6 +192,11 @@ export class MyAppointmentsComponent {
     this.statusFilter = '';
     this.specializationFilter = '';
     this.rangeFilter = '';
+    this.patientFilterValues = {
+      statusFilter: '',
+      specializationFilter: '',
+      rangeFilter: ''
+    };
   }
 
   // Date helpers moved to shared utils

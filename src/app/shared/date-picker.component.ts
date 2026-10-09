@@ -83,7 +83,16 @@ export class DatePickerComponent implements ControlValueAccessor, AfterViewInit,
   private platformId = inject(PLATFORM_ID);
   private fpInstance: any;
   private value: any;
-  disabled = false;
+  private _disabled = false;
+
+  @Input()
+  set disabled(value: boolean) {
+    this._disabled = !!value;
+    this.applyDisabled();
+  }
+  get disabled(): boolean {
+    return this._disabled;
+  }
 
   onChange: any = () => { };
   onTouched: any = () => { };
@@ -129,6 +138,16 @@ export class DatePickerComponent implements ControlValueAccessor, AfterViewInit,
 
     if (this.value) {
       this.fpInstance.setDate(this.value, false);
+    }
+    this.applyDisabled();
+  }
+
+  private applyDisabled() {
+    if (!this.fpInstance) return;
+    this.fpInstance.set('clickOpens', !this._disabled);
+    this.fpInstance.input.disabled = this._disabled;
+    if (this.fpInstance.altInput) {
+      this.fpInstance.altInput.disabled = this._disabled;
     }
   }
 

@@ -5,16 +5,16 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-    background: #111c1f;
+    background: var(--panel);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #1f3236;
+    background: var(--border);
     border-radius: 9999px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #14b8a6;
+    background: var(--accent);
 }
 
 /* Line Clamp Utilities */

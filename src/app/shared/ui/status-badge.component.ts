@@ -35,6 +35,7 @@ export type AppStatus =
 export class StatusBadgeComponent {
   @Input() status: AppStatus = '';
   @Input() text = '';
+  @Input() size: 'sm' | 'md' | 'lg' = 'md';
 
   get normalized(): string {
     return String(this.status || '').toUpperCase().trim();
@@ -66,6 +67,14 @@ export class StatusBadgeComponent {
         return this.status
           ? String(this.status).replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())
           : 'Unknown';
+    }
+  }
+
+  get sizeClass(): string {
+    switch (this.size) {
+      case 'sm': return 'px-2 py-0.5 text-[10px]';
+      case 'lg': return 'px-3.5 py-1 text-sm';
+      default: return 'px-2.5 py-1 text-xs';
     }
   }
 

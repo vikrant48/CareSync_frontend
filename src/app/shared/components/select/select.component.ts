@@ -23,9 +23,9 @@ export interface SelectOption {
   template: `
     <div class="w-full flex flex-col space-y-1.5 relative">
       <!-- Label -->
-      <label *ngIf="label" class="text-xs font-semibold text-[#9aa3b8] flex items-center gap-1">
+      <label *ngIf="label" class="text-xs font-semibold text-[var(--muted)] flex items-center gap-1">
         <span>{{ label }}</span>
-        <span *ngIf="required" class="text-rose-400 font-bold">*</span>
+        <span *ngIf="required" class="text-rose-500 font-bold">*</span>
       </label>
 
       <!-- Custom Select Trigger Button -->
@@ -34,26 +34,26 @@ export interface SelectOption {
         (click)="toggleOpen()"
         (keydown)="onKeyDown($event)"
         [ngClass]="[
-          'w-full bg-[#151b2b] text-[#f5f7ff] text-sm rounded-xl py-2.5 px-3.5 border transition-all duration-200 flex items-center justify-between cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-[#5b6cf0]/20',
-          disabled ? 'opacity-50 !cursor-not-allowed bg-[#151b2b]/50' : 'hover:border-[#3b4763]',
-          isOpen ? '!border-[#5b6cf0] ring-2 ring-[#5b6cf0]/20' : '',
+          'w-full bg-[var(--bg)] text-[var(--text)] text-sm rounded-xl py-2.5 px-3.5 border transition-all duration-200 flex items-center justify-between cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20',
+          disabled ? 'opacity-50 !cursor-not-allowed' : 'hover:border-[var(--primary)]/40',
+          isOpen ? '!border-[var(--primary)] ring-2 ring-[var(--primary)]/20' : '',
           getStateClasses()
         ]"
       >
         <!-- Left Selected Content -->
         <div class="flex items-center gap-2 truncate">
-          <i *ngIf="selectedOption?.icon" [class]="selectedOption?.icon" class="text-[#9aa3b8] text-sm"></i>
-          <span *ngIf="selectedOption" class="truncate font-medium text-white">
+          <i *ngIf="selectedOption?.icon" [class]="selectedOption?.icon" class="text-[var(--muted)] text-sm"></i>
+          <span *ngIf="selectedOption" class="truncate font-medium text-[var(--text)]">
             {{ selectedOption.label }}
           </span>
-          <span *ngIf="!selectedOption" class="text-[#9aa3b8]/50 truncate">
+          <span *ngIf="!selectedOption" class="text-[var(--muted)] truncate">
             {{ placeholder }}
           </span>
         </div>
 
         <!-- Right Chevron Icon -->
         <i
-          class="fa-solid fa-chevron-down text-xs text-[#9aa3b8] transition-transform duration-200"
+          class="fa-solid fa-chevron-down text-xs text-[var(--muted)] transition-transform duration-200"
           [class.rotate-180]="isOpen"
         ></i>
       </div>
@@ -61,7 +61,7 @@ export interface SelectOption {
       <!-- Dropdown Options Popup -->
       <div
         *ngIf="isOpen"
-        class="absolute top-full left-0 right-0 mt-1 z-50 bg-[#1b2333] border border-[#2a3347] rounded-xl shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-2 duration-150"
+        class="absolute top-full left-0 right-0 mt-1 z-50 bg-[var(--panel)] border border-[var(--border)] rounded-xl shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-2 duration-150"
       >
         <div
           *ngFor="let opt of options; let i = index"
@@ -69,8 +69,8 @@ export interface SelectOption {
           [ngClass]="[
             'px-3.5 py-2.5 text-sm flex items-center justify-between transition-colors cursor-pointer select-none',
             opt.disabled ? 'opacity-40 cursor-not-allowed pointer-events-none' : '',
-            highlightedIndex === i ? 'bg-[#5b6cf0]/10 text-white' : 'text-[#9aa3b8] hover:bg-[#151b2b] hover:text-white',
-            isSelected(opt) ? '!bg-[#5b6cf0] !text-white font-semibold' : ''
+            highlightedIndex === i ? 'bg-[var(--primary-soft)] text-[var(--text)]' : 'text-[var(--muted)] hover:bg-[var(--bg)] hover:text-[var(--text)]',
+            isSelected(opt) ? '!bg-[var(--primary)] !text-[var(--primary-fg)] font-semibold' : ''
           ]"
         >
           <div class="flex items-center gap-2.5 truncate">
@@ -80,7 +80,7 @@ export interface SelectOption {
           <i *ngIf="isSelected(opt)" class="fa-solid fa-check text-xs ml-2"></i>
         </div>
 
-        <div *ngIf="!options || options.length === 0" class="px-3.5 py-3 text-xs text-[#9aa3b8] text-center italic">
+        <div *ngIf="!options || options.length === 0" class="px-3.5 py-3 text-xs text-[var(--muted)] text-center italic">
           No options available
         </div>
       </div>
@@ -184,7 +184,7 @@ export class SelectComponent implements ControlValueAccessor {
     if (this.errorMessage || this.state === 'error') {
       return 'border-rose-500/80 focus:border-rose-500';
     }
-    return 'border-[#2a3347]';
+    return 'border-[var(--border)]';
   }
 
   // ControlValueAccessor Interface

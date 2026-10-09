@@ -12,7 +12,7 @@ import { MasterDataService } from '../../core/services/master-data.service';
 import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.component';
 import { PatientProfileService, PatientDto, MedicalHistoryWithDoctorItem } from '../../core/services/patient-profile.service';
 import { forkJoin, map, firstValueFrom } from 'rxjs';
-import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropdown.component';
+import { SelectOption } from '../../shared/select-dropdown.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 import { SkeletonComponent } from '../../shared/ui/skeleton.component';
 import { FilterBarComponent, FilterConfig } from '../../shared/components';
@@ -36,7 +36,6 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
     MedicalHistoryDetailModalComponent,
     DoctorLayoutComponent,
     SharedChatModalComponent,
-    SelectDropdownComponent,
     EmptyStateComponent,
     SkeletonComponent,
     FilterBarComponent,
@@ -74,46 +73,47 @@ export class DoctorAppointmentsComponent {
     this.statusFilter = 'ALL';
     this.range = 'ALL';
     this.searchTerm = '';
+    this.appointmentFilterValues = {
+      statusFilter: 'ALL',
+      searchTerm: '',
+      range: 'ALL'
+    };
     this.refresh();
   }
 
-  get appointmentFilterConfigs(): FilterConfig[] {
-    return [
-      {
-        type: 'select',
-        key: 'statusFilter',
-        label: 'Status',
-        placeholder: 'All Statuses',
-        options: this.statusOptions
-      },
-      {
-        type: 'search',
-        key: 'searchTerm',
-        label: 'Search',
-        placeholder: 'Search patient name, phone, or appointment ID...'
-      },
-      {
-        type: 'radio',
-        key: 'range',
-        label: 'Date Range',
-        defaultValue: 'ALL',
-        options: [
-          { label: 'Today', value: 'TODAY' },
-          { label: 'Upcoming', value: 'UPCOMING' },
-          { label: 'Past', value: 'PAST' },
-          { label: 'All', value: 'ALL' }
-        ]
-      }
-    ];
-  }
+  readonly appointmentFilterConfigs: FilterConfig[] = [
+    {
+      type: 'select',
+      key: 'statusFilter',
+      label: 'Status',
+      placeholder: 'All Statuses',
+      options: [{ value: 'ALL', label: 'All Statuses' }]
+    },
+    {
+      type: 'search',
+      key: 'searchTerm',
+      label: 'Search',
+      placeholder: 'Search patient name, phone, or appointment ID...'
+    },
+    {
+      type: 'radio',
+      key: 'range',
+      label: 'Date Range',
+      defaultValue: 'ALL',
+      options: [
+        { label: 'Today', value: 'TODAY' },
+        { label: 'Upcoming', value: 'UPCOMING' },
+        { label: 'Past', value: 'PAST' },
+        { label: 'All', value: 'ALL' }
+      ]
+    }
+  ];
 
-  get appointmentFilterValues(): Record<string, any> {
-    return {
-      statusFilter: this.statusFilter,
-      searchTerm: this.searchTerm,
-      range: this.range
-    };
-  }
+  appointmentFilterValues: Record<string, any> = {
+    statusFilter: 'ALL',
+    searchTerm: '',
+    range: 'ALL'
+  };
 
   onFilterBarChange(values: Record<string, any>) {
     this.statusFilter = values['statusFilter'] || 'ALL';
@@ -194,7 +194,11 @@ export class DoctorAppointmentsComponent {
   ) {
     this.refresh();
     this.masterDataService.getStatuses().subscribe({
-      next: (s) => this.statuses = s || []
+      next: (s) => {
+        this.statuses = s || [];
+        const statusFilter = this.appointmentFilterConfigs.find((c) => c.key === 'statusFilter');
+        if (statusFilter) statusFilter.options = this.statusOptions;
+      }
     });
   }
 

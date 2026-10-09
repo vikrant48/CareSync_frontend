@@ -116,6 +116,33 @@ export class RegisterComponent implements OnInit {
     return !!(field && field.invalid && (field.dirty || field.touched || this.showValidationErrors));
   }
 
+  fieldError(fieldName: string, form: FormGroup): string {
+    if (!this.isFieldInvalid(fieldName, form)) return '';
+    const field = form.get(fieldName);
+    if (!field) return '';
+    if (field.hasError('taken')) {
+      return fieldName === 'email' ? 'Email is already registered.' : 'Username is already taken.';
+    }
+    if (field.hasError('email')) return 'Enter a valid email address.';
+    if (field.hasError('minlength')) return 'Password must be at least 6 characters.';
+    if (field.hasError('pattern')) return 'Enter the 6-digit code.';
+    if (field.hasError('required')) {
+      const labels: Record<string, string> = {
+        firstName: 'First name',
+        lastName: 'Last name',
+        email: 'Email',
+        gender: 'Gender',
+        username: 'Username',
+        password: 'Password',
+        otp: 'Verification code',
+        specialization: 'Specialization',
+        role: 'Role'
+      };
+      return `${labels[fieldName] || 'This field'} is required.`;
+    }
+    return 'Check this field.';
+  }
+
   // Flag to show validation errors when user tries to navigate
   showValidationErrors = false;
 
@@ -159,13 +186,17 @@ export class RegisterComponent implements OnInit {
             let hasError = false;
 
             if (!res.usernameAvailable) {
-              this.basicForm.get('username')?.setErrors({ taken: true });
+              const username = this.basicForm.get('username');
+              username?.setErrors({ taken: true });
+              username?.markAsTouched();
               this.toast.showError('Username is already taken');
               hasError = true;
             }
 
             if (!res.emailAvailable) {
-              this.basicForm.get('email')?.setErrors({ taken: true });
+              const email = this.basicForm.get('email');
+              email?.setErrors({ taken: true });
+              email?.markAsTouched();
               this.toast.showError('Email is already registered');
               hasError = true;
             }

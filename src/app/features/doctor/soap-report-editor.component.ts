@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 import { AppointmentApiService } from '../../core/services/appointment-api.service';
 import { ToastService } from '../../core/services/toast.service';
 import { SoapReportDto } from '../../core/models/appointment.models';
@@ -8,7 +9,7 @@ import { SoapReportDto } from '../../core/models/appointment.models';
 @Component({
     selector: 'app-soap-report-editor',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, ModalShellComponent],
     templateUrl: './soap-report-editor.component.html',
     styleUrl: './soap-report-editor.component.css'
 })

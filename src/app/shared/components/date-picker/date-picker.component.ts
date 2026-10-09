@@ -12,13 +12,13 @@ export interface CalendarDay {
 }
 
 @Component({
-    selector: 'app-date-picker',
+    selector: 'app-calendar-picker',
     standalone: true,
     imports: [CommonModule],
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => DatePickerComponent),
+            useExisting: forwardRef(() => CalendarPickerComponent),
             multi: true
         }
     ],
@@ -135,7 +135,7 @@ export interface CalendarDay {
     </div>
   `
 })
-export class DatePickerComponent implements ControlValueAccessor, OnInit {
+export class CalendarPickerComponent implements ControlValueAccessor, OnInit {
     @Input() label?: string;
     @Input() placeholder = 'YYYY-MM-DD';
     @Input() required = false;

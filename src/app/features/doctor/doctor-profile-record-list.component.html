@@ -1,0 +1,94 @@
+<div *ngIf="kind === 'education'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div *ngFor="let e of items; trackBy: trackItem"
+    class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 sm:p-5 shadow-xl flex items-start justify-between group hover:border-[var(--accent)]/40 transition-all">
+    <div class="flex items-start gap-3.5">
+      <div class="w-11 h-11 rounded-xl bg-[var(--accent)]/15 border border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)] shrink-0">
+        <i class="fa-solid fa-graduation-cap text-base"></i>
+      </div>
+      <div class="space-y-1">
+        <h4 class="font-bold text-[var(--text)] text-sm sm:text-base">{{ e.degree }}</h4>
+        <p class="text-xs text-[var(--muted)] font-medium">{{ e.institution }}</p>
+        <div class="flex items-center gap-2 text-[10px] text-[var(--muted)] font-bold mt-1">
+          <span class="bg-[var(--bg)] border border-[var(--bg)] px-2 py-0.5 rounded text-[var(--accent)]">{{ e.yearOfCompletion }}</span>
+          <span *ngIf="e.details">• {{ e.details }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center gap-1">
+      <button type="button" (click)="edit.emit(e)" aria-label="Edit education"
+        class="w-8 h-8 rounded-lg bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--muted)] hover:text-[var(--accent)] flex items-center justify-center cursor-pointer">
+        <i class="fa-solid fa-pen text-xs" aria-hidden="true"></i>
+      </button>
+      <button type="button" (click)="remove.emit(e)" aria-label="Delete education"
+        class="w-8 h-8 rounded-lg bg-[var(--bg)] hover:bg-[#ef4444]/20 border border-[var(--bg)] hover:border-[#ef4444]/40 text-[var(--muted)] hover:text-[#ef4444] flex items-center justify-center cursor-pointer">
+        <i class="fa-solid fa-trash text-xs" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+  <div *ngIf="items.length === 0" class="md:col-span-2">
+    <app-empty-state icon="fa-solid fa-graduation-cap" title="No education details listed"
+      message="Click Add Education to list your degrees."></app-empty-state>
+  </div>
+</div>
+
+<div *ngIf="kind === 'experience'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div *ngFor="let x of items; trackBy: trackItem"
+    class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 sm:p-5 shadow-xl flex items-start justify-between group hover:border-[var(--accent)]/40 transition-all">
+    <div class="flex items-start gap-3.5">
+      <div class="w-11 h-11 rounded-xl bg-[#a855f7]/15 border border-[#a855f7]/30 flex items-center justify-center text-[#a855f7] shrink-0">
+        <i class="fa-solid fa-hospital-user text-base"></i>
+      </div>
+      <div class="space-y-1">
+        <h4 class="font-bold text-[var(--text)] text-sm sm:text-base">{{ x.position }}</h4>
+        <p class="text-xs text-[var(--muted)] font-medium">{{ x.hospitalName }}</p>
+        <div class="flex items-center gap-2 text-[10px] text-[var(--muted)] font-bold mt-1">
+          <span class="bg-[var(--bg)] border border-[var(--bg)] px-2 py-0.5 rounded text-[#a855f7]">{{ x.yearsOfService }} Years</span>
+          <span *ngIf="x.details">• {{ x.details }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center gap-1">
+      <button type="button" (click)="edit.emit(x)" aria-label="Edit experience"
+        class="w-8 h-8 rounded-lg bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--muted)] hover:text-[var(--accent)] flex items-center justify-center cursor-pointer">
+        <i class="fa-solid fa-pen text-xs" aria-hidden="true"></i>
+      </button>
+      <button type="button" (click)="remove.emit(x)" aria-label="Delete experience"
+        class="w-8 h-8 rounded-lg bg-[var(--bg)] hover:bg-[#ef4444]/20 border border-[var(--bg)] hover:border-[#ef4444]/40 text-[var(--muted)] hover:text-[#ef4444] flex items-center justify-center cursor-pointer">
+        <i class="fa-solid fa-trash text-xs" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+  <div *ngIf="items.length === 0" class="md:col-span-2">
+    <app-empty-state icon="fa-solid fa-briefcase" title="No experience listed"
+      message="Click Add Experience to record your medical roles."></app-empty-state>
+  </div>
+</div>
+
+<div *ngIf="kind === 'certificates'" class="space-y-3">
+  <div *ngFor="let c of items; trackBy: trackItem"
+    class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4 group hover:border-[var(--accent)]/40 transition-all">
+    <div class="flex items-center gap-3.5 w-full sm:w-auto">
+      <div class="w-11 h-11 rounded-xl bg-[#f59e0b]/15 border border-[#f59e0b]/30 flex items-center justify-center text-[#f59e0b] shrink-0">
+        <i class="fa-solid fa-file-contract text-base"></i>
+      </div>
+      <div>
+        <h4 class="font-bold text-[var(--text)] text-sm truncate max-w-xs">{{ c.name || c.originalFilename || 'Medical Certificate' }}</h4>
+        <p class="text-xs text-[var(--muted)] font-medium mt-0.5">{{ c.details || 'Verified Credential' }}</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 self-end sm:self-auto">
+      <a *ngIf="c.url" [href]="c.url" target="_blank"
+        class="px-3 py-1.5 rounded-lg bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--accent)] text-xs font-bold transition-all flex items-center gap-1.5">
+        <i class="fa-solid fa-eye text-xs"></i> View
+      </a>
+      <button type="button" (click)="remove.emit(c)" aria-label="Delete certificate"
+        class="w-8 h-8 rounded-lg bg-[var(--bg)] hover:bg-[#ef4444]/20 border border-[var(--bg)] hover:border-[#ef4444]/40 text-[var(--muted)] hover:text-[#ef4444] flex items-center justify-center cursor-pointer">
+        <i class="fa-solid fa-trash text-xs" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+  <div *ngIf="items.length === 0">
+    <app-empty-state icon="fa-solid fa-award" title="No certificates uploaded"
+      message="Upload your medical licenses and certifications."></app-empty-state>
+  </div>
+</div>

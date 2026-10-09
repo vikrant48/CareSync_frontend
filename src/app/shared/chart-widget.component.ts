@@ -32,9 +32,17 @@ export class ChartWidgetComponent implements AfterViewInit, OnDestroy, OnChanges
 
   @ViewChild('canvas') canvas!: ElementRef<HTMLCanvasElement>;
   private chart: Chart | null = null;
+  private themeObserver: MutationObserver | null = null;
 
   ngAfterViewInit() {
     this.render();
+    if (typeof MutationObserver !== 'undefined') {
+      this.themeObserver = new MutationObserver(() => {
+        this.destroy();
+        this.render();
+      });
+      this.themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    }
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -45,18 +53,29 @@ export class ChartWidgetComponent implements AfterViewInit, OnDestroy, OnChanges
   }
 
   ngOnDestroy() {
+    this.themeObserver?.disconnect();
     this.destroy();
+  }
+
+  private token(name: string, fallback: string): string {
+    if (typeof document === 'undefined') return fallback;
+    return getComputedStyle(document.body).getPropertyValue(name).trim() || fallback;
   }
 
   private render() {
     if (!this.canvas) return;
     const isPieOrDoughnut = this.type === 'pie' || this.type === 'doughnut';
-    const background = this.colors || (isPieOrDoughnut ? this.generateColors(this.data.length) : 'rgba(91, 108, 240, 0.85)');
+    const primary = this.token('--primary', '#2563eb');
+    const panel = this.token('--panel', '#111827');
+    const text = this.token('--text', '#e5e7eb');
+    const muted = this.token('--muted', '#9ca3af');
+    const border = this.token('--border', '#1f2937');
+    const background = this.colors || (isPieOrDoughnut ? this.generateColors(this.data.length) : primary);
     const ds = {
       label: this.datasetLabel || this.title,
       data: this.data,
       backgroundColor: background as any,
-      borderColor: isPieOrDoughnut ? '#151b2b' : '#5b6cf0',
+      borderColor: isPieOrDoughnut ? panel : primary,
       borderWidth: isPieOrDoughnut ? 3 : 1,
       borderRadius: this.type === 'bar' ? 6 : 0,
       cutout: this.type === 'doughnut' ? '68%' : 0,
@@ -74,10 +93,10 @@ export class ChartWidgetComponent implements AfterViewInit, OnDestroy, OnChanges
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: '#1b2333',
-            titleColor: '#ffffff',
-            bodyColor: '#9aa3b8',
-            borderColor: '#2a3347',
+            backgroundColor: panel,
+            titleColor: text,
+            bodyColor: muted,
+            borderColor: border,
             borderWidth: 1,
             padding: 10,
             displayColors: isPieOrDoughnut,
@@ -86,13 +105,13 @@ export class ChartWidgetComponent implements AfterViewInit, OnDestroy, OnChanges
         scales: isPieOrDoughnut ? {} : {
           x: {
             grid: { display: false },
-            ticks: { color: '#9aa3b8', font: { size: 11 } },
-            border: { color: '#2a3347' }
+            ticks: { color: muted, font: { size: 11 } },
+            border: { color: border }
           },
           y: {
-            grid: { color: 'rgba(255,255,255,0.05)' },
-            ticks: { color: '#9aa3b8', font: { size: 11 }, precision: 0 },
-            border: { color: '#2a3347' }
+            grid: { color: border },
+            ticks: { color: muted, font: { size: 11 }, precision: 0 },
+            border: { color: border }
           },
         },
       },

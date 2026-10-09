@@ -10,13 +10,14 @@ import { SpecializationAutocompleteComponent } from '../../shared/specialization
 import { ToastService } from '../../core/services/toast.service';
 import { MasterDataService } from '../../core/services/master-data.service';
 import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropdown.component';
-import { DatePickerComponent } from '../../shared/date-picker.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
+import { DoctorProfileRecordListComponent } from './doctor-profile-record-list.component';
+import { SkeletonComponent } from '../../shared/ui/skeleton.component';
 
 @Component({
   selector: 'app-doctor-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, DoctorLayoutComponent, SpecializationAutocompleteComponent, SelectDropdownComponent, DatePickerComponent, EmptyStateComponent],
+  imports: [CommonModule, FormsModule, DoctorLayoutComponent, SpecializationAutocompleteComponent, SelectDropdownComponent, EmptyStateComponent, SkeletonComponent, DoctorProfileRecordListComponent],
   templateUrl: './doctor-profile.component.html',
   styleUrls: ['./doctor-profile.component.css']
 })
@@ -101,6 +102,10 @@ export class DoctorProfileComponent implements OnInit {
     return full || this.profile?.username || 'Doctor';
   }
 
+  trackLanguage(_index: number, language: string): string {
+    return language;
+  }
+
   ngOnInit(): void {
     this.masterDataService.getAllMasterData().subscribe({
       next: (data) => {
@@ -124,6 +129,11 @@ export class DoctorProfileComponent implements OnInit {
   }
 
   loadAll() {
+    if (!this.username) {
+      this.error.set('No authenticated doctor user');
+      this.loading.set(false);
+      return;
+    }
     this.loading.set(true);
     this.error.set(null);
     const u = this.username!;
@@ -680,7 +690,7 @@ export class DoctorProfileComponent implements OnInit {
         this.router.navigate(['/doctor/documents']);
         break;
       case 'password':
-        this.startEditOverview();
+        this.router.navigate(['/doctor/change-password']);
         break;
     }
   }
