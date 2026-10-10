@@ -1,3 +1,10 @@
+/**
+ * Netlify Edge / Deno polyfill: define `global` on `globalThis` if missing.
+ */
+if (typeof (globalThis as any).global === 'undefined') {
+  (globalThis as any).global = globalThis;
+}
+
 import { AngularAppEngine, createRequestHandler } from '@angular/ssr';
 import { getContext } from '@netlify/angular-runtime/app-engine.js';
 

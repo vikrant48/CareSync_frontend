@@ -1,15 +1,16 @@
-import { Injectable } from '@angular/core';
-import { Client, Stomp } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
+import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Client } from '@stomp/stompjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { filter, map } from 'rxjs/operators';
 import { AuthService } from './auth.service';
 
 @Injectable({
     providedIn: 'root'
 })
 export class WebSocketService {
+    private platformId = inject(PLATFORM_ID);
+    private isBrowser = isPlatformBrowser(this.platformId);
     private stompClient: Client | null = null;
     private connectionStatus = new BehaviorSubject<boolean>(false);
 
@@ -17,22 +18,21 @@ export class WebSocketService {
     private notificationSubject = new Subject<any>();
 
     constructor(private authService: AuthService) {
-        this.initializeWebSocketConnection();
+        if (this.isBrowser) {
+            this.initializeWebSocketConnection();
+        }
     }
 
-    private initializeWebSocketConnection() {
-        // Determine the user's role and email/identifier
-        // For now we will rely on the token being present in AuthService or LocalStorage
-        // The backend endpoint is public for handshake, but usually we pass token
+    private async initializeWebSocketConnection() {
+        if (!this.isBrowser) {
+            return;
+        }
 
         const socketUrl = `${environment.apiBaseUrl.replace('/api', '')}/ws`;
-        // Note: If your API base URL is just http://localhost:8080/api, replace ensures http://localhost:8080/ws
-
-        // We can't easily pass headers with SockJS in the standard way for handshake query params
-        // But StompJS allows connectHeaders
+        const sockJsModule = await import('sockjs-client');
+        const SockJS = (sockJsModule as any).default || sockJsModule;
 
         this.stompClient = new Client({
-            // brokerURL: 'ws://localhost:8080/ws', // Use this if not using SockJS
             webSocketFactory: () => new SockJS(socketUrl),
             reconnectDelay: 5000,
             heartbeatIncoming: 4000,
