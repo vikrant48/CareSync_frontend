@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"
+  publish = "dist/caresync-frontend/browser"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[[plugins]]
+  package = "@netlify/angular-runtime"
