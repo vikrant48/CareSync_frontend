@@ -55,7 +55,7 @@ export interface AppointmentCounts {
           </div>
         </div>
 
-        <!-- Middle: 4 Appointment Stat KPI Cards -->
+        <!-- Right: 4 Appointment Stat KPI Cards -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full lg:w-auto">
           <!-- TOTAL -->
           <div class="bg-[var(--bg)] border border-[var(--border)] p-3 sm:p-4 rounded-xl text-center shadow-sm min-w-[85px]">
@@ -87,50 +87,50 @@ export interface AppointmentCounts {
             <div class="text-lg sm:text-xl font-extrabold text-rose-700 dark:text-rose-400 mt-0.5">{{ appointmentCounts?.cancelled ?? 0 }}</div>
           </div>
         </div>
-
-        <!-- Right: Edit Profile Button -->
-        <div class="w-full lg:w-auto flex justify-end">
-          <a routerLink="/patient/profile/edit" 
-            class="w-full sm:w-auto bg-[var(--primary)] hover:bg-indigo-600 active:scale-95 text-white font-bold text-xs sm:text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-500/25 transition-all flex items-center justify-center gap-2">
-            <i class="fa-solid fa-pen-to-square text-xs"></i>
-            <span>Edit</span>
-          </a>
-        </div>
       </section>
 
       <!-- Main Navigation Tabs -->
       <section class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
         
         <!-- Tab Headers -->
-        <div class="flex items-center gap-2 border-b border-[var(--border)] px-4 sm:px-6 pt-3 overflow-x-auto scrollbar-none">
-          <button (click)="activeTab='overview'"
-            [ngClass]="activeTab === 'overview' 
-              ? 'border-b-2 border-[var(--primary)] text-[var(--primary)] font-bold' 
-              : 'text-[var(--muted)] hover:text-[var(--text)] font-semibold'"
-            class="px-4 py-3 text-xs sm:text-sm transition-colors whitespace-nowrap outline-none flex items-center gap-2">
-            <i class="fa-solid fa-user text-xs"></i>
-            <span>Overview</span>
-          </button>
+        <div class="flex items-center justify-between border-b border-[var(--border)] px-4 sm:px-6 pt-2 pb-2 sm:pb-0 gap-3">
+          <div class="flex items-center gap-2 overflow-x-auto scrollbar-none flex-1">
+            <button (click)="activeTab='overview'"
+              [ngClass]="activeTab === 'overview' 
+                ? 'border-b-2 border-[var(--primary)] text-[var(--primary)] font-bold' 
+                : 'text-[var(--muted)] hover:text-[var(--text)] font-semibold'"
+              class="px-4 py-3 text-xs sm:text-sm transition-colors whitespace-nowrap outline-none flex items-center gap-2">
+              <i class="fa-solid fa-user text-xs"></i>
+              <span>Overview</span>
+            </button>
 
-          <button (click)="activeTab='history'"
-            [ngClass]="activeTab === 'history' 
-              ? 'border-b-2 border-[var(--primary)] text-[var(--primary)] font-bold' 
-              : 'text-[var(--muted)] hover:text-[var(--text)] font-semibold'"
-            class="px-4 py-3 text-xs sm:text-sm transition-colors whitespace-nowrap outline-none flex items-center gap-2">
-            <i class="fa-solid fa-notes-medical text-xs"></i>
-            <span>Medical History</span>
-          </button>
+            <button (click)="activeTab='history'"
+              [ngClass]="activeTab === 'history' 
+                ? 'border-b-2 border-[var(--primary)] text-[var(--primary)] font-bold' 
+                : 'text-[var(--muted)] hover:text-[var(--text)] font-semibold'"
+              class="px-4 py-3 text-xs sm:text-sm transition-colors whitespace-nowrap outline-none flex items-center gap-2">
+              <i class="fa-solid fa-notes-medical text-xs"></i>
+              <span>Medical History</span>
+            </button>
 
-          <a routerLink="/patient/appointments"
-            class="px-4 py-3 text-xs sm:text-sm font-semibold text-[var(--muted)] hover:text-[var(--text)] transition-colors whitespace-nowrap flex items-center gap-2">
-            <i class="fa-solid fa-calendar-days text-xs"></i>
-            <span>Appointments</span>
-          </a>
+            <a routerLink="/patient/appointments"
+              class="px-4 py-3 text-xs sm:text-sm font-semibold text-[var(--muted)] hover:text-[var(--text)] transition-colors whitespace-nowrap flex items-center gap-2">
+              <i class="fa-solid fa-calendar-days text-xs"></i>
+              <span>Appointments</span>
+            </a>
 
-          <a routerLink="/patient/lab-bookings"
-            class="px-4 py-3 text-xs sm:text-sm font-semibold text-[var(--muted)] hover:text-[var(--text)] transition-colors whitespace-nowrap flex items-center gap-2">
-            <i class="fa-solid fa-flask text-xs"></i>
-            <span>Lab Tests</span>
+            <a routerLink="/patient/lab-bookings"
+              class="px-4 py-3 text-xs sm:text-sm font-semibold text-[var(--muted)] hover:text-[var(--text)] transition-colors whitespace-nowrap flex items-center gap-2">
+              <i class="fa-solid fa-flask text-xs"></i>
+              <span>Lab Tests</span>
+            </a>
+          </div>
+
+          <!-- Edit Button in Tab Bar: Only visible when activeTab === 'overview' -->
+          <a *ngIf="activeTab === 'overview'" routerLink="/patient/profile/edit" 
+            class="shrink-0 bg-[var(--primary)] hover:bg-indigo-600 active:scale-95 text-white font-bold text-xs sm:text-sm px-4 py-2 sm:mb-2 rounded-xl shadow-md shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 animate-in fade-in duration-200">
+            <i class="fa-solid fa-pen-to-square text-xs"></i>
+            <span>Edit</span>
           </a>
         </div>
 
