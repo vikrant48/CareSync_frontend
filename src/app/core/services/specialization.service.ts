@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, of } from 'rxjs';
-import { map, catchError, tap } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { MasterDataService } from './master-data.service';
 
@@ -24,26 +24,6 @@ export class SpecializationService {
   private specializationsSubject = new BehaviorSubject<string[]>([]);
   public specializations$ = this.specializationsSubject.asObservable();
 
-  // Default specializations list (fallback)
-  private defaultSpecializations = [
-    'Cardiology',
-    'Dermatology',
-    'Endocrinology',
-    'Gastroenterology',
-    'General Medicine',
-    'Gynecology',
-    'Neurology',
-    'Oncology',
-    'Ophthalmology',
-    'Orthopedics',
-    'Pediatrics',
-    'Psychiatry',
-    'Pulmonology',
-    'Radiology',
-    'Surgery',
-    'Urology'
-  ];
-
   constructor() {
     this.loadSpecializations();
   }
@@ -51,8 +31,7 @@ export class SpecializationService {
   loadSpecializations(): void {
     this.masterDataService.getSpecializations().subscribe({
       next: (specializations) => {
-        const allSpecializations = [...new Set([...this.defaultSpecializations, ...specializations])];
-        this.specializationsSubject.next(allSpecializations.sort());
+        this.specializationsSubject.next(this.uniqueNames(specializations));
       },
       error: () => {
         this.loadFallbackSpecializations();
@@ -63,13 +42,16 @@ export class SpecializationService {
   private loadFallbackSpecializations(): void {
     this.getExistingSpecializations().subscribe({
       next: (specializations) => {
-        const allSpecializations = [...new Set([...this.defaultSpecializations, ...specializations])];
-        this.specializationsSubject.next(allSpecializations.sort());
+        this.specializationsSubject.next(this.uniqueNames(specializations));
       },
       error: () => {
-        this.specializationsSubject.next(this.defaultSpecializations);
+        this.specializationsSubject.next([]);
       }
     });
+  }
+
+  private uniqueNames(specializations: string[] | null | undefined): string[] {
+    return [...new Set((specializations || []).map(spec => spec.trim()).filter(Boolean))].sort();
   }
 
   /**

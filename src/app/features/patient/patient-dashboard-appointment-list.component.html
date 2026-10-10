@@ -61,7 +61,11 @@
                         {{ a.doctorName }}
                     </h4>
                     <span class="text-xs text-muted truncate font-medium">
-                        {{ a.doctorSpecialization || 'General Physician' }}
+                        {{ a.doctorSpecialization || 'Not provided' }}
+                    </span>
+                    <span *ngIf="a.doctorActive === false"
+                        class="w-fit text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 border border-rose-500/20">
+                        Doctor inactive
                     </span>
                     <div class="flex flex-wrap items-center gap-3 text-[11px] text-muted mt-1">
                         <span class="flex items-center gap-1.5 font-medium">

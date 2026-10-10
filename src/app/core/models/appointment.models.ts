@@ -43,6 +43,8 @@ export interface AppointmentDto {
     doctorName?: string;
     doctorSpecialization?: string;
     doctorProfileImageUrl?: string;
+    doctorActive?: boolean;
+    patientActive?: boolean;
     appointmentDate?: string;
     appointmentTime?: string;
     status?: AppointmentStatus | string;
@@ -50,6 +52,54 @@ export interface AppointmentDto {
     notes?: string;
     consultationFees?: number;
     [key: string]: any;
+}
+
+export type AppointmentBookingSource = 'MANUAL' | 'AI_ASSISTED' | 'EMERGENCY';
+
+export interface DoctorEducationSummary {
+    degree?: string;
+    institution?: string;
+    yearOfCompletion?: number;
+}
+
+export interface AppointmentDetails {
+    appointmentId: number;
+    patientId?: number;
+    patientName?: string;
+    patientEmail?: string;
+    patientContactInfo?: string;
+    patientIllnessDetails?: string;
+    patientProfileImageUrl?: string;
+    patientBloodGroup?: string;
+    patientGender?: string;
+    patientDateOfBirth?: string;
+    patientAge?: number;
+    doctorId?: number;
+    doctorName: string;
+    doctorSpecialization?: string;
+    doctorEmail?: string;
+    doctorContactInfo?: string;
+    doctorProfileImageUrl?: string;
+    doctorIsVerified?: boolean;
+    doctorExperienceYears?: number;
+    doctorEducation?: DoctorEducationSummary[];
+    doctorLanguages?: string[];
+    doctorAverageRating?: number;
+    doctorReviewCount?: number;
+    doctorActive?: boolean;
+    patientActive?: boolean;
+    appointmentDate: string;
+    appointmentTime: string;
+    status: string;
+    reason?: string;
+    consultationFees?: number;
+    bookingSource?: AppointmentBookingSource;
+    clinicName?: string;
+    clinicAddress?: string;
+    videoRoomId?: string;
+    isActive?: boolean;
+    transactionId?: string;
+    feedbackSubmitted?: boolean;
 }
 
 export interface SlotHoldRequest {
@@ -98,6 +148,15 @@ export interface PreVisitIntakeResponse {
     redFlags?: string;
     editHistory?: string;
     updatedAt: string;
+}
+
+export interface PreVisitBrief {
+    appointmentId: number;
+    patientId: number;
+    historySummary: string;
+    currentMedications: string;
+    allergies: string;
+    unfinishedFollowUps?: string;
 }
 
 export interface SoapReportDto {
@@ -209,4 +268,32 @@ export interface ESignCompletionResponse {
     contentHash: string;
     pdfUrl: string;
     message: string;
+}
+
+export interface FollowUpSlot {
+    doctorId: number;
+    doctorName: string;
+    specialization?: string;
+    date: string;
+    slot: string;
+    consultationFee?: number;
+    reason?: string;
+}
+
+export interface AppointmentFollowThrough {
+    plainLanguageSummary?: string;
+    feedbackRequested: boolean;
+    suggestedFollowUp?: FollowUpSlot;
+    replacementOffer?: FollowUpSlot;
+}
+
+export interface CertificateReview {
+    certificateId: number;
+    extractedHolderName?: string;
+    extractedOrganization?: string;
+    extractedCredentialId?: string;
+    extractedIssueDate?: string;
+    extractedExpiryDate?: string;
+    mismatches: string[];
+    adminApprovalRequired: boolean;
 }

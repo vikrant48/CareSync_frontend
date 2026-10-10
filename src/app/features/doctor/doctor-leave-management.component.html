@@ -1,11 +1,13 @@
 <app-doctor-layout>
-    <div class="max-w-[1400px] mx-auto p-3 sm:p-6 space-y-5 text-[var(--text)] font-sans selection:bg-[var(--accent)]/30 pb-16">
+    <div
+        class="max-w-[1400px] mx-auto p-3 sm:p-6 space-y-5 text-[var(--text)] font-sans selection:bg-[var(--accent)]/30 pb-16">
 
         <!-- Header Banner -->
         <div
             class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--accent-soft)] via-[var(--panel)] to-[var(--primary-soft)] border border-[var(--border)] p-5 sm:p-7 shadow-2xl">
             <!-- Ambient Backdrop Glow -->
-            <div class="absolute -top-16 -right-16 w-72 h-72 bg-[var(--accent)]/10 rounded-full blur-3xl pointer-events-none">
+            <div
+                class="absolute -top-16 -right-16 w-72 h-72 bg-[var(--accent)]/10 rounded-full blur-3xl pointer-events-none">
             </div>
 
             <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -65,7 +67,8 @@
                     <div>
                         <span class="text-xs font-bold text-[var(--muted)]">Approved</span>
                         <div class="flex items-baseline gap-2 mt-0.5">
-                            <span class="text-2xl font-black text-[var(--text)] tracking-tight">{{ getApprovedCount() }}</span>
+                            <span class="text-2xl font-black text-[var(--text)] tracking-tight">{{ getApprovedCount()
+                                }}</span>
                             <span class="text-[10px] text-[#10b981] font-medium">{{ getApprovedPercentage() }}% of
                                 total</span>
                         </div>
@@ -86,7 +89,8 @@
                     <div>
                         <span class="text-xs font-bold text-[var(--muted)]">Pending</span>
                         <div class="flex items-baseline gap-2 mt-0.5">
-                            <span class="text-2xl font-black text-[var(--text)] tracking-tight">{{ getPendingCount() }}</span>
+                            <span class="text-2xl font-black text-[var(--text)] tracking-tight">{{ getPendingCount()
+                                }}</span>
                             <span class="text-[10px] text-[#f59e0b] font-medium">{{ getPendingPercentage() }}% of
                                 total</span>
                         </div>
@@ -107,7 +111,8 @@
                     <div>
                         <span class="text-xs font-bold text-[var(--muted)]">Rejected</span>
                         <div class="flex items-baseline gap-2 mt-0.5">
-                            <span class="text-2xl font-black text-[var(--text)] tracking-tight">{{ getRejectedCount() }}</span>
+                            <span class="text-2xl font-black text-[var(--text)] tracking-tight">{{ getRejectedCount()
+                                }}</span>
                             <span class="text-[10px] text-[#ef4444] font-medium">{{ getRejectedPercentage() }}% of
                                 total</span>
                         </div>
@@ -122,7 +127,8 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
             <!-- Left Column: Apply for Leave Form (5 cols) -->
-            <div class="lg:col-span-5 bg-[var(--panel)] border border-[var(--border)] rounded-3xl p-5 sm:p-6 shadow-2xl space-y-5">
+            <div
+                class="lg:col-span-5 bg-[var(--panel)] border border-[var(--border)] rounded-3xl p-5 sm:p-6 shadow-2xl space-y-5">
                 <!-- Section Header -->
                 <div class="flex items-center gap-3">
                     <div
@@ -172,7 +178,8 @@
                         <div class="flex items-center justify-between">
                             <label class="block text-xs font-semibold text-[var(--muted)]">Reason <span
                                     class="text-[#ef4444]">*</span></label>
-                            <span class="text-[10px] text-[var(--muted)] font-medium">{{ form.reason.length }}/300</span>
+                            <span class="text-[10px] text-[var(--muted)] font-medium">{{ form.reason.length
+                                }}/300</span>
                         </div>
                         <textarea [(ngModel)]="form.reason" name="reason" rows="3" maxlength="300"
                             placeholder="Provide details about your leave request..."
@@ -197,7 +204,8 @@
             </div>
 
             <!-- Right Column: Leave History Table (7 cols) -->
-            <div class="lg:col-span-7 bg-[var(--panel)] border border-[var(--border)] rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4">
+            <div
+                class="lg:col-span-7 bg-[var(--panel)] border border-[var(--border)] rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4">
                 <!-- Section Header -->
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
@@ -207,7 +215,8 @@
                         </div>
                         <div>
                             <h2 class="text-base font-black text-[var(--text)] tracking-tight">Leave History</h2>
-                            <p class="text-[11px] text-[var(--muted)] font-medium">View and track all your leave requests</p>
+                            <p class="text-[11px] text-[var(--muted)] font-medium">View and track all your leave
+                                requests</p>
                         </div>
                     </div>
 
@@ -218,7 +227,8 @@
                 </div>
 
                 <!-- Loading State -->
-                <div *ngIf="loading" class="py-12 flex flex-col items-center justify-center text-[var(--muted)] space-y-2">
+                <div *ngIf="loading"
+                    class="py-12 flex flex-col items-center justify-center text-[var(--muted)] space-y-2">
                     <i class="fa-solid fa-circle-notch fa-spin text-3xl text-[var(--accent)]"></i>
                     <p class="text-xs font-medium">Loading leave records...</p>
                 </div>

@@ -10,17 +10,17 @@ import { DoctorNotificationComponent } from './doctor-notification.component';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { DoctorProfileService } from '../../core/services/doctor-profile.service';
-import { AppointmentService, DoctorAppointmentItem } from '../../core/services/appointment.service';
+import { AppointmentService, DoctorAppointmentItem, DoctorDashboardMetrics } from '../../core/services/appointment.service';
 import { PatientProfileService, PatientDto, MedicalHistoryItem, MedicalHistoryWithDoctorItem } from '../../core/services/patient-profile.service';
 import { DatePickerComponent } from '../../shared/date-picker.component';
 import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 import { DoctorDashboardScheduleComponent } from './doctor-dashboard-schedule.component';
 import { DoctorDashboardPatientsComponent } from './doctor-dashboard-patients.component';
 
-import { AnalyticsApiService, OverallAnalytics } from '../../core/services/analytics.service';
-import { ReportsApiService } from '../../core/services/reports.service';
 import { LeaveService, DoctorLeave } from '../../core/services/leave.service';
 import { ConfirmService } from '../../core/services/confirm.service';
+
+type DashboardTrend = { text: string; direction: 'up' | 'down' | 'flat' };
 
 @Component({
   selector: 'app-doctor-dashboard',
@@ -44,8 +44,6 @@ export class DoctorDashboardComponent implements OnInit {
   private apptApi = inject(AppointmentService);
   private patientApi = inject(PatientProfileService);
 
-  private analyticsApi = inject(AnalyticsApiService);
-  private reportsApi = inject(ReportsApiService);
   private leaveApi = inject(LeaveService);
   private confirm = inject(ConfirmService);
   public router = inject(Router);
@@ -58,6 +56,8 @@ export class DoctorDashboardComponent implements OnInit {
   documents: any[] = [];
 
   todayDateFormatted: string = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  insightRange: 'week' | 'month' = 'week';
+  loadingCalendar = true;
 
   // Appointments
   todayAppointments: DoctorAppointmentItem[] = [];
@@ -86,8 +86,9 @@ export class DoctorDashboardComponent implements OnInit {
   savingLeave = false;
   leaveError: string | null = null;
 
-  // Analytics state
-  overall: OverallAnalytics | null = null;
+  metrics: DoctorDashboardMetrics | null = null;
+  loadingMetrics = false;
+  metricsUnavailable = false;
 
   get isOnLeaveToday(): boolean {
     const today = this.todayISO();
@@ -109,6 +110,7 @@ export class DoctorDashboardComponent implements OnInit {
       condition: a.reason || '',
       lastVisit: a.appointmentDate || '',
       status: a.status || '',
+      isActive: a.patientActive !== false,
       avatar: a.patientProfileImageUrl || 'assets/default-profile.png',
       appointment: a
     }));
@@ -119,6 +121,94 @@ export class DoctorDashboardComponent implements OnInit {
       ?? (appointment as DoctorAppointmentItem & { patientAge?: number | string }).patientAge;
     if (raw == null || raw === '' || raw === '—') return null;
     return raw;
+  }
+
+  get greeting(): string {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good Morning,';
+    if (hour < 17) return 'Good Afternoon,';
+    return 'Good Evening,';
+  }
+
+  setInsightRange(value: string): void {
+    this.insightRange = value === 'month' ? 'month' : 'week';
+    this.cdr.markForCheck();
+  }
+
+  get consultationTotal(): number {
+    return this.consultationInsights.reduce((sum, item) => sum + item.count, 0);
+  }
+
+  get consultationInsights(): { label: string; count: number; percent: number; colorClass: string; dotClass: string; offset: number }[] {
+    const palette = [
+      { label: 'Follow-up', colorClass: 'text-[var(--accent)]', dotClass: 'bg-[var(--accent)]' },
+      { label: 'New Patient', colorClass: 'text-[var(--primary)]', dotClass: 'bg-[var(--primary)]' },
+      { label: 'Lab Review', colorClass: 'text-purple-500', dotClass: 'bg-purple-500' },
+      { label: 'Others', colorClass: 'text-[var(--muted)]', dotClass: 'bg-[var(--muted)]' },
+    ];
+    const counts = new Map(palette.map(item => [item.label, 0]));
+    const firstVisits = this.firstVisitByPatient();
+    for (const appointment of this.appointmentsInInsightRange()) {
+      const label = this.consultationKind(appointment, firstVisits);
+      counts.set(label, (counts.get(label) || 0) + 1);
+    }
+    const total = Array.from(counts.values()).reduce((sum, count) => sum + count, 0);
+    let offset = 0;
+    return palette.map(item => {
+      const count = counts.get(item.label) || 0;
+      const percent = total > 0 ? Math.round((count / total) * 100) : 0;
+      const segment = { ...item, count, percent, offset };
+      offset += percent;
+      return segment;
+    });
+  }
+
+  private appointmentsInInsightRange(): DoctorAppointmentItem[] {
+    const now = new Date();
+    const start = new Date(now);
+    if (this.insightRange === 'week') {
+      start.setDate(start.getDate() - start.getDay());
+    } else {
+      start.setDate(1);
+    }
+    start.setHours(0, 0, 0, 0);
+    const startKey = this.dateKey(start);
+    const endKey = this.dateKey(now);
+    return (this.calendarAppointments || []).filter(appointment => {
+      if (this.isCancelledStatus(appointment.status)) return false;
+      const day = this.appointmentDayKey(appointment.appointmentDate);
+      return !!day && day >= startKey && day <= endKey;
+    });
+  }
+
+  private firstVisitByPatient(): Map<number, string> {
+    const first = new Map<number, string>();
+    for (const appointment of this.calendarAppointments || []) {
+      if (this.isCancelledStatus(appointment.status) || appointment.patientId == null) continue;
+      const day = this.appointmentDayKey(appointment.appointmentDate);
+      if (!day) continue;
+      const current = first.get(appointment.patientId);
+      if (!current || day < current) first.set(appointment.patientId, day);
+    }
+    return first;
+  }
+
+  private consultationKind(appointment: DoctorAppointmentItem, firstVisits: Map<number, string>): string {
+    const reason = (appointment.reason || '').toLowerCase();
+    if (reason.includes('lab')) return 'Lab Review';
+    const day = this.appointmentDayKey(appointment.appointmentDate);
+    const earliest = firstVisits.get(appointment.patientId);
+    if (reason.includes('follow') || (earliest && day && day !== earliest)) return 'Follow-up';
+    if (earliest && day === earliest) return 'New Patient';
+    return 'Others';
+  }
+
+  private isCancelledStatus(status?: string): boolean {
+    return String(status || '').toUpperCase().includes('CANCEL');
+  }
+
+  private dateKey(date: Date): string {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
   }
 
   get calendarTitle(): string {
@@ -214,7 +304,7 @@ export class DoctorDashboardComponent implements OnInit {
       this.refreshToday();
       this.loadCalendarAppointments();
       this.refreshLeaves();
-      this.loadAnalytics();
+      this.loadDashboardMetrics();
     }
   }
 
@@ -260,13 +350,16 @@ export class DoctorDashboardComponent implements OnInit {
   }
 
   loadCalendarAppointments() {
+    this.loadingCalendar = true;
     this.apptApi.getDoctorAllAppointments().subscribe({
       next: (res) => {
         this.calendarAppointments = res || [];
+        this.loadingCalendar = false;
         this.cdr.markForCheck();
       },
       error: () => {
         this.calendarAppointments = [];
+        this.loadingCalendar = false;
         this.cdr.markForCheck();
       },
     });
@@ -286,18 +379,6 @@ export class DoctorDashboardComponent implements OnInit {
         this.cdr.markForCheck();
       },
     });
-  }
-
-  todayStats(): Record<'BOOKED' | 'SCHEDULED' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED', number> {
-    const stats = { BOOKED: 0, SCHEDULED: 0, CONFIRMED: 0, IN_PROGRESS: 0, COMPLETED: 0, CANCELLED: 0 } as Record<any, number>;
-    for (const a of this.todayAppointments || []) {
-      if (a.status === 'CANCELLED_BY_PATIENT' || a.status === 'CANCELLED_BY_DOCTOR' || a.status === 'CANCELLED') {
-        stats['CANCELLED']++;
-      } else if (stats[a.status] != null) {
-        stats[a.status]++;
-      }
-    }
-    return stats as any;
   }
 
   get nextAppointment(): DoctorAppointmentItem | null {
@@ -459,23 +540,102 @@ export class DoctorDashboardComponent implements OnInit {
     });
   }
 
-  loadAnalytics() {
-    if (this.doctorId == null) return;
-    const end = new Date().toISOString().slice(0, 10);
-    const start = this.isoDaysAgo(30);
-
-    this.analyticsApi.getOverallAnalytics(start, end).subscribe({
-      next: (o) => {
-        this.overall = o || null;
+  loadDashboardMetrics() {
+    this.loadingMetrics = true;
+    this.metricsUnavailable = false;
+    this.cdr.markForCheck();
+    this.apptApi.getDoctorDashboardMetrics().subscribe({
+      next: (metrics) => {
+        this.metrics = metrics;
+        this.loadingMetrics = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.metrics = null;
+        this.loadingMetrics = false;
+        this.metricsUnavailable = true;
         this.cdr.markForCheck();
       }
     });
   }
 
-  private isoDaysAgo(days: number) {
-    const d = new Date();
-    d.setDate(d.getDate() - days);
-    return d.toISOString().slice(0, 10);
+  appointmentTrend(): DashboardTrend {
+    if (this.loadingMetrics) return { text: '', direction: 'flat' };
+    return this.countTrend(this.metrics?.appointmentChangeFromYesterday, 'yesterday');
+  }
+
+  patientTrend(): DashboardTrend {
+    if (this.loadingMetrics) return { text: '', direction: 'flat' };
+    if (this.metricsUnavailable || !this.metrics) {
+      return { text: 'Not available', direction: 'flat' };
+    }
+    const percent = this.metrics.patientChangePercent;
+    if (percent == null) {
+      const added = this.metrics.newPatientsThisMonth ?? 0;
+      return added > 0
+        ? { text: `${added} new this month`, direction: 'up' }
+        : { text: 'No change this month', direction: 'flat' };
+    }
+    if (percent === 0) {
+      return { text: '0% this month', direction: 'flat' };
+    }
+    return {
+      text: `${this.formatMetric(Math.abs(percent))}% this month`,
+      direction: percent > 0 ? 'up' : 'down'
+    };
+  }
+
+  pendingReportTrend(): DashboardTrend {
+    if (this.loadingMetrics) return { text: '', direction: 'flat' };
+    return this.countTrend(this.metrics?.pendingReportChangeFromYesterday, 'yesterday');
+  }
+
+  satisfactionLabel(): string {
+    if (this.loadingMetrics) return '';
+    if (this.metricsUnavailable) return 'Not available';
+    if (this.metrics?.satisfactionRating == null) return 'No reviews yet';
+    return `${this.metrics.satisfactionRating.toFixed(1)} / 5`;
+  }
+
+  satisfactionTrend(): DashboardTrend {
+    if (this.loadingMetrics) return { text: '', direction: 'flat' };
+    if (this.metricsUnavailable || !this.metrics) {
+      return { text: 'Not available', direction: 'flat' };
+    }
+    const change = this.metrics.satisfactionChangeThisMonth;
+    if (change == null) {
+      return { text: 'Not enough reviews', direction: 'flat' };
+    }
+    if (change === 0) {
+      return { text: 'No change this month', direction: 'flat' };
+    }
+    return {
+      text: `${this.formatMetric(Math.abs(change))} this month`,
+      direction: change > 0 ? 'up' : 'down'
+    };
+  }
+
+  trendClass(direction: DashboardTrend['direction']): string {
+    if (direction === 'up') return 'text-emerald-700 dark:text-emerald-400';
+    if (direction === 'down') return 'text-amber-700 dark:text-amber-400';
+    return 'text-muted';
+  }
+
+  private countTrend(delta: number | null | undefined, period: string): DashboardTrend {
+    if (this.metricsUnavailable || delta == null) {
+      return { text: 'Not available', direction: 'flat' };
+    }
+    if (delta === 0) {
+      return { text: `Same as ${period}`, direction: 'flat' };
+    }
+    return {
+      text: `${Math.abs(delta)} from ${period}`,
+      direction: delta > 0 ? 'up' : 'down'
+    };
+  }
+
+  private formatMetric(value: number): string {
+    return Number.isInteger(value) ? String(value) : value.toFixed(1);
   }
 
   trackLeave(index: number, leave: { id?: number; startDate?: string }): number | string {

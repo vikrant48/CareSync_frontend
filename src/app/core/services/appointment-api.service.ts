@@ -12,7 +12,10 @@ import {
     SoapReportDto,
     AppointmentAnalyticsResponse,
     AppointmentStatusLogDto,
-    CompletionPreview
+    CompletionPreview,
+    AppointmentDetails,
+    PreVisitBrief,
+    AppointmentFollowThrough
 } from '../models/appointment.models';
 import { PatientAppointmentItem, DoctorAppointmentItem, SlotAvailabilityResponse, CreateAppointmentRequest } from './appointment.service';
 
@@ -84,6 +87,14 @@ export class AppointmentApiService {
         );
     }
 
+    getPreVisitBrief(appointmentId: number): Observable<PreVisitBrief> {
+        return this.http.get<PreVisitBrief>(`${this.baseUrl}/api/appointments/${appointmentId}/pre-visit-brief`);
+    }
+
+    getFollowThrough(appointmentId: number): Observable<AppointmentFollowThrough> {
+        return this.http.get<AppointmentFollowThrough>(`${this.baseUrl}/api/appointments/${appointmentId}/follow-through`);
+    }
+
     // --- Ambient AI Scribe & SOAP Report ---
     generateSoapDraft(appointmentId: number, liveTranscript?: string): Observable<SoapReportDto> {
         return this.http.post<SoapReportDto>(
@@ -95,6 +106,13 @@ export class AppointmentApiService {
     getSoapDraft(appointmentId: number): Observable<SoapReportDto> {
         return this.http.get<SoapReportDto>(
             `${this.baseUrl}/api/appointments/${appointmentId}/soap-draft`
+        );
+    }
+
+    saveSoapDraft(appointmentId: number, reportDto: SoapReportDto): Observable<SoapReportDto> {
+        return this.http.put<SoapReportDto>(
+            `${this.baseUrl}/api/appointments/${appointmentId}/soap-draft`,
+            reportDto
         );
     }
 
@@ -125,8 +143,8 @@ export class AppointmentApiService {
     }
 
     // --- Patient Queries ---
-    getAppointmentDetails(id: number): Observable<any> {
-        return this.http.get<any>(`${this.baseUrl}/api/appointments/${id}`);
+    getAppointmentDetails(id: number): Observable<AppointmentDetails> {
+        return this.http.get<AppointmentDetails>(`${this.baseUrl}/api/appointments/${id}/details`);
     }
 
     getMyAppointments(): Observable<PatientAppointmentItem[]> {

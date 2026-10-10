@@ -29,7 +29,13 @@
               <div class="w-8 h-8 rounded-full overflow-hidden border border-[var(--border)] bg-[var(--bg)] shrink-0">
                 <img [src]="p.avatar" class="w-full h-full object-cover" onerror="this.src='assets/default-profile.png'" />
               </div>
-              <span class="font-extrabold text-[var(--text)]">{{ p.name }}</span>
+              <div>
+                <span class="font-extrabold text-[var(--text)]">{{ p.name }}</span>
+                <span *ngIf="p.isActive === false"
+                      class="block w-fit mt-0.5 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-600 border border-rose-500/20">
+                  Inactive
+                </span>
+              </div>
             </div>
           </td>
           <td *ngIf="showAge" class="py-3 px-3 text-muted">{{ p.age }}</td>

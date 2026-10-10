@@ -112,17 +112,17 @@ import { ModalShellComponent } from './ui/modal-shell.component';
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700">
                 <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Chief Complaint</span>
-                <p class="text-xs font-semibold text-blue-300">{{ dictationResult()!.chiefComplaint || 'Not specified' }}</p>
+                <p class="text-xs font-semibold text-blue-300">{{ dictationResult()!.chiefComplaint || 'Not provided' }}</p>
               </div>
 
               <div class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700">
                 <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Diagnosis</span>
-                <p class="text-xs font-semibold text-indigo-300">{{ dictationResult()!.diagnosis || 'Under evaluation' }}</p>
+                <p class="text-xs font-semibold text-indigo-300">{{ dictationResult()!.diagnosis || 'Not provided' }}</p>
               </div>
 
               <div class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700">
                 <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Vitals / Follow-up</span>
-                <p class="text-xs font-semibold text-cyan-300">{{ dictationResult()!.vitals || dictationResult()!.followUp || 'Standard follow-up' }}</p>
+                <p class="text-xs font-semibold text-cyan-300">{{ dictationResult()!.vitals || dictationResult()!.followUp || 'Not provided' }}</p>
               </div>
             </div>
 
@@ -140,7 +140,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
                       S - Subjective
                     </span>
                   </div>
-                  <p class="text-xs leading-relaxed text-slate-300">{{ dictationResult()!.soapNote!.subjective || 'No subjective history provided.' }}</p>
+                  <p class="text-xs leading-relaxed text-slate-300">{{ dictationResult()!.soapNote!.subjective || 'Not provided' }}</p>
                 </div>
 
                 <!-- Objective -->
@@ -150,7 +150,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
                       O - Objective
                     </span>
                   </div>
-                  <p class="text-xs leading-relaxed text-slate-300">{{ dictationResult()!.soapNote!.objective || 'Vitals & clinical exam within normal limits.' }}</p>
+                  <p class="text-xs leading-relaxed text-slate-300">{{ dictationResult()!.soapNote!.objective || 'Not provided' }}</p>
                 </div>
 
                 <!-- Assessment -->
@@ -160,7 +160,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
                       A - Assessment
                     </span>
                   </div>
-                  <p class="text-xs leading-relaxed text-slate-300">{{ dictationResult()!.soapNote!.assessment || 'Clinical assessment pending.' }}</p>
+                  <p class="text-xs leading-relaxed text-slate-300">{{ dictationResult()!.soapNote!.assessment || 'Not provided' }}</p>
                 </div>
 
                 <!-- Plan -->
@@ -170,7 +170,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
                       P - Plan
                     </span>
                   </div>
-                  <p class="text-xs leading-relaxed text-slate-300">{{ dictationResult()!.soapNote!.plan || 'Follow-up as required.' }}</p>
+                  <p class="text-xs leading-relaxed text-slate-300">{{ dictationResult()!.soapNote!.plan || 'Not provided' }}</p>
                 </div>
               </div>
             </div>
@@ -402,7 +402,7 @@ Prescriptions: ${result.prescriptions?.map(p => `${p.name} ${p.dosage}`).join(',
     onConfirm() {
         const result = this.dictationResult();
         if (result) {
-            this.dictationComplete.emit(result);
+            this.dictationComplete.emit({ ...result, transcript: this.transcriptText() });
         }
         this.closeModal.emit();
     }

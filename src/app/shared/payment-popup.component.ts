@@ -456,7 +456,12 @@ export class PaymentPopupComponent implements OnInit, OnDestroy, OnChanges {
   @Input() paymentType?: 'APPOINTMENT' | 'CONSULTATION' | 'LAB_TEST';
   @Input() additionalInfo?: string;
 
-  @Input() appointmentBookingDetails?: { doctorId: number; appointmentDateTime: string; reason?: string };
+  @Input() appointmentBookingDetails?: {
+    doctorId: number;
+    appointmentDateTime: string;
+    reason?: string;
+    bookingSource?: 'MANUAL' | 'AI_ASSISTED' | 'EMERGENCY';
+  };
   @Input() labTestBookingDetails?: BookingRequest | null;
 
   @Output() paymentSuccess = new EventEmitter<PaymentDetails>();
@@ -649,6 +654,7 @@ export class PaymentPopupComponent implements OnInit, OnDestroy, OnChanges {
         doctorId: this.appointmentBookingDetails.doctorId,
         appointmentDateTime: this.appointmentBookingDetails.appointmentDateTime,
         reason: this.appointmentBookingDetails.reason,
+        bookingSource: this.appointmentBookingDetails.bookingSource,
         amount: this.amount,
         paymentMethod: paymentRequest.paymentMethod,
         upiId: paymentRequest.upiId,

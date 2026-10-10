@@ -24,6 +24,8 @@ export interface DoctorSuggestion {
     isVerified?: boolean;
     isOnLeave?: boolean;
     leaveMessage?: string;
+    recommendedDate?: string;
+    recommendedSlot?: string;
 }
 
 export interface AiBookingSuggestion {
@@ -108,6 +110,7 @@ export interface SoapNote {
 export interface ClinicalDictationResponse {
     success: boolean;
     error?: string;
+    transcript?: string;
     patientName?: string;
     chiefComplaint?: string;
     vitals?: string;
@@ -116,5 +119,17 @@ export interface ClinicalDictationResponse {
     labOrders?: string[];
     followUp?: string;
     soapNote?: SoapNote;
+}
+
+export interface AiIntakeDraftResponse {
+    chiefComplaint?: string;
+    symptoms?: string[];
+    duration?: string;
+    severity?: string;
+    currentMedications?: string;
+    allergies?: string;
+    redFlags?: string[];
+    hasEmergencyFlags: boolean;
+    emergencyMessage?: string;
 }
 

@@ -94,7 +94,7 @@ export class PdfService {
       dateDisplay = receiptData.paymentDate || 'N/A';
     }
 
-    const paidToDisplay = receiptData.paidTo || receiptData.recipientUpiId || receiptData.upiId || receiptData.merchantUpiId || 'CareSync Healthcare Services';
+    const paidToDisplay = receiptData.paidTo || receiptData.recipientUpiId || receiptData.upiId || receiptData.merchantUpiId || 'Not provided';
     const txnId = receiptData.transactionId;
     const paymentMethodDisplay = (receiptData.paymentMethod).toUpperCase();
 
@@ -223,7 +223,7 @@ export class PdfService {
     doc.text('Service:', 24, infoY);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(15, 23, 42);
-    doc.text(receiptData.description || 'Healthcare Consultation & Services', 60, infoY);
+    doc.text(receiptData.description || 'Not provided', 60, infoY);
     infoY += 8;
 
     // Row 3: Prescribed / Doctor
@@ -274,7 +274,7 @@ export class PdfService {
 
         doc.setTextColor(15, 23, 42);
         doc.text(test.testName, 22, y + 5.5);
-        const desc = test.description || 'Standard Test';
+        const desc = test.description || 'Not provided';
         doc.text(desc.substring(0, 35) + (desc.length > 35 ? '...' : ''), 85, y + 5.5);
         doc.text(test.price.toFixed(2), 160, y + 5.5);
         y += 8;
@@ -316,7 +316,7 @@ export class PdfService {
       const apptRows = [
         { label: 'Consulting Doctor', info: doctorDisplay },
         { label: 'Appointment Schedule', info: scheduleDisplay },
-        { label: 'Reason / Description', info: receiptData.reason || receiptData.description || 'Doctor Consultation' }
+        { label: 'Reason / Description', info: receiptData.reason || receiptData.description || 'Not provided' }
       ];
 
       doc.setFont('helvetica', 'normal');
@@ -421,13 +421,14 @@ export class PdfService {
     this.paymentService.getPaymentByBookingId(appointmentId).subscribe({
       next: (payment) => {
         const dateStr = payment.paymentCompletedAt || payment.createdAt || appointmentData?.appointmentDate || new Date().toISOString();
-        const amt = Number(payment.amount) > 0 ? Number(payment.amount) : Number(appointmentData?.consultationFees || appointmentData?.doctorConsultationFees || 500);
+        const recordedFee = Number(appointmentData?.consultationFees || appointmentData?.doctorConsultationFees || 0);
+        const amt = Number(payment.amount) > 0 ? Number(payment.amount) : recordedFee;
 
         const doctorName = appointmentData?.doctorName || payment.doctorName;
         const doctorSpec = appointmentData?.doctorSpecialization || payment.doctorSpecialization;
         const apptDate = appointmentData?.appointmentDate;
         const apptTime = appointmentData?.appointmentTime;
-        const reasonStr = appointmentData?.reason || payment.additionalInfo || payment.description || 'Doctor Consultation';
+        const reasonStr = appointmentData?.reason || payment.additionalInfo || payment.description || 'Not provided';
 
         const receiptData: PaymentReceiptData = {
           transactionId: payment.transactionId,
@@ -446,7 +447,7 @@ export class PdfService {
           bookingDate: apptDate || dateStr,
           paymentDate: dateStr,
           status: payment.paymentStatus || 'Completed',
-          description: `Doctor Appointment in (${doctorSpec || 'Consultation'})`,
+          description: doctorSpec ? `Doctor Appointment (${doctorSpec})` : 'Doctor Appointment',
           prescribedBy: doctorName ? (doctorName.startsWith('Dr.') ? doctorName : `Dr. ${doctorName}`) : undefined,
           upiId: payment.upiId
         };
@@ -511,11 +512,16 @@ export class PdfService {
     doc.setTextColor(30, 41, 59);
     doc.text(`Dr. ${data.doctorName}`, 16, y);
 
-    y += 6;
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(grayText[0], grayText[1], grayText[2]);
-    doc.text(`${data.doctorSpecialization || 'General Physician'} | ${data.doctorQualifications || 'MBBS'}`, 16, y);
+    const credentials = [data.doctorSpecialization, data.doctorQualifications]
+      .map(value => value?.trim())
+      .filter((value): value is string => !!value);
+    if (credentials.length) {
+      y += 6;
+      doc.text(credentials.join(' | '), 16, y);
+    }
 
     if (data.doctorContactInfo) {
       y += 5;
@@ -615,8 +621,8 @@ export class PdfService {
       const dosages = String(data.doses || '').split(',').map(s => s.trim()).filter(Boolean);
       medicinesList = medNames.map((name, idx) => ({
         name: name,
-        dosage: dosages[idx] || (dosages.length === 1 ? dosages[0] : 'As prescribed by physician'),
-        duration: 'As directed'
+        dosage: dosages[idx] || (dosages.length === 1 ? dosages[0] : undefined),
+        duration: undefined
       }));
     }
 
@@ -646,7 +652,8 @@ export class PdfService {
         }
 
         const splitMedName = doc.splitTextToSize(m.name, 75);
-        const dosageText = `${m.dosage || 'As directed'}${m.instructions ? ' (' + m.instructions + ')' : ''}`.trim();
+        const dosageParts = [m.dosage, m.duration, m.instructions].filter((part) => !!part);
+        const dosageText = dosageParts.length ? dosageParts.join(' · ') : 'Not provided';
         const splitDosage = doc.splitTextToSize(dosageText, 80);
 
         const rowHeight = Math.max(splitMedName.length, splitDosage.length) * 5.5 + 4;

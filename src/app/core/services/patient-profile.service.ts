@@ -28,6 +28,8 @@ export interface PatientDto {
   gender?: string;
   bloodGroup?: string;
   completionPercentage?: number;
+  createdAt?: string;
+  lastLogin?: string;
 }
 
 export interface MedicalHistoryItem {

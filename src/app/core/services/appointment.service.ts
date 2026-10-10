@@ -7,6 +7,7 @@ export interface CreateAppointmentRequest {
   appointmentDateTime: string; // ISO string: YYYY-MM-DDTHH:mm:ss
   reason?: string;
   transactionId?: string;
+  bookingSource?: 'MANUAL' | 'AI_ASSISTED' | 'EMERGENCY';
 }
 
 export interface PatientAppointmentItem {
@@ -25,6 +26,8 @@ export interface PatientAppointmentItem {
   statusChangedAt?: string;
   doctorIsVerified?: boolean;
   doctorProfileImageUrl?: string;
+  doctorActive?: boolean;
+  patientActive?: boolean;
   videoRoomId?: string;
   isActive?: boolean;
   consultationFees?: number;
@@ -49,10 +52,25 @@ export interface DoctorAppointmentItem {
   statusChangedBy?: string;
   statusChangedAt?: string;
   patientProfileImageUrl?: string;
+  doctorActive?: boolean;
+  patientActive?: boolean;
   videoRoomId?: string;
   isActive?: boolean;
   appointmentMedicalHistory?: any;
   medicalHistory?: any[];
+}
+
+export interface DoctorDashboardMetrics {
+  todayAppointments: number;
+  appointmentChangeFromYesterday: number;
+  totalPatients: number;
+  newPatientsThisMonth: number;
+  patientChangePercent?: number | null;
+  pendingReports: number;
+  pendingReportChangeFromYesterday: number;
+  satisfactionRating?: number | null;
+  reviewCount: number;
+  satisfactionChangeThisMonth?: number | null;
 }
 
 export interface SlotAvailabilityResponse {
@@ -82,6 +100,7 @@ export class AppointmentService {
     doctorId: number;
     appointmentDateTime: string;
     reason?: string;
+    bookingSource?: 'MANUAL' | 'AI_ASSISTED' | 'EMERGENCY';
     amount: number;
     paymentMethod: string;
     upiId?: string;
@@ -162,6 +181,10 @@ export class AppointmentService {
 
   getDoctorTodayAppointments() {
     return this.http.get<DoctorAppointmentItem[]>(`${this.baseUrl}/api/appointments/doctor/my-patients/today`);
+  }
+
+  getDoctorDashboardMetrics() {
+    return this.http.get<DoctorDashboardMetrics>(`${this.baseUrl}/api/appointments/doctor/dashboard-metrics`);
   }
 
   getDoctorUpcomingAppointments() {

@@ -190,9 +190,12 @@ export interface AppointmentCounts {
                     <i class="fa-solid fa-shield-halved text-emerald-700 dark:text-emerald-400 text-sm"></i>
                     <h2 class="text-base font-bold text-[var(--text)] tracking-tight">Account Status</h2>
                   </div>
-                  <span class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5">
-                    <i class="fa-solid fa-circle-check text-[10px]"></i>
-                    <span>Active(to be added)</span>
+                  <span class="border text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5"
+                        [ngClass]="patient.isActive === false
+                          ? 'bg-rose-500/10 text-rose-600 border-rose-500/20'
+                          : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'">
+                    <i class="fa-solid text-[10px]" [ngClass]="patient.isActive === false ? 'fa-circle-xmark' : 'fa-circle-check'"></i>
+                    <span>{{ accountStatus(patient) }}</span>
                   </span>
                 </div>
 
@@ -217,24 +220,27 @@ export interface AppointmentCounts {
 
                   <div class="flex items-center justify-between">
                     <span class="text-[var(--muted)]">Email Preference</span>
-                    <span class="font-medium text-[var(--text)]">{{ patient.email || 'shruti@gmail.com' }}</span>
+                    <span class="font-medium text-[var(--text)]">{{ patient.email || 'Not provided' }}</span>
                   </div>
 
                   <div class="flex items-center justify-between">
                     <span class="text-[var(--muted)]">Account Status</span>
-                    <span class="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
-                      Active(to be added)
+                    <span class="border text-[11px] font-bold px-2.5 py-0.5 rounded-full"
+                          [ngClass]="patient.isActive === false
+                            ? 'bg-rose-500/10 text-rose-600 border-rose-500/20'
+                            : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'">
+                      {{ accountStatus(patient) }}
                     </span>
                   </div>
 
                   <div class="flex items-center justify-between">
                     <span class="text-[var(--muted)]">Member Since</span>
-                    <span class="font-medium text-[var(--text)]">15 Jan 2024(to be added)</span>
+                    <span class="font-medium text-[var(--text)]">{{ formatDateTime(patient.createdAt, false) }}</span>
                   </div>
 
                   <div class="flex items-center justify-between">
                     <span class="text-[var(--muted)]">Last Login</span>
-                    <span class="font-medium text-[var(--text)]">04 Oct 2026, 10:24 AM(to be added)</span>
+                    <span class="font-medium text-[var(--text)]">{{ formatDateTime(patient.lastLogin, true) }}</span>
                   </div>
                 </div>
               </div>
@@ -351,16 +357,31 @@ export class PatientProfilePageComponent {
   }
 
   formatDateOfBirth(dob?: string | Date): string {
-    if (!dob) return 'Oct 12, 2010 (15 years)';
+    if (!dob) return 'Not provided';
     try {
       const d = new Date(dob);
       if (isNaN(d.getTime())) return String(dob);
       const dateFormatted = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      const age = new Date().getFullYear() - d.getFullYear();
+      const today = new Date();
+      let age = today.getFullYear() - d.getFullYear();
+      if (today.getMonth() < d.getMonth() || (today.getMonth() === d.getMonth() && today.getDate() < d.getDate())) age--;
       return `${dateFormatted} (${age} years)`;
     } catch {
       return String(dob);
     }
+  }
+
+  accountStatus(patient: PatientDto): string {
+    return patient.isActive === false ? 'Inactive' : 'Active';
+  }
+
+  formatDateTime(value?: string, includeTime = false): string {
+    if (!value) return 'Not available';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Not available';
+    return date.toLocaleString('en-IN', includeTime
+      ? { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }
+      : { day: '2-digit', month: 'short', year: 'numeric' });
   }
 
   onImageError() {

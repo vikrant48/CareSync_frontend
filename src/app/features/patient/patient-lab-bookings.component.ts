@@ -8,6 +8,8 @@ import { PdfService, PaymentReceiptData } from '../../core/services/pdf.service'
 import { PaymentService } from '../../core/services/payment.service';
 import { PaymentPopupComponent, PaymentDetails } from '../../shared/payment-popup.component';
 import { ToastService } from '../../core/services/toast.service';
+import { AiAssistantService } from '../../core/services/ai-assistant.service';
+import { VisionScanResponse } from '../../core/models/ai.models';
 import { ConfirmService } from '../../core/services/confirm.service';
 import { SkeletonComponent } from '../../shared/ui/skeleton.component';
 import { StatusBadgeComponent } from '../../shared/ui/status-badge.component';
@@ -30,6 +32,7 @@ export class PatientLabBookingsComponent implements OnInit {
   private paymentService = inject(PaymentService);
   private toast = inject(ToastService);
   private confirm = inject(ConfirmService);
+  private ai = inject(AiAssistantService);
 
   bookings = signal<BookingResponse[]>([]);
   isLoading = signal<boolean>(false);
@@ -81,6 +84,9 @@ export class PatientLabBookingsComponent implements OnInit {
   // File upload signals
   isUploading = signal<boolean>(false);
   uploadBookingId = signal<number | null>(null);
+  classifyingReport = signal<boolean>(false);
+  extractedReport = signal<VisionScanResponse | null>(null);
+  extractedBookingId = signal<number | null>(null);
 
   // Computed counts
   get totalCount(): number {
@@ -401,40 +407,58 @@ export class PatientLabBookingsComponent implements OnInit {
   onFileSelected(event: any, booking: BookingResponse) {
     const file = event.target.files[0];
     if (!file) return;
-
-    // Reset file input value so change event fires again for same file
     event.target.value = '';
-
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       this.toast.showError('File size exceeds 5MB limit');
       return;
     }
 
-    this.isUploading.set(true);
+    this.classifyingReport.set(true);
     this.uploadBookingId.set(booking.id);
+    this.extractedReport.set(null);
+    this.extractedBookingId.set(booking.id);
+    this.ai.scanMedicalDocument(file).subscribe({
+      next: scan => {
+        this.extractedReport.set(scan);
+        this.classifyingReport.set(false);
+        this.uploadLabReport(file, booking);
+      },
+      error: () => {
+        this.extractedReport.set({ success: false, error: 'The report was uploaded, but its fields could not be extracted.' });
+        this.classifyingReport.set(false);
+        this.uploadLabReport(file, booking);
+      }
+    });
+  }
 
+  private uploadLabReport(file: File, booking: BookingResponse) {
+    this.isUploading.set(true);
     const formData = new FormData();
     formData.append('file', file);
     formData.append('bookingId', booking.id.toString());
     formData.append('patientId', booking.patientId.toString());
     formData.append('description', `Lab Report for Booking #${booking.id}`);
-
     this.labTestService.uploadLabReport(formData).subscribe({
-      next: (response) => {
-        this.toast.showSuccess('Lab report uploaded successfully');
+      next: () => {
+        this.toast.showSuccess('Lab report uploaded. Review the extracted fields.');
         this.isUploading.set(false);
         this.uploadBookingId.set(null);
-        // Optionally reload bookings or update the specific booking
         this.loadBookings();
       },
       error: (error) => {
-        console.error('Error uploading report:', error);
         const errorMsg = typeof error.error === 'string' ? error.error : (error.error?.message || 'Failed to upload lab report');
         this.toast.showError(errorMsg);
         this.isUploading.set(false);
         this.uploadBookingId.set(null);
       }
     });
+  }
+
+  extractedFieldSummary(): string {
+    const scan = this.extractedReport();
+    if (!scan?.labResults?.length) return '';
+    return scan.labResults.map(item =>
+      [item.testName, item.resultValue, item.referenceRange, item.status].filter(Boolean).join(' · ')
+    ).join('\n');
   }
 }

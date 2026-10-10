@@ -23,8 +23,11 @@ export interface Doctor {
   experiences?: any[];
   educations?: any[];
   certificates?: any[];
-  languages?: string;
+  languages?: string | string[];
+  bio?: string;
   completionPercentage?: number;
+  createdAt?: string;
+  lastLogin?: string;
 }
 
 export interface SearchDoctorsParams {

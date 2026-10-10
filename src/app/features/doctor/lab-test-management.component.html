@@ -1,11 +1,13 @@
 <app-doctor-layout>
-  <div class="max-w-[1400px] mx-auto p-3 sm:p-6 space-y-5 text-[var(--text)] font-sans selection:bg-[var(--accent)]/30 pb-16">
+  <div
+    class="max-w-[1400px] mx-auto p-3 sm:p-6 space-y-5 text-[var(--text)] font-sans selection:bg-[var(--accent)]/30 pb-16">
 
     <!-- Hero Header Section -->
     <div
       class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[var(--accent-soft)] via-[var(--panel)] to-[var(--primary-soft)] border border-[var(--border)] p-5 sm:p-7 shadow-2xl">
       <!-- Ambient Backdrop Graphic -->
-      <div class="absolute -top-16 -right-16 w-72 h-72 bg-[var(--accent)]/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -top-16 -right-16 w-72 h-72 bg-[var(--accent)]/10 rounded-full blur-3xl pointer-events-none">
+      </div>
 
       <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
         <div class="space-y-2">
@@ -156,8 +158,10 @@
             <!-- Status Toggle Switch -->
             <button type="button" (click)="toggleTestStatus(test)"
               [class]="test.isActive ? 'text-[var(--accent)]' : 'text-[var(--muted)]'"
-              class="text-lg transition-all cursor-pointer" [attr.aria-label]="test.isActive ? 'Deactivate test' : 'Activate test'">
-              <i class="fa-solid" [class.fa-toggle-on]="test.isActive" [class.fa-toggle-off]="!test.isActive" aria-hidden="true"></i>
+              class="text-lg transition-all cursor-pointer"
+              [attr.aria-label]="test.isActive ? 'Deactivate test' : 'Activate test'">
+              <i class="fa-solid" [class.fa-toggle-on]="test.isActive" [class.fa-toggle-off]="!test.isActive"
+                aria-hidden="true"></i>
             </button>
           </div>
         </div>
@@ -209,8 +213,10 @@
 
             <button type="button" (click)="toggleTestStatus(test)"
               [class]="test.isActive ? 'text-[var(--accent)]' : 'text-[var(--muted)]'"
-              class="text-xl transition-all cursor-pointer" [attr.aria-label]="test.isActive ? 'Deactivate test' : 'Activate test'">
-              <i class="fa-solid" [class.fa-toggle-on]="test.isActive" [class.fa-toggle-off]="!test.isActive" aria-hidden="true"></i>
+              class="text-xl transition-all cursor-pointer"
+              [attr.aria-label]="test.isActive ? 'Deactivate test' : 'Activate test'">
+              <i class="fa-solid" [class.fa-toggle-on]="test.isActive" [class.fa-toggle-off]="!test.isActive"
+                aria-hidden="true"></i>
             </button>
           </div>
         </div>
@@ -222,65 +228,64 @@
 
   <app-modal-shell [open]="drawerOpen()" [title]="editingTest() ? 'Edit Lab Test' : 'New Lab Test'"
     subtitle="Add a new lab test to the catalog" titleId="lab-test-editor-title" icon="fa-solid fa-flask"
-    iconWrapClass="bg-[var(--accent-soft)] text-[var(--accent)]" maxWidthClass="max-w-md"
-    bodyClass="p-4 sm:p-5" footerClass="p-4 flex flex-col-reverse sm:flex-row sm:justify-end gap-2"
-    [hasFooter]="true" (close)="closeDrawer()">
-        <form id="lab-test-editor-form" [formGroup]="labTestForm" (ngSubmit)="onSubmit()" class="space-y-3.5">
-          <!-- Test Name Field -->
-          <div class="space-y-1">
-            <label class="block text-xs font-semibold text-[var(--muted)]">Test Name <span
-                class="text-[#ef4444]">*</span></label>
-            <div class="relative">
-              <i class="fa-solid fa-flask absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[var(--muted)]"></i>
-              <input type="text" formControlName="testName" placeholder="e.g. Complete Blood Count (CBC)"
-                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl pl-8 pr-3 py-2 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)] placeholder:text-[var(--muted)]">
-            </div>
-            <p *ngIf="labTestForm.get('testName')?.invalid && labTestForm.get('testName')?.touched"
-              class="text-[11px] text-[#ef4444] font-medium">Test name is required</p>
-          </div>
+    iconWrapClass="bg-[var(--accent-soft)] text-[var(--accent)]" maxWidthClass="max-w-md" bodyClass="p-4 sm:p-5"
+    footerClass="p-4 flex flex-col-reverse sm:flex-row sm:justify-end gap-2" [hasFooter]="true" (close)="closeDrawer()">
+    <form id="lab-test-editor-form" [formGroup]="labTestForm" (ngSubmit)="onSubmit()" class="space-y-3.5">
+      <!-- Test Name Field -->
+      <div class="space-y-1">
+        <label class="block text-xs font-semibold text-[var(--muted)]">Test Name <span
+            class="text-[#ef4444]">*</span></label>
+        <div class="relative">
+          <i class="fa-solid fa-flask absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[var(--muted)]"></i>
+          <input type="text" formControlName="testName" placeholder="e.g. Complete Blood Count (CBC)"
+            class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl pl-8 pr-3 py-2 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)] placeholder:text-[var(--muted)]">
+        </div>
+        <p *ngIf="labTestForm.get('testName')?.invalid && labTestForm.get('testName')?.touched"
+          class="text-[11px] text-[#ef4444] font-medium">Test name is required</p>
+      </div>
 
-          <!-- Price Field -->
-          <div class="space-y-1">
-            <label class="block text-xs font-semibold text-[var(--muted)]">Price (₹) <span
-                class="text-[#ef4444]">*</span></label>
-            <div class="relative">
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[var(--muted)]">₹</span>
-              <input type="number" formControlName="price" placeholder="Enter test price" step="0.01"
-                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl pl-8 pr-3 py-2 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)] placeholder:text-[var(--muted)]">
-            </div>
-            <p *ngIf="labTestForm.get('price')?.invalid && labTestForm.get('price')?.touched"
-              class="text-[11px] text-[#ef4444] font-medium">Valid price is required</p>
-          </div>
+      <!-- Price Field -->
+      <div class="space-y-1">
+        <label class="block text-xs font-semibold text-[var(--muted)]">Price (₹) <span
+            class="text-[#ef4444]">*</span></label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[var(--muted)]">₹</span>
+          <input type="number" formControlName="price" placeholder="Enter test price" step="0.01"
+            class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl pl-8 pr-3 py-2 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)] placeholder:text-[var(--muted)]">
+        </div>
+        <p *ngIf="labTestForm.get('price')?.invalid && labTestForm.get('price')?.touched"
+          class="text-[11px] text-[#ef4444] font-medium">Valid price is required</p>
+      </div>
 
-          <!-- Description Field -->
-          <div class="space-y-1">
-            <div class="flex justify-between items-center">
-              <label class="block text-xs font-semibold text-[var(--muted)]">Description</label>
-              <span class="text-[10px] text-[var(--muted)] font-medium">{{ (labTestForm.get('description')?.value ||
-                '').length }}/500</span>
-            </div>
-            <div class="relative">
-              <i class="fa-solid fa-file-lines absolute left-3 top-2.5 text-xs text-[var(--muted)]"></i>
-              <textarea formControlName="description" rows="2"
-                placeholder="Provide details about what this test covers, sample requirements, preparation instructions, etc."
-                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl pl-8 pr-3 py-2 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)] placeholder:text-[var(--muted)] resize-none"></textarea>
-            </div>
-          </div>
+      <!-- Description Field -->
+      <div class="space-y-1">
+        <div class="flex justify-between items-center">
+          <label class="block text-xs font-semibold text-[var(--muted)]">Description</label>
+          <span class="text-[10px] text-[var(--muted)] font-medium">{{ (labTestForm.get('description')?.value ||
+            '').length }}/500</span>
+        </div>
+        <div class="relative">
+          <i class="fa-solid fa-file-lines absolute left-3 top-2.5 text-xs text-[var(--muted)]"></i>
+          <textarea formControlName="description" rows="2"
+            placeholder="Provide details about what this test covers, sample requirements, preparation instructions, etc."
+            class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl pl-8 pr-3 py-2 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)] placeholder:text-[var(--muted)] resize-none"></textarea>
+        </div>
+      </div>
 
-          <!-- Active Status Toggle Container -->
-          <div class="bg-[var(--bg)] border border-[var(--bg)] rounded-xl p-3 flex items-center justify-between">
-            <div>
-              <h4 class="text-xs font-bold text-[var(--text)]">Active Status</h4>
-              <p class="text-[10px] text-[var(--muted)] mt-0.5 font-medium">Make this test available for selection</p>
-            </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" formControlName="isActive" class="sr-only peer">
-              <div
-                class="w-10 h-5.5 bg-[var(--bg)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:bg-[var(--accent)]">
-              </div>
-            </label>
+      <!-- Active Status Toggle Container -->
+      <div class="bg-[var(--bg)] border border-[var(--bg)] rounded-xl p-3 flex items-center justify-between">
+        <div>
+          <h4 class="text-xs font-bold text-[var(--text)]">Active Status</h4>
+          <p class="text-[10px] text-[var(--muted)] mt-0.5 font-medium">Make this test available for selection</p>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" formControlName="isActive" class="sr-only peer">
+          <div
+            class="w-10 h-5.5 bg-[var(--bg)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:bg-[var(--accent)]">
           </div>
-        </form>
+        </label>
+      </div>
+    </form>
     <button modalFooter type="button" (click)="closeDrawer()" [disabled]="isSubmitting()" class="btn-secondary">
       Cancel
     </button>

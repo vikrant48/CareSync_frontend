@@ -1,29 +1,29 @@
 <ng-template #appointmentPageContent>
-    <div class="min-h-screen bg-gray-950 text-gray-100 p-4 sm:p-6 lg:p-8 space-y-6">
+    <div class="min-h-screen bg-[var(--bg)] text-[var(--text)] p-4 sm:p-6 lg:p-8 space-y-6">
 
         <!-- Back Button & Page Title Bar -->
         <div class="flex items-center justify-between gap-4">
             <div class="flex items-center gap-3">
                 <button type="button" (click)="goBack()"
-                    class="w-9 h-9 rounded-xl bg-gray-900 border border-gray-800 hover:bg-gray-800 text-gray-300 hover:text-white flex items-center justify-center transition-all">
+                    class="w-9 h-9 rounded-xl bg-[var(--panel)] border border-[var(--border)] hover:bg-[var(--border)] text-[var(--text)] flex items-center justify-center transition-all">
                     <i class="fa-solid fa-arrow-left text-sm"></i>
                 </button>
-                <h1 class="text-xl sm:text-2xl font-black text-gray-100 tracking-tight">
+                <h1 class="text-xl sm:text-2xl font-black text-[var(--text)] tracking-tight">
                     Appointment Details
                 </h1>
             </div>
 
-            <div *ngIf="appointment" class="flex items-center gap-2 text-xs font-mono text-gray-500">
+            <div *ngIf="appointment" class="flex items-center gap-2 text-xs font-mono text-[var(--muted)]">
                 <i class="fa-solid fa-hashtag text-cyan-400"></i>
-                <span>APT-{{ appointment.appointmentId || appointment.id }}</span>
+                <span>APT-{{ appointment.appointmentId }}</span>
             </div>
         </div>
 
         <!-- Loading State -->
         <div *ngIf="loading" class="space-y-6 animate-pulse">
-            <div class="h-32 bg-gray-900 rounded-2xl border border-gray-800"></div>
-            <div class="h-24 bg-gray-900 rounded-2xl border border-gray-800"></div>
-            <div class="h-64 bg-gray-900 rounded-2xl border border-gray-800"></div>
+            <div class="h-32 bg-[var(--panel)] rounded-2xl border border-[var(--border)]"></div>
+            <div class="h-24 bg-[var(--panel)] rounded-2xl border border-[var(--border)]"></div>
+            <div class="h-64 bg-[var(--panel)] rounded-2xl border border-[var(--border)]"></div>
         </div>
 
         <!-- Error State -->
@@ -34,7 +34,7 @@
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
             <h3 class="text-base font-bold text-rose-400">Unable to Load Appointment Details</h3>
-            <p class="text-xs text-gray-400 max-w-md mx-auto">{{ errorMsg }}</p>
+            <p class="text-xs text-[var(--muted)] max-w-md mx-auto">{{ errorMsg }}</p>
             <button type="button" (click)="loadAppointmentDetails()"
                 class="px-5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition-all">
                 <i class="fa-solid fa-rotate-right mr-1.5"></i> Retry
@@ -47,17 +47,158 @@
             <!-- Section 1: Fixed Header Component -->
             <app-appointment-header [appointment]="appointment" [viewerRole]="viewerRole"></app-appointment-header>
 
+            <section *ngIf="viewerRole === 'PATIENT' && hasFollowThrough()"
+                class="rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-indigo-500/10 to-emerald-500/10 p-5 space-y-4">
+                <div>
+                    <h2 class="text-sm font-black text-[var(--text)] flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-indigo-400"></i>
+                        After your visit
+                    </h2>
+                    <p class="mt-1 text-[11px] text-[var(--muted)]">AI drafts the summary and next option. You confirm
+                        payment
+                        and feedback.</p>
+                </div>
+                <pre *ngIf="followThrough?.plainLanguageSummary"
+                    class="whitespace-pre-wrap font-sans text-xs leading-relaxed text-[var(--text)]">{{ followThrough?.plainLanguageSummary }}</pre>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div *ngIf="followThrough?.suggestedFollowUp"
+                        class="rounded-xl border border-[var(--border)] bg-[var(--panel)] p-3 space-y-2">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">Suggested
+                            follow-up
+                        </div>
+                        <div class="text-sm font-bold text-[var(--text)]">{{
+                            followThrough?.suggestedFollowUp?.doctorName }}
+                        </div>
+                        <div class="text-xs text-[var(--muted)]">{{ followThrough?.suggestedFollowUp?.date }} at {{
+                            followThrough?.suggestedFollowUp?.slot }}</div>
+                        <button type="button" (click)="openFollowUpPayment(followThrough!.suggestedFollowUp!)"
+                            class="btn-primary min-h-[40px]">Confirm follow-up and pay</button>
+                    </div>
+                    <div *ngIf="followThrough?.replacementOffer"
+                        class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 space-y-2">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-amber-500 dark:text-amber-300">
+                            Replacement visit
+                        </div>
+                        <div class="text-xs text-[var(--text)]">{{ followThrough?.replacementOffer?.reason }}</div>
+                        <div class="text-sm font-bold text-[var(--text)]">{{ followThrough?.replacementOffer?.doctorName
+                            }}
+                        </div>
+                        <div class="text-xs text-[var(--muted)]">{{ followThrough?.replacementOffer?.specialization }} ·
+                            {{
+                            followThrough?.replacementOffer?.date }} at {{ followThrough?.replacementOffer?.slot }}
+                        </div>
+                        <button type="button" (click)="openFollowUpPayment(followThrough!.replacementOffer!)"
+                            class="btn-primary min-h-[40px]">Book this doctor</button>
+                    </div>
+                </div>
+                <button *ngIf="followThrough?.feedbackRequested" type="button" (click)="requestFeedback()"
+                    class="btn-secondary min-h-[40px]">
+                    <i class="fa-solid fa-star"></i> Share feedback for this visit
+                </button>
+            </section>
+
+            <section *ngIf="viewerRole === 'DOCTOR'"
+                class="rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-cyan-500/10 to-indigo-500/10 transition-all duration-300"
+                [ngClass]="(isPreVisitBriefExpanded && (preVisitBriefLoading || preVisitBriefLoaded)) ? 'p-5 space-y-4' : 'px-5 py-3.5'">
+                <!-- Header with Title, Actions, and Expand/Shrink Toggle -->
+                <div class="flex items-center justify-between gap-3 flex-wrap">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div
+                            class="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-500 dark:text-cyan-400 flex items-center justify-center text-sm shrink-0">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <h2 class="text-sm font-black text-[var(--text)] flex items-center gap-2 truncate">
+                                AI Pre-Visit Brief
+                            </h2>
+                            <p class="text-[11px] text-[var(--muted)] truncate">
+                                Prior visits, current intake medicines and allergies.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 shrink-0">
+                        <!-- Generate Brief Button (when not loaded) -->
+                        <button *ngIf="!preVisitBriefLoaded" type="button" (click)="loadPreVisitBrief()"
+                            [disabled]="preVisitBriefLoading"
+                            class="px-3.5 py-1.5 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid"
+                                [ngClass]="preVisitBriefLoading ? 'fa-spinner fa-spin' : 'fa-wand-magic-sparkles'"></i>
+                            <span>{{ preVisitBriefLoading ? 'Generating…' : 'Generate Brief' }}</span>
+                        </button>
+
+                        <!-- Refresh Brief Button (when already loaded) -->
+                        <button *ngIf="preVisitBriefLoaded" type="button" (click)="loadPreVisitBrief()"
+                            [disabled]="preVisitBriefLoading"
+                            class="px-2.5 py-1.5 bg-[var(--panel)] hover:bg-[var(--border)] border border-[var(--border)] text-[var(--text)] text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                            title="Regenerate / Refresh brief">
+                            <i class="fa-solid fa-rotate-right text-cyan-500"
+                                [class.fa-spin]="preVisitBriefLoading"></i>
+                            <span class="hidden sm:inline">Refresh</span>
+                        </button>
+
+                        <!-- Status badge -->
+                        <span *ngIf="preVisitBriefLoaded"
+                            class="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[9px] font-bold uppercase text-amber-500 dark:text-amber-300">
+                            Verify in chart
+                        </span>
+
+                        <!-- Expand / Shrink (Collapse) Icon Button -->
+                        <button *ngIf="preVisitBriefLoaded" type="button" (click)="togglePreVisitBrief()"
+                            class="w-8 h-8 rounded-xl bg-[var(--panel)] border border-[var(--border)] hover:bg-[var(--border)] text-[var(--text)] flex items-center justify-center transition-all cursor-pointer shadow-sm"
+                            [title]="isPreVisitBriefExpanded ? 'Shrink / Hide Data' : 'Expand / Show Data'"
+                            [attr.aria-expanded]="isPreVisitBriefExpanded">
+                            <i class="fa-solid text-xs transition-transform duration-200"
+                                [ngClass]="isPreVisitBriefExpanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Collapsible Content (Data hidden when shrunk) -->
+                <div *ngIf="isPreVisitBriefExpanded && (preVisitBriefLoading || preVisitBriefLoaded)"
+                    class="space-y-4 pt-1 animate-fade-in">
+                    <!-- Loading State -->
+                    <div *ngIf="preVisitBriefLoading" class="text-xs text-[var(--muted)] flex items-center gap-2 py-2">
+                        <i class="fa-solid fa-spinner fa-spin text-cyan-500"></i>
+                        <span>Analyzing clinical history and preparing brief…</span>
+                    </div>
+
+                    <!-- Loaded Content -->
+                    <ng-container *ngIf="!preVisitBriefLoading && preVisitBriefLoaded">
+                        <pre
+                            class="whitespace-pre-wrap font-sans text-xs leading-relaxed text-[var(--text)] bg-[var(--panel)]/40 p-3.5 rounded-xl border border-[var(--border)]">{{ preVisitBrief }}</pre>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div class="rounded-xl border border-[var(--border)] bg-[var(--panel)] p-3">
+                                <div class="text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">
+                                    Patient-reported
+                                    medicines</div>
+                                <div class="mt-1 text-xs text-[var(--text)]">{{ briefMedications || 'Not provided' }}
+                                </div>
+                            </div>
+                            <div class="rounded-xl border border-[var(--border)] bg-[var(--panel)] p-3">
+                                <div class="text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">
+                                    Patient-reported
+                                    allergies</div>
+                                <div class="mt-1 text-xs text-[var(--text)]">{{ briefAllergies || 'Not provided' }}
+                                </div>
+                            </div>
+                        </div>
+                    </ng-container>
+                </div>
+            </section>
+
             <!-- Section 2: 7-Stage Pipeline Stepper Component -->
-            <app-status-stepper [currentStatus]="appointment.status"></app-status-stepper>
+            <app-status-stepper class="block mt-4" [currentStatus]="appointment.status"></app-status-stepper>
 
             <!-- Section 3: Navigation Tabs (Overview, Process, Medical History) -->
             <div class="space-y-6">
-                <div class="flex items-center gap-2 border-b border-gray-800 overflow-x-auto pb-1 scrollbar-thin">
+                <div
+                    class="flex items-center gap-2 border-b border-[var(--border)] overflow-x-auto pb-1 scrollbar-thin">
                     <button type="button" (click)="activeTab = 'OVERVIEW'"
                         class="px-5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 relative shrink-0"
                         [ngClass]="{
                   'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30': activeTab === 'OVERVIEW',
-                  'text-gray-400 hover:text-gray-200 hover:bg-gray-900': activeTab !== 'OVERVIEW'
+                  'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--panel)]': activeTab !== 'OVERVIEW'
                 }">
                         <i class="fa-solid fa-circle-info"></i>
                         <span>Overview</span>
@@ -67,7 +208,7 @@
                         class="px-5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 relative shrink-0"
                         [ngClass]="{
                   'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30': activeTab === 'PROCESS',
-                  'text-gray-400 hover:text-gray-200 hover:bg-gray-900': activeTab !== 'PROCESS'
+                  'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--panel)]': activeTab !== 'PROCESS'
                 }">
                         <i class="fa-solid fa-list-check"></i>
                         <span>Process</span>
@@ -77,7 +218,7 @@
                         class="px-5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 relative shrink-0"
                         [ngClass]="{
                   'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30': activeTab === 'MEDICAL_HISTORY',
-                  'text-gray-400 hover:text-gray-200 hover:bg-gray-900': activeTab !== 'MEDICAL_HISTORY'
+                  'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--panel)]': activeTab !== 'MEDICAL_HISTORY'
                 }">
                         <i class="fa-solid fa-clock-rotate-left"></i>
                         <span>Medical History</span>
@@ -118,7 +259,7 @@
     <!-- 2. AI SOAP Report Editor Modal (Doctor) -->
     <app-soap-report-editor *ngIf="showSoapEditorModal" [isOpen]="showSoapEditorModal"
         [appointmentId]="selectedSoapAppointment?.appointmentId || selectedSoapAppointment?.id"
-        (close)="showSoapEditorModal = false" (reportSigned)="onSoapSaved()">
+        (close)="showSoapEditorModal = false" (soapSaved)="onSoapSaved()">
     </app-soap-report-editor>
 
     <!-- 3. Medical Record Form Modal (Doctor) -->
@@ -134,24 +275,31 @@
 
     <!-- 5. In-Consultation Chat Modal (Both) -->
     <app-shared-chat-modal *ngIf="showChatModal" [isOpen]="showChatModal"
-        [appointmentId]="appointment?.appointmentId || appointment?.id"
-        [participantName]="viewerRole === 'PATIENT' ? appointment?.doctorName : appointment?.patientName"
-        [participantImage]="viewerRole === 'PATIENT' ? appointment?.doctorProfileImageUrl : appointment?.patientProfileImageUrl"
+        [appointmentId]="appointment?.appointmentId ?? null"
+        [participantName]="(viewerRole === 'PATIENT' ? appointment?.doctorName : appointment?.patientName) || null"
+        [participantImage]="(viewerRole === 'PATIENT' ? appointment?.doctorProfileImageUrl : appointment?.patientProfileImageUrl) || null"
         (close)="showChatModal = false">
     </app-shared-chat-modal>
 
     <!-- 6. Stage 7 Visit Completion Preview Modal (Doctor) -->
     <app-visit-completion-preview-modal *ngIf="showCompletionPreviewModal" [isOpen]="showCompletionPreviewModal"
-        [appointmentId]="appointment?.appointmentId || appointment?.id" [previewData]="completionPreviewData"
+        [appointmentId]="appointment?.appointmentId ?? 0" [previewData]="completionPreviewData"
         (close)="showCompletionPreviewModal = false" (proceedToSign)="onProceedToSignFromPreview()"
         (backToEdit)="onBackToEditFromPreview()">
     </app-visit-completion-preview-modal>
 
     <!-- 7. Stage 7 E-Sign Confirmation Modal (Doctor) -->
     <app-esign-confirmation-modal *ngIf="showEsignModal" [isOpen]="showEsignModal"
-        [appointmentId]="appointment?.appointmentId || appointment?.id" [doctorName]="appointment?.doctorName || ''"
+        [appointmentId]="appointment?.appointmentId ?? 0" [doctorName]="appointment?.doctorName || ''"
         (close)="showEsignModal = false" (signedSuccess)="onESignSignedSuccess()">
     </app-esign-confirmation-modal>
+
+    <app-payment-popup [isVisible]="followUpPaymentOpen" [amount]="selectedFollowUp?.consultationFee || 0"
+        [title]="'Confirm suggested visit'" [patientId]="appointment?.patientId || 0"
+        [appointmentBookingDetails]="followUpBookingDetails()" [paymentType]="'APPOINTMENT'"
+        [additionalInfo]="selectedFollowUp?.reason || ''" (paymentSuccess)="onFollowUpPaid($event)"
+        (paymentCancel)="followUpPaymentOpen = false" (paymentError)="followUpPaymentOpen = false">
+    </app-payment-popup>
 </ng-template>
 
 <!-- Role-Based Sidebar & Navigation Layout -->

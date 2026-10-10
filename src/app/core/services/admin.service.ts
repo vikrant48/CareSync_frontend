@@ -85,6 +85,13 @@ export class AdminService {
     );
   }
 
+  reviewCertificate(doctorId: number | string, certificateId: number | string) {
+    return this.http.post<import('../models/appointment.models').CertificateReview>(
+      `${this.baseUrl}/api/admin/doctors/${doctorId}/certificates/${certificateId}/review`,
+      {}
+    );
+  }
+
   getBlockedIPs() {
     return this.http.get<BlockedIP[]>(`${this.baseUrl}/api/admin/blocked-ips`);
   }

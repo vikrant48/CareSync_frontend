@@ -221,11 +221,12 @@ export class DoctorPublicProfileComponent {
   getAppointmentInfo(): string {
     if (!this.doctor) return '';
     const doctorName = this.formatDoctorName(this.doctor);
-    const specialization = this.doctor.specialization || 'General';
+    const specialization = (this.doctor.specialization || '').trim();
     const date = this.selectedDate ? new Date(this.selectedDate).toLocaleDateString() : '';
     const slot = this.selectedSlot || '';
+    const specialtyPart = specialization ? ` (${specialization})` : '';
 
-    return `${doctorName} (${specialization}) - ${date} ${slot}`.trim();
+    return `${doctorName}${specialtyPart} - ${date} ${slot}`.trim();
   }
 
   onProceedToPayment(evt: { date: string; slot: string; reason: string }) {

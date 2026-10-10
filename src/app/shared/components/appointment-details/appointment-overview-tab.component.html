@@ -1,150 +1,187 @@
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
-    <!-- LEFT: Doctor Details (for Patient) OR Patient Details (for Doctor) -->
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-xl space-y-5 flex flex-col justify-between">
+<div *ngIf="appointment as details" class="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
+    <div
+        class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-6 shadow-xl space-y-5 flex flex-col justify-between">
         <div>
-            <div class="flex items-center gap-3 pb-4 border-b border-gray-800/80">
+            <div class="flex items-center gap-3 pb-4 border-b border-[var(--border)]">
                 <div
-                    class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center font-bold">
+                    class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center font-bold">
                     <i [class]="viewerRole === 'PATIENT' ? 'fa-solid fa-user-doctor' : 'fa-solid fa-id-card'"></i>
                 </div>
-                <h3 class="text-base font-bold text-gray-100">
+                <h3 class="text-base font-bold text-[var(--text)]">
                     {{ viewerRole === 'PATIENT' ? 'Doctor Details' : 'Patient Details' }}
                 </h3>
             </div>
 
-            <!-- Content Grid -->
             <div class="space-y-4 pt-4 text-xs sm:text-sm">
                 <div class="grid grid-cols-3 gap-2">
-                    <span class="text-gray-400 font-medium">Name</span>
-                    <span class="col-span-2 font-bold text-gray-200">{{ otherPersonName }}</span>
+                    <span class="text-[var(--muted)] font-medium">Name</span>
+                    <span class="col-span-2 font-bold text-[var(--text)]">{{ otherPersonName(details) }}</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <span class="text-[var(--muted)] font-medium">Account Status</span>
+                    <span class="col-span-2 font-bold"
+                        [class.text-rose-600]="viewerRole === 'PATIENT' ? details.doctorActive === false : details.patientActive === false"
+                        [class.dark:text-rose-400]="viewerRole === 'PATIENT' ? details.doctorActive === false : details.patientActive === false"
+                        [class.text-emerald-600]="viewerRole === 'PATIENT' ? details.doctorActive !== false : details.patientActive !== false"
+                        [class.dark:text-emerald-400]="viewerRole === 'PATIENT' ? details.doctorActive !== false : details.patientActive !== false">
+                        {{ (viewerRole === 'PATIENT' ? details.doctorActive : details.patientActive) === false ?
+                        'Inactive' : 'Active' }}
+                    </span>
                 </div>
 
                 <ng-container *ngIf="viewerRole === 'PATIENT'">
                     <div class="grid grid-cols-3 gap-2">
-                        <span class="text-gray-400 font-medium">Specialization</span>
-                        <span class="col-span-2 font-semibold text-cyan-400">{{ appointment?.doctorSpecialization ||
-                            'Cardiology' }}</span>
+                        <span class="text-[var(--muted)] font-medium">Specialization</span>
+                        <span class="col-span-2 font-semibold text-cyan-600 dark:text-cyan-400">{{
+                            displayValue(details.doctorSpecialization) }}</span>
                     </div>
                     <div class="grid grid-cols-3 gap-2">
-                        <span class="text-gray-400 font-medium">Experience</span>
-                        <span class="col-span-2 text-gray-300">12+ years</span>
+                        <span class="text-[var(--muted)] font-medium">Experience</span>
+                        <span class="col-span-2 text-[var(--text)]">{{ experienceLabel(details) }}</span>
                     </div>
                     <div class="grid grid-cols-3 gap-2">
-                        <span class="text-gray-400 font-medium">Education</span>
-                        <span class="col-span-2 text-gray-300">MBBS, MD (Medicine), DM (Cardiology)</span>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2">
-                        <span class="text-gray-400 font-medium">Languages</span>
-                        <div class="col-span-2 flex items-center gap-2">
-                            <span
-                                class="px-2 py-0.5 rounded-lg bg-gray-800 border border-gray-700 text-[11px]">English</span>
-                            <span
-                                class="px-2 py-0.5 rounded-lg bg-gray-800 border border-gray-700 text-[11px]">Hindi</span>
+                        <span class="text-[var(--muted)] font-medium">Education</span>
+                        <div class="col-span-2 text-[var(--text)] space-y-1"
+                            *ngIf="educationLines(details).length; else educationMissing">
+                            <p *ngFor="let education of educationLines(details)">{{ education }}</p>
                         </div>
+                        <ng-template #educationMissing>
+                            <span class="col-span-2 text-[var(--muted)]">Not provided</span>
+                        </ng-template>
                     </div>
                     <div class="grid grid-cols-3 gap-2">
-                        <span class="text-gray-400 font-medium">Consultation Fee</span>
-                        <span class="col-span-2 font-bold text-emerald-400">₹800</span>
+                        <span class="text-[var(--muted)] font-medium">Languages</span>
+                        <div class="col-span-2 flex flex-wrap items-center gap-2"
+                            *ngIf="languages(details).length; else languagesMissing">
+                            <span *ngFor="let language of languages(details)"
+                                class="px-2 py-0.5 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[11px] text-[var(--text)]">{{
+                                language }}</span>
+                        </div>
+                        <ng-template #languagesMissing>
+                            <span class="col-span-2 text-[var(--muted)]">Not provided</span>
+                        </ng-template>
                     </div>
                     <div class="grid grid-cols-3 gap-2">
-                        <span class="text-gray-400 font-medium">Rating</span>
-                        <span class="col-span-2 text-amber-400 font-bold flex items-center gap-1">
-                            <i class="fa-solid fa-star text-xs"></i> 4.8 <span class="text-gray-500 font-normal">(532
-                                reviews)</span>
+                        <span class="text-[var(--muted)] font-medium">Consultation Fee</span>
+                        <span class="col-span-2 font-bold text-emerald-600 dark:text-emerald-400"
+                            *ngIf="details.consultationFees != null; else feeMissing">
+                            {{ details.consultationFees | currency:'INR':'symbol':'1.0-0' }}
                         </span>
+                        <ng-template #feeMissing>
+                            <span class="col-span-2 text-[var(--muted)]">Not provided</span>
+                        </ng-template>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <span class="text-[var(--muted)] font-medium">Rating</span>
+                        <span class="col-span-2 text-amber-500 dark:text-amber-400 font-bold flex items-center gap-1"
+                            *ngIf="hasReviews(details); else ratingMissing">
+                            <i class="fa-solid fa-star text-xs"></i>
+                            {{ details.doctorAverageRating }}
+                            <span class="text-[var(--muted)] font-normal">({{ details.doctorReviewCount }} {{
+                                details.doctorReviewCount === 1 ? 'review' : 'reviews' }})</span>
+                        </span>
+                        <ng-template #ratingMissing>
+                            <span class="col-span-2 text-[var(--muted)] font-normal">No reviews yet</span>
+                        </ng-template>
                     </div>
                 </ng-container>
 
                 <ng-container *ngIf="viewerRole === 'DOCTOR'">
                     <div class="grid grid-cols-3 gap-2">
-                        <span class="text-gray-400 font-medium">Mobile Number</span>
-                        <span class="col-span-2 text-gray-200">{{ appointment?.patientMobile || '+91 98765 43210'
+                        <span class="text-[var(--muted)] font-medium">Mobile Number</span>
+                        <span class="col-span-2 text-[var(--text)]">{{ displayValue(details.patientContactInfo)
                             }}</span>
                     </div>
                     <div class="grid grid-cols-3 gap-2">
-                        <span class="text-gray-400 font-medium">Email Address</span>
-                        <span class="col-span-2 text-gray-200 truncate">{{ appointment?.patientEmail ||
-                            'patient@caresync.com' }}</span>
+                        <span class="text-[var(--muted)] font-medium">Email Address</span>
+                        <span class="col-span-2 text-[var(--text)] truncate">{{ displayValue(details.patientEmail)
+                            }}</span>
                     </div>
                     <div class="grid grid-cols-3 gap-2">
-                        <span class="text-gray-400 font-medium">Blood Group</span>
-                        <span class="col-span-2 text-rose-400 font-bold">O+</span>
+                        <span class="text-[var(--muted)] font-medium">Blood Group</span>
+                        <span class="col-span-2 text-rose-600 dark:text-rose-400 font-bold">{{
+                            displayValue(details.patientBloodGroup) }}</span>
                     </div>
                     <div class="grid grid-cols-3 gap-2">
-                        <span class="text-gray-400 font-medium">Age / Gender</span>
-                        <span class="col-span-2 text-gray-300">28 Yrs / Female</span>
+                        <span class="text-[var(--muted)] font-medium">Age / Gender</span>
+                        <span class="col-span-2 text-[var(--text)]">{{ demographicsLabel(details) }}</span>
                     </div>
                 </ng-container>
-
             </div>
         </div>
     </div>
 
-    <!-- RIGHT: Appointment Info Card & Clinic Location Card -->
     <div class="space-y-6">
-        <!-- Appointment Info Card -->
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-xl space-y-4">
-            <div class="flex items-center gap-3 pb-3 border-b border-gray-800/80">
+        <div class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-6 shadow-xl space-y-4">
+            <div class="flex items-center gap-3 pb-3 border-b border-[var(--border)]">
                 <div
-                    class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-bold">
+                    class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
                     <i class="fa-solid fa-calendar-check"></i>
                 </div>
-                <h3 class="text-base font-bold text-gray-100">Appointment Info</h3>
+                <h3 class="text-base font-bold text-[var(--text)]">Appointment Info</h3>
             </div>
 
             <div class="space-y-3 text-xs sm:text-sm">
                 <div class="flex items-center justify-between">
-                    <span class="text-gray-400">Appointment ID</span>
-                    <span class="font-mono font-bold text-cyan-400">APT-{{ appointment?.appointmentId || appointment?.id
-                        || '2026-0927' }}</span>
+                    <span class="text-[var(--muted)]">Appointment ID</span>
+                    <span class="font-mono font-bold text-cyan-600 dark:text-cyan-400">APT-{{ details.appointmentId
+                        }}</span>
                 </div>
                 <div class="flex items-center justify-between">
-                    <span class="text-gray-400">Date</span>
-                    <span class="font-medium text-gray-200">{{ appointment?.appointmentDate | date:'fullDate' }}</span>
+                    <span class="text-[var(--muted)]">Date</span>
+                    <span class="font-medium text-[var(--text)]">{{ details.appointmentDate ? (details.appointmentDate |
+                        date:'fullDate') : 'Not provided' }}</span>
                 </div>
                 <div class="flex items-center justify-between">
-                    <span class="text-gray-400">Time Slot</span>
-                    <span class="font-mono text-gray-200">{{ appointment?.appointmentTime }}</span>
+                    <span class="text-[var(--muted)]">Time Slot</span>
+                    <span class="font-mono text-[var(--text)]">{{ displayValue(details.appointmentTime) }}</span>
                 </div>
                 <div class="flex items-center justify-between">
-                    <span class="text-gray-400">Booking Type</span>
-                    <span class="inline-flex items-center gap-1.5 font-medium text-emerald-400">
-                        <i class="fa-solid fa-wand-magic-sparkles text-xs"></i> AI Assisted
+                    <span class="text-[var(--muted)]">Booking Type</span>
+                    <span class="inline-flex items-center gap-1.5 font-medium"
+                        [class.text-emerald-600]="details.bookingSource === 'AI_ASSISTED'"
+                        [class.dark:text-emerald-400]="details.bookingSource === 'AI_ASSISTED'"
+                        [class.text-rose-600]="details.bookingSource === 'EMERGENCY'"
+                        [class.dark:text-rose-400]="details.bookingSource === 'EMERGENCY'"
+                        [class.text-[var(--text)]]="details.bookingSource !== 'AI_ASSISTED' && details.bookingSource !== 'EMERGENCY'">
+                        <i *ngIf="details.bookingSource === 'AI_ASSISTED'"
+                            class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+                        {{ bookingLabel(details.bookingSource) }}
                     </span>
                 </div>
                 <div class="flex items-center justify-between">
-                    <span class="text-gray-400">Current Status</span>
-                    <app-status-badge [status]="appointment?.status"></app-status-badge>
+                    <span class="text-[var(--muted)]">Current Status</span>
+                    <app-status-badge [status]="details.status"></app-status-badge>
                 </div>
-                <div class="pt-2 border-t border-gray-800">
-                    <span class="text-gray-400 block mb-1">Reason for Visit</span>
-                    <p class="text-gray-300 italic text-xs leading-relaxed">
-                        {{ appointment?.reason || 'No specific reason provided.' }}
+                <div class="pt-2 border-t border-[var(--border)]">
+                    <span class="text-[var(--muted)] block mb-1">Reason for Visit</span>
+                    <p class="text-[var(--text)] italic text-xs leading-relaxed">
+                        {{ details.reason?.trim() || 'No specific reason provided.' }}
                     </p>
                 </div>
             </div>
         </div>
 
-        <!-- Clinic Location Card with Map Snippet -->
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 shadow-xl space-y-3">
+        <div *ngIf="hasClinic(details)"
+            class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 shadow-xl space-y-3">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
-                    <i class="fa-solid fa-location-dot text-cyan-400"></i>
-                    <h4 class="text-xs font-bold text-gray-200 uppercase tracking-wider">Clinic Location</h4>
+                    <i class="fa-solid fa-location-dot text-cyan-600 dark:text-cyan-400"></i>
+                    <h4 class="text-xs font-bold text-[var(--text)] uppercase tracking-wider">Clinic Location</h4>
                 </div>
                 <span
-                    class="px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/30 text-[10px] font-bold text-cyan-400">Primary
+                    class="px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/30 text-[10px] font-bold text-cyan-600 dark:text-cyan-400">Primary
                     Clinic</span>
             </div>
 
             <div class="flex items-start gap-3 pt-1">
                 <div
-                    class="w-12 h-12 rounded-xl bg-gray-950 border border-gray-800 flex items-center justify-center shrink-0">
-                    <i class="fa-solid fa-hospital-user text-xl text-gray-400"></i>
+                    class="w-12 h-12 rounded-xl bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-hospital-user text-xl text-[var(--muted)]"></i>
                 </div>
                 <div class="text-xs space-y-1">
-                    <h5 class="font-bold text-gray-200">CareSync Heart & Health Clinic</h5>
-                    <p class="text-gray-400">123 MG Road, Indiranagar, Bangalore, Karnataka 560038</p>
+                    <h5 class="font-bold text-[var(--text)]">{{ displayValue(details.clinicName) }}</h5>
+                    <p class="text-[var(--muted)]">{{ displayValue(details.clinicAddress) }}</p>
                 </div>
             </div>
         </div>

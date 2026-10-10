@@ -47,7 +47,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
               {{ formatDoctorName(doc) }}
               <i *ngIf="doc.isVerified" class="fa-solid fa-circle-check text-emerald-500 text-xs" title="Verified Doctor"></i>
             </div>
-            <div class="text-xs text-emerald-600 dark:text-emerald-400 font-medium">{{ doc.specialization || 'General' }}</div>
+            <div class="text-xs text-emerald-600 dark:text-emerald-400 font-medium">{{ doc.specialization || 'Not provided' }}</div>
           </div>
         </div>
 

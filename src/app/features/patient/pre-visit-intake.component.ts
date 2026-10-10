@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -6,6 +6,7 @@ import { AppointmentApiService } from '../../core/services/appointment-api.servi
 import { ToastService } from '../../core/services/toast.service';
 import { PreVisitIntakeRequest, AppointmentStatus } from '../../core/models/appointment.models';
 import { StatusBadgeComponent } from '../../shared/ui/status-badge.component';
+import { AiAssistantService } from '../../core/services/ai-assistant.service';
 
 @Component({
     selector: 'app-pre-visit-intake',
@@ -14,12 +15,13 @@ import { StatusBadgeComponent } from '../../shared/ui/status-badge.component';
     templateUrl: './pre-visit-intake.component.html',
     styleUrl: './pre-visit-intake.component.css'
 })
-export class PreVisitIntakeComponent implements OnInit {
+export class PreVisitIntakeComponent implements OnInit, OnDestroy {
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private location = inject(Location);
     private appointmentApi = inject(AppointmentApiService);
     private toast = inject(ToastService);
+    private aiAssistant = inject(AiAssistantService);
 
     appointmentId: number = 0;
     appointmentStatus: string = AppointmentStatus.BOOKED;
@@ -27,12 +29,19 @@ export class PreVisitIntakeComponent implements OnInit {
     activeStep: number = 1;
     completedSteps: number[] = [];
     submitting: boolean = false;
+    aiNarrative: string = '';
+    drafting: boolean = false;
+    aiDraftApplied: boolean = false;
+    listening: boolean = false;
+    speechSupported: boolean = false;
+    emergencyMessage: string = '';
+    private recognition: any;
 
     intakeData: PreVisitIntakeRequest = {
         chiefComplaint: '',
         symptoms: [],
-        duration: '1-3 Days',
-        severity: 'Mild',
+        duration: '',
+        severity: '',
         currentMedications: '',
         allergies: '',
         consentGiven: true
@@ -44,6 +53,75 @@ export class PreVisitIntakeComponent implements OnInit {
             this.appointmentId = Number(idParam);
             this.loadExistingDraft();
         }
+        this.setupSpeechRecognition();
+    }
+
+    ngOnDestroy(): void {
+        this.recognition?.stop();
+    }
+
+    private setupSpeechRecognition(): void {
+        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        if (!SpeechRecognition) return;
+        this.speechSupported = true;
+        this.recognition = new SpeechRecognition();
+        this.recognition.continuous = true;
+        this.recognition.interimResults = false;
+        this.recognition.lang = 'en-US';
+        this.recognition.onresult = (event: any) => {
+            let spoken = '';
+            for (let index = event.resultIndex; index < event.results.length; index++) {
+                if (event.results[index].isFinal) spoken += `${event.results[index][0].transcript} `;
+            }
+            this.aiNarrative = `${this.aiNarrative} ${spoken}`.trim();
+        };
+        this.recognition.onend = () => this.listening = false;
+        this.recognition.onerror = () => {
+            this.listening = false;
+            this.toast.show('Voice capture stopped. You can continue by typing.', 'warning');
+        };
+    }
+
+    toggleListening(): void {
+        if (!this.recognition) return;
+        if (this.listening) {
+            this.recognition.stop();
+            this.listening = false;
+            return;
+        }
+        this.recognition.start();
+        this.listening = true;
+    }
+
+    draftWithAi(): void {
+        if (this.aiNarrative.trim().length < 5) {
+            this.toast.show('Describe the concern in at least 5 characters.', 'warning');
+            return;
+        }
+        this.drafting = true;
+        this.emergencyMessage = '';
+        this.aiAssistant.draftIntake(this.aiNarrative.trim()).subscribe({
+            next: draft => {
+                this.drafting = false;
+                this.intakeData = {
+                    ...this.intakeData,
+                    chiefComplaint: draft.chiefComplaint || this.intakeData.chiefComplaint,
+                    symptoms: draft.symptoms || [],
+                    duration: draft.duration || '',
+                    severity: draft.severity || '',
+                    currentMedications: draft.currentMedications || '',
+                    allergies: draft.allergies || ''
+                };
+                this.emergencyMessage = draft.emergencyMessage || '';
+                this.aiDraftApplied = true;
+                this.activeStep = 1;
+                this.toast.showSuccess('AI draft applied. Review every field before submitting.');
+            },
+            error: err => {
+                this.drafting = false;
+                this.toast.showError(err?.error?.message || err?.error?.error || 'Could not create the intake draft.');
+            }
+        });
     }
 
     loadExistingDraft(): void {
@@ -63,6 +141,16 @@ export class PreVisitIntakeComponent implements OnInit {
             return !!this.intakeData.chiefComplaint && this.intakeData.chiefComplaint.trim().length >= 5;
         }
         return true;
+    }
+
+    get symptomsText(): string {
+        return Array.isArray(this.intakeData.symptoms)
+            ? this.intakeData.symptoms.join(', ')
+            : (this.intakeData.symptoms || '');
+    }
+
+    set symptomsText(value: string) {
+        this.intakeData.symptoms = value.split(',').map(item => item.trim()).filter(Boolean);
     }
 
     nextStep(): void {

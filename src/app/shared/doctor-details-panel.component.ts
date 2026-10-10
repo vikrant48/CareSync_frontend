@@ -38,10 +38,16 @@ import { ToastService } from '../core/services/toast.service';
             <div class="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
               <h2 class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">{{ formatDoctorName() }}</h2>
               <i class="fa-solid fa-circle-check text-emerald-700 dark:text-emerald-400 text-lg" title="Verified Doctor"></i>
+              <span class="text-[10px] font-bold uppercase px-2.5 py-1 rounded-full border"
+                    [ngClass]="doctor.isActive === false
+                      ? 'bg-rose-500/10 text-rose-600 border-rose-500/20'
+                      : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'">
+                {{ doctor.isActive === false ? 'Inactive' : 'Active' }}
+              </span>
             </div>
 
             <div class="flex items-center justify-center sm:justify-start gap-2 text-xs sm:text-sm font-semibold flex-wrap">
-              <span class="text-[var(--primary)] font-bold">{{ doctor.specialization || 'Cardiology' }}</span>
+              <span class="text-[var(--primary)] font-bold">{{ displayValue(doctor.specialization) }}</span>
               <span class="text-[var(--border)]" *ngIf="hospitalName">•</span>
               <span class="text-[var(--muted)] flex items-center gap-1.5" *ngIf="hospitalName">
                 <i class="fa-solid fa-building-columns text-xs text-[var(--primary)]"></i> {{ hospitalName }}
@@ -53,7 +59,7 @@ import { ToastService } from '../core/services/toast.service';
               <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--bg)] border border-[var(--border)] text-xs font-semibold text-[var(--text)]">
                 <i class="fa-solid fa-star text-amber-700 dark:text-amber-400 text-xs"></i>
                 <span>{{ (avgRating ?? doctor.averageRating || 0).toFixed(1) }}</span>
-                <span class="text-[var(--muted)] text-[11px]">(to be added )</span>
+                <span class="text-[var(--muted)] text-[11px]">({{ doctor.reviewCount ?? 0 }} reviews)</span>
               </div>
               <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--bg)] border border-[var(--border)] text-xs font-semibold text-[var(--text)]">
                 <i class="fa-solid fa-money-bill-wave text-emerald-700 dark:text-emerald-400 text-xs"></i>
@@ -71,10 +77,10 @@ import { ToastService } from '../core/services/toast.service';
 
         <!-- Right Side Actions -->
         <div class="w-full lg:w-auto flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0 items-stretch sm:items-center lg:items-end">
-          <button *ngIf="enableBooking" type="button" (click)="openBooking.emit()"
-                  class="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-xl shadow-lg shadow-[var(--primary)]/20 transition-all flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto">
+          <button *ngIf="enableBooking" type="button" (click)="openBooking.emit()" [disabled]="doctor.isActive === false"
+                  class="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-xl shadow-lg shadow-[var(--primary)]/20 transition-all flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed">
             <i class="fa-regular fa-calendar-check text-xs"></i>
-            <span>Book Appointment</span>
+            <span>{{ doctor.isActive === false ? 'Doctor Inactive' : 'Book Appointment' }}</span>
           </button>
 
           <div class="flex items-center gap-2 w-full sm:w-auto justify-center">
@@ -218,9 +224,9 @@ import { ToastService } from '../core/services/toast.service';
                     PDF
                   </div>
                   <div class="min-w-0">
-                    <h4 class="font-bold text-[var(--text)] text-xs sm:text-sm truncate" [title]="c.name">{{ c.name || 'Medical Degree Certificate' }}</h4>
+                    <h4 class="font-bold text-[var(--text)] text-xs sm:text-sm truncate" [title]="c.name">{{ c.name || 'Not provided' }}</h4>
                     <div class="text-[11px] text-[var(--muted)] flex items-center gap-2">
-                      <span>{{ c.issuingOrganization || 'Organization' }}</span>
+                      <span>{{ c.issuingOrganization || 'Not provided' }}</span>
                       <span *ngIf="c.issueDate">• Issued: {{ c.issueDate }}</span>
                     </div>
                   </div>
@@ -283,12 +289,15 @@ import { ToastService } from '../core/services/toast.service';
               <h3 class="text-base font-bold text-[var(--text)]">Specialties</h3>
             </div>
 
-            <div class="flex flex-wrap gap-2 pt-1">
+            <div class="flex flex-wrap gap-2 pt-1" *ngIf="specialtiesList.length; else specialtiesMissing">
               <span *ngFor="let s of specialtiesList"
                     class="bg-[var(--bg)] border border-[var(--border)] text-xs font-semibold text-gray-300 px-3.5 py-2 rounded-xl hover:border-[var(--primary)] transition-colors">
                 {{ s }}
               </span>
             </div>
+            <ng-template #specialtiesMissing>
+              <p class="text-xs sm:text-sm text-[var(--muted)]">Not provided</p>
+            </ng-template>
           </div>
 
           <!-- About Card -->
@@ -392,11 +401,15 @@ export class DoctorDetailsPanelComponent {
     return /^dr\.?\s+/i.test(base) ? base : `Dr ${base}`;
   }
 
+  displayValue(value: unknown): string {
+    if (value == null) return 'Not provided';
+    const text = String(value).trim();
+    return text || 'Not provided';
+  }
+
   languagesText(): string {
-    const langs: any = (this.doctor as any)?.languages;
-    if (!langs) return 'Hindi, Punjabi';
-    if (Array.isArray(langs)) return langs.filter((x) => !!x).join(', ') || 'Hindi, Punjabi';
-    return String(langs);
+    const languages = this.languageList();
+    return languages.length ? languages.join(', ') : 'Not provided';
   }
 
   get hospitalName(): string {
@@ -415,18 +428,17 @@ export class DoctorDetailsPanelComponent {
   }
 
   get specialtiesList(): string[] {
-    const spec = this.doctor?.specialization || 'Cardiology';
-    return [
-      'Interventional Cardiology',
-      'Heart Failure',
-      'Echocardiography',
-      'Preventive Cardiology'
-    ];
+    const specialization = this.doctor?.specialization?.trim();
+    return specialization ? [specialization] : [];
   }
 
   get aboutBio(): string {
-    const name = this.formatDoctorName();
-    const spec = this.doctor?.specialization || 'NA';
-    return `${name} is a dedicated ${spec} with expertise. Committed to providing evidence-based care with a patient-centric approach.`;
+    return this.displayValue(this.doctor?.bio);
+  }
+
+  private languageList(): string[] {
+    const languages = this.doctor?.languages;
+    const values = Array.isArray(languages) ? languages : String(languages || '').split(',');
+    return values.map(language => language.trim()).filter(Boolean);
   }
 }

@@ -443,7 +443,7 @@ export interface SavedChatSession {
            <div *ngIf="msg.suggestion.type === 'DOCTORS'" class="space-y-3">
              <div class="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
                 <div *ngFor="let doc of msg.suggestion.doctors" 
-                     (click)="selectDoctor(doc.id, msg.suggestion.reason)"
+                     (click)="chooseDoctorSuggestion(doc, msg.suggestion.reason)"
                      class="min-w-[200px] bg-[var(--panel)] border border-[var(--border)] p-4 rounded-xl shadow-md hover:border-[var(--primary)] border-2 cursor-pointer transition-all hover:shadow-lg">
                    <div class="flex items-start gap-3 mb-3">
                       <div class="w-12 h-12 rounded-full bg-[var(--bg)] flex items-center justify-center overflow-hidden shrink-0 border border-[var(--border)]">
@@ -467,13 +467,18 @@ export interface SavedChatSession {
                       </div>
                       <div class="flex items-center gap-1.5 text-[10px] text-[var(--muted)]">
                          <i class="fas fa-language text-indigo-400"></i>
-                         <span class="truncate">{{ doc.languages || 'English, Hindi' }}</span>
+                         <span class="truncate">{{ doctorLanguages(doc.languages) }}</span>
                       </div>
                    </div>
 
                    <div class="flex items-center justify-between pt-2 border-t border-[var(--border)]">
                       <span class="text-[10px] text-[var(--muted)]">Consultation Fee</span>
                       <span class="text-[12px] font-bold text-emerald-400">₹{{ doc.consultationFee }}</span>
+                   </div>
+                   <div *ngIf="doc.recommendedDate && doc.recommendedSlot"
+                        class="mt-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 p-2 text-[10px] text-emerald-700 dark:text-emerald-300">
+                      <i class="fa-solid fa-calendar-check mr-1"></i>
+                      Earliest: {{ doc.recommendedDate | date:'mediumDate' }} at {{ doc.recommendedSlot }}
                    </div>
                 </div>
              </div>
@@ -859,8 +864,22 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
     this.sendMessage(`ACTION_SELECT_SPECIALIZATION_${spec}${reason ? '_' + reason : ''}`);
   }
 
+  doctorLanguages(value: unknown): string {
+    const items = Array.isArray(value) ? value : String(value ?? '').split(',');
+    const text = items.map(item => String(item).trim()).filter(Boolean).join(', ');
+    return text || 'Not provided';
+  }
+
   selectDoctor(doctorId: number, reason?: string) {
     this.sendMessage(`ACTION_SELECT_DOCTOR_${doctorId}${reason ? '_' + reason : ''}`);
+  }
+
+  chooseDoctorSuggestion(doctor: DoctorSuggestion, reason?: string) {
+    if (doctor.recommendedDate && doctor.recommendedSlot) {
+      this.selectFinalSlot(doctor.id, doctor.recommendedDate, doctor.recommendedSlot, reason);
+      return;
+    }
+    this.selectDoctor(doctor.id, reason);
   }
 
   selectRelativeDate(doctorId: number, daysToAdd: number, reason?: string) {
@@ -945,7 +964,12 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
     this.isPaymentPopupVisible = true;
   }
 
-  getAppointmentBookingDetails(): { doctorId: number; appointmentDateTime: string; reason?: string } | undefined {
+  getAppointmentBookingDetails(): {
+    doctorId: number;
+    appointmentDateTime: string;
+    reason?: string;
+    bookingSource: 'AI_ASSISTED';
+  } | undefined {
     if (!this.currentSuggestion || !this.currentSuggestion.doctorId || !this.currentSuggestion.date || !this.currentSuggestion.slot) {
       return undefined;
     }
@@ -957,7 +981,8 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
     return {
       doctorId: this.currentSuggestion.doctorId,
       appointmentDateTime: localIsoString,
-      reason: this.editableReason || 'AI Assisted Booking'
+      reason: this.editableReason || 'AI Assisted Booking',
+      bookingSource: 'AI_ASSISTED'
     };
   }
 
@@ -1001,7 +1026,8 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
       const payload = {
         doctorId: sug.doctorId!,
         appointmentDateTime: localIsoString,
-        reason: this.editableReason || 'AI Assisted Booking'
+        reason: this.editableReason || 'AI Assisted Booking',
+        bookingSource: 'AI_ASSISTED' as const
       };
 
       this.appointmentService.bookAppointment(payload).subscribe({
@@ -1074,7 +1100,7 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
   onDictationComplete(res: ClinicalDictationResponse) {
     if (!res || !res.success) return;
     const soapMsg: ChatMessage = {
-      text: `### 🎙️ AI Voice Dictation S.O.A.P Note\n\n**Diagnosis:** ${res.diagnosis || 'Under Evaluation'}\n**Chief Complaint:** ${res.chiefComplaint || 'Consultation notes'}\n\n**[S] Subjective:** ${res.soapNote?.subjective || 'Provided'}\n**[O] Objective:** ${res.soapNote?.objective || 'Examined'}\n**[A] Assessment:** ${res.soapNote?.assessment || 'Assessed'}\n**[P] Plan:** ${res.soapNote?.plan || 'Treatment active'}\n\n**Prescriptions:** ${res.prescriptions?.length ? res.prescriptions.map(p => `${p.name} (${p.dosage})`).join(', ') : 'None'}`,
+      text: `### 🎙️ AI Voice Dictation S.O.A.P Note\n\n**Diagnosis:** ${res.diagnosis || 'Not provided'}\n**Chief Complaint:** ${res.chiefComplaint || 'Not provided'}\n\n**[S] Subjective:** ${res.soapNote?.subjective || 'Not provided'}\n**[O] Objective:** ${res.soapNote?.objective || 'Not provided'}\n**[A] Assessment:** ${res.soapNote?.assessment || 'Not provided'}\n**[P] Plan:** ${res.soapNote?.plan || 'Not provided'}\n\n**Prescriptions:** ${res.prescriptions?.length ? res.prescriptions.map(p => `${p.name}${p.dosage ? ' (' + p.dosage + ')' : ''}`).join(', ') : 'None'}`,
       isAi: true,
       timestamp: new Date()
     };

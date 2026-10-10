@@ -20,7 +20,8 @@ import { RescheduleAppointmentModalComponent } from '../../reschedule-appointmen
 import { SharedChatModalComponent } from '../../chat/shared-chat-modal.component';
 import { AppointmentService } from '../../../core/services/appointment.service';
 import { PatientProfileService } from '../../../core/services/patient-profile.service';
-import { CompletionPreview } from '../../../core/models/appointment.models';
+import { AppointmentDetails, CompletionPreview, AppointmentFollowThrough, FollowUpSlot } from '../../../core/models/appointment.models';
+import { PaymentPopupComponent, PaymentDetails } from '../../payment-popup.component';
 
 @Component({
     selector: 'app-appointment-details-page',
@@ -40,7 +41,8 @@ import { CompletionPreview } from '../../../core/models/appointment.models';
         EsignConfirmationModalComponent,
         MedicalHistoryFormModalComponent,
         RescheduleAppointmentModalComponent,
-        SharedChatModalComponent
+        SharedChatModalComponent,
+        PaymentPopupComponent
     ],
     templateUrl: './appointment-details-page.component.html',
     styleUrl: './appointment-details-page.component.css'
@@ -55,11 +57,17 @@ export class AppointmentDetailsPageComponent implements OnInit {
     private patientProfileService = inject(PatientProfileService);
 
     appointmentId?: number;
-    appointment: any = null;
+    appointment: AppointmentDetails | null = null;
     viewerRole: 'PATIENT' | 'DOCTOR' = 'PATIENT';
     activeTab: 'OVERVIEW' | 'PROCESS' | 'MEDICAL_HISTORY' = 'PROCESS';
     loading: boolean = true;
     errorMsg: string = '';
+    preVisitBriefLoading: boolean = false;
+    preVisitBriefLoaded: boolean = false;
+    isPreVisitBriefExpanded: boolean = true;
+    preVisitBrief: string = '';
+    briefMedications: string = '';
+    briefAllergies: string = '';
 
     // Medical History Form State
     medicalHistoryForm: any = {
@@ -90,6 +98,9 @@ export class AppointmentDetailsPageComponent implements OnInit {
     showMedicalHistoryFormModal: boolean = false;
     showRescheduleModal: boolean = false;
     showChatModal: boolean = false;
+    followThrough: AppointmentFollowThrough | null = null;
+    selectedFollowUp: FollowUpSlot | null = null;
+    followUpPaymentOpen: boolean = false;
 
     ngOnInit(): void {
         const routePath = this.router.url;
@@ -120,6 +131,9 @@ export class AppointmentDetailsPageComponent implements OnInit {
             next: (data) => {
                 this.appointment = data;
                 this.loading = false;
+                if (this.viewerRole === 'PATIENT') {
+                    this.loadFollowThrough();
+                }
             },
             error: (err) => {
                 this.appointment = null;
@@ -129,13 +143,79 @@ export class AppointmentDetailsPageComponent implements OnInit {
         });
     }
 
+    private loadFollowThrough(): void {
+        if (!this.appointmentId) return;
+        this.appointmentApiService.getFollowThrough(this.appointmentId).subscribe({
+            next: response => this.followThrough = response,
+            error: () => this.followThrough = null
+        });
+    }
+
+    hasFollowThrough(): boolean {
+        const item = this.followThrough;
+        return !!item && (!!item.plainLanguageSummary || item.feedbackRequested || !!item.suggestedFollowUp || !!item.replacementOffer);
+    }
+
+    openFollowUpPayment(slot: FollowUpSlot): void {
+        this.selectedFollowUp = slot;
+        this.followUpPaymentOpen = true;
+    }
+
+    followUpBookingDetails() {
+        const slot = this.selectedFollowUp;
+        if (!slot) return undefined;
+        const [hours, minutes] = slot.slot.split(':');
+        return {
+            doctorId: slot.doctorId,
+            appointmentDateTime: `${slot.date}T${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}:00`,
+            reason: slot.reason || 'Follow-up visit',
+            bookingSource: 'AI_ASSISTED' as const
+        };
+    }
+
+    onFollowUpPaid(_details: PaymentDetails): void {
+        this.followUpPaymentOpen = false;
+        this.selectedFollowUp = null;
+        this.loadAppointmentDetails();
+    }
+
+    requestFeedback(): void {
+        this.router.navigate(['/patient/feedback']);
+    }
+
+    loadPreVisitBrief(): void {
+        if (!this.appointmentId) return;
+        this.preVisitBriefLoading = true;
+        this.isPreVisitBriefExpanded = true;
+        this.appointmentApiService.getPreVisitBrief(this.appointmentId).subscribe({
+            next: response => {
+                this.preVisitBrief = response.historySummary || 'No prior visits or medical history were found.';
+                this.briefMedications = response.currentMedications || 'Not provided';
+                this.briefAllergies = response.allergies || 'Not provided';
+                this.preVisitBriefLoaded = true;
+                this.preVisitBriefLoading = false;
+            },
+            error: () => {
+                this.preVisitBrief = 'Pre-visit history summary is currently unavailable.';
+                this.briefMedications = 'Not provided';
+                this.briefAllergies = 'Not provided';
+                this.preVisitBriefLoaded = true;
+                this.preVisitBriefLoading = false;
+            }
+        });
+    }
+
+    togglePreVisitBrief(): void {
+        this.isPreVisitBriefExpanded = !this.isPreVisitBriefExpanded;
+    }
+
     goBack(): void {
         this.location.back();
     }
 
     handleProcessAction(actionKey: string): void {
-        if (!this.appointment) return;
-        const aptId = this.appointment.appointmentId || this.appointment.id;
+        const aptId = this.appointment?.appointmentId;
+        if (!this.appointment || !aptId) return;
 
         switch (actionKey) {
             case 'INTAKE':
@@ -343,9 +423,8 @@ export class AppointmentDetailsPageComponent implements OnInit {
     }
 
     openMedicalRecordForm(aptId: number): void {
-        const defaultVisitDate = (this.appointment?.appointmentDateTime
-            ? this.appointment.appointmentDateTime.split('T')[0]
-            : new Date().toISOString().split('T')[0]);
+        const defaultVisitDate = this.appointment?.appointmentDate
+            || new Date().toISOString().split('T')[0];
 
         this.savingMedicalRecord = false;
         this.medicalRecordSaved = false;
@@ -358,7 +437,6 @@ export class AppointmentDetailsPageComponent implements OnInit {
                     || intake?.chiefComplaint
                     || intake?.aiTriageSummary
                     || intake?.preVisitSummary
-                    || this.appointment?.symptoms
                     || '';
 
                 this.patientProfileService.getMedicalHistoryByAppointment(aptId).subscribe({
@@ -408,7 +486,7 @@ export class AppointmentDetailsPageComponent implements OnInit {
                 });
             },
             error: () => {
-                const fallbackSymptoms = this.appointment?.symptoms || '';
+                const fallbackSymptoms = '';
                 this.patientProfileService.getMedicalHistoryByAppointment(aptId).subscribe({
                     next: (mh: any) => {
                         this.medicalHistoryForm = {
@@ -452,10 +530,17 @@ export class AppointmentDetailsPageComponent implements OnInit {
 
         const patientId = this.medicalHistoryForm.patientId || this.appointment?.patientId;
         const doctorId = this.appointment?.doctorId;
+        const appointmentId = this.appointment?.appointmentId || this.appointmentId;
+        if (!patientId || !doctorId || !appointmentId) {
+            this.savingMedicalRecord = false;
+            this.medicalRecordError = 'Patient or doctor information is missing for this appointment.';
+            return;
+        }
         const data = {
             ...this.medicalHistoryForm,
             patientId,
-            appointmentId: this.appointmentId || this.appointment?.id
+            doctorId,
+            appointmentId
         };
 
         const request$ = this.medicalHistoryForm.id

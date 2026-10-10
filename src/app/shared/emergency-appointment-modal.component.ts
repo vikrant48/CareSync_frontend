@@ -112,7 +112,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
             </div>
             <div class="flex-1 min-w-0">
               <h4 class="font-bold text-[var(--text)] text-sm sm:text-base">Dr. {{ selectedDoctor.firstName }} {{ selectedDoctor.lastName }}</h4>
-              <p class="text-[var(--primary)] text-xs font-semibold mb-2">{{ selectedDoctor.specialization || 'General Physician' }}</p>
+              <p class="text-[var(--primary)] text-xs font-semibold mb-2">{{ selectedDoctor.specialization || 'Not provided' }}</p>
               
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs text-[var(--muted)]">
                 <div class="flex items-center gap-2" *ngIf="selectedDoctor.consultationFees">
@@ -222,7 +222,7 @@ export class EmergencyAppointmentModalComponent implements OnInit, OnDestroy {
   }
 
   get doctorOptions(): SelectOption[] {
-    return this.availableDoctors.map(d => ({
+    return this.availableDoctors.filter(d => d.isActive !== false).map(d => ({
       value: d.id,
       label: `Dr. ${d.firstName} ${d.lastName} ${d.specialization ? '(' + d.specialization + ')' : ''}`
     }));

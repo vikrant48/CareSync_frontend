@@ -110,6 +110,8 @@ export class AdminDashboardComponent implements OnInit {
   selectedDoctorExperiences: any[] = [];
   selectedDoctorEducations: any[] = [];
   selectedDoctorCertificates: any[] = [];
+  certificateReviews: Record<number, import('../../core/models/appointment.models').CertificateReview> = {};
+  reviewingCertificateId: number | null = null;
   loadingDoctorDetails = false;
 
   blockedIPs: BlockedIP[] = [];
@@ -285,6 +287,8 @@ export class AdminDashboardComponent implements OnInit {
     this.selectedDoctorExperiences = [];
     this.selectedDoctorEducations = [];
     this.selectedDoctorCertificates = [];
+    this.certificateReviews = {};
+    this.reviewingCertificateId = null;
     this.loadingDoctorDetails = true;
 
     this.adminService.getDoctorDetails(doc.id).subscribe({
@@ -303,13 +307,36 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
+  formatLanguages(value: unknown): string {
+    const items = Array.isArray(value) ? value : String(value ?? '').split(',');
+    const text = items.map(item => String(item).trim()).filter(Boolean).join(', ');
+    return text || 'Not provided';
+  }
+
   closeDoctorModal() {
     this.selectedDoctor = null;
     this.selectedDoctorProfile = null;
     this.selectedDoctorExperiences = [];
     this.selectedDoctorEducations = [];
     this.selectedDoctorCertificates = [];
+    this.certificateReviews = {};
+    this.reviewingCertificateId = null;
     this.loadingDoctorDetails = false;
+  }
+
+  reviewCertificate(cert: any) {
+    if (!this.selectedDoctor?.id || !cert?.id) return;
+    this.reviewingCertificateId = cert.id;
+    this.adminService.reviewCertificate(this.selectedDoctor.id, cert.id).subscribe({
+      next: review => {
+        this.certificateReviews = { ...this.certificateReviews, [cert.id]: review };
+        this.reviewingCertificateId = null;
+      },
+      error: err => {
+        this.reviewingCertificateId = null;
+        this.toastService.showError(err?.error?.error || 'Could not review this certificate');
+      }
+    });
   }
 
   loadCurrentMasterItems() {

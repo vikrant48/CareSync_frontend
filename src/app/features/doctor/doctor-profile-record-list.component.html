@@ -72,8 +72,8 @@
         <i class="fa-solid fa-file-contract text-base"></i>
       </div>
       <div>
-        <h4 class="font-bold text-[var(--text)] text-sm truncate max-w-xs">{{ c.name || c.originalFilename || 'Medical Certificate' }}</h4>
-        <p class="text-xs text-[var(--muted)] font-medium mt-0.5">{{ c.details || 'Verified Credential' }}</p>
+        <h4 class="font-bold text-[var(--text)] text-sm truncate max-w-xs">{{ c.name || c.originalFilename || 'Not provided' }}</h4>
+        <p *ngIf="c.details" class="text-xs text-[var(--muted)] font-medium mt-0.5">{{ c.details }}</p>
       </div>
     </div>
     <div class="flex items-center gap-2 self-end sm:self-auto">

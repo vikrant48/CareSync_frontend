@@ -14,6 +14,10 @@
                     <p class="text-xs font-medium text-[var(--muted)] truncate mt-0.5">
                         {{ otherPersonSubtext }}
                     </p>
+                    <span *ngIf="!otherPersonActive"
+                          class="inline-flex mt-1 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-600 border border-rose-500/20">
+                        Inactive
+                    </span>
                 </div>
             </div>
 

@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 import { AuthService } from '../../core/services/auth.service';
 import { DoctorProfileService, DocumentItem } from '../../core/services/doctor-profile.service';
+import { AiAssistantService } from '../../core/services/ai-assistant.service';
+import { VisionScanResponse } from '../../core/models/ai.models';
 import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropdown.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 import { FilterBarComponent, FilterConfig } from '../../shared/components';
@@ -18,6 +20,7 @@ import { FilterBarComponent, FilterConfig } from '../../shared/components';
 export class DoctorDocumentsComponent implements OnInit {
   private svc = inject(DoctorProfileService);
   private auth = inject(AuthService);
+  private ai = inject(AiAssistantService);
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
 
   loading = signal<boolean>(true);
@@ -33,6 +36,8 @@ export class DoctorDocumentsComponent implements OnInit {
   uploadCategory: 'Education' | 'Experience' | 'Other' = 'Other';
   uploadEducationSubtype: string = '';
   uploading: boolean = false;
+  classifying: boolean = false;
+  documentScan: VisionScanResponse | null = null;
   successMessage: string | null = null;
 
   // Filter state
@@ -179,6 +184,51 @@ export class DoctorDocumentsComponent implements OnInit {
   onFileSelected(event: any) {
     const file = event?.target?.files?.[0];
     this.selectedFile = file || null;
+    this.documentScan = null;
+    if (!file) return;
+    this.classifying = true;
+    this.ai.scanMedicalDocument(file).subscribe({
+      next: scan => {
+        this.classifying = false;
+        this.documentScan = scan;
+        const suggested = this.mapScannedType(scan.documentType, scan.rawSummary);
+        if (suggested) this.uploadType = suggested;
+        if (!this.uploadDescription && scan.rawSummary) {
+          this.uploadDescription = scan.rawSummary.slice(0, 300);
+        }
+      },
+      error: () => {
+        this.classifying = false;
+        this.documentScan = { success: false, error: 'Classification is unavailable. Choose the document type manually.' };
+      }
+    });
+  }
+
+  private mapScannedType(documentType?: string, summary?: string): string | null {
+    const text = `${documentType || ''} ${summary || ''}`.toLowerCase();
+    if (text.includes('certificate') || text.includes('license')) return 'CERTIFICATE';
+    if (documentType === 'PRESCRIPTION') return 'PRESCRIPTION';
+    if (documentType === 'LAB_REPORT') return 'LAB_REPORT';
+    if (documentType === 'MEDICAL_NOTE') return 'MEDICAL_DOCUMENT';
+    return null;
+  }
+
+  scanFieldSummary(): string {
+    const scan = this.documentScan;
+    if (!scan) return '';
+    const medications = (scan.medications || []).map(item =>
+      [item.name, item.dosage, item.frequency, item.duration].filter(Boolean).join(' ')
+    ).filter(Boolean);
+    const labs = (scan.labResults || []).map(item =>
+      [item.testName, item.resultValue, item.status].filter(Boolean).join(' ')
+    ).filter(Boolean);
+    return [
+      scan.patientName ? `Patient: ${scan.patientName}` : '',
+      scan.doctorName ? `Doctor: ${scan.doctorName}` : '',
+      scan.date ? `Date: ${scan.date}` : '',
+      medications.length ? `Medicines: ${medications.join('; ')}` : '',
+      labs.length ? `Results: ${labs.join('; ')}` : ''
+    ].filter(Boolean).join('\n');
   }
 
   uploadDocument() {
@@ -211,6 +261,7 @@ export class DoctorDocumentsComponent implements OnInit {
         this.applyFilters();
         // reset form
         this.selectedFile = null;
+        this.documentScan = null;
         this.uploadDescription = '';
         this.uploadType = 'OTHER';
         this.uploadCategory = 'Other';

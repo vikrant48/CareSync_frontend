@@ -50,7 +50,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
                </h4>
                <div class="bg-gray-800/40 rounded-lg p-3 text-sm space-y-1">
                   <div class="font-medium text-white">{{ doctorInfo.doctorName }}</div>
-                  <div class="text-gray-400">{{ doctorInfo.doctorSpecialization || 'General Practice' }}</div>
+                  <div class="text-gray-400">{{ doctorInfo.doctorSpecialization || 'Not provided' }}</div>
                   <div class="text-gray-500 text-xs">{{ doctorInfo.doctorContactInfo || 'No contact info' }}</div>
                </div>
             </div>

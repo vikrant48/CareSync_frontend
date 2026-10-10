@@ -162,6 +162,15 @@
                     <input #fileInput type="file" class="hidden" (change)="onFileSelected($event, booking)"
                         accept=".pdf,.jpg,.jpeg,.png">
 
+                    <div *ngIf="extractedBookingId() === booking.id && (classifyingReport() || extractedReport())"
+                        class="basis-full rounded-xl border border-indigo-500/30 bg-indigo-500/5 p-3 space-y-1">
+                        <div class="text-[11px] font-bold text-[var(--text)]">Extracted report fields</div>
+                        <div *ngIf="classifyingReport()" class="text-[11px] text-[var(--muted)]">Classifying document…</div>
+                        <div *ngIf="extractedReport()?.documentType" class="text-[11px] text-[var(--text)]">Type: {{ extractedReport()?.documentType }}</div>
+                        <pre class="whitespace-pre-wrap font-sans text-[11px] text-[var(--muted)]">{{ extractedReport()?.rawSummary || extractedReport()?.error }}</pre>
+                        <pre *ngIf="extractedFieldSummary()" class="whitespace-pre-wrap font-sans text-[11px] text-[var(--text)]">{{ extractedFieldSummary() }}</pre>
+                    </div>
+
                     <!-- Cancel Booking -->
                     <button *ngIf="canCancelBooking(booking)" type="button" (click)="cancelBooking(booking)"
                         class="bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-700 dark:text-rose-400 text-xs font-bold px-4 py-2 rounded-xl transition-all flex items-center gap-2">

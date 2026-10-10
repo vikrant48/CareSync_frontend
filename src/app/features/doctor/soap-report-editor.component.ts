@@ -5,11 +5,13 @@ import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 import { AppointmentApiService } from '../../core/services/appointment-api.service';
 import { ToastService } from '../../core/services/toast.service';
 import { SoapReportDto } from '../../core/models/appointment.models';
+import { ClinicalDictationComponent } from '../../shared/clinical-dictation.component';
+import { ClinicalDictationResponse } from '../../core/models/ai.models';
 
 @Component({
     selector: 'app-soap-report-editor',
     standalone: true,
-    imports: [CommonModule, FormsModule, ModalShellComponent],
+    imports: [CommonModule, FormsModule, ModalShellComponent, ClinicalDictationComponent],
     templateUrl: './soap-report-editor.component.html',
     styleUrl: './soap-report-editor.component.css'
 })
@@ -37,6 +39,7 @@ export class SoapReportEditorComponent {
     transcriptInput: string = '';
     generating: boolean = false;
     signing: boolean = false;
+    showDictation: boolean = false;
 
     ngOnChanges(changes: any): void {
         if (changes['isOpen'] && this.isOpen && this.appointmentId) {
@@ -101,6 +104,28 @@ export class SoapReportEditorComponent {
         });
     }
 
+    applyDictation(result: ClinicalDictationResponse): void {
+        this.showDictation = false;
+        if (result.transcript) {
+            this.transcriptInput = result.transcript;
+        }
+        this.soapReport = {
+            ...this.soapReport,
+            subjective: result.soapNote?.subjective || this.soapReport.subjective,
+            objective: result.soapNote?.objective || this.soapReport.objective,
+            assessment: result.soapNote?.assessment || result.diagnosis || this.soapReport.assessment,
+            plan: result.soapNote?.plan || this.soapReport.plan,
+            symptoms: result.chiefComplaint || this.soapReport.symptoms,
+            diagnosis: result.diagnosis || this.soapReport.diagnosis,
+            medicine: result.prescriptions?.map(item => item.name).filter(Boolean).join(', ') || this.soapReport.medicine,
+            doses: result.prescriptions?.map(item =>
+                [item.name, item.dosage, item.frequency, item.duration, item.instructions].filter(Boolean).join(' ')
+            ).filter(Boolean).join('\n') || this.soapReport.doses,
+            transcript: result.transcript || this.transcriptInput
+        };
+        this.toast.showSuccess('Dictation draft applied. Review and edit every field before saving.');
+    }
+
     @Output() soapSaved = new EventEmitter<SoapReportDto>();
 
     saveDraftOnly(): void {
@@ -110,15 +135,13 @@ export class SoapReportEditorComponent {
         }
 
         this.signing = true;
-        // Save draft via generateSoapDraft endpoint or draft endpoint
-        const fullNotes = `SUBJECTIVE: ${this.soapReport.subjective}\nOBJECTIVE: ${this.soapReport.objective}\nASSESSMENT: ${this.soapReport.assessment}\nPLAN: ${this.soapReport.plan}`;
-        this.appointmentApi.generateSoapDraft(this.appointmentId, fullNotes).subscribe({
+        this.soapReport.transcript = this.transcriptInput;
+        this.appointmentApi.saveSoapDraft(this.appointmentId, this.soapReport).subscribe({
             next: (res: SoapReportDto) => {
                 this.signing = false;
                 this.soapReport = res;
-                this.toast.showSuccess('SOAP Report Draft saved successfully!');
+                this.toast.showSuccess('Reviewed SOAP and prescription draft saved. Complete the e-sign step to finalize it.');
                 this.soapSaved.emit(res);
-                this.reportSigned.emit(res);
                 this.closeModal();
             },
             error: (err: any) => {

@@ -41,11 +41,15 @@ export class DoctorProfileComponent implements OnInit {
     lastName: '',
     specialization: '',
     contactInfo: '',
+    alternateContactInfo: '',
     email: '',
     isActive: true,
     gender: undefined,
+    dateOfBirth: '',
     consultationFees: undefined,
     address: '',
+    licenseNumber: '',
+    bio: '',
     languages: [],
   };
 
@@ -106,6 +110,37 @@ export class DoctorProfileComponent implements OnInit {
     return language;
   }
 
+  displayValue(value: unknown): string {
+    if (value == null) return 'Not provided';
+    const text = String(value).trim();
+    return text || 'Not provided';
+  }
+
+  profileLanguages(): string[] {
+    return this.normalizeLanguages(this.profile?.languages);
+  }
+
+  genderLabel(): string {
+    const gender = this.profile?.gender?.trim();
+    if (!gender) return 'Not provided';
+    const normalized = gender.toLowerCase();
+    if (normalized === 'male' || normalized === 'm') return 'Male';
+    if (normalized === 'female' || normalized === 'f') return 'Female';
+    return gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase();
+  }
+
+  feeLabel(): string {
+    const fee = this.profile?.consultationFees;
+    if (fee == null || fee === '') return 'Not provided';
+    return `₹${fee}`;
+  }
+
+  completionPercent(): number {
+    const value = Number(this.profile?.completionPercentage);
+    if (!Number.isFinite(value)) return 0;
+    return Math.min(100, Math.max(0, Math.round(value)));
+  }
+
   ngOnInit(): void {
     this.masterDataService.getAllMasterData().subscribe({
       next: (data) => {
@@ -151,11 +186,15 @@ export class DoctorProfileComponent implements OnInit {
           lastName: profile?.lastName ?? '',
           specialization: profile?.specialization ?? '',
           contactInfo: profile?.contactInfo ?? '',
+          alternateContactInfo: profile?.alternateContactInfo ?? '',
           email: profile?.email ?? '',
           isActive: profile?.isActive ?? true,
           gender: profile?.gender ?? undefined,
+          dateOfBirth: profile?.dateOfBirth ?? '',
           consultationFees: profile?.consultationFees ?? undefined,
           address: profile?.address ?? '',
+          licenseNumber: profile?.licenseNumber ?? '',
+          bio: profile?.bio ?? '',
           languages: this.normalizeLanguages(profile?.languages),
         };
         this.educations = educations || [];
@@ -189,7 +228,11 @@ export class DoctorProfileComponent implements OnInit {
 
   saveProfile() {
     if (!this.username) return;
-    this.svc.updateProfile(this.username, this.profileForm).subscribe({
+    const payload = {
+      ...this.profileForm,
+      dateOfBirth: this.profileForm.dateOfBirth || undefined,
+    };
+    this.svc.updateProfile(this.username, payload).subscribe({
       next: (resp) => {
         this.profile = resp;
         this.editingOverview = false;
@@ -697,16 +740,17 @@ export class DoctorProfileComponent implements OnInit {
 
   // Years of Experience Calculator
   getTotalExperienceYears(): string {
-    if (!this.experiences || this.experiences.length === 0) return '4+ Years';
-    const total = this.experiences.reduce((sum, exp) => sum + (exp.yearsOfService || 1), 0);
-    return `${total}+ Years`;
+    if (!this.experiences?.length) return 'Not provided';
+    const total = this.experiences.reduce((sum, exp) => sum + (Number(exp.yearsOfService) || 0), 0);
+    if (total <= 0) return 'Not provided';
+    return total === 1 ? '1 year' : `${total} years`;
   }
 
   // Hospital Name Helper
   getPrimaryHospitalName(): string {
-    if (this.experiences && this.experiences.length > 0) {
-      return this.experiences[0].hospitalName || 'CareSync Multi-Speciality Hospital';
-    }
-    return 'CareSync Multi-Speciality Hospital';
+    const named = (this.experiences || []).filter(exp => exp.hospitalName?.trim());
+    if (!named.length) return 'Not provided';
+    const latest = [...named].sort((a, b) => (b.id ?? 0) - (a.id ?? 0))[0];
+    return latest.hospitalName;
   }
 }

@@ -8,12 +8,16 @@ export interface UpdateDoctorRequest {
   lastName?: string;
   specialization?: string;
   contactInfo?: string;
+  alternateContactInfo?: string;
   profileImageUrl?: string;
   email?: string;
   isActive?: boolean;
   gender?: string;
+  dateOfBirth?: string;
   consultationFees?: number;
   address?: string;
+  licenseNumber?: string;
+  bio?: string;
   languages?: string[];
 }
 

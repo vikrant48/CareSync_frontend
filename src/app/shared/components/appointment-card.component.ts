@@ -43,7 +43,7 @@ export class AppointmentCardComponent {
 
     get otherPersonSubtext(): string {
         if (this.viewerRole === 'PATIENT') {
-            return this.appointment?.doctorSpecialization || 'Healthcare Provider';
+            return this.appointment?.doctorSpecialization || 'Not provided';
         }
         return this.appointment?.patientMobile || `Appointment #${this.appointment?.appointmentId || this.appointment?.id}`;
     }
@@ -53,6 +53,12 @@ export class AppointmentCardComponent {
             return this.appointment?.doctorProfileImageUrl;
         }
         return this.appointment?.patientProfileImageUrl;
+    }
+
+    get otherPersonActive(): boolean {
+        return this.viewerRole === 'PATIENT'
+            ? this.appointment?.doctorActive !== false
+            : this.appointment?.patientActive !== false;
     }
 
     onViewAppointment(): void {
@@ -140,7 +146,8 @@ export class AppointmentCardComponent {
 
     get canPatientReschedule(): boolean {
         const s = this.appointmentStatus();
-        return s === 'BOOKED' || s === 'CONFIRMED' || s === 'SCHEDULED';
+        return this.appointment?.doctorActive !== false
+            && (s === 'BOOKED' || s === 'CONFIRMED' || s === 'SCHEDULED');
     }
 
     get canPatientCancel(): boolean {
@@ -149,7 +156,7 @@ export class AppointmentCardComponent {
     }
 
     get canOpenChat(): boolean {
-        return this.appointmentStatus() === 'IN_PROGRESS';
+        return this.otherPersonActive && this.appointmentStatus() === 'IN_PROGRESS';
     }
 
     onReschedule(event: Event): void {
@@ -212,8 +219,8 @@ export class AppointmentCardComponent {
             medNames.forEach((name: string, idx: number) => {
                 medicinesList.push({
                     name: name,
-                    dosage: dosages[idx] || (dosages.length === 1 ? dosages[0] : 'As prescribed'),
-                    duration: 'As directed'
+                    dosage: dosages[idx] || (dosages.length === 1 ? dosages[0] : undefined),
+                    duration: undefined
                 });
             });
         }
@@ -232,8 +239,8 @@ export class AppointmentCardComponent {
             doctorName: String(this.appointment.doctorName || 'Doctor'),
             doctorSpecialization: String(this.appointment.doctorSpecialization || ''),
             visitDate: `${this.appointment.appointmentDate || ''} ${this.appointment.appointmentTime || ''}`.trim(),
-            symptoms: medHistory?.symptoms || soap?.symptoms || this.appointment.reason || 'General Consultation',
-            diagnosis: medHistory?.diagnosis || soap?.diagnosis || (medHistory || soap ? 'Consultation Completed' : 'Completed Consultation Record'),
+            symptoms: medHistory?.symptoms || soap?.symptoms || this.appointment.reason || 'Not provided',
+            diagnosis: medHistory?.diagnosis || soap?.diagnosis || 'Not provided',
             medicines: medicinesList.length > 0 ? medicinesList : undefined,
             prescriptionNotes: medHistory?.notes || soap?.notes || (medHistory?.treatment || soap?.treatment ? `Treatment Plan: ${medHistory?.treatment || soap?.treatment}` : undefined),
             verificationUrl: `https://caresync.app/verify/prescription/${aptId}`,

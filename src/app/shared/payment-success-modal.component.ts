@@ -152,7 +152,7 @@ export class PaymentSuccessModalComponent {
         patientName: String(this.paymentDetails.patientName) || 'Patient',
         patientId: this.paymentDetails.patientId || 0,
         paymentDate: new Date().toISOString(),
-        paidTo: this.recipientUpiId || 'CareSync Healthcare Services',
+        paidTo: this.recipientUpiId || 'Not provided',
         recipientUpiId: this.recipientUpiId,
         upiId: this.paymentDetails.upiId,
         status: 'SUCCESS',
