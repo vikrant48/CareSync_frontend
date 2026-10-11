@@ -6,9 +6,11 @@
             <!-- Left: Title & Tagline -->
             <div class="flex-1 flex flex-col justify-between space-y-3 text-center md:text-left">
                 <div class="space-y-1">
-                    <h1 class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">Find & Book Appointments
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">Find & Book
+                        Appointments
                     </h1>
-                    <p class="text-xs sm:text-sm text-[var(--muted)]">Search for specialized doctors and book your slot.</p>
+                    <p class="text-xs sm:text-sm text-[var(--muted)]">Search for specialized doctors and book your slot.
+                    </p>
                 </div>
                 <div>
                     <button
@@ -168,12 +170,22 @@
                     </div>
                 </div>
 
-                <!-- Full-Width Action Button -->
-                <div class="mt-3 pt-2">
-                    <app-button variant="primary" size="md" customClass="w-full" [disabled]="d.isActive === false"
-                        (btnClick)="goToDoctorAndBook(d); $event.stopPropagation()">
-                        {{ d.isActive === false ? 'Doctor Inactive' : 'View & Book Appointment' }}
-                    </app-button>
+                <!-- Action Buttons: View & Book + Emerg Booking -->
+                <div class="mt-3 pt-2 flex items-center gap-2">
+                    <button type="button" [disabled]="d.isActive === false"
+                        (click)="goToDoctorAndBook(d); $event.stopPropagation()"
+                        class="flex-1 min-w-0 py-2.5 px-3 bg-[#5b6cf0] hover:bg-[#4c5ee0] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 text-xs sm:text-sm truncate cursor-pointer">
+                        <span class="truncate">{{ d.isActive === false ? 'Doctor Inactive' : 'View & Book Appointment'
+                            }}</span>
+                    </button>
+
+                    <button type="button" [disabled]="d.isActive === false"
+                        (click)="bookEmergencyDoctor(d); $event.stopPropagation()"
+                        class="shrink-0 py-2.5 px-3 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 dark:bg-[#4a1219] dark:hover:bg-[#5e1720] dark:border-[#7c1d29]/70 dark:text-rose-100 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed font-semibold rounded-xl transition-all shadow-sm hover:shadow flex items-center justify-center gap-1.5 text-xs sm:text-sm cursor-pointer whitespace-nowrap"
+                        [title]="'Book Emergency Appointment with ' + formatDoctorName(d)">
+                        <i class="fa-solid fa-bolt text-xs text-amber-400"></i>
+                        <span>Emerg Booking</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -221,7 +233,7 @@
     </div>
 
     <!-- Emergency Appointment Modal -->
-    <app-emergency-appointment-modal [isOpen]="showEmergencyModal" [availableDoctors]="doctors"
-        (closeModal)="closeEmergencyModal()"
+    <app-emergency-appointment-modal [isOpen]="showEmergencyModal" [preselectedDoctor]="emergencyDoctor"
+        [availableDoctors]="doctors" (closeModal)="closeEmergencyModal()"
         (appointmentBooked)="onEmergencyAppointmentBooked($event)"></app-emergency-appointment-modal>
 </app-patient-layout>

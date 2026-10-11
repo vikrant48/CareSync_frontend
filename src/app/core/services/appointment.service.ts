@@ -109,11 +109,14 @@ export class AppointmentService {
     return this.http.post<PatientAppointmentItem>(`${this.baseUrl}/api/appointments/patient/book-with-payment`, payload);
   }
 
-  bookEmergencyAppointment(doctorId: number, reason?: string) {
+  bookEmergencyAppointment(doctorId: number, reason?: string, appointmentDateTime?: string) {
     const params = new URLSearchParams();
     params.append('doctorId', doctorId.toString());
     if (reason) {
       params.append('reason', reason);
+    }
+    if (appointmentDateTime) {
+      params.append('appointmentDateTime', appointmentDateTime);
     }
 
     return this.http.post<PatientAppointmentItem>(

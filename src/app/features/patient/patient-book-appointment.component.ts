@@ -4,6 +4,8 @@ import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DoctorService, Doctor } from '../../core/services/doctor.service';
 import { MasterDataService } from '../../core/services/master-data.service';
+import { AppointmentService } from '../../core/services/appointment.service';
+import { ToastService } from '../../core/services/toast.service';
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { EmergencyAppointmentModalComponent } from '../../shared/emergency-appointment-modal.component';
 import { SpecializationAutocompleteComponent } from '../../shared/specialization-autocomplete.component';
@@ -125,11 +127,14 @@ export class PatientBookAppointmentComponent {
 
   doctors: Doctor[] = [];
   ratings: Record<number, { avg: number; count: number }> = {};
+  bookingEmergencyDoctorId: number | null = null;
 
   constructor(
     private doctorApi: DoctorService,
     private router: Router,
-    private masterDataService: MasterDataService
+    private masterDataService: MasterDataService,
+    private appointmentService: AppointmentService,
+    private toast: ToastService
   ) {
     this.searchDoctors();
     this.masterDataService.getGenders().subscribe({
@@ -283,16 +288,26 @@ export class PatientBookAppointmentComponent {
     return 'Location not specified';
   }
 
+  emergencyDoctor: Doctor | null = null;
+
   goToDoctorAndBook(d: Doctor) {
     this.router.navigate(['/patient/doctor', d.username], { queryParams: { book: 'true' } });
   }
 
+  bookEmergencyDoctor(d: Doctor) {
+    if (d.isActive === false) return;
+    this.emergencyDoctor = d;
+    this.showEmergencyModal = true;
+  }
+
   openEmergencyModal() {
+    this.emergencyDoctor = null;
     this.showEmergencyModal = true;
   }
 
   closeEmergencyModal() {
     this.showEmergencyModal = false;
+    this.emergencyDoctor = null;
   }
 
   resetFilters() {

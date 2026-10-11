@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, OnInit, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AppointmentService } from '../core/services/appointment.service';
@@ -17,70 +17,69 @@ import { ModalShellComponent } from './ui/modal-shell.component';
       [showHeader]="false"
       [hasFooter]="true"
       footerClass="p-0 border-0"
-      maxWidthClass="max-w-xl sm:max-w-2xl"
-      panelClass="bg-white dark:bg-gray-900 text-[var(--text)] border border-red-200 dark:border-red-900/40 rounded-2xl relative max-h-[90dvh] overflow-hidden flex flex-col w-full mx-auto"
+      maxWidthClass="max-w-lg"
+      panelClass="bg-white dark:bg-gray-900 text-[var(--text)] border border-red-200 dark:border-red-900/40 rounded-2xl relative max-h-[90dvh] overflow-hidden flex flex-col w-full mx-auto shadow-2xl"
       bodyClass="p-0 overflow-hidden flex flex-col max-h-[90dvh]"
-      ariaLabel="Emergency appointment"
+      ariaLabel="Emergency appointment confirmation"
       backdropClass="bg-black/80 backdrop-blur-sm"
       [fullScreenMobile]="true"
       (close)="close()"
     >
       <!-- Header -->
-      <div modalHeader class="bg-gradient-to-r from-[#53131c] via-[#6d1825] to-[#801b2a] px-6 py-5 flex items-center justify-between border-b border-red-900/40 shrink-0 relative overflow-hidden">
-        <div class="flex items-center gap-3.5 z-10">
-          <div class="w-11 h-11 rounded-2xl bg-red-500/20 border border-red-500/30 flex items-center justify-center text-red-400 shrink-0 shadow-inner">
-            <i class="fa-solid fa-bell-exclamation text-xl"></i>
+      <div modalHeader class="bg-gradient-to-r from-[#53131c] via-[#6d1825] to-[#801b2a] px-4 sm:px-5 py-3 flex items-center justify-between border-b border-red-900/40 shrink-0 relative overflow-hidden">
+        <div class="flex items-center gap-2.5 z-10">
+          <div class="w-8 h-8 rounded-xl bg-red-500/20 border border-red-500/30 flex items-center justify-center text-red-400 shrink-0 shadow-inner">
+            <i class="fa-solid fa-bell-exclamation text-sm"></i>
           </div>
           <div>
-            <h2 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Emergency Booking</h2>
-            <p class="text-red-100 text-xs sm:text-sm font-medium">Immediate consultation scheduling</p>
+            <h2 class="text-sm sm:text-base font-bold text-white tracking-tight">Emergency Booking Confirmation</h2>
+            <p class="text-red-100 text-[11px] font-medium">Review and confirm immediate consultation</p>
           </div>
         </div>
-        <div class="flex items-center gap-3 z-10">
+        <div class="flex items-center gap-2 z-10">
           <!-- Live Time Display on Top Right Header -->
-          <div class="px-3 py-1.5 rounded-xl bg-red-950/60 border border-red-500/30 text-red-100 text-xs font-bold tracking-wide flex items-center gap-2 shadow-sm">
-            <i class="fa-regular fa-clock text-red-400 text-xs"></i>
-            <span>{{ currentTime }} - {{ currentDate }}</span>
+          <div class="px-2.5 py-1 rounded-lg bg-red-950/60 border border-red-500/30 text-red-100 text-[11px] font-bold tracking-wide flex items-center gap-1.5 shadow-sm">
+            <i class="fa-regular fa-clock text-red-400 text-[10px]"></i>
+            <span>{{ currentTime }}</span>
           </div>
           <button 
             type="button" 
             aria-label="Close emergency booking" 
-            class="w-9 h-9 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-100 hover:text-white transition-all flex items-center justify-center shrink-0 cursor-pointer" 
+            class="w-7 h-7 rounded-lg bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-100 hover:text-white transition-all flex items-center justify-center shrink-0 cursor-pointer" 
             (click)="close()"
           >
-            <i class="fa-solid fa-xmark text-lg"></i>
+            <i class="fa-solid fa-xmark text-xs"></i>
           </button>
         </div>
       </div>
 
       <!-- Scrollable Body -->
-      <div class="overflow-y-auto p-5 sm:p-6 space-y-5 bg-[var(--bg)] custom-scrollbar flex-1 min-h-0">
+      <div class="overflow-y-auto p-3.5 sm:p-4 space-y-3 bg-[var(--bg)] custom-scrollbar flex-1 min-h-0">
         
         <!-- Vital Information Warning Notice Card -->
-        <div class="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-red-900/60 rounded-2xl p-4 sm:p-5 flex gap-4 text-rose-800 dark:text-red-200 shadow-sm">
-          <div class="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400 flex items-center justify-center text-lg shrink-0 mt-0.5">
+        <div class="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-red-900/60 rounded-xl p-2.5 sm:p-3 flex gap-2.5 text-rose-800 dark:text-red-200 shadow-sm">
+          <div class="w-7 h-7 rounded-lg bg-red-500/20 border border-red-500/30 text-red-400 flex items-center justify-center text-xs shrink-0 mt-0.5">
             <i class="fa-solid fa-triangle-exclamation"></i>
           </div>
-          <div class="space-y-1.5 min-w-0">
-            <h4 class="font-bold text-[var(--text)] text-sm sm:text-base">Vital Information</h4>
-            <ul class="text-xs sm:text-sm text-red-200/80 space-y-1 ml-4 list-disc leading-relaxed">
-              <li>Consultations are scheduled for <strong class="text-[var(--text)] font-bold">immediate attention</strong>.</li>
+          <div class="space-y-0.5 min-w-0">
+            <h4 class="font-bold text-[var(--text)] text-xs">Vital Information</h4>
+            <ul class="text-[11px] text-red-200/80 space-y-0.5 ml-3.5 list-disc leading-tight">
               <li>Emergency fees may apply based on the doctor's policy.</li>
               <li>Please ensure your medical situation strictly requires urgent care.</li>
             </ul>
           </div>
         </div>
 
-        <!-- Select Specialist Field -->
-        <div class="space-y-2">
-          <label class="block text-xs sm:text-sm font-bold text-[var(--text)]">
+        <!-- If NO preselected doctor, show doctor select dropdown -->
+        <div *ngIf="!preselectedDoctor" class="space-y-1">
+          <label class="block text-xs font-semibold text-[var(--text)]">
             Select Specialist <span class="text-red-500">*</span>
           </label>
           <div 
-            class="relative flex items-center bg-[var(--bg)] border border-[var(--border)] rounded-xl px-3.5 py-1 focus-within:border-[var(--primary)] transition-colors"
+            class="relative flex items-center bg-[var(--bg)] border border-[var(--border)] rounded-xl px-3 py-1 focus-within:border-[var(--primary)] transition-colors"
             [class.border-red-500]="showValidation && !selectedDoctorId"
           >
-            <div class="w-8 h-8 rounded-lg bg-[var(--panel)] border border-[var(--border)] text-[var(--primary)] flex items-center justify-center text-xs shrink-0 mr-3">
+            <div class="w-7 h-7 rounded-lg bg-[var(--panel)] border border-[var(--border)] text-[var(--primary)] flex items-center justify-center text-[11px] shrink-0 mr-2">
               <i class="fa-solid fa-user-doctor"></i>
             </div>
             <app-select-dropdown 
@@ -88,96 +87,117 @@ import { ModalShellComponent } from './ui/modal-shell.component';
               [options]="doctorOptions" 
               placeholder="-- Select a doctor --"
               [(ngModel)]="selectedDoctorId"
-              customButtonClass="w-full bg-transparent border-0 px-0 text-xs sm:text-sm text-[var(--text)] focus:outline-none focus:ring-0 shadow-none hover:border-transparent font-medium"
+              customButtonClass="w-full bg-transparent border-0 px-0 text-xs text-[var(--text)] focus:outline-none focus:ring-0 shadow-none hover:border-transparent font-medium"
               class="w-full min-w-0"
             >
             </app-select-dropdown>
           </div>
-          <p *ngIf="showValidation && !selectedDoctorId" class="text-red-400 text-xs ml-1 animate-pulse">
+          <p *ngIf="showValidation && !selectedDoctorId" class="text-red-400 text-[11px] ml-1 animate-pulse">
             Please select a doctor to proceed.
           </p>
         </div>
 
-        <!-- Selected Doctor Preview Card -->
-        <div *ngIf="selectedDoctor" class="bg-[var(--bg)] rounded-xl p-4 border border-[var(--border)] animate-fade-in">
-          <div class="flex items-start gap-4">
-            <div class="relative w-12 h-12 shrink-0">
-              <div class="w-12 h-12 rounded-full bg-[var(--panel)] flex items-center justify-center overflow-hidden border border-[var(--border)]">
-                <img *ngIf="selectedDoctor.profileImageUrl" [src]="selectedDoctor.profileImageUrl" [alt]="'Dr. ' + (selectedDoctor.firstName || '')" class="w-full h-full object-cover" />
-                <span *ngIf="!selectedDoctor.profileImageUrl" class="text-lg font-bold text-[var(--primary)]">{{ selectedDoctor.firstName?.charAt(0) }}</span>
-              </div>
-              <div *ngIf="selectedDoctor.isVerified" class="absolute -bottom-1 -right-1 bg-[var(--primary)] text-white text-[8px] w-4 h-4 flex items-center justify-center rounded-full border border-[var(--bg)]" title="Verified">
-                <i class="fa-solid fa-check"></i>
-              </div>
-            </div>
-            <div class="flex-1 min-w-0">
-              <h4 class="font-bold text-[var(--text)] text-sm sm:text-base">Dr. {{ selectedDoctor.firstName }} {{ selectedDoctor.lastName }}</h4>
-              <p class="text-[var(--primary)] text-xs font-semibold mb-2">{{ selectedDoctor.specialization || 'Not provided' }}</p>
-              
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs text-[var(--muted)]">
-                <div class="flex items-center gap-2" *ngIf="selectedDoctor.consultationFees">
-                  <i class="fa-solid fa-money-bill-wave text-emerald-400/80 w-4"></i>
-                  <span>Fee: ₹{{ selectedDoctor.consultationFees }}</span>
-                </div>
-                <div class="flex items-center gap-2" *ngIf="selectedDoctor.contactInfo">
-                  <i class="fa-solid fa-phone text-indigo-400/80 w-4"></i>
-                  <span>{{ selectedDoctor.contactInfo }}</span>
-                </div>
-              </div>
-            </div>
+        <!-- Doctor Details Bar (Short: Name, Specialization, Fees in one line) -->
+        <div *ngIf="selectedDoctor" class="bg-[var(--panel)] rounded-xl px-3 py-2 border border-[var(--border)] shadow-sm flex items-center justify-between gap-2.5 text-xs">
+          <div class="flex items-center gap-1.5 min-w-0">
+            <i class="fa-solid fa-user-doctor text-[var(--primary)] text-[11px] shrink-0"></i>
+            <span class="font-bold text-[var(--text)] truncate">
+              {{ formatDoctorName(selectedDoctor) }}
+            </span>
+            <span class="text-[var(--border)] shrink-0">•</span>
+            <span class="text-[var(--muted)] truncate text-[11px]">
+              {{ selectedDoctor.specialization || 'General Physician' }}
+            </span>
+          </div>
+
+          <div class="flex items-center gap-1 shrink-0 font-bold text-emerald-600 dark:text-emerald-400 text-xs">
+            <span class="text-[var(--muted)] font-normal text-[11px]">Fee:</span>
+            <span>₹{{ selectedDoctor.consultationFees || '0' }}</span>
           </div>
         </div>
 
-        <!-- Emergency Details Textarea Field -->
-        <div class="space-y-2">
-          <label class="block text-xs sm:text-sm font-bold text-[var(--text)]">
-            Emergency Details <span class="text-red-500">*</span>
-          </label>
+        <!-- Emergency Details Single-Line Input Field (Pre-filled, user can edit) -->
+        <div class="space-y-1">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-semibold text-[var(--text)]">
+              Emergency Reason <span class="text-red-500">*</span>
+            </label>
+            <span class="text-[10px] text-[var(--muted)] font-medium">Editable</span>
+          </div>
+
           <div 
-            class="relative bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3.5 flex gap-3 focus-within:border-[var(--primary)] transition-colors"
+            class="relative bg-[var(--bg)] border border-[var(--border)] rounded-xl px-3 py-1.5 flex items-center gap-2 focus-within:border-[var(--primary)] transition-colors"
             [class.border-red-500]="showValidation && !reason.trim()"
           >
-            <div class="w-9 h-9 rounded-xl bg-[var(--panel)] border border-[var(--border)] text-[var(--primary)] flex items-center justify-center text-sm shrink-0 mt-0.5">
-              <i class="fa-solid fa-file-lines"></i>
-            </div>
-            <div class="flex-1 min-w-0 relative">
-              <textarea 
-                class="w-full bg-transparent text-[var(--text)] text-xs sm:text-sm placeholder-[var(--muted)] focus:outline-none resize-none min-h-[90px] pr-12" 
-                [(ngModel)]="reason"
-                maxlength="500"
-                placeholder="Describe symptoms, severity, and duration..."
-              ></textarea>
-              <span class="absolute bottom-0 right-0 text-[10px] sm:text-xs font-semibold text-[var(--muted)]">
-                {{ reason.length }}/500
-              </span>
-            </div>
+            <i class="fa-solid fa-file-lines text-[var(--primary)] text-[11px] shrink-0"></i>
+            <input 
+              type="text"
+              class="w-full bg-transparent text-[var(--text)] text-xs placeholder-[var(--muted)] focus:outline-none font-medium truncate" 
+              [(ngModel)]="reason"
+              maxlength="250"
+              placeholder="Enter emergency reason..."
+            />
           </div>
-          <p *ngIf="showValidation && !reason.trim()" class="text-red-400 text-xs ml-1 animate-pulse">
-            Brief emergency details are required.
+          <p *ngIf="showValidation && !reason.trim()" class="text-red-400 text-[11px] ml-1 animate-pulse">
+            Emergency reason is required.
           </p>
+        </div>
+
+        <!-- Tick Radio Confirmation Option -->
+        <div 
+          (click)="toggleConfirmation()"
+          class="p-2.5 sm:p-3 rounded-xl border transition-all cursor-pointer select-none flex items-start sm:items-center gap-2.5 group"
+          [ngClass]="isConfirmed 
+            ? 'bg-rose-500/10 dark:bg-rose-950/30 border-rose-500 text-[var(--text)] ring-1 ring-rose-500/30' 
+            : 'bg-[var(--panel)] border-[var(--border)] text-[var(--muted)] hover:border-rose-400/50'"
+        >
+          <!-- Radio / Tick Circle Icon -->
+          <div 
+            class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0 transition-all duration-200"
+            [ngClass]="isConfirmed 
+              ? 'border-rose-600 bg-rose-600 text-white shadow-sm shadow-rose-500/50 scale-105' 
+              : 'border-gray-400 dark:border-gray-500 bg-transparent group-hover:border-rose-400'"
+          >
+            <i *ngIf="isConfirmed" class="fa-solid fa-check text-[8px]"></i>
+          </div>
+
+          <!-- Label Text -->
+          <div class="flex-1 min-w-0">
+            <span class="text-xs font-bold text-[var(--text)] block">
+              Confirm Urgent Consultation Request
+            </span>
+            <span class="text-[10px] text-[var(--muted)] block leading-tight mt-0.5">
+              Click this radio to confirm immediate scheduling with {{ selectedDoctor ? formatDoctorName(selectedDoctor) : 'the doctor' }}.
+            </span>
+          </div>
         </div>
 
       </div>
 
       <!-- Footer Buttons -->
-      <div modalFooter class="p-4 sm:p-5 border-t border-[var(--border)] bg-[var(--bg)] flex items-center justify-end gap-3 rounded-b-2xl shrink-0">
+      <div modalFooter class="p-3 sm:p-3.5 border-t border-[var(--border)] bg-[var(--bg)] flex items-center justify-end gap-2.5 rounded-b-2xl shrink-0">
         <button 
           type="button"
-          class="btn-secondary" 
+          class="px-3 py-1.5 text-xs font-medium rounded-xl border border-[var(--border)] bg-[var(--panel)] text-[var(--text)] hover:bg-[var(--bg)] transition-all flex items-center gap-1.5 cursor-pointer" 
           (click)="close()" 
           [disabled]="booking"
         >
-          <i class="fa-solid fa-xmark text-xs"></i>
+          <i class="fa-solid fa-xmark text-[10px]"></i>
           <span>Cancel Request</span>
         </button>
+
         <button 
           type="button"
-          class="btn-primary" 
+          class="px-3.5 py-1.5 rounded-xl font-bold text-xs text-white transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+          [disabled]="booking || !isConfirmed || !selectedDoctorId"
+          [ngClass]="{
+            'opacity-40 !cursor-not-allowed bg-gray-500': !isConfirmed || !selectedDoctorId,
+            'bg-gradient-to-r from-[#63141f] to-[#7f1a28] hover:from-[#761825] hover:to-[#911e2e] active:scale-[0.98] border border-[#9b2232]/50 shadow-sm': isConfirmed && selectedDoctorId
+          }"
           (click)="bookEmergencyAppointment()" 
-          [disabled]="booking"
         >
-          <i *ngIf="booking" class="fa-solid fa-circle-notch fa-spin text-xs"></i>
-          <i *ngIf="!booking" class="fa-solid fa-bell text-xs"></i>
+          <i *ngIf="booking" class="fa-solid fa-circle-notch fa-spin text-[10px]"></i>
+          <i *ngIf="!booking" class="fa-solid fa-bell text-[10px]"></i>
           <span>{{ booking ? 'Processing Emergency Request...' : 'Confirm Emergency Booking' }}</span>
         </button>
       </div>
@@ -185,17 +205,18 @@ import { ModalShellComponent } from './ui/modal-shell.component';
     </app-modal-shell>
   `
 })
-export class EmergencyAppointmentModalComponent implements OnInit, OnDestroy {
+export class EmergencyAppointmentModalComponent implements OnInit, OnDestroy, OnChanges {
   @Input() isOpen = false;
+  @Input() preselectedDoctor: Doctor | null = null;
   @Input() availableDoctors: Doctor[] = [];
   @Output() closeModal = new EventEmitter<void>();
   @Output() appointmentBooked = new EventEmitter<any>();
 
   selectedDoctorId: number | null = null;
-  reason = '';
+  reason = 'Emergency booking';
+  isConfirmed = false;
   booking = false;
   error: string | null = null;
-
   showValidation = false;
 
   currentDate = '';
@@ -207,11 +228,32 @@ export class EmergencyAppointmentModalComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.updateClock();
     this.timer = setInterval(() => this.updateClock(), 1000);
+    this.syncDoctorSelection();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['isOpen'] && this.isOpen) {
+      this.syncDoctorSelection();
+      this.reason = 'Emergency booking';
+      this.isConfirmed = false;
+      this.showValidation = false;
+    }
+    if (changes['preselectedDoctor'] && this.preselectedDoctor) {
+      this.selectedDoctorId = this.preselectedDoctor.id;
+    }
   }
 
   ngOnDestroy() {
     if (this.timer) {
       clearInterval(this.timer);
+    }
+  }
+
+  private syncDoctorSelection() {
+    if (this.preselectedDoctor) {
+      this.selectedDoctorId = this.preselectedDoctor.id;
+    } else if (this.availableDoctors && this.availableDoctors.length > 0 && !this.selectedDoctorId) {
+      this.selectedDoctorId = this.availableDoctors[0].id;
     }
   }
 
@@ -229,8 +271,29 @@ export class EmergencyAppointmentModalComponent implements OnInit, OnDestroy {
   }
 
   get selectedDoctor(): Doctor | null {
+    if (this.preselectedDoctor) {
+      return this.preselectedDoctor;
+    }
     if (!this.selectedDoctorId) return null;
     return this.availableDoctors.find(d => d.id === this.selectedDoctorId) || null;
+  }
+
+  toggleConfirmation() {
+    this.isConfirmed = !this.isConfirmed;
+  }
+
+  formatDoctorName(d: Doctor): string {
+    if (!d) return '';
+    const parts = [d.firstName, d.lastName].filter(Boolean);
+    if (parts.length > 0) {
+      return `Dr. ${parts.join(' ')}`;
+    }
+    return d.name ? `Dr. ${d.name}` : (d.username ? `Dr. ${d.username}` : 'Doctor');
+  }
+
+  doctorInitial(d: Doctor): string {
+    if (!d) return 'D';
+    return (d.firstName?.charAt(0) || d.name?.charAt(0) || 'D').toUpperCase();
   }
 
   close() {
@@ -240,7 +303,8 @@ export class EmergencyAppointmentModalComponent implements OnInit, OnDestroy {
 
   reset() {
     this.selectedDoctorId = null;
-    this.reason = '';
+    this.reason = 'Emergency booking';
+    this.isConfirmed = false;
     this.booking = false;
     this.error = null;
     this.showValidation = false;
@@ -250,36 +314,45 @@ export class EmergencyAppointmentModalComponent implements OnInit, OnDestroy {
     this.showValidation = true;
     this.error = null;
 
-    // Validation
-    const missingDoctor = !this.selectedDoctorId;
-    const missingReason = !this.reason.trim();
-    if (missingDoctor || missingReason) {
-      let msg = '';
-      if (missingDoctor && missingReason) {
-        msg = 'Please first select a doctor and fill the reason.';
-      } else if (missingDoctor) {
-        msg = 'Please select a doctor for the emergency appointment.';
-      } else {
-        msg = 'Please provide a reason for the emergency appointment.';
-      }
-      this.error = msg;
-      this.toast.showError(msg);
+    if (!this.isConfirmed) {
+      this.toast.showError('Please tick the confirmation radio to proceed.');
+      return;
+    }
+
+    const doctorId = this.selectedDoctorId || this.preselectedDoctor?.id;
+    const finalReason = (this.reason || 'Emergency booking').trim();
+
+    if (!doctorId) {
+      this.toast.showError('Please select a doctor for the emergency appointment.');
+      return;
+    }
+
+    if (!finalReason) {
+      this.toast.showError('Please provide a reason for the emergency appointment.');
       return;
     }
 
     this.booking = true;
 
-    this.appointmentService.bookEmergencyAppointment(this.selectedDoctorId!, this.reason.trim())
+    // Generate local ISO datetime to guarantee 100% time alignment with user's clock
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const clientLocalIso = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+
+    this.appointmentService.bookEmergencyAppointment(doctorId, finalReason, clientLocalIso)
       .subscribe({
         next: (response) => {
           this.booking = false;
           this.toast.showSuccess('Emergency appointment booked successfully! The doctor has been notified.');
           this.appointmentBooked.emit(response);
 
-          // Auto-close after 2 seconds
-          setTimeout(() => {
-            this.close();
-          }, 2000);
+          // Close modal
+          this.close();
         },
         error: (err) => {
           this.booking = false;
