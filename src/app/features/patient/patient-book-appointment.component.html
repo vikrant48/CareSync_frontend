@@ -99,7 +99,7 @@
                 <div>
                     <!-- Top Doctor Header -->
                     <div class="flex items-start gap-3.5 mb-3">
-                        <div class="flex flex-col items-center shrink-0">
+                        <div class="relative shrink-0">
                             <div
                                 class="w-14 h-14 rounded-full ring-2 ring-[var(--border)] group-hover:ring-[var(--primary)] transition-all overflow-hidden bg-[var(--bg)] flex items-center justify-center shadow-md">
                                 <img *ngIf="d.profileImageUrl; else defaultDocAvatar" [src]="d.profileImageUrl"
@@ -109,27 +109,37 @@
                                     <span class="text-lg font-bold text-[var(--text)]">{{ doctorInitial(d) }}</span>
                                 </ng-template>
                             </div>
-                            <!-- Verified Pill Badge under Avatar -->
-                            <span *ngIf="d.isVerified !== false"
-                                class="mt-1.5 bg-[#10e984] text-[var(--text)] text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1 shadow-md">
-                                <i class="fa-solid fa-check text-[8px]"></i> 
+                            <!-- Active Status Green Dot at bottom-right of profile image -->
+                            <span *ngIf="d.isActive !== false"
+                                class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-[var(--panel)] shadow-sm"
+                                title="Active">
+                            </span>
+                            <span *ngIf="d.isActive === false"
+                                class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-rose-500 rounded-full border-2 border-[var(--panel)] shadow-sm"
+                                title="Inactive">
                             </span>
                         </div>
 
                         <div class="min-w-0 flex-1 pt-0.5">
-                            <h3
-                                class="font-extrabold text-base text-[var(--text)] truncate group-hover:text-[var(--primary)] transition-colors">
-                                {{ formatDoctorName(d) }}
-                            </h3>
+                            <div class="flex items-center gap-1.5 min-w-0">
+                                <h3
+                                    class="font-extrabold text-base text-[var(--text)] truncate group-hover:text-[var(--primary)] transition-colors">
+                                    {{ formatDoctorName(d) }}
+                                </h3>
+                                <!-- Circular Blue Verified Tick Badge -->
+                                <span *ngIf="d.isVerified"
+                                    class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-500 text-white shrink-0 shadow-sm"
+                                    title="Verified Doctor">
+                                    <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                        stroke-width="3.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                </span>
+                            </div>
                             <div class="text-xs font-semibold text-[var(--primary)] truncate mt-0.5">
                                 {{ d.specialization || 'Not provided' }}
                             </div>
-                            <span class="inline-flex mt-1 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border"
-                                [ngClass]="d.isActive === false
-                                  ? 'bg-rose-500/10 text-rose-600 border-rose-500/20'
-                                  : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'">
-                                {{ d.isActive === false ? 'Inactive' : 'Active' }}
-                            </span>
                             <div class="text-[11px] text-[var(--muted)] truncate mt-0.5" *ngIf="d.gender">
                                 <span class="capitalize">{{ d.gender }}</span> Doctor
                             </div>
@@ -140,7 +150,8 @@
                     <div class="space-y-1.5 my-3 pt-2 border-t border-[var(--border)] text-xs">
                         <div class="flex items-center justify-between text-[var(--muted)]">
                             <div class="flex items-center gap-2">
-                                <i class="fa-solid fa-money-bill-wave text-emerald-700 dark:text-emerald-400 text-xs"></i>
+                                <i
+                                    class="fa-solid fa-money-bill-wave text-emerald-700 dark:text-emerald-400 text-xs"></i>
                                 <span class="font-extrabold text-[var(--text)]">₹{{ d.consultationFees || '0'}} <span
                                         class="text-[var(--muted)] font-normal">/ Visit</span></span>
                             </div>
@@ -174,8 +185,8 @@
 
         <div class="flex items-center gap-3 text-xs text-[var(--muted)]">
             <span class="font-medium">
-                Showing <span class="font-bold text-[var(--text)]">{{ startItemIndex }}–{{ endItemIndex }}</span> of <span
-                    class="font-bold text-[var(--primary)]">{{ totalDoctorsCount }}</span> doctors
+                Showing <span class="font-bold text-[var(--text)]">{{ startItemIndex }}–{{ endItemIndex }}</span> of
+                <span class="font-bold text-[var(--primary)]">{{ totalDoctorsCount }}</span> doctors
             </span>
             <span class="hidden sm:inline text-[var(--border)]">|</span>
             <span class="hidden sm:inline font-medium">
@@ -192,8 +203,9 @@
 
             <!-- Numbered Pages (Matching Reference Screenshot 1) -->
             <div class="hidden sm:flex items-center gap-1">
-                <button *ngFor="let p of paginationPages" (click)="goToPage(p)" [class.!bg-[var(--primary)]]="p === page"
-                    [class.!text-[var(--text)]]="p === page" [class.font-bold]="p === page" [class.bg-[var(--panel)]]="p !== page"
+                <button *ngFor="let p of paginationPages" (click)="goToPage(p)"
+                    [class.!bg-[var(--primary)]]="p === page" [class.!text-[var(--text)]]="p === page"
+                    [class.font-bold]="p === page" [class.bg-[var(--panel)]]="p !== page"
                     [class.text-[var(--muted)]]="p !== page"
                     class="w-7 h-7 rounded-lg text-xs flex items-center justify-center border border-[var(--border)] hover:border-[var(--primary)] transition-all">
                     {{ p + 1 }}

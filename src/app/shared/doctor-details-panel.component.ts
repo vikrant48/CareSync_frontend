@@ -29,20 +29,29 @@ import { ToastService } from '../core/services/toast.service';
               <img *ngIf="doctor.profileImageUrl" [src]="doctor.profileImageUrl" class="w-full h-full object-cover" (error)="doctor.profileImageUrl = ''" />
               <span *ngIf="!doctor.profileImageUrl">{{ doctorInitial() }}</span>
             </div>
-            <div *ngIf="doctor.isVerified !== false" class="absolute -bottom-2 left-1/2 -translate-x-1/2 px-2.5 py-0.5 bg-[var(--primary)] text-white text-[10px] font-bold uppercase tracking-wider rounded-full flex items-center gap-1 shadow-md border border-blue-400/30 whitespace-nowrap">
-              <i class="fa-solid fa-check text-[10px]"></i>
-            </div>
+            <!-- Active Status Green Dot -->
+            <span *ngIf="doctor.isActive !== false"
+                  class="absolute bottom-1 right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-[var(--panel)] shadow-sm"
+                  title="Active"></span>
+            <span *ngIf="doctor.isActive === false"
+                  class="absolute bottom-1 right-1 w-5 h-5 bg-rose-500 rounded-full border-2 border-[var(--panel)] shadow-sm"
+                  title="Inactive"></span>
           </div>
 
           <div class="space-y-2 min-w-0">
             <div class="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
               <h2 class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">{{ formatDoctorName() }}</h2>
-              <i class="fa-solid fa-circle-check text-emerald-700 dark:text-emerald-400 text-lg" title="Verified Doctor"></i>
-              <span class="text-[10px] font-bold uppercase px-2.5 py-1 rounded-full border"
-                    [ngClass]="doctor.isActive === false
-                      ? 'bg-rose-500/10 text-rose-600 border-rose-500/20'
-                      : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'">
-                {{ doctor.isActive === false ? 'Inactive' : 'Active' }}
+              <!-- Circular Blue Verified Tick Badge -->
+              <span *ngIf="doctor.isVerified" 
+                    class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white shrink-0 shadow-sm" 
+                    title="Verified Doctor">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </span>
+              <span *ngIf="doctor.isActive === false"
+                    class="text-[10px] font-bold uppercase px-2.5 py-1 rounded-full border bg-rose-500/10 text-rose-600 border-rose-500/20">
+                Inactive
               </span>
             </div>
 

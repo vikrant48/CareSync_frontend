@@ -29,23 +29,30 @@ import { ModalShellComponent } from './ui/modal-shell.component';
         class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between shrink-0 bg-white dark:bg-gray-900"
       >
         <div class="flex items-center gap-3" *ngIf="doctor as doc">
-          <div class="flex flex-col items-center gap-1">
+          <div class="relative shrink-0">
             <div
-              class="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center text-gray-400 dark:text-white border-2"
+              class="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center text-gray-400 dark:text-white border-2 border-gray-200 dark:border-gray-700"
               [ngClass]="{
-                'border-emerald-500': doc.isVerified,
-                'border-transparent': !doc.isVerified,
                 'bg-gray-200 dark:bg-gray-700': !doc.profileImageUrl
               }"
             >
               <img *ngIf="doc.profileImageUrl" [src]="doc.profileImageUrl" class="w-full h-full object-cover" (error)="doc.profileImageUrl = ''" />
               <span *ngIf="!doc.profileImageUrl">{{ doctorInitial(doc) }}</span>
             </div>
+            <span *ngIf="doc.isActive !== false"
+                  class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white dark:border-gray-900 shadow-sm"
+                  title="Active"></span>
           </div>
           <div>
-            <div class="font-bold text-gray-900 dark:text-white flex items-center gap-1 text-sm sm:text-base">
+            <div class="font-bold text-gray-900 dark:text-white flex items-center gap-1.5 text-sm sm:text-base">
               {{ formatDoctorName(doc) }}
-              <i *ngIf="doc.isVerified" class="fa-solid fa-circle-check text-emerald-500 text-xs" title="Verified Doctor"></i>
+              <span *ngIf="doc.isVerified" 
+                    class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-500 text-white shrink-0 shadow-sm" 
+                    title="Verified Doctor">
+                <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </span>
             </div>
             <div class="text-xs text-emerald-600 dark:text-emerald-400 font-medium">{{ doc.specialization || 'Not provided' }}</div>
           </div>
