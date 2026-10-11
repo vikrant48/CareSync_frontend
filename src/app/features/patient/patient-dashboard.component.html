@@ -1,5 +1,5 @@
 <app-patient-layout>
-    <div class="max-w-[1440px] mx-auto p-3 sm:p-5 space-y-4">
+    <div class="max-w-[1400px] mx-auto p-3 sm:p-5 space-y-4">
         <!-- Welcome header card -->
         <section class="surface p-4 sm:p-5 shadow-sm relative">
             <div class="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -69,8 +69,7 @@
         <!-- Financial Overview (3 Sleek SaaS Cards) -->
         <section *ngIf="financialStats" class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
             <!-- Total Spent Card -->
-            <div
-                class="surface surface-hover p-4 shadow-sm flex items-center justify-between transition-all">
+            <div class="surface surface-hover p-4 shadow-sm flex items-center justify-between transition-all">
                 <div class="flex items-center gap-3">
                     <div
                         class="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center text-base shrink-0">
@@ -87,8 +86,7 @@
             </div>
 
             <!-- Appointments Spend Card -->
-            <div
-                class="surface surface-hover p-4 shadow-sm flex items-center justify-between transition-all">
+            <div class="surface surface-hover p-4 shadow-sm flex items-center justify-between transition-all">
                 <div class="flex items-center gap-3">
                     <div
                         class="w-10 h-10 rounded-xl bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center text-base shrink-0">
@@ -105,8 +103,7 @@
             </div>
 
             <!-- Lab Tests Spend Card -->
-            <div
-                class="surface surface-hover p-4 shadow-sm flex items-center justify-between transition-all">
+            <div class="surface surface-hover p-4 shadow-sm flex items-center justify-between transition-all">
                 <div class="flex items-center gap-3">
                     <div
                         class="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center text-base shrink-0">
@@ -132,36 +129,20 @@
             (openLabTests)="goToLabTests()"></app-patient-dashboard-metrics-cards>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <app-patient-dashboard-appointment-list
-                title="Today's Appointments"
-                icon="fa-regular fa-calendar-check"
-                [items]="todayAppointments()"
-                [loading]="loadingAppointments"
-                loadingLabel="Loading appointments..."
+            <app-patient-dashboard-appointment-list title="Today's Appointments" icon="fa-regular fa-calendar-check"
+                [items]="todayAppointments()" [loading]="loadingAppointments" loadingLabel="Loading appointments..."
                 emptyTitle="No appointments for today."
                 emptyMessage="You don't have any appointments scheduled for today."
-                emptyActionLabel="Book an Appointment"
-                emptyVariant="highlight"
-                actionVariant="primary"
-                (viewAll)="goToMyAppointments()"
-                (emptyAction)="goToBookAppointment()"
+                emptyActionLabel="Book an Appointment" emptyVariant="highlight" actionVariant="primary"
+                (viewAll)="goToMyAppointments()" (emptyAction)="goToBookAppointment()"
                 (open)="goToAppointmentDetail($event)">
             </app-patient-dashboard-appointment-list>
-            <app-patient-dashboard-appointment-list
-                title="Upcoming Appointments"
-                icon="fa-regular fa-calendar-days"
-                [items]="upcomingAppointments()"
-                [limit]="4"
-                [loading]="loadingAppointments"
-                loadingLabel="Loading upcoming appointments..."
-                emptyTitle="No upcoming appointments."
-                emptyMessage="Book a consultation with our verified specialists."
-                emptyActionLabel="Browse Doctors"
-                emptyVariant="plain"
-                actionVariant="secondary"
-                (viewAll)="goToMyAppointments()"
-                (emptyAction)="goToBookAppointment()"
-                (open)="goToAppointmentDetail($event)">
+            <app-patient-dashboard-appointment-list title="Upcoming Appointments" icon="fa-regular fa-calendar-days"
+                [items]="upcomingAppointments()" [limit]="4" [loading]="loadingAppointments"
+                loadingLabel="Loading upcoming appointments..." emptyTitle="No upcoming appointments."
+                emptyMessage="Book a consultation with our verified specialists." emptyActionLabel="Browse Doctors"
+                emptyVariant="plain" actionVariant="secondary" (viewAll)="goToMyAppointments()"
+                (emptyAction)="goToBookAppointment()" (open)="goToAppointmentDetail($event)">
             </app-patient-dashboard-appointment-list>
         </div>
 

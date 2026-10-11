@@ -16,7 +16,7 @@ export interface AppointmentCounts {
   standalone: true,
   imports: [CommonModule, RouterModule, PatientProfileHistoryComponent],
   template: `
-    <div class="max-w-7xl mx-auto space-y-6 p-4 sm:p-6 lg:p-8" *ngIf="patient; else loading">
+    <div class="max-w-[1400px] mx-auto p-3 sm:p-5 space-y-4" *ngIf="patient; else loading">
       
       <!-- Top Hero Header Card -->
       <section class="relative overflow-hidden bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-6">

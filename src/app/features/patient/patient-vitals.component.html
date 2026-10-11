@@ -1,12 +1,13 @@
 <app-patient-layout>
-    <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
+    <div class="max-w-[1400px] mx-auto p-3 sm:p-5 space-y-4">
 
         <!-- Hero Header Card -->
         <header
             class="relative overflow-hidden bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6">
             <!-- Left Info -->
             <div class="relative z-10 space-y-1">
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">Health Vitals Tracking</h1>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">Health Vitals Tracking
+                </h1>
                 <p class="text-xs sm:text-sm text-[var(--muted)] max-w-xl">
                     Log and monitor your key health metrics over time.
                 </p>
@@ -142,7 +143,8 @@
                     <div class="flex items-center justify-between mb-3">
                         <div
                             class="w-9 h-9 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
-                            <i class="fa-solid fa-temperature-three-quarters text-rose-700 dark:text-rose-400 text-sm"></i>
+                            <i
+                                class="fa-solid fa-temperature-three-quarters text-rose-700 dark:text-rose-400 text-sm"></i>
                         </div>
                         <span class="text-xs font-semibold text-[var(--muted)]">Body Temperature</span>
                     </div>
@@ -262,7 +264,8 @@
                 <div class="flex items-center justify-between mb-5">
                     <div class="flex items-center gap-2.5">
                         <div class="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center">
-                            <i class="fa-solid fa-temperature-three-quarters text-rose-700 dark:text-rose-400 text-xs"></i>
+                            <i
+                                class="fa-solid fa-temperature-three-quarters text-rose-700 dark:text-rose-400 text-xs"></i>
                         </div>
                         <h3 class="text-sm font-bold text-[var(--text)] tracking-wide">Body Temperature Trend</h3>
                     </div>
@@ -286,39 +289,46 @@
             </div>
         </div>
 
-        <app-patient-vitals-history [vitals]="vitalsHistory" (logReading)="showLogForm = true" (view)="openDetailsModal($event)"></app-patient-vitals-history>
+        <app-patient-vitals-history [vitals]="vitalsHistory" (logReading)="showLogForm = true"
+            (view)="openDetailsModal($event)"></app-patient-vitals-history>
     </div>
 
     <app-modal-shell [open]="showLogForm" title="Log New Vitals" subtitle="Enter your latest health measurements"
         titleId="log-vitals-title" icon="fa-solid fa-notes-medical"
-        iconWrapClass="bg-[var(--primary-soft)] text-[var(--primary)]" maxWidthClass="max-w-lg"
-        bodyClass="p-4 sm:p-6" footerClass="p-4 flex flex-col-reverse sm:flex-row sm:justify-end gap-2"
-        [hasFooter]="true" (close)="showLogForm = false">
+        iconWrapClass="bg-[var(--primary-soft)] text-[var(--primary)]" maxWidthClass="max-w-lg" bodyClass="p-4 sm:p-6"
+        footerClass="p-4 flex flex-col-reverse sm:flex-row sm:justify-end gap-2" [hasFooter]="true"
+        (close)="showLogForm = false">
         <form id="log-vitals-form" [formGroup]="vitalsForm" (ngSubmit)="onSubmit()" class="space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="form-label" for="vital-systolic">Systolic BP (mmHg)</label>
-                    <input id="vital-systolic" type="number" formControlName="systolicBP" placeholder="e.g. 120" class="form-input" />
+                    <input id="vital-systolic" type="number" formControlName="systolicBP" placeholder="e.g. 120"
+                        class="form-input" />
                 </div>
                 <div>
                     <label class="form-label" for="vital-diastolic">Diastolic BP (mmHg)</label>
-                    <input id="vital-diastolic" type="number" formControlName="diastolicBP" placeholder="e.g. 80" class="form-input" />
+                    <input id="vital-diastolic" type="number" formControlName="diastolicBP" placeholder="e.g. 80"
+                        class="form-input" />
                 </div>
                 <div>
                     <label class="form-label" for="vital-sugar">Sugar Level (mg/dL)</label>
-                    <input id="vital-sugar" type="number" formControlName="sugarLevel" placeholder="e.g. 96" class="form-input" />
+                    <input id="vital-sugar" type="number" formControlName="sugarLevel" placeholder="e.g. 96"
+                        class="form-input" />
                 </div>
                 <div>
                     <label class="form-label" for="vital-weight">Weight (kg)</label>
-                    <input id="vital-weight" type="number" step="0.1" formControlName="weight" placeholder="e.g. 68.5" class="form-input" />
+                    <input id="vital-weight" type="number" step="0.1" formControlName="weight" placeholder="e.g. 68.5"
+                        class="form-input" />
                 </div>
                 <div>
                     <label class="form-label" for="vital-temp">Body Temperature (°F)</label>
-                    <input id="vital-temp" type="number" step="0.1" formControlName="temperature" placeholder="e.g. 98.6" class="form-input" />
+                    <input id="vital-temp" type="number" step="0.1" formControlName="temperature"
+                        placeholder="e.g. 98.6" class="form-input" />
                 </div>
                 <div>
                     <label class="form-label" for="vital-heart">Heart Rate (bpm)</label>
-                    <input id="vital-heart" type="number" formControlName="heartRate" placeholder="e.g. 72" class="form-input" />
+                    <input id="vital-heart" type="number" formControlName="heartRate" placeholder="e.g. 72"
+                        class="form-input" />
                 </div>
             </div>
         </form>
@@ -329,10 +339,10 @@
         </button>
     </app-modal-shell>
 
-    <app-modal-shell [open]="!!selectedVitalDetails" title="Vitals Reading Details"
-        titleId="vital-details-title" icon="fa-solid fa-heart-pulse"
-        iconWrapClass="bg-[var(--primary-soft)] text-[var(--primary)]" maxWidthClass="max-w-md"
-        bodyClass="p-4 sm:p-6" footerClass="p-4 flex justify-end" [hasFooter]="true" (close)="closeDetailsModal()">
+    <app-modal-shell [open]="!!selectedVitalDetails" title="Vitals Reading Details" titleId="vital-details-title"
+        icon="fa-solid fa-heart-pulse" iconWrapClass="bg-[var(--primary-soft)] text-[var(--primary)]"
+        maxWidthClass="max-w-md" bodyClass="p-4 sm:p-6" footerClass="p-4 flex justify-end" [hasFooter]="true"
+        (close)="closeDetailsModal()">
         <p *ngIf="selectedVitalDetails?.recordedAt" modalHeaderExtra class="text-xs text-muted">
             {{ selectedVitalDetails?.recordedAt | date:'dd MMMM yyyy, hh:mm a' }}
         </p>
@@ -345,22 +355,26 @@
             </div>
             <div class="bg-[var(--bg)] p-3 rounded-xl border border-[var(--border)]">
                 <div class="text-muted font-bold text-[10px] uppercase mb-1">Sugar Level</div>
-                <div class="text-sm font-extrabold text-amber-700 dark:text-amber-400">{{ selectedVitalDetails.sugarLevel ?
+                <div class="text-sm font-extrabold text-amber-700 dark:text-amber-400">{{
+                    selectedVitalDetails.sugarLevel ?
                     (selectedVitalDetails.sugarLevel + ' mg/dL') : '--' }}</div>
             </div>
             <div class="bg-[var(--bg)] p-3 rounded-xl border border-[var(--border)]">
                 <div class="text-muted font-bold text-[10px] uppercase mb-1">Weight</div>
-                <div class="text-sm font-extrabold text-purple-700 dark:text-purple-400">{{ selectedVitalDetails.weight ?
+                <div class="text-sm font-extrabold text-purple-700 dark:text-purple-400">{{ selectedVitalDetails.weight
+                    ?
                     (selectedVitalDetails.weight + ' kg') : '--' }}</div>
             </div>
             <div class="bg-[var(--bg)] p-3 rounded-xl border border-[var(--border)]">
                 <div class="text-muted font-bold text-[10px] uppercase mb-1">Body Temperature</div>
-                <div class="text-sm font-extrabold text-rose-700 dark:text-rose-400">{{ selectedVitalDetails.temperature ?
+                <div class="text-sm font-extrabold text-rose-700 dark:text-rose-400">{{ selectedVitalDetails.temperature
+                    ?
                     (selectedVitalDetails.temperature + ' °F') : '--' }}</div>
             </div>
             <div class="bg-[var(--bg)] p-3 rounded-xl border border-[var(--border)] col-span-2">
                 <div class="text-muted font-bold text-[10px] uppercase mb-1">Heart Rate</div>
-                <div class="text-sm font-extrabold text-emerald-700 dark:text-emerald-400">{{ selectedVitalDetails.heartRate ?
+                <div class="text-sm font-extrabold text-emerald-700 dark:text-emerald-400">{{
+                    selectedVitalDetails.heartRate ?
                     (selectedVitalDetails.heartRate + ' bpm') : '--' }}</div>
             </div>
         </div>

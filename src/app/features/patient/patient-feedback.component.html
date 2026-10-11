@@ -1,5 +1,5 @@
 <app-patient-layout>
-    <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+    <div class="max-w-[1400px] mx-auto p-3 sm:p-5 space-y-4">
 
         <!-- Hero Header Card -->
         <header
@@ -28,7 +28,8 @@
             </div>
 
             <!-- Background Glow Accent -->
-            <div class="absolute right-0 top-0 w-64 h-64 bg-[var(--primary)]/10 rounded-full blur-3xl pointer-events-none">
+            <div
+                class="absolute right-0 top-0 w-64 h-64 bg-[var(--primary)]/10 rounded-full blur-3xl pointer-events-none">
             </div>
         </header>
 
@@ -46,7 +47,8 @@
                         <i class="fa-regular fa-[var(--primary)] fa-pen-to-square text-base"></i>
                     </div>
                     <div>
-                        <h2 class="text-base sm:text-lg font-bold text-[var(--text)] tracking-tight">Give Your Feedback</h2>
+                        <h2 class="text-base sm:text-lg font-bold text-[var(--text)] tracking-tight">Give Your Feedback
+                        </h2>
                         <p class="text-xs text-[var(--muted)]">Share your experience about your recent visit.</p>
                     </div>
                 </div>
@@ -81,7 +83,8 @@
                                 {{ (activeAppointment.doctorName[0] || 'D') | uppercase }}
                             </div>
                             <div>
-                                <h3 class="text-xs sm:text-sm font-bold text-[var(--text)]">{{ activeAppointment.doctorName }}
+                                <h3 class="text-xs sm:text-sm font-bold text-[var(--text)]">{{
+                                    activeAppointment.doctorName }}
                                 </h3>
                                 <p class="text-[11px] text-[var(--primary)] font-medium">{{
                                     activeAppointment.doctorSpecialization || 'Specialist' }}</p>
@@ -220,7 +223,8 @@
                                 {{ totalFeedbacksCount }}
                             </div>
                         </div>
-                        <div class="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                        <div
+                            class="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold flex items-center gap-1">
                             <i class="fa-solid fa-check text-[8px]"></i>
                             <span>Submitted</span>
                         </div>
@@ -231,7 +235,8 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
 
                     <!-- Rating Distribution Card -->
-                    <div class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 sm:p-5 shadow-sm space-y-3">
+                    <div
+                        class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 sm:p-5 shadow-sm space-y-3">
                         <h3 class="text-xs sm:text-sm font-bold text-[var(--text)]">Rating Distribution</h3>
 
                         <div class="space-y-2">
@@ -303,7 +308,8 @@
                     </div>
 
                     <!-- What Patients Say Card -->
-                    <div class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 sm:p-5 shadow-sm space-y-3">
+                    <div
+                        class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 sm:p-5 shadow-sm space-y-3">
                         <h3 class="text-xs sm:text-sm font-bold text-[var(--text)]">What Patients Say</h3>
 
                         <div class="flex flex-wrap gap-2">
@@ -407,7 +413,8 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-[var(--border)]">
-                        <tr *ngFor="let item of filteredGivenFeedback" class="hover:bg-[var(--bg)]/50 transition-colors">
+                        <tr *ngFor="let item of filteredGivenFeedback"
+                            class="hover:bg-[var(--bg)]/50 transition-colors">
                             <!-- Date & Time -->
                             <td class="px-4 py-3.5 whitespace-nowrap text-[var(--text)] font-medium">
                                 {{ formatDate(item.submittedAt) }}
@@ -421,7 +428,8 @@
                                         {{ (item.doctorName?.[0] || 'D') | uppercase }}
                                     </div>
                                     <div>
-                                        <div class="font-bold text-[var(--text)]">{{ item.doctorName || 'Doctor' }}</div>
+                                        <div class="font-bold text-[var(--text)]">{{ item.doctorName || 'Doctor' }}
+                                        </div>
                                     </div>
                                 </div>
                             </td>
@@ -510,8 +518,7 @@
         </section>
     </div>
 
-    <app-modal-shell [open]="!!selectedFeedbackForDetails"
-        [title]="selectedFeedbackForDetails?.doctorName || 'Doctor'"
+    <app-modal-shell [open]="!!selectedFeedbackForDetails" [title]="selectedFeedbackForDetails?.doctorName || 'Doctor'"
         [subtitle]="selectedFeedbackForDetails ? formatDate(selectedFeedbackForDetails.submittedAt) : ''"
         titleId="feedback-details-title" icon="fa-solid fa-star"
         iconWrapClass="bg-amber-500/15 text-amber-700 dark:text-amber-400" maxWidthClass="max-w-md"
@@ -522,7 +529,8 @@
                 <div class="flex items-center gap-1 text-amber-700 dark:text-amber-400 text-sm">
                     <i *ngFor="let star of [1,2,3,4,5]; trackBy: trackStar" class="fa-star"
                         [ngClass]="star <= selectedFeedbackForDetails.rating ? 'fa-solid' : 'fa-regular text-slate-500 dark:text-slate-400'"></i>
-                    <span class="text-xs font-bold text-[var(--text)] ml-2">{{ selectedFeedbackForDetails.rating }}/5</span>
+                    <span class="text-xs font-bold text-[var(--text)] ml-2">{{ selectedFeedbackForDetails.rating
+                        }}/5</span>
                 </div>
                 <span *ngIf="!selectedFeedbackForDetails.anonymous"
                     class="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
@@ -535,7 +543,8 @@
             </div>
             <div class="space-y-1">
                 <label class="text-[10px] font-bold uppercase text-muted">Feedback Comment</label>
-                <p class="text-xs text-[var(--text)] leading-relaxed bg-[var(--bg)] p-3 rounded-xl border border-[var(--border)]">
+                <p
+                    class="text-xs text-[var(--text)] leading-relaxed bg-[var(--bg)] p-3 rounded-xl border border-[var(--border)]">
                     {{ selectedFeedbackForDetails.comment || 'No comment provided.' }}
                 </p>
             </div>

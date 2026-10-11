@@ -1,10 +1,11 @@
 <app-patient-layout>
-    <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
+    <div class="max-w-[1400px] mx-auto p-3 sm:p-5 space-y-4">
         <!-- Top Page Header -->
         <section
             class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="space-y-1">
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">Analytics & Insights</h2>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">Analytics & Insights
+                </h2>
                 <p class="text-xs sm:text-sm text-[var(--muted)]">Track your health journey and appointment history.</p>
             </div>
             <p class="text-xs font-medium text-[var(--muted)] shrink-0">All appointments</p>
@@ -63,7 +64,8 @@
                         </div>
                     </div>
                     <div class="flex items-center justify-between mt-3 pt-2 relative z-10">
-                        <div class="text-[11px] font-medium text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+                        <div
+                            class="text-[11px] font-medium text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
                             <i class="fa-solid fa-chart-line text-[10px]"></i>
                             <span>Activity Level</span>
                         </div>
@@ -123,7 +125,8 @@
                         </div>
                     </div>
                     <div class="flex items-center justify-between mt-3 pt-2 relative z-10">
-                        <div class="text-[11px] font-medium text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+                        <div
+                            class="text-[11px] font-medium text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
                             <i class="fa-solid fa-check-double text-[10px]"></i>
                             <span>Successful visits</span>
                         </div>
@@ -154,7 +157,8 @@
                         </div>
                     </div>
                     <div class="flex items-center justify-between mt-3 pt-2 relative z-10">
-                        <div class="text-[11px] font-medium text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                        <div
+                            class="text-[11px] font-medium text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
                             <i class="fa-solid fa-coins text-[10px]"></i>
                             <span>Lifetime spending</span>
                         </div>
@@ -210,7 +214,8 @@
                         </div>
                     </div>
                     <div class="flex items-center justify-between mt-3 pt-2 relative z-10">
-                        <div class="text-[11px] font-medium text-purple-700 dark:text-purple-400 flex items-center gap-1.5">
+                        <div
+                            class="text-[11px] font-medium text-purple-700 dark:text-purple-400 flex items-center gap-1.5">
                             <i class="fa-solid fa-flask text-[10px]"></i>
                             <span>Tests & Diagnostics</span>
                         </div>
@@ -226,7 +231,8 @@
             <!-- Charts Section (2 Columns) -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <!-- Doctor Visits Chart (7 Cols) -->
-                <div class="lg:col-span-7 bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 flex flex-col shadow-sm">
+                <div
+                    class="lg:col-span-7 bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 flex flex-col shadow-sm">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2">
                             <i class="fa-solid fa-user-doctor text-[var(--primary)] text-sm"></i>
@@ -259,7 +265,8 @@
                                         <div class="h-full bg-gradient-to-r from-[var(--primary)] to-indigo-400 rounded-full"
                                             [style.width.%]="doc.percent"></div>
                                     </div>
-                                    <span class="font-extrabold text-[var(--text)] text-xs min-w-[48px] text-right">{{ doc.count
+                                    <span class="font-extrabold text-[var(--text)] text-xs min-w-[48px] text-right">{{
+                                        doc.count
                                         }} <span class="text-[var(--muted)] font-normal text-[11px]">({{ doc.percent
                                             }}%)</span></span>
                                 </div>
@@ -276,7 +283,8 @@
                 </div>
 
                 <!-- Appointment Status Donut Chart (5 Cols) -->
-                <div class="lg:col-span-5 bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 flex flex-col shadow-sm">
+                <div
+                    class="lg:col-span-5 bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 flex flex-col shadow-sm">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2">
                             <i class="fa-solid fa-chart-pie text-[var(--primary)] text-sm"></i>
@@ -354,16 +362,19 @@
                 </div>
             </div>
 
-            <app-patient-reports-activity [appointments]="recentAppointments" (view)="viewAppointment($event)"></app-patient-reports-activity>
+            <app-patient-reports-activity [appointments]="recentAppointments"
+                (view)="viewAppointment($event)"></app-patient-reports-activity>
         </div>
 
         <!-- Skeleton Loading State -->
         <ng-template #loadingTpl>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
-                <div class="h-28 bg-[var(--panel)] border border-[var(--border)] rounded-2xl" *ngFor="let i of [1,2,3,4]; trackBy: trackIndex"></div>
+                <div class="h-28 bg-[var(--panel)] border border-[var(--border)] rounded-2xl"
+                    *ngFor="let i of [1,2,3,4]; trackBy: trackIndex"></div>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 animate-pulse">
-                <div class="h-28 bg-[var(--panel)] border border-[var(--border)] rounded-2xl" *ngFor="let i of [1,2,3]; trackBy: trackIndex"></div>
+                <div class="h-28 bg-[var(--panel)] border border-[var(--border)] rounded-2xl"
+                    *ngFor="let i of [1,2,3]; trackBy: trackIndex"></div>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6 animate-pulse">
                 <div class="h-80 bg-[var(--panel)] border border-[var(--border)] rounded-2xl lg:col-span-7"></div>

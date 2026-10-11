@@ -1,5 +1,5 @@
 <app-patient-layout>
-    <div class="max-w-7xl mx-auto p-3.5 sm:p-6 pb-20 sm:pb-24">
+    <div class="max-w-[1400px] mx-auto p-3 sm:p-5 space-y-4 pb-24">
         <!-- Header Banner Card Box -->
         <header
             class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -165,10 +165,14 @@
                     <div *ngIf="extractedBookingId() === booking.id && (classifyingReport() || extractedReport())"
                         class="basis-full rounded-xl border border-indigo-500/30 bg-indigo-500/5 p-3 space-y-1">
                         <div class="text-[11px] font-bold text-[var(--text)]">Extracted report fields</div>
-                        <div *ngIf="classifyingReport()" class="text-[11px] text-[var(--muted)]">Classifying document…</div>
-                        <div *ngIf="extractedReport()?.documentType" class="text-[11px] text-[var(--text)]">Type: {{ extractedReport()?.documentType }}</div>
-                        <pre class="whitespace-pre-wrap font-sans text-[11px] text-[var(--muted)]">{{ extractedReport()?.rawSummary || extractedReport()?.error }}</pre>
-                        <pre *ngIf="extractedFieldSummary()" class="whitespace-pre-wrap font-sans text-[11px] text-[var(--text)]">{{ extractedFieldSummary() }}</pre>
+                        <div *ngIf="classifyingReport()" class="text-[11px] text-[var(--muted)]">Classifying document…
+                        </div>
+                        <div *ngIf="extractedReport()?.documentType" class="text-[11px] text-[var(--text)]">Type: {{
+                            extractedReport()?.documentType }}</div>
+                        <pre
+                            class="whitespace-pre-wrap font-sans text-[11px] text-[var(--muted)]">{{ extractedReport()?.rawSummary || extractedReport()?.error }}</pre>
+                        <pre *ngIf="extractedFieldSummary()"
+                            class="whitespace-pre-wrap font-sans text-[11px] text-[var(--text)]">{{ extractedFieldSummary() }}</pre>
                     </div>
 
                     <!-- Cancel Booking -->
