@@ -132,7 +132,7 @@
             <app-patient-dashboard-appointment-list title="Today's Appointments" icon="fa-regular fa-calendar-check"
                 [items]="todayAppointments()" [loading]="loadingAppointments" loadingLabel="Loading appointments..."
                 emptyTitle="No appointments for today."
-                emptyMessage="You don't have any appointments scheduled for today."
+                emptyMessage=""
                 emptyActionLabel="Book an Appointment" emptyVariant="highlight" actionVariant="primary"
                 (viewAll)="goToMyAppointments()" (emptyAction)="goToBookAppointment()"
                 (open)="goToAppointmentDetail($event)">
