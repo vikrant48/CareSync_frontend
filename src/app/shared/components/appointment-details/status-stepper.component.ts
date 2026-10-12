@@ -25,7 +25,7 @@ export class StatusStepperComponent implements OnChanges {
         { id: '4', name: 'Waiting Room', state: 'UPCOMING', statuses: ['WAITING_ROOM', 'READY_FOR_VISIT'] },
         { id: '5', name: 'In Progress', state: 'UPCOMING', statuses: ['IN_PROGRESS'] },
         { id: '6', name: 'Medical Report', state: 'UPCOMING', statuses: ['MEDICAL_RECORD', 'REPORT_DRAFTED'] },
-        { id: '7', name: 'Completed', state: 'UPCOMING', statuses: ['COMPLETED'] }
+        { id: '7', name: 'Completed', state: 'UPCOMING', statuses: ['READY_TO_COMPLETE', 'COMPLETED'] }
     ];
 
     get isCancelled(): boolean {
@@ -58,7 +58,7 @@ export class StatusStepperComponent implements OnChanges {
             return;
         }
 
-        // Map 14 backend statuses to 7 pipeline stage index
+        // Map backend statuses to 7 pipeline stage index
         const stageOrder: { [key: string]: number } = {
             'HELD': 0, 'BOOKED': 0,
             'CONFIRMED': 1, 'SCHEDULED': 1,
@@ -66,6 +66,7 @@ export class StatusStepperComponent implements OnChanges {
             'WAITING_ROOM': 3, 'READY_FOR_VISIT': 3,
             'IN_PROGRESS': 4,
             'MEDICAL_RECORD': 5, 'REPORT_DRAFTED': 5,
+            'READY_TO_COMPLETE': 6,
             'COMPLETED': 6
         };
 

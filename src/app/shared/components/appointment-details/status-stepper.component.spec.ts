@@ -25,4 +25,12 @@ describe('StatusStepperComponent', () => {
         expect(component.stages[4].state).toBe('CURRENT');
         expect(component.stages[0].state).toBe('COMPLETED');
     });
+
+    it('should map READY_TO_COMPLETE to stage index 6 and complete previous stages', () => {
+        component.currentStatus = 'READY_TO_COMPLETE';
+        component.ngOnChanges({ currentStatus: {} as any });
+        expect(component.stages[6].state).toBe('CURRENT');
+        expect(component.stages[5].state).toBe('COMPLETED');
+        expect(component.stages[0].state).toBe('COMPLETED');
+    });
 });

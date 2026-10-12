@@ -53,6 +53,7 @@ export class StatusBadgeComponent {
       case 'READY_FOR_VISIT': return 'Ready for Visit';
       case 'IN_PROGRESS': return 'In Consultation';
       case 'REPORT_DRAFTED': return 'Report Drafted';
+      case 'READY_TO_COMPLETE': return 'Ready To Complete';
       case 'COMPLETED': return 'Completed';
       case 'CANCELLED': return 'Cancelled';
       case 'CANCELLED_BY_PATIENT': return 'Cancelled (Patient)';
@@ -88,7 +89,7 @@ export class StatusBadgeComponent {
       case 'INTAKE_COMPLETED': return 'status-badge--intake';
       case 'READY_FOR_VISIT': return 'status-badge--ready';
       case 'IN_PROGRESS': return 'status-badge--in-progress';
-      case 'REPORT_DRAFTED': return 'status-badge--report-drafted';
+      case 'REPORT_DRAFTED': case 'READY_TO_COMPLETE': return 'status-badge--report-drafted';
       case 'COMPLETED': case 'ACTIVE': return 'status-badge--completed';
       case 'CANCELLED': case 'CANCELLED_BY_PATIENT': case 'CANCELLED_BY_DOCTOR': case 'INACTIVE': return 'status-badge--danger';
       case 'NO_SHOW_PATIENT': case 'NO_SHOW_DOCTOR': case 'PENDING': return 'status-badge--warning';
