@@ -30,7 +30,7 @@ export interface SavedChatSession {
       *ngIf="!isOpen()"
       id="ai-widget-trigger"
       (click)="toggleChat()"
-      class="fixed bottom-20 right-4 md:bottom-8 md:right-8 w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-[60] group"
+      class="fixed bottom-20 right-4 xl:bottom-8 xl:right-8 w-12 h-12 xl:w-14 xl:h-14 bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-[60] group"
     >
       <i class="fas fa-robot text-xl md:text-2xl group-hover:rotate-12 transition-transform"></i>
       <span class="absolute -top-1 -right-1 flex h-3 w-3" *ngIf="messages().length === 0">

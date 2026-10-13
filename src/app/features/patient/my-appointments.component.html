@@ -37,8 +37,7 @@
             </div>
         </div>
 
-        <app-skeleton *ngIf="loading" variant="card" [count]="3"
-            wrapperClass="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></app-skeleton>
+        <app-page-loader *ngIf="loading" label="Loading appointments..."></app-page-loader>
 
         <!-- Empty State -->
         <app-empty-state *ngIf="!loading && filtered().length === 0 && appointments.length === 0"

@@ -37,12 +37,12 @@
         </app-filter-bar>
 
         <!-- 4 KPI Stat Cards Row -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
             <!-- Stat 1: Total Appointments -->
             <div
-                class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 shadow-xl flex items-center gap-4 transition-all hover:border-[var(--accent)]/40">
+                class="bg-[var(--panel)] border border-[var(--border)] rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl flex items-center gap-2.5 sm:gap-4 transition-all hover:border-[var(--accent)]/40 min-w-0">
                 <div
-                    class="w-12 h-12 rounded-2xl bg-[var(--bg)] text-[var(--primary)] flex items-center justify-center text-xl shrink-0 shadow-inner">
+                    class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[var(--bg)] text-[var(--primary)] flex items-center justify-center text-base sm:text-xl shrink-0 shadow-inner">
                     <i class="fa-regular fa-calendar-check"></i>
                 </div>
                 <div class="min-w-0">
@@ -56,9 +56,9 @@
 
             <!-- Stat 2: Confirmed -->
             <div
-                class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 shadow-xl flex items-center gap-4 transition-all hover:border-[var(--accent)]/40">
+                class="bg-[var(--panel)] border border-[var(--border)] rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl flex items-center gap-2.5 sm:gap-4 transition-all hover:border-[var(--accent)]/40 min-w-0">
                 <div
-                    class="w-12 h-12 rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center text-xl shrink-0 shadow-inner">
+                    class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center text-base sm:text-xl shrink-0 shadow-inner">
                     <i class="fa-solid fa-circle-check"></i>
                 </div>
                 <div class="min-w-0">
@@ -71,9 +71,9 @@
 
             <!-- Stat 3: Pending -->
             <div
-                class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 shadow-xl flex items-center gap-4 transition-all hover:border-[var(--accent)]/40">
+                class="bg-[var(--panel)] border border-[var(--border)] rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl flex items-center gap-2.5 sm:gap-4 transition-all hover:border-[var(--accent)]/40 min-w-0">
                 <div
-                    class="w-12 h-12 rounded-2xl bg-[var(--accent-soft)] text-amber-700 dark:text-amber-400 flex items-center justify-center text-xl shrink-0 shadow-inner">
+                    class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[var(--accent-soft)] text-amber-700 dark:text-amber-400 flex items-center justify-center text-base sm:text-xl shrink-0 shadow-inner">
                     <i class="fa-regular fa-clock"></i>
                 </div>
                 <div class="min-w-0">
@@ -86,9 +86,9 @@
 
             <!-- Stat 4: Cancelled -->
             <div
-                class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 shadow-xl flex items-center gap-4 transition-all hover:border-[var(--accent)]/40">
+                class="bg-[var(--panel)] border border-[var(--border)] rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl flex items-center gap-2.5 sm:gap-4 transition-all hover:border-[var(--accent)]/40 min-w-0">
                 <div
-                    class="w-12 h-12 rounded-2xl bg-[var(--danger-soft)] text-rose-700 dark:text-rose-400 flex items-center justify-center text-xl shrink-0 shadow-inner">
+                    class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[var(--danger-soft)] text-rose-700 dark:text-rose-400 flex items-center justify-center text-base sm:text-xl shrink-0 shadow-inner">
                     <i class="fa-solid fa-circle-xmark"></i>
                 </div>
                 <div class="min-w-0">
@@ -101,8 +101,7 @@
         </div>
 
         <!-- Loading Skeleton -->
-        <app-skeleton *ngIf="loading" variant="card" [count]="6"
-            wrapperClass="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></app-skeleton>
+        <app-page-loader *ngIf="loading" label="Loading schedule..." accent="doctor"></app-page-loader>
 
         <!-- Empty States -->
         <app-empty-state

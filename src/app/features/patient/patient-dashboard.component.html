@@ -1,75 +1,75 @@
 <app-patient-layout>
     <div class="max-w-[1400px] mx-auto p-3 sm:p-5 space-y-4">
         <!-- Welcome header card -->
-        <section class="surface p-4 sm:p-5 shadow-sm relative">
-            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-                <!-- Left: Profile Info -->
-                <div
-                    class="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left w-full md:w-auto">
-                    <ng-container *ngIf="!loadingWelcome">
-                        <img *ngIf="profileImageUrl; else avatar" [src]="profileImageUrl" alt="Profile"
-                            class="w-14 h-14 rounded-full ring-2 ring-[var(--primary)]/30 object-cover shadow-lg shrink-0" />
-                        <ng-template #avatar>
-                            <div
-                                class="w-14 h-14 rounded-full bg-gradient-to-tr from-[var(--primary)] to-indigo-600 text-white flex items-center justify-center text-xl font-bold shadow-lg shrink-0 ring-2 ring-[var(--primary)]/30">
-                                {{ (patientName || 'P').charAt(0).toUpperCase() }}
-                            </div>
-                        </ng-template>
-                    </ng-container>
-                    <div *ngIf="loadingWelcome" class="w-14 h-14 rounded-full bg-[var(--bg)] animate-pulse shrink-0">
-                    </div>
-
-                    <div class="flex-1 min-w-0">
-                        <ng-container *ngIf="loadingWelcome; else nameReady">
-                            <div class="space-y-1.5 animate-pulse">
-                                <div class="h-4 w-28 bg-[var(--bg)] rounded"></div>
-                                <div class="h-3 w-20 bg-[var(--bg)] rounded"></div>
-                            </div>
-                        </ng-container>
-                        <ng-template #nameReady>
-                            <div class="text-[11px] font-bold text-muted tracking-wider uppercase">{{ greeting }}
-                            </div>
-                            <h1
-                                class="text-xl sm:text-2xl font-extrabold text-[var(--text)] flex items-center justify-center sm:justify-start gap-2 mt-0.5 tracking-tight">
-                                {{ patientName || 'Patient' }}
-                            </h1>
-                            <div class="mt-2.5 text-[11px] text-muted w-48 mx-auto sm:mx-0">
-                                <div class="flex items-center justify-between mb-1 font-semibold">
-                                    <span class="text-muted">Profile Completion</span>
-                                    <span class="font-bold text-[var(--primary)]">{{ completionPercentage }}%</span>
-                                </div>
-                                <div class="w-full bg-[var(--bg)] rounded-full h-1.5 overflow-hidden">
-                                    <div class="bg-[var(--primary)] h-1.5 rounded-full transition-all duration-500 shadow-sm shadow-[var(--primary)]"
-                                        [style.width.%]="completionPercentage"></div>
-                                </div>
-                            </div>
-                        </ng-template>
-                    </div>
+        <section class="surface p-3 sm:p-5 shadow-sm relative">
+            <div class="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-3 md:flex md:items-center md:justify-between md:gap-4">
+                <ng-container *ngIf="!loadingWelcome">
+                    <img *ngIf="profileImageUrl; else avatar" [src]="profileImageUrl" alt="Profile"
+                        class="w-14 h-14 rounded-full ring-2 ring-[var(--primary)]/30 object-cover shadow-lg shrink-0 md:order-1" />
+                    <ng-template #avatar>
+                        <div
+                            class="w-14 h-14 rounded-full bg-gradient-to-tr from-[var(--primary)] to-indigo-600 text-white flex items-center justify-center text-xl font-bold shadow-lg shrink-0 ring-2 ring-[var(--primary)]/30 md:order-1">
+                            {{ (patientName || 'P').charAt(0).toUpperCase() }}
+                        </div>
+                    </ng-template>
+                </ng-container>
+                <div *ngIf="loadingWelcome" class="w-14 h-14 rounded-full bg-[var(--bg)] animate-pulse shrink-0 md:order-1">
                 </div>
 
-                <!-- Right: Reusable Action Buttons + Notification Bell -->
-                <div
-                    class="w-full md:w-auto flex flex-wrap sm:flex-nowrap items-center justify-center sm:justify-end gap-2.5">
-                    <app-button variant="primary" size="sm" icon="fa-solid fa-calendar-plus"
+                <div class="min-w-0 text-left md:order-2 md:flex-1">
+                    <ng-container *ngIf="loadingWelcome; else nameReady">
+                        <div class="space-y-1.5 animate-pulse">
+                            <div class="h-4 w-28 bg-[var(--bg)] rounded"></div>
+                            <div class="h-3 w-20 bg-[var(--bg)] rounded"></div>
+                        </div>
+                    </ng-container>
+                    <ng-template #nameReady>
+                        <div class="text-[11px] font-bold text-muted tracking-wider uppercase">{{ greeting }}</div>
+                        <h1 class="text-xl sm:text-2xl font-extrabold text-[var(--text)] truncate mt-0.5 tracking-tight">
+                            {{ patientName || 'Patient' }}
+                        </h1>
+                        <div class="mt-2.5 text-[11px] text-muted w-full max-w-[12rem] md:w-48">
+                            <div class="flex items-center justify-between mb-1 font-semibold gap-2">
+                                <span class="text-muted truncate">Profile Completion</span>
+                                <span class="font-bold text-[var(--primary)] shrink-0">{{ completionPercentage }}%</span>
+                            </div>
+                            <div class="w-full bg-[var(--bg)] rounded-full h-1.5 overflow-hidden">
+                                <div class="bg-[var(--primary)] h-1.5 rounded-full transition-all duration-500 shadow-sm shadow-[var(--primary)]"
+                                    [style.width.%]="completionPercentage"></div>
+                            </div>
+                        </div>
+                    </ng-template>
+                </div>
+
+                <app-patient-notification class="justify-self-end shrink-0 md:order-4"></app-patient-notification>
+
+                <div class="col-span-3 grid grid-cols-3 gap-1.5 w-full min-w-0 md:order-3 md:col-auto md:flex md:w-auto md:items-center md:gap-2">
+                    <app-button class="min-w-0 block [&_button]:w-full [&_button]:px-1.5 [&_button]:text-[10px] md:[&_button]:w-auto md:[&_button]:px-3 md:[&_button]:text-xs"
+                        variant="primary" size="sm" icon="fa-solid fa-calendar-plus"
                         (btnClick)="goToBookAppointment()">
-                        Book Appointment
+                        <span class="md:hidden">Book</span>
+                        <span class="hidden md:inline">Book Appointment</span>
                     </app-button>
-                    <app-button variant="secondary" size="sm" icon="fa-solid fa-calendar-check"
+                    <app-button class="min-w-0 block [&_button]:w-full [&_button]:px-1.5 [&_button]:text-[10px] md:[&_button]:w-auto md:[&_button]:px-3 md:[&_button]:text-xs"
+                        variant="secondary" size="sm" icon="fa-solid fa-calendar-check"
                         (btnClick)="goToMyAppointments()">
-                        My Appointments
+                        <span class="md:hidden">Appointments</span>
+                        <span class="hidden md:inline">My Appointments</span>
                     </app-button>
-                    <app-button variant="secondary" size="sm" icon="fa-solid fa-heart-pulse" (btnClick)="goToVitals()">
-                        Health Vitals
+                    <app-button class="min-w-0 block [&_button]:w-full [&_button]:px-1.5 [&_button]:text-[10px] md:[&_button]:w-auto md:[&_button]:px-3 md:[&_button]:text-xs"
+                        variant="secondary" size="sm" icon="fa-solid fa-heart-pulse" (btnClick)="goToVitals()">
+                        <span class="md:hidden">Vitals</span>
+                        <span class="hidden md:inline">Health Vitals</span>
                     </app-button>
-                    <app-patient-notification></app-patient-notification>
                 </div>
             </div>
         </section>
 
         <!-- Financial Overview (3 Sleek SaaS Cards) -->
-        <section *ngIf="financialStats" class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+        <section *ngIf="financialStats"
+            class="grid grid-flow-col auto-cols-[minmax(160px,1fr)] sm:grid-flow-row sm:auto-cols-auto sm:grid-cols-3 gap-2.5 sm:gap-3.5 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
             <!-- Total Spent Card -->
-            <div class="surface surface-hover p-4 shadow-sm flex items-center justify-between transition-all">
+            <div class="surface surface-hover p-3 sm:p-4 shadow-sm flex items-center justify-between transition-all">
                 <div class="flex items-center gap-3">
                     <div
                         class="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center text-base shrink-0">
@@ -86,7 +86,7 @@
             </div>
 
             <!-- Appointments Spend Card -->
-            <div class="surface surface-hover p-4 shadow-sm flex items-center justify-between transition-all">
+            <div class="surface surface-hover p-3 sm:p-4 shadow-sm flex items-center justify-between transition-all">
                 <div class="flex items-center gap-3">
                     <div
                         class="w-10 h-10 rounded-xl bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center text-base shrink-0">
@@ -103,7 +103,7 @@
             </div>
 
             <!-- Lab Tests Spend Card -->
-            <div class="surface surface-hover p-4 shadow-sm flex items-center justify-between transition-all">
+            <div class="surface surface-hover p-3 sm:p-4 shadow-sm flex items-center justify-between transition-all">
                 <div class="flex items-center gap-3">
                     <div
                         class="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center text-base shrink-0">

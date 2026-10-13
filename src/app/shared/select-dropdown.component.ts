@@ -29,7 +29,7 @@ export interface SelectOption {
               [disabled]="disabled"
               [attr.aria-expanded]="isOpen"
               aria-haspopup="listbox"
-              [class]="customButtonClass || 'w-full filter-control-height rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3.5 text-xs sm:text-sm cursor-pointer relative transition-all duration-200 group flex items-center justify-between text-left font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 hover:border-gray-300 dark:hover:border-gray-600'"
+              [class]="customButtonClass || 'w-full filter-control-height rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3.5 text-xs sm:text-sm cursor-pointer relative transition-all duration-200 group flex items-center justify-between text-left font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 hover:border-gray-300 dark:hover:border-gray-500'"
               [class.opacity-50]="disabled"
               [class.cursor-not-allowed]="disabled">
         <span [class.text-gray-400]="!selectedValue" class="block truncate pr-5">

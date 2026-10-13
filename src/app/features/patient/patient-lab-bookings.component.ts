@@ -11,7 +11,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { AiAssistantService } from '../../core/services/ai-assistant.service';
 import { VisionScanResponse } from '../../core/models/ai.models';
 import { ConfirmService } from '../../core/services/confirm.service';
-import { SkeletonComponent } from '../../shared/ui/skeleton.component';
+import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 import { StatusBadgeComponent } from '../../shared/ui/status-badge.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
@@ -20,7 +20,7 @@ import { FilterBarComponent, FilterConfig } from '../../shared/components';
 @Component({
   selector: 'app-patient-lab-bookings',
   standalone: true,
-  imports: [CommonModule, PatientLayoutComponent, PaymentPopupComponent, SkeletonComponent, StatusBadgeComponent, EmptyStateComponent, ModalShellComponent, FilterBarComponent],
+  imports: [CommonModule, PatientLayoutComponent, PaymentPopupComponent, PageLoaderComponent, StatusBadgeComponent, EmptyStateComponent, ModalShellComponent, FilterBarComponent],
   templateUrl: './patient-lab-bookings.component.html',
   styleUrl: './patient-lab-bookings.component.css'
 })

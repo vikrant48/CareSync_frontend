@@ -22,22 +22,14 @@
                 </button>
             </div>
 
-            <!-- Background Ambient Heartbeat Graphic -->
-            <div class="absolute right-0 top-0 bottom-0 w-1/2 opacity-15 pointer-events-none hidden md:block">
-                <svg class="w-full h-full text-[var(--primary)]" viewBox="0 0 400 120" fill="none" stroke="currentColor"
-                    stroke-width="2">
-                    <path d="M0,60 L100,60 L115,20 L130,100 L145,40 L160,75 L175,60 L400,60" stroke-linecap="round"
-                        stroke-linejoin="round" />
-                </svg>
-            </div>
         </header>
 
-        <!-- 4 Vitals KPI Stat Cards Row -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <!-- 4 Vitals KPI Stat Cards: two rows on phone, one row on laptop -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
 
             <!-- 1. Blood Pressure Card -->
             <div
-                class="relative overflow-hidden bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 shadow-sm flex flex-col justify-between hover:border-[var(--primary)]/40 transition-colors group">
+                class="relative bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-3 sm:p-5 shadow-sm flex flex-col justify-between hover:border-[var(--primary)]/40 transition-colors min-w-0">
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <div
@@ -62,17 +54,11 @@
                     </span>
                     <span class="text-[11px] text-[var(--muted)]">vs last log</span>
                 </div>
-
-                <!-- Wave Sparkline SVG -->
-                <svg class="absolute right-2 bottom-2 w-28 h-10 text-blue-500/15 group-hover:text-blue-500/25 transition-colors pointer-events-none"
-                    viewBox="0 0 100 30" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M0,20 Q25,5 50,15 T100,5" stroke-linecap="round" />
-                </svg>
             </div>
 
             <!-- 2. Sugar Level Card -->
             <div
-                class="relative overflow-hidden bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 shadow-sm flex flex-col justify-between hover:border-[var(--primary)]/40 transition-colors group">
+                class="relative bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-3 sm:p-5 shadow-sm flex flex-col justify-between hover:border-[var(--primary)]/40 transition-colors min-w-0">
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <div
@@ -95,17 +81,11 @@
                     </span>
                     <span class="text-[11px] text-[var(--muted)]">vs last log</span>
                 </div>
-
-                <!-- Wave Sparkline SVG -->
-                <svg class="absolute right-2 bottom-2 w-28 h-10 text-amber-500/15 group-hover:text-amber-500/25 transition-colors pointer-events-none"
-                    viewBox="0 0 100 30" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M0,15 Q30,25 60,5 T100,18" stroke-linecap="round" />
-                </svg>
             </div>
 
             <!-- 3. Weight Card -->
             <div
-                class="relative overflow-hidden bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 shadow-sm flex flex-col justify-between hover:border-[var(--primary)]/40 transition-colors group">
+                class="relative bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-3 sm:p-5 shadow-sm flex flex-col justify-between hover:border-[var(--primary)]/40 transition-colors min-w-0">
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <div
@@ -128,17 +108,11 @@
                     </span>
                     <span class="text-[11px] text-[var(--muted)]">vs last log</span>
                 </div>
-
-                <!-- Wave Sparkline SVG -->
-                <svg class="absolute right-2 bottom-2 w-28 h-10 text-purple-500/15 group-hover:text-purple-500/25 transition-colors pointer-events-none"
-                    viewBox="0 0 100 30" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M0,18 Q40,10 70,20 T100,8" stroke-linecap="round" />
-                </svg>
             </div>
 
             <!-- 4. Body Temperature Card -->
             <div
-                class="relative overflow-hidden bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 shadow-sm flex flex-col justify-between hover:border-[var(--primary)]/40 transition-colors group">
+                class="relative bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-3 sm:p-5 shadow-sm flex flex-col justify-between hover:border-[var(--primary)]/40 transition-colors min-w-0">
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <div
@@ -162,12 +136,6 @@
                     </span>
                     <span class="text-[11px] text-[var(--muted)]">vs last log</span>
                 </div>
-
-                <!-- Wave Sparkline SVG -->
-                <svg class="absolute right-2 bottom-2 w-28 h-10 text-red-500/15 group-hover:text-red-500/25 transition-colors pointer-events-none"
-                    viewBox="0 0 100 30" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M0,15 Q35,15 70,14 T100,15" stroke-linecap="round" />
-                </svg>
             </div>
         </div>
 

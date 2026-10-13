@@ -14,6 +14,7 @@ import { SearchableSelectComponent } from '../../shared/searchable-select.compon
 import { ToastService } from '../../core/services/toast.service';
 import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 import { FilterBarComponent, FilterConfig } from '../../shared/components';
+import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 
 export interface CategoryTab {
   id: string;
@@ -26,7 +27,7 @@ export interface CategoryTab {
 @Component({
   selector: 'app-lab-tests',
   standalone: true,
-  imports: [CommonModule, FormsModule, DoctorLayoutComponent, PatientLayoutComponent, PaymentPopupComponent, SearchableSelectComponent, ModalShellComponent, FilterBarComponent],
+  imports: [CommonModule, FormsModule, DoctorLayoutComponent, PatientLayoutComponent, PaymentPopupComponent, SearchableSelectComponent, ModalShellComponent, FilterBarComponent, PageLoaderComponent],
   templateUrl: './lab-tests.component.html'
 })
 export class LabTestsComponent implements OnInit {

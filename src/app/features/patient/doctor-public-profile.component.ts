@@ -12,11 +12,12 @@ import { DoctorBookingModalComponent } from '../../shared/doctor-booking-modal.c
 import { ToastService } from '../../core/services/toast.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PaymentService } from '../../core/services/payment.service';
+import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 
 @Component({
   selector: 'app-doctor-public-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, DoctorDetailsPanelComponent, PaymentPopupComponent, DoctorBookingModalComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, DoctorDetailsPanelComponent, PaymentPopupComponent, DoctorBookingModalComponent, PageLoaderComponent],
   templateUrl: './doctor-public-profile.component.html',
   styleUrl: './doctor-public-profile.component.css'
 })

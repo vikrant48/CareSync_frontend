@@ -16,7 +16,7 @@
         </div>
     </div>
 
-    <div *ngIf="appointments.length > 0" class="hidden md:block overflow-x-auto">
+    <div *ngIf="appointments.length > 0" class="hidden xl:block overflow-x-auto">
         <table class="w-full text-left border-collapse">
             <thead>
                 <tr
@@ -73,7 +73,7 @@
         </table>
     </div>
 
-    <div *ngIf="appointments.length > 0" class="md:hidden divide-y divide-[var(--border)]">
+    <div *ngIf="appointments.length > 0" class="xl:hidden divide-y divide-[var(--border)]">
         <article *ngFor="let a of visibleAppointments; trackBy: trackAppointment" class="p-4 space-y-3">
             <div class="flex items-start justify-between gap-3">
                 <div class="flex items-center gap-3 min-w-0">

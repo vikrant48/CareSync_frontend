@@ -14,9 +14,9 @@
                 </div>
                 <div>
                     <button
-                        class="px-3.5 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-700 dark:text-rose-400 border border-rose-500/30 text-xs font-bold shadow-md inline-flex items-center gap-2 transition-all"
+                        class="px-3.5 py-1.5 rounded-xl bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-xs font-bold shadow-md inline-flex items-center gap-2 transition-all"
                         (click)="openEmergencyModal()">
-                        <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span>Emergency Booking</span>
                     </button>
                 </div>
@@ -60,8 +60,10 @@
             (filterChange)="onFilterBarChange($event)">
         </app-filter-bar>
 
+        <app-page-loader *ngIf="loadingDoctors" label="Loading doctors..."></app-page-loader>
+
         <!-- Doctors Found Toolbar -->
-        <div class="flex items-center justify-between py-1">
+        <div *ngIf="!loadingDoctors" class="flex items-center justify-between py-1">
             <div class="text-sm font-extrabold text-[var(--text)] flex items-center gap-2">
                 <span>{{ totalDoctorsCount }} Doctors Found</span>
             </div>
@@ -75,9 +77,6 @@
                 </select>
             </div>
         </div>
-
-        <app-skeleton *ngIf="loadingDoctors" variant="card" [count]="6"
-            wrapperClass="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></app-skeleton>
 
         <app-empty-state *ngIf="!loadingDoctors && doctors.length === 0" icon="fa-solid fa-face-frown"
             title="No doctors found" message="No doctors found matching your criteria." [hasAction]="true">
@@ -181,9 +180,9 @@
 
                     <button type="button" [disabled]="d.isActive === false"
                         (click)="bookEmergencyDoctor(d); $event.stopPropagation()"
-                        class="shrink-0 py-2.5 px-3 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 dark:bg-[#4a1219] dark:hover:bg-[#5e1720] dark:border-[#7c1d29]/70 dark:text-rose-100 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed font-semibold rounded-xl transition-all shadow-sm hover:shadow flex items-center justify-center gap-1.5 text-xs sm:text-sm cursor-pointer whitespace-nowrap"
+                        class="shrink-0 py-2.5 px-3 bg-emerald-400/70 hover:bg-emerald-400/85 text-white border border-emerald-300/45 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed font-semibold rounded-xl transition-all shadow-sm hover:shadow flex items-center justify-center gap-1.5 text-xs sm:text-sm cursor-pointer whitespace-nowrap"
                         [title]="'Book Emergency Appointment with ' + formatDoctorName(d)">
-                        <i class="fa-solid fa-bolt text-xs text-amber-400"></i>
+                        <i class="fa-solid fa-bolt text-xs text-emerald-100"></i>
                         <span>Emerg Booking</span>
                     </button>
                 </div>
@@ -193,7 +192,7 @@
 
     <!-- Fixed Bottom Pagination Bar (Constrained to Main Content Layout) -->
     <div *ngIf="!loadingDoctors && totalDoctorsCount > 0"
-        class="fixed left-0 md:left-64 right-0 z-40 bg-[var(--bg)]/95 backdrop-blur-md border-t border-[var(--border)] shadow-2xl px-4 sm:px-6 py-2.5 flex items-center justify-between transition-all fixed-above-mobile-nav safe-bottom">
+        class="fixed left-0 xl:left-64 right-0 z-40 bg-[var(--bg)]/95 backdrop-blur-md border-t border-[var(--border)] shadow-2xl px-3 sm:px-6 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 transition-all fixed-above-mobile-nav safe-bottom">
 
         <div class="flex items-center gap-3 text-xs text-[var(--muted)]">
             <span class="font-medium">

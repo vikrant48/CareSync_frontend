@@ -9,10 +9,7 @@
             (click)="viewAll.emit()">View All</button>
     </div>
 
-    <div *ngIf="loading" class="flex-1 flex items-center justify-center gap-2 text-muted py-8 text-xs">
-        <span class="animate-spin h-4 w-4 border-2 border-[var(--primary)] border-t-transparent rounded-full"></span>
-        <span>{{ loadingLabel }}</span>
-    </div>
+    <app-page-loader *ngIf="loading" [label]="loadingLabel" [compact]="true"></app-page-loader>
 
     <div *ngIf="!loading && items.length === 0 && emptyVariant === 'highlight'"
         class="flex-1 flex flex-col items-center justify-center text-center py-6">

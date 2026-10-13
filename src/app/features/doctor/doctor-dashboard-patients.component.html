@@ -1,4 +1,4 @@
-<div class="h-full w-full surface p-5 shadow-sm flex flex-col space-y-4">
+<div class="h-full w-full surface p-3 sm:p-5 shadow-sm flex flex-col space-y-3 sm:space-y-4">
   <div class="flex items-center justify-between gap-3 pb-1">
     <h2 class="text-sm font-extrabold text-[var(--text)] tracking-tight min-w-0">Recent Patients</h2>
     <a routerLink="/doctor/appointments" class="shrink-0 whitespace-nowrap text-xs font-bold text-[var(--primary)] hover:underline">View All</a>
@@ -11,41 +11,70 @@
     <p class="text-sm font-bold text-[var(--text)]">No recent patients</p>
     <p class="text-xs text-muted mt-1">Patients from today's appointments will show up here.</p>
   </div>
-  <div *ngIf="patients.length > 0" class="overflow-x-auto">
-    <table class="w-full text-left border-collapse">
-      <thead>
-        <tr class="border-b border-[var(--border)] text-[10px] font-bold text-muted uppercase tracking-wider">
-          <th class="py-2.5 px-3">PATIENT</th>
-          <th *ngIf="showAge" class="py-2.5 px-3">AGE</th>
-          <th class="py-2.5 px-3">CONDITION</th>
-          <th class="py-2.5 px-3">LAST VISIT</th>
-          <th class="py-2.5 px-3 text-right">STATUS</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-[var(--border)] text-xs font-medium text-[var(--text)]">
-        <tr *ngFor="let p of patients; trackBy: trackPatient" class="hover:bg-[var(--bg)] transition-colors cursor-pointer" (click)="openPatient.emit(p.appointment)">
-          <td class="py-3 px-3">
-            <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-full overflow-hidden border border-[var(--border)] bg-[var(--bg)] shrink-0">
-                <img [src]="p.avatar" class="w-full h-full object-cover" onerror="this.src='assets/default-profile.png'" />
-              </div>
-              <div>
-                <span class="font-extrabold text-[var(--text)]">{{ p.name }}</span>
-                <span *ngIf="p.isActive === false"
-                      class="block w-fit mt-0.5 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-600 border border-rose-500/20">
-                  Inactive
-                </span>
-              </div>
-            </div>
-          </td>
-          <td *ngIf="showAge" class="py-3 px-3 text-muted">{{ p.age }}</td>
-          <td class="py-3 px-3 text-muted">{{ p.condition }}</td>
-          <td class="py-3 px-3 text-muted">{{ p.lastVisit }}</td>
-          <td class="py-3 px-3 text-right">
-            <app-status-badge *ngIf="p.status" [status]="p.status" size="sm"></app-status-badge>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+
+  <div *ngIf="patients.length > 0" class="space-y-2.5 flex-1">
+    <div *ngFor="let p of patients; trackBy: trackPatient"
+         class="inset-surface surface-hover p-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:p-3.5 transition-all cursor-pointer group"
+         role="link" tabindex="0"
+         (click)="openPatient.emit(p.appointment)"
+         (keydown.enter)="openPatient.emit(p.appointment)"
+         [attr.aria-label]="'Open appointment for ' + p.name">
+      <div class="flex items-start gap-3 min-w-0 w-full sm:w-auto">
+        <img *ngIf="p.avatar; else patientAvatar" [src]="p.avatar" [alt]="p.name"
+             class="w-11 h-11 rounded-full object-cover ring-2 ring-[var(--border)] shrink-0"
+             onerror="this.src='assets/default-profile.png'" />
+        <ng-template #patientAvatar>
+          <div class="w-11 h-11 rounded-full bg-gradient-to-tr from-[var(--primary)] to-indigo-600 text-white flex items-center justify-center font-bold text-sm shrink-0 ring-2 ring-[var(--border)]">
+            {{ (p.name || 'P').charAt(0) }}
+          </div>
+        </ng-template>
+        <div class="flex flex-col min-w-0 flex-1">
+          <div class="flex items-start justify-between gap-2">
+            <h4 class="text-sm font-bold text-[var(--text)] truncate group-hover:text-[var(--primary)] transition-colors">
+              {{ p.name }}
+            </h4>
+            <i class="fa-solid fa-chevron-right text-muted text-xs shrink-0 mt-1 sm:hidden" aria-hidden="true"></i>
+          </div>
+          <span class="text-xs text-muted truncate font-medium">{{ p.condition || 'Not provided' }}</span>
+          <span *ngIf="p.isActive === false"
+                class="w-fit mt-1 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 border border-rose-500/20">
+            Patient inactive
+          </span>
+          <div class="hidden sm:flex items-center gap-3 text-[11px] text-muted mt-1.5">
+            <span *ngIf="showAge && p.age" class="inline-flex items-center gap-1.5 font-medium whitespace-nowrap">
+              <i class="fa-solid fa-user text-[var(--primary)]"></i>
+              {{ p.age }}
+            </span>
+            <span class="inline-flex items-center gap-1.5 font-medium whitespace-nowrap">
+              <i class="fa-regular fa-calendar text-[var(--primary)]"></i>
+              {{ p.lastVisit }}
+            </span>
+            <span *ngIf="p.appointment?.appointmentTime" class="inline-flex items-center gap-1.5 font-medium whitespace-nowrap">
+              <i class="fa-regular fa-clock text-[var(--primary)]"></i>
+              {{ p.appointment.appointmentTime }}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="flex sm:hidden items-center gap-2 min-w-0 flex-nowrap">
+        <span *ngIf="showAge && p.age" class="inline-flex items-center gap-1 font-medium whitespace-nowrap text-[11px] text-muted shrink-0">
+          <i class="fa-solid fa-user text-[var(--primary)]"></i>
+          {{ p.age }}
+        </span>
+        <span class="inline-flex items-center gap-1 font-medium whitespace-nowrap text-[11px] text-muted shrink-0">
+          <i class="fa-regular fa-calendar text-[var(--primary)]"></i>
+          {{ p.lastVisit }}
+        </span>
+        <span *ngIf="p.appointment?.appointmentTime" class="inline-flex items-center gap-1 font-medium whitespace-nowrap text-[11px] text-muted shrink-0">
+          <i class="fa-regular fa-clock text-[var(--primary)]"></i>
+          {{ p.appointment.appointmentTime }}
+        </span>
+        <app-status-badge *ngIf="p.status" class="ml-auto shrink-0" [status]="p.status" size="sm"></app-status-badge>
+      </div>
+      <div class="hidden sm:flex items-center gap-2.5 shrink-0 ml-2" *ngIf="p.status">
+        <app-status-badge [status]="p.status" size="md"></app-status-badge>
+        <i class="fa-solid fa-chevron-right text-muted group-hover:text-[var(--text)] text-xs group-hover:translate-x-0.5 transition-all"></i>
+      </div>
+    </div>
   </div>
 </div>

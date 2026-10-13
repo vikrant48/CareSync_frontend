@@ -1,16 +1,36 @@
 <div [ngClass]="[
-  'w-full flex flex-wrap items-end gap-3.5 p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 shadow-xl',
+  'w-full rounded-xl sm:rounded-2xl border transition-all duration-200 shadow-xl',
   theme === 'doctor'
     ? 'bg-[var(--panel)] border-[var(--border)] text-[var(--text)]'
     : 'bg-[var(--panel)] border-[var(--border)] text-[var(--text)]',
   containerClass
 ]">
+    <button type="button" (click)="toggleFilters()"
+        class="md:hidden w-full flex items-center justify-between gap-2 px-3 py-2.5 text-left border-[var(--border)]"
+        [class.border-b]="filtersExpanded" [attr.aria-expanded]="filtersExpanded">
+        <span class="flex items-center gap-2 min-w-0">
+            <i class="fa-solid fa-sliders text-xs text-[var(--accent)] shrink-0" aria-hidden="true"></i>
+            <span class="text-xs font-bold uppercase tracking-wider">Filters</span>
+            <span *ngIf="activeFilterCount > 0"
+                class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--accent)] text-[var(--accent-fg)] shrink-0">
+                {{ activeFilterCount }}
+            </span>
+        </span>
+        <span class="flex items-center gap-1.5 text-xs font-bold text-[var(--accent)] shrink-0 whitespace-nowrap">
+            <span>{{ filtersExpanded ? 'Minimize' : 'Expand' }}</span>
+            <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"
+                [class.rotate-180]="filtersExpanded" aria-hidden="true"></i>
+        </span>
+    </button>
+
+    <div [ngClass]="filtersExpanded ? 'flex' : 'hidden md:flex'"
+        class="w-full flex-wrap items-end gap-2.5 sm:gap-3.5 p-2.5 sm:p-4">
 
     <!-- Loop through configured filters -->
     <ng-container *ngFor="let config of filters">
         <div *ngIf="!config.hidden" [ngClass]="[
            'flex flex-col space-y-1.5 transition-all duration-200',
-           config.width ? config.width : 'flex-1 min-w-[170px]',
+           config.width ? config.width : 'flex-1 basis-full sm:basis-auto min-w-0 sm:min-w-[170px]',
            config.colSpan ? config.colSpan : ''
          ]">
 
@@ -53,7 +73,8 @@
             <!-- TYPE 3: Single Select -->
             <app-select *ngIf="config.type === 'select'" [options]="getSelectOptions(config.options)"
                 [ngModel]="filterValues[config.key]" (selectionChange)="onImmediateChange(config.key, $event)"
-                [placeholder]="config.placeholder || 'Select option'" [disabled]="!!config.disabled">
+                [placeholder]="config.placeholder || 'Select option'" [disabled]="!!config.disabled"
+                [triggerClass]="selectTriggerClass">
             </app-select>
 
             <!-- TYPE 4: Searchable Select -->
@@ -143,4 +164,5 @@
         </button>
     </div>
 
+    </div>
 </div>

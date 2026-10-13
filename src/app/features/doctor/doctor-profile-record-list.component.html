@@ -66,17 +66,17 @@
 
 <div *ngIf="kind === 'certificates'" class="space-y-3">
   <div *ngFor="let c of items; trackBy: trackItem"
-    class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4 group hover:border-[var(--accent)]/40 transition-all">
-    <div class="flex items-center gap-3.5 w-full sm:w-auto">
+    class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 shadow-xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 group hover:border-[var(--accent)]/40 transition-all min-w-0 overflow-hidden">
+    <div class="flex items-center gap-3.5 min-w-0 flex-1">
       <div class="w-11 h-11 rounded-xl bg-[#f59e0b]/15 border border-[#f59e0b]/30 flex items-center justify-center text-[#f59e0b] shrink-0">
         <i class="fa-solid fa-file-contract text-base"></i>
       </div>
-      <div>
-        <h4 class="font-bold text-[var(--text)] text-sm truncate max-w-xs">{{ c.name || c.originalFilename || 'Not provided' }}</h4>
-        <p *ngIf="c.details" class="text-xs text-[var(--muted)] font-medium mt-0.5">{{ c.details }}</p>
+      <div class="min-w-0 flex-1">
+        <h4 class="font-bold text-[var(--text)] text-sm truncate" [title]="c.name || c.originalFilename || 'Not provided'">{{ c.name || c.originalFilename || 'Not provided' }}</h4>
+        <p *ngIf="c.details" class="text-xs text-[var(--muted)] font-medium mt-0.5 truncate" [title]="c.details">{{ c.details }}</p>
       </div>
     </div>
-    <div class="flex items-center gap-2 self-end sm:self-auto">
+    <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
       <a *ngIf="c.url" [href]="c.url" target="_blank"
         class="px-3 py-1.5 rounded-lg bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--accent)] text-xs font-bold transition-all flex items-center gap-1.5">
         <i class="fa-solid fa-eye text-xs"></i> View

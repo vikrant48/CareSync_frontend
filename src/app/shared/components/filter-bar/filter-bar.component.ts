@@ -98,6 +98,14 @@ export class FilterBarComponent implements OnInit, OnChanges, OnDestroy {
     @Output() buttonClick = new EventEmitter<{ key: string; event: MouseEvent }>();
 
     filterValues: Record<string, any> = {};
+    filtersExpanded = false;
+
+    get selectTriggerClass(): string {
+        const surface = this.theme === 'doctor'
+            ? 'bg-[var(--bg)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/30'
+            : 'bg-[var(--panel)] focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]/30';
+        return `w-full text-xs font-medium rounded-xl py-2.5 px-3.5 border border-[var(--border)] text-[var(--text)] shadow-inner ${surface}`;
+    }
     private debouncedSubject = new Subject<void>();
     private debounceSubscription?: Subscription;
 
@@ -121,6 +129,10 @@ export class FilterBarComponent implements OnInit, OnChanges, OnDestroy {
 
     ngOnDestroy(): void {
         this.debounceSubscription?.unsubscribe();
+    }
+
+    toggleFilters(): void {
+        this.filtersExpanded = !this.filtersExpanded;
     }
 
     /** Initialize filter values object with incoming values or defaults */

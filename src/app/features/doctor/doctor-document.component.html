@@ -171,6 +171,8 @@
       (filterChange)="onFilterBarChange($event)">
     </app-filter-bar>
 
+    <app-page-loader *ngIf="loading()" label="Loading documents..." accent="doctor"></app-page-loader>
+
     <!-- Empty Library State -->
     <app-empty-state *ngIf="!loading() && (documents?.length || 0) === 0" icon="fa-solid fa-folder-open"
       title="No documents yet" message="Upload your first document to get started."></app-empty-state>
@@ -216,7 +218,7 @@
         </div>
 
         <!-- Bottom Metadata & Actions Row -->
-        <div class="flex items-center justify-between pt-3 border-t border-[var(--border)]">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between pt-3 border-t border-[var(--border)]">
           <!-- Format, Size & Date -->
           <div class="flex items-center gap-2 text-[11px] font-bold text-[var(--muted)]">
             <span
@@ -256,17 +258,6 @@
       </div>
     </div>
 
-  </div>
-
-  <!-- Loading State Overlay -->
-  <div *ngIf="loading()"
-    class="fixed top-14 left-0 right-0 bottom-0 md:left-64 z-40 flex flex-col items-center justify-center bg-[var(--bg)]/80 backdrop-blur-md">
-    <div
-      class="bg-[var(--panel)] border border-[var(--border)] p-8 rounded-3xl shadow-2xl flex flex-col items-center animate-in zoom-in duration-300">
-      <i class="fa-solid fa-circle-notch fa-spin text-4xl text-[var(--accent)] mb-4"></i>
-      <h3 class="text-lg font-black text-[var(--text)]">Loading Documents</h3>
-      <p class="text-xs text-[var(--muted)] mt-1 font-medium">Please wait while we fetch your files...</p>
-    </div>
   </div>
 
   <!-- Error Alert -->

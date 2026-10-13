@@ -172,10 +172,10 @@
             <div class="lg:col-span-6 space-y-5 flex flex-col justify-between">
 
                 <!-- Top 3 Stat KPI Cards -->
-                <div class="grid grid-cols-3 gap-3.5">
+                <div class="grid grid-cols-3 gap-2 sm:gap-3.5">
 
                     <!-- Card 1: Total Feedbacks -->
-                    <div class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 shadow-sm space-y-2">
+                    <div class="bg-[var(--panel)] border border-[var(--border)] rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-sm space-y-2 min-w-0">
                         <div class="flex items-center justify-between">
                             <div
                                 class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-[var(--primary)]">
@@ -191,7 +191,7 @@
                     </div>
 
                     <!-- Card 2: Average Rating -->
-                    <div class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 shadow-sm space-y-2">
+                    <div class="bg-[var(--panel)] border border-[var(--border)] rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-sm space-y-2 min-w-0">
                         <div class="flex items-center justify-between">
                             <div
                                 class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-700 dark:text-amber-400">
@@ -207,7 +207,7 @@
                     </div>
 
                     <!-- Card 3: Responses -->
-                    <div class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 shadow-sm space-y-2">
+                    <div class="bg-[var(--panel)] border border-[var(--border)] rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-sm space-y-2 min-w-0">
                         <div class="flex items-center justify-between">
                             <div
                                 class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
@@ -386,10 +386,7 @@
             </div>
 
             <!-- Loading History State -->
-            <div *ngIf="loadingGiven" class="py-12 text-center text-xs text-[var(--muted)]">
-                <i class="fa-solid fa-spinner fa-spin text-lg text-[var(--primary)] mb-2"></i>
-                <p>Loading feedback history...</p>
-            </div>
+            <app-page-loader *ngIf="loadingGiven" label="Loading feedback history..." [compact]="true"></app-page-loader>
 
             <!-- Empty History State -->
             <div *ngIf="!loadingGiven && filteredGivenFeedback.length === 0"
@@ -399,7 +396,7 @@
             </div>
 
             <!-- Feedback Table (Desktop) -->
-            <div *ngIf="!loadingGiven && filteredGivenFeedback.length > 0" class="hidden md:block overflow-x-auto">
+            <div *ngIf="!loadingGiven && filteredGivenFeedback.length > 0" class="hidden xl:block overflow-x-auto">
                 <table class="w-full text-xs text-left">
                     <thead
                         class="bg-[var(--bg)] text-[var(--muted)] uppercase text-[10px] font-bold tracking-wider border-b border-[var(--border)]">
@@ -475,7 +472,7 @@
             </div>
 
             <!-- Feedback Cards (Mobile) -->
-            <div *ngIf="!loadingGiven && filteredGivenFeedback.length > 0" class="md:hidden space-y-3">
+            <div *ngIf="!loadingGiven && filteredGivenFeedback.length > 0" class="xl:hidden space-y-3">
                 <div *ngFor="let item of filteredGivenFeedback"
                     class="bg-[var(--bg)] border border-[var(--border)] rounded-xl p-4 space-y-3">
                     <div class="flex items-center justify-between">

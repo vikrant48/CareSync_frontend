@@ -2,7 +2,7 @@
     <div class="max-w-[1400px] mx-auto p-3 sm:p-5 space-y-4">
         <!-- Top Page Header -->
         <section
-            class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div class="space-y-1">
                 <h2 class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">Analytics & Insights
                 </h2>
@@ -11,11 +11,13 @@
             <p class="text-xs font-medium text-[var(--muted)] shrink-0">All appointments</p>
         </section>
 
+        <app-page-loader *ngIf="loadingReports" label="Loading reports..."></app-page-loader>
+
         <!-- Main Content -->
-        <div *ngIf="!loadingReports; else loadingTpl" class="space-y-6 animate-in fade-in duration-300">
+        <div *ngIf="!loadingReports" class="space-y-6 animate-in fade-in duration-300">
 
             <!-- KPI Cards Row 1 (4 Columns) -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
                 <!-- Total Appointments -->
                 <div
                     class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 relative overflow-hidden flex flex-col justify-between group hover:border-[var(--border)] transition-all shadow-sm">
@@ -39,11 +41,6 @@
                             <span>All time record</span>
                         </div>
                     </div>
-                    <!-- Wave Sparkline SVG -->
-                    <svg class="absolute right-2 bottom-2 w-28 h-12 text-[var(--primary)]/20 group-hover:text-[var(--primary)]/30 transition-colors pointer-events-none"
-                        viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path d="M0,30 Q20,10 40,25 T80,12 T100,5" stroke-linecap="round" />
-                    </svg>
                 </div>
 
                 <!-- Avg. Visits / Month -->
@@ -70,11 +67,6 @@
                             <span>Activity Level</span>
                         </div>
                     </div>
-                    <!-- Wave Sparkline SVG -->
-                    <svg class="absolute right-2 bottom-2 w-28 h-12 text-emerald-500/20 group-hover:text-emerald-500/30 transition-colors pointer-events-none"
-                        viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path d="M0,28 Q25,35 50,15 T100,8" stroke-linecap="round" />
-                    </svg>
                 </div>
 
                 <!-- Cancelled -->
@@ -100,11 +92,6 @@
                             <span>Missed consultations</span>
                         </div>
                     </div>
-                    <!-- Flat Line SVG -->
-                    <svg class="absolute right-2 bottom-2 w-28 h-12 text-rose-500/20 group-hover:text-rose-500/30 transition-colors pointer-events-none"
-                        viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <line x1="0" y1="20" x2="100" y2="20" stroke-linecap="round" />
-                    </svg>
                 </div>
 
                 <!-- Completed -->
@@ -131,16 +118,11 @@
                             <span>Successful visits</span>
                         </div>
                     </div>
-                    <!-- Wave Sparkline SVG -->
-                    <svg class="absolute right-2 bottom-2 w-28 h-12 text-indigo-500/20 group-hover:text-indigo-500/30 transition-colors pointer-events-none"
-                        viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path d="M0,32 Q30,20 60,30 T100,6" stroke-linecap="round" />
-                    </svg>
                 </div>
             </div>
 
             <!-- KPI Cards Row 2 (3 Columns) -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="grid grid-flow-col auto-cols-[minmax(170px,1fr)] sm:grid-flow-row sm:auto-cols-auto sm:grid-cols-3 gap-2.5 sm:gap-4 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
                 <!-- Total Spend -->
                 <div
                     class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 relative overflow-hidden flex flex-col justify-between group hover:border-[var(--border)] transition-all shadow-sm">
@@ -163,11 +145,6 @@
                             <span>Lifetime spending</span>
                         </div>
                     </div>
-                    <!-- Wave Sparkline SVG -->
-                    <svg class="absolute right-2 bottom-2 w-32 h-12 text-amber-500/20 group-hover:text-amber-500/30 transition-colors pointer-events-none"
-                        viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path d="M0,30 Q30,35 60,15 T100,10" stroke-linecap="round" />
-                    </svg>
                 </div>
 
                 <!-- Appointment Spend -->
@@ -191,11 +168,6 @@
                             <span>Doctor consultations</span>
                         </div>
                     </div>
-                    <!-- Wave Sparkline SVG -->
-                    <svg class="absolute right-2 bottom-2 w-32 h-12 text-blue-500/20 group-hover:text-blue-500/30 transition-colors pointer-events-none"
-                        viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path d="M0,25 Q40,35 70,12 T100,8" stroke-linecap="round" />
-                    </svg>
                 </div>
 
                 <!-- Lab Test Spend -->
@@ -220,11 +192,6 @@
                             <span>Tests & Diagnostics</span>
                         </div>
                     </div>
-                    <!-- Wave Sparkline SVG -->
-                    <svg class="absolute right-2 bottom-2 w-32 h-12 text-purple-500/20 group-hover:text-purple-500/30 transition-colors pointer-events-none"
-                        viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path d="M0,28 Q35,15 70,25 T100,5" stroke-linecap="round" />
-                    </svg>
                 </div>
             </div>
 
@@ -366,20 +333,5 @@
                 (view)="viewAppointment($event)"></app-patient-reports-activity>
         </div>
 
-        <!-- Skeleton Loading State -->
-        <ng-template #loadingTpl>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
-                <div class="h-28 bg-[var(--panel)] border border-[var(--border)] rounded-2xl"
-                    *ngFor="let i of [1,2,3,4]; trackBy: trackIndex"></div>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 animate-pulse">
-                <div class="h-28 bg-[var(--panel)] border border-[var(--border)] rounded-2xl"
-                    *ngFor="let i of [1,2,3]; trackBy: trackIndex"></div>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6 animate-pulse">
-                <div class="h-80 bg-[var(--panel)] border border-[var(--border)] rounded-2xl lg:col-span-7"></div>
-                <div class="h-80 bg-[var(--panel)] border border-[var(--border)] rounded-2xl lg:col-span-5"></div>
-            </div>
-        </ng-template>
     </div>
 </app-patient-layout>

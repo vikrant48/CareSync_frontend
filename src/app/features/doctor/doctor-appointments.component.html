@@ -1,10 +1,10 @@
 <app-doctor-layout>
     <div
-        class="max-w-[1400px] mx-auto p-4 sm:p-6 space-y-6 text-[var(--text)] font-sans selection:bg-[var(--accent)]/30 pb-20">
+        class="max-w-[1400px] mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6 text-[var(--text)] font-sans selection:bg-[var(--accent)]/30 pb-20">
 
         <!-- Page Header with Ambient Graphic Wave -->
         <div
-            class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--accent-soft)] via-[var(--panel)] to-[var(--primary-soft)] border border-[var(--border)] p-6 shadow-2xl">
+            class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--accent-soft)] via-[var(--panel)] to-[var(--primary-soft)] border border-[var(--border)] p-4 sm:p-6 shadow-2xl">
             <!-- Ambient Backdrop Graphic -->
             <div
                 class="absolute -top-12 -right-12 w-64 h-64 bg-[var(--accent)]/10 rounded-full blur-3xl pointer-events-none">
@@ -25,8 +25,7 @@
         </app-filter-bar>
 
         <!-- Loading Skeleton -->
-        <app-skeleton *ngIf="loading" variant="card" [count]="6"
-            wrapperClass="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></app-skeleton>
+        <app-page-loader *ngIf="loading" label="Loading appointments..." accent="doctor"></app-page-loader>
 
         <!-- Empty State -->
         <app-empty-state *ngIf="!loading && filteredAppointments().length === 0" icon="fa-solid fa-calendar-xmark"
@@ -37,7 +36,7 @@
         </app-empty-state>
 
         <!-- Appointment Cards Grid (Preserved Untouched) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-6"
             *ngIf="!loading && filteredAppointments().length > 0">
             <app-appointment-card *ngFor="let a of filteredAppointments()" class="h-full" [appointment]="a"
                 viewerRole="DOCTOR"></app-appointment-card>
@@ -45,7 +44,7 @@
 
         <!-- Fixed Bottom Pagination Bar -->
         <div *ngIf="!loading && (totalAppointmentsCount > 0 || appointments.length > 0)"
-            class="fixed left-0 md:left-64 right-0 z-40 fixed-above-mobile-nav bg-[var(--panel)]/95 backdrop-blur-md border-t border-[var(--border)] px-3 sm:px-8 py-1.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 shadow-2xl">
+            class="fixed left-0 xl:left-64 right-0 z-40 fixed-above-mobile-nav bg-[var(--panel)]/95 backdrop-blur-md border-t border-[var(--border)] px-3 sm:px-8 py-1.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 shadow-2xl">
 
             <div class="flex items-center gap-3 text-xs text-[var(--muted)] min-w-0">
                 <span class="font-medium truncate">
@@ -54,23 +53,23 @@
                 </span>
             </div>
 
-            <div class="flex items-center gap-1 max-w-full overflow-x-auto">
+            <div class="inline-flex flex-nowrap items-center gap-1 max-w-full overflow-x-auto">
                 <button type="button"
-                    class="h-9 px-3 text-xs font-bold rounded-md border border-[var(--bg)] bg-[var(--bg)] text-[var(--text)] hover:bg-[var(--bg)] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1 cursor-pointer"
+                    class="h-7 min-h-0 px-2 text-[11px] font-bold rounded-md border border-[var(--bg)] bg-[var(--bg)] text-[var(--text)] hover:bg-[var(--bg)] disabled:opacity-40 disabled:cursor-not-allowed transition-all inline-flex items-center gap-1 cursor-pointer shrink-0 whitespace-nowrap"
                     [disabled]="page === 0" (click)="prevPage()">
                     <i class="fa-solid fa-chevron-left text-[8px]"></i> Prev
                 </button>
 
-                <div class="flex items-center gap-1">
+                <div class="inline-flex flex-nowrap items-center gap-1">
                     <button *ngFor="let p of pageNumbers" type="button" (click)="goToPage(p)"
                         [class]="p === page ? 'bg-[var(--accent)] text-[var(--accent-fg)] font-black' : 'bg-[var(--bg)] border border-[var(--bg)] text-[var(--muted)] hover:text-[var(--text)] font-bold'"
-                        class="min-w-9 h-9 text-xs rounded-md transition-all flex items-center justify-center cursor-pointer">
+                        class="!w-6 !h-6 !min-w-6 !min-h-0 !p-0 text-[11px] leading-none rounded-md transition-all inline-flex items-center justify-center cursor-pointer shrink-0">
                         {{ p + 1 }}
                     </button>
                 </div>
 
                 <button type="button"
-                    class="h-9 px-3 text-xs font-bold rounded-md border border-[var(--bg)] bg-[var(--bg)] text-[var(--text)] hover:bg-[var(--bg)] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1 cursor-pointer"
+                    class="h-7 min-h-0 px-2 text-[11px] font-bold rounded-md border border-[var(--bg)] bg-[var(--bg)] text-[var(--text)] hover:bg-[var(--bg)] disabled:opacity-40 disabled:cursor-not-allowed transition-all inline-flex items-center gap-1 cursor-pointer shrink-0 whitespace-nowrap"
                     [disabled]="page >= totalPages - 1" (click)="nextPage()">
                     Next <i class="fa-solid fa-chevron-right text-[8px]"></i>
                 </button>

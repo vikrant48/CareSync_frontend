@@ -1,4 +1,4 @@
-<div *ngIf="open" class="fixed inset-0 flex justify-center p-4 animate-fade-in bg-black/60 backdrop-blur-sm" [ngClass]="[
+<div *ngIf="open" class="fixed inset-0 flex justify-center p-2 sm:p-4 animate-fade-in bg-black/60 backdrop-blur-sm" [ngClass]="[
     zIndexClass,
     backdropClass,
     fullScreenMobile ? 'items-end sm:items-center' : 'items-center'
@@ -40,7 +40,7 @@
         </div>
 
         <!-- Footer -->
-        <div *ngIf="hasFooter" class="shrink-0 border-t border-gray-200 dark:border-gray-700/60 modal-sticky-footer"
+        <div *ngIf="hasFooter" class="shrink-0 max-w-full overflow-x-auto border-t border-gray-200 dark:border-gray-700/60 modal-sticky-footer"
             [ngClass]="footerClass || 'p-4'">
             <ng-content select="[modalFooter]"></ng-content>
         </div>

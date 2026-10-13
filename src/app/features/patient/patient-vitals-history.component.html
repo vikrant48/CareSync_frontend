@@ -29,7 +29,7 @@
             </div>
 
             <!-- Desktop Table View -->
-            <div *ngIf="vitals.length > 0" class="hidden md:block overflow-x-auto">
+            <div *ngIf="vitals.length > 0" class="hidden xl:block overflow-x-auto">
                 <table class="w-full text-left text-xs border-collapse">
                     <thead>
                         <tr
@@ -124,7 +124,7 @@
             </div>
 
             <!-- Mobile Cards View -->
-            <div *ngIf="vitals.length > 0" class="md:hidden p-4 space-y-3">
+            <div *ngIf="vitals.length > 0" class="xl:hidden p-3 sm:p-4 space-y-3">
                 <div *ngFor="let vital of vitals; trackBy: trackVital"
                     class="bg-[var(--bg)]/70 border border-[var(--border)] rounded-xl p-4 space-y-3">
                     <div class="flex items-center justify-between text-xs border-b border-[var(--border)] pb-2">

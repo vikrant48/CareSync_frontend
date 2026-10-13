@@ -7,11 +7,12 @@ import { ReportsApiService } from '../../core/services/reports.service';
 import { AppointmentService, DoctorAppointmentItem } from '../../core/services/appointment.service';
 import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 import { DoctorReportsSummaryComponent } from './doctor-reports-summary.component';
+import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 
 @Component({
   selector: 'app-doctor-reports',
   standalone: true,
-  imports: [CommonModule, ChartWidgetComponent, DoctorLayoutComponent, DoctorReportsSummaryComponent],
+  imports: [CommonModule, ChartWidgetComponent, DoctorLayoutComponent, DoctorReportsSummaryComponent,PageLoaderComponent ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './doctor-reports.component.html',
   styleUrl: './doctor-reports.component.css'

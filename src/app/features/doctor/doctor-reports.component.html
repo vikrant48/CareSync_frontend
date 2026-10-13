@@ -52,7 +52,7 @@
                 </div>
 
                 <div class="h-64 w-full">
-                    <p *ngIf="loadingAppointments" class="text-xs text-[var(--muted)]">Loading appointments…</p>
+                    <app-page-loader *ngIf="loadingAppointments" label="Loading appointments" accent="doctor"></app-page-loader>
                     <p *ngIf="!loadingAppointments && overviewChart.data.length === 0"
                         class="text-xs text-[var(--muted)]">
                         No appointments in this period.</p>
@@ -79,7 +79,7 @@
                 </div>
 
                 <div class="h-64 w-full">
-                    <p *ngIf="loadingSeasonalTrends" class="text-xs text-[var(--muted)]">Loading visits…</p>
+                    <app-page-loader *ngIf="loadingSeasonalTrends" label="Loading trends" accent="doctor"></app-page-loader>
                     <p *ngIf="!loadingSeasonalTrends && !seasonalTrends" class="text-xs text-[var(--muted)]">Visit trend
                         is not available right now.</p>
                     <p *ngIf="!loadingSeasonalTrends && seasonalTrends && !visitTrendHasData"
@@ -99,7 +99,7 @@
                     <h3 class="font-black text-[var(--text)] text-base">Patient Satisfaction</h3>
                     <p class="text-xs text-[var(--muted)] font-medium mt-0.5">
                         {{ loadingFeedbackSentiment ? 'Loading reviews…' : (satisfaction.total ? 'Based on ' +
-                        satisfaction.total + ' reviews' : 'No reviews yet') }}
+                        satisfaction.total + ' reviews' : 'No reviews') }}
                     </p>
                 </div>
 
@@ -184,7 +184,7 @@
                     <p class="text-xs text-[var(--muted)] font-medium mt-0.5">Distribution of appointment types</p>
                 </div>
 
-                <p *ngIf="loadingAppointments" class="text-xs text-[var(--muted)]">Loading appointments…</p>
+                <app-page-loader *ngIf="loadingAppointments" label="Loading appointments" accent="doctor"></app-page-loader>
                 <p *ngIf="!loadingAppointments && appointmentTypeTotal === 0" class="text-xs text-[var(--muted)]">No
                     appointments in this period.</p>
                 <div *ngIf="!loadingAppointments && appointmentTypeTotal > 0" class="space-y-3.5 pt-2">
@@ -214,7 +214,7 @@
                 </div>
 
                 <div class="h-56 w-full pt-2">
-                    <p *ngIf="loadingDayOfWeek" class="text-xs text-[var(--muted)]">Loading activity…</p>
+                    <app-page-loader *ngIf="loadingDayOfWeek" label="Loading activity" accent="doctor"></app-page-loader>
                     <p *ngIf="!loadingDayOfWeek && !dayOfWeek" class="text-xs text-[var(--muted)]">Weekly activity is
                         not available right now.</p>
                     <p *ngIf="!loadingDayOfWeek && dayOfWeek && !weeklyHasActivity" class="text-xs text-[var(--muted)]">
@@ -235,7 +235,7 @@
                     <span class="text-xs font-semibold text-[var(--muted)]">{{ reportRangeLabel }}</span>
                 </div>
 
-                <p *ngIf="loadingCancellationPatterns" class="text-xs text-[var(--muted)]">Loading cancellations…</p>
+                <app-page-loader *ngIf="loadingCancellationPatterns" label="Loading patterns" accent="doctor"></app-page-loader>
                 <div *ngIf="!loadingCancellationPatterns"
                     class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center pt-1">
                     <div class="sm:col-span-5 flex flex-col items-center justify-center p-4">

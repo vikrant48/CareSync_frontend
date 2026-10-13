@@ -10,11 +10,12 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
 import { AppointmentService, PatientAppointmentItem } from '../../core/services/appointment.service';
 import { UserAvatarComponent } from '../../shared/components/user-avatar.component';
 import { PatientReportsActivityComponent } from './patient-reports-activity.component';
+import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 
 @Component({
   selector: 'app-patient-reports',
   standalone: true,
-  imports: [CommonModule, RouterModule, ChartWidgetComponent, PatientLayoutComponent, UserAvatarComponent, PatientReportsActivityComponent],
+  imports: [CommonModule, RouterModule, ChartWidgetComponent, PatientLayoutComponent, UserAvatarComponent, PatientReportsActivityComponent, PageLoaderComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './patient-reports.component.html',
   styleUrl: './patient-reports.component.css'

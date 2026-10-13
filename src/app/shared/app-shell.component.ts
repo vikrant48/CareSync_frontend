@@ -33,7 +33,7 @@ export interface AppShellTab {
   template: `
     <app-product-tour *ngIf="showTour"></app-product-tour>
     <div class="min-h-[calc(100vh-3.5rem)] w-full bg-[var(--bg)] text-[var(--text)] transition-colors duration-300">
-      <aside class="hidden md:flex fixed top-14 left-0 bottom-0 w-64 flex-col bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 z-30 overflow-hidden">
+      <aside class="hidden xl:flex fixed top-14 left-0 bottom-0 w-64 flex-col bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 z-30 overflow-hidden">
         <ng-content select="[shellHeader]"></ng-content>
 
         <nav class="flex-1 px-3 py-3 space-y-1 overflow-y-auto custom-scrollbar">
@@ -60,7 +60,7 @@ export interface AppShellTab {
         </div>
       </aside>
 
-      <main class="md:pl-64 w-full min-h-[calc(100vh-3.5rem)]">
+      <main class="xl:pl-64 w-full min-w-0 min-h-[calc(100vh-3.5rem)]">
         <div [class]="contentPadClass">
           <ng-content></ng-content>
         </div>
@@ -70,7 +70,7 @@ export interface AppShellTab {
 
       <app-ai-assistant-widget *ngIf="showAssistant && !assistantInside"></app-ai-assistant-widget>
 
-      <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 safe-bottom"
+      <nav class="xl:hidden fixed bottom-0 left-0 right-0 z-50 safe-bottom"
            [ngClass]="variant === 'doctor'
              ? 'bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] overflow-hidden'
              : 'border-t bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700'"
@@ -102,9 +102,9 @@ export interface AppShellTab {
         </div>
       </nav>
 
-      <div *ngIf="variant === 'patient' && menuOpen" class="md:hidden fixed inset-x-0 top-0 z-40" style="bottom: calc(4rem + env(safe-area-inset-bottom, 0px));">
+      <div *ngIf="variant === 'patient' && menuOpen" class="xl:hidden fixed inset-x-0 top-0 z-40" style="bottom: calc(4rem + env(safe-area-inset-bottom, 0px));">
         <div class="absolute inset-x-0 top-0 bottom-0 bg-black/50" (click)="menuOpen = false"></div>
-        <div class="absolute left-0 right-0 bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 rounded-t-xl shadow-xl p-3 space-y-1">
+        <div class="absolute left-0 right-0 bottom-0 max-h-[min(70dvh,32rem)] overflow-y-auto bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 rounded-t-xl shadow-xl p-3 space-y-1">
           <div class="flex items-center justify-between px-2 py-1">
             <div class="text-sm font-semibold">Quick Actions</div>
             <button type="button" (click)="menuOpen = false" aria-label="Close menu" class="touch-target flex items-center justify-center text-gray-400">
@@ -127,29 +127,29 @@ export interface AppShellTab {
       </div>
 
       <ng-container *ngIf="variant === 'doctor'">
-        <div *ngIf="menuOpen" class="md:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" (click)="menuOpen = false" aria-hidden="true"></div>
-        <div class="md:hidden fixed inset-x-0 bottom-0 z-40 bg-white dark:bg-gray-900 rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.12)] transform transition-transform duration-300 ease-out max-h-[75vh] overflow-y-auto"
+        <div *ngIf="menuOpen" class="xl:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" (click)="menuOpen = false" aria-hidden="true"></div>
+        <div class="xl:hidden fixed inset-x-0 z-[45] bg-white dark:bg-gray-900 rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.12)] transform transition-transform duration-300 ease-out max-h-[calc(100dvh-7.5rem)] overflow-y-auto"
+             style="bottom: calc(4rem + env(safe-area-inset-bottom, 0px));"
              [class.translate-y-0]="menuOpen" [class.translate-y-full]="!menuOpen">
-          <div class="sticky top-0 bg-white dark:bg-gray-900 z-10 px-6 py-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
+          <div class="sticky top-0 bg-white dark:bg-gray-900 z-10 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
             <span class="bg-gray-200 dark:bg-gray-700 w-12 h-1.5 rounded-full absolute top-2 left-1/2 -translate-x-1/2"></span>
             <h3 class="font-bold text-lg text-[var(--text)] mt-2">More Options</h3>
             <button type="button" (click)="menuOpen = false" aria-label="Close menu" class="w-11 h-11 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 mt-2 touch-target">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
-          <div class="p-6 grid grid-cols-2 gap-3">
+          <div class="p-4 sm:p-6 pb-16 grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
             <ng-container *ngFor="let item of menuLinks">
-              <button *ngIf="item.logout" type="button" (click)="onLogout()" [class]="item.tileClass">
+              <button *ngIf="item.logout" type="button" (click)="onLogout()" [class]="item.tileClass + ' min-h-[6.25rem] min-w-0 w-full'">
                 <i [class]="item.icon + ' text-2xl mb-2'"></i>
-                <span [class]="item.labelClass || 'text-sm font-medium'">{{ item.label }}</span>
+                <span [class]="(item.labelClass || 'text-sm font-medium') + ' text-center leading-tight'">{{ item.label }}</span>
               </button>
-              <a *ngIf="!item.logout" [routerLink]="item.link" (click)="menuOpen = false" [class]="item.tileClass">
+              <a *ngIf="!item.logout" [routerLink]="item.link" (click)="menuOpen = false" [class]="item.tileClass + ' min-h-[6.25rem] min-w-0 w-full'">
                 <i [class]="item.icon + ' text-2xl mb-2'"></i>
-                <span [class]="item.labelClass || 'text-sm font-medium'">{{ item.label }}</span>
+                <span [class]="(item.labelClass || 'text-sm font-medium') + ' text-center leading-tight'">{{ item.label }}</span>
               </a>
             </ng-container>
           </div>
-          <div class="safe-bottom" style="height: calc(2rem + env(safe-area-inset-bottom, 0px));"></div>
         </div>
       </ng-container>
     </div>
@@ -182,8 +182,8 @@ export class AppShellComponent {
 
   get contentPadClass(): string {
     return this.variant === 'doctor'
-      ? 'pb-[calc(8rem+env(safe-area-inset-bottom,0px))] md:pb-8'
-      : 'pb-[calc(7rem+env(safe-area-inset-bottom,0px))] md:pb-8';
+      ? 'pb-[calc(8rem+env(safe-area-inset-bottom,0px))] xl:pb-8'
+      : 'pb-[calc(7rem+env(safe-area-inset-bottom,0px))] xl:pb-8';
   }
 
   get sidebarActiveClass(): string {

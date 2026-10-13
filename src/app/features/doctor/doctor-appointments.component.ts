@@ -14,7 +14,7 @@ import { PatientProfileService, PatientDto, MedicalHistoryWithDoctorItem } from 
 import { forkJoin, map, firstValueFrom } from 'rxjs';
 import { SelectOption } from '../../shared/select-dropdown.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
-import { SkeletonComponent } from '../../shared/ui/skeleton.component';
+import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 import { FilterBarComponent, FilterConfig } from '../../shared/components';
 import { IntakeSummaryModalComponent } from './intake-summary-modal.component';
 import { SoapReportEditorComponent } from './soap-report-editor.component';
@@ -37,7 +37,7 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
     DoctorLayoutComponent,
     SharedChatModalComponent,
     EmptyStateComponent,
-    SkeletonComponent,
+    PageLoaderComponent,
     FilterBarComponent,
     IntakeSummaryModalComponent,
     SoapReportEditorComponent

@@ -409,30 +409,9 @@ export class DoctorDashboardComponent implements OnInit {
   }
 
   openPatient(a: DoctorAppointmentItem | null) {
-    if (!a) return;
-    this.historyFormModalOpen = false;
-    this.historyDetailModalOpen = false;
-
-    this.selectedAppointment = a;
-    this.showPatientModal = true;
-    this.selectedPatient = null;
-    this.selectedPatientHistory = [];
-    this.selectedPatientDocuments = [];
-    this.mhForm = { visitDate: this.todayISO() };
-    this.patientApi.getCompleteData(a.patientId).subscribe({
-      next: (data) => {
-        this.selectedPatient = data.patient;
-        this.selectedPatientHistory = data.medicalHistory;
-        this.selectedPatientDocuments = data.documents || [];
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.selectedPatient = null;
-        this.selectedPatientHistory = [];
-        this.selectedPatientDocuments = [];
-        this.cdr.detectChanges();
-      },
-    });
+    const appointmentId = a?.appointmentId;
+    if (!appointmentId) return;
+    this.router.navigate(['/doctor/appointments', appointmentId]);
   }
 
   openHistoryForm(a: DoctorAppointmentItem) {
@@ -593,7 +572,7 @@ export class DoctorDashboardComponent implements OnInit {
   satisfactionLabel(): string {
     if (this.loadingMetrics) return '';
     if (this.metricsUnavailable) return 'Not available';
-    if (this.metrics?.satisfactionRating == null) return 'No reviews yet';
+    if (this.metrics?.satisfactionRating == null) return 'No reviews';
     return `${this.metrics.satisfactionRating.toFixed(1)} / 5`;
   }
 

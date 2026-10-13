@@ -8,11 +8,12 @@ import { ConfirmService } from '../../core/services/confirm.service';
 import { DatePickerComponent } from '../../shared/date-picker.component';
 import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropdown.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
+import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 
 @Component({
   selector: 'app-doctor-leave-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, DoctorLayoutComponent, DatePickerComponent, SelectDropdownComponent, EmptyStateComponent],
+  imports: [CommonModule, FormsModule, DoctorLayoutComponent, DatePickerComponent, SelectDropdownComponent, EmptyStateComponent, PageLoaderComponent],
   templateUrl: './doctor-leave-management.component.html',
   styleUrl: './doctor-leave-management.component.css'
 })

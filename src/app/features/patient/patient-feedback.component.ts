@@ -8,12 +8,13 @@ import { ToastService } from '../../core/services/toast.service';
 import { PatientAppointmentItem } from '../../core/services/appointment.service';
 import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
+import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 import { DoctorService, Doctor } from '../../core/services/doctor.service';
 
 @Component({
   selector: 'app-patient-feedback',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, PatientLayoutComponent, ModalShellComponent],
+  imports: [CommonModule, FormsModule, RouterModule, PatientLayoutComponent, ModalShellComponent, PageLoaderComponent],
   templateUrl: './patient-feedback.component.html',
   styleUrl: './patient-feedback.component.css'
 })

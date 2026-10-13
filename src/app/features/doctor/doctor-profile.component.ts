@@ -12,12 +12,12 @@ import { MasterDataService } from '../../core/services/master-data.service';
 import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropdown.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 import { DoctorProfileRecordListComponent } from './doctor-profile-record-list.component';
-import { SkeletonComponent } from '../../shared/ui/skeleton.component';
+import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 
 @Component({
   selector: 'app-doctor-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, DoctorLayoutComponent, SpecializationAutocompleteComponent, SelectDropdownComponent, EmptyStateComponent, SkeletonComponent, DoctorProfileRecordListComponent],
+  imports: [CommonModule, FormsModule, DoctorLayoutComponent, SpecializationAutocompleteComponent, SelectDropdownComponent, EmptyStateComponent, PageLoaderComponent, DoctorProfileRecordListComponent],
   templateUrl: './doctor-profile.component.html',
   styleUrls: ['./doctor-profile.component.css']
 })

@@ -6,6 +6,7 @@ import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 import { LabTestService, LabTest } from '../../core/services/lab-test.service';
 import { ToastService } from '../../core/services/toast.service';
 import { FilterBarComponent, FilterConfig } from '../../shared/components';
+import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 
 interface CreateLabTestRequest {
   testName: string;
@@ -17,7 +18,7 @@ interface CreateLabTestRequest {
 @Component({
   selector: 'app-lab-test-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, DoctorLayoutComponent, ModalShellComponent, FilterBarComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, DoctorLayoutComponent, ModalShellComponent, FilterBarComponent, PageLoaderComponent],
   templateUrl: './lab-test-management.component.html',
   styleUrl: './lab-test-management.component.css'
 })

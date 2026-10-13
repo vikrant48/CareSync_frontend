@@ -1,14 +1,14 @@
 <ng-template #appointmentPageContent>
-    <div class="min-h-screen bg-[var(--bg)] text-[var(--text)] p-4 sm:p-6 lg:p-8 space-y-6">
+    <div class="min-h-screen bg-[var(--bg)] text-[var(--text)] p-3 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 overflow-x-hidden">
 
         <!-- Back Button & Page Title Bar -->
-        <div class="flex items-center justify-between gap-4">
-            <div class="flex items-center gap-3">
+        <div class="flex items-center justify-between gap-2 sm:gap-4 min-w-0">
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
                 <button type="button" (click)="goBack()"
                     class="w-9 h-9 rounded-xl bg-[var(--panel)] border border-[var(--border)] hover:bg-[var(--border)] text-[var(--text)] flex items-center justify-center transition-all">
                     <i class="fa-solid fa-arrow-left text-sm"></i>
                 </button>
-                <h1 class="text-xl sm:text-2xl font-black text-[var(--text)] tracking-tight">
+                <h1 class="text-lg sm:text-2xl font-black text-[var(--text)] tracking-tight truncate">
                     Appointment Details
                 </h1>
             </div>
@@ -48,7 +48,7 @@
             <app-appointment-header [appointment]="appointment" [viewerRole]="viewerRole"></app-appointment-header>
 
             <section *ngIf="viewerRole === 'PATIENT' && hasFollowThrough()"
-                class="rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-indigo-500/10 to-emerald-500/10 p-5 space-y-4">
+                class="rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-indigo-500/10 to-emerald-500/10 p-3 sm:p-5 space-y-3 sm:space-y-4">
                 <div>
                     <h2 class="text-sm font-black text-[var(--text)] flex items-center gap-2">
                         <i class="fa-solid fa-wand-magic-sparkles text-indigo-400"></i>
@@ -99,7 +99,7 @@
 
             <section *ngIf="viewerRole === 'DOCTOR'"
                 class="rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-cyan-500/10 to-indigo-500/10 transition-all duration-300"
-                [ngClass]="(isPreVisitBriefExpanded && (preVisitBriefLoading || preVisitBriefLoaded)) ? 'p-5 space-y-4' : 'px-5 py-3.5'">
+                [ngClass]="(isPreVisitBriefExpanded && (preVisitBriefLoading || preVisitBriefLoaded)) ? 'p-3 sm:p-5 space-y-3 sm:space-y-4' : 'px-3 sm:px-5 py-3'">
                 <!-- Header with Title, Actions, and Expand/Shrink Toggle -->
                 <div class="flex items-center justify-between gap-3 flex-wrap">
                     <div class="flex items-center gap-3 min-w-0">
@@ -193,9 +193,9 @@
             <!-- Section 3: Navigation Tabs (Overview, Process, Medical History) -->
             <div class="space-y-6">
                 <div
-                    class="flex items-center gap-2 border-b border-[var(--border)] overflow-x-auto pb-1 scrollbar-thin">
+                    class="flex items-center gap-1.5 sm:gap-2 border-b border-[var(--border)] overflow-x-auto pb-1 no-scrollbar">
                     <button type="button" (click)="activeTab = 'OVERVIEW'"
-                        class="px-5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 relative shrink-0"
+                        class="px-3 sm:px-5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 sm:gap-2 relative shrink-0"
                         [ngClass]="{
                   'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30': activeTab === 'OVERVIEW',
                   'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--panel)]': activeTab !== 'OVERVIEW'
@@ -205,7 +205,7 @@
                     </button>
 
                     <button type="button" (click)="activeTab = 'PROCESS'"
-                        class="px-5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 relative shrink-0"
+                        class="px-3 sm:px-5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 sm:gap-2 relative shrink-0"
                         [ngClass]="{
                   'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30': activeTab === 'PROCESS',
                   'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--panel)]': activeTab !== 'PROCESS'
@@ -215,7 +215,7 @@
                     </button>
 
                     <button type="button" (click)="activeTab = 'MEDICAL_HISTORY'"
-                        class="px-5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 relative shrink-0"
+                        class="px-3 sm:px-5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 sm:gap-2 relative shrink-0"
                         [ngClass]="{
                   'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30': activeTab === 'MEDICAL_HISTORY',
                   'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--panel)]': activeTab !== 'MEDICAL_HISTORY'

@@ -10,14 +10,14 @@ import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { EmergencyAppointmentModalComponent } from '../../shared/emergency-appointment-modal.component';
 import { SpecializationAutocompleteComponent } from '../../shared/specialization-autocomplete.component';
 import { SelectOption } from '../../shared/select-dropdown.component';
-import { SkeletonComponent } from '../../shared/ui/skeleton.component';
+import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 import { ButtonComponent, FilterBarComponent, FilterConfig } from '../../shared/components';
 
 @Component({
   selector: 'app-patient-book-appointment',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent, SkeletonComponent, EmptyStateComponent, ButtonComponent, FilterBarComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent, PageLoaderComponent, EmptyStateComponent, ButtonComponent, FilterBarComponent],
   templateUrl: './patient-book-appointment.component.html',
   styleUrl: './patient-book-appointment.component.css'
 })
@@ -85,7 +85,8 @@ export class PatientBookAppointmentComponent {
     genderFilter: '',
     addressFilter: ''
   };
-  loadingDoctors = false;
+  loadingDoctors = true;
+  private doctorSearchId = 0;
   showEmergencyModal = false;
   genders: string[] = [];
 
@@ -152,6 +153,7 @@ export class PatientBookAppointmentComponent {
   }
 
   searchDoctors() {
+    const requestId = ++this.doctorSearchId;
     this.loadingDoctors = true;
     const searchParams = {
       query: this.nameFilter || undefined,
@@ -166,13 +168,17 @@ export class PatientBookAppointmentComponent {
     // Fetch doctors for current page
     this.doctorApi.searchDoctors(searchParams).subscribe({
       next: (res) => {
+        if (requestId !== this.doctorSearchId) return;
         this.doctors = res || [];
         this.loadingDoctors = false;
         (res || []).forEach((d) => {
           this.ratings[d.id] = { avg: d.averageRating || 0, count: d.reviewCount || 0 };
         });
       },
-      error: () => (this.loadingDoctors = false),
+      error: () => {
+        if (requestId !== this.doctorSearchId) return;
+        this.loadingDoctors = false;
+      },
     });
 
     // Fetch total doctor count for filtered query

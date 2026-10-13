@@ -1,15 +1,18 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
+import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
 import { PatientProfileService, PatientDto } from '../core/services/patient-profile.service';
 import { TourService } from '../core/services/tour.service';
 import { AppShellComponent, AppShellLink, AppShellTab } from './app-shell.component';
+import { PageLoaderComponent } from './ui/page-loader.component';
 
 @Component({
   selector: 'app-patient-layout',
   standalone: true,
   host: { class: 'block h-full w-full' },
-  imports: [CommonModule, AppShellComponent],
+  imports: [CommonModule, AppShellComponent, PageLoaderComponent],
   template: `
     <app-shell variant="patient" [sidebarLinks]="sidebarLinks" [tabs]="tabs" [menuLinks]="menuLinks"
                [showTour]="true" (logout)="logout()">
@@ -30,7 +33,10 @@ import { AppShellComponent, AppShellLink, AppShellTab } from './app-shell.compon
           </div>
         </div>
       </div>
-      <ng-content></ng-content>
+      <app-page-loader *ngIf="pageNavigating" label="Loading..."></app-page-loader>
+      <div [hidden]="pageNavigating">
+        <ng-content></ng-content>
+      </div>
     </app-shell>
   `,
 })
@@ -75,10 +81,26 @@ export class PatientLayoutComponent implements OnInit {
   profileImageUrl: string | null = typeof localStorage !== 'undefined' ? localStorage.getItem('caresync_patient_avatar') : null;
   protected tour = inject(TourService);
   private patientApi = inject(PatientProfileService);
+  private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
+  pageNavigating = false;
+  private navTimer?: ReturnType<typeof setTimeout>;
 
   constructor(public auth: AuthService) { }
 
   ngOnInit() {
+    this.destroyRef.onDestroy(() => clearTimeout(this.navTimer));
+    this.router.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
+      if (event instanceof NavigationStart) {
+        clearTimeout(this.navTimer);
+        this.pageNavigating = true;
+      }
+      if (event instanceof NavigationEnd || event instanceof NavigationCancel || event instanceof NavigationError) {
+        clearTimeout(this.navTimer);
+        this.pageNavigating = false;
+      }
+    });
+
     if (typeof localStorage !== 'undefined') {
       const cachedName = localStorage.getItem('caresync_patient_name');
       const cachedImage = localStorage.getItem('caresync_patient_avatar');

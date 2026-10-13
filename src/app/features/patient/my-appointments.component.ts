@@ -14,13 +14,13 @@ import { MasterDataService } from '../../core/services/master-data.service';
 import { SelectOption } from '../../shared/select-dropdown.component';
 import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
-import { SkeletonComponent } from '../../shared/ui/skeleton.component';
+import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 import { FilterBarComponent, FilterConfig } from '../../shared/components';
 
 @Component({
   selector: 'app-my-appointments',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, AppointmentCardComponent, RescheduleAppointmentModalComponent, CancellationModalComponent, SharedChatModalComponent, EmptyStateComponent, SkeletonComponent, FilterBarComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, AppointmentCardComponent, RescheduleAppointmentModalComponent, CancellationModalComponent, SharedChatModalComponent, EmptyStateComponent, PageLoaderComponent, FilterBarComponent],
   templateUrl: './my-appointments.component.html',
   styleUrl: './my-appointments.component.css'
 })

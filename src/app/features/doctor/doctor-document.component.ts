@@ -9,11 +9,12 @@ import { VisionScanResponse } from '../../core/models/ai.models';
 import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropdown.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 import { FilterBarComponent, FilterConfig } from '../../shared/components';
+import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 
 @Component({
   selector: 'app-doctor-documents',
   standalone: true,
-  imports: [CommonModule, FormsModule, DoctorLayoutComponent, SelectDropdownComponent, EmptyStateComponent, FilterBarComponent],
+  imports: [CommonModule, FormsModule, DoctorLayoutComponent, SelectDropdownComponent, EmptyStateComponent, FilterBarComponent, PageLoaderComponent],
   templateUrl: './doctor-document.component.html',
   styleUrl: './doctor-document.component.css'
 })

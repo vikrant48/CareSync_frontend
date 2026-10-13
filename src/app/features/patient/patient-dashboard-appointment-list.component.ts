@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { PatientAppointmentItem } from '../../core/services/appointment.service';
 import { ButtonComponent } from '../../shared/components';
 import { StatusBadgeComponent } from '../../shared/ui/status-badge.component';
+import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 
 @Component({
   selector: 'app-patient-dashboard-appointment-list',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, StatusBadgeComponent],
+  imports: [CommonModule, ButtonComponent, StatusBadgeComponent, PageLoaderComponent],
   templateUrl: './patient-dashboard-appointment-list.component.html',
 })
 export class PatientDashboardAppointmentListComponent {

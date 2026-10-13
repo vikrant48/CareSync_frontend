@@ -4,9 +4,9 @@
 
     <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-24 sm:pb-36">
         <!-- System KPI Widgets Bar -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-8 mobile-compact-grid">
             <button type="button" (click)="openSection('users')"
-                class="bg-[var(--panel)]/60 border border-[var(--border)]/60 rounded-xl p-3.5 sm:p-4 flex items-center gap-3 text-left cursor-pointer hover:border-[var(--primary)]/40 transition">
+                class="bg-[var(--panel)]/60 border border-[var(--border)]/60 rounded-xl p-2.5 sm:p-4 flex items-center gap-2 sm:gap-3 text-left cursor-pointer hover:border-[var(--primary)]/40 transition mobile-compact-card">
                 <div
                     class="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-700 dark:text-blue-400 shrink-0 text-lg">
                     <i class="fa-solid fa-users" aria-hidden="true"></i>
@@ -17,7 +17,7 @@
                 </div>
             </button>
             <button type="button" (click)="openSection('doctors', 'VERIFIED')"
-                class="bg-[var(--panel)]/60 border border-[var(--border)]/60 rounded-xl p-3.5 sm:p-4 flex items-center gap-3 text-left cursor-pointer hover:border-[var(--primary)]/40 transition">
+                class="bg-[var(--panel)]/60 border border-[var(--border)]/60 rounded-xl p-2.5 sm:p-4 flex items-center gap-2 sm:gap-3 text-left cursor-pointer hover:border-[var(--primary)]/40 transition mobile-compact-card">
                 <div
                     class="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-700 dark:text-indigo-300 shrink-0 text-lg">
                     <i class="fa-solid fa-user-doctor" aria-hidden="true"></i>
@@ -28,7 +28,7 @@
                 </div>
             </button>
             <button type="button" (click)="openSection('doctors', 'UNVERIFIED')"
-                class="bg-[var(--panel)]/60 border border-[var(--border)]/60 rounded-xl p-3.5 sm:p-4 flex items-center gap-3 text-left cursor-pointer hover:border-[var(--primary)]/40 transition">
+                class="bg-[var(--panel)]/60 border border-[var(--border)]/60 rounded-xl p-2.5 sm:p-4 flex items-center gap-2 sm:gap-3 text-left cursor-pointer hover:border-[var(--primary)]/40 transition mobile-compact-card">
                 <div
                     class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-700 dark:text-amber-400 shrink-0 text-lg">
                     <i class="fa-solid fa-user-clock" aria-hidden="true"></i>
@@ -39,7 +39,7 @@
                 </div>
             </button>
             <button type="button" (click)="openSection('security')"
-                class="bg-[var(--panel)]/60 border border-[var(--border)]/60 rounded-xl p-3.5 sm:p-4 flex items-center gap-3 text-left cursor-pointer hover:border-[var(--primary)]/40 transition">
+                class="bg-[var(--panel)]/60 border border-[var(--border)]/60 rounded-xl p-2.5 sm:p-4 flex items-center gap-2 sm:gap-3 text-left cursor-pointer hover:border-[var(--primary)]/40 transition mobile-compact-card">
                 <div
                     class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-rose-700 dark:text-rose-400 shrink-0 text-lg">
                     <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
@@ -70,7 +70,7 @@
                 panelClass="!bg-[var(--bg)]/40 !border-[var(--border)]/50"></app-skeleton>
 
             <!-- Mobile card rows -->
-            <div *ngIf="!loadingUsers" class="md:hidden space-y-2.5">
+            <div *ngIf="!loadingUsers" class="xl:hidden space-y-2.5">
                 <article *ngFor="let u of filteredUsers"
                     class="rounded-xl border border-[var(--border)]/50 bg-[var(--bg)]/50 p-3.5 space-y-3 active:scale-[0.99] transition-transform">
                     <div class="flex items-start justify-between gap-3">
@@ -94,7 +94,7 @@
                             {{ u.role }}
                         </span>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
                         <span
                             class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border"
                             [ngClass]="{
@@ -105,6 +105,7 @@
                                 [ngClass]="u.isActive ? 'bg-emerald-400' : 'bg-rose-400'"></span>
                             {{ u.isActive ? 'Active' : 'Inactive' }}
                         </span>
+                        <div class="grid grid-cols-2 gap-2 w-full">
                         <button type="button" (click)="toggleUserStatus(u)" [disabled]="togglingUsername === u.username"
                             class="flex-1 px-3 py-2.5 min-h-touch rounded-xl text-xs font-semibold transition border shadow-sm"
                             [ngClass]="{
@@ -115,10 +116,11 @@
                             Active') }}
                         </button>
                         <button type="button" (click)="openPasswordResetModal(u)" title="Change User Password"
-                            class="px-3 py-2.5 min-h-touch rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md shadow-amber-500/20 transition flex items-center gap-1.5 shrink-0">
+                            class="px-2.5 py-2.5 min-h-touch rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md shadow-amber-500/20 transition flex items-center justify-center gap-1.5 min-w-0">
                             <i class="fa-solid fa-key text-xs" aria-hidden="true"></i>
                             <span>Change Password</span>
                         </button>
+                        </div>
                     </div>
                 </article>
                 <div *ngIf="filteredUsers.length === 0" class="py-10 text-center text-muted text-sm">No users match
@@ -127,7 +129,7 @@
 
             <!-- Desktop table -->
             <div *ngIf="!loadingUsers"
-                class="hidden md:block overflow-x-auto max-h-[min(60vh,480px)] overflow-y-auto custom-scrollbar rounded-xl border border-[var(--border)]/50">
+                class="hidden xl:block overflow-x-auto max-h-[min(60vh,480px)] overflow-y-auto custom-scrollbar rounded-xl border border-[var(--border)]/50">
                 <table class="w-full text-left text-sm text-[var(--text)] border-collapse">
                     <thead
                         class="bg-[var(--bg)] sticky top-0 z-10 text-xs uppercase text-muted font-semibold border-b border-[var(--border)] shadow-sm">
@@ -211,7 +213,7 @@
                 panelClass="!bg-[var(--bg)]/40 !border-[var(--border)]/50"></app-skeleton>
 
             <!-- Mobile card rows -->
-            <div *ngIf="!loadingDoctors" class="md:hidden space-y-2.5">
+            <div *ngIf="!loadingDoctors" class="xl:hidden space-y-2.5">
                 <article *ngFor="let doc of filteredDoctors"
                     class="rounded-xl border border-[var(--border)]/50 bg-[var(--bg)]/50 p-3.5 space-y-3">
                     <div class="flex items-start gap-3">
@@ -264,7 +266,7 @@
 
             <!-- Desktop table -->
             <div *ngIf="!loadingDoctors"
-                class="hidden md:block overflow-x-auto max-h-[min(60vh,480px)] overflow-y-auto custom-scrollbar rounded-xl border border-[var(--border)]/50">
+                class="hidden xl:block overflow-x-auto max-h-[min(60vh,480px)] overflow-y-auto custom-scrollbar rounded-xl border border-[var(--border)]/50">
                 <table class="w-full text-left text-sm text-[var(--text)] border-collapse">
                     <thead
                         class="bg-[var(--bg)] sticky top-0 z-10 text-xs uppercase text-muted font-semibold border-b border-[var(--border)] shadow-sm">
@@ -416,7 +418,7 @@
                     </div>
 
                     <!-- Mobile: stacked rows -->
-                    <div class="md:hidden space-y-2">
+                    <div class="xl:hidden space-y-2">
                         <div *ngFor="let item of masterItems"
                             class="flex items-center justify-between gap-3 px-3 py-3 rounded-xl bg-[var(--panel)]/80 border border-[var(--border)]">
                             <span class="text-sm text-[var(--text)] truncate">{{ item }}</span>
@@ -432,7 +434,7 @@
                     </div>
 
                     <!-- Desktop: chip wrap -->
-                    <div class="hidden md:flex flex-wrap gap-2 max-h-80 overflow-y-auto p-1">
+                    <div class="hidden xl:flex flex-wrap gap-2 max-h-80 overflow-y-auto p-1">
                         <span *ngFor="let item of masterItems"
                             class="px-3 py-1.5 rounded-lg bg-[var(--panel)] border border-[var(--border)] text-xs font-medium text-[var(--text)] flex items-center gap-2 hover:border-[var(--border)] transition">
                             <span>{{ item }}</span>
@@ -503,7 +505,7 @@
             </div>
 
             <!-- Mobile card rows -->
-            <div class="md:hidden space-y-2.5">
+            <div class="xl:hidden space-y-2.5">
                 <article *ngFor="let ip of blockedIPs"
                     class="rounded-xl border border-[var(--border)]/50 bg-[var(--bg)]/50 p-3.5 space-y-2.5">
                     <div class="font-mono font-bold text-rose-700 dark:text-rose-300 text-sm break-all">{{ ip.ipAddress }}</div>
@@ -523,7 +525,7 @@
 
             <!-- Desktop table -->
             <div
-                class="hidden md:block overflow-x-auto max-h-[min(60vh,480px)] overflow-y-auto custom-scrollbar rounded-xl border border-[var(--border)]/50">
+                class="hidden xl:block overflow-x-auto max-h-[min(60vh,480px)] overflow-y-auto custom-scrollbar rounded-xl border border-[var(--border)]/50">
                 <table class="w-full text-left text-sm text-[var(--text)] border-collapse">
                     <thead
                         class="bg-[var(--bg)] sticky top-0 z-10 text-xs uppercase text-muted font-semibold border-b border-[var(--border)] shadow-sm">

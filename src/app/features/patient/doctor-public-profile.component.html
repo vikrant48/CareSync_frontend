@@ -16,12 +16,7 @@
             (paymentCancel)="closePaymentModal()" (paymentError)="onPaymentError($event)"></app-payment-popup>
 
         <ng-template #loadingTpl>
-            <div class="flex flex-col items-center justify-center min-h-[50vh] space-y-4 animate-pulse">
-                <div class="w-32 h-32 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-                <div class="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-                <div class="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-                <div class="sr-only">Loading doctor profile...</div>
-            </div>
+            <app-page-loader label="Loading doctor profile..."></app-page-loader>
         </ng-template>
     </div>
 </app-patient-layout>

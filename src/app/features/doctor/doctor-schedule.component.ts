@@ -13,7 +13,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 import { FilterBarComponent, FilterConfig } from '../../shared/components';
-import { SkeletonComponent } from '../../shared/ui/skeleton.component';
+import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 @Component({
     selector: 'app-doctor-schedule',
     standalone: true,
@@ -29,7 +29,7 @@ import { SkeletonComponent } from '../../shared/ui/skeleton.component';
         SharedChatModalComponent,
         EmptyStateComponent,
         FilterBarComponent,
-        SkeletonComponent
+        PageLoaderComponent
     ],
     templateUrl: './doctor-schedule.component.html',
     styleUrl: './doctor-schedule.component.css'

@@ -33,20 +33,15 @@ export interface SelectOption {
         tabindex="0"
         (click)="toggleOpen()"
         (keydown)="onKeyDown($event)"
-        [ngClass]="[
-          'w-full bg-[var(--bg)] text-[var(--text)] text-sm rounded-xl py-2.5 px-3.5 border transition-all duration-200 flex items-center justify-between cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20',
-          disabled ? 'opacity-50 !cursor-not-allowed' : 'hover:border-[var(--primary)]/40',
-          isOpen ? '!border-[var(--primary)] ring-2 ring-[var(--primary)]/20' : '',
-          getStateClasses()
-        ]"
+        [ngClass]="triggerClasses"
       >
         <!-- Left Selected Content -->
-        <div class="flex items-center gap-2 truncate">
-          <i *ngIf="selectedOption?.icon" [class]="selectedOption?.icon" class="text-[var(--muted)] text-sm"></i>
-          <span *ngIf="selectedOption" class="truncate font-medium text-[var(--text)]">
-            {{ selectedOption.label }}
+        <div class="flex items-center gap-2 truncate min-w-0">
+          <i *ngIf="selectedOption?.icon && hasSelection" [class]="selectedOption?.icon" class="text-[var(--muted)] text-xs"></i>
+          <span *ngIf="hasSelection" class="truncate font-medium text-[var(--text)]">
+            {{ selectedOption?.label }}
           </span>
-          <span *ngIf="!selectedOption" class="text-[var(--muted)] truncate">
+          <span *ngIf="!hasSelection" class="truncate text-[var(--muted)]/70">
             {{ placeholder }}
           </span>
         </div>
@@ -101,6 +96,7 @@ export class SelectComponent implements ControlValueAccessor {
   @Input() disabled = false;
   @Input() errorMessage?: string;
   @Input() state: 'default' | 'error' = 'default';
+  @Input() triggerClass = '';
 
   @Output() selectionChange = new EventEmitter<any>();
 
@@ -122,6 +118,22 @@ export class SelectComponent implements ControlValueAccessor {
 
   get selectedOption(): SelectOption | undefined {
     return this.options.find((opt) => opt.value === this.selectedValue);
+  }
+
+  get hasSelection(): boolean {
+    return this.selectedValue !== null && this.selectedValue !== undefined && this.selectedValue !== '';
+  }
+
+  get triggerClasses(): string[] {
+    const base = this.triggerClass
+      || 'w-full bg-[var(--panel)] text-[var(--text)] text-xs font-medium rounded-xl py-2.5 px-3.5 border border-[var(--border)] shadow-inner';
+    return [
+      base,
+      'transition-all duration-200 flex items-center justify-between cursor-pointer select-none focus:outline-none',
+      this.disabled ? 'opacity-50 !cursor-not-allowed' : '',
+      this.isOpen ? '!border-[var(--primary)] ring-1 ring-[var(--primary)]/30' : '',
+      this.getStateClasses()
+    ];
   }
 
   isSelected(opt: SelectOption): boolean {
