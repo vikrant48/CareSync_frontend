@@ -31,12 +31,10 @@
             <button type="button" (click)="navigateToBooking()" class="btn-primary">Book Your First Test</button>
         </app-empty-state>
 
-        <div *ngIf="!isLoading() && !errorMessage() && bookings().length > 0" class="mb-6 space-y-2">
-            <p class="text-xs font-medium text-muted">All dates</p>
-            <app-filter-bar [filters]="bookingFilterConfigs" [values]="bookingFilterValues" [theme]="'patient'"
-                (filterChange)="onBookingFilterChange($event)">
-            </app-filter-bar>
-        </div>
+        <app-filter-bar *ngIf="!isLoading() && !errorMessage() && bookings().length > 0"
+            [filters]="bookingFilterConfigs" [values]="bookingFilterValues" [theme]="'patient'"
+            (filterChange)="onBookingFilterChange($event)">
+        </app-filter-bar>
 
         <!-- Bookings Horizontal List Cards -->
         <div *ngIf="!isLoading() && !errorMessage() && filteredBookings().length > 0"

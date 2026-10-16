@@ -91,7 +91,7 @@
 
         <ng-template #defaultAction>
             <button type="button" (click)="onViewAppointment(); $event.stopPropagation()"
-                class="h-[38px] py-0 w-full px-4 bg-[var(--primary)] hover:bg-[var(--primary-hover)] active:scale-[0.99] text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-[var(--primary)]/20 flex items-center justify-center gap-1.5">
+                class="h-[38px] py-0 w-full px-4 bg-[#5b6cf0]/25 hover:bg-[#5b6cf0]/40 text-indigo-700 dark:text-indigo-100 border border-[#5b6cf0]/45 active:scale-[0.99] text-xs font-bold rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5">
                 <span>View Appointment</span>
                 <i class="fa-solid fa-chevron-right text-[10px]" aria-hidden="true"></i>
             </button>
@@ -99,7 +99,7 @@
                 (click)="$event.stopPropagation()">
                 <div *ngIf="canPatientReschedule" class="grid grid-cols-2 gap-2">
                     <button type="button" (click)="onReschedule($event)"
-                        class="h-[38px] py-0 px-3 bg-[var(--bg)] hover:bg-[var(--border)] text-[var(--text)] text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1.5">
+                        class="h-[38px] py-0 px-3 bg-[var(--bg)] hover:bg-[var(--border)] text-[var(--text)] border border-[var(--border)] hover:border-[var(--muted)] text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1.5">
                         Reschedule
                     </button>
                     <button type="button" (click)="onCancel($event)" [disabled]="!canPatientCancel"

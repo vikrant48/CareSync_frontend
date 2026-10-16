@@ -154,8 +154,18 @@
         </div>
     </ng-container>
 
+    <!-- Clear Filters Action as red text in the filter row, only when a filter is set (clearAllStyle = 'danger') -->
+    <div *ngIf="showClearAll && clearAllStyle === 'danger' && activeFilterCount > 0"
+        class="flex items-center self-end h-[38px] shrink-0 animate-in fade-in duration-200">
+        <button type="button" (click)="clearAllFilters()"
+            class="h-6 py-0 text-xs font-bold flex items-center gap-1.5 px-1 text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 transition-colors cursor-pointer select-none">
+            <i class="fa-solid fa-circle-xmark text-xs" aria-hidden="true"></i>
+            <span>Clear filters ({{ activeFilterCount }})</span>
+        </button>
+    </div>
+
     <!-- Clear Filters Action (Rendered only when activeFilterCount > 0) -->
-    <div *ngIf="showClearAll && activeFilterCount > 0"
+    <div *ngIf="showClearAll && clearAllStyle === 'link' && activeFilterCount > 0"
         class="flex items-center self-end h-[38px] ml-auto shrink-0 animate-in fade-in duration-200">
         <button type="button" (click)="clearAllFilters()"
             [ngClass]="theme === 'doctor' ? 'text-[var(--accent)] hover:text-[var(--accent)]' : 'text-[var(--primary)] hover:text-[var(--primary-hover)]'"

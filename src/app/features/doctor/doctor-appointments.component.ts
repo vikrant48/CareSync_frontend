@@ -21,6 +21,7 @@ import { AppointmentApiService } from '../../core/services/appointment-api.servi
 import { PreVisitIntakeRequest, PreVisitIntakeResponse, SoapReportDto } from '../../core/models/appointment.models';
 import { ToastService } from '../../core/services/toast.service';
 import { PageContainerComponent } from '../../shared/ui/page-container.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { PaginatorComponent } from '../../shared/ui/paginator.component';
 import { StickyActionBarComponent } from '../../shared/ui/sticky-action-bar.component';
 import { memoByDeps } from '../../shared/utils/memo';
@@ -32,7 +33,7 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
 @Component({
   selector: 'app-doctor-appointments',
   standalone: true,
-  imports: [StickyActionBarComponent, PaginatorComponent, PageContainerComponent, 
+  imports: [PageHeaderComponent, StickyActionBarComponent, PaginatorComponent, PageContainerComponent, 
     CommonModule,
     FormsModule,
     RouterModule,

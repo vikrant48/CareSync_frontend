@@ -7,6 +7,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { FilterBarComponent, FilterConfig } from '../../shared/components';
 import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 import { PageContainerComponent } from '../../shared/ui/page-container.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { InrPipe } from '../../shared/utils/inr.pipe';
 import { ConfirmService } from '../../core/services/confirm.service';
 
@@ -20,7 +21,7 @@ interface CreateLabTestRequest {
 @Component({
   selector: 'app-lab-test-management',
   standalone: true,
-  imports: [InrPipe, PageContainerComponent, CommonModule, FormsModule, ReactiveFormsModule, ModalShellComponent, FilterBarComponent, PageLoaderComponent],
+  imports: [PageHeaderComponent, InrPipe, PageContainerComponent, CommonModule, FormsModule, ReactiveFormsModule, ModalShellComponent, FilterBarComponent, PageLoaderComponent],
   // All view state is in signals and the reactive form, so OnPush needs no manual markForCheck
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './lab-test-management.component.html',

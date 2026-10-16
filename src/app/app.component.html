@@ -24,10 +24,17 @@
       </div> -->
 
       <nav class="flex items-center gap-2 flex-nowrap shrink-0">
+        @if (isBrowser && !auth.isAuthenticated()) {
+        <span class="flex items-center gap-1.5 sm:gap-2 flex-nowrap">
+          <a routerLink="/login" class="btn-secondary btn-sm h-[34px] min-h-[34px] py-0 px-3 text-xs" aria-label="Login">Login</a>
+          <a routerLink="/register" class="btn-primary btn-sm h-[34px] min-h-[34px] py-0 px-3 text-xs" aria-label="Register">Register</a>
+        </span>
+        }
+
         <!-- Git Repos Dropdown Button -->
         <div class="relative git-repo-dropdown-container">
           <button type="button" (click)="toggleGitDropdown($event)"
-            class="h-[30px] min-h-[30px] py-0 relative inline-flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 rounded-lg text-xs font-bold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-500 hover:to-indigo-500 shadow-md shadow-blue-500/25 border border-blue-400/50 transition-all duration-300 hover:scale-105 active:scale-95 group"
+            class="h-[34px] min-h-[34px] py-0 relative inline-flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 rounded-lg text-xs font-bold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-500 hover:to-indigo-500 shadow-md shadow-blue-500/25 border border-blue-400/50 transition-all duration-300 hover:scale-105 active:scale-95 group"
             title="CareSync GitHub Repositories" aria-label="GitHub Repositories">
             <i class="fa-brands fa-github text-sm text-white transition-transform group-hover:scale-110" aria-hidden="true"></i>
             <span class="hidden sm:inline tracking-wide font-semibold">Git Repos</span>
@@ -90,13 +97,6 @@
             </div>
           </div>
         </div>
-
-        @if (isBrowser && !auth.isAuthenticated()) {
-        <span class="flex items-center gap-1.5 sm:gap-2 flex-nowrap">
-          <a routerLink="/login" class="btn-secondary btn-sm h-[30px] min-h-[30px] py-0 px-3 text-xs" aria-label="Login">Login</a>
-          <a routerLink="/register" class="btn-primary btn-sm h-[30px] min-h-[30px] py-0 px-3 text-xs" aria-label="Register">Register</a>
-        </span>
-        }
       </nav>
     </div>
   </header>

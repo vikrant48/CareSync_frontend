@@ -13,6 +13,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 import { FilterBarComponent, FilterConfig } from '../../shared/components';
 import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { formatInr } from '../../shared/utils/format.util';
 import { extractApiError } from '../../shared/utils/api-error.util';
 import { markForCheckOn } from '../../shared/utils/mark-for-check';
@@ -28,7 +29,7 @@ export interface CategoryTab {
 @Component({
   selector: 'app-lab-tests',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaymentPopupComponent, SearchableSelectComponent, ModalShellComponent, FilterBarComponent, PageLoaderComponent],
+  imports: [PageHeaderComponent, CommonModule, FormsModule, PaymentPopupComponent, SearchableSelectComponent, ModalShellComponent, FilterBarComponent, PageLoaderComponent],
   // View state is signals/computed; HTTP results also request a check via markForCheckOn
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './lab-tests.component.html'

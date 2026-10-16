@@ -20,7 +20,7 @@
 
     <!-- Hero Greeting Banner with Notification Bell -->
     <div
-      class="relative z-20 rounded-2xl bg-gradient-to-r from-[var(--accent-soft)] via-[var(--panel)] to-[var(--primary-soft)] border border-[var(--border)] p-4 sm:p-8 shadow-2xl">
+      class="page-hero page-hero--tall z-20">
       <!-- Background Ambient Glows (isolated in clipped background container) -->
       <div class="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
         <div class="absolute -top-16 -left-16 w-64 h-64 bg-[var(--accent)]/15 rounded-full blur-3xl">
@@ -31,10 +31,10 @@
 
       <div class="relative z-10 md:flex md:flex-row md:items-center md:justify-between md:gap-6">
         <!-- Left Info Section -->
-        <div class="space-y-2 max-w-lg pr-14 md:pr-0">
+        <div class="space-y-1 max-w-lg pr-14 md:pr-0">
           <span class="text-xs font-bold uppercase tracking-widest text-[var(--accent)]">{{ greeting }}</span>
           <h1
-            class="text-2xl sm:text-4xl font-black text-[var(--text)] tracking-tight leading-tight flex items-center gap-2">
+            class="text-xl sm:text-3xl font-black text-[var(--text)] tracking-tight leading-tight flex items-center gap-2">
             <span>{{ doctorName && doctorName !== 'Doctor' ? 'Dr. ' + doctorName : 'Doctor' }}</span>
           </h1>
           <p class="text-xs sm:text-sm text-[var(--muted)] font-medium pt-1">

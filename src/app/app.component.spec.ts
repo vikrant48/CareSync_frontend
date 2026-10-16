@@ -32,7 +32,7 @@ describe('AppComponent', () => {
     expect(compiled.querySelector('router-outlet')).toBeTruthy();
   });
 
-  it('header buttons (Git Repos, Login, Register) are all 30px', () => {
+  it('header buttons (Git Repos, Login, Register) are all 34px', () => {
     localStorage.removeItem('accessToken');
     const fixture = TestBed.createComponent(AppComponent);
     document.body.appendChild(fixture.nativeElement);
@@ -43,7 +43,7 @@ describe('AppComponent', () => {
     const register = header.querySelector('a[aria-label="Register"]') as HTMLElement;
     [git, login, register].forEach((el) => {
       expect(el).toBeTruthy();
-      expect(Math.round(el.getBoundingClientRect().height)).toBe(30);
+      expect(Math.round(el.getBoundingClientRect().height)).toBe(34);
     });
     fixture.nativeElement.remove();
   });

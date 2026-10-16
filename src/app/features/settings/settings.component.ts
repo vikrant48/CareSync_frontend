@@ -61,15 +61,12 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
   template: `
     <!-- Settings Main Template -->
     <ng-template #settingsContent>
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8 animate-fade-in">
+      <div class="max-w-7xl mx-auto p-3 sm:p-5 space-y-4 animate-fade-in">
 
-        <div class="surface px-5 py-5 sm:px-6 shadow-sm">
-          <app-page-header
-            title="Settings"
-            subtitle="Manage your app preferences and account security."
-            containerClass="!mb-0">
-          </app-page-header>
-        </div>
+        <app-page-header variant="hero" size="compact"
+          title="Settings"
+          subtitle="Manage your app preferences and account security.">
+        </app-page-header>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-start">
 

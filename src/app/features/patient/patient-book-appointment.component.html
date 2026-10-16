@@ -1,51 +1,13 @@
     <app-page-container extraClass="pb-28">
-        <!-- Hero Header Section with Doctor Graphic Banner (Matching Reference Screenshot 1) -->
-        <section
-            class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
-            <!-- Left: Title & Tagline -->
-            <div class="flex-1 flex flex-col justify-between space-y-3 text-center md:text-left">
-                <div class="space-y-1">
-                    <h1 class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">Find & Book
-                        Appointments
-                    </h1>
-                    <p class="text-xs sm:text-sm text-[var(--muted)]">Search for specialized doctors and book your slot.
-                    </p>
-                </div>
-                <div>
-                    <button
-                        class="h-[38px] py-0 px-3.5 rounded-xl bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-xs font-bold shadow-md inline-flex items-center gap-2 transition-all"
-                        (click)="openEmergencyModal()">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span>Emergency Booking</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Right: Doctor Graphic Banner with Female Doctor Image -->
-            <div
-                class="w-full md:w-[480px] h-[115px] rounded-2xl bg-gradient-to-r from-[var(--primary)] to-indigo-600 border border-[var(--primary)]/30 px-5 sm:px-6 flex items-center justify-between relative overflow-hidden shadow-xl shrink-0">
-                <!-- Background Pattern -->
-                <div
-                    class="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:12px_12px]">
-                </div>
-
-                <!-- Banner Text -->
-                <div class="space-y-0.5 z-10 max-w-[220px]">
-                    <h3 class="text-sm sm:text-base font-black text-white leading-tight uppercase tracking-wide">
-                        Your Health<br /><span class="text-white">Our Priority</span>
-                    </h3>
-                    <p class="text-[11px] text-white/80 leading-tight">
-                        Book consultations with trusted & verified doctors.
-                    </p>
-                </div>
-
-                <!-- Female Doctor Asset Image -->
-                <div class="relative z-10 h-[135px] -mb-5 -mr-3 shrink-0 flex items-end">
-                    <img src="assets/female-doctor-banner.png" alt="Female Doctor"
-                        class="h-full object-contain filter drop-shadow-2xl" />
-                </div>
-            </div>
-        </section>
+        <app-page-header variant="hero" title="Find & Book Appointments"
+            subtitle="Search for specialized doctors and book your slot." [hasActions]="true">
+            <button type="button"
+                class="h-[38px] py-0 px-3.5 rounded-xl bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-xs font-bold shadow-md inline-flex items-center gap-2 transition-all"
+                (click)="openEmergencyModal()">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Emergency Booking</span>
+            </button>
+        </app-page-header>
 
         <ng-template #specializationTpl>
             <app-specialization-autocomplete class="block w-full" [(ngModel)]="specializationFilter"
@@ -55,7 +17,7 @@
             </app-specialization-autocomplete>
         </ng-template>
 
-        <app-filter-bar [filters]="bookFilterConfigs" [values]="bookFilterValues" [theme]="'patient'"
+        <app-filter-bar [filters]="bookFilterConfigs" [values]="bookFilterValues" [theme]="'patient'" [clearAllStyle]="'danger'"
             (filterChange)="onFilterBarChange($event)">
         </app-filter-bar>
 
@@ -173,16 +135,16 @@
                 <div class="mt-3 pt-2 flex items-center gap-2">
                     <button type="button" [disabled]="d.isActive === false"
                         (click)="goToDoctorAndBook(d); $event.stopPropagation()"
-                        class="h-[38px] py-0 flex-1 min-w-0 px-3 bg-[#5b6cf0] hover:bg-[#4c5ee0] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 text-xs sm:text-sm truncate cursor-pointer">
+                        class="h-[38px] py-0 flex-1 min-w-0 px-3 bg-[#5b6cf0]/25 hover:bg-[#5b6cf0]/40 text-indigo-700 dark:text-indigo-100 border border-[#5b6cf0]/45 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed font-semibold rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 text-xs sm:text-sm truncate cursor-pointer">
                         <span class="truncate">{{ d.isActive === false ? 'Doctor Inactive' : 'View & Book Appointment'
                             }}</span>
                     </button>
 
                     <button type="button" [disabled]="d.isActive === false"
                         (click)="bookEmergencyDoctor(d); $event.stopPropagation()"
-                        class="h-[38px] py-0 shrink-0 px-3 bg-emerald-400/70 hover:bg-emerald-400/85 text-white border border-emerald-300/45 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed font-semibold rounded-xl transition-all shadow-sm hover:shadow flex items-center justify-center gap-1.5 text-xs sm:text-sm cursor-pointer whitespace-nowrap"
+                        class="h-[38px] py-0 shrink-0 px-3 bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed font-semibold rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 text-xs sm:text-sm cursor-pointer whitespace-nowrap"
                         [title]="'Book Emergency Appointment with ' + formatDoctorName(d)">
-                        <i class="fa-solid fa-bolt text-xs text-emerald-100" aria-hidden="true"></i>
+                        <i class="fa-solid fa-bolt text-xs text-emerald-600 dark:text-emerald-300" aria-hidden="true"></i>
                         <span>Emerg Booking</span>
                     </button>
                 </div>

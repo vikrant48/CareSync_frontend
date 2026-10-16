@@ -6,33 +6,14 @@
 
 <!-- Header Banner Template -->
 <ng-template #labTestsHeader>
-  <header
-    class="relative overflow-hidden border border-[var(--border)] rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-6"
-    [ngClass]="currentRole() === 'DOCTOR' ? 'bg-gradient-to-r from-[var(--accent-soft)] via-[var(--panel)] to-[var(--primary-soft)]' : 'bg-[var(--panel)]'">
-    <!-- Left Banner Info -->
-    <div class="relative z-10 space-y-1">
-      <h1 class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">Lab Tests Booking</h1>
-      <p class="text-xs sm:text-sm text-[var(--muted)] max-w-xl">
-        Select and book your lab tests online with instant digital report generation.
-      </p>
-    </div>
-
-    <!-- Right Action Button -->
-    <div class="relative z-10 flex items-center gap-3">
-      <button (click)="navigateToBooking()"
-        class="btn-size-md bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] font-semibold text-xs sm:text-sm px-4 sm:px-5 rounded-xl shadow-sm transition-all flex items-center gap-2">
-        <i class="fa-regular fa-calendar-check text-[var(--primary)] text-sm" aria-hidden="true"></i>
-        <span>View My Bookings</span>
-      </button>
-    </div>
-
-    <!-- 3D Lab Flask Decorative Art Accent -->
-    <div
-      class="absolute right-4 top-1/2 -translate-y-1/2 w-48 h-32 opacity-20 pointer-events-none hidden md:flex items-center justify-center">
-      <div class="relative w-24 h-24 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-400 blur-2xl"></div>
-      <i class="fa-solid fa-flask-vial text-7xl text-[var(--primary)] absolute" aria-hidden="true"></i>
-    </div>
-  </header>
+  <app-page-header variant="hero" title="Lab Tests Booking" containerClass="mb-6"
+    subtitle="Select and book your lab tests online with instant digital report generation." [hasActions]="true">
+    <button (click)="navigateToBooking()"
+      class="btn-size-md bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] font-semibold text-xs sm:text-sm px-4 sm:px-5 rounded-xl shadow-sm transition-all flex items-center gap-2">
+      <i class="fa-regular fa-calendar-check text-[var(--primary)] text-sm" aria-hidden="true"></i>
+      <span>View My Bookings</span>
+    </button>
+  </app-page-header>
 </ng-template>
 
 <!-- Main Lab Tests Content Template -->

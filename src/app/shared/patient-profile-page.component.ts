@@ -4,6 +4,7 @@ import { PatientDto, MedicalHistoryItem, PatientProfileService } from '../core/s
 import { ToastService } from '../core/services/toast.service';
 import { RouterModule } from '@angular/router';
 import { PatientProfileHistoryComponent } from './patient-profile-history.component';
+import { PageLoaderComponent } from './ui/page-loader.component';
 
 export interface AppointmentCounts {
   total: number;
@@ -15,19 +16,20 @@ export interface AppointmentCounts {
 @Component({
   selector: 'app-patient-profile-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, PatientProfileHistoryComponent],
+  imports: [CommonModule, RouterModule, PatientProfileHistoryComponent, PageLoaderComponent],
   template: `
     <div class="max-w-[1400px] mx-auto p-3 sm:p-5 space-y-4" *ngIf="patient; else loading">
       
       <!-- Top Hero Header Card -->
-      <section class="relative overflow-hidden bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-6">
+      <section class="page-hero page-hero--tall overflow-hidden">
+        <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-4 sm:gap-6">
         
         <!-- Left: Identity & Profile Strength -->
         <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 w-full lg:w-auto text-center sm:text-left">
           
           <!-- Avatar with Camera Overlay & Active Dot -->
           <div class="relative shrink-0">
-            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[var(--bg)] border-4 border-[var(--border)] shadow-xl overflow-hidden flex items-center justify-center text-[var(--text)] text-2xl font-bold">
+            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[var(--bg)] border-4 border-[var(--border)] shadow-xl overflow-hidden flex items-center justify-center text-[var(--text)] text-2xl font-bold">
               <img *ngIf="patient.profileImageUrl; else initials" [src]="patient.profileImageUrl" class="w-full h-full object-cover transition-transform hover:scale-110 duration-500" (error)="onImageError()" />
               <ng-template #initials>
                 <span>{{ initialsFromName(patient) }}</span>
@@ -59,13 +61,13 @@ export interface AppointmentCounts {
         <!-- Right: 4 Appointment Stat KPI Cards -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full lg:w-auto">
           <!-- TOTAL -->
-          <div class="bg-[var(--bg)] border border-[var(--border)] p-3 sm:p-4 rounded-xl text-center shadow-sm min-w-[85px]">
+          <div class="bg-[var(--bg)] border border-[var(--border)] p-3 rounded-xl text-center shadow-sm min-w-[85px]">
             <div class="text-[9px] sm:text-[10px] text-[var(--muted)] font-bold uppercase tracking-wider">Appointments</div>
             <div class="text-lg sm:text-xl font-extrabold text-[var(--text)] mt-0.5">{{ appointmentCounts?.total ?? 0 }}</div>
           </div>
 
           <!-- DONE -->
-          <div class="bg-emerald-500/10 border border-emerald-500/20 p-3 sm:p-4 rounded-xl text-center shadow-sm min-w-[85px]">
+          <div class="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl text-center shadow-sm min-w-[85px]">
             <div class="text-[9px] sm:text-[10px] text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider flex items-center justify-center gap-1">
               <i class="fa-solid fa-circle-check text-[8px]" aria-hidden="true"></i> DONE
             </div>
@@ -73,7 +75,7 @@ export interface AppointmentCounts {
           </div>
 
           <!-- UPCOMING -->
-          <div class="bg-amber-500/10 border border-amber-500/20 p-3 sm:p-4 rounded-xl text-center shadow-sm min-w-[85px]">
+          <div class="bg-amber-500/10 border border-amber-500/20 p-3 rounded-xl text-center shadow-sm min-w-[85px]">
             <div class="text-[9px] sm:text-[10px] text-amber-700 dark:text-amber-400 font-bold uppercase tracking-wider flex items-center justify-center gap-1">
               <i class="fa-solid fa-clock text-[8px]" aria-hidden="true"></i> UPCOMING
             </div>
@@ -81,12 +83,13 @@ export interface AppointmentCounts {
           </div>
 
           <!-- CANCELLED -->
-          <div class="bg-rose-500/10 border border-rose-500/20 p-3 sm:p-4 rounded-xl text-center shadow-sm min-w-[85px]">
+          <div class="bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl text-center shadow-sm min-w-[85px]">
             <div class="text-[9px] sm:text-[10px] text-rose-700 dark:text-rose-400 font-bold uppercase tracking-wider flex items-center justify-center gap-1">
               <i class="fa-solid fa-circle-xmark text-[8px]" aria-hidden="true"></i> CANCELLED
             </div>
             <div class="text-lg sm:text-xl font-extrabold text-rose-700 dark:text-rose-400 mt-0.5">{{ appointmentCounts?.cancelled ?? 0 }}</div>
           </div>
+        </div>
         </div>
       </section>
 
@@ -152,32 +155,32 @@ export interface AppointmentCounts {
                 </div>
 
                 <div class="space-y-3.5 text-xs sm:text-sm">
-                  <div class="flex justify-between border-b border-[var(--border)]/60 pb-2.5">
+                  <div class="flex justify-between pb-2.5">
                     <span class="text-[var(--muted)]">Full Name</span>
                     <span class="font-bold text-[var(--text)]">{{ fullName(patient) }}</span>
                   </div>
 
-                  <div class="flex justify-between border-b border-[var(--border)]/60 pb-2.5">
+                  <div class="flex justify-between pb-2.5">
                     <span class="text-[var(--muted)]">Email</span>
                     <span class="font-bold text-[var(--text)]">{{ patient.email || 'NA' }}</span>
                   </div>
 
-                  <div class="flex justify-between border-b border-[var(--border)]/60 pb-2.5">
+                  <div class="flex justify-between pb-2.5">
                     <span class="text-[var(--muted)]">Date of Birth</span>
                     <span class="font-bold text-[var(--text)]">{{ formatDateOfBirth(patient.dateOfBirth) }}</span>
                   </div>
 
-                  <div class="flex justify-between border-b border-[var(--border)]/60 pb-2.5">
+                  <div class="flex justify-between pb-2.5">
                     <span class="text-[var(--muted)]">Gender</span>
                     <span class="font-bold text-[var(--text)]">{{ patient.gender || 'NA' }}</span>
                   </div>
 
-                  <div class="flex justify-between border-b border-[var(--border)]/60 pb-2.5">
+                  <div class="flex justify-between pb-2.5">
                     <span class="text-[var(--muted)]">Blood Group</span>
                     <span class="font-bold text-[var(--text)]">{{ patient.bloodGroup || 'NA' }}</span>
                   </div>
 
-                  <div class="flex justify-between border-b border-[var(--border)]/60 pb-2.5">
+                  <div class="flex justify-between pb-2.5">
                     <span class="text-[var(--muted)]">Contact Number</span>
                     <span class="font-bold text-[var(--text)] font-mono">{{ patient.contactInfo || 'NA' }}</span>
                   </div>
@@ -329,12 +332,9 @@ export interface AppointmentCounts {
       </section>
     </div>
 
-    <!-- Loading Skeleton -->
+    <!-- Loading: the same CareSync logo loader as the rest of the app -->
     <ng-template #loading>
-      <div class="max-w-7xl mx-auto space-y-6 p-4 sm:p-6 animate-pulse">
-        <div class="bg-[var(--panel)] rounded-2xl p-6 border border-[var(--border)] h-40"></div>
-        <div class="bg-[var(--panel)] rounded-2xl p-6 border border-[var(--border)] h-96"></div>
-      </div>
+      <app-page-loader label="Loading profile..."></app-page-loader>
     </ng-template>
   `,
   styles: []

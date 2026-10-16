@@ -1,43 +1,13 @@
   <app-page-container paddingClass="p-3 sm:p-6" spacingClass="space-y-5" extraClass="font-sans selection:bg-[var(--accent)]/30 pb-16">
 
-    <!-- Hero Header Section -->
-    <div
-      class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--accent-soft)] via-[var(--panel)] to-[var(--primary-soft)] border border-[var(--border)] p-5 sm:p-7 shadow-2xl">
-      <!-- Ambient Backdrop Graphic -->
-      <div class="absolute -top-16 -right-16 w-72 h-72 bg-[var(--accent)]/10 rounded-full blur-3xl pointer-events-none">
-      </div>
-
-      <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
-        <div class="space-y-2">
-          <!-- Feature Badges -->
-          <div class="flex flex-wrap items-center gap-2">
-            <span
-              class="bg-[var(--accent)]/15 border border-[var(--accent)]/30 text-[var(--accent)] px-2.5 py-0.5 rounded-full text-[11px] font-bold flex items-center gap-1.5">
-              <i class="fa-solid fa-folder-tree" aria-hidden="true"></i> Organized Catalog
-            </span>
-            <span
-              class="bg-[var(--accent)]/15 border border-[var(--accent)]/30 text-[var(--accent)] px-2.5 py-0.5 rounded-full text-[11px] font-bold flex items-center gap-1.5">
-              <i class="fa-solid fa-bolt" aria-hidden="true"></i> Quick Management
-            </span>
-            <span
-              class="bg-[var(--accent)]/15 border border-[var(--accent)]/30 text-[var(--accent)] px-2.5 py-0.5 rounded-full text-[11px] font-bold flex items-center gap-1.5">
-              <i class="fa-solid fa-circle-check" aria-hidden="true"></i> Accurate Pricing
-            </span>
-          </div>
-
-          <h1 class="text-xl sm:text-3xl font-black text-[var(--text)] tracking-tight">Lab Test Management</h1>
-          <p class="text-xs sm:text-sm text-[var(--muted)] font-medium max-w-xl">
-            Create, update, and manage the catalog of lab tests available for your patients.
-          </p>
-        </div>
-
-        <button type="button" (click)="openAddDrawer()"
-          class="btn-size-lg px-5 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs sm:text-sm rounded-xl shadow-xl shadow-[var(--accent)]/20 transition-all cursor-pointer flex items-center gap-2 transform hover:-translate-y-0.5">
-          <i class="fa-solid fa-plus" aria-hidden="true"></i>
-          <span>Add New Test</span>
-        </button>
-      </div>
-    </div>
+    <app-page-header variant="hero" title="Lab Test Management"
+      subtitle="Create, update, and manage the catalog of lab tests available for your patients." [hasActions]="true">
+      <button type="button" (click)="openAddDrawer()"
+        class="btn-size-md px-5 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs sm:text-sm rounded-xl shadow-md shadow-[var(--accent)]/20 transition-all cursor-pointer flex items-center gap-2">
+        <i class="fa-solid fa-plus" aria-hidden="true"></i>
+        <span>Add New Test</span>
+      </button>
+    </app-page-header>
 
     <app-filter-bar [filters]="testFilterConfigs" [values]="testFilterValues" [theme]="'doctor'"
       (filterChange)="onFilterBarChange($event)">
@@ -292,4 +262,4 @@
       <i *ngIf="isSubmitting()" class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>
       <span>{{ isSubmitting() ? 'Saving...' : (editingTest() ? 'Update Changes' : 'Create Test') }}</span>
     </button>
-  </app-modal-shell>
+  </app-modal-shell>

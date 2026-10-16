@@ -61,7 +61,7 @@ export class PatientLabBookingsComponent implements OnInit {
       key: 'statusFilter',
       label: 'Status',
       defaultValue: 'ALL',
-      width: 'w-full',
+      width: 'w-full sm:w-auto sm:flex-1 min-w-0',
       options: [
         { label: 'All', value: 'ALL' },
         { label: 'Upcoming', value: 'UPCOMING' },

@@ -296,6 +296,41 @@ a:focus-visible,
   color: var(--muted);
 }
 
+/* Page header banner, the same on every page. Heights follow the reference headers:
+   tall = patient dashboard (dashboards, profiles), standard = My Appointments (most pages),
+   compact = Settings (settings, change password). Content inside goes in one child element. */
+.page-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1rem;
+  color: var(--text);
+  background-color: var(--panel);
+  background-image: linear-gradient(to right, var(--accent-soft), var(--panel), var(--primary-soft));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+@media (min-width: 640px) {
+  .page-hero {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .page-hero--tall {
+    min-height: 8rem;
+  }
+
+  .page-hero--standard {
+    min-height: 6.875rem;
+  }
+
+  .page-hero--compact {
+    min-height: 6.375rem;
+  }
+}
+
 .heading {
   font-family: Outfit, ui-sans-serif, system-ui, sans-serif;
   letter-spacing: -0.02em;

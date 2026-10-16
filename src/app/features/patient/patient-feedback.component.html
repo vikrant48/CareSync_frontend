@@ -1,36 +1,19 @@
     <app-page-container>
 
-        <!-- Hero Header Card -->
-        <header
-            class="relative overflow-hidden bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <!-- Left Header Text -->
-            <div class="relative z-10 space-y-1">
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">Feedback Center</h1>
-                <p class="text-xs sm:text-sm text-[var(--muted)] max-w-xl">
-                    Your insights help us improve care for everyone.
-                </p>
-            </div>
-
-            <!-- Right Ambient 3D Star & Rating Graphic Badge Accent -->
-            <div class="relative z-10 hidden md:flex items-center gap-3">
+        <app-page-header variant="hero" title="Feedback Center"
+            subtitle="Your insights help us improve care for everyone." [hasActions]="true">
+            <div
+                class="hidden md:flex bg-[var(--bg)] border border-[var(--border)] rounded-2xl px-4 py-2 items-center gap-3 shadow-md">
                 <div
-                    class="bg-[var(--bg)] border border-[var(--border)] rounded-2xl p-3 px-4 flex items-center gap-3 shadow-lg">
-                    <div
-                        class="w-10 h-10 rounded-xl bg-[var(--primary)]/10 border border-[var(--primary)]/20 flex items-center justify-center text-[var(--primary)]">
-                        <i class="fa-solid fa-star text-lg text-amber-700 dark:text-amber-400" aria-hidden="true"></i>
-                    </div>
-                    <div>
-                        <div class="text-xs font-bold text-[var(--text)]">Share Experience</div>
-                        <div class="text-[10px] text-[var(--muted)]">Verified Patient Reviews</div>
-                    </div>
+                    class="w-9 h-9 rounded-xl bg-[var(--primary)]/10 border border-[var(--primary)]/20 flex items-center justify-center text-[var(--primary)]">
+                    <i class="fa-solid fa-star text-base text-amber-700 dark:text-amber-400" aria-hidden="true"></i>
+                </div>
+                <div>
+                    <div class="text-xs font-bold text-[var(--text)]">Share Experience</div>
+                    <div class="text-[10px] text-[var(--muted)]">Verified Patient Reviews</div>
                 </div>
             </div>
-
-            <!-- Background Glow Accent -->
-            <div
-                class="absolute right-0 top-0 w-64 h-64 bg-[var(--primary)]/10 rounded-full blur-3xl pointer-events-none">
-            </div>
-        </header>
+        </app-page-header>
 
         <!-- Main Top Section: Give Feedback Form Card (Left 6-col) + KPI Stats & Analytics (Right 6-col) -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">

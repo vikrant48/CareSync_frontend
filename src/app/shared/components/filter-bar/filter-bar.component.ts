@@ -88,6 +88,8 @@ export class FilterBarComponent implements OnInit, OnChanges, OnDestroy {
     @Input() debounceTimeMs = 300;
     @Input() containerClass = '';
     @Input() showClearAll = true;
+    /** 'link': small text link shown only when a filter is set (default). 'danger': red text in the filter row, only when a filter is set. */
+    @Input() clearAllStyle: 'link' | 'danger' = 'link';
 
     @Output() filterChange = new EventEmitter<Record<string, any>>();
     @Output() filterReset = new EventEmitter<Record<string, any>>();

@@ -10,12 +10,13 @@ import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 import { DoctorService, Doctor } from '../../core/services/doctor.service';
 import { PageContainerComponent } from '../../shared/ui/page-container.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { memoByDeps } from '../../shared/utils/memo';
 
 @Component({
   selector: 'app-patient-feedback',
   standalone: true,
-  imports: [PageContainerComponent, CommonModule, FormsModule, RouterModule, ModalShellComponent, PageLoaderComponent],
+  imports: [PageHeaderComponent, PageContainerComponent, CommonModule, FormsModule, RouterModule, ModalShellComponent, PageLoaderComponent],
   // OnPush: every async callback that changes view state calls markForCheck
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './patient-feedback.component.html',

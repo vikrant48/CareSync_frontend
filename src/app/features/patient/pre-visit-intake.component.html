@@ -2,8 +2,8 @@
     <div class="max-w-3xl mx-auto space-y-6">
 
         <!-- Header Card -->
-        <div
-            class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-6 shadow-xl backdrop-blur-lg flex items-center justify-between">
+        <div class="page-hero page-hero--standard">
+          <div class="relative z-10 flex items-center justify-between gap-3 sm:gap-4">
             <div>
                 <div class="flex items-center gap-3">
                     <button (click)="goBack()"
@@ -11,7 +11,7 @@
                         <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
                     </button>
                     <h1
-                        class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                        class="text-xl sm:text-3xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
                         Pre-Visit Digital Intake
                     </h1>
                 </div>
@@ -19,6 +19,7 @@
                     health status.</p>
             </div>
             <app-status-badge [status]="appointmentStatus"></app-status-badge>
+          </div>
         </div>
 
         <div class="bg-gradient-to-br from-indigo-500/10 to-cyan-500/10 border border-indigo-500/30 rounded-2xl p-6 space-y-4">

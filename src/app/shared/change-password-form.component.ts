@@ -95,7 +95,7 @@ import { ToastService } from '../core/services/toast.service';
 
           </div>
 
-          <div class="xl:col-span-5 bg-[var(--bg)] border border-[var(--border)] rounded-xl p-4 space-y-2.5">
+          <div class="xl:col-span-5 xl:mt-7 bg-[var(--bg)] border border-[var(--border)] rounded-xl p-4 space-y-2.5">
             <h3 class="text-sm font-bold">Password Requirements</h3>
             <div class="space-y-1.5 text-xs">
               <div class="flex items-center gap-2" [ngClass]="form.newPassword.length >= 8 ? 'text-emerald-700 dark:text-emerald-400 font-semibold' : 'text-muted'">

@@ -9,13 +9,14 @@ import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropd
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 import { PageContainerComponent } from '../../shared/ui/page-container.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatCardComponent } from '../../shared/ui/stat-card.component';
 import { toLocalDateKey } from '../../shared/utils/format.util';
 
 @Component({
   selector: 'app-doctor-leave-management',
   standalone: true,
-  imports: [StatCardComponent, PageContainerComponent, CommonModule, FormsModule, DatePickerComponent, SelectDropdownComponent, EmptyStateComponent, PageLoaderComponent],
+  imports: [PageHeaderComponent, StatCardComponent, PageContainerComponent, CommonModule, FormsModule, DatePickerComponent, SelectDropdownComponent, EmptyStateComponent, PageLoaderComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './doctor-leave-management.component.html',
   styleUrl: './doctor-leave-management.component.css'

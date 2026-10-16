@@ -13,6 +13,7 @@ import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 import { FilterBarComponent, FilterConfig } from '../../shared/components';
 import { PageContainerComponent } from '../../shared/ui/page-container.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { PaginatorComponent } from '../../shared/ui/paginator.component';
 import { StickyActionBarComponent } from '../../shared/ui/sticky-action-bar.component';
 import { doctorDisplayName, doctorInitial as getDoctorInitial } from '../../shared/utils/doctor-name.util';
@@ -23,7 +24,7 @@ import { markForCheckOn } from '../../shared/utils/mark-for-check';
 @Component({
   selector: 'app-patient-book-appointment',
   standalone: true,
-  imports: [InrPipe, StickyActionBarComponent, PaginatorComponent, PageContainerComponent, CommonModule, RouterModule, FormsModule, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent, PageLoaderComponent, EmptyStateComponent, FilterBarComponent],
+  imports: [PageHeaderComponent, InrPipe, StickyActionBarComponent, PaginatorComponent, PageContainerComponent, CommonModule, RouterModule, FormsModule, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent, PageLoaderComponent, EmptyStateComponent, FilterBarComponent],
   // OnPush: HTTP results go through markForCheckOn; child modals/autocomplete request their own checks
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './patient-book-appointment.component.html',
@@ -77,16 +78,6 @@ export class PatientBookAppointmentComponent {
       icon: 'fa-solid fa-location-dot',
       placeholder: 'Select location...',
       defaultValue: ''
-    },
-    {
-      type: 'button',
-      key: 'search',
-      buttonLabel: 'Search',
-      buttonIcon: 'fa-solid fa-magnifying-glass',
-      clearable: false,
-      width: 'w-full sm:w-36',
-      buttonClass: 'bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white border border-transparent',
-      onClick: () => this.searchDoctors()
     }
   ];
 

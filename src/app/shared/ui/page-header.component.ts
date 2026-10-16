@@ -23,4 +23,6 @@ export class PageHeaderComponent {
   @Input() variant: 'default' | 'hero' = 'default';
   /** Font Awesome classes; shown in the hero variant only */
   @Input() icon = '';
+  /** Hero height: `standard` for most pages, `compact` for settings / change password, `tall` for dashboards and profiles */
+  @Input() size: 'tall' | 'standard' | 'compact' = 'standard';
 }

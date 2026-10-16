@@ -13,7 +13,7 @@
 
       <!-- Hero Cover & Profile Header Card -->
       <div
-        class="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-[var(--accent-soft)] via-[var(--panel)] to-[var(--primary-soft)] border border-[var(--border)] p-3 sm:p-7 shadow-2xl">
+        class="page-hero page-hero--tall overflow-hidden">
         <!-- Ambient Backdrop Glow -->
         <div
           class="absolute -top-16 -right-16 w-80 h-80 bg-[var(--accent)]/10 rounded-full blur-3xl pointer-events-none">
@@ -27,7 +27,7 @@
             <div class="relative group cursor-pointer shrink-0" (click)="triggerProfileImageUpload()"
               title="Click to change profile picture">
               <div
-                class="w-24 h-24 sm:w-28 sm:h-28 rounded-full ring-4 ring-[var(--accent)]/40 shadow-2xl overflow-hidden bg-[var(--bg)] flex items-center justify-center relative">
+                class="w-16 h-16 sm:w-20 sm:h-20 rounded-full ring-4 ring-[var(--accent)]/40 shadow-2xl overflow-hidden bg-[var(--bg)] flex items-center justify-center relative">
                 <!-- Preview Overlay -->
                 <div *ngIf="profileImagePreviewUrl"
                   class="absolute inset-0 z-30 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center p-2 text-center">
@@ -56,7 +56,7 @@
                   [class.opacity-50]="uploadingProfileImage" />
 
                 <ng-template #initials>
-                  <div class="text-3xl sm:text-4xl font-black text-[var(--accent)]">
+                  <div class="text-2xl sm:text-3xl font-black text-[var(--accent)]">
                     {{ (profile?.firstName || profile?.username || 'D').charAt(0) }}
                   </div>
                 </ng-template>
@@ -70,10 +70,10 @@
 
               <!-- Camera Badge Icon -->
               <div
-                class="absolute bottom-1 right-1 w-8 h-8 rounded-full bg-[var(--accent)] text-[var(--accent-fg)] flex items-center justify-center shadow-lg border-2 border-[var(--bg)]">
+                class="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-[var(--accent)] text-[var(--accent-fg)] flex items-center justify-center shadow-lg border-2 border-[var(--bg)]">
                 <i class="fa-solid fa-camera text-xs" aria-hidden="true"></i>
               </div>
-              <span class="absolute top-1 right-1 w-3.5 h-3.5 rounded-full border-2 border-[var(--bg)]"
+              <span class="absolute top-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-[var(--bg)]"
                 [class.bg-[#10b981]]="profile?.isActive" [class.bg-[#ef4444]]="!profile?.isActive"
                 [attr.aria-label]="profile?.isActive ? 'Active' : 'Away'" [attr.title]="profile?.isActive ? 'Active' : 'Away'"></span>
 

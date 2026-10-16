@@ -1,6 +1,6 @@
     <app-page-container>
         <!-- Welcome header card -->
-        <section class="surface p-3 sm:p-5 shadow-sm relative">
+        <section class="page-hero page-hero--tall">
             <div class="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-3 md:flex md:items-center md:justify-between md:gap-4">
                 <ng-container *ngIf="!loadingWelcome">
                     <img *ngIf="profileImageUrl; else avatar" [src]="profileImageUrl" alt="Profile"
@@ -43,19 +43,19 @@
                 <app-patient-notification class="justify-self-end shrink-0 md:order-4"></app-patient-notification>
 
                 <div class="col-span-3 grid grid-cols-3 gap-1.5 w-full min-w-0 md:order-3 md:col-auto md:flex md:w-auto md:items-center md:gap-2">
-                    <app-button class="min-w-0 block [&_button]:w-full [&_button]:px-1.5 [&_button]:text-[10px] md:[&_button]:w-auto md:[&_button]:px-3 md:[&_button]:text-xs"
+                    <app-button class="min-w-0 block [&_button]:w-full [&_button]:h-[30px] [&_button]:min-h-[30px] [&_button]:px-1.5 [&_button]:text-[10px] md:[&_button]:w-auto md:[&_button]:px-3 md:[&_button]:text-xs"
                         variant="primary" size="sm" icon="fa-solid fa-calendar-plus"
                         (btnClick)="goToBookAppointment()">
                         <span class="md:hidden">Book</span>
                         <span class="hidden md:inline">Book Appointment</span>
                     </app-button>
-                    <app-button class="min-w-0 block [&_button]:w-full [&_button]:px-1.5 [&_button]:text-[10px] md:[&_button]:w-auto md:[&_button]:px-3 md:[&_button]:text-xs"
+                    <app-button class="min-w-0 block [&_button]:w-full [&_button]:h-[30px] [&_button]:min-h-[30px] [&_button]:px-1.5 [&_button]:text-[10px] md:[&_button]:w-auto md:[&_button]:px-3 md:[&_button]:text-xs"
                         variant="secondary" size="sm" icon="fa-solid fa-calendar-check"
                         (btnClick)="goToMyAppointments()">
                         <span class="md:hidden">Appointments</span>
                         <span class="hidden md:inline">My Appointments</span>
                     </app-button>
-                    <app-button class="min-w-0 block [&_button]:w-full [&_button]:px-1.5 [&_button]:text-[10px] md:[&_button]:w-auto md:[&_button]:px-3 md:[&_button]:text-xs"
+                    <app-button class="min-w-0 block [&_button]:w-full [&_button]:h-[30px] [&_button]:min-h-[30px] [&_button]:px-1.5 [&_button]:text-[10px] md:[&_button]:w-auto md:[&_button]:px-3 md:[&_button]:text-xs"
                         variant="secondary" size="sm" icon="fa-solid fa-heart-pulse" (btnClick)="goToVitals()">
                         <span class="md:hidden">Vitals</span>
                         <span class="hidden md:inline">Health Vitals</span>

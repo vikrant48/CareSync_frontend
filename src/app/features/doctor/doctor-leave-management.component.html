@@ -1,35 +1,19 @@
     <app-page-container paddingClass="p-3 sm:p-6" spacingClass="space-y-5" extraClass="font-sans selection:bg-[var(--accent)]/30 pb-16">
 
-        <!-- Header Banner -->
-        <div
-            class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--accent-soft)] via-[var(--panel)] to-[var(--primary-soft)] border border-[var(--border)] p-5 sm:p-7 shadow-2xl">
-            <!-- Ambient Backdrop Glow -->
+        <app-page-header variant="hero" title="Leave Management"
+            subtitle="Manage your availability and time off" [hasActions]="true">
             <div
-                class="absolute -top-16 -right-16 w-72 h-72 bg-[var(--accent)]/10 rounded-full blur-3xl pointer-events-none">
-            </div>
-
-            <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div class="space-y-1.5">
-                    <h1 class="text-xl sm:text-3xl font-black text-[var(--text)] tracking-tight">Leave Management</h1>
-                    <p class="text-xs sm:text-sm text-[var(--muted)] font-medium max-w-xl">
-                        Manage your availability and time off
-                    </p>
-                </div>
-
-                <!-- Top Right Illustration Badge -->
+                class="bg-[var(--panel)]/80 border border-[var(--border)] rounded-2xl px-3 py-2 flex items-center gap-3 backdrop-blur-md shadow-md">
                 <div
-                    class="bg-[var(--panel)]/80 border border-[var(--border)] rounded-2xl p-3 sm:px-4 sm:py-2.5 flex items-center gap-3 backdrop-blur-md shadow-xl self-end sm:self-auto">
-                    <div
-                        class="w-8 h-8 rounded-xl bg-[var(--accent)]/15 border border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)]">
-                        <i class="fa-solid fa-leaf text-xs" aria-hidden="true"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs font-bold text-[var(--text)] leading-snug">Take time to recharge for</p>
-                        <p class="text-[11px] text-[var(--accent)] font-semibold">better patient care 🌿</p>
-                    </div>
+                    class="w-8 h-8 rounded-xl bg-[var(--accent)]/15 border border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)]">
+                    <i class="fa-solid fa-leaf text-xs" aria-hidden="true"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-[var(--text)] leading-snug">Take time to recharge for</p>
+                    <p class="text-[11px] text-[var(--accent)] font-semibold">better patient care 🌿</p>
                 </div>
             </div>
-        </div>
+        </app-page-header>
 
         <!-- KPI row. Leaves have no approval workflow in the backend, so they are shown as Upcoming / Past. -->
         <div class="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">

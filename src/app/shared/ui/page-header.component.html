@@ -1,7 +1,18 @@
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 animate-fade-in"
-    [ngClass]="variant === 'hero'
-        ? 'bg-gradient-to-r from-[var(--accent-soft)] via-[var(--panel)] to-[var(--primary-soft)] border border-[var(--border)] rounded-2xl p-4 sm:p-6 shadow-sm ' + containerClass
-        : 'mb-4 sm:mb-6 ' + containerClass">
+<div *ngIf="variant === 'hero'; else plainHeader" class="animate-fade-in"
+    [ngClass]="'page-hero page-hero--' + size + ' ' + containerClass">
+    <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+        <ng-container *ngTemplateOutlet="headerBody"></ng-container>
+    </div>
+</div>
+
+<ng-template #plainHeader>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 animate-fade-in"
+        [ngClass]="'mb-4 sm:mb-6 ' + containerClass">
+        <ng-container *ngTemplateOutlet="headerBody"></ng-container>
+    </div>
+</ng-template>
+
+<ng-template #headerBody>
     <div class="min-w-0 flex items-center gap-3">
         <div *ngIf="icon && variant === 'hero'"
             class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-[var(--primary-soft)] text-[var(--primary)] flex items-center justify-center shrink-0">
@@ -24,4 +35,4 @@
     <div *ngIf="hasActions" class="responsive-action-row w-full sm:w-auto sm:flex-wrap shrink-0">
         <ng-content></ng-content>
     </div>
-</div>
+</ng-template>
