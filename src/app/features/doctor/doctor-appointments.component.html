@@ -1,6 +1,4 @@
-<app-doctor-layout>
-    <div
-        class="max-w-[1400px] mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6 text-[var(--text)] font-sans selection:bg-[var(--accent)]/30 pb-20">
+    <app-page-container paddingClass="p-3 sm:p-6" spacingClass="space-y-4 sm:space-y-6" extraClass="font-sans selection:bg-[var(--accent)]/30 pb-20">
 
         <!-- Page Header with Ambient Graphic Wave -->
         <div
@@ -31,50 +29,21 @@
         <app-empty-state *ngIf="!loading && filteredAppointments().length === 0" icon="fa-solid fa-calendar-xmark"
             title="No appointments found"
             message="Try adjusting your filters or search terms to find what you're looking for." [hasAction]="true">
-            <button type="button" class="mt-2 text-xs font-bold text-[var(--accent)] hover:underline px-3 py-1"
+            <button type="button" class="mt-2 h-6 py-0 inline-flex items-center text-xs font-bold text-[var(--accent)] hover:underline px-3 rounded-lg"
                 (click)="clearAppointmentFilters()">Clear Filters</button>
         </app-empty-state>
 
         <!-- Appointment Cards Grid (Preserved Untouched) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-6"
             *ngIf="!loading && filteredAppointments().length > 0">
-            <app-appointment-card *ngFor="let a of filteredAppointments()" class="h-full" [appointment]="a"
+            <app-appointment-card *ngFor="let a of filteredAppointments(); trackBy: trackByAppointmentId" class="h-full" [appointment]="a"
                 viewerRole="DOCTOR"></app-appointment-card>
         </div>
 
-        <!-- Fixed Bottom Pagination Bar -->
-        <div *ngIf="!loading && (totalAppointmentsCount > 0 || appointments.length > 0)"
-            class="fixed left-0 xl:left-64 right-0 z-40 fixed-above-mobile-nav bg-[var(--panel)]/95 backdrop-blur-md border-t border-[var(--border)] px-3 sm:px-8 py-1.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 shadow-2xl">
-
-            <div class="flex items-center gap-3 text-xs text-[var(--muted)] min-w-0">
-                <span class="font-medium truncate">
-                    Showing <span class="font-bold text-[var(--text)]">{{ startItemIndex }}–{{ endItemIndex }}</span> of
-                    <span class="font-bold text-[var(--accent)]">{{ totalAppointmentsCount }}</span> appointments
-                </span>
-            </div>
-
-            <div class="inline-flex flex-nowrap items-center gap-1 max-w-full overflow-x-auto">
-                <button type="button"
-                    class="h-7 min-h-0 px-2 text-[11px] font-bold rounded-md border border-[var(--bg)] bg-[var(--bg)] text-[var(--text)] hover:bg-[var(--bg)] disabled:opacity-40 disabled:cursor-not-allowed transition-all inline-flex items-center gap-1 cursor-pointer shrink-0 whitespace-nowrap"
-                    [disabled]="page === 0" (click)="prevPage()">
-                    <i class="fa-solid fa-chevron-left text-[8px]"></i> Prev
-                </button>
-
-                <div class="inline-flex flex-nowrap items-center gap-1">
-                    <button *ngFor="let p of pageNumbers" type="button" (click)="goToPage(p)"
-                        [class]="p === page ? 'bg-[var(--accent)] text-[var(--accent-fg)] font-black' : 'bg-[var(--bg)] border border-[var(--bg)] text-[var(--muted)] hover:text-[var(--text)] font-bold'"
-                        class="!w-6 !h-6 !min-w-6 !min-h-0 !p-0 text-[11px] leading-none rounded-md transition-all inline-flex items-center justify-center cursor-pointer shrink-0">
-                        {{ p + 1 }}
-                    </button>
-                </div>
-
-                <button type="button"
-                    class="h-7 min-h-0 px-2 text-[11px] font-bold rounded-md border border-[var(--bg)] bg-[var(--bg)] text-[var(--text)] hover:bg-[var(--bg)] disabled:opacity-40 disabled:cursor-not-allowed transition-all inline-flex items-center gap-1 cursor-pointer shrink-0 whitespace-nowrap"
-                    [disabled]="page >= totalPages - 1" (click)="nextPage()">
-                    Next <i class="fa-solid fa-chevron-right text-[8px]"></i>
-                </button>
-            </div>
-        </div>
+        <app-sticky-action-bar *ngIf="!loading && (totalAppointmentsCount > 0 || appointments.length > 0)">
+            <app-paginator [page]="page" [pageSize]="size" [total]="totalAppointmentsCount" [showSummaryAlways]="true"
+                (pageChange)="goToPage($event)"></app-paginator>
+        </app-sticky-action-bar>
 
         <!-- Details Modal (Shared) -->
         <app-patient-details-modal [open]="detailsOpen" [patient]="patient" [history]="history" [documents]="documents"
@@ -92,11 +61,10 @@
         <!-- Ambient AI Scribe & SOAP Report Editor Modal -->
         <app-soap-report-editor [isOpen]="soapModalOpen" [appointmentId]="selectedSoapAppointmentId"
             [soapReport]="soapReportData" (close)="closeSoapModal()"
-            (reportSigned)="onSoapReportSigned($event)"></app-soap-report-editor>
+            (soapSaved)="onSoapReportSaved()"></app-soap-report-editor>
 
         <!-- Shared Chat Modal -->
         <app-shared-chat-modal [isOpen]="chatOpen" [appointmentId]="chatAppointmentId"
             [participantName]="chatParticipantName" [participantImage]="chatParticipantImage"
             (close)="closeChat()"></app-shared-chat-modal>
-    </div>
-</app-doctor-layout>
+    </app-page-container>

@@ -8,7 +8,6 @@ import { PreVisitIntakeRequest, PreVisitIntakeResponse } from '../../core/models
     standalone: true,
     imports: [CommonModule, ModalShellComponent],
     templateUrl: './intake-summary-modal.component.html',
-    styleUrl: './intake-summary-modal.component.css'
 })
 export class IntakeSummaryModalComponent {
     @Input() isOpen: boolean = false;

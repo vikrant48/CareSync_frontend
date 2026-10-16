@@ -1,21 +1,21 @@
-<app-doctor-layout>
-  <div class="max-w-[1400px] mx-auto p-3 sm:p-6 space-y-4 sm:space-y-5 text-[var(--text)] font-sans selection:bg-[var(--accent)]/30">
+  <app-page-container paddingClass="p-3 sm:p-6" spacingClass="space-y-4 sm:space-y-5" extraClass="font-sans selection:bg-[var(--accent)]/30">
 
     <!-- Active Leave Warning Banner -->
     <div *ngIf="isOnLeaveToday"
       class="bg-amber-50 dark:bg-amber-950/70 border-l-4 border-amber-500 text-amber-900 dark:text-amber-200 p-4 rounded-2xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-amber-200 dark:border-amber-800/50">
       <div class="flex items-center gap-3">
-        <i class="fa-solid fa-triangle-exclamation text-xl text-amber-500"></i>
+        <i class="fa-solid fa-triangle-exclamation text-xl text-amber-500" aria-hidden="true"></i>
         <div>
           <p class="font-bold text-xs sm:text-sm">You are currently on leave today.</p>
           <p class="text-[11px] text-amber-800/80 dark:text-amber-300/80">Your booking slots are hidden from patients
             until your leave ends.</p>
         </div>
       </div>
-      <button (click)="leaveModalOpen = true"
-        class="text-xs font-bold underline min-h-[44px] px-3 rounded-lg bg-amber-100 dark:bg-amber-900/40 border border-amber-300 dark:border-amber-700/50 text-amber-900 dark:text-amber-100">
+      <!-- Leave is managed on its own page (one validated form) -->
+      <a routerLink="/doctor/leaves"
+        class="btn-size-md inline-flex items-center text-xs font-bold underline px-3 rounded-lg bg-amber-100 dark:bg-amber-900/40 border border-amber-300 dark:border-amber-700/50 text-amber-900 dark:text-amber-100">
         Manage Leave
-      </button>
+      </a>
     </div>
 
     <!-- Hero Greeting Banner with Notification Bell -->
@@ -56,7 +56,7 @@
       <div class="surface p-3 sm:p-4 shadow-sm flex items-center gap-2.5 sm:gap-4 transition-all surface-hover min-w-0">
         <div
           class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[var(--bg)] text-[var(--primary)] flex items-center justify-center text-base sm:text-xl shrink-0 shadow-inner">
-          <i class="fa-regular fa-calendar-check"></i>
+          <i class="fa-regular fa-calendar-check" aria-hidden="true"></i>
         </div>
         <div class="min-w-0">
           <div class="text-[11px] font-semibold text-muted truncate">Today's Appointments</div>
@@ -67,8 +67,8 @@
           <div *ngIf="loadingMetrics" class="mt-1 h-3 w-24 rounded bg-[var(--bg)] animate-pulse"></div>
           <div *ngIf="!loadingMetrics" class="text-[10px] font-bold flex items-center gap-1 mt-0.5"
             [ngClass]="trendClass(appointmentTrend().direction)">
-            <i *ngIf="appointmentTrend().direction === 'up'" class="fa-solid fa-arrow-up text-[8px]"></i>
-            <i *ngIf="appointmentTrend().direction === 'down'" class="fa-solid fa-arrow-down text-[8px]"></i>
+            <i *ngIf="appointmentTrend().direction === 'up'" class="fa-solid fa-arrow-up text-[8px]" aria-hidden="true"></i>
+            <i *ngIf="appointmentTrend().direction === 'down'" class="fa-solid fa-arrow-down text-[8px]" aria-hidden="true"></i>
             <span>{{ appointmentTrend().text }}</span>
           </div>
         </div>
@@ -78,7 +78,7 @@
       <div class="surface p-3 sm:p-4 shadow-sm flex items-center gap-2.5 sm:gap-4 transition-all surface-hover min-w-0">
         <div
           class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center text-base sm:text-xl shrink-0 shadow-inner">
-          <i class="fa-solid fa-users"></i>
+          <i class="fa-solid fa-users" aria-hidden="true"></i>
         </div>
         <div class="min-w-0">
           <div class="text-[11px] font-semibold text-muted truncate">Total Patients</div>
@@ -89,8 +89,8 @@
           <div *ngIf="loadingMetrics" class="mt-1 h-3 w-24 rounded bg-[var(--bg)] animate-pulse"></div>
           <div *ngIf="!loadingMetrics" class="text-[10px] font-bold flex items-center gap-1 mt-0.5"
             [ngClass]="trendClass(patientTrend().direction)">
-            <i *ngIf="patientTrend().direction === 'up'" class="fa-solid fa-arrow-up text-[8px]"></i>
-            <i *ngIf="patientTrend().direction === 'down'" class="fa-solid fa-arrow-down text-[8px]"></i>
+            <i *ngIf="patientTrend().direction === 'up'" class="fa-solid fa-arrow-up text-[8px]" aria-hidden="true"></i>
+            <i *ngIf="patientTrend().direction === 'down'" class="fa-solid fa-arrow-down text-[8px]" aria-hidden="true"></i>
             <span>{{ patientTrend().text }}</span>
           </div>
         </div>
@@ -100,7 +100,7 @@
       <div class="surface p-3 sm:p-4 shadow-sm flex items-center gap-2.5 sm:gap-4 transition-all surface-hover min-w-0">
         <div
           class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center text-base sm:text-xl shrink-0 shadow-inner">
-          <i class="fa-regular fa-file-lines"></i>
+          <i class="fa-regular fa-file-lines" aria-hidden="true"></i>
         </div>
         <div class="min-w-0">
           <div class="text-[11px] font-semibold text-muted truncate">Pending Reports</div>
@@ -111,8 +111,8 @@
           <div *ngIf="loadingMetrics" class="mt-1 h-3 w-24 rounded bg-[var(--bg)] animate-pulse"></div>
           <div *ngIf="!loadingMetrics" class="text-[10px] font-bold flex items-center gap-1 mt-0.5"
             [ngClass]="trendClass(pendingReportTrend().direction)">
-            <i *ngIf="pendingReportTrend().direction === 'up'" class="fa-solid fa-arrow-up text-[8px]"></i>
-            <i *ngIf="pendingReportTrend().direction === 'down'" class="fa-solid fa-arrow-down text-[8px]"></i>
+            <i *ngIf="pendingReportTrend().direction === 'up'" class="fa-solid fa-arrow-up text-[8px]" aria-hidden="true"></i>
+            <i *ngIf="pendingReportTrend().direction === 'down'" class="fa-solid fa-arrow-down text-[8px]" aria-hidden="true"></i>
             <span>{{ pendingReportTrend().text }}</span>
           </div>
         </div>
@@ -122,7 +122,7 @@
       <div class="surface p-3 sm:p-4 shadow-sm flex items-center gap-2.5 sm:gap-4 transition-all surface-hover min-w-0">
         <div
           class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-base sm:text-xl shrink-0 shadow-inner">
-          <i class="fa-solid fa-star"></i>
+          <i class="fa-solid fa-star" aria-hidden="true"></i>
         </div>
         <div class="min-w-0">
           <div class="text-[11px] font-semibold text-muted truncate">Patient Satisfaction</div>
@@ -133,8 +133,8 @@
           <div *ngIf="loadingMetrics" class="mt-1 h-3 w-24 rounded bg-[var(--bg)] animate-pulse"></div>
           <div *ngIf="!loadingMetrics" class="text-[10px] font-bold flex items-center gap-1 mt-0.5"
             [ngClass]="trendClass(satisfactionTrend().direction)">
-            <i *ngIf="satisfactionTrend().direction === 'up'" class="fa-solid fa-arrow-up text-[8px]"></i>
-            <i *ngIf="satisfactionTrend().direction === 'down'" class="fa-solid fa-arrow-down text-[8px]"></i>
+            <i *ngIf="satisfactionTrend().direction === 'up'" class="fa-solid fa-arrow-up text-[8px]" aria-hidden="true"></i>
+            <i *ngIf="satisfactionTrend().direction === 'down'" class="fa-solid fa-arrow-down text-[8px]" aria-hidden="true"></i>
             <span>{{ satisfactionTrend().text }}</span>
           </div>
         </div>
@@ -201,7 +201,7 @@
             class="p-2.5 sm:p-3.5 rounded-xl bg-[var(--accent-soft)] border border-[var(--border)] flex flex-row lg:flex-col items-center justify-start lg:justify-center text-left lg:text-center gap-2 lg:gap-2.5 group transition-all cursor-pointer min-h-[44px]">
             <div
               class="w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center text-sm lg:text-lg shrink-0 group-hover:scale-110 transition-transform">
-              <i class="fa-solid fa-video"></i>
+              <i class="fa-solid fa-video" aria-hidden="true"></i>
             </div>
             <span class="text-[11px] font-extrabold text-[var(--text)] leading-tight">Start Consultation</span>
           </button>
@@ -211,7 +211,7 @@
             class="p-2.5 sm:p-3.5 rounded-xl bg-[var(--primary-soft)] border border-[var(--border)] flex flex-row lg:flex-col items-center justify-start lg:justify-center text-left lg:text-center gap-2 lg:gap-2.5 group transition-all cursor-pointer min-h-[44px]">
             <div
               class="w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl bg-[var(--primary-soft)] text-[var(--primary)] flex items-center justify-center text-sm lg:text-lg shrink-0 group-hover:scale-110 transition-transform">
-              <i class="fa-solid fa-user-group"></i>
+              <i class="fa-solid fa-user-group" aria-hidden="true"></i>
             </div>
             <span class="text-[11px] font-extrabold text-[var(--text)] leading-tight">View Patients</span>
           </button>
@@ -222,7 +222,7 @@
             class="p-2.5 sm:p-3.5 rounded-xl bg-purple-500/10 border border-[var(--border)] flex flex-row lg:flex-col items-center justify-start lg:justify-center text-left lg:text-center gap-2 lg:gap-2.5 group transition-all cursor-pointer min-h-[44px]">
             <div
               class="w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-300 flex items-center justify-center text-sm lg:text-lg shrink-0 group-hover:scale-110 transition-transform">
-              <i class="fa-regular fa-file-lines"></i>
+              <i class="fa-regular fa-file-lines" aria-hidden="true"></i>
             </div>
             <span class="text-[11px] font-extrabold text-[var(--text)] leading-tight">Write Prescription</span>
           </button>
@@ -232,7 +232,7 @@
             class="p-2.5 sm:p-3.5 rounded-xl bg-amber-500/10 border border-[var(--border)] flex flex-row lg:flex-col items-center justify-start lg:justify-center text-left lg:text-center gap-2 lg:gap-2.5 group transition-all cursor-pointer min-h-[44px]">
             <div
               class="w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-300 flex items-center justify-center text-sm lg:text-lg shrink-0 group-hover:scale-110 transition-transform">
-              <i class="fa-solid fa-flask"></i>
+              <i class="fa-solid fa-flask" aria-hidden="true"></i>
             </div>
             <span class="text-[11px] font-extrabold text-[var(--text)] leading-tight">Order Lab Test</span>
           </button>
@@ -312,72 +312,5 @@
       [infoText]="selectedAppointment?.status === 'COMPLETED' ? 'This medical record is finalized and cannot be modified.' : (selectedAppointment?.status !== 'IN_PROGRESS' ? 'Form available only for in-progress appointments.' : null)"
       (close)="closeHistoryForm()" (submit)="saveMedicalHistory()"></app-medical-history-form-modal>
 
-    <!-- Leave Management Modal Shell -->
-    <app-modal-shell [open]="leaveModalOpen" title="Manage Leaves" icon="fa-solid fa-calendar-day"
-      iconWrapClass="bg-[var(--bg)] text-[var(--primary)]" maxWidthClass="max-w-2xl" zIndexClass="z-[110]"
-      bodyClass="p-6 space-y-6" footerClass="p-4 bg-[var(--bg)] text-center" [hasFooter]="true"
-      (close)="leaveModalOpen = false">
-      <div class="bg-[var(--panel)] p-5 rounded-2xl border border-[var(--border)]">
-        <h4 class="font-bold text-[var(--text)] mb-4 text-xs uppercase tracking-wider">Schedule New Leave</h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <app-date-picker [(ngModel)]="leafForm.startDate" label="Start Date" placeholder="Select Date"
-            [minDate]="'today'">
-          </app-date-picker>
-          <app-date-picker [(ngModel)]="leafForm.endDate" label="End Date" placeholder="Select Date"
-            [minDate]="leafForm.startDate || 'today'">
-          </app-date-picker>
-        </div>
-        <div class="space-y-1.5 mb-4">
-          <label class="text-xs font-semibold text-muted">Reason (Optional)</label>
-          <input type="text" [(ngModel)]="leafForm.reason" placeholder="e.g., Vacation, Medical, Personal"
-            class="form-input">
-        </div>
-        <button type="button" (click)="addLeave()" [disabled]="savingLeave || !leafForm.startDate || !leafForm.endDate"
-          class="w-full min-h-[44px] bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-[var(--primary-fg)] font-black text-xs rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50">
-          <i class="fa-solid fa-plus" *ngIf="!savingLeave"></i>
-          <i class="fa-solid fa-spinner animate-spin" *ngIf="savingLeave"></i>
-          {{ savingLeave ? 'Adding Leave...' : 'Schedule Leave' }}
-        </button>
-        <p *ngIf="leaveError" class="mt-2 text-xs text-rose-400 font-medium"><i
-            class="fa-solid fa-circle-exclamation"></i> {{ leaveError }}</p>
-      </div>
 
-      <div class="space-y-4">
-        <h4 class="font-bold text-[var(--text)] text-xs uppercase tracking-wider">Current & Upcoming Leaves</h4>
-        <div *ngIf="upcomingLeaves.length === 0"
-          class="text-center py-8 text-muted bg-[var(--panel)] rounded-2xl border border-dashed border-[var(--border)]">
-          <i class="fa-solid fa-couch text-2xl mb-2 opacity-40"></i>
-          <p class="text-xs">No leaves scheduled currently.</p>
-        </div>
-        <div class="space-y-3">
-          <div *ngFor="let l of upcomingLeaves; trackBy: trackLeave"
-            class="bg-[var(--panel)] p-4 rounded-2xl border border-[var(--border)] flex items-center justify-between">
-            <div class="flex items-center gap-4">
-              <div
-                class="w-10 h-10 rounded-xl bg-[var(--bg)] text-[var(--primary)] flex items-center justify-center font-bold text-xs uppercase">
-                {{ l.startDate | date:'MMM' }}
-              </div>
-              <div>
-                <div class="text-xs font-bold text-[var(--text)]">
-                  {{ l.startDate | date:'d MMM' }} - {{ l.endDate | date:'d MMM, yyyy' }}
-                </div>
-                <div class="text-[11px] text-muted mt-0.5">
-                  {{ l.reason || 'No reason provided' }}
-                </div>
-              </div>
-            </div>
-            <button type="button" (click)="deleteLeave(l.id!)"
-              class="w-8 h-8 flex items-center justify-center text-rose-400 hover:bg-rose-950/50 rounded-xl transition-all"
-              aria-label="Delete leave">
-              <i class="fa-solid fa-trash-can"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <p modalFooter class="text-[10px] text-muted uppercase tracking-widest font-bold m-0">Booking slots are
-        automatically blocked for these dates</p>
-    </app-modal-shell>
-
-  </div>
-</app-doctor-layout>
+  </app-page-container>

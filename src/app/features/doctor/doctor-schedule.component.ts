@@ -1,8 +1,7 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
-import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 import { AppointmentCardComponent } from '../../shared/components/appointment-card.component';
 import { PatientDetailsModalComponent } from '../../shared/patient-details-modal.component';
 import { MedicalHistoryDetailModalComponent } from '../../shared/medical-history-detail-modal.component';
@@ -14,14 +13,17 @@ import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.co
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 import { FilterBarComponent, FilterConfig } from '../../shared/components';
 import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
+import { PageContainerComponent } from '../../shared/ui/page-container.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { memoByDeps } from '../../shared/utils/memo';
+import { trackByAppointmentId } from '../../shared/utils/track-by';
 @Component({
     selector: 'app-doctor-schedule',
     standalone: true,
-    imports: [
+    imports: [PageHeaderComponent, PageContainerComponent, 
         CommonModule,
         FormsModule,
         RouterModule,
-        DoctorLayoutComponent,
         AppointmentCardComponent,
         PatientDetailsModalComponent,
         MedicalHistoryDetailModalComponent,
@@ -31,10 +33,13 @@ import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
         FilterBarComponent,
         PageLoaderComponent
     ],
+    // OnPush: async callbacks below request a check; child cards/modals/chat request their own
+    changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './doctor-schedule.component.html',
     styleUrl: './doctor-schedule.component.css'
 })
 export class DoctorScheduleComponent implements OnInit {
+  readonly trackByAppointmentId = trackByAppointmentId;
     private apptApi = inject(AppointmentService);
     private patientApi = inject(PatientProfileService);
     private router = inject(Router);
@@ -140,7 +145,12 @@ export class DoctorScheduleComponent implements OnInit {
         });
     }
 
-    filteredAppointments() {
+    filteredAppointments = memoByDeps<DoctorAppointmentItem[]>(
+      () => this.computeFilteredAppointments(),
+      () => [this.todayAppointments, this.filterStatus, this.searchTerm],
+    );
+
+    private computeFilteredAppointments(): DoctorAppointmentItem[] {
         const term = (this.searchTerm || '').trim().toLowerCase();
         return this.todayAppointments
             .filter(a => this.filterStatus === 'ALL' ? true : a.status === this.filterStatus)
@@ -203,8 +213,14 @@ export class DoctorScheduleComponent implements OnInit {
         this.selectedHistoryDoctorInfo = item;
         this.historyDetailModalOpen = true;
         this.patientApi.getMedicalHistoryDetail(item.id).subscribe({
-            next: (detail) => this.selectedHistoryDetail = detail,
-            error: () => this.selectedHistoryDetail = { ...item } as any
+            next: (detail) => {
+                this.selectedHistoryDetail = detail;
+                this.cdr.markForCheck();
+            },
+            error: () => {
+                this.selectedHistoryDetail = { ...item } as any;
+                this.cdr.markForCheck();
+            }
         });
     }
 
@@ -271,14 +287,17 @@ export class DoctorScheduleComponent implements OnInit {
             next: () => {
                 this.savingHistory = false;
                 this.historySaved = true;
+                this.cdr.markForCheck();
                 setTimeout(() => {
                     this.closeHistoryForm();
                     this.refreshToday(); // Refresh to get updated MH list in appointment objects
+                    this.cdr.markForCheck();
                 }, 1500);
             },
             error: (e: any) => {
                 this.savingHistory = false;
                 this.historyError = 'Failed to save record';
+                this.cdr.markForCheck();
             }
         });
     }

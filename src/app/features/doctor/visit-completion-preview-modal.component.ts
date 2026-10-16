@@ -16,7 +16,7 @@ import { CompletionPreview } from '../../core/models/appointment.models';
       <div *ngIf="previewData" class="p-3.5 rounded-xl border"
            [ngClass]="(isCompleted || isReady) ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-500/30 text-emerald-900 dark:text-emerald-100' : 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-500/30 text-amber-900 dark:text-amber-100'">
         <div class="flex items-start gap-3 text-xs">
-          <i [class]="(isCompleted || isReady) ? 'fa-solid fa-circle-check text-base mt-0.5' : 'fa-solid fa-triangle-exclamation text-base mt-0.5'"></i>
+          <i [class]="(isCompleted || isReady) ? 'fa-solid fa-circle-check text-base mt-0.5' : 'fa-solid fa-triangle-exclamation text-base mt-0.5'" aria-hidden="true"></i>
           <div>
             <div class="font-bold text-sm">
               {{ isCompleted ? 'Consultation completed and electronically signed.' : (isReady ? 'All mandatory clinical records are saved and verified.' : 'Record validation check incomplete.') }}
@@ -42,7 +42,7 @@ import { CompletionPreview } from '../../core/models/appointment.models';
 
         <div class="bg-[var(--bg)] border border-[var(--border)] rounded-xl p-4 space-y-3">
           <div class="text-xs font-bold text-cyan-700 dark:text-cyan-300 uppercase tracking-wider flex items-center gap-2">
-            <i class="fa-solid fa-user-pen"></i> Stage 3: Patient Intake & AI Triage Summary
+            <i class="fa-solid fa-user-pen" aria-hidden="true"></i> Stage 3: Patient Intake & AI Triage Summary
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
             <div class="bg-[var(--panel)] p-3 rounded-lg border border-[var(--border)]">
@@ -61,7 +61,7 @@ import { CompletionPreview } from '../../core/models/appointment.models';
 
         <div class="bg-[var(--bg)] border border-[var(--border)] rounded-xl p-4 space-y-3">
           <div class="text-xs font-bold text-purple-700 dark:text-purple-300 uppercase tracking-wider flex items-center gap-2">
-            <i class="fa-solid fa-notes-medical"></i> Stage 6: AI SOAP Clinical Notes
+            <i class="fa-solid fa-notes-medical" aria-hidden="true"></i> Stage 6: AI SOAP Clinical Notes
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
             <div class="bg-[var(--panel)] p-3 rounded-lg border border-[var(--border)] space-y-1">
@@ -85,7 +85,7 @@ import { CompletionPreview } from '../../core/models/appointment.models';
 
         <div class="bg-[var(--bg)] border border-[var(--border)] rounded-xl p-4 space-y-3">
           <div class="text-xs font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider flex items-center gap-2">
-            <i class="fa-solid fa-file-prescription"></i> Medical Record & Prescriptions
+            <i class="fa-solid fa-file-prescription" aria-hidden="true"></i> Medical Record & Prescriptions
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
             <div class="bg-[var(--panel)] p-3 rounded-lg border border-[var(--border)]">
@@ -110,17 +110,17 @@ import { CompletionPreview } from '../../core/models/appointment.models';
 
       <div modalFooter class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 w-full">
         <button *ngIf="!isCompleted" type="button" (click)="onBackToEdit()" class="btn-secondary">
-          <i class="fa-solid fa-arrow-left"></i>
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
           <span>Back to Edit</span>
         </button>
         <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:ml-auto">
           <button type="button" (click)="closeModal()" class="btn-secondary">Close</button>
           <button *ngIf="!isCompleted" type="button" (click)="onProceedToSign()" [disabled]="!isReady" class="btn-primary">
-            <i class="fa-solid fa-file-signature"></i>
+            <i class="fa-solid fa-file-signature" aria-hidden="true"></i>
             <span>Proceed to Electronic Signature</span>
           </button>
           <button *ngIf="isCompleted" type="button" (click)="onDownloadPdf()" class="btn-primary">
-            <i class="fa-solid fa-file-pdf"></i>
+            <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
             <span>Download Rx PDF</span>
           </button>
         </div>

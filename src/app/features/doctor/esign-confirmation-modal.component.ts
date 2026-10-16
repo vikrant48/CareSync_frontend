@@ -18,7 +18,7 @@ import { ESignCompletionResponse } from '../../core/models/appointment.models';
       [hasFooter]="true" (close)="closeModal()">
 
       <div class="bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-500/30 rounded-xl p-3.5 flex items-start gap-3 text-xs text-purple-900 dark:text-purple-100">
-        <i class="fa-solid fa-shield-halved text-purple-600 dark:text-purple-300 text-base mt-0.5 shrink-0"></i>
+        <i class="fa-solid fa-shield-halved text-purple-600 dark:text-purple-300 text-base mt-0.5 shrink-0" aria-hidden="true"></i>
         <div>
           <div class="font-bold">Cryptographic Signing Audit</div>
           <div class="text-[11px] mt-0.5">
@@ -49,8 +49,8 @@ import { ESignCompletionResponse } from '../../core/models/appointment.models';
 
       <button modalFooter type="button" (click)="closeModal()" class="btn-secondary">Cancel</button>
       <button modalFooter type="button" (click)="submitESign()" [disabled]="submitting || !declarationAccepted || !password || !doctorNameTyped" class="btn-primary">
-        <i *ngIf="submitting" class="fa-solid fa-spinner fa-spin"></i>
-        <i *ngIf="!submitting" class="fa-solid fa-signature"></i>
+        <i *ngIf="submitting" class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+        <i *ngIf="!submitting" class="fa-solid fa-signature" aria-hidden="true"></i>
         <span>Confirm & Electronically Sign</span>
       </button>
     </app-modal-shell>

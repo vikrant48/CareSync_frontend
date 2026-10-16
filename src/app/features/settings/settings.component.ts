@@ -6,15 +6,13 @@ import { ThemeService } from '../../core/services/theme.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PatientProfileService, PatientDto } from '../../core/services/patient-profile.service';
 import { ToastService } from '../../core/services/toast.service';
-import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
-import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { ChangePasswordFormComponent } from '../../shared/change-password-form.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, DoctorLayoutComponent, PatientLayoutComponent, ChangePasswordFormComponent, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ChangePasswordFormComponent, PageHeaderComponent],
   styles: [`
     .theme-option {
       position: relative;
@@ -220,26 +218,8 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
       </div>
     </ng-template>
 
-    <!-- Role Based Layout Switching -->
-    <ng-container *ngIf="auth.role() === 'DOCTOR'; else patientOrNoLayout">
-      <app-doctor-layout>
-        <ng-container *ngTemplateOutlet="settingsContent"></ng-container>
-      </app-doctor-layout>
-    </ng-container>
-
-    <ng-template #patientOrNoLayout>
-      <ng-container *ngIf="auth.role() === 'PATIENT'; else noLayout">
-        <app-patient-layout>
-          <ng-container *ngTemplateOutlet="settingsContent"></ng-container>
-        </app-patient-layout>
-      </ng-container>
-    </ng-template>
-
-    <ng-template #noLayout>
-      <div class="min-h-[calc(100dvh-3.5rem)] bg-[var(--bg)] text-[var(--text)] p-4 sm:p-6">
-        <ng-container *ngTemplateOutlet="settingsContent"></ng-container>
-      </div>
-    </ng-template>
+    <!-- Layout (doctor / patient / none for admin) comes from the route: RoleLayoutComponent -->
+    <ng-container *ngTemplateOutlet="settingsContent"></ng-container>
   `,
 })
 export class SettingsComponent implements OnInit {

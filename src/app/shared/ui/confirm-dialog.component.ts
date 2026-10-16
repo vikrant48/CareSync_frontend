@@ -12,7 +12,6 @@ import { ModalShellComponent } from './modal-shell.component';
   standalone: true,
   imports: [CommonModule, ModalShellComponent],
   templateUrl: './confirm-dialog.component.html',
-  styleUrl: './confirm-dialog.component.css'
 })
 export class ConfirmDialogComponent {
   confirm = inject(ConfirmService);

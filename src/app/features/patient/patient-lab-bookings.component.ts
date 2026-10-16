@@ -1,9 +1,9 @@
-import { Component, OnInit, inject, signal, effect } from '@angular/core';
+import { DocumentOpenerService } from '../../core/services/document-opener.service';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal, effect, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { LabTestService, BookingResponse } from '../../core/services/lab-test.service';
 import { AuthService } from '../../core/services/auth.service';
-import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { PdfService, PaymentReceiptData } from '../../core/services/pdf.service';
 import { PaymentService } from '../../core/services/payment.service';
 import { PaymentPopupComponent, PaymentDetails } from '../../shared/payment-popup.component';
@@ -16,16 +16,25 @@ import { StatusBadgeComponent } from '../../shared/ui/status-badge.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 import { FilterBarComponent, FilterConfig } from '../../shared/components';
+import { PageContainerComponent } from '../../shared/ui/page-container.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { InrPipe } from '../../shared/utils/inr.pipe';
+import { extractApiError } from '../../shared/utils/api-error.util';
+import { trackById } from '../../shared/utils/track-by';
 
 @Component({
   selector: 'app-patient-lab-bookings',
   standalone: true,
-  imports: [CommonModule, PatientLayoutComponent, PaymentPopupComponent, PageLoaderComponent, StatusBadgeComponent, EmptyStateComponent, ModalShellComponent, FilterBarComponent],
+  imports: [InrPipe, PageHeaderComponent, PageContainerComponent, CommonModule, PaymentPopupComponent, PageLoaderComponent, StatusBadgeComponent, EmptyStateComponent, ModalShellComponent, FilterBarComponent],
+  // View state is all signals (bookings, filters, upload/scan, payment), so OnPush needs no manual markForCheck
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './patient-lab-bookings.component.html',
   styleUrl: './patient-lab-bookings.component.css'
 })
 export class PatientLabBookingsComponent implements OnInit {
+  readonly trackById = trackById;
   private labTestService = inject(LabTestService);
+  private documentOpener = inject(DocumentOpenerService);
   private authService = inject(AuthService);
   private router = inject(Router);
   private pdfService = inject(PdfService);
@@ -109,7 +118,7 @@ export class PatientLabBookingsComponent implements OnInit {
   }
 
   // Filtered & Sorted Bookings
-  get filteredBookings(): BookingResponse[] {
+  readonly filteredBookings = computed((): BookingResponse[] => {
     let list = [...this.bookings()];
 
     // Apply Status Filter
@@ -138,7 +147,7 @@ export class PatientLabBookingsComponent implements OnInit {
     }
 
     return list;
-  }
+  });
 
   constructor() {
     effect(() => {
@@ -162,15 +171,6 @@ export class PatientLabBookingsComponent implements OnInit {
     if (sort === 'latest' || sort === 'oldest' || sort === 'amount-high' || sort === 'amount-low') {
       this.sortOption.set(sort);
     }
-  }
-
-  setStatusFilter(filter: 'ALL' | 'UPCOMING' | 'COMPLETED' | 'CANCELLED') {
-    this.statusFilter.set(filter);
-  }
-
-  onSortChange(event: Event) {
-    const value = (event.target as HTMLSelectElement).value as any;
-    this.sortOption.set(value);
   }
 
   ngOnInit() {
@@ -200,8 +200,8 @@ export class PatientLabBookingsComponent implements OnInit {
         if (error.status === 401) {
           errorMsg = 'You are not authorized. Please login again.';
           this.authService.logout();
-        } else if (error.error?.message) {
-          errorMsg = error.error.message;
+        } else {
+          errorMsg = extractApiError(error, errorMsg);
         }
 
         this.errorMessage.set(errorMsg);
@@ -293,29 +293,6 @@ export class PatientLabBookingsComponent implements OnInit {
   }
 
   /**
-   * Get CSS classes for booking status
-   */
-  getStatusClass(status: string): string {
-    const s = (status || '').toUpperCase();
-    const baseClasses = 'px-3 py-1 rounded-full text-sm font-medium border';
-
-    switch (s) {
-      case 'PENDING':
-        return `${baseClasses} bg-yellow-500/10 text-yellow-500 border-yellow-500/20`;
-      case 'SCHEDULED':
-        return `${baseClasses} bg-blue-500/10 text-blue-500 border-blue-500/20`;
-      case 'IN_PROGRESS':
-        return `${baseClasses} bg-purple-500/10 text-purple-500 border-purple-500/20`;
-      case 'COMPLETED':
-        return `${baseClasses} bg-green-500/10 text-green-500 border-green-500/20`;
-      case 'CANCELLED':
-        return `${baseClasses} bg-red-500/10 text-red-500 border-red-500/20`;
-      default:
-        return `${baseClasses} bg-gray-500/10 text-gray-400 border-gray-500/20`;
-    }
-  }
-
-  /**
    * Get human-readable status label
    */
   getStatusLabel(status: string): string {
@@ -382,8 +359,6 @@ export class PatientLabBookingsComponent implements OnInit {
    * Handle successful payment
    */
   onPaymentSuccess(paymentDetails: PaymentDetails) {
-    console.log('Payment successful:', paymentDetails);
-
     // Payment has already been processed by the payment popup component
     // We only need to refresh the bookings to show the updated status
     this.loadBookings();
@@ -446,8 +421,7 @@ export class PatientLabBookingsComponent implements OnInit {
         this.loadBookings();
       },
       error: (error) => {
-        const errorMsg = typeof error.error === 'string' ? error.error : (error.error?.message || 'Failed to upload lab report');
-        this.toast.showError(errorMsg);
+        this.toast.showError(extractApiError(error, 'Failed to upload lab report'));
         this.isUploading.set(false);
         this.uploadBookingId.set(null);
       }
@@ -460,5 +434,13 @@ export class PatientLabBookingsComponent implements OnInit {
     return scan.labResults.map(item =>
       [item.testName, item.resultValue, item.referenceRange, item.status].filter(Boolean).join(' · ')
     ).join('\n');
+  }
+
+  /** Lab reports are private files: fetch a fresh copy instead of using a link that may have expired. */
+  openLabReport(booking: { labReports?: { id: number; url?: string; cloudinaryUrl?: string }[] }) {
+    const report = booking.labReports?.[0];
+    if (report) {
+      this.documentOpener.open(report.id, report.cloudinaryUrl || report.url);
+    }
   }
 }

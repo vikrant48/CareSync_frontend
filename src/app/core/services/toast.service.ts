@@ -16,20 +16,31 @@ export class ToastService {
   toasts$ = this.toastsSubject.asObservable();
   private nextId = 1;
 
-  // Default display duration: 2000ms
-  showSuccess(message: string, durationMs: number = 2000) {
+  /** Default display time per type: long enough to read; errors/warnings stay longer. */
+  private static readonly DEFAULT_DURATION: Record<ToastType, number> = {
+    success: 4000,
+    info: 4000,
+    warning: 6000,
+    error: 6000,
+  };
+
+  showSuccess(message: string, durationMs?: number) {
     this.show(message, 'success', durationMs);
   }
 
-  showError(message: string, durationMs: number = 2000) {
+  showError(message: string, durationMs?: number) {
     this.show(message, 'error', durationMs);
   }
 
-  showInfo(message: string, durationMs: number = 2000) {
+  showInfo(message: string, durationMs?: number) {
     this.show(message, 'info', durationMs);
   }
 
-  show(message: string, type: ToastType, durationMs: number = 2000) {
+  showWarning(message: string, durationMs?: number) {
+    this.show(message, 'warning', durationMs);
+  }
+
+  show(message: string, type: ToastType, durationMs: number = ToastService.DEFAULT_DURATION[type]) {
     const id = this.nextId++;
     const expiresAt = Date.now() + durationMs;
     const toast: Toast = { id, message, type, expiresAt };

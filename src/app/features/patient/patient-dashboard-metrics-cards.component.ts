@@ -1,11 +1,12 @@
 import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { StatCardComponent } from '../../shared/ui/stat-card.component';
 import { PatientAppointmentItem } from '../../core/services/appointment.service';
 
 @Component({
   selector: 'app-patient-dashboard-metrics-cards',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, StatCardComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './patient-dashboard-metrics-cards.component.html',
   styleUrl: './patient-dashboard-metrics-cards.component.css'

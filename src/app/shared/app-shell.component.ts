@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ToastContainerComponent } from './toast-container.component';
 import { AiAssistantWidgetComponent } from './ai-assistant-widget.component';
 import { ProductTourComponent } from './product-tour/product-tour.component';
 
@@ -29,7 +28,7 @@ export interface AppShellTab {
   selector: 'app-shell',
   standalone: true,
   host: { class: 'block h-full w-full' },
-  imports: [CommonModule, RouterModule, ToastContainerComponent, AiAssistantWidgetComponent, ProductTourComponent],
+  imports: [CommonModule, RouterModule, AiAssistantWidgetComponent, ProductTourComponent],
   template: `
     <app-product-tour *ngIf="showTour"></app-product-tour>
     <div class="min-h-[calc(100vh-3.5rem)] w-full bg-[var(--bg)] text-[var(--text)] transition-colors duration-300">
@@ -64,7 +63,6 @@ export interface AppShellTab {
         <div [class]="contentPadClass">
           <ng-content></ng-content>
         </div>
-        <app-toast-container></app-toast-container>
         <app-ai-assistant-widget *ngIf="showAssistant && assistantInside"></app-ai-assistant-widget>
       </main>
 
@@ -84,12 +82,12 @@ export interface AppShellTab {
                     [class]="tabClass">
               <ng-container *ngIf="variant === 'doctor'; else plainMenuIcon">
                 <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-1 transition-transform" [class.rotate-90]="menuOpen">
-                  <i class="fa-solid" [class.fa-bars]="!menuOpen" [class.fa-xmark]="menuOpen"></i>
+                  <i class="fa-solid" [class.fa-bars]="!menuOpen" [class.fa-xmark]="menuOpen" aria-hidden="true"></i>
                 </div>
                 <span class="text-[10px] font-medium">{{ tab.label }}</span>
               </ng-container>
               <ng-template #plainMenuIcon>
-                <i class="fa-solid" [class.fa-bars]="!menuOpen" [class.fa-xmark]="menuOpen"></i>
+                <i class="fa-solid" [class.fa-bars]="!menuOpen" [class.fa-xmark]="menuOpen" aria-hidden="true"></i>
                 <span class="text-xs mt-1">{{ tab.label }}</span>
               </ng-template>
             </button>
@@ -107,8 +105,8 @@ export interface AppShellTab {
         <div class="absolute left-0 right-0 bottom-0 max-h-[min(70dvh,32rem)] overflow-y-auto bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 rounded-t-xl shadow-xl p-3 space-y-1">
           <div class="flex items-center justify-between px-2 py-1">
             <div class="text-sm font-semibold">Quick Actions</div>
-            <button type="button" (click)="menuOpen = false" aria-label="Close menu" class="touch-target flex items-center justify-center text-gray-400">
-              <i class="fa-solid fa-xmark"></i>
+            <button type="button" (click)="menuOpen = false" aria-label="Close menu" class="touch-target flex items-center justify-center text-gray-700 dark:text-gray-400">
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
             </button>
           </div>
           <div class="grid grid-cols-1 gap-1">
@@ -135,7 +133,7 @@ export interface AppShellTab {
             <span class="bg-gray-200 dark:bg-gray-700 w-12 h-1.5 rounded-full absolute top-2 left-1/2 -translate-x-1/2"></span>
             <h3 class="font-bold text-lg text-[var(--text)] mt-2">More Options</h3>
             <button type="button" (click)="menuOpen = false" aria-label="Close menu" class="w-11 h-11 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 mt-2 touch-target">
-              <i class="fa-solid fa-xmark"></i>
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
             </button>
           </div>
           <div class="p-4 sm:p-6 pb-16 grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">

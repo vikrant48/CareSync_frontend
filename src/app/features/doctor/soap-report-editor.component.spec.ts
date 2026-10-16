@@ -20,7 +20,7 @@ describe('SoapReportEditorComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should validate SOAP required fields before signing', () => {
+    it('should validate SOAP required fields before saving the draft', () => {
         component.soapReport = {
             appointmentId: 101,
             patientId: 1,
@@ -33,7 +33,7 @@ describe('SoapReportEditorComponent', () => {
             isSigned: false
         };
         spyOn(component['toast'], 'show');
-        component.signAndComplete();
+        component.saveDraftOnly();
         expect(component['toast'].show).toHaveBeenCalled();
     });
 });

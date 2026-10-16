@@ -40,7 +40,7 @@ type ThemeChoice = 'light' | 'dark' | 'system';
               Admin: {{ auth.username() }}
             </span>
             <button type="button" (click)="logout()"
-              class="px-2.5 sm:px-3 py-1.5 text-xs font-medium text-[var(--text)] bg-[var(--bg)] hover:bg-[var(--border)] rounded-lg border border-[var(--border)] transition min-h-touch inline-flex items-center gap-1.5"
+              class="btn-size-md px-2.5 sm:px-3 text-xs font-medium text-[var(--text)] bg-[var(--bg)] hover:bg-[var(--border)] rounded-lg border border-[var(--border)] transition inline-flex items-center gap-1.5"
               aria-label="Sign out">
               <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
               <span class="hidden sm:inline">Sign Out</span>

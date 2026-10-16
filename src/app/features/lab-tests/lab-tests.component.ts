@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, effect } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -7,14 +7,15 @@ import { AuthService } from '../../core/services/auth.service';
 import { PatientProfileService, PatientDto } from '../../core/services/patient-profile.service';
 import { AppointmentService } from '../../core/services/appointment.service';
 import { PaymentService } from '../../core/services/payment.service';
-import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
-import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { PaymentPopupComponent, PaymentDetails } from '../../shared/payment-popup.component';
 import { SearchableSelectComponent } from '../../shared/searchable-select.component';
 import { ToastService } from '../../core/services/toast.service';
 import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 import { FilterBarComponent, FilterConfig } from '../../shared/components';
 import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
+import { formatInr } from '../../shared/utils/format.util';
+import { extractApiError } from '../../shared/utils/api-error.util';
+import { markForCheckOn } from '../../shared/utils/mark-for-check';
 
 export interface CategoryTab {
   id: string;
@@ -27,10 +28,13 @@ export interface CategoryTab {
 @Component({
   selector: 'app-lab-tests',
   standalone: true,
-  imports: [CommonModule, FormsModule, DoctorLayoutComponent, PatientLayoutComponent, PaymentPopupComponent, SearchableSelectComponent, ModalShellComponent, FilterBarComponent, PageLoaderComponent],
+  imports: [CommonModule, FormsModule, PaymentPopupComponent, SearchableSelectComponent, ModalShellComponent, FilterBarComponent, PageLoaderComponent],
+  // View state is signals/computed; HTTP results also request a check via markForCheckOn
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './lab-tests.component.html'
 })
 export class LabTestsComponent implements OnInit {
+  private cdr = inject(ChangeDetectorRef);
   private labTestService = inject(LabTestService);
   private authService = inject(AuthService);
   private patientService = inject(PatientProfileService);
@@ -105,22 +109,22 @@ export class LabTestsComponent implements OnInit {
     const desc = (test.description || '').toLowerCase();
 
     if (name.includes('full body') || name.includes('checkup') || name.includes('package')) {
-      return { category: 'Health Package', icon: 'fa-user-doctor text-blue-400', iconBg: 'bg-blue-500/10 border-blue-500/20', isPopular: true };
+      return { category: 'Health Package', icon: 'fa-user-doctor text-blue-700 dark:text-blue-400', iconBg: 'bg-blue-500/10 border-blue-500/20', isPopular: true };
     }
     if (name.includes('afp') || name.includes('liver') || name.includes('lft') || name.includes('bilirubin')) {
       return { category: 'Liver', icon: 'fa-cubes text-[#f97316]', iconBg: 'bg-orange-500/10 border-orange-500/20', isPopular: true };
     }
     if (name.includes('ana') || name.includes('autoimmune') || name.includes('antibody') || name.includes('antibodies')) {
-      return { category: 'Autoimmune', icon: 'fa-shield-halved text-indigo-400', iconBg: 'bg-indigo-500/10 border-indigo-500/20', isPopular: true };
+      return { category: 'Autoimmune', icon: 'fa-shield-halved text-indigo-700 dark:text-indigo-400', iconBg: 'bg-indigo-500/10 border-indigo-500/20', isPopular: true };
     }
     if (name.includes('tpo') || name.includes('thyroid') || name.includes('tsh') || name.includes('t3') || name.includes('t4')) {
-      return { category: 'Thyroid', icon: 'fa-dna text-purple-400', iconBg: 'bg-purple-500/10 border-purple-500/20' };
+      return { category: 'Thyroid', icon: 'fa-dna text-purple-700 dark:text-purple-400', iconBg: 'bg-purple-500/10 border-purple-500/20' };
     }
     if (name.includes('hcg') || name.includes('beta') || name.includes('pregnancy')) {
       return { category: 'Pregnancy', icon: 'fa-baby text-pink-400', iconBg: 'bg-pink-500/10 border-pink-500/20' };
     }
     if (name.includes('urea') || name.includes('kidney') || name.includes('creatinine') || name.includes('kft')) {
-      return { category: 'Kidney', icon: 'fa-filter text-violet-400', iconBg: 'bg-violet-500/10 border-violet-500/20' };
+      return { category: 'Kidney', icon: 'fa-filter text-violet-700 dark:text-violet-400', iconBg: 'bg-violet-500/10 border-violet-500/20' };
     }
     if (name.includes('ck-mb') || name.includes('heart') || name.includes('cardiac') || name.includes('troponin')) {
       return { category: 'Heart', icon: 'fa-heart-pulse text-rose-500', iconBg: 'bg-rose-500/10 border-rose-500/20' };
@@ -129,10 +133,10 @@ export class LabTestsComponent implements OnInit {
       return { category: 'Blood', icon: 'fa-droplet text-red-500', iconBg: 'bg-red-500/10 border-red-500/20', isPopular: true };
     }
     if (name.includes('sugar') || name.includes('glucose') || name.includes('hba1c') || name.includes('diabetes')) {
-      return { category: 'Diabetes', icon: 'fa-bullseye text-amber-400', iconBg: 'bg-amber-500/10 border-amber-500/20', isPopular: true };
+      return { category: 'Diabetes', icon: 'fa-bullseye text-amber-700 dark:text-amber-400', iconBg: 'bg-amber-500/10 border-amber-500/20', isPopular: true };
     }
 
-    return { category: 'General', icon: 'fa-vial text-sky-400', iconBg: 'bg-sky-500/10 border-sky-500/20' };
+    return { category: 'General', icon: 'fa-vial text-sky-700 dark:text-sky-400', iconBg: 'bg-sky-500/10 border-sky-500/20' };
   }
 
   // Dynamic Category Tabs computed from loaded lab tests
@@ -159,12 +163,12 @@ export class LabTestsComponent implements OnInit {
 
     return [
       { id: 'ALL', label: 'All Tests', icon: 'fa-table-cells-large', count: total },
-      { id: 'POPULAR', label: 'Popular', icon: 'fa-star text-amber-400', count: popularCount },
+      { id: 'POPULAR', label: 'Popular', icon: 'fa-star text-amber-700 dark:text-amber-400', count: popularCount },
       { id: 'BLOOD', label: 'Blood Tests', icon: 'fa-droplet text-red-500', count: bloodCount },
-      { id: 'THYROID', label: 'Thyroid', icon: 'fa-dna text-purple-400', count: thyroidCount },
-      { id: 'DIABETES', label: 'Diabetes', icon: 'fa-bullseye text-amber-400', count: diabetesCount },
-      { id: 'LIVER', label: 'Liver', icon: 'fa-cubes text-orange-400', count: liverCount },
-      { id: 'KIDNEY', label: 'Kidney', icon: 'fa-filter text-violet-400', count: kidneyCount },
+      { id: 'THYROID', label: 'Thyroid', icon: 'fa-dna text-purple-700 dark:text-purple-400', count: thyroidCount },
+      { id: 'DIABETES', label: 'Diabetes', icon: 'fa-bullseye text-amber-700 dark:text-amber-400', count: diabetesCount },
+      { id: 'LIVER', label: 'Liver', icon: 'fa-cubes text-orange-700 dark:text-orange-400', count: liverCount },
+      { id: 'KIDNEY', label: 'Kidney', icon: 'fa-filter text-violet-700 dark:text-violet-400', count: kidneyCount },
     ];
   });
 
@@ -267,7 +271,7 @@ export class LabTestsComponent implements OnInit {
 
   loadPatients() {
     this.isLoadingPatients.set(true);
-    this.appointmentService.getDoctorUniquePatients().subscribe({
+    this.appointmentService.getDoctorUniquePatients().pipe(markForCheckOn(this.cdr)).subscribe({
       next: (patients) => {
         this.patients.set(patients);
         this.isLoadingPatients.set(false);
@@ -288,7 +292,7 @@ export class LabTestsComponent implements OnInit {
     this.isLoading.set(true);
     this.toast.clearAll();
 
-    this.labTestService.getAllLabTests().subscribe({
+    this.labTestService.getAllLabTests().pipe(markForCheckOn(this.cdr)).subscribe({
       next: (tests) => {
         this.labTests.set(tests.filter(test => test.isActive));
         this.isLoading.set(false);
@@ -428,7 +432,7 @@ export class LabTestsComponent implements OnInit {
       paymentRequest
     };
 
-    this.labTestService.createPatientBookingWithPayment(patientBookingWithPayment).subscribe({
+    this.labTestService.createPatientBookingWithPayment(patientBookingWithPayment).pipe(markForCheckOn(this.cdr)).subscribe({
       next: () => {
         this.toast.showSuccess('Booking created successfully with payment!');
         this.clearSelections();
@@ -442,11 +446,7 @@ export class LabTestsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error creating booking with payment:', error);
-        let errorMsg = 'Failed to create booking with payment. Please try again.';
-        if (error.error?.message) {
-          errorMsg = error.error.message;
-        }
-        this.toast.showError(errorMsg);
+        this.toast.showError(extractApiError(error, 'Failed to create booking with payment. Please try again.'));
         this.isBooking.set(false);
       }
     });
@@ -455,7 +455,7 @@ export class LabTestsComponent implements OnInit {
   private createDoctorBooking(bookingRequest: BookingRequest) {
     this.isBooking.set(true);
 
-    this.labTestService.createDoctorBooking(bookingRequest).subscribe({
+    this.labTestService.createDoctorBooking(bookingRequest).pipe(markForCheckOn(this.cdr)).subscribe({
       next: () => {
         this.toast.showSuccess('Booking created successfully! Patient can pay later.');
         this.clearSelections();
@@ -467,11 +467,7 @@ export class LabTestsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error creating doctor booking:', error);
-        let errorMsg = 'Failed to create booking. Please try again.';
-        if (error.error?.message) {
-          errorMsg = error.error.message;
-        }
-        this.toast.showError(errorMsg);
+        this.toast.showError(extractApiError(error, 'Failed to create booking. Please try again.'));
         this.isBooking.set(false);
       }
     });
@@ -485,24 +481,8 @@ export class LabTestsComponent implements OnInit {
     }
   }
 
-  getSelectedPatientName(): string {
-    const selectedId = this.selectedPatientId();
-    if (!selectedId) return '';
-    const patient = this.patients().find(p => p.id === selectedId);
-    return patient ? `${patient.firstName} ${patient.lastName}` : '';
-  }
-
   formatPrice(price: number): string {
-    return `₹${price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  }
-
-  getPrescriberName(): string {
-    const role = this.currentRole();
-    const user = this.currentUser();
-    if (role === 'DOCTOR' && user) {
-      return `Dr. ${user.firstName || ''} ${user.lastName || ''}`.trim();
-    }
-    return 'Self';
+    return formatInr(price, 2);
   }
 
   navigateToBooking() {

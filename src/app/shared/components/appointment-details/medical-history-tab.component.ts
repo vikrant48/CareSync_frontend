@@ -8,7 +8,6 @@ import { PatientProfileService } from '../../../core/services/patient-profile.se
     standalone: true,
     imports: [CommonModule, FormsModule],
     templateUrl: './medical-history-tab.component.html',
-    styleUrl: './medical-history-tab.component.css'
 })
 export class MedicalHistoryTabComponent implements OnInit {
     private patientProfileService = inject(PatientProfileService);

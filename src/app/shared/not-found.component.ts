@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
+import { SUPPORT_EMAIL } from './utils/app-contact';
 
 @Component({
   selector: 'app-not-found',
@@ -48,7 +49,7 @@ import { AuthService } from '../core/services/auth.service';
         </div>
 
         <div class="pt-8 border-t border-[var(--border)] text-xs sm:text-sm text-muted">
-          Need assistance? <a routerLink="/login" class="link">Contact Support</a>
+          Need assistance? <a [href]="'mailto:' + supportEmail" class="link">Contact Support</a>
         </div>
 
       </div>
@@ -56,6 +57,7 @@ import { AuthService } from '../core/services/auth.service';
   `
 })
 export class NotFoundComponent {
+  readonly supportEmail = SUPPORT_EMAIL;
   private authService = inject(AuthService);
   private router = inject(Router);
 

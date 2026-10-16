@@ -1,4 +1,4 @@
-import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { Injectable, PLATFORM_ID, effect, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Client } from '@stomp/stompjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
@@ -17,10 +17,31 @@ export class WebSocketService {
     // Use a Subject to broadcast notification messages to subscribers
     private notificationSubject = new Subject<any>();
 
+    // Token sent on the current connection; the server authenticates the STOMP session with it
+    private sessionToken: string | null = null;
+
     constructor(private authService: AuthService) {
         if (this.isBrowser) {
             this.initializeWebSocketConnection();
+
+            // Reconnect on login/logout so the socket session matches the logged-in user.
+            // Token refreshes keep the existing (already authenticated) session.
+            effect(() => {
+                const token = this.authService.accessToken();
+                if (this.stompClient && !!token !== !!this.sessionToken) {
+                    void this.reconnect();
+                }
+            });
         }
+    }
+
+    private async reconnect() {
+        if (!this.stompClient) {
+            return;
+        }
+        this.connectionStatus.next(false);
+        await this.stompClient.deactivate();
+        this.stompClient.activate();
     }
 
     private async initializeWebSocketConnection() {
@@ -34,6 +55,12 @@ export class WebSocketService {
 
         this.stompClient = new Client({
             webSocketFactory: () => new SockJS(socketUrl),
+            // Send the current access token on every (re)connect; chat requires an authenticated session
+            beforeConnect: (client) => {
+                const token = this.authService.accessToken();
+                this.sessionToken = token;
+                client.connectHeaders = token ? { Authorization: `Bearer ${token}` } : {};
+            },
             reconnectDelay: 5000,
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,

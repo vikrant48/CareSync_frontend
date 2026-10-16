@@ -1,12 +1,11 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { AppointmentCardComponent } from '../../shared/components/appointment-card.component';
-import { getDoctorAppointmentEpochMs } from '../../shared/doctor-appointment-utils';
+import { getAppointmentEpochMs } from '../../shared/appointment-utils';
 import { PatientDetailsModalComponent } from '../../shared/patient-details-modal.component';
 import { MedicalHistoryDetailModalComponent } from '../../shared/medical-history-detail-modal.component';
-import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 import { AppointmentService, DoctorAppointmentItem } from '../../core/services/appointment.service';
 import { MasterDataService } from '../../core/services/master-data.service';
 import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.component';
@@ -21,20 +20,25 @@ import { SoapReportEditorComponent } from './soap-report-editor.component';
 import { AppointmentApiService } from '../../core/services/appointment-api.service';
 import { PreVisitIntakeRequest, PreVisitIntakeResponse, SoapReportDto } from '../../core/models/appointment.models';
 import { ToastService } from '../../core/services/toast.service';
+import { PageContainerComponent } from '../../shared/ui/page-container.component';
+import { PaginatorComponent } from '../../shared/ui/paginator.component';
+import { StickyActionBarComponent } from '../../shared/ui/sticky-action-bar.component';
+import { memoByDeps } from '../../shared/utils/memo';
+import { trackByAppointmentId } from '../../shared/utils/track-by';
+import { markForCheckOn } from '../../shared/utils/mark-for-check';
 
 type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
 
 @Component({
   selector: 'app-doctor-appointments',
   standalone: true,
-  imports: [
+  imports: [StickyActionBarComponent, PaginatorComponent, PageContainerComponent, 
     CommonModule,
     FormsModule,
     RouterModule,
     AppointmentCardComponent,
     PatientDetailsModalComponent,
     MedicalHistoryDetailModalComponent,
-    DoctorLayoutComponent,
     SharedChatModalComponent,
     EmptyStateComponent,
     PageLoaderComponent,
@@ -42,10 +46,14 @@ type TimeRange = 'UPCOMING' | 'TODAY' | 'PAST' | 'ALL';
     IntakeSummaryModalComponent,
     SoapReportEditorComponent
   ],
+  // OnPush: every HTTP call below is piped through markForCheckOn so its results render
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './doctor-appointments.component.html',
   styleUrl: './doctor-appointments.component.css'
 })
 export class DoctorAppointmentsComponent {
+  private cdr = inject(ChangeDetectorRef);
+  readonly trackByAppointmentId = trackByAppointmentId;
   loading = false;
   appointments: DoctorAppointmentItem[] = [];
   statusFilter: string = 'ALL';
@@ -127,21 +135,8 @@ export class DoctorAppointmentsComponent {
   size = 9;
   totalAppointmentsCount = 0;
 
-  get startItemIndex(): number {
-    if (this.totalAppointmentsCount === 0) return 0;
-    return this.page * this.size + 1;
-  }
-
-  get endItemIndex(): number {
-    return Math.min((this.page + 1) * this.size, this.totalAppointmentsCount);
-  }
-
   get totalPages(): number {
     return Math.max(1, Math.ceil(this.totalAppointmentsCount / this.size));
-  }
-
-  get pageNumbers(): number[] {
-    return Array.from({ length: this.totalPages }, (_, i) => i);
   }
 
   goToPage(p: number) {
@@ -193,7 +188,7 @@ export class DoctorAppointmentsComponent {
     private toast: ToastService
   ) {
     this.refresh();
-    this.masterDataService.getStatuses().subscribe({
+    this.masterDataService.getStatuses().pipe(markForCheckOn(this.cdr)).subscribe({
       next: (s) => {
         this.statuses = s || [];
         const statusFilter = this.appointmentFilterConfigs.find((c) => c.key === 'statusFilter');
@@ -208,7 +203,7 @@ export class DoctorAppointmentsComponent {
     this.intakeSummaryText = 'Loading AI intake summary...';
     this.intakeData = null;
 
-    this.appointmentApi.getPreVisitIntakeSummary(a.appointmentId).subscribe({
+    this.appointmentApi.getPreVisitIntakeSummary(a.appointmentId).pipe(markForCheckOn(this.cdr)).subscribe({
       next: (res) => {
         this.intakeSummaryText = res.aiTriageSummary || res.preVisitSummary || 'Intake summary available.';
         this.intakeData = res;
@@ -238,7 +233,7 @@ export class DoctorAppointmentsComponent {
       isSigned: false
     };
 
-    this.appointmentApi.getSoapDraft(a.appointmentId).subscribe({
+    this.appointmentApi.getSoapDraft(a.appointmentId).pipe(markForCheckOn(this.cdr)).subscribe({
       next: (res) => {
         if (res) {
           this.soapReportData = res;
@@ -252,8 +247,8 @@ export class DoctorAppointmentsComponent {
     this.soapModalOpen = false;
   }
 
-  onSoapReportSigned(report: SoapReportDto): void {
-    this.toast.showSuccess('Medical SOAP report signed and appointment completed!');
+  // The editor already shows the "draft saved" toast; just refresh the list.
+  onSoapReportSaved(): void {
     this.refresh();
   }
 
@@ -262,35 +257,10 @@ export class DoctorAppointmentsComponent {
     this.loadAppointments();
   }
 
-  setRange(r: TimeRange) {
-    this.range = r;
-    this.page = 0;
-    this.loadAppointments();
-  }
-
-  onFilterChange() {
-    this.page = 0;
-    this.loadAppointments();
-  }
-
-  nextPage() {
-    if (this.page < this.totalPages - 1) {
-      this.page++;
-      this.loadAppointments();
-    }
-  }
-
-  prevPage() {
-    if (this.page > 0) {
-      this.page--;
-      this.loadAppointments();
-    }
-  }
-
   private loadAppointments() {
     this.loading = true;
 
-    this.appts.getDoctorPaginatedAppointments(this.page, this.size, this.statusFilter, this.range, this.searchTerm).subscribe({
+    this.appts.getDoctorPaginatedAppointments(this.page, this.size, this.statusFilter, this.range, this.searchTerm).pipe(markForCheckOn(this.cdr)).subscribe({
       next: (items) => {
         this.appointments = items || [];
         if (!this.totalAppointmentsCount || this.totalAppointmentsCount < this.appointments.length) {
@@ -304,7 +274,7 @@ export class DoctorAppointmentsComponent {
       }
     });
 
-    this.appts.countDoctorAppointments(this.statusFilter, this.range, this.searchTerm).subscribe({
+    this.appts.countDoctorAppointments(this.statusFilter, this.range, this.searchTerm).pipe(markForCheckOn(this.cdr)).subscribe({
       next: (count) => {
         if (count && count > 0) {
           this.totalAppointmentsCount = count;
@@ -320,44 +290,15 @@ export class DoctorAppointmentsComponent {
     });
   }
 
-  private applyRangeFilterAndSet(items: DoctorAppointmentItem[], now: number) {
-    let list = items;
-    if (this.range === 'TODAY') {
-      const todayISO = new Date().toISOString().slice(0, 10);
-      list = items.filter((a) => (a.appointmentDate || '').startsWith(todayISO));
-    } else if (this.range === 'UPCOMING') {
-      list = items.filter((a) => getDoctorAppointmentEpochMs(a) >= now);
-    } else if (this.range === 'PAST') {
-      list = items.filter((a) => getDoctorAppointmentEpochMs(a) < now);
-    }
-    this.appointments = this.sortByNearestUpcoming(list);
-    this.loading = false;
-  }
+  filteredAppointments = memoByDeps<DoctorAppointmentItem[]>(
+    () => this.computeFilteredAppointments(),
+    () => [this.appointments, this.searchTerm],
+  );
 
-  filteredAppointments(): DoctorAppointmentItem[] {
+  private computeFilteredAppointments(): DoctorAppointmentItem[] {
     const term = (this.searchTerm || '').trim().toLowerCase();
     return (this.appointments || [])
       .filter((a) => term ? ((a.patientName || '').toLowerCase().includes(term) || (String(a.patientId || '').includes(term))) : true);
-  }
-
-  changeStatus(a: DoctorAppointmentItem, status: string) {
-    if (!status) return;
-    this.appts.updateAppointmentStatus(a.appointmentId, status).subscribe({
-      next: () => this.refresh(),
-    });
-  }
-
-  startConsultation(a: DoctorAppointmentItem) {
-    this.appts.updateAppointmentStatus(a.appointmentId, 'IN_PROGRESS').subscribe({
-      next: (updated) => {
-        this.refresh();
-      },
-      error: (err: any) => console.error('Error starting consultation:', err)
-    });
-  }
-
-  joinConsultation(a: DoctorAppointmentItem) {
-    this.router.navigate(['/doctor/consultation', a.appointmentId]);
   }
 
   openDetails(a: DoctorAppointmentItem) {
@@ -366,7 +307,7 @@ export class DoctorAppointmentsComponent {
     this.patient = null;
     this.history = [];
     this.documents = [];
-    this.patients.getCompleteData(a.patientId).subscribe({
+    this.patients.getCompleteData(a.patientId).pipe(markForCheckOn(this.cdr)).subscribe({
       next: (resp) => {
         this.patient = resp?.patient ?? null;
         this.history = (resp?.medicalHistory as any) || [];
@@ -374,7 +315,7 @@ export class DoctorAppointmentsComponent {
       }
     });
     // Also load with-doctor records if available
-    this.patients.getMedicalHistoryWithDoctor(a.patientId).subscribe({
+    this.patients.getMedicalHistoryWithDoctor(a.patientId).pipe(markForCheckOn(this.cdr)).subscribe({
       next: (h) => (this.history = h || this.history || []),
     });
   }
@@ -387,7 +328,7 @@ export class DoctorAppointmentsComponent {
     };
     this.selectedHistoryDetail = null;
     this.historyDetailModalOpen = true;
-    this.patients.getMedicalHistoryDetail(h.id).subscribe({
+    this.patients.getMedicalHistoryDetail(h.id).pipe(markForCheckOn(this.cdr)).subscribe({
       next: (detail) => (this.selectedHistoryDetail = detail),
       error: () => (this.selectedHistoryDetail = { id: h.id, visitDate: h.visitDate } as any),
     });
@@ -407,25 +348,16 @@ export class DoctorAppointmentsComponent {
     this.documents = [];
   }
 
-  private dedupById(items: DoctorAppointmentItem[]) {
-    const seen = new Set<number>();
-    const out: DoctorAppointmentItem[] = [];
-    for (const a of items) {
-      if (!seen.has(a.appointmentId)) { seen.add(a.appointmentId); out.push(a); }
-    }
-    return out;
-  }
-
   private sortByNearestUpcoming(items: DoctorAppointmentItem[]) {
     const now = Date.now();
-    const upcoming = items.filter(a => getDoctorAppointmentEpochMs(a) >= now);
-    const past = items.filter(a => getDoctorAppointmentEpochMs(a) < now);
+    const upcoming = items.filter(a => getAppointmentEpochMs(a) >= now);
+    const past = items.filter(a => getAppointmentEpochMs(a) < now);
 
     // Sort upcoming by nearest date (Ascending)
-    upcoming.sort((a, b) => getDoctorAppointmentEpochMs(a) - getDoctorAppointmentEpochMs(b));
+    upcoming.sort((a, b) => getAppointmentEpochMs(a) - getAppointmentEpochMs(b));
 
     // Sort past by most recent date (Descending)
-    past.sort((a, b) => getDoctorAppointmentEpochMs(b) - getDoctorAppointmentEpochMs(a));
+    past.sort((a, b) => getAppointmentEpochMs(b) - getAppointmentEpochMs(a));
 
     return [...upcoming, ...past];
   }

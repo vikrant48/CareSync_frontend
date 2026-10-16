@@ -1,5 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppointmentProcessTabComponent } from './appointment-process-tab.component';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
 
 describe('AppointmentProcessTabComponent', () => {
     let component: AppointmentProcessTabComponent;
@@ -7,7 +10,8 @@ describe('AppointmentProcessTabComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [AppointmentProcessTabComponent]
+            imports: [AppointmentProcessTabComponent],
+            providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])]
         }).compileComponents();
 
         fixture = TestBed.createComponent(AppointmentProcessTabComponent);

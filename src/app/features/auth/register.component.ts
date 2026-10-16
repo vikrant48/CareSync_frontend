@@ -5,18 +5,18 @@ import { ReactiveFormsModule, FormBuilder, Validators, FormGroup, FormsModule } 
 import { AuthService } from '../../core/services/auth.service';
 import { RegisterRequest } from '../../core/models/auth.models';
 import { ToastService } from '../../core/services/toast.service';
-import { ToastContainerComponent } from '../../shared/toast-container.component';
 import { SelectDropdownComponent } from '../../shared/select-dropdown.component';
 import { SpecializationService } from '../../core/services/specialization.service';
 import { MasterDataService } from '../../core/services/master-data.service';
 import { DatePickerComponent } from '../../shared/date-picker.component';
 import { FeatureCarouselComponent } from './feature-carousel.component';
 import { environment } from '../../../../environments/environment';
+import { AppValidators, validationMessage } from '../../shared/utils/validators';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, ToastContainerComponent, SelectDropdownComponent, DatePickerComponent, FeatureCarouselComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, SelectDropdownComponent, DatePickerComponent, FeatureCarouselComponent],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css'
 })
@@ -32,13 +32,13 @@ export class RegisterComponent implements OnInit {
   constructor(private fb: FormBuilder) {
     // Initialize reactive forms inside constructor to avoid using 'fb' before assignment
     this.basicForm = this.fb.group({
-      firstName: ['', Validators.required],
-      lastName: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      contactInfo: ['+91 '],
-      dateOfBirth: [''],
+      firstName: ['', [AppValidators.requiredText(), Validators.maxLength(50)]],
+      lastName: ['', [AppValidators.requiredText(), Validators.maxLength(50)]],
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(120)]],
+      contactInfo: ['+91 ', [AppValidators.phone(10)]],
+      dateOfBirth: ['', [AppValidators.notInFuture(), AppValidators.maxAge(120)]],
       gender: ['', Validators.required],
-      username: ['', Validators.required],
+      username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(30), AppValidators.noWhitespace()]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
 
@@ -53,7 +53,7 @@ export class RegisterComponent implements OnInit {
 
     this.doctorForm = this.fb.group({
       specialization: ['', Validators.required],
-      experience: [null, [Validators.min(0)]],
+      experience: [null, [Validators.min(0), Validators.max(70)]],
     });
 
     this.patientForm = this.fb.group({
@@ -100,7 +100,7 @@ export class RegisterComponent implements OnInit {
 
   incrementExperience() {
     const current = this.doctorForm.get('experience')?.value || 0;
-    this.doctorForm.patchValue({ experience: current + 1 });
+    this.doctorForm.patchValue({ experience: Math.min(70, current + 1) });
   }
 
   decrementExperience() {
@@ -123,24 +123,22 @@ export class RegisterComponent implements OnInit {
     if (field.hasError('taken')) {
       return fieldName === 'email' ? 'Email is already registered.' : 'Username is already taken.';
     }
-    if (field.hasError('email')) return 'Enter a valid email address.';
-    if (field.hasError('minlength')) return 'Password must be at least 6 characters.';
-    if (field.hasError('pattern')) return 'Enter the 6-digit code.';
-    if (field.hasError('required')) {
-      const labels: Record<string, string> = {
-        firstName: 'First name',
-        lastName: 'Last name',
-        email: 'Email',
-        gender: 'Gender',
-        username: 'Username',
-        password: 'Password',
-        otp: 'Verification code',
-        specialization: 'Specialization',
-        role: 'Role'
-      };
-      return `${labels[fieldName] || 'This field'} is required.`;
-    }
-    return 'Check this field.';
+    if (fieldName === 'otp' && field.hasError('pattern')) return 'Enter the 6-digit code.';
+    const labels: Record<string, string> = {
+      firstName: 'First name',
+      lastName: 'Last name',
+      email: 'Email',
+      contactInfo: 'Mobile number',
+      dateOfBirth: 'Birth date',
+      gender: 'Gender',
+      username: 'Username',
+      password: 'Password',
+      otp: 'Verification code',
+      specialization: 'Specialization',
+      experience: 'Experience',
+      role: 'Role'
+    };
+    return validationMessage(field, labels[fieldName] || 'This field');
   }
 
   // Flag to show validation errors when user tries to navigate
@@ -159,7 +157,7 @@ export class RegisterComponent implements OnInit {
     } else if (step === this.currentStep) {
       return 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/30 scale-110';
     } else {
-      return 'bg-white dark:bg-gray-800 text-gray-400 border-gray-200 dark:border-gray-700 border-2';
+      return 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-400 border-gray-200 dark:border-gray-700 border-2';
     }
   }
 

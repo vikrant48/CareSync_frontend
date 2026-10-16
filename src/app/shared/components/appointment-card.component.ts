@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { UserAvatarComponent } from './user-avatar.component';
@@ -13,12 +13,13 @@ import { VisitCompletionPreviewModalComponent } from '../../features/doctor/visi
     standalone: true,
     imports: [CommonModule, UserAvatarComponent, StatusBadgeComponent, VisitCompletionPreviewModalComponent],
     templateUrl: './appointment-card.component.html',
-    styleUrl: './appointment-card.component.css'
 })
 export class AppointmentCardComponent {
     private router = inject(Router);
     private pdfService = inject(PdfService);
     private appointmentApiService = inject(AppointmentApiService);
+    // Host lists may be OnPush: the preview modal opens from an HTTP callback, so request a check
+    private cdr = inject(ChangeDetectorRef);
 
     @Input({ required: true }) appointment!: AppointmentDto | any;
     @Input() viewerRole: 'PATIENT' | 'DOCTOR' = 'PATIENT';
@@ -91,6 +92,7 @@ export class AppointmentCardComponent {
             next: (data) => {
                 this.previewModalData = data;
                 this.showPreviewModal = true;
+                this.cdr.markForCheck();
             },
             error: (err) => {
                 console.error('Failed to load completion preview, attempting fallback', err);
@@ -133,6 +135,7 @@ export class AppointmentCardComponent {
                     readinessReasons: []
                 };
                 this.showPreviewModal = true;
+                this.cdr.markForCheck();
             },
             error: (e) => {
                 console.error('Fallback preview failed', e);

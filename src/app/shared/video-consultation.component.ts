@@ -266,7 +266,7 @@ export class VideoConsultationComponent implements OnInit, OnDestroy {
   connectToRoom() {
     const apptId = Number(this.appointmentId);
     this.loading = true;
-    this.loadingStatusText = 'Authenticating LiveKit access token...';
+    this.loadingStatusText = 'Authenticating secure video session...';
     this.showToastError = false;
 
     this.videoService.getVideoToken(apptId).subscribe({

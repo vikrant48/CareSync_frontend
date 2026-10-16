@@ -9,7 +9,6 @@ import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
     standalone: true,
     imports: [CommonModule, ModalShellComponent],
     templateUrl: './appointment-audit-trail-modal.component.html',
-    styleUrl: './appointment-audit-trail-modal.component.css'
 })
 export class AppointmentAuditTrailModalComponent implements OnChanges {
     private appointmentApi = inject(AppointmentApiService);

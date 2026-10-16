@@ -4,11 +4,12 @@ import { RouterModule } from '@angular/router';
 import { PatientAppointmentItem } from '../../core/services/appointment.service';
 import { StatusBadgeComponent } from '../../shared/ui/status-badge.component';
 import { UserAvatarComponent } from '../../shared/components/user-avatar.component';
+import { InrPipe } from '../../shared/utils/inr.pipe';
 
 @Component({
   selector: 'app-patient-reports-activity',
   standalone: true,
-  imports: [CommonModule, RouterModule, StatusBadgeComponent, UserAvatarComponent],
+  imports: [InrPipe, CommonModule, RouterModule, StatusBadgeComponent, UserAvatarComponent],
   host: { class: 'block' },
   templateUrl: './patient-reports-activity.component.html',
 })

@@ -11,7 +11,6 @@ import { CommonModule } from '@angular/common';
   host: { class: 'block w-full' },
   imports: [CommonModule],
   templateUrl: './page-header.component.html',
-  styleUrl: './page-header.component.css'
 })
 export class PageHeaderComponent {
   @Input() title = '';
@@ -20,4 +19,8 @@ export class PageHeaderComponent {
   @Input() compact = false;
   @Input() hasActions = false;
   @Input() containerClass = '';
+  /** `hero` = the gradient banner used at the top of most patient/doctor pages */
+  @Input() variant: 'default' | 'hero' = 'default';
+  /** Font Awesome classes; shown in the hero variant only */
+  @Input() icon = '';
 }

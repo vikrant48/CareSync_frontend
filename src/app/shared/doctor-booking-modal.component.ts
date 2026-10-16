@@ -6,6 +6,7 @@ import { Doctor } from '../core/services/doctor.service';
 import { ToastService } from '../core/services/toast.service';
 import { DatePickerComponent } from './date-picker.component';
 import { ModalShellComponent } from './ui/modal-shell.component';
+import { doctorDisplayName, doctorInitial as getDoctorInitial } from './utils/doctor-name.util';
 
 @Component({
   selector: 'app-doctor-booking-modal',
@@ -60,11 +61,11 @@ import { ModalShellComponent } from './ui/modal-shell.component';
 
         <button
           type="button"
-          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+          class="text-gray-700 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
           aria-label="Close"
           (click)="close.emit()"
         >
-          <i class="fa-solid fa-xmark text-xl"></i>
+          <i class="fa-solid fa-xmark text-xl" aria-hidden="true"></i>
         </button>
       </div>
 
@@ -83,7 +84,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
         <div class="flex items-center justify-between">
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Available Slots</label>
           <span *ngIf="loadingSlots" class="text-xs text-emerald-500"
-            ><i class="fa-solid fa-circle-notch fa-spin mr-1"></i> Checking...</span
+            ><i class="fa-solid fa-circle-notch fa-spin mr-1" aria-hidden="true"></i> Checking...</span
           >
         </div>
 
@@ -91,7 +92,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
           *ngIf="isOnLeave"
           class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-xl p-4 flex items-start gap-3 animate-in fade-in slide-in-from-top-2"
         >
-          <i class="fa-solid fa-calendar-xmark text-amber-500 mt-1"></i>
+          <i class="fa-solid fa-calendar-xmark text-amber-500 mt-1" aria-hidden="true"></i>
           <div>
             <h4 class="text-sm font-bold text-amber-800 dark:text-amber-200">Doctor Unavailable</h4>
             <p class="text-sm text-amber-700 dark:text-amber-300 mt-0.5">{{ leaveMessage }}</p>
@@ -103,7 +104,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
             <button
               type="button"
               *ngFor="let s of slots"
-              class="py-2 px-1 text-sm rounded-lg border transition-all duration-200"
+              class="btn-size-md px-1 text-sm rounded-lg border transition-all duration-200 inline-flex items-center justify-center"
               [ngClass]="
                 selectedSlot === s
                   ? 'bg-blue-500 text-white border-emerald-500 shadow-md ring-2 ring-emerald-500/20'
@@ -116,9 +117,9 @@ import { ModalShellComponent } from './ui/modal-shell.component';
           </div>
           <div
             *ngIf="slots.length === 0"
-            class="flex flex-col items-center justify-center py-8 text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-200 dark:border-gray-700"
+            class="flex flex-col items-center justify-center py-8 text-gray-700 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-200 dark:border-gray-700"
           >
-            <i class="fa-regular fa-calendar-xmark text-2xl mb-2"></i>
+            <i class="fa-regular fa-calendar-xmark text-2xl mb-2" aria-hidden="true"></i>
             <span class="text-sm">No slots available</span>
           </div>
         </div>
@@ -126,19 +127,19 @@ import { ModalShellComponent } from './ui/modal-shell.component';
 
       <!-- Reason -->
       <div class="space-y-2">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Note for Doctor</label>
-        <textarea class="input w-full min-h-[80px]" rows="3" [(ngModel)]="reason" placeholder="Briefly describe your problem..."></textarea>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" for="doctor-booking-modal-note-for-doctor-1">Note for Doctor</label>
+        <textarea id="doctor-booking-modal-note-for-doctor-1" class="input w-full min-h-[80px]" rows="3" [(ngModel)]="reason" placeholder="Briefly describe your problem..."></textarea>
       </div>
 
       <div modalFooter>
         <button
           type="button"
-          class="btn-primary w-full py-3 text-base shadow-lg shadow-blue-500/20 disabled:bg-gray-300 disabled:dark:bg-gray-700 disabled:text-gray-500 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none"
+          class="btn-primary w-full text-base shadow-lg shadow-blue-500/20 disabled:bg-gray-300 disabled:dark:bg-gray-700 disabled:text-gray-500 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none"
           [disabled]="validating || !selectedSlot || isOnLeave || slots.length === 0"
           (click)="book()"
         >
-          <span *ngIf="!validating">Confirm Booking <i class="fa-solid fa-arrow-right ml-2 opacity-80"></i></span>
-          <span *ngIf="validating"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Processing...</span>
+          <span *ngIf="!validating">Confirm Booking <i class="fa-solid fa-arrow-right ml-2 opacity-80" aria-hidden="true"></i></span>
+          <span *ngIf="validating"><i class="fa-solid fa-circle-notch fa-spin mr-2" aria-hidden="true"></i> Processing...</span>
         </button>
       </div>
     </app-modal-shell>
@@ -264,14 +265,10 @@ export class DoctorBookingModalComponent implements OnChanges {
   }
 
   doctorInitial(d: Doctor) {
-    const base = (d.name || `${d.firstName || ''} ${d.lastName || ''}`).trim();
-    const stripped = base.replace(/^dr\.?\s+/i, '');
-    return stripped.charAt(0) || '?';
+    return getDoctorInitial(d);
   }
 
   formatDoctorName(d: Doctor) {
-    const base = (d.name || `${d.firstName || ''} ${d.lastName || ''}`).trim();
-    if (!base) return '';
-    return /^dr\.?\s+/i.test(base) ? base : `Dr ${base}`;
+    return doctorDisplayName(d);
   }
 }

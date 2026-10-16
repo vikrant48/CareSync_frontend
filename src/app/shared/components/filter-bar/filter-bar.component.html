@@ -43,18 +43,19 @@
 
             <!-- TYPE 1: Search Input -->
             <div *ngIf="config.type === 'search'" class="relative flex items-center">
-                <i class="fa-solid fa-magnifying-glass absolute left-3.5 text-xs text-[var(--accent)]"></i>
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 text-xs text-[var(--accent)]" aria-hidden="true"></i>
                 <input type="text" [(ngModel)]="filterValues[config.key]" (input)="onTextInputChange()"
                     [placeholder]="config.placeholder || 'Search...'" [disabled]="!!config.disabled" [ngClass]="[
-                 'w-full text-xs font-medium rounded-xl pl-9 pr-3.5 py-2.5 border transition-all focus:outline-none shadow-inner',
+                 'w-full filter-control text-xs font-medium rounded-xl pl-9 pr-9 py-0 border transition-all focus:outline-none shadow-inner',
                  theme === 'doctor'
                    ? 'bg-[var(--bg)] text-[var(--text)] border-[var(--border)] placeholder-[var(--muted)]/50 focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/30'
                    : 'bg-[var(--panel)] text-[var(--text)] border-[var(--border)] placeholder-[var(--muted)]/50 focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]/30',
                  config.disabled ? 'opacity-50 cursor-not-allowed' : ''
                ]" />
                 <button *ngIf="filterValues[config.key]" type="button" (click)="onImmediateChange(config.key, null)"
-                    class="absolute right-3 text-xs text-[var(--muted)] hover:text-[var(--text)] transition-colors">
-                    <i class="fa-solid fa-xmark"></i>
+                    aria-label="Clear search"
+                    class="absolute right-1 w-8 h-8 inline-flex items-center justify-center rounded-lg text-xs text-[var(--muted)] hover:text-[var(--text)] transition-colors">
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
                 </button>
             </div>
 
@@ -62,7 +63,7 @@
             <div *ngIf="config.type === 'text'" class="relative flex items-center">
                 <input type="text" [(ngModel)]="filterValues[config.key]" (input)="onTextInputChange()"
                     [placeholder]="config.placeholder || 'Enter text...'" [disabled]="!!config.disabled" [ngClass]="[
-                 'w-full text-xs font-medium rounded-xl px-3.5 py-2.5 border transition-all focus:outline-none shadow-inner',
+                 'w-full filter-control text-xs font-medium rounded-xl px-3.5 py-0 border transition-all focus:outline-none shadow-inner',
                  theme === 'doctor'
                    ? 'bg-[var(--bg)] text-[var(--text)] border-[var(--border)] placeholder-[var(--muted)]/50 focus:border-[var(--accent)]'
                    : 'bg-[var(--panel)] text-[var(--text)] border-[var(--border)] placeholder-[var(--muted)]/50 focus:border-[var(--primary)]',
@@ -71,16 +72,16 @@
             </div>
 
             <!-- TYPE 3: Single Select -->
-            <app-select *ngIf="config.type === 'select'" [options]="getSelectOptions(config.options)"
+            <app-select-dropdown *ngIf="config.type === 'select'" [options]="getSelectOptions(config.options)"
                 [ngModel]="filterValues[config.key]" (selectionChange)="onImmediateChange(config.key, $event)"
                 [placeholder]="config.placeholder || 'Select option'" [disabled]="!!config.disabled"
-                [triggerClass]="selectTriggerClass">
-            </app-select>
+                [autoCapitalize]="false" [customButtonClass]="selectTriggerClass">
+            </app-select-dropdown>
 
             <!-- TYPE 4: Searchable Select -->
             <app-searchable-select *ngIf="config.type === 'searchable-select'"
                 [options]="getSearchableOptions(config.options)" [value]="filterValues[config.key]"
-                valueKey="value" labelKey="label"
+                valueKey="value" labelKey="label" icon="fa-solid fa-list" noResultsHint="Try a different search term"
                 (selectionChange)="onImmediateChange(config.key, $event)"
                 [placeholder]="config.placeholder || 'Search & select...'" [disabled]="!!config.disabled">
             </app-searchable-select>
@@ -88,11 +89,11 @@
             <!-- TYPE 5: Radio / Segmented Pill Control -->
             <div *ngIf="config.type === 'radio'"
                 [ngClass]="theme === 'doctor' ? 'bg-[var(--bg)] border-[var(--border)]' : 'bg-[var(--panel)] border-[var(--border)]'"
-                class="flex items-center p-1 rounded-xl border space-x-1 overflow-x-auto custom-scrollbar">
+                class="filter-control flex items-stretch p-1 rounded-xl border space-x-1 overflow-x-auto no-scrollbar">
                 <button *ngFor="let opt of getRadioOptions(config.options)" type="button"
                     (click)="selectRadioOption(config.key, opt.value)" [disabled]="!!config.disabled || !!opt.disabled"
                     [ngClass]="[
-                  'px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 select-none cursor-pointer',
+                  'px-3 py-0 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 select-none cursor-pointer',
                   filterValues[config.key] === opt.value
                     ? (theme === 'doctor' ? 'bg-[var(--accent)] text-[var(--accent-fg)] shadow-md' : 'bg-[var(--primary)] text-white shadow-md')
                     : (theme === 'doctor' ? 'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--bg)]' : 'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--bg)]')
@@ -103,13 +104,13 @@
             </div>
 
             <!-- TYPE 6: Date Picker -->
-            <app-date-picker *ngIf="config.type === 'date'" [ngModel]="filterValues[config.key]"
+            <app-date-picker *ngIf="config.type === 'date'" [compact]="true" [ngModel]="filterValues[config.key]"
                 (dateChange)="onImmediateChange(config.key, $event)" [placeholder]="config.placeholder || 'YYYY-MM-DD'"
                 [disabled]="!!config.disabled">
             </app-date-picker>
 
             <!-- TYPE 7: Date Range Picker -->
-            <app-date-range-picker *ngIf="config.type === 'date-range'" [ngModel]="filterValues[config.key]"
+            <app-date-range-picker *ngIf="config.type === 'date-range'"
                 (rangeChange)="onImmediateChange(config.key, $event)"
                 [placeholder]="config.placeholder || 'Select date range'" [disabled]="!!config.disabled">
             </app-date-range-picker>
@@ -119,14 +120,14 @@
                 <input type="number" [(ngModel)]="filterValues[config.minKey || (config.key + '_min')]"
                     (input)="onNumberRangeChange(config)" [placeholder]="config.minPlaceholder || 'Min'"
                     [disabled]="!!config.disabled" [ngClass]="[
-                 'w-full text-xs font-medium rounded-xl px-2.5 py-2.5 border transition-all focus:outline-none',
+                 'w-full filter-control text-xs font-medium rounded-xl px-2.5 py-0 border transition-all focus:outline-none',
                  theme === 'doctor' ? 'bg-[var(--bg)] text-[var(--text)] border-[var(--border)] focus:border-[var(--accent)]' : 'bg-[var(--panel)] text-[var(--text)] border-[var(--border)] focus:border-[var(--primary)]'
                ]" />
                 <span class="text-xs text-[var(--muted)] font-bold">-</span>
                 <input type="number" [(ngModel)]="filterValues[config.maxKey || (config.key + '_max')]"
                     (input)="onNumberRangeChange(config)" [placeholder]="config.maxPlaceholder || 'Max'"
                     [disabled]="!!config.disabled" [ngClass]="[
-                 'w-full text-xs font-medium rounded-xl px-2.5 py-2.5 border transition-all focus:outline-none',
+                 'w-full filter-control text-xs font-medium rounded-xl px-2.5 py-0 border transition-all focus:outline-none',
                  theme === 'doctor' ? 'bg-[var(--bg)] text-[var(--text)] border-[var(--border)] focus:border-[var(--accent)]' : 'bg-[var(--panel)] text-[var(--text)] border-[var(--border)] focus:border-[var(--primary)]'
                ]" />
             </div>
@@ -135,7 +136,7 @@
             <div *ngIf="config.type === 'button'">
                 <button type="button" (click)="handleButtonClick(config, $event)" [disabled]="!!config.disabled"
                     [ngClass]="[
-                  'w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md',
+                  'w-full filter-control px-4 py-0 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md',
                   config.buttonClass ? config.buttonClass : (theme === 'doctor' ? 'bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--accent)]' : 'bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)]'),
                   config.disabled ? 'opacity-50 cursor-not-allowed' : ''
                 ]">
@@ -155,11 +156,11 @@
 
     <!-- Clear Filters Action (Rendered only when activeFilterCount > 0) -->
     <div *ngIf="showClearAll && activeFilterCount > 0"
-        class="flex items-center ml-auto shrink-0 animate-in fade-in duration-200">
+        class="flex items-center self-end h-[38px] ml-auto shrink-0 animate-in fade-in duration-200">
         <button type="button" (click)="clearAllFilters()"
             [ngClass]="theme === 'doctor' ? 'text-[var(--accent)] hover:text-[var(--accent)]' : 'text-[var(--primary)] hover:text-[var(--primary-hover)]'"
-            class="text-xs font-bold flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-white/5 transition-all cursor-pointer select-none">
-            <i class="fa-solid fa-circle-xmark text-sm"></i>
+            class="h-6 py-0 text-xs font-bold flex items-center gap-1.5 px-2.5 rounded-lg hover:bg-white/5 transition-all cursor-pointer select-none">
+            <i class="fa-solid fa-circle-xmark text-xs" aria-hidden="true"></i>
             <span>Clear filters ({{ activeFilterCount }})</span>
         </button>
     </div>

@@ -5,16 +5,14 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { LoginRequest } from '../../core/models/auth.models';
 import { ToastService } from '../../core/services/toast.service';
-import { ToastContainerComponent } from '../../shared/toast-container.component';
 import { FeatureCarouselComponent } from './feature-carousel.component';
 import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ToastContainerComponent, FeatureCarouselComponent],
+  imports: [CommonModule, FormsModule, RouterModule, FeatureCarouselComponent],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
 })
 export class LoginComponent {
   private auth = inject(AuthService);

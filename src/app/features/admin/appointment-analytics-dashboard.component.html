@@ -5,7 +5,7 @@
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
             <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)] flex items-center gap-3">
-                <i class="fa-solid fa-chart-line text-cyan-700 dark:text-cyan-400"></i> Appointment Analytics
+                <i class="fa-solid fa-chart-line text-cyan-700 dark:text-cyan-400" aria-hidden="true"></i> Appointment Analytics
             </h2>
             <p class="text-xs sm:text-sm text-muted mt-1">
                 Operational performance, completion rates, status breakdown, and lifecycle conversion metrics.
@@ -20,7 +20,7 @@
 
     <!-- Loading Skeleton -->
     <div *ngIf="loading" class="py-20 text-center text-xs text-muted">
-        <i class="fa-solid fa-spinner fa-spin text-2xl text-cyan-700 dark:text-cyan-400 mb-3 block"></i>
+        <i class="fa-solid fa-spinner fa-spin text-2xl text-cyan-700 dark:text-cyan-400 mb-3 block" aria-hidden="true"></i>
         <span>Aggregating analytics & funnel statistics...</span>
     </div>
 
@@ -33,7 +33,7 @@
                 <span class="text-xs font-semibold text-muted uppercase tracking-wider">Total Appointments</span>
                 <div class="text-2xl sm:text-3xl font-extrabold text-[var(--text)]">{{ analytics.totalAppointments }}</div>
                 <div class="text-[11px] text-muted flex items-center gap-1">
-                    <i class="fa-solid fa-calendar-check text-cyan-700 dark:text-cyan-400"></i> Recorded Volume
+                    <i class="fa-solid fa-calendar-check text-cyan-700 dark:text-cyan-400" aria-hidden="true"></i> Recorded Volume
                 </div>
             </div>
 
@@ -69,7 +69,7 @@
             <div class="flex items-center justify-between border-b border-[var(--border)] pb-4">
                 <div>
                     <h2 class="text-lg font-bold text-[var(--text)] flex items-center gap-2">
-                        <i class="fa-solid fa-filter text-indigo-700 dark:text-indigo-300"></i> Appointment Lifecycle Conversion Funnel
+                        <i class="fa-solid fa-filter text-indigo-700 dark:text-indigo-300" aria-hidden="true"></i> Appointment Lifecycle Conversion Funnel
                     </h2>
                     <p class="text-xs text-muted mt-0.5">Progressive patient retention from initial slot hold to
                         visit completion</p>
@@ -102,7 +102,7 @@
         <!-- Status Breakdown Grid -->
         <div class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-6 space-y-4">
             <h2 class="text-lg font-bold text-[var(--text)] flex items-center gap-2 border-b border-[var(--border)] pb-3">
-                <i class="fa-solid fa-cubes text-cyan-700 dark:text-cyan-400"></i> Detailed Status Distribution
+                <i class="fa-solid fa-cubes text-cyan-700 dark:text-cyan-400" aria-hidden="true"></i> Detailed Status Distribution
             </h2>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">

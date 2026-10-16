@@ -1,14 +1,16 @@
-<div class="fixed bottom-4 right-4 z-[9999] w-full max-w-sm flex flex-col gap-3 pointer-events-none px-4 sm:px-0">
-    <div *ngFor="let t of toasts"
+<!-- Live region: screen readers announce new toasts. Above the mobile bottom nav, bottom-right on desktop. -->
+<div class="fixed right-4 bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] xl:bottom-4 z-[9999] w-full max-w-sm flex flex-col gap-3 pointer-events-none px-4 sm:px-0"
+    aria-live="polite" aria-relevant="additions">
+    <div *ngFor="let t of toasts; trackBy: trackToast"
         class="pointer-events-auto transform transition-all duration-300 ease-in-out animate-in slide-in-from-bottom-2 fade-in"
-        [class.translate-x-full]="t.dismissed" role="alert">
+        [class.translate-x-full]="t.dismissed" [attr.role]="t.type === 'error' || t.type === 'warning' ? 'alert' : 'status'">
 
         <div class="relative overflow-hidden rounded-xl shadow-lg border backdrop-blur-md p-4 pr-10 min-h-[60px] flex items-start gap-3"
             [ngClass]="getToastClasses(t.type)">
 
             <!-- Icon -->
             <div class="shrink-0 mt-0.5">
-                <i class="fa-solid text-lg" [ngClass]="getIconClass(t.type)"></i>
+                <i class="fa-solid text-lg" [ngClass]="getIconClass(t.type)" aria-hidden="true"></i>
             </div>
 
             <!-- Content -->
@@ -24,7 +26,7 @@
             <button type="button" (click)="dismiss(t.id)"
                 class="absolute top-2 right-2 p-2 min-w-touch min-h-touch rounded-lg opacity-60 hover:opacity-100 hover:bg-black/5 transition-all focus:outline-none inline-flex items-center justify-center"
                 title="Dismiss" aria-label="Dismiss notification">
-                <i class="fa-solid fa-xmark text-sm"></i>
+                <i class="fa-solid fa-xmark text-sm" aria-hidden="true"></i>
             </button>
         </div>
 

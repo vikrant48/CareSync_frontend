@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, HostListener } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -7,6 +7,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { PreVisitIntakeRequest, AppointmentStatus } from '../../core/models/appointment.models';
 import { StatusBadgeComponent } from '../../shared/ui/status-badge.component';
 import { AiAssistantService } from '../../core/services/ai-assistant.service';
+import { HasUnsavedChanges } from '../../core/guards/unsaved-changes.guard';
 
 @Component({
     selector: 'app-pre-visit-intake',
@@ -15,7 +16,7 @@ import { AiAssistantService } from '../../core/services/ai-assistant.service';
     templateUrl: './pre-visit-intake.component.html',
     styleUrl: './pre-visit-intake.component.css'
 })
-export class PreVisitIntakeComponent implements OnInit, OnDestroy {
+export class PreVisitIntakeComponent implements OnInit, OnDestroy, HasUnsavedChanges {
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private location = inject(Location);
@@ -44,7 +45,7 @@ export class PreVisitIntakeComponent implements OnInit, OnDestroy {
         severity: '',
         currentMedications: '',
         allergies: '',
-        consentGiven: true
+        consentGiven: false
     };
 
     ngOnInit(): void {
@@ -53,6 +54,7 @@ export class PreVisitIntakeComponent implements OnInit, OnDestroy {
             this.appointmentId = Number(idParam);
             this.loadExistingDraft();
         }
+        this.savedSnapshot = JSON.stringify(this.intakeData);
         this.setupSpeechRecognition();
     }
 
@@ -168,8 +170,26 @@ export class PreVisitIntakeComponent implements OnInit, OnDestroy {
         this.activeStep = Math.max(1, this.activeStep - 1);
     }
 
+    /** JSON of the intake as last loaded/saved, to detect unsaved edits */
+    private savedSnapshot = '';
+    private submitted = false;
+
+    hasUnsavedChanges(): boolean {
+        return !this.submitted && JSON.stringify(this.intakeData) !== this.savedSnapshot;
+    }
+
+    /** Browser close / refresh with unsaved edits */
+    @HostListener('window:beforeunload', ['$event'])
+    onBeforeUnload(event: BeforeUnloadEvent) {
+        if (this.hasUnsavedChanges()) {
+            event.preventDefault();
+            event.returnValue = '';
+        }
+    }
+
     saveDraft(): void {
         localStorage.setItem(`intake_draft_${this.appointmentId}`, JSON.stringify(this.intakeData));
+        this.savedSnapshot = JSON.stringify(this.intakeData);
         this.toast.showSuccess('Intake draft saved locally.');
     }
 
@@ -184,6 +204,7 @@ export class PreVisitIntakeComponent implements OnInit, OnDestroy {
             next: (res) => {
                 this.submitting = false;
                 localStorage.removeItem(`intake_draft_${this.appointmentId}`);
+                this.submitted = true;
                 this.toast.showSuccess('Pre-visit intake submitted! AI summary generated for your doctor.');
                 this.router.navigate(['/patient/appointments', this.appointmentId]);
             },

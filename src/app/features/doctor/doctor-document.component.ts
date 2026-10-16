@@ -1,7 +1,7 @@
-import { Component, OnInit, inject, signal, ViewChild, ElementRef } from '@angular/core';
+import { DocumentOpenerService } from '../../core/services/document-opener.service';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject, signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 import { AuthService } from '../../core/services/auth.service';
 import { DoctorProfileService, DocumentItem } from '../../core/services/doctor-profile.service';
 import { AiAssistantService } from '../../core/services/ai-assistant.service';
@@ -10,18 +10,25 @@ import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropd
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 import { FilterBarComponent, FilterConfig } from '../../shared/components';
 import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
+import { PageContainerComponent } from '../../shared/ui/page-container.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { ConfirmService } from '../../core/services/confirm.service';
 
 @Component({
   selector: 'app-doctor-documents',
   standalone: true,
-  imports: [CommonModule, FormsModule, DoctorLayoutComponent, SelectDropdownComponent, EmptyStateComponent, FilterBarComponent, PageLoaderComponent],
+  imports: [PageHeaderComponent, PageContainerComponent, CommonModule, FormsModule, SelectDropdownComponent, EmptyStateComponent, FilterBarComponent, PageLoaderComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './doctor-document.component.html',
-  styleUrl: './doctor-document.component.css'
 })
 export class DoctorDocumentsComponent implements OnInit {
   private svc = inject(DoctorProfileService);
+  private documentOpener = inject(DocumentOpenerService);
   private auth = inject(AuthService);
   private ai = inject(AiAssistantService);
+  private confirm = inject(ConfirmService);
+  // OnPush: plain fields changed in async callbacks below request a check explicitly
+  private cdr = inject(ChangeDetectorRef);
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
 
   loading = signal<boolean>(true);
@@ -158,28 +165,27 @@ export class DoctorDocumentsComponent implements OnInit {
         this.documents = docs || [];
         this.applyFilters();
         this.loading.set(false);
+        this.cdr.markForCheck();
       },
       error: (e) => {
         this.error.set(e?.error?.message || 'Failed to load documents');
         this.loading.set(false);
+        this.cdr.markForCheck();
       },
     });
   }
 
-  deleteDocument(doc: DocumentItem) {
+  async deleteDocument(doc: DocumentItem) {
     if (!doc?.id) return;
+    const ok = await this.confirm.ask({ title: 'Delete document', message: `Delete "${doc.originalFilename || 'this document'}"? This cannot be undone.`, confirmLabel: 'Delete', cancelLabel: 'Keep', danger: true });
+    if (!ok) return;
     this.svc.deleteDocument(doc.id).subscribe({
       next: () => {
         this.documents = this.documents.filter((d) => d.id !== doc.id);
         this.applyFilters();
+        this.cdr.markForCheck();
       },
     });
-  }
-
-  updateDocDescription(doc: DocumentItem) {
-    const desc = doc?.description || '';
-    if (!doc?.id) return;
-    this.svc.updateDocumentDescription(doc.id, desc).subscribe();
   }
 
   onFileSelected(event: any) {
@@ -197,10 +203,12 @@ export class DoctorDocumentsComponent implements OnInit {
         if (!this.uploadDescription && scan.rawSummary) {
           this.uploadDescription = scan.rawSummary.slice(0, 300);
         }
+        this.cdr.markForCheck();
       },
       error: () => {
         this.classifying = false;
         this.documentScan = { success: false, error: 'Classification is unavailable. Choose the document type manually.' };
+        this.cdr.markForCheck();
       }
     });
   }
@@ -272,12 +280,17 @@ export class DoctorDocumentsComponent implements OnInit {
         }
         this.uploading = false;
         this.successMessage = 'Uploaded successfully';
-        setTimeout(() => { this.successMessage = null; }, 3000);
+        this.cdr.markForCheck();
+        setTimeout(() => {
+          this.successMessage = null;
+          this.cdr.markForCheck();
+        }, 3000);
       },
       error: (e) => {
         const msg = typeof e?.error === 'string' ? e.error : (e?.error?.message || 'Upload failed');
         this.error.set(msg);
         this.uploading = false;
+        this.cdr.markForCheck();
       },
     });
   }
@@ -302,10 +315,6 @@ export class DoctorDocumentsComponent implements OnInit {
       list = list.filter((d) => (d.description || '').includes(`Subtype: ${this.filterEducationSubtype}`));
     }
     this.displayedDocs = list;
-  }
-
-  onFilterChanged() {
-    this.applyFilters();
   }
 
   clearFilters() {
@@ -360,8 +369,9 @@ export class DoctorDocumentsComponent implements OnInit {
   }
 
   downloadDocument(doc: DocumentItem) {
-    if (!doc?.filePath) return;
-    window.open(doc.filePath, '_blank');
+    if (!doc?.filePath && !doc?.id) return;
+    // Fetched fresh: private files are served through short-lived signed links
+    this.documentOpener.open(doc.id, doc.filePath);
   }
 
   trackByDocId(_index: number, doc: DocumentItem): number {

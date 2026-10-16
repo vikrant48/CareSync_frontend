@@ -23,7 +23,7 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
     >
       <!-- Loading Spinner -->
       <span *ngIf="loading" class="inline-block animate-spin mr-2">
-        <i class="fa-solid fa-spinner text-current"></i>
+        <i class="fa-solid fa-spinner text-current" aria-hidden="true"></i>
       </span>
 
       <!-- Left Icon -->
@@ -61,12 +61,12 @@ export class ButtonComponent {
     getSizeClasses(): string {
         switch (this.size) {
             case 'sm':
-                return 'px-2.5 sm:px-3 py-1.5 text-xs rounded-lg gap-1.5';
+                return 'btn-size-sm px-2.5 py-0 text-[11px] rounded-lg gap-1';
             case 'lg':
-                return 'px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base rounded-xl sm:rounded-2xl gap-2 sm:gap-2.5';
+                return 'btn-size-lg px-4 sm:px-5 py-0 text-sm rounded-xl gap-2';
             case 'md':
             default:
-                return 'px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-xl gap-1.5 sm:gap-2';
+                return 'btn-size-md px-3 sm:px-4 py-0 text-xs rounded-lg gap-1.5';
         }
     }
 

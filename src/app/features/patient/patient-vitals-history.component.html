@@ -4,7 +4,7 @@
             <div class="p-5 flex items-center justify-between border-b border-[var(--border)]">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-lg bg-[var(--primary)]/10 flex items-center justify-center">
-                        <i class="fa-regular fa-clock text-[var(--primary)] text-sm"></i>
+                        <i class="fa-regular fa-clock text-[var(--primary)] text-sm" aria-hidden="true"></i>
                     </div>
                     <h3 class="text-sm font-bold text-[var(--text)] tracking-wide">Recent Vitals Readings</h3>
                 </div>
@@ -20,10 +20,10 @@
                 class="p-12 text-center text-xs text-[var(--muted)] flex flex-col items-center justify-center space-y-3">
                 <div
                     class="w-12 h-12 rounded-full bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center">
-                    <i class="fa-solid fa-notes-medical text-lg opacity-40"></i>
+                    <i class="fa-solid fa-notes-medical text-lg opacity-40" aria-hidden="true"></i>
                 </div>
                 <p>No vitals readings recorded yet.</p>
-                <button (click)="logReading.emit()" class="bg-[var(--primary)] text-white text-xs px-4 py-2 rounded-xl">
+                <button (click)="logReading.emit()" class="btn-size-lg bg-[var(--primary)] text-white text-xs px-4 rounded-xl inline-flex items-center justify-center">
                     Log Your First Reading
                 </button>
             </div>
@@ -42,7 +42,7 @@
                             <th class="py-3.5 px-5 text-right">ACTION</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-[var(--border)]/60 text-slate-300">
+                    <tbody class="divide-y divide-[var(--border)]/60 text-slate-600 dark:text-slate-300">
                         <tr *ngFor="let vital of vitals; trackBy: trackVital" class="hover:bg-[var(--bg)]/40 transition-colors group">
 
                             <!-- Date & Time -->
@@ -60,7 +60,7 @@
                                     <span [ngClass]="getBPStatus(vital.systolicBP, vital.diastolicBP).class"
                                         class="px-2 py-0.5 rounded text-[10px] font-semibold border inline-flex items-center gap-1">
                                         <i class="fa-solid"
-                                            [ngClass]="getBPStatus(vital.systolicBP, vital.diastolicBP).icon"></i>
+                                            [ngClass]="getBPStatus(vital.systolicBP, vital.diastolicBP).icon" aria-hidden="true"></i>
                                         {{ getBPStatus(vital.systolicBP, vital.diastolicBP).label }}
                                     </span>
                                 </div>
@@ -74,7 +74,7 @@
                                     </span>
                                     <span [ngClass]="getSugarStatus(vital.sugarLevel).class"
                                         class="px-2 py-0.5 rounded text-[10px] font-semibold border inline-flex items-center gap-1">
-                                        <i class="fa-solid" [ngClass]="getSugarStatus(vital.sugarLevel).icon"></i>
+                                        <i class="fa-solid" [ngClass]="getSugarStatus(vital.sugarLevel).icon" aria-hidden="true"></i>
                                         {{ getSugarStatus(vital.sugarLevel).label }}
                                     </span>
                                 </div>
@@ -88,7 +88,7 @@
                                     </span>
                                     <span [ngClass]="getWeightStatus(vital.weight).class"
                                         class="px-2 py-0.5 rounded text-[10px] font-semibold border inline-flex items-center gap-1">
-                                        <i class="fa-solid" [ngClass]="getWeightStatus(vital.weight).icon"></i>
+                                        <i class="fa-solid" [ngClass]="getWeightStatus(vital.weight).icon" aria-hidden="true"></i>
                                         {{ getWeightStatus(vital.weight).label }}
                                     </span>
                                 </div>
@@ -102,7 +102,7 @@
                                     </span>
                                     <span [ngClass]="getTempStatus(vital.temperature).class"
                                         class="px-2 py-0.5 rounded text-[10px] font-semibold border inline-flex items-center gap-1">
-                                        <i class="fa-solid" [ngClass]="getTempStatus(vital.temperature).icon"></i>
+                                        <i class="fa-solid" [ngClass]="getTempStatus(vital.temperature).icon" aria-hidden="true"></i>
                                         {{ getTempStatus(vital.temperature).label }}
                                     </span>
                                 </div>
@@ -112,9 +112,9 @@
                             <td class="py-4 px-5 text-right">
                                 <div class="flex items-center justify-end gap-2">
                                     <button (click)="view.emit(vital)"
-                                        class="bg-[var(--bg)] hover:bg-[var(--bg)] text-[var(--text)] border border-[var(--border)] font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors inline-flex items-center gap-1.5">
+                                        class="btn-size-md bg-[var(--bg)] hover:bg-[var(--bg)] text-[var(--text)] border border-[var(--border)] font-semibold px-3 rounded-lg text-xs transition-colors inline-flex items-center gap-1.5">
                                         <span>View Details</span>
-                                        <i class="fa-solid fa-chevron-right text-[10px] text-[var(--muted)]"></i>
+                                        <i class="fa-solid fa-chevron-right text-[10px] text-[var(--muted)]" aria-hidden="true"></i>
                                     </button>
                                 </div>
                             </td>
@@ -132,7 +132,7 @@
                         <button (click)="view.emit(vital)"
                             class="text-[var(--primary)] font-semibold text-xs flex items-center gap-1">
                             <span>Details</span>
-                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                            <i class="fa-solid fa-chevron-right text-[10px]" aria-hidden="true"></i>
                         </button>
                     </div>
 

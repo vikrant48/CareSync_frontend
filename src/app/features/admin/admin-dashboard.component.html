@@ -107,7 +107,7 @@
                         </span>
                         <div class="grid grid-cols-2 gap-2 w-full">
                         <button type="button" (click)="toggleUserStatus(u)" [disabled]="togglingUsername === u.username"
-                            class="flex-1 px-3 py-2.5 min-h-touch rounded-xl text-xs font-semibold transition border shadow-sm"
+                            class="btn-size-lg flex-1 px-3 rounded-xl text-xs font-semibold transition border shadow-sm inline-flex items-center justify-center"
                             [ngClass]="{
                 'bg-rose-500/20 hover:bg-rose-500/30 text-rose-700 dark:text-rose-300 border-rose-500/40': u.isActive,
                 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border-blue-500/40': !u.isActive
@@ -116,7 +116,7 @@
                             Active') }}
                         </button>
                         <button type="button" (click)="openPasswordResetModal(u)" title="Change User Password"
-                            class="px-2.5 py-2.5 min-h-touch rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md shadow-amber-500/20 transition flex items-center justify-center gap-1.5 min-w-0">
+                            class="btn-size-lg px-2.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md shadow-amber-500/20 transition flex items-center justify-center gap-1.5 min-w-0" aria-label="Change User Password">
                             <i class="fa-solid fa-key text-xs" aria-hidden="true"></i>
                             <span>Change Password</span>
                         </button>
@@ -169,7 +169,7 @@
                             <td class="py-3.5 px-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
                                     <button (click)="toggleUserStatus(u)" [disabled]="togglingUsername === u.username"
-                                        class="px-3 py-1.5 rounded-xl text-xs font-semibold transition border shadow-sm"
+                                        class="btn-size-lg px-3 rounded-xl text-xs font-semibold transition border shadow-sm inline-flex items-center justify-center"
                                         [ngClass]="{
                         'bg-rose-500/20 hover:bg-rose-500/30 text-rose-700 dark:text-rose-300 border-rose-500/40': u.isActive,
                         'bg-blue-500/20 hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border-blue-500/40': !u.isActive
@@ -178,7 +178,7 @@
                                         Inactive' : 'Set Active') }}
                                     </button>
                                     <button (click)="openPasswordResetModal(u)" title="Change User Password"
-                                        class="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md shadow-amber-500/20 transition flex items-center gap-1.5">
+                                        class="btn-size-lg px-3 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md shadow-amber-500/20 transition flex items-center gap-1.5" aria-label="Change User Password">
                                         <i class="fa-solid fa-key text-xs" aria-hidden="true"></i>
                                         <span>Change Password</span>
                                     </button>
@@ -245,17 +245,17 @@
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <button type="button" (click)="openDoctorModal(doc)"
-                            class="px-3 py-2.5 min-h-touch rounded-xl text-xs font-semibold bg-[var(--panel)] hover:bg-[var(--border)] text-[var(--text)] border border-[var(--border)] transition">
+                            class="btn-size-md px-3 rounded-xl text-xs font-semibold bg-[var(--panel)] hover:bg-[var(--border)] text-[var(--text)] border border-[var(--border)] transition inline-flex items-center justify-center">
                             View Profile
                         </button>
                         <button type="button" *ngIf="!doc.isVerified" (click)="toggleDoctorVerification(doc, true)"
                             [disabled]="verifyingDoctorId === doc.id"
-                            class="px-3 py-2.5 min-h-touch rounded-xl text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-500/40 transition">
+                            class="btn-size-md px-3 rounded-xl text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-500/40 transition inline-flex items-center justify-center">
                             Verify
                         </button>
                         <button type="button" *ngIf="doc.isVerified" (click)="toggleDoctorVerification(doc, false)"
                             [disabled]="verifyingDoctorId === doc.id"
-                            class="px-3 py-2.5 min-h-touch rounded-xl text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 dark:text-amber-300 border border-amber-500/40 transition">
+                            class="btn-size-md px-3 rounded-xl text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 dark:text-amber-300 border border-amber-500/40 transition inline-flex items-center justify-center">
                             Unverify
                         </button>
                     </div>
@@ -312,17 +312,17 @@
                             <td class="py-3.5 px-4 text-right">
                                 <div class="flex items-center justify-end gap-2 flex-wrap">
                                     <button (click)="openDoctorModal(doc)"
-                                        class="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-500/40 transition flex items-center gap-1">
+                                        class="btn-size-md px-2.5 rounded-xl text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-500/40 transition flex items-center gap-1">
                                         <span>View Profile</span>
                                     </button>
                                     <button *ngIf="!doc.isVerified" (click)="toggleDoctorVerification(doc, true)"
                                         [disabled]="verifyingDoctorId === doc.id"
-                                        class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-500/40 transition">
+                                        class="btn-size-md px-3 rounded-xl text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-500/40 transition inline-flex items-center justify-center">
                                         Verify Doctor
                                     </button>
                                     <button *ngIf="doc.isVerified" (click)="toggleDoctorVerification(doc, false)"
                                         [disabled]="verifyingDoctorId === doc.id"
-                                        class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 dark:text-amber-300 border border-amber-500/40 transition">
+                                        class="btn-size-md px-3 rounded-xl text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 dark:text-amber-300 border border-amber-500/40 transition inline-flex items-center justify-center">
                                         Unverify
                                     </button>
                                 </div>
@@ -345,12 +345,12 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <button (click)="goToDoctorPage(doctorPage - 1)" [disabled]="doctorPage === 0"
-                        class="px-3 py-1.5 rounded-lg bg-[var(--panel)] hover:bg-[var(--border)] border border-[var(--border)] text-[var(--text)] disabled:opacity-40 disabled:cursor-not-allowed transition">
-                        <i class="fa-solid fa-chevron-left mr-1"></i> Previous
+                        class="btn-size-md px-3 rounded-lg bg-[var(--panel)] hover:bg-[var(--border)] border border-[var(--border)] text-[var(--text)] disabled:opacity-40 disabled:cursor-not-allowed transition inline-flex items-center justify-center">
+                        <i class="fa-solid fa-chevron-left mr-1" aria-hidden="true"></i> Previous
                     </button>
                     <button (click)="goToDoctorPage(doctorPage + 1)" [disabled]="doctorPage >= doctorTotalPages - 1"
-                        class="px-3 py-1.5 rounded-lg bg-[var(--panel)] hover:bg-[var(--border)] border border-[var(--border)] text-[var(--text)] disabled:opacity-40 disabled:cursor-not-allowed transition">
-                        Next <i class="fa-solid fa-chevron-right ml-1"></i>
+                        class="btn-size-md px-3 rounded-lg bg-[var(--panel)] hover:bg-[var(--border)] border border-[var(--border)] text-[var(--text)] disabled:opacity-40 disabled:cursor-not-allowed transition inline-flex items-center justify-center">
+                        Next <i class="fa-solid fa-chevron-right ml-1" aria-hidden="true"></i>
                     </button>
                 </div>
             </div>
@@ -375,8 +375,8 @@
 
                     <form (ngSubmit)="submitMasterData()" class="space-y-4">
                         <div>
-                            <label class="block text-xs font-semibold text-muted mb-1">Master Data Type</label>
-                            <select [(ngModel)]="selectedMasterType" name="masterType"
+                            <label class="block text-xs font-semibold text-muted mb-1" for="admin-dashboard-mastertype-1">Master Data Type</label>
+                            <select id="admin-dashboard-mastertype-1" [(ngModel)]="selectedMasterType" name="masterType"
                                 (change)="loadCurrentMasterItems()"
                                 class="w-full px-3 py-2.5 bg-[var(--panel)] border border-[var(--border)] rounded-xl text-sm text-[var(--text)] focus:outline-none focus:border-blue-500 min-h-touch">
                                 <option value="specializations">Specializations</option>
@@ -392,14 +392,14 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-muted mb-1">New Item Value</label>
-                            <input type="text" [(ngModel)]="newMasterValue" name="masterValue"
+                            <label class="block text-xs font-semibold text-muted mb-1" for="admin-dashboard-mastervalue-2">New Item Value</label>
+                            <input id="admin-dashboard-mastervalue-2" type="text" [(ngModel)]="newMasterValue" name="masterValue"
                                 placeholder="e.g. Cardiology, City Hospital..." required
                                 class="w-full px-3 py-2.5 bg-[var(--panel)] border border-[var(--border)] rounded-xl text-sm text-[var(--text)] placeholder-slate-500 focus:outline-none focus:border-blue-500 min-h-touch" />
                         </div>
 
                         <button type="submit" [disabled]="isSubmittingMaster || !newMasterValue.trim()"
-                            class="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-sm rounded-xl shadow-lg shadow-blue-500/20 disabled:opacity-50 transition min-h-touch">
+                            class="btn-size-lg w-full px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-sm rounded-xl shadow-lg shadow-blue-500/20 disabled:opacity-50 transition inline-flex items-center justify-center">
                             {{ isSubmittingMaster ? 'Saving Entry...' : 'Add Master Entry' }}
                         </button>
                     </form>
@@ -439,7 +439,7 @@
                             class="px-3 py-1.5 rounded-lg bg-[var(--panel)] border border-[var(--border)] text-xs font-medium text-[var(--text)] flex items-center gap-2 hover:border-[var(--border)] transition">
                             <span>{{ item }}</span>
                             <button (click)="openDeleteConfirmation(item)" title="Delete {{ item }}"
-                                class="w-4 h-4 rounded-full bg-[var(--border)]/80 hover:bg-rose-500/20 text-muted hover:text-rose-700 dark:hover:text-rose-300 flex items-center justify-center text-[10px] font-bold transition border border-[var(--border)]/50 hover:border-rose-500/40">
+                                class="w-4 h-4 rounded-full bg-[var(--border)]/80 hover:bg-rose-500/20 text-muted hover:text-rose-700 dark:hover:text-rose-300 flex items-center justify-center text-[10px] font-bold transition border border-[var(--border)]/50 hover:border-rose-500/40" attr.aria-label="Delete {{ item }}">
                                 ✕
                             </button>
                         </span>
@@ -476,11 +476,11 @@
 
             <div modalFooter class="flex items-center justify-end gap-3">
                 <button type="button" (click)="itemToDelete = null"
-                    class="px-4 py-2 text-xs font-semibold text-muted hover:text-[var(--text)] bg-[var(--panel)] hover:bg-[var(--border)] rounded-xl border border-[var(--border)] transition">
+                    class="btn-size-lg px-4 text-xs font-semibold text-muted hover:text-[var(--text)] bg-[var(--panel)] hover:bg-[var(--border)] rounded-xl border border-[var(--border)] transition inline-flex items-center justify-center">
                     Cancel
                 </button>
                 <button type="button" (click)="confirmDeleteMasterItem()" [disabled]="isDeletingMaster"
-                    class="px-4 py-2 text-xs font-bold bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white rounded-xl shadow-lg shadow-rose-600/20 transition disabled:opacity-50 flex items-center gap-2">
+                    class="btn-size-lg px-4 text-xs font-bold bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white rounded-xl shadow-lg shadow-rose-600/20 transition disabled:opacity-50 flex items-center gap-2">
                     <span *ngIf="isDeletingMaster"
                         class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                     <span>{{ isDeletingMaster ? 'Deleting...' : 'Save & Confirm Delete' }}</span>
@@ -499,7 +499,7 @@
                 </div>
 
                 <button *ngIf="blockedIPs.length > 0" type="button" (click)="unblockAllIPs()"
-                    class="w-full sm:w-auto px-4 py-2.5 min-h-touch bg-rose-500/20 hover:bg-rose-500/30 text-rose-700 dark:text-rose-300 border border-rose-500/40 rounded-xl text-xs font-semibold transition">
+                    class="btn-size-md w-full sm:w-auto px-4 bg-rose-500/20 hover:bg-rose-500/30 text-rose-700 dark:text-rose-300 border border-rose-500/40 rounded-xl text-xs font-semibold transition inline-flex items-center justify-center">
                     Clear / Unblock All IPs
                 </button>
             </div>
@@ -514,7 +514,7 @@
                     <div class="flex items-center gap-2">
                         <div class="text-[11px] text-muted flex-1">{{ ip.blockedAt || 'Recent' }}</div>
                         <button type="button" (click)="unblockSingleIP(ip.ipAddress)"
-                            class="px-3 py-2.5 min-h-touch rounded-xl text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-500/40 transition">
+                            class="btn-size-md px-3 rounded-xl text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-500/40 transition inline-flex items-center justify-center">
                             Unblock
                         </button>
                     </div>
@@ -544,7 +544,7 @@
                             <td class="py-3.5 px-4 text-xs text-muted">{{ ip.blockedAt || 'Recent' }}</td>
                             <td class="py-3.5 px-4 text-right">
                                 <button (click)="unblockSingleIP(ip.ipAddress)"
-                                    class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-500/40 transition">
+                                    class="btn-size-md px-3 rounded-xl text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-500/40 transition inline-flex items-center justify-center">
                                     Unblock IP
                                 </button>
                             </td>
@@ -688,7 +688,7 @@
                         class="p-3 bg-[var(--bg)]/60 rounded-lg border border-[var(--border)]/40">
                         <div class="flex justify-between items-start font-semibold text-[var(--text)]">
                             <span>{{ edu.degree }}</span>
-                            <span class="text-xs text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded-md">Year: {{
+                            <span class="text-xs text-teal-700 dark:text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded-md">Year: {{
                                 edu.yearOfCompletion }}</span>
                         </div>
                         <div class="text-xs text-muted mt-1 font-medium">{{ edu.institution }}</div>
@@ -716,11 +716,11 @@
                         </div>
                         <div class="flex items-center gap-2">
                         <a *ngIf="cert.url" [href]="cert.url" target="_blank"
-                            class="px-2.5 py-1 text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-500/40 rounded-lg transition">
+                            class="btn-size-md px-2.5 text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-500/40 rounded-lg transition inline-flex items-center justify-center" rel="noopener noreferrer">
                             View Doc 🔗
                         </a>
                         <button type="button" (click)="reviewCertificate(cert)" [disabled]="reviewingCertificateId === cert.id"
-                            class="px-2.5 py-1 text-xs font-semibold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 rounded-lg">
+                            class="btn-size-md px-2.5 text-xs font-semibold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 rounded-lg inline-flex items-center justify-center">
                             {{ reviewingCertificateId === cert.id ? 'Checking…' : 'Check details' }}
                         </button>
                         </div>
@@ -744,7 +744,7 @@
 
         <div modalFooter class="flex items-center justify-between gap-4">
             <button type="button" (click)="closeDoctorModal()"
-                class="px-4 py-2 text-xs font-semibold text-muted hover:text-[var(--text)] bg-[var(--border)]/50 hover:bg-[var(--border)] rounded-xl border border-[var(--border)] transition">
+                class="btn-size-md px-4 text-xs font-semibold text-muted hover:text-[var(--text)] bg-[var(--border)]/50 hover:bg-[var(--border)] rounded-xl border border-[var(--border)] transition inline-flex items-center justify-center">
                 Close
             </button>
 
@@ -752,13 +752,13 @@
                 <button type="button" *ngIf="!selectedDoctor.isVerified"
                     (click)="toggleDoctorVerification(selectedDoctor, true); closeDoctorModal()"
                     [disabled]="verifyingDoctorId === selectedDoctor.id"
-                    class="px-4 py-2 text-xs font-bold bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-400 hover:to-indigo-400 text-slate-950 rounded-xl shadow-lg shadow-blue-500/20 transition transform active:scale-95">
+                    class="btn-size-lg px-4 text-xs font-bold bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-400 hover:to-indigo-400 text-slate-950 rounded-xl shadow-lg shadow-blue-500/20 transition transform active:scale-95 inline-flex items-center justify-center">
                     ✓ Verify & Approve Doctor
                 </button>
                 <button type="button" *ngIf="selectedDoctor.isVerified"
                     (click)="toggleDoctorVerification(selectedDoctor, false); closeDoctorModal()"
                     [disabled]="verifyingDoctorId === selectedDoctor.id"
-                    class="px-4 py-2 text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 dark:text-amber-300 border border-amber-500/40 rounded-xl transition">
+                    class="btn-size-lg px-4 text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 dark:text-amber-300 border border-amber-500/40 rounded-xl transition inline-flex items-center justify-center">
                     Diverify (Unverify Doctor)
                 </button>
             </div>
@@ -792,7 +792,7 @@
 
         <div
             class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 text-xs text-amber-200/90 leading-relaxed">
-            <i class="fa-solid fa-triangle-exclamation mr-1 text-amber-700 dark:text-amber-400"></i>
+            <i class="fa-solid fa-triangle-exclamation mr-1 text-amber-700 dark:text-amber-400" aria-hidden="true"></i>
             This will update the user's password and immediately deactivate all active sessions and refresh tokens for
             security.
         </div>
@@ -829,12 +829,12 @@
 
         <div modalFooter class="flex items-center justify-end gap-3">
             <button type="button" (click)="closePasswordResetModal()"
-                class="px-4 py-2 text-xs font-semibold text-muted hover:text-[var(--text)] bg-[var(--panel)] hover:bg-[var(--border)] rounded-xl border border-[var(--border)] transition">
+                class="btn-size-lg px-4 text-xs font-semibold text-muted hover:text-[var(--text)] bg-[var(--panel)] hover:bg-[var(--border)] rounded-xl border border-[var(--border)] transition inline-flex items-center justify-center">
                 Cancel
             </button>
             <button type="button" (click)="submitPasswordReset()"
                 [disabled]="isSubmittingPasswordReset || !newPasswordInput || !confirmPasswordInput"
-                class="px-4 py-2.5 text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 rounded-xl shadow-lg shadow-amber-500/20 transition disabled:opacity-50 flex items-center gap-2">
+                class="btn-size-lg px-4 text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 rounded-xl shadow-lg shadow-amber-500/20 transition disabled:opacity-50 flex items-center gap-2">
                 <span *ngIf="isSubmittingPasswordReset"
                     class="w-3.5 h-3.5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></span>
                 <span>{{ isSubmittingPasswordReset ? 'Updating Password...' : 'Update Password & Revoke Sessions'

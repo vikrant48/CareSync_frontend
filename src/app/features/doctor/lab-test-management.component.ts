@@ -1,12 +1,14 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 import { LabTestService, LabTest } from '../../core/services/lab-test.service';
 import { ToastService } from '../../core/services/toast.service';
 import { FilterBarComponent, FilterConfig } from '../../shared/components';
 import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
+import { PageContainerComponent } from '../../shared/ui/page-container.component';
+import { InrPipe } from '../../shared/utils/inr.pipe';
+import { ConfirmService } from '../../core/services/confirm.service';
 
 interface CreateLabTestRequest {
   testName: string;
@@ -18,7 +20,9 @@ interface CreateLabTestRequest {
 @Component({
   selector: 'app-lab-test-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, DoctorLayoutComponent, ModalShellComponent, FilterBarComponent, PageLoaderComponent],
+  imports: [InrPipe, PageContainerComponent, CommonModule, FormsModule, ReactiveFormsModule, ModalShellComponent, FilterBarComponent, PageLoaderComponent],
+  // All view state is in signals and the reactive form, so OnPush needs no manual markForCheck
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './lab-test-management.component.html',
   styleUrl: './lab-test-management.component.css'
 })
@@ -26,6 +30,7 @@ export class LabTestManagementComponent implements OnInit {
   private labTestService = inject(LabTestService);
   private fb = inject(FormBuilder);
   private toast = inject(ToastService);
+  private confirm = inject(ConfirmService);
 
   // Signals for reactive state management
   labTests = signal<LabTest[]>([]);
@@ -108,7 +113,7 @@ export class LabTestManagementComponent implements OnInit {
     });
   }
 
-  filteredLabTests(): LabTest[] {
+  readonly filteredLabTests = computed((): LabTest[] => {
     let list = this.labTests();
 
     // Search term
@@ -129,7 +134,7 @@ export class LabTestManagementComponent implements OnInit {
     }
 
     return list;
-  }
+  });
 
   openAddDrawer() {
     this.editingTest.set(null);
@@ -184,7 +189,11 @@ export class LabTestManagementComponent implements OnInit {
     }
   }
 
-  toggleTestStatus(test: LabTest) {
+  async toggleTestStatus(test: LabTest) {
+    if (test.isActive) {
+      const ok = await this.confirm.ask({ title: 'Deactivate lab test', message: `Deactivate "${test.testName}"? Patients won't be able to book it until it is activated again.`, confirmLabel: 'Deactivate', cancelLabel: 'Keep active', danger: true });
+      if (!ok) return;
+    }
     const updatedTest: CreateLabTestRequest = {
       testName: test.testName,
       price: test.price,
@@ -214,10 +223,6 @@ export class LabTestManagementComponent implements OnInit {
       searchTerm: '',
       statusFilter: 'ALL'
     };
-  }
-
-  clearMessages() {
-    this.toast.clearAll();
   }
 
   trackByTestId(index: number, test: LabTest): number {

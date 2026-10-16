@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { VitalLog } from '../../core/services/vitals.service';
 import { getBPStatus as bpStatus, getSugarStatus as sugarStatus, getTempStatus as tempStatus, getWeightStatus as weightStatus } from './vitals-status';
@@ -7,6 +7,7 @@ import { getBPStatus as bpStatus, getSugarStatus as sugarStatus, getTempStatus a
   selector: 'app-patient-vitals-history',
   standalone: true,
   imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './patient-vitals-history.component.html',
 })
 export class PatientVitalsHistoryComponent {

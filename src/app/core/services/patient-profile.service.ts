@@ -153,4 +153,9 @@ export class PatientProfileService {
   getDocumentsByPatient(patientId: number | string) {
     return this.http.get<PatientDocumentItem[]>(`${this.baseUrl}/api/files/patient/${patientId}`);
   }
+
+  /** The logged-in patient's own data as one JSON file (right of access). */
+  exportMyData() {
+    return this.http.get(`${this.baseUrl}/api/patients/me/export`, { responseType: 'blob' });
+  }
 }

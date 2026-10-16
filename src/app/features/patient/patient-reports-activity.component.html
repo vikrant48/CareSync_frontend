@@ -1,7 +1,7 @@
 <div class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
     <div class="p-4 sm:px-5 sm:py-4 flex items-center justify-between border-b border-[var(--border)]">
         <div class="flex items-center gap-2">
-            <i class="fa-regular fa-clock text-[var(--primary)] text-sm"></i>
+            <i class="fa-regular fa-clock text-[var(--primary)] text-sm" aria-hidden="true"></i>
             <h3 class="text-sm font-bold text-[var(--text)] tracking-wide">Recent Activity</h3>
         </div>
         <a routerLink="/patient/appointments"
@@ -11,7 +11,7 @@
 
     <div *ngIf="appointments.length === 0" class="py-10 text-center text-[var(--muted)]">
         <div class="flex flex-col items-center justify-center gap-2">
-            <i class="fa-regular fa-calendar-xmark text-2xl opacity-40"></i>
+            <i class="fa-regular fa-calendar-xmark text-2xl opacity-40" aria-hidden="true"></i>
             <p class="text-xs font-medium">No recent appointment activity found</p>
         </div>
     </div>
@@ -50,7 +50,7 @@
                         <span *ngIf="visitLabel(a)" class="text-[11px] text-[var(--muted)] block">{{ visitLabel(a) }}</span>
                     </td>
                     <td class="py-3.5 px-5 align-top">
-                        <span *ngIf="a.consultationFees != null" class="font-extrabold text-[var(--text)]">₹{{ a.consultationFees }}</span>
+                        <span *ngIf="a.consultationFees != null" class="font-extrabold text-[var(--text)]">{{ a.consultationFees | inr }}</span>
                     </td>
                     <td class="py-3.5 px-5 align-top">
                         <app-status-badge *ngIf="a.status" [status]="a.status"></app-status-badge>
@@ -58,9 +58,9 @@
                     <td class="py-3.5 px-5 align-top text-right">
                         <div class="inline-flex items-center gap-2">
                             <button type="button" (click)="view.emit(a.appointmentId)"
-                                class="bg-[var(--bg)] hover:bg-[var(--bg)] text-[var(--text)] border border-[var(--border)] px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors">
+                                class="btn-size-md bg-[var(--bg)] hover:bg-[var(--bg)] text-[var(--text)] border border-[var(--border)] px-3 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors">
                                 <span>View Details</span>
-                                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                                <i class="fa-solid fa-chevron-right text-[10px]" aria-hidden="true"></i>
                             </button>
                             <button type="button" aria-label="More actions"
                                 class="w-7 h-7 rounded-lg hover:bg-[var(--bg)] text-[var(--muted)] hover:text-[var(--text)] flex items-center justify-center transition-colors">
@@ -93,14 +93,14 @@
                 </div>
                 <div>
                     <p class="text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">Amount</p>
-                    <p *ngIf="a.consultationFees != null" class="font-extrabold text-[var(--text)]">₹{{ a.consultationFees }}</p>
+                    <p *ngIf="a.consultationFees != null" class="font-extrabold text-[var(--text)]">{{ a.consultationFees | inr }}</p>
                     <p *ngIf="a.reason || visitLabel(a)" class="text-[11px] text-[var(--muted)]">{{ a.reason }}<span *ngIf="a.reason && visitLabel(a)"> · </span>{{ visitLabel(a) }}</p>
                 </div>
             </div>
             <button type="button" (click)="view.emit(a.appointmentId)" aria-label="View appointment details"
-                class="w-full min-h-[44px] bg-[var(--bg)] text-[var(--text)] border border-[var(--border)] px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5">
+                class="btn-size-md w-full bg-[var(--bg)] text-[var(--text)] border border-[var(--border)] px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5">
                 <span>View Details</span>
-                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                <i class="fa-solid fa-chevron-right text-[10px]" aria-hidden="true"></i>
             </button>
         </article>
     </div>

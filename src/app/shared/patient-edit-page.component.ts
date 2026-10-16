@@ -1,29 +1,30 @@
-import { Component, OnInit, inject, Input } from '@angular/core';
+import { Component, OnInit, inject, Input, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { PatientLayoutComponent } from './patient-layout.component';
 import { ToastService } from '../core/services/toast.service';
 import { PatientProfileService, PatientDto, UpdatePatientRequest } from '../core/services/patient-profile.service';
 import { AuthService } from '../core/services/auth.service';
 import { MasterDataService } from '../core/services/master-data.service';
 import { SelectDropdownComponent } from './select-dropdown.component';
 import { DatePickerComponent } from './date-picker.component';
+import { HasUnsavedChanges } from '../core/guards/unsaved-changes.guard';
+import { AppValidators } from './utils/validators';
+import { AbstractControl } from '@angular/forms';
 
 @Component({
   selector: 'app-patient-edit-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, PatientLayoutComponent, SelectDropdownComponent, DatePickerComponent],
+  imports: [CommonModule, FormsModule, RouterModule, SelectDropdownComponent, DatePickerComponent],
   template: `
-    <app-patient-layout>
       <div class="max-w-7xl mx-auto space-y-6 p-4 sm:p-6 lg:p-8 animate-in fade-in duration-500">
         
         <!-- Header Row -->
         <div class="space-y-1 sm:space-y-2 mb-6">
           <div class="flex items-center gap-3">
             <a [routerLink]="backLink"
-               class="bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--border)] text-[var(--text)] text-xs sm:text-sm font-bold px-3.5 py-2 rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm">
-              <i class="fa-solid fa-arrow-left text-xs"></i>
+               class="btn-size-md bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--border)] text-[var(--text)] text-xs sm:text-sm font-bold px-3.5 rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm">
+              <i class="fa-solid fa-arrow-left text-xs" aria-hidden="true"></i>
               <span>Back</span>
             </a>
             <h2 class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">Edit Profile</h2>
@@ -46,21 +47,21 @@ import { DatePickerComponent } from './date-picker.component';
               </div>
               <label class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white flex items-center justify-center cursor-pointer shadow-lg transition-transform hover:scale-105" title="Change Photo">
                 <input #profileFileInput type="file" class="hidden" (change)="onFileChange($event)" />
-                <i class="fa-solid fa-camera text-xs"></i>
+                <i class="fa-solid fa-camera text-xs" aria-hidden="true"></i>
               </label>
             </div>
 
             <div class="space-y-1.5 min-w-0">
               <h3 class="text-xl sm:text-2xl font-extrabold text-[var(--text)] truncate">{{ fullName(editableProfile) }}</h3>
               <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 text-xs text-[var(--muted)]">
-                <span class="bg-[var(--bg)] border border-[var(--border)] px-2.5 py-1 rounded-lg font-medium text-gray-300">ID: {{ editableProfile?.id ?? 'NA' }}</span>
-                <span class="flex items-center gap-1.5"><i class="fa-regular fa-envelope text-[var(--primary)]"></i> {{ editableProfile?.email || 'NA' }}</span>
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-phone text-[var(--primary)]"></i> {{ editableProfile?.contactInfo || 'NA' }}</span>
+                <span class="bg-[var(--bg)] border border-[var(--border)] px-2.5 py-1 rounded-lg font-medium text-gray-600 dark:text-gray-300">ID: {{ editableProfile?.id ?? 'NA' }}</span>
+                <span class="flex items-center gap-1.5"><i class="fa-regular fa-envelope text-[var(--primary)]" aria-hidden="true"></i> {{ editableProfile?.email || 'NA' }}</span>
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-phone text-[var(--primary)]" aria-hidden="true"></i> {{ editableProfile?.contactInfo || 'NA' }}</span>
               </div>
 
               <div class="pt-1" *ngIf="file">
-                <button type="button" class="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5" (click)="uploadImage()" [disabled]="uploading">
-                  <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
+                <button type="button" class="btn-size-lg bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white text-xs font-bold px-3 rounded-lg flex items-center gap-1.5" (click)="uploadImage()" [disabled]="uploading">
+                  <i class="fa-solid fa-cloud-arrow-up text-xs" aria-hidden="true"></i>
                   {{ uploading ? 'Uploading...' : 'Confirm Upload' }}
                 </button>
               </div>
@@ -77,20 +78,20 @@ import { DatePickerComponent } from './date-picker.component';
               <div class="h-full bg-[var(--primary)] rounded-full transition-all duration-500" [style.width.%]="completionPercentage"></div>
             </div>
             <div class="flex items-center gap-1.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400 pt-0.5">
-              <i class="fa-solid fa-circle-check text-xs"></i>
+              <i class="fa-solid fa-circle-check text-xs" aria-hidden="true"></i>
               <span>{{ completionPercentage >= 80 ? 'Great! Your profile is almost complete.' : 'Complete your profile details.' }}</span>
             </div>
           </div>
         </div>
 
         <!-- Main Edit Form Card Box -->
-        <form (ngSubmit)="save()" class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-xl space-y-8">
+        <form (ngSubmit)="save()" novalidate class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-xl space-y-8">
           
           <!-- Personal Information Section -->
           <div class="space-y-5">
             <div class="flex items-center gap-2.5 pb-3 border-b border-[var(--border)]">
               <div class="w-7 h-7 rounded-lg bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center text-sm shrink-0">
-                <i class="fa-solid fa-user"></i>
+                <i class="fa-solid fa-user" aria-hidden="true"></i>
               </div>
               <h3 class="text-base font-bold text-[var(--text)]">Personal Information</h3>
             </div>
@@ -98,48 +99,52 @@ import { DatePickerComponent } from './date-picker.component';
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
               <!-- First Name -->
               <div class="space-y-1.5">
-                <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider">
-                  FIRST NAME <span class="text-rose-500">*</span>
+                <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider" for="pe-firstName">
+                  FIRST NAME <span class="text-rose-500" aria-hidden="true">*</span><span class="sr-only">(required)</span>
                 </label>
                 <input class="w-full bg-[var(--bg)] border border-[var(--border)] focus:border-[var(--primary)] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-[var(--text)] placeholder-[var(--muted)] outline-none transition-colors"
-                       [(ngModel)]="form.firstName" name="firstName" placeholder="Enter first name" />
+                       [(ngModel)]="form.firstName" name="firstName" placeholder="Enter first name" id="pe-firstName" (blur)="markTouched('firstName')" [attr.aria-invalid]="fieldError('firstName') ? true : null" [attr.aria-describedby]="fieldError('firstName') ? 'pe-firstName-error' : null" [class.!border-rose-500]="!!fieldError('firstName')" autocomplete="given-name" maxlength="50" />
+                <p *ngIf="fieldError('firstName')" id="pe-firstName-error" role="alert" class="form-error">{{ fieldError('firstName') }}</p>
               </div>
 
               <!-- Last Name -->
               <div class="space-y-1.5">
-                <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider">
-                  LAST NAME <span class="text-rose-500">*</span>
+                <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider" for="pe-lastName">
+                  LAST NAME <span class="text-rose-500" aria-hidden="true">*</span><span class="sr-only">(required)</span>
                 </label>
                 <input class="w-full bg-[var(--bg)] border border-[var(--border)] focus:border-[var(--primary)] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-[var(--text)] placeholder-[var(--muted)] outline-none transition-colors"
-                       [(ngModel)]="form.lastName" name="lastName" placeholder="Enter last name" />
+                       [(ngModel)]="form.lastName" name="lastName" placeholder="Enter last name" id="pe-lastName" (blur)="markTouched('lastName')" [attr.aria-invalid]="fieldError('lastName') ? true : null" [attr.aria-describedby]="fieldError('lastName') ? 'pe-lastName-error' : null" [class.!border-rose-500]="!!fieldError('lastName')" autocomplete="family-name" maxlength="50" />
+                <p *ngIf="fieldError('lastName')" id="pe-lastName-error" role="alert" class="form-error">{{ fieldError('lastName') }}</p>
               </div>
 
               <!-- Email Address -->
               <div class="space-y-1.5">
-                <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider">
-                  EMAIL ADDRESS <span class="text-rose-500">*</span>
+                <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider" for="pe-email">
+                  EMAIL ADDRESS <span class="text-rose-500" aria-hidden="true">*</span><span class="sr-only">(required)</span>
                 </label>
                 <div class="relative flex items-center">
                   <div class="absolute left-3.5 text-[var(--primary)] pointer-events-none text-xs sm:text-sm">
-                    <i class="fa-regular fa-envelope"></i>
+                    <i class="fa-regular fa-envelope" aria-hidden="true"></i>
                   </div>
                   <input class="w-full bg-[var(--bg)] border border-[var(--border)] focus:border-[var(--primary)] rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-[var(--text)] placeholder-[var(--muted)] outline-none transition-colors"
-                         [(ngModel)]="form.email" name="email" type="email" placeholder="email@example.com" />
+                         [(ngModel)]="form.email" name="email" type="email" placeholder="email@example.com" id="pe-email" (blur)="markTouched('email')" [attr.aria-invalid]="fieldError('email') ? true : null" [attr.aria-describedby]="fieldError('email') ? 'pe-email-error' : null" [class.!border-rose-500]="!!fieldError('email')" autocomplete="email" />
                 </div>
+                <p *ngIf="fieldError('email')" id="pe-email-error" role="alert" class="form-error">{{ fieldError('email') }}</p>
               </div>
 
               <!-- Contact Number -->
               <div class="space-y-1.5">
-                <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider">
-                  CONTACT NUMBER <span class="text-rose-500">*</span>
+                <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider" for="pe-contactInfo">
+                  CONTACT NUMBER <span class="text-rose-500" aria-hidden="true">*</span><span class="sr-only">(required)</span>
                 </label>
                 <div class="relative flex items-center">
                   <div class="absolute left-3.5 text-[var(--primary)] pointer-events-none text-xs sm:text-sm">
-                    <i class="fa-solid fa-phone"></i>
+                    <i class="fa-solid fa-phone" aria-hidden="true"></i>
                   </div>
                   <input class="w-full bg-[var(--bg)] border border-[var(--border)] focus:border-[var(--primary)] rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-[var(--text)] placeholder-[var(--muted)] outline-none transition-colors"
-                         [(ngModel)]="form.contactInfo" name="contactInfo" placeholder="+91 0000000000" />
+                         [(ngModel)]="form.contactInfo" name="contactInfo" placeholder="+91 0000000000" id="pe-contactInfo" (blur)="markTouched('contactInfo')" [attr.aria-invalid]="fieldError('contactInfo') ? true : null" [attr.aria-describedby]="fieldError('contactInfo') ? 'pe-contactInfo-error' : null" [class.!border-rose-500]="!!fieldError('contactInfo')" type="tel" inputmode="tel" autocomplete="tel" />
                 </div>
+                <p *ngIf="fieldError('contactInfo')" id="pe-contactInfo-error" role="alert" class="form-error">{{ fieldError('contactInfo') }}</p>
               </div>
 
               <!-- Date of Birth -->
@@ -147,7 +152,9 @@ import { DatePickerComponent } from './date-picker.component';
                 <app-date-picker
                   [(ngModel)]="form.dateOfBirth"
                   name="dateOfBirth"
-                  label="DATE OF BIRTH *"
+                  label="DATE OF BIRTH"
+                  [error]="fieldError('dateOfBirth')"
+                  (ngModelChange)="markTouched('dateOfBirth')"
                   placeholder="DD-MM-YYYY">
                 </app-date-picker>
               </div>
@@ -155,7 +162,10 @@ import { DatePickerComponent } from './date-picker.component';
               <!-- Gender -->
               <div class="space-y-1.5">
                 <app-select-dropdown 
-                   label="GENDER *" 
+                   label="GENDER *"
+                   [errorMessage]="fieldError('gender')"
+                   [required]="true"
+                   (selectionChange)="markTouched('gender')"
                    [options]="genders" 
                    placeholder="Select Gender"
                    [(ngModel)]="form.gender" 
@@ -166,7 +176,7 @@ import { DatePickerComponent } from './date-picker.component';
               <!-- Blood Group -->
               <div class="space-y-1.5 md:col-span-1">
                 <app-select-dropdown 
-                   label="BLOOD GROUP *" 
+                   label="BLOOD GROUP"
                    [options]="bloodGroups" 
                    placeholder="Select Blood Group"
                    [autoCapitalize]="false"
@@ -181,34 +191,35 @@ import { DatePickerComponent } from './date-picker.component';
           <div class="space-y-5">
             <div class="flex items-center gap-2.5 pb-3 border-b border-[var(--border)]">
               <div class="w-7 h-7 rounded-lg bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center text-sm shrink-0">
-                <i class="fa-solid fa-file-lines"></i>
+                <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
               </div>
               <h3 class="text-base font-bold text-[var(--text)]">Medical Information</h3>
             </div>
 
             <div class="space-y-1.5">
-              <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider">
+              <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider" for="pe-illnessDetails">
                 MEDICAL HISTORY / ILLNESS DETAILS
               </label>
               <div class="relative">
                 <textarea class="w-full bg-[var(--bg)] border border-[var(--border)] focus:border-[var(--primary)] rounded-xl p-3.5 text-xs sm:text-sm text-[var(--text)] placeholder-[var(--muted)] outline-none transition-colors min-h-[110px]"
                           rows="4" [(ngModel)]="form.illnessDetails" name="illnessDetails"
-                          placeholder="Any existing conditions, allergies, or relevant medical history..."></textarea>
+                          placeholder="Any existing conditions, allergies, or relevant medical history..." id="pe-illnessDetails" (blur)="markTouched('illnessDetails')" [attr.aria-invalid]="fieldError('illnessDetails') ? true : null" [attr.aria-describedby]="fieldError('illnessDetails') ? 'pe-illnessDetails-error' : null" [class.!border-rose-500]="!!fieldError('illnessDetails')" maxlength="500"></textarea>
                 <div class="text-[10px] text-[var(--muted)] font-semibold text-right pt-1">
                   {{ illnessDetailsCharCount }}/500
                 </div>
+                <p *ngIf="fieldError('illnessDetails')" id="pe-illnessDetails-error" role="alert" class="form-error">{{ fieldError('illnessDetails') }}</p>
               </div>
             </div>
           </div>
 
           <!-- Status Messages -->
           <div *ngIf="error" class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-400 flex items-center gap-3">
-            <i class="fa-solid fa-circle-exclamation text-lg shrink-0"></i>
+            <i class="fa-solid fa-circle-exclamation text-lg shrink-0" aria-hidden="true"></i>
             <span class="text-xs sm:text-sm font-medium">{{ error }}</span>
           </div>
           
           <div *ngIf="success" class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 flex items-center gap-3">
-            <i class="fa-solid fa-circle-check text-lg shrink-0"></i>
+            <i class="fa-solid fa-circle-check text-lg shrink-0" aria-hidden="true"></i>
             <span class="text-xs sm:text-sm font-medium">Profile updated successfully!</span>
           </div>
 
@@ -216,19 +227,19 @@ import { DatePickerComponent } from './date-picker.component';
           <div class="pt-5 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-4">
             <button type="button" (click)="reset()" [disabled]="saving"
                     class="text-xs font-bold text-[var(--muted)] hover:text-[var(--text)] flex items-center gap-2 transition-colors cursor-pointer bg-transparent border-0 p-0">
-              <i class="fa-solid fa-rotate-right text-xs text-[var(--primary)]"></i>
+              <i class="fa-solid fa-rotate-right text-xs text-[var(--primary)]" aria-hidden="true"></i>
               <span>Reset Changes</span>
             </button>
 
             <div class="flex items-center gap-3 ml-auto">
               <a [routerLink]="backLink"
-                 class="bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs sm:text-sm font-bold px-5 py-2.5 rounded-xl transition-all cursor-pointer">
+                 class="btn-size-lg bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs sm:text-sm font-bold px-5 rounded-xl transition-all cursor-pointer inline-flex items-center justify-center">
                 Cancel
               </a>
               <button type="submit" [disabled]="saving"
-                      class="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white text-xs sm:text-sm font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-[var(--primary)]/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50">
-                <i class="fa-solid fa-floppy-disk text-xs" *ngIf="!saving"></i>
-                <i class="fa-solid fa-circle-notch animate-spin text-xs" *ngIf="saving"></i>
+                      class="btn-size-lg bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white text-xs sm:text-sm font-bold px-5 rounded-xl shadow-lg shadow-[var(--primary)]/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50">
+                <i class="fa-solid fa-floppy-disk text-xs" *ngIf="!saving" aria-hidden="true"></i>
+                <i class="fa-solid fa-circle-notch animate-spin text-xs" *ngIf="saving" aria-hidden="true"></i>
                 <span>{{ saving ? 'Saving...' : 'Save Changes' }}</span>
               </button>
             </div>
@@ -236,11 +247,10 @@ import { DatePickerComponent } from './date-picker.component';
 
         </form>
       </div>
-    </app-patient-layout>
   `,
   styles: [],
 })
-export class PatientEditPageComponent implements OnInit {
+export class PatientEditPageComponent implements OnInit , HasUnsavedChanges {
   private svc = inject(PatientProfileService);
   private auth = inject(AuthService);
   private router = inject(Router);
@@ -319,6 +329,63 @@ export class PatientEditPageComponent implements OnInit {
     ];
     const filled = fields.filter(f => f && String(f).trim().length > 0).length;
     return Math.round((filled / fields.length) * 100);
+  }
+
+  // ---- Inline validation ----
+  private static readonly VALIDATED_FIELDS = ['firstName', 'lastName', 'email', 'contactInfo', 'dateOfBirth', 'gender', 'illnessDetails'] as const;
+  /** Fields the user has left at least once; errors show after blur, or for all fields once Save is pressed. */
+  private touched = new Set<string>();
+  submitAttempted = false;
+
+  markTouched(name: string) {
+    this.touched.add(name);
+  }
+
+  /** Message for a field, shown only after it was touched or a save was attempted. */
+  fieldError(name: string): string {
+    if (!this.submitAttempted && !this.touched.has(name)) return '';
+    return this.validateField(name);
+  }
+
+  private validateField(name: string): string {
+    const f = this.form as any;
+    const value = f[name];
+    const text = String(value ?? '').trim();
+    const check = (fn: (c: AbstractControl) => any) => fn({ value } as AbstractControl);
+    switch (name) {
+      case 'firstName':
+        return text ? '' : 'First name is required.';
+      case 'lastName':
+        return text ? '' : 'Last name is required.';
+      case 'email':
+        if (!text) return 'Email is required.';
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text) ? '' : 'Enter a valid email address.';
+      case 'contactInfo':
+        if (!text || text === '+91') return 'Contact number is required.';
+        return check(AppValidators.phone(10)) ? 'Enter a valid 10-digit mobile number.' : '';
+      case 'dateOfBirth':
+        if (check(AppValidators.notInFuture())) return "Date of birth can't be in the future.";
+        return check(AppValidators.maxAge(120)) ? 'Enter a date of birth within the last 120 years.' : '';
+      case 'gender':
+        return text ? '' : 'Gender is required.';
+      case 'illnessDetails':
+        return text.length > 500 ? 'Keep this under 500 characters.' : '';
+      default:
+        return '';
+    }
+  }
+
+  /** Returns true when valid; otherwise reveals all errors and focuses the first invalid field. */
+  private validateAll(): boolean {
+    this.submitAttempted = true;
+    const firstInvalid = PatientEditPageComponent.VALIDATED_FIELDS.find((n) => this.validateField(n));
+    if (!firstInvalid) return true;
+    this.toast.showError('Please fix the highlighted fields.');
+    setTimeout(() => {
+      const el = document.getElementById(`pe-${firstInvalid}`) ?? document.getElementById(`pe-${firstInvalid}-wrap`);
+      el?.focus();
+    });
+    return false;
   }
 
   get illnessDetailsCharCount(): number {
@@ -403,6 +470,25 @@ export class PatientEditPageComponent implements OnInit {
     });
   }
 
+  /** True when the form differs from the loaded profile (and it has not just been saved). */
+  hasUnsavedChanges(): boolean {
+    const p = this.editableProfile;
+    if (!p || this.success) return false;
+    const keys: (keyof UpdatePatientRequest)[] = [
+      'firstName', 'lastName', 'email', 'contactInfo', 'dateOfBirth', 'gender', 'bloodGroup', 'illnessDetails'
+    ];
+    return keys.some((k) => ((p as any)[k] ?? '') !== ((this.form as any)[k] ?? ''));
+  }
+
+  /** Browser close / refresh with unsaved edits */
+  @HostListener('window:beforeunload', ['$event'])
+  onBeforeUnload(event: BeforeUnloadEvent) {
+    if (this.hasUnsavedChanges()) {
+      event.preventDefault();
+      event.returnValue = '';
+    }
+  }
+
   reset() {
     const p = this.editableProfile;
     if (!p) return;
@@ -419,9 +505,12 @@ export class PatientEditPageComponent implements OnInit {
     };
     this.error = null;
     this.success = false;
+    this.touched.clear();
+    this.submitAttempted = false;
   }
 
   save() {
+    if (!this.validateAll()) return;
     const id = this.editableProfile?.id ?? this.auth.userId();
     if (!id) return;
     this.saving = true;

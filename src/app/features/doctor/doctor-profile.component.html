@@ -1,6 +1,4 @@
-<app-doctor-layout>
-  <div
-    class="max-w-[1400px] mx-auto p-3 sm:p-6 space-y-5 text-[var(--text)] font-sans selection:bg-[var(--accent)]/30 pb-16 relative">
+  <app-page-container paddingClass="p-3 sm:p-6" spacingClass="space-y-5" extraClass="font-sans selection:bg-[var(--accent)]/30 pb-16 relative">
 
     <app-page-loader *ngIf="loading()" label="Loading profile..." accent="doctor"></app-page-loader>
 
@@ -66,14 +64,14 @@
                 <!-- Hover Overlay -->
                 <div
                   class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[var(--text)]">
-                  <i class="fa-solid fa-camera text-xl"></i>
+                  <i class="fa-solid fa-camera text-xl" aria-hidden="true"></i>
                 </div>
               </div>
 
               <!-- Camera Badge Icon -->
               <div
                 class="absolute bottom-1 right-1 w-8 h-8 rounded-full bg-[var(--accent)] text-[var(--accent-fg)] flex items-center justify-center shadow-lg border-2 border-[var(--bg)]">
-                <i class="fa-solid fa-camera text-xs"></i>
+                <i class="fa-solid fa-camera text-xs" aria-hidden="true"></i>
               </div>
               <span class="absolute top-1 right-1 w-3.5 h-3.5 rounded-full border-2 border-[var(--bg)]"
                 [class.bg-[#10b981]]="profile?.isActive" [class.bg-[#ef4444]]="!profile?.isActive"
@@ -92,7 +90,7 @@
                 <span *ngIf="profile?.isVerified"
                   class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-500/15 border border-blue-500/40 text-blue-500 shrink-0"
                   title="Verified" aria-label="Verified">
-                  <i class="fa-solid fa-circle-check text-sm"></i>
+                  <i class="fa-solid fa-circle-check text-sm" aria-hidden="true"></i>
                 </span>
               </div>
 
@@ -101,17 +99,17 @@
                 class="flex flex-wrap items-center justify-start gap-2 text-xs font-semibold text-[var(--muted)]">
                 <span
                   class="bg-[var(--bg)] border border-[var(--border)] text-[var(--accent)] px-3 py-1 rounded-full flex items-center gap-1.5">
-                  <i class="fa-solid fa-stethoscope text-xs"></i>
+                  <i class="fa-solid fa-stethoscope text-xs" aria-hidden="true"></i>
                   {{ displayValue(profile?.specialization) }}
                 </span>
                 <span *ngIf="profile?.id != null"
                   class="bg-[var(--bg)] border border-[var(--border)] px-3 py-1 rounded-full flex items-center gap-1.5">
-                  <i class="fa-solid fa-id-badge text-xs text-[var(--muted)]"></i>
+                  <i class="fa-solid fa-id-badge text-xs text-[var(--muted)]" aria-hidden="true"></i>
                   ID: #{{ profile.id }}
                 </span>
                 <span
                   class="bg-[var(--bg)] border border-[var(--border)] px-3 py-1 rounded-full flex items-center gap-1.5">
-                  <i class="fa-solid fa-briefcase text-xs text-[var(--muted)]"></i>
+                  <i class="fa-solid fa-briefcase text-xs text-[var(--muted)]" aria-hidden="true"></i>
                   {{ getTotalExperienceYears() }}
                 </span>
               </div>
@@ -142,36 +140,36 @@
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
         <!-- Tab Pills -->
         <div class="responsive-action-row flex-1">
-          <button type="button" (click)="activeTab='overview'"
+          <button type="button" (click)="activeTab='overview'" [attr.aria-pressed]="activeTab==='overview'"
             [class]="activeTab==='overview' ? 'bg-[var(--accent)] text-[var(--accent-fg)] font-black' : 'bg-[var(--panel)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] font-bold'"
-            class="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-md shrink-0">
-            <i class="fa-solid fa-user-doctor"></i> Overview
+            class="btn-size-sm px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-md shrink-0">
+            <i class="fa-solid fa-user-doctor" aria-hidden="true"></i> Overview
           </button>
-          <button type="button" (click)="activeTab='education'"
+          <button type="button" (click)="activeTab='education'" [attr.aria-pressed]="activeTab==='education'"
             [class]="activeTab==='education' ? 'bg-[var(--accent)] text-[var(--accent-fg)] font-black' : 'bg-[var(--panel)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] font-bold'"
-            class="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-md shrink-0">
-            <i class="fa-solid fa-graduation-cap"></i> Education
+            class="btn-size-sm px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-md shrink-0">
+            <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i> Education
           </button>
-          <button type="button" (click)="activeTab='experience'"
+          <button type="button" (click)="activeTab='experience'" [attr.aria-pressed]="activeTab==='experience'"
             [class]="activeTab==='experience' ? 'bg-[var(--accent)] text-[var(--accent-fg)] font-black' : 'bg-[var(--panel)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] font-bold'"
-            class="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-md shrink-0">
-            <i class="fa-solid fa-briefcase"></i> Experience
+            class="btn-size-sm px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-md shrink-0">
+            <i class="fa-solid fa-briefcase" aria-hidden="true"></i> Experience
           </button>
-          <button type="button" (click)="activeTab='certificates'"
+          <button type="button" (click)="activeTab='certificates'" [attr.aria-pressed]="activeTab==='certificates'"
             [class]="activeTab==='certificates' ? 'bg-[var(--accent)] text-[var(--accent-fg)] font-black' : 'bg-[var(--panel)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] font-bold'"
-            class="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-md shrink-0">
-            <i class="fa-solid fa-award"></i> Certificates
+            class="btn-size-sm px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-md shrink-0">
+            <i class="fa-solid fa-award" aria-hidden="true"></i> Certificates
           </button>
           <button type="button" (click)="onQuickAction('documents')"
-            class="bg-[var(--panel)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] font-bold px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-md shrink-0">
-            <i class="fa-solid fa-file-lines"></i> Documents
+            class="btn-size-md bg-[var(--panel)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] font-bold px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-md shrink-0">
+            <i class="fa-solid fa-file-lines" aria-hidden="true"></i> Documents
           </button>
         </div>
 
         <!-- Far Right Edit Profile Button -->
         <button type="button" (click)="startEditOverview()" *ngIf="!editingOverview"
-          class="px-3 sm:px-5 py-2 bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--text)] font-bold text-xs sm:text-sm rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 sm:gap-2 shadow-lg self-end sm:self-auto shrink-0">
-          <i class="fa-solid fa-pen-to-square text-[var(--accent)]"></i>
+          class="btn-size-md px-3 sm:px-5 bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--text)] font-bold text-xs sm:text-sm rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 sm:gap-2 shadow-lg self-end sm:self-auto shrink-0">
+          <i class="fa-solid fa-pen-to-square text-[var(--accent)]" aria-hidden="true"></i>
           <span>Edit Profile</span>
         </button>
       </div>
@@ -187,7 +185,7 @@
             class="bg-[var(--panel)] border border-[var(--border)] rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 flex flex-col justify-between">
             <div
               class="flex items-center gap-2.5 text-[var(--text)] font-black text-sm sm:text-base border-b border-[var(--border)] pb-3">
-              <i class="fa-solid fa-user text-[var(--accent)]"></i>
+              <i class="fa-solid fa-user text-[var(--accent)]" aria-hidden="true"></i>
               <span>Personal Details</span>
             </div>
 
@@ -226,7 +224,7 @@
             class="bg-[var(--panel)] border border-[var(--border)] rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 flex flex-col justify-between">
             <div
               class="flex items-center gap-2.5 text-[var(--text)] font-black text-sm sm:text-base border-b border-[var(--border)] pb-3">
-              <i class="fa-solid fa-location-dot text-[var(--accent)]"></i>
+              <i class="fa-solid fa-location-dot text-[var(--accent)]" aria-hidden="true"></i>
               <span>Contact & Location</span>
             </div>
 
@@ -251,7 +249,7 @@
                 <span class="text-[var(--muted)] font-medium">Location</span>
                 <span class="font-bold text-[var(--text)] flex items-center gap-1 truncate max-w-[200px]"
                   [title]="profile?.address || 'Not provided'">
-                  <i class="fa-solid fa-location-dot text-[10px] text-[var(--accent)]"></i>
+                  <i class="fa-solid fa-location-dot text-[10px] text-[var(--accent)]" aria-hidden="true"></i>
                   {{ displayValue(profile?.address) }}
                 </span>
               </div>
@@ -263,7 +261,7 @@
             class="bg-[var(--panel)] border border-[var(--border)] rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 flex flex-col justify-between">
             <div
               class="flex items-center gap-2.5 text-[var(--text)] font-black text-sm sm:text-base border-b border-[var(--border)] pb-3">
-              <i class="fa-solid fa-briefcase text-[var(--accent)]"></i>
+              <i class="fa-solid fa-briefcase text-[var(--accent)]" aria-hidden="true"></i>
               <span>Professional Information</span>
             </div>
 
@@ -298,7 +296,7 @@
           <div class="bg-[var(--panel)] border border-[var(--border)] rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4">
             <div
               class="flex items-center gap-2.5 text-[var(--text)] font-black text-sm sm:text-base border-b border-[var(--border)] pb-3">
-              <i class="fa-solid fa-bolt text-[var(--accent)]"></i>
+              <i class="fa-solid fa-bolt text-[var(--accent)]" aria-hidden="true"></i>
               <span>Quick Actions</span>
             </div>
 
@@ -309,7 +307,7 @@
                 <div class="flex items-center gap-3">
                   <div
                     class="w-9 h-9 rounded-xl bg-[var(--accent)]/15 border border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)]">
-                    <i class="fa-solid fa-user-pen text-xs"></i>
+                    <i class="fa-solid fa-user-pen text-xs" aria-hidden="true"></i>
                   </div>
                   <div>
                     <h4 class="text-xs font-bold text-[var(--text)] group-hover:text-[var(--accent)] transition-colors">
@@ -319,7 +317,7 @@
                   </div>
                 </div>
                 <i
-                  class="fa-solid fa-chevron-right text-xs text-[var(--muted)] group-hover:text-[var(--text)] transition-colors"></i>
+                  class="fa-solid fa-chevron-right text-xs text-[var(--muted)] group-hover:text-[var(--text)] transition-colors" aria-hidden="true"></i>
               </button>
 
               <!-- Tile 2: Manage Education -->
@@ -328,7 +326,7 @@
                 <div class="flex items-center gap-3">
                   <div
                     class="w-9 h-9 rounded-xl bg-[var(--primary)]/15 border border-[var(--primary)]/30 flex items-center justify-center text-[var(--primary)]">
-                    <i class="fa-solid fa-graduation-cap text-xs"></i>
+                    <i class="fa-solid fa-graduation-cap text-xs" aria-hidden="true"></i>
                   </div>
                   <div>
                     <h4
@@ -339,7 +337,7 @@
                   </div>
                 </div>
                 <i
-                  class="fa-solid fa-chevron-right text-xs text-[var(--muted)] group-hover:text-[var(--text)] transition-colors"></i>
+                  class="fa-solid fa-chevron-right text-xs text-[var(--muted)] group-hover:text-[var(--text)] transition-colors" aria-hidden="true"></i>
               </button>
 
               <!-- Tile 3: Add Experience -->
@@ -348,7 +346,7 @@
                 <div class="flex items-center gap-3">
                   <div
                     class="w-9 h-9 rounded-xl bg-[#a855f7]/15 border border-[#a855f7]/30 flex items-center justify-center text-[#a855f7]">
-                    <i class="fa-solid fa-briefcase text-xs"></i>
+                    <i class="fa-solid fa-briefcase text-xs" aria-hidden="true"></i>
                   </div>
                   <div>
                     <h4 class="text-xs font-bold text-[var(--text)] group-hover:text-[#a855f7] transition-colors">Add
@@ -358,7 +356,7 @@
                   </div>
                 </div>
                 <i
-                  class="fa-solid fa-chevron-right text-xs text-[var(--muted)] group-hover:text-[var(--text)] transition-colors"></i>
+                  class="fa-solid fa-chevron-right text-xs text-[var(--muted)] group-hover:text-[var(--text)] transition-colors" aria-hidden="true"></i>
               </button>
 
               <!-- Tile 4: Upload Certificates -->
@@ -367,7 +365,7 @@
                 <div class="flex items-center gap-3">
                   <div
                     class="w-9 h-9 rounded-xl bg-[#f59e0b]/15 border border-[#f59e0b]/30 flex items-center justify-center text-[#f59e0b]">
-                    <i class="fa-solid fa-award text-xs"></i>
+                    <i class="fa-solid fa-award text-xs" aria-hidden="true"></i>
                   </div>
                   <div>
                     <h4 class="text-xs font-bold text-[var(--text)] group-hover:text-[#f59e0b] transition-colors">Upload
@@ -376,7 +374,7 @@
                   </div>
                 </div>
                 <i
-                  class="fa-solid fa-chevron-right text-xs text-[var(--muted)] group-hover:text-[var(--text)] transition-colors"></i>
+                  class="fa-solid fa-chevron-right text-xs text-[var(--muted)] group-hover:text-[var(--text)] transition-colors" aria-hidden="true"></i>
               </button>
 
               <!-- Tile 5: Manage Documents -->
@@ -385,7 +383,7 @@
                 <div class="flex items-center gap-3">
                   <div
                     class="w-9 h-9 rounded-xl bg-[#10b981]/15 border border-[#10b981]/30 flex items-center justify-center text-[#10b981]">
-                    <i class="fa-solid fa-file-lines text-xs"></i>
+                    <i class="fa-solid fa-file-lines text-xs" aria-hidden="true"></i>
                   </div>
                   <div>
                     <h4 class="text-xs font-bold text-[var(--text)] group-hover:text-[#10b981] transition-colors">Manage
@@ -394,7 +392,7 @@
                   </div>
                 </div>
                 <i
-                  class="fa-solid fa-chevron-right text-xs text-[var(--muted)] group-hover:text-[var(--text)] transition-colors"></i>
+                  class="fa-solid fa-chevron-right text-xs text-[var(--muted)] group-hover:text-[var(--text)] transition-colors" aria-hidden="true"></i>
               </button>
 
               <!-- Tile 6: Change Password -->
@@ -403,7 +401,7 @@
                 <div class="flex items-center gap-3">
                   <div
                     class="w-9 h-9 rounded-xl bg-[#ef4444]/15 border border-[#ef4444]/30 flex items-center justify-center text-[#ef4444]">
-                    <i class="fa-solid fa-lock text-xs"></i>
+                    <i class="fa-solid fa-lock text-xs" aria-hidden="true"></i>
                   </div>
                   <div>
                     <h4 class="text-xs font-bold text-[var(--text)] group-hover:text-[#ef4444] transition-colors">Change
@@ -412,7 +410,7 @@
                   </div>
                 </div>
                 <i
-                  class="fa-solid fa-chevron-right text-xs text-[var(--muted)] group-hover:text-[var(--text)] transition-colors"></i>
+                  class="fa-solid fa-chevron-right text-xs text-[var(--muted)] group-hover:text-[var(--text)] transition-colors" aria-hidden="true"></i>
               </button>
             </div>
           </div>
@@ -424,7 +422,7 @@
           class="bg-[var(--panel)] border border-[var(--border)] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
           <div class="flex items-center justify-between border-b border-[var(--border)] pb-4">
             <h3 class="text-base sm:text-lg font-black text-[var(--text)] flex items-center gap-2">
-              <i class="fa-solid fa-user-pen text-[var(--accent)]"></i> Edit Doctor Profile
+              <i class="fa-solid fa-user-pen text-[var(--accent)]" aria-hidden="true"></i> Edit Doctor Profile
             </h3>
             <button type="button" (click)="editingOverview=false"
               class="text-[var(--muted)] hover:text-[var(--text)] text-xs font-bold" aria-label="Close edit profile">
@@ -434,21 +432,25 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div class="space-y-1.5">
-              <label class="block text-xs font-semibold text-[var(--muted)]">First Name</label>
-              <input [(ngModel)]="profileForm.firstName" placeholder="First Name"
-                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2.5 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" />
+              <label class="block text-xs font-semibold text-[var(--muted)]" for="dp-firstName">First Name</label>
+              <input id="dp-firstName" [(ngModel)]="profileForm.firstName" placeholder="First Name"
+                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2.5 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" (blur)="markTouched('firstName')" [attr.aria-invalid]="fieldError('firstName') ? true : null" [attr.aria-describedby]="fieldError('firstName') ? 'dp-firstName-error' : null" [class.!border-rose-500]="!!fieldError('firstName')" autocomplete="given-name" maxlength="50" />
+              <p *ngIf="fieldError('firstName')" id="dp-firstName-error" role="alert" class="form-error">{{ fieldError('firstName') }}</p>
             </div>
 
             <div class="space-y-1.5">
-              <label class="block text-xs font-semibold text-[var(--muted)]">Last Name</label>
-              <input [(ngModel)]="profileForm.lastName" placeholder="Last Name"
-                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2.5 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" />
+              <label class="block text-xs font-semibold text-[var(--muted)]" for="dp-lastName">Last Name</label>
+              <input id="dp-lastName" [(ngModel)]="profileForm.lastName" placeholder="Last Name"
+                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2.5 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" (blur)="markTouched('lastName')" [attr.aria-invalid]="fieldError('lastName') ? true : null" [attr.aria-describedby]="fieldError('lastName') ? 'dp-lastName-error' : null" [class.!border-rose-500]="!!fieldError('lastName')" autocomplete="family-name" maxlength="50" />
+              <p *ngIf="fieldError('lastName')" id="dp-lastName-error" role="alert" class="form-error">{{ fieldError('lastName') }}</p>
             </div>
 
             <div class="space-y-1.5">
               <label class="block text-xs font-semibold text-[var(--muted)]">Specialization</label>
-              <app-specialization-autocomplete [(ngModel)]="profileForm.specialization" placeholder="e.g. Cardiology">
+              <app-specialization-autocomplete [(ngModel)]="profileForm.specialization" placeholder="e.g. Cardiology"
+                (ngModelChange)="markTouched('specialization')">
               </app-specialization-autocomplete>
+              <p *ngIf="fieldError('specialization')" id="dp-specialization-error" role="alert" class="form-error">{{ fieldError('specialization') }}</p>
             </div>
 
             <div class="space-y-1.5">
@@ -458,61 +460,69 @@
             </div>
 
             <div class="space-y-1.5">
-              <label class="block text-xs font-semibold text-[var(--muted)]">Consultation Fees (₹)</label>
-              <input type="number" [(ngModel)]="profileForm.consultationFees"
-                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2.5 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" />
+              <label class="block text-xs font-semibold text-[var(--muted)]" for="dp-consultationFees">Consultation Fees (₹)</label>
+              <input id="dp-consultationFees" type="number" [(ngModel)]="profileForm.consultationFees"
+                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2.5 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" (blur)="markTouched('consultationFees')" [attr.aria-invalid]="fieldError('consultationFees') ? true : null" [attr.aria-describedby]="fieldError('consultationFees') ? 'dp-consultationFees-error' : null" [class.!border-rose-500]="!!fieldError('consultationFees')" min="0" max="100000" inputmode="decimal" />
+              <p *ngIf="fieldError('consultationFees')" id="dp-consultationFees-error" role="alert" class="form-error">{{ fieldError('consultationFees') }}</p>
             </div>
 
             <div class="space-y-1.5">
-              <label class="block text-xs font-semibold text-[var(--muted)]">Email Address</label>
-              <input type="email" [(ngModel)]="profileForm.email"
-                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2.5 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" />
+              <label class="block text-xs font-semibold text-[var(--muted)]" for="dp-email">Email Address</label>
+              <input id="dp-email" type="email" [(ngModel)]="profileForm.email"
+                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2.5 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" (blur)="markTouched('email')" [attr.aria-invalid]="fieldError('email') ? true : null" [attr.aria-describedby]="fieldError('email') ? 'dp-email-error' : null" [class.!border-rose-500]="!!fieldError('email')" autocomplete="email" />
+              <p *ngIf="fieldError('email')" id="dp-email-error" role="alert" class="form-error">{{ fieldError('email') }}</p>
             </div>
 
             <div class="space-y-1.5">
-              <label class="block text-xs font-semibold text-[var(--muted)]">Contact Number</label>
-              <input [(ngModel)]="profileForm.contactInfo"
-                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2.5 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" />
+              <label class="block text-xs font-semibold text-[var(--muted)]" for="dp-contactInfo">Contact Number</label>
+              <input id="dp-contactInfo" [(ngModel)]="profileForm.contactInfo"
+                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2.5 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" (blur)="markTouched('contactInfo')" [attr.aria-invalid]="fieldError('contactInfo') ? true : null" [attr.aria-describedby]="fieldError('contactInfo') ? 'dp-contactInfo-error' : null" [class.!border-rose-500]="!!fieldError('contactInfo')" type="tel" inputmode="tel" autocomplete="tel" />
+              <p *ngIf="fieldError('contactInfo')" id="dp-contactInfo-error" role="alert" class="form-error">{{ fieldError('contactInfo') }}</p>
             </div>
 
             <div class="space-y-1.5">
-              <label class="block text-xs font-semibold text-[var(--muted)]">Alternate Number</label>
-              <input [(ngModel)]="profileForm.alternateContactInfo"
-                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2.5 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" />
+              <label class="block text-xs font-semibold text-[var(--muted)]" for="dp-alternateContactInfo">Alternate Number</label>
+              <input id="dp-alternateContactInfo" [(ngModel)]="profileForm.alternateContactInfo"
+                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2.5 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" (blur)="markTouched('alternateContactInfo')" [attr.aria-invalid]="fieldError('alternateContactInfo') ? true : null" [attr.aria-describedby]="fieldError('alternateContactInfo') ? 'dp-alternateContactInfo-error' : null" [class.!border-rose-500]="!!fieldError('alternateContactInfo')" type="tel" inputmode="tel" />
+              <p *ngIf="fieldError('alternateContactInfo')" id="dp-alternateContactInfo-error" role="alert" class="form-error">{{ fieldError('alternateContactInfo') }}</p>
             </div>
 
             <div class="space-y-1.5">
-              <label class="block text-xs font-semibold text-[var(--muted)]">Date of Birth</label>
-              <input type="date" [(ngModel)]="profileForm.dateOfBirth"
-                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2.5 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" />
+              <label class="block text-xs font-semibold text-[var(--muted)]" for="dp-dateOfBirth">Date of Birth</label>
+              <input id="dp-dateOfBirth" type="date" [(ngModel)]="profileForm.dateOfBirth"
+                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2.5 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" (blur)="markTouched('dateOfBirth')" [attr.aria-invalid]="fieldError('dateOfBirth') ? true : null" [attr.aria-describedby]="fieldError('dateOfBirth') ? 'dp-dateOfBirth-error' : null" [class.!border-rose-500]="!!fieldError('dateOfBirth')" />
+              <p *ngIf="fieldError('dateOfBirth')" id="dp-dateOfBirth-error" role="alert" class="form-error">{{ fieldError('dateOfBirth') }}</p>
             </div>
 
             <div class="space-y-1.5">
-              <label class="block text-xs font-semibold text-[var(--muted)]">License Number</label>
-              <input [(ngModel)]="profileForm.licenseNumber"
-                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2.5 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" />
+              <label class="block text-xs font-semibold text-[var(--muted)]" for="dp-licenseNumber">License Number</label>
+              <input id="dp-licenseNumber" [(ngModel)]="profileForm.licenseNumber"
+                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2.5 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" (blur)="markTouched('licenseNumber')" [attr.aria-invalid]="fieldError('licenseNumber') ? true : null" [attr.aria-describedby]="fieldError('licenseNumber') ? 'dp-licenseNumber-error' : null" [class.!border-rose-500]="!!fieldError('licenseNumber')" maxlength="50" />
+              <p *ngIf="fieldError('licenseNumber')" id="dp-licenseNumber-error" role="alert" class="form-error">{{ fieldError('licenseNumber') }}</p>
             </div>
 
             <div class="space-y-1.5">
-              <label class="block text-xs font-semibold text-[var(--muted)]">Clinic Address</label>
-              <input [(ngModel)]="profileForm.address"
-                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2.5 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" />
+              <label class="block text-xs font-semibold text-[var(--muted)]" for="dp-address">Clinic Address</label>
+              <input id="dp-address" [(ngModel)]="profileForm.address"
+                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2.5 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" (blur)="markTouched('address')" [attr.aria-invalid]="fieldError('address') ? true : null" [attr.aria-describedby]="fieldError('address') ? 'dp-address-error' : null" [class.!border-rose-500]="!!fieldError('address')" maxlength="250" />
+              <p *ngIf="fieldError('address')" id="dp-address-error" role="alert" class="form-error">{{ fieldError('address') }}</p>
             </div>
 
             <div class="space-y-1.5 md:col-span-2">
-              <label class="block text-xs font-semibold text-[var(--muted)]">Bio / About</label>
-              <textarea [(ngModel)]="profileForm.bio" rows="3"
-                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2.5 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]"></textarea>
+              <label class="block text-xs font-semibold text-[var(--muted)]" for="dp-bio">Bio / About</label>
+              <textarea id="dp-bio" [(ngModel)]="profileForm.bio" rows="3"
+                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2.5 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" (blur)="markTouched('bio')" [attr.aria-invalid]="fieldError('bio') ? true : null" [attr.aria-describedby]="fieldError('bio') ? 'dp-bio-error' : null" [class.!border-rose-500]="!!fieldError('bio')" maxlength="1000"></textarea>
+              <p *ngIf="fieldError('bio')" id="dp-bio-error" role="alert" class="form-error">{{ fieldError('bio') }}</p>
             </div>
           </div>
 
           <div class="flex items-center gap-3 pt-3 border-t border-[var(--border)]">
-            <button (click)="saveProfile()"
-              class="px-6 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs rounded-xl shadow-lg cursor-pointer">
-              Save Changes
+            <button type="button" (click)="saveProfile()" [disabled]="savingProfile"
+              class="btn-size-lg disabled:opacity-60 disabled:cursor-not-allowed px-6 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs rounded-xl shadow-lg cursor-pointer inline-flex items-center justify-center">
+              {{ savingProfile ? 'Saving…' : 'Save Changes' }}
             </button>
-            <button (click)="editingOverview=false"
-              class="px-5 py-2.5 bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--text)] font-bold text-xs rounded-xl cursor-pointer">
+            <button type="button" (click)="editingOverview=false"
+              class="btn-size-lg px-5 bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--text)] font-bold text-xs rounded-xl cursor-pointer inline-flex items-center justify-center">
               Cancel
             </button>
           </div>
@@ -525,8 +535,8 @@
         <div class="flex items-center justify-between">
           <h2 class="text-base sm:text-lg font-black text-[var(--text)]">Education & Qualifications</h2>
           <button (click)="startAddEducation()" *ngIf="!editingEducationMode"
-            class="px-4 py-2 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs rounded-xl cursor-pointer flex items-center gap-2">
-            <i class="fa-solid fa-plus text-xs"></i> Add Education
+            class="btn-size-lg px-4 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs rounded-xl cursor-pointer flex items-center gap-2">
+            <i class="fa-solid fa-plus text-xs" aria-hidden="true"></i> Add Education
           </button>
         </div>
 
@@ -534,7 +544,7 @@
         <div *ngIf="editingEducationMode"
           class="bg-[var(--panel)] border border-[var(--border)] rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4">
           <h3 class="text-sm font-bold text-[var(--text)] flex items-center gap-2">
-            <i class="fa-solid fa-graduation-cap text-[var(--accent)]"></i>
+            <i class="fa-solid fa-graduation-cap text-[var(--accent)]" aria-hidden="true"></i>
             {{ editingEducationId ? 'Edit Education' : 'Add New Education' }}
           </h3>
 
@@ -542,37 +552,43 @@
             <div class="space-y-1">
               <label class="block text-xs font-semibold text-[var(--muted)]">Degree / Qualification</label>
               <app-select-dropdown [(ngModel)]="newEducation.degree" [options]="degreeOptions"
-                placeholder="Select Degree">
+                placeholder="Select Degree" [errorMessage]="fieldError('eduDegree')" (selectionChange)="markTouched('eduDegree')">
               </app-select-dropdown>
+              <input *ngIf="newEducation.degree === '__other__'" id="dp-customDegree" [(ngModel)]="customDegree" placeholder="Type the degree" maxlength="120" (blur)="markTouched('customDegree')" [attr.aria-label]="'Type the degree'" [attr.aria-invalid]="fieldError('customDegree') ? true : null" [attr.aria-describedby]="fieldError('customDegree') ? 'dp-customDegree-error' : null" class="mt-2 w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2 border border-[var(--border)] focus:outline-none focus:border-[var(--accent)]" [class.!border-rose-500]="!!fieldError('customDegree')" />
+              <p *ngIf="fieldError('customDegree')" id="dp-customDegree-error" role="alert" class="form-error">{{ fieldError('customDegree') }}</p>
             </div>
 
             <div class="space-y-1">
               <label class="block text-xs font-semibold text-[var(--muted)]">Institution / University</label>
               <app-select-dropdown [(ngModel)]="newEducation.institution" [options]="institutionOptions"
-                placeholder="Select Institution">
+                placeholder="Select Institution" [errorMessage]="fieldError('eduInstitution')" (selectionChange)="markTouched('eduInstitution')">
               </app-select-dropdown>
+              <input *ngIf="newEducation.institution === '__other__'" id="dp-customInstitution" [(ngModel)]="customInstitution" placeholder="Type the institution" maxlength="120" (blur)="markTouched('customInstitution')" [attr.aria-label]="'Type the institution'" [attr.aria-invalid]="fieldError('customInstitution') ? true : null" [attr.aria-describedby]="fieldError('customInstitution') ? 'dp-customInstitution-error' : null" class="mt-2 w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2 border border-[var(--border)] focus:outline-none focus:border-[var(--accent)]" [class.!border-rose-500]="!!fieldError('customInstitution')" />
+              <p *ngIf="fieldError('customInstitution')" id="dp-customInstitution-error" role="alert" class="form-error">{{ fieldError('customInstitution') }}</p>
             </div>
 
             <div class="space-y-1">
-              <label class="block text-xs font-semibold text-[var(--muted)]">Year of Completion</label>
-              <input type="number" [(ngModel)]="newEducation.yearOfCompletion"
-                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" />
+              <label class="block text-xs font-semibold text-[var(--muted)]" for="dp-eduYear">Year of Completion</label>
+              <input id="dp-eduYear" type="number" [(ngModel)]="newEducation.yearOfCompletion"
+                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" (blur)="markTouched('eduYear')" [attr.aria-invalid]="fieldError('eduYear') ? true : null" [attr.aria-describedby]="fieldError('eduYear') ? 'dp-eduYear-error' : null" [class.!border-rose-500]="!!fieldError('eduYear')" min="1950" inputmode="numeric" />
+              <p *ngIf="fieldError('eduYear')" id="dp-eduYear-error" role="alert" class="form-error">{{ fieldError('eduYear') }}</p>
             </div>
 
             <div class="space-y-1">
-              <label class="block text-xs font-semibold text-[var(--muted)]">Additional Details</label>
-              <input [(ngModel)]="newEducation.details" placeholder="e.g. Gold Medalist"
-                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" />
+              <label class="block text-xs font-semibold text-[var(--muted)]" for="dp-eduDetails">Additional Details</label>
+              <input id="dp-eduDetails" [(ngModel)]="newEducation.details" placeholder="e.g. Gold Medalist"
+                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" (blur)="markTouched('eduDetails')" [attr.aria-invalid]="fieldError('eduDetails') ? true : null" [attr.aria-describedby]="fieldError('eduDetails') ? 'dp-eduDetails-error' : null" [class.!border-rose-500]="!!fieldError('eduDetails')" maxlength="200" />
+              <p *ngIf="fieldError('eduDetails')" id="dp-eduDetails-error" role="alert" class="form-error">{{ fieldError('eduDetails') }}</p>
             </div>
           </div>
 
           <div class="flex items-center gap-3 pt-2">
-            <button (click)="submitEducation()"
-              class="px-5 py-2 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs rounded-xl cursor-pointer">
+            <button type="button" (click)="submitEducation()"
+              class="btn-size-lg px-5 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs rounded-xl cursor-pointer inline-flex items-center justify-center">
               {{ editingEducationId ? 'Update' : 'Save Education' }}
             </button>
-            <button (click)="cancelEditEducation()"
-              class="px-4 py-2 bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--text)] font-bold text-xs rounded-xl cursor-pointer">
+            <button type="button" (click)="cancelEditEducation()"
+              class="btn-size-lg px-4 bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--text)] font-bold text-xs rounded-xl cursor-pointer inline-flex items-center justify-center">
               Cancel
             </button>
           </div>
@@ -587,8 +603,8 @@
         <div class="flex items-center justify-between">
           <h2 class="text-base sm:text-lg font-black text-[var(--text)]">Professional Experience</h2>
           <button (click)="startAddExperience()" *ngIf="!editingExperienceMode"
-            class="px-4 py-2 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs rounded-xl cursor-pointer flex items-center gap-2">
-            <i class="fa-solid fa-plus text-xs"></i> Add Experience
+            class="btn-size-lg px-4 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs rounded-xl cursor-pointer flex items-center gap-2">
+            <i class="fa-solid fa-plus text-xs" aria-hidden="true"></i> Add Experience
           </button>
         </div>
 
@@ -596,7 +612,7 @@
         <div *ngIf="editingExperienceMode"
           class="bg-[var(--panel)] border border-[var(--border)] rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4">
           <h3 class="text-sm font-bold text-[var(--text)] flex items-center gap-2">
-            <i class="fa-solid fa-briefcase text-[var(--accent)]"></i>
+            <i class="fa-solid fa-briefcase text-[var(--accent)]" aria-hidden="true"></i>
             {{ editingExperienceId ? 'Edit Experience' : 'Add New Experience' }}
           </h3>
 
@@ -604,37 +620,43 @@
             <div class="space-y-1">
               <label class="block text-xs font-semibold text-[var(--muted)]">Hospital / Clinic Name</label>
               <app-select-dropdown [(ngModel)]="newExperience.hospitalName" [options]="hospitalOptions"
-                placeholder="Select Hospital">
+                placeholder="Select Hospital" [errorMessage]="fieldError('expHospital')" (selectionChange)="markTouched('expHospital')">
               </app-select-dropdown>
+              <input *ngIf="newExperience.hospitalName === '__other__'" id="dp-customHospital" [(ngModel)]="customHospital" placeholder="Type the hospital or clinic" maxlength="120" (blur)="markTouched('customHospital')" [attr.aria-label]="'Type the hospital or clinic'" [attr.aria-invalid]="fieldError('customHospital') ? true : null" [attr.aria-describedby]="fieldError('customHospital') ? 'dp-customHospital-error' : null" class="mt-2 w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2 border border-[var(--border)] focus:outline-none focus:border-[var(--accent)]" [class.!border-rose-500]="!!fieldError('customHospital')" />
+              <p *ngIf="fieldError('customHospital')" id="dp-customHospital-error" role="alert" class="form-error">{{ fieldError('customHospital') }}</p>
             </div>
 
             <div class="space-y-1">
               <label class="block text-xs font-semibold text-[var(--muted)]">Designation / Role</label>
               <app-select-dropdown [(ngModel)]="newExperience.position" [options]="positionOptions"
-                placeholder="Select Position">
+                placeholder="Select Position" [errorMessage]="fieldError('expPosition')" (selectionChange)="markTouched('expPosition')">
               </app-select-dropdown>
+              <input *ngIf="newExperience.position === '__other__'" id="dp-customPosition" [(ngModel)]="customPosition" placeholder="Type the role" maxlength="120" (blur)="markTouched('customPosition')" [attr.aria-label]="'Type the role'" [attr.aria-invalid]="fieldError('customPosition') ? true : null" [attr.aria-describedby]="fieldError('customPosition') ? 'dp-customPosition-error' : null" class="mt-2 w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2 border border-[var(--border)] focus:outline-none focus:border-[var(--accent)]" [class.!border-rose-500]="!!fieldError('customPosition')" />
+              <p *ngIf="fieldError('customPosition')" id="dp-customPosition-error" role="alert" class="form-error">{{ fieldError('customPosition') }}</p>
             </div>
 
             <div class="space-y-1">
-              <label class="block text-xs font-semibold text-[var(--muted)]">Years of Service</label>
-              <input type="number" [(ngModel)]="newExperience.yearsOfService"
-                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" />
+              <label class="block text-xs font-semibold text-[var(--muted)]" for="dp-expYears">Years of Service</label>
+              <input id="dp-expYears" type="number" [(ngModel)]="newExperience.yearsOfService"
+                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" (blur)="markTouched('expYears')" [attr.aria-invalid]="fieldError('expYears') ? true : null" [attr.aria-describedby]="fieldError('expYears') ? 'dp-expYears-error' : null" [class.!border-rose-500]="!!fieldError('expYears')" min="0" max="70" inputmode="numeric" />
+              <p *ngIf="fieldError('expYears')" id="dp-expYears-error" role="alert" class="form-error">{{ fieldError('expYears') }}</p>
             </div>
 
             <div class="space-y-1">
-              <label class="block text-xs font-semibold text-[var(--muted)]">Role Description</label>
-              <input [(ngModel)]="newExperience.details" placeholder="e.g. Senior Consultant"
-                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" />
+              <label class="block text-xs font-semibold text-[var(--muted)]" for="dp-expDetails">Role Description</label>
+              <input id="dp-expDetails" [(ngModel)]="newExperience.details" placeholder="e.g. Senior Consultant"
+                class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" (blur)="markTouched('expDetails')" [attr.aria-invalid]="fieldError('expDetails') ? true : null" [attr.aria-describedby]="fieldError('expDetails') ? 'dp-expDetails-error' : null" [class.!border-rose-500]="!!fieldError('expDetails')" maxlength="200" />
+              <p *ngIf="fieldError('expDetails')" id="dp-expDetails-error" role="alert" class="form-error">{{ fieldError('expDetails') }}</p>
             </div>
           </div>
 
           <div class="flex items-center gap-3 pt-2">
-            <button (click)="submitExperience()"
-              class="px-5 py-2 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs rounded-xl cursor-pointer">
+            <button type="button" (click)="submitExperience()"
+              class="btn-size-lg px-5 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs rounded-xl cursor-pointer inline-flex items-center justify-center">
               {{ editingExperienceId ? 'Update' : 'Save Experience' }}
             </button>
-            <button (click)="cancelEditExperience()"
-              class="px-4 py-2 bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--text)] font-bold text-xs rounded-xl cursor-pointer">
+            <button type="button" (click)="cancelEditExperience()"
+              class="btn-size-lg px-4 bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--text)] font-bold text-xs rounded-xl cursor-pointer inline-flex items-center justify-center">
               Cancel
             </button>
           </div>
@@ -649,8 +671,8 @@
         <div class="flex items-center justify-between">
           <h2 class="text-base sm:text-lg font-black text-[var(--text)]">Medical Certificates</h2>
           <button (click)="startAddCertificate()" *ngIf="!editingCertificatesMode"
-            class="px-4 py-2 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs rounded-xl cursor-pointer flex items-center gap-2">
-            <i class="fa-solid fa-upload text-xs"></i> Upload Certificate
+            class="btn-size-lg px-4 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs rounded-xl cursor-pointer flex items-center gap-2">
+            <i class="fa-solid fa-upload text-xs" aria-hidden="true"></i> Upload Certificate
           </button>
         </div>
 
@@ -658,7 +680,7 @@
         <div *ngIf="editingCertificatesMode"
           class="bg-[var(--panel)] border border-[var(--border)] rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4">
           <h3 class="text-sm font-bold text-[var(--text)] flex items-center gap-2">
-            <i class="fa-solid fa-award text-[var(--accent)]"></i> Upload Certificate File
+            <i class="fa-solid fa-award text-[var(--accent)]" aria-hidden="true"></i> Upload Certificate File
           </h3>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -669,19 +691,19 @@
             </div>
 
             <div class="space-y-1">
-              <label class="block text-xs font-semibold text-[var(--muted)]">Description</label>
-              <input [(ngModel)]="certDescription" placeholder="e.g. Fellowship Certificate"
+              <label class="block text-xs font-semibold text-[var(--muted)]" for="doctor-profile-description-15">Description</label>
+              <input id="doctor-profile-description-15" [(ngModel)]="certDescription" placeholder="e.g. Fellowship Certificate"
                 class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl px-3.5 py-2 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)]" />
             </div>
           </div>
 
           <div class="flex items-center gap-3 pt-2">
             <button (click)="uploadCertificate()" [disabled]="uploadingCertificate || !certFile"
-              class="px-5 py-2 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs rounded-xl cursor-pointer disabled:opacity-40">
+              class="btn-size-lg px-5 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs rounded-xl cursor-pointer disabled:opacity-40 inline-flex items-center justify-center">
               {{ uploadingCertificate ? 'Uploading...' : 'Start Upload' }}
             </button>
             <button (click)="cancelAddCertificate()"
-              class="px-4 py-2 bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--text)] font-bold text-xs rounded-xl cursor-pointer">
+              class="btn-size-lg px-4 bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--text)] font-bold text-xs rounded-xl cursor-pointer inline-flex items-center justify-center">
               Cancel
             </button>
           </div>
@@ -693,5 +715,4 @@
 
     </section>
 
-  </div>
-</app-doctor-layout>
+  </app-page-container>

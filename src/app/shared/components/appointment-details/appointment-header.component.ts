@@ -9,7 +9,6 @@ import { AppointmentDetails } from '../../../core/models/appointment.models';
     standalone: true,
     imports: [CommonModule, UserAvatarComponent, StatusBadgeComponent],
     templateUrl: './appointment-header.component.html',
-    styleUrl: './appointment-header.component.css'
 })
 export class AppointmentHeaderComponent {
     @Input() appointment: AppointmentDetails | null = null;

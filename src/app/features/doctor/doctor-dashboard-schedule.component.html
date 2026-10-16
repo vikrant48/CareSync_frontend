@@ -36,11 +36,11 @@
           </span>
           <div class="hidden sm:flex items-center gap-3 text-[11px] text-muted mt-1.5">
             <span class="inline-flex items-center gap-1.5 font-medium whitespace-nowrap">
-              <i class="fa-regular fa-calendar text-[var(--primary)]"></i>
+              <i class="fa-regular fa-calendar text-[var(--primary)]" aria-hidden="true"></i>
               {{ a.appointmentDate }}
             </span>
             <span class="inline-flex items-center gap-1.5 font-medium whitespace-nowrap">
-              <i class="fa-regular fa-clock text-[var(--primary)]"></i>
+              <i class="fa-regular fa-clock text-[var(--primary)]" aria-hidden="true"></i>
               {{ a.appointmentTime }}
             </span>
           </div>
@@ -48,18 +48,18 @@
       </div>
       <div class="flex sm:hidden items-center gap-2 min-w-0 flex-nowrap">
         <span class="inline-flex items-center gap-1 font-medium whitespace-nowrap text-[11px] text-muted shrink-0">
-          <i class="fa-regular fa-calendar text-[var(--primary)]"></i>
+          <i class="fa-regular fa-calendar text-[var(--primary)]" aria-hidden="true"></i>
           {{ a.appointmentDate }}
         </span>
         <span class="inline-flex items-center gap-1 font-medium whitespace-nowrap text-[11px] text-muted shrink-0">
-          <i class="fa-regular fa-clock text-[var(--primary)]"></i>
+          <i class="fa-regular fa-clock text-[var(--primary)]" aria-hidden="true"></i>
           {{ a.appointmentTime }}
         </span>
         <app-status-badge class="ml-auto shrink-0" [status]="a.status" size="sm"></app-status-badge>
       </div>
       <div class="hidden sm:flex items-center gap-2.5 shrink-0 ml-2">
         <app-status-badge [status]="a.status" size="md"></app-status-badge>
-        <i class="fa-solid fa-chevron-right text-muted group-hover:text-[var(--text)] text-xs group-hover:translate-x-0.5 transition-all"></i>
+        <i class="fa-solid fa-chevron-right text-muted group-hover:text-[var(--text)] text-xs group-hover:translate-x-0.5 transition-all" aria-hidden="true"></i>
       </div>
     </div>
   </div>
@@ -75,7 +75,7 @@
       [compact]="true"
       [hasAction]="true"
     >
-      <a routerLink="/doctor/schedule" class="inline-flex items-center min-h-[44px] px-4 rounded-xl bg-[var(--primary)] text-[var(--primary-fg)] text-xs font-bold hover:bg-[var(--primary-hover)] transition-all">
+      <a routerLink="/doctor/schedule" class="btn-size-lg inline-flex items-center px-4 rounded-xl bg-[var(--primary)] text-[var(--primary-fg)] text-xs font-bold hover:bg-[var(--primary-hover)] transition-all">
         Manage Schedule
       </a>
     </app-empty-state>

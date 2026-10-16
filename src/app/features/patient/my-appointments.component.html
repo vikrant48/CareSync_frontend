@@ -1,19 +1,13 @@
-<app-patient-layout>
-    <div class="max-w-[1400px] mx-auto p-3 sm:p-5 space-y-4 pb-28">
+    <app-page-container extraClass="pb-28">
 
-        <!-- Hero Header Banner (Matching Reference Screenshot 1) -->
-        <section
-            class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div class="space-y-1">
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">My Appointments</h1>
-                <p class="text-xs sm:text-sm text-[var(--muted)]">Manage and track your scheduled consultations</p>
-            </div>
+        <app-page-header variant="hero" title="My Appointments"
+            subtitle="Manage and track your scheduled consultations" [hasActions]="true">
             <a routerLink="/patient/book-appointment"
-                class="px-4 py-2.5 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white text-xs font-bold shadow-lg shadow-[var(--primary)]/25 inline-flex items-center gap-2 transition-all shrink-0">
-                <i class="fa-solid fa-circle-plus text-xs"></i>
+                class="btn-size-lg px-4 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white text-xs font-bold shadow-lg shadow-[var(--primary)]/25 inline-flex items-center gap-2 transition-all shrink-0">
+                <i class="fa-solid fa-circle-plus text-xs" aria-hidden="true"></i>
                 <span>Book New Appointment</span>
             </a>
-        </section>
+        </app-page-header>
 
         <!-- Filter Bar -->
         <app-filter-bar [filters]="patientFilterConfigs" [values]="patientFilterValues" [theme]="'patient'"
@@ -46,7 +40,7 @@
             containerClass="bg-[var(--panel)] rounded-2xl border border-[var(--border)] border-dashed px-4 py-8"
             [hasAction]="true">
             <a routerLink="/patient/book-appointment"
-                class="px-4 py-2 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white text-xs font-bold shadow-md transition-all">Book
+                class="btn-size-lg px-4 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white text-xs font-bold shadow-md transition-all inline-flex items-center justify-center">Book
                 Now</a>
         </app-empty-state>
 
@@ -56,14 +50,14 @@
             containerClass="bg-[var(--panel)] rounded-2xl border border-[var(--border)] border-dashed px-4 py-8"
             [hasAction]="true">
             <button type="button" (click)="clearFilters()"
-                class="px-4 py-2 rounded-xl bg-[var(--bg)] hover:bg-[var(--border)] text-[var(--primary)] text-xs font-bold border border-[var(--border)] transition-all">Clear
+                class="btn-size-md px-4 rounded-xl bg-[var(--bg)] hover:bg-[var(--border)] text-[var(--primary)] text-xs font-bold border border-[var(--border)] transition-all inline-flex items-center justify-center">Clear
                 Filters</button>
         </app-empty-state>
 
         <!-- Appointments Grid (3 Columns on Desktop matching Reference Screenshot 1) -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in"
             *ngIf="!loading && filtered().length > 0">
-            <app-appointment-card *ngFor="let a of filtered()" [appointment]="a" viewerRole="PATIENT"
+            <app-appointment-card *ngFor="let a of filtered(); trackBy: trackByAppointmentId" [appointment]="a" viewerRole="PATIENT"
                 class="h-full" (reschedule)="startReschedule($event)" (cancel)="cancelAppointment($event)"
                 (openChat)="openChat($event)"></app-appointment-card>
         </div>
@@ -81,5 +75,4 @@
         <app-shared-chat-modal [isOpen]="chatOpen" [appointmentId]="chatAppointmentId"
             [participantName]="chatParticipantName" [participantImage]="chatParticipantImage"
             (close)="closeChat()"></app-shared-chat-modal>
-    </div>
-</app-patient-layout>
+    </app-page-container>

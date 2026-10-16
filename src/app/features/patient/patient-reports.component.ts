@@ -5,17 +5,21 @@ import { ChartWidgetComponent } from '../../shared/chart-widget.component';
 import { AuthService } from '../../core/services/auth.service';
 import { ReportsApiService } from '../../core/services/reports.service';
 import { AnalyticsApiService } from '../../core/services/analytics.service';
-import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { DoctorService, Doctor } from '../../core/services/doctor.service';
 import { AppointmentService, PatientAppointmentItem } from '../../core/services/appointment.service';
 import { UserAvatarComponent } from '../../shared/components/user-avatar.component';
 import { PatientReportsActivityComponent } from './patient-reports-activity.component';
 import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
+import { PageContainerComponent } from '../../shared/ui/page-container.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { doctorDisplayName } from '../../shared/utils/doctor-name.util';
+import { InrPipe } from '../../shared/utils/inr.pipe';
+import { memoByDeps } from '../../shared/utils/memo';
 
 @Component({
   selector: 'app-patient-reports',
   standalone: true,
-  imports: [CommonModule, RouterModule, ChartWidgetComponent, PatientLayoutComponent, UserAvatarComponent, PatientReportsActivityComponent, PageLoaderComponent],
+  imports: [InrPipe, PageHeaderComponent, PageContainerComponent, CommonModule, RouterModule, ChartWidgetComponent, UserAvatarComponent, PatientReportsActivityComponent, PageLoaderComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './patient-reports.component.html',
   styleUrl: './patient-reports.component.css'
@@ -134,10 +138,6 @@ export class PatientReportsComponent implements OnInit {
     return `${doc.doctorId}-${doc.name}`;
   }
 
-  trackIndex(index: number): number {
-    return index;
-  }
-
   viewAppointment(id: number) {
     if (id) {
       this.router.navigate(['/patient/appointments', id]);
@@ -196,7 +196,7 @@ export class PatientReportsComponent implements OnInit {
   }
 
   private loadDoctors() {
-    this.doctorApi.getAllForPatients(0, 50).subscribe({
+    this.doctorApi.getDirectory().subscribe({
       next: (list) => {
         this.doctors = list || [];
         this.doctorNameById = {};
@@ -226,7 +226,16 @@ export class PatientReportsComponent implements OnInit {
     this.doctorVisitData = ids.map((k) => Number(visits[k] || 0));
   }
 
+  private readonly _doctorVisitList = memoByDeps<Array<{ doctorId: number; name: string; count: number; percent: number }>>(
+    () => this.computeDoctorVisitList(),
+    () => [this.doctorVisitData, this.doctorVisitLabels, this.patientAnalytics],
+  );
+
   get doctorVisitList(): Array<{ doctorId: number; name: string; count: number; percent: number }> {
+    return this._doctorVisitList();
+  }
+
+  private computeDoctorVisitList(): Array<{ doctorId: number; name: string; count: number; percent: number }> {
     const total = this.doctorVisitData.reduce((a, b) => a + b, 0) || 1;
     const keys = Object.keys(this.patientAnalytics?.doctorVisitCount || {});
     return this.doctorVisitLabels.map((name, i) => {
@@ -241,9 +250,7 @@ export class PatientReportsComponent implements OnInit {
   }
 
   private formatDoctorName(d: Doctor): string {
-    const base = (d.name || `${d.firstName || ''} ${d.lastName || ''}`).trim();
-    const hasPrefix = /^dr\.?\s/i.test(base);
-    return hasPrefix ? base : `Dr ${base}`;
+    return doctorDisplayName(d);
   }
 
   private completeLoad() {

@@ -14,11 +14,11 @@
 
             <!-- Left Content (Selected or Placeholder) -->
             <div class="flex items-center gap-2.5 min-w-0 flex-1">
-                <i class="fa-solid fa-user-injured text-blue-500 shrink-0 text-sm"></i>
+                <i [class]="icon" class="text-blue-500 shrink-0 text-sm" aria-hidden="true"></i>
 
                 <!-- Loading Spinner in Trigger -->
-                <span *ngIf="loading" class="text-xs sm:text-sm text-gray-400 flex items-center gap-2">
-                    <i class="fa-solid fa-spinner fa-spin text-blue-500"></i>
+                <span *ngIf="loading" class="text-xs sm:text-sm text-gray-700 dark:text-gray-400 flex items-center gap-2">
+                    <i class="fa-solid fa-spinner fa-spin text-blue-500" aria-hidden="true"></i>
                     <span>Loading options...</span>
                 </span>
 
@@ -43,19 +43,19 @@
             <div class="flex items-center gap-1.5 shrink-0 ml-1">
                 <button *ngIf="selectedOption && !disabled" type="button" (click)="onClear($event)"
                     title="Clear selection" aria-label="Clear selection"
-                    class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-red-500 rounded-full transition-colors">
-                    <i class="fa-solid fa-times text-xs"></i>
+                    class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-400 hover:text-red-500 rounded-full transition-colors">
+                    <i class="fa-solid fa-times text-xs" aria-hidden="true"></i>
                 </button>
 
-                <i class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform duration-200"
-                    [class.rotate-180]="isOpen"></i>
+                <i class="fa-solid fa-chevron-down text-xs text-gray-700 dark:text-gray-400 transition-transform duration-200"
+                    [class.rotate-180]="isOpen" aria-hidden="true"></i>
             </div>
         </button>
     </div>
 
     <!-- Hint Text -->
     <p *ngIf="hint" class="text-[11px] text-amber-500 dark:text-amber-400 font-medium flex items-center gap-1 mt-1">
-        <i class="fa-solid fa-info-circle"></i>
+        <i class="fa-solid fa-info-circle" aria-hidden="true"></i>
         <span>{{ hint }}</span>
     </p>
 
@@ -68,12 +68,12 @@
             class="p-2 sm:p-2.5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/80 dark:bg-gray-800/50 backdrop-blur-sm">
             <div class="relative">
                 <i
-                    class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400"></i>
+                    class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-700 dark:text-gray-400" aria-hidden="true"></i>
                 <input #searchInput type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange($event)"
                     [placeholder]="searchPlaceholder"
                     class="w-full pl-8 pr-7 py-2 text-xs sm:text-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all" />
                 <button *ngIf="searchQuery" type="button" (click)="searchQuery = ''; onSearchChange('')"
-                    class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                    class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-700 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
                     aria-label="Clear search">
                     <i class="fa-solid fa-xmark text-xs" aria-hidden="true"></i>
                 </button>
@@ -85,16 +85,16 @@
 
             <!-- Empty State: No options provided at all -->
             <div *ngIf="normalizedOptions.length === 0" class="py-6 px-4 text-center text-gray-500 dark:text-gray-400">
-                <i class="fa-solid fa-user-slash text-xl mb-1.5 opacity-40"></i>
+                <i class="fa-solid fa-user-slash text-xl mb-1.5 opacity-40" aria-hidden="true"></i>
                 <p class="text-xs sm:text-sm font-medium">{{ emptyText }}</p>
             </div>
 
             <!-- No Search Results -->
             <div *ngIf="normalizedOptions.length > 0 && filteredOptions.length === 0"
                 class="py-6 px-4 text-center text-gray-500 dark:text-gray-400">
-                <i class="fa-solid fa-magnifying-glass-minus text-xl mb-1.5 opacity-40"></i>
+                <i class="fa-solid fa-magnifying-glass-minus text-xl mb-1.5 opacity-40" aria-hidden="true"></i>
                 <p class="text-xs sm:text-sm font-medium">{{ noResultsText }}</p>
-                <p class="text-[11px] opacity-70 mt-0.5">Try searching with a different name or email</p>
+                <p *ngIf="noResultsHint" class="text-[11px] opacity-70 mt-0.5">{{ noResultsHint }}</p>
             </div>
 
             <!-- Filtered Options List -->
@@ -119,7 +119,7 @@
                 </div>
 
                 <i class="fa-solid fa-check text-xs text-blue-600 dark:text-blue-400 shrink-0"
-                    [class.opacity-100]="option.value === value" [class.opacity-0]="option.value !== value"></i>
+                    [class.opacity-100]="option.value === value" [class.opacity-0]="option.value !== value" aria-hidden="true"></i>
             </div>
         </div>
     </div>

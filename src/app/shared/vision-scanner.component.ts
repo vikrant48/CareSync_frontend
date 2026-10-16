@@ -29,11 +29,11 @@ import { ModalShellComponent } from './ui/modal-shell.component';
             </div>
             <div>
               <h3 class="text-base sm:text-lg font-bold leading-tight tracking-wide">{{ modalTitle }}</h3>
-              <p class="text-xs text-blue-100/90 font-medium">Powered by Gemini 1.5 Multimodal Vision AI</p>
+              <p class="text-xs text-blue-100/90 font-medium">AI document scanner</p>
             </div>
           </div>
           <button type="button" (click)="closeModal.emit()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center text-white">
-            <i class="fas fa-times text-sm"></i>
+            <i class="fas fa-times text-sm" aria-hidden="true"></i>
           </button>
         </div>
 
@@ -48,7 +48,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
             <input type="file" (change)="onFileSelected($event)" accept="image/*,.pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
 
             <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-tr from-blue-600/20 to-indigo-600/20 border border-blue-500/30 text-blue-400 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-lg">
-              <i class="fas fa-file-medical"></i>
+              <i class="fas fa-file-medical" aria-hidden="true"></i>
             </div>
             <h4 class="text-base sm:text-lg font-bold text-slate-100 mb-1">Upload Medical Document or Prescription</h4>
             <p class="text-xs sm:text-sm text-slate-400 max-w-md mx-auto mb-6 leading-relaxed">
@@ -56,7 +56,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
             </p>
 
             <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-blue-500/20 group-hover:from-blue-500 group-hover:to-indigo-500 transition-all">
-              <i class="fas fa-camera text-sm"></i> Select File to Scan
+              <i class="fas fa-camera text-sm" aria-hidden="true"></i> Select File to Scan
             </div>
           </div>
 
@@ -65,7 +65,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
             <div class="relative w-44 h-56 mx-auto mb-6 rounded-xl border border-slate-800 bg-slate-900 overflow-hidden shadow-2xl">
               <img *ngIf="previewUrl()" [src]="previewUrl()" alt="Medical Preview" class="w-full h-full object-cover opacity-60">
               <div *ngIf="!previewUrl()" class="w-full h-full flex items-center justify-center text-4xl text-slate-700">
-                <i class="fas fa-file-medical-alt"></i>
+                <i class="fas fa-file-medical-alt" aria-hidden="true"></i>
               </div>
 
               <!-- Scanning Laser Beam -->
@@ -75,7 +75,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
 
             <div class="space-y-2">
               <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-mono font-bold border border-cyan-500/30 animate-pulse">
-                <i class="fas fa-microchip"></i> Gemini Vision AI Extracting Data...
+                <i class="fas fa-microchip" aria-hidden="true"></i> AI is extracting data...
               </div>
               <p class="text-xs sm:text-sm font-medium text-slate-300">Parsing handwriting, medications, dosages & lab metrics...</p>
             </div>
@@ -83,7 +83,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
 
           <!-- Error Alert -->
           <div *ngIf="errorMessage()" class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs sm:text-sm flex items-center gap-3">
-            <i class="fas fa-exclamation-triangle text-lg text-rose-500"></i>
+            <i class="fas fa-exclamation-triangle text-lg text-rose-500" aria-hidden="true"></i>
             <div>
               <p class="font-bold">Scan Error</p>
               <p class="text-xs opacity-90">{{ errorMessage() }}</p>
@@ -108,20 +108,20 @@ import { ModalShellComponent } from './ui/modal-shell.component';
                     'fa-vials': scanResult()!.documentType === 'LAB_REPORT',
                     'fa-notes-medical': scanResult()!.documentType === 'MEDICAL_NOTE',
                     'fa-file': !scanResult()!.documentType || scanResult()!.documentType === 'UNKNOWN'
-                  }"></i> {{ scanResult()!.documentType || 'DOCUMENT' }}
+                  }" aria-hidden="true"></i> {{ scanResult()!.documentType || 'DOCUMENT' }}
                 </span>
 
                 <span *ngIf="scanResult()!.patientName" class="text-xs font-medium text-slate-300">
-                  <i class="fas fa-user text-slate-500 mr-1"></i> Patient: <strong>{{ scanResult()!.patientName }}</strong>
+                  <i class="fas fa-user text-slate-500 mr-1" aria-hidden="true"></i> Patient: <strong>{{ scanResult()!.patientName }}</strong>
                 </span>
 
                 <span *ngIf="scanResult()!.doctorName" class="text-xs font-medium text-slate-300">
-                  <i class="fas fa-user-md text-slate-500 mr-1"></i> Doctor: <strong>{{ scanResult()!.doctorName }}</strong>
+                  <i class="fas fa-user-md text-slate-500 mr-1" aria-hidden="true"></i> Doctor: <strong>{{ scanResult()!.doctorName }}</strong>
                 </span>
               </div>
 
               <span *ngIf="scanResult()!.date" class="text-xs font-mono text-slate-400">
-                <i class="far fa-calendar-alt mr-1"></i> {{ scanResult()!.date }}
+                <i class="far fa-calendar-alt mr-1" aria-hidden="true"></i> {{ scanResult()!.date }}
               </span>
             </div>
 
@@ -134,7 +134,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
             <!-- Warnings Alert Box -->
             <div *ngIf="scanResult()!.warnings && scanResult()!.warnings!.length > 0" class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 space-y-1.5">
               <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
-                <i class="fas fa-exclamation-circle text-amber-400"></i> Clinical Flags & Safety Notes:
+                <i class="fas fa-exclamation-circle text-amber-400" aria-hidden="true"></i> Clinical Flags & Safety Notes:
               </div>
               <ul class="list-disc list-inside text-xs space-y-1 opacity-90">
                 <li *ngFor="let w of scanResult()!.warnings">{{ w }}</li>
@@ -144,7 +144,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
             <!-- Extracted Medications Table -->
             <div *ngIf="scanResult()!.medications && scanResult()!.medications!.length > 0" class="space-y-3">
               <h5 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                <i class="fas fa-pills text-purple-400"></i> Extracted Medications ({{ scanResult()!.medications!.length }})
+                <i class="fas fa-pills text-purple-400" aria-hidden="true"></i> Extracted Medications ({{ scanResult()!.medications!.length }})
               </h5>
               <!-- Mobile cards -->
               <div class="md:hidden space-y-2">
@@ -186,7 +186,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
             <!-- Extracted Lab Results Table -->
             <div *ngIf="scanResult()!.labResults && scanResult()!.labResults!.length > 0" class="space-y-3">
               <h5 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                <i class="fas fa-microscope text-emerald-400"></i> Extracted Lab Test Metrics ({{ scanResult()!.labResults!.length }})
+                <i class="fas fa-microscope text-emerald-400" aria-hidden="true"></i> Extracted Lab Test Metrics ({{ scanResult()!.labResults!.length }})
               </h5>
               <!-- Mobile cards -->
               <div class="md:hidden space-y-2">
@@ -244,16 +244,16 @@ import { ModalShellComponent } from './ui/modal-shell.component';
 
         <!-- Footer Actions -->
         <div modalFooter class="flex items-center justify-between w-full">
-          <button type="button" *ngIf="scanResult()" (click)="resetScanner()" class="px-4 py-2 rounded-xl border border-slate-700 text-xs font-semibold text-slate-300 hover:bg-slate-800 transition-colors">
-            <i class="fas fa-redo mr-1.5"></i> Scan Another
+          <button type="button" *ngIf="scanResult()" (click)="resetScanner()" class="btn-size-md px-4 rounded-xl border border-slate-700 text-xs font-semibold text-slate-300 hover:bg-slate-800 transition-colors inline-flex items-center justify-center">
+            <i class="fas fa-redo mr-1.5" aria-hidden="true"></i> Scan Another
           </button>
 
           <div class="flex items-center gap-3 ml-auto">
-            <button type="button" (click)="closeModal.emit()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors">
+            <button type="button" (click)="closeModal.emit()" class="btn-size-sm px-4 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors inline-flex items-center justify-center">
               Close
             </button>
-            <button type="button" *ngIf="scanResult() && scanResult()!.success" (click)="onConfirm()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-blue-600/20 hover:from-blue-500 hover:to-indigo-500 transition-all">
-              <i class="fas fa-check mr-1.5"></i> Done & Import
+            <button type="button" *ngIf="scanResult() && scanResult()!.success" (click)="onConfirm()" class="btn-size-lg px-5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-blue-600/20 hover:from-blue-500 hover:to-indigo-500 transition-all inline-flex items-center justify-center">
+              <i class="fas fa-check mr-1.5" aria-hidden="true"></i> Done & Import
             </button>
           </div>
         </div>

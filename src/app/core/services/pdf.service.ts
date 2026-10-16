@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { jsPDF } from 'jspdf';
+// Type-only import: the jspdf library itself is loaded on demand (see loadJsPdf) to keep it out of page bundles
+import type { jsPDF } from 'jspdf';
 import { Observable } from 'rxjs';
 import { PaymentService } from './payment.service';
 import { LabTestService, BookingResponse } from './lab-test.service';
@@ -77,7 +78,17 @@ export class PdfService {
    * Generate and download payment receipt PDF
    */
   generatePaymentReceipt(receiptData: PaymentReceiptData): void {
-    const doc = new jsPDF('p', 'mm', 'a4');
+    this.loadJsPdf()
+      .then((JsPDF) => this.renderPaymentReceipt(new JsPDF('p', 'mm', 'a4'), receiptData))
+      .catch((err) => console.error('Failed to load PDF library', err));
+  }
+
+  /** Downloads jspdf the first time a PDF is generated (cached by the browser/module loader afterwards). */
+  private loadJsPdf(): Promise<typeof jsPDF> {
+    return import('jspdf').then((m) => m.jsPDF);
+  }
+
+  private renderPaymentReceipt(doc: jsPDF, receiptData: PaymentReceiptData): void {
 
     const formattedAmount = `Rs. ${(receiptData.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
@@ -376,7 +387,7 @@ export class PdfService {
    * Fetches payment data from DB via bookingId and combines with lab booking details
    */
   generateReceiptByBookingId(bookingId: number, bookingData?: BookingResponse): void {
-    this.paymentService.getPaymentByBookingId(bookingId).subscribe({
+    this.paymentService.getPaymentByBookingId(bookingId, 'BOOKING').subscribe({
       next: (payment) => {
         const amt = Number(payment.amount) > 0 ? Number(payment.amount) : Number(bookingData?.totalPrice || 0);
         const receiptData: PaymentReceiptData = {
@@ -418,7 +429,7 @@ export class PdfService {
    * Fetches payment data from DB via appointmentId and combines with appointment details
    */
   generateAppointmentReceiptByBookingId(appointmentId: number, appointmentData?: any): void {
-    this.paymentService.getPaymentByBookingId(appointmentId).subscribe({
+    this.paymentService.getPaymentByBookingId(appointmentId, 'APPOINTMENT').subscribe({
       next: (payment) => {
         const dateStr = payment.paymentCompletedAt || payment.createdAt || appointmentData?.appointmentDate || new Date().toISOString();
         const recordedFee = Number(appointmentData?.consultationFees || appointmentData?.doctorConsultationFees || 0);
@@ -464,7 +475,12 @@ export class PdfService {
    * Generate official Doctor Prescription & Consultation Summary PDF with QR Code Verification
    */
   generatePrescriptionPdf(data: PrescriptionPdfData): void {
-    const doc = new jsPDF();
+    this.loadJsPdf()
+      .then((JsPDF) => this.startPrescriptionPdf(new JsPDF(), data))
+      .catch((err) => console.error('Failed to load PDF library', err));
+  }
+
+  private startPrescriptionPdf(doc: jsPDF, data: PrescriptionPdfData): void {
     const qrText = data.verificationUrl || `https://caresync.app/verify/prescription/${data.appointmentId}`;
     const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrText)}`;
 

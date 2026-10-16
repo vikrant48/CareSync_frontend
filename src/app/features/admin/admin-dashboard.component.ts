@@ -11,13 +11,13 @@ import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 import { SkeletonComponent } from '../../shared/ui/skeleton.component';
 import { FilterBarComponent, FilterConfig } from '../../shared/components';
 import { AdminChromeComponent, AdminSection } from './admin-chrome.component';
+import { ConfirmService } from '../../core/services/confirm.service';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
   imports: [CommonModule, FormsModule, ModalShellComponent, SkeletonComponent, FilterBarComponent, AdminChromeComponent],
   templateUrl: './admin-dashboard.component.html',
-  styleUrl: './admin-dashboard.component.css'
 })
 export class AdminDashboardComponent implements OnInit {
   adminService = inject(AdminService);
@@ -25,6 +25,7 @@ export class AdminDashboardComponent implements OnInit {
   doctorProfileService = inject(DoctorProfileService);
   masterService = inject(MasterDataService);
   toastService = inject(ToastService);
+  private confirm = inject(ConfirmService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -191,7 +192,11 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  toggleUserStatus(u: UserSummary) {
+  async toggleUserStatus(u: UserSummary) {
+    if (u.isActive) {
+      const ok = await this.confirm.ask({ title: 'Deactivate user', message: `Deactivate ${u.username}? They will no longer be able to sign in.`, confirmLabel: 'Deactivate', cancelLabel: 'Cancel', danger: true });
+      if (!ok) return;
+    }
     this.togglingUsername = u.username;
     this.adminService.toggleUserActiveStatus(u.username).subscribe({
       next: (res) => {
@@ -428,7 +433,9 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  unblockAllIPs() {
+  async unblockAllIPs() {
+    const ok = await this.confirm.ask({ title: 'Unblock all IPs', message: 'Remove every IP address from the block list?', confirmLabel: 'Unblock all', cancelLabel: 'Cancel', danger: true });
+    if (!ok) return;
     this.adminService.unblockAllIPs().subscribe({
       next: (res) => {
         this.toastService.showSuccess(res.message);

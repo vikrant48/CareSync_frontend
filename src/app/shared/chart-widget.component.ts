@@ -8,7 +8,7 @@ import { Chart, ChartType } from 'chart.js/auto';
   imports: [CommonModule],
   template: `
     <div class="w-full h-full relative flex items-center justify-center overflow-hidden">
-      <canvas #canvas class="w-full h-full max-w-full max-h-full block"></canvas>
+      <canvas #canvas class="w-full h-full max-w-full max-h-full block" role="img" [attr.aria-label]="ariaSummary"></canvas>
     </div>
   `,
   styles: [`
@@ -29,6 +29,15 @@ export class ChartWidgetComponent implements AfterViewInit, OnDestroy, OnChanges
   @Input() data: number[] = [];
   @Input() datasetLabel: string = '';
   @Input() colors: string[] | undefined;
+
+  /** Text alternative for screen readers: the chart's label/value pairs (first 12). */
+  get ariaSummary(): string {
+    const name = this.title || this.datasetLabel || 'Chart';
+    if (!this.labels?.length) return `${name}: no data`;
+    const points = this.labels.slice(0, 12).map((l, i) => `${l} ${this.data?.[i] ?? 0}`).join(', ');
+    const more = this.labels.length > 12 ? `, and ${this.labels.length - 12} more` : '';
+    return `${name}: ${points}${more}`;
+  }
 
   @ViewChild('canvas') canvas!: ElementRef<HTMLCanvasElement>;
   private chart: Chart | null = null;

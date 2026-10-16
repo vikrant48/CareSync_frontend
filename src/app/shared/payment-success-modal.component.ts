@@ -20,7 +20,7 @@ import { PdfService, PaymentReceiptData } from '../core/services/pdf.service';
         <div class="flex items-center justify-between gap-3 text-xs sm:text-sm">
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-[var(--primary-soft)] text-[var(--primary)] flex items-center justify-center text-sm shrink-0">
-              <i class="fa-solid fa-indian-rupee-sign"></i>
+              <i class="fa-solid fa-indian-rupee-sign" aria-hidden="true"></i>
             </div>
             <span class="text-muted font-semibold">Amount Paid</span>
           </div>
@@ -30,21 +30,21 @@ import { PdfService, PaymentReceiptData } from '../core/services/pdf.service';
         <div class="flex items-center justify-between gap-3 text-xs sm:text-sm">
           <div class="flex items-center gap-3 min-w-0">
             <div class="w-9 h-9 rounded-xl bg-[var(--primary-soft)] text-[var(--primary)] flex items-center justify-center text-sm shrink-0">
-              <i class="fa-regular fa-file-lines"></i>
+              <i class="fa-regular fa-file-lines" aria-hidden="true"></i>
             </div>
             <span class="text-muted font-semibold">Transaction ID</span>
           </div>
           <div class="flex items-center gap-2 min-w-0">
             <span class="text-[var(--text)] font-mono text-xs font-semibold truncate max-w-[140px] sm:max-w-[200px]" [title]="paymentDetails?.transactionId">{{ paymentDetails?.transactionId }}</span>
             <button type="button" (click)="copyTransactionId()" class="min-w-[44px] min-h-[44px] text-[var(--primary)] rounded-lg hover:bg-[var(--bg)]" title="Copy ID" aria-label="Copy transaction ID">
-              <i class="fa-regular fa-copy text-xs"></i>
+              <i class="fa-regular fa-copy text-xs" aria-hidden="true"></i>
             </button>
           </div>
         </div>
         <div class="flex items-center justify-between gap-3 text-xs sm:text-sm">
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-[var(--primary-soft)] text-[var(--primary)] flex items-center justify-center text-sm shrink-0">
-              <i class="fa-regular fa-calendar-days"></i>
+              <i class="fa-regular fa-calendar-days" aria-hidden="true"></i>
             </div>
             <span class="text-muted font-semibold">Date & Time</span>
           </div>
@@ -53,7 +53,7 @@ import { PdfService, PaymentReceiptData } from '../core/services/pdf.service';
         <div class="flex items-center justify-between gap-3 text-xs sm:text-sm">
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-[var(--primary-soft)] text-[var(--primary)] flex items-center justify-center text-sm shrink-0">
-              <i class="fa-regular fa-credit-card"></i>
+              <i class="fa-regular fa-credit-card" aria-hidden="true"></i>
             </div>
             <span class="text-muted font-semibold">Payment Method</span>
           </div>
@@ -62,7 +62,7 @@ import { PdfService, PaymentReceiptData } from '../core/services/pdf.service';
         <div class="flex items-center justify-between gap-3 text-xs sm:text-sm">
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-[var(--primary-soft)] text-[var(--primary)] flex items-center justify-center text-sm shrink-0">
-              <i class="fa-regular fa-user"></i>
+              <i class="fa-regular fa-user" aria-hidden="true"></i>
             </div>
             <span class="text-muted font-semibold">Paid to</span>
           </div>
@@ -73,12 +73,12 @@ import { PdfService, PaymentReceiptData } from '../core/services/pdf.service';
       </div>
 
       <button modalFooter type="button" (click)="downloadPDF()" class="btn-secondary">
-        <i class="fa-solid fa-download text-xs"></i>
+        <i class="fa-solid fa-download text-xs" aria-hidden="true"></i>
         <span>Download Receipt</span>
       </button>
       <button modalFooter type="button" (click)="closeModal()" class="btn-primary">
         <span>Done</span>
-        <i class="fa-solid fa-arrow-right text-xs"></i>
+        <i class="fa-solid fa-arrow-right text-xs" aria-hidden="true"></i>
       </button>
     </app-modal-shell>
   `,
@@ -149,7 +149,7 @@ export class PaymentSuccessModalComponent {
         amount: this.paymentDetails.amount,
         currency: 'INR',
         paymentMethod: this.getPaymentMethodDisplay(),
-        patientName: String(this.paymentDetails.patientName) || 'Patient',
+        patientName: this.paymentDetails.patientName ? String(this.paymentDetails.patientName) : 'Patient',
         patientId: this.paymentDetails.patientId || 0,
         paymentDate: new Date().toISOString(),
         paidTo: this.recipientUpiId || 'Not provided',

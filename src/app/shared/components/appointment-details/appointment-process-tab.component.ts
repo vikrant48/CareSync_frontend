@@ -21,7 +21,6 @@ export interface ProcessStageRow {
     standalone: true,
     imports: [CommonModule],
     templateUrl: './appointment-process-tab.component.html',
-    styleUrl: './appointment-process-tab.component.css'
 })
 export class AppointmentProcessTabComponent implements OnChanges {
     @Input() appointment: any;

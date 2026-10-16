@@ -43,16 +43,16 @@ import flatpickr from 'flatpickr';
                type="text"
                [placeholder]="placeholder"
                [disabled]="disabled"
-               class="input-modern min-h-touch sm:h-[34px] sm:min-h-0 py-2.5 sm:py-0 text-sm sm:text-xs px-3 pr-9 w-full cursor-pointer"
+               [class]="fieldClass"
                [class.error]="error"
                [class.opacity-50]="disabled"
                [class.cursor-not-allowed]="disabled">
         
-        <i class="fa-solid fa-calendar text-xs absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-emerald-500 transition-colors pointer-events-none"
-           [class.text-red-400]="error"></i>
+        <i class="fa-solid fa-calendar text-xs absolute right-3 top-1/2 -translate-y-1/2 text-gray-700 dark:text-gray-400 group-hover:text-emerald-500 transition-colors pointer-events-none"
+           [class.text-red-400]="error" aria-hidden="true"></i>
       </div>
       
-      <p *ngIf="error" class="error-msg animate-in fade-in slide-in-from-top-1 duration-200 text-[10px]">
+      <p *ngIf="error" role="alert" class="error-msg animate-in fade-in slide-in-from-top-1 duration-200 text-[10px]">
         {{ error }}
       </p>
     </div>
@@ -75,6 +75,8 @@ export class DatePickerComponent implements ControlValueAccessor, AfterViewInit,
   @Input() minDate?: string | Date;
   @Input() maxDate?: string | Date;
   @Input() mode: 'single' | 'multiple' | 'range' = 'single';
+  /** 38px variant for filter bars (forms use the default 44px) */
+  @Input() compact = false;
 
   @Output() dateChange = new EventEmitter<string>();
 
@@ -151,8 +153,13 @@ export class DatePickerComponent implements ControlValueAccessor, AfterViewInit,
     }
   }
 
+  get fieldClass(): string {
+    return 'input-modern py-0 text-sm sm:text-xs px-3 pr-9 w-full cursor-pointer '
+      + (this.compact ? 'filter-control' : 'h-11 min-h-touch');
+  }
+
   private getAltInputClass(): string {
-    return 'input-modern min-h-touch sm:h-[34px] sm:min-h-0 py-2.5 sm:py-0 text-sm sm:text-xs px-3 pr-9 w-full cursor-pointer' + (this.error ? ' error' : '');
+    return this.fieldClass + (this.error ? ' error' : '');
   }
 
   private updateAltInputClass() {

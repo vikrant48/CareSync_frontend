@@ -9,7 +9,7 @@
         <div class="flex items-center gap-2 sm:gap-3 pointer-events-auto min-w-0 flex-1 mr-2">
             <div
                 class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-brand flex items-center justify-center text-white shadow-lg shadow-blue-500/20 shrink-0">
-                <i class="fa-solid fa-video text-sm sm:text-lg"></i>
+                <i class="fa-solid fa-video text-sm sm:text-lg" aria-hidden="true"></i>
             </div>
             <div class="min-w-0 flex-1">
                 <h2 class="text-xs sm:text-base font-bold tracking-tight flex items-center gap-1.5 truncate"
@@ -36,15 +36,15 @@
           'text-emerald-400': connectionQuality === 'excellent' || connectionQuality === 'good',
           'text-amber-400': connectionQuality === 'poor',
           'text-red-400': connectionQuality === 'lost'
-        }"></i>
+        }" aria-hidden="true"></i>
                 <span class="capitalize text-[11px] font-medium">{{ connectionQuality }}</span>
             </div>
 
             <!-- Leave / Exit Button -->
             <button (click)="leaveConsultation()"
-                class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95"
+                class="btn-size-sm px-2.5 sm:px-3 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95"
                 [ngClass]="isWaitingScreen ? 'btn-secondary' : 'bg-white/10 hover:bg-white/20 text-white backdrop-blur-md'">
-                <i class="fa-solid fa-arrow-left text-xs"></i>
+                <i class="fa-solid fa-arrow-left text-xs" aria-hidden="true"></i>
                 <span>Exit</span>
             </button>
         </div>
@@ -62,7 +62,7 @@
                 <video #previewVideo autoplay playsinline muted class="w-full h-full object-cover"
                     [ngClass]="{'hidden': !cameraEnabled}"></video>
                 <div *ngIf="!cameraEnabled" class="flex flex-col items-center justify-center text-gray-500">
-                    <i class="fa-solid fa-video-slash text-4xl mb-2"></i>
+                    <i class="fa-solid fa-video-slash text-4xl mb-2" aria-hidden="true"></i>
                     <span class="text-xs font-medium">Camera Off</span>
                 </div>
 
@@ -72,12 +72,12 @@
                     <button (click)="togglePreviewMic()"
                         class="w-9 h-9 rounded-full flex items-center justify-center transition-colors"
                         [ngClass]="micEnabled ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-red-500 text-white'">
-                        <i class="fa-solid" [ngClass]="micEnabled ? 'fa-microphone' : 'fa-microphone-slash'"></i>
+                        <i class="fa-solid" [ngClass]="micEnabled ? 'fa-microphone' : 'fa-microphone-slash'" aria-hidden="true"></i>
                     </button>
                     <button (click)="togglePreviewCamera()"
                         class="w-9 h-9 rounded-full flex items-center justify-center transition-colors"
                         [ngClass]="cameraEnabled ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-red-500 text-white'">
-                        <i class="fa-solid" [ngClass]="cameraEnabled ? 'fa-video' : 'fa-video-slash'"></i>
+                        <i class="fa-solid" [ngClass]="cameraEnabled ? 'fa-video' : 'fa-video-slash'" aria-hidden="true"></i>
                     </button>
                 </div>
             </div>
@@ -87,7 +87,7 @@
                 class="w-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 rounded-2xl p-4 mb-6 text-left flex items-start gap-3">
                 <div
                     class="w-10 h-10 rounded-xl bg-brand-soft text-brand flex items-center justify-center shrink-0 mt-0.5">
-                    <i class="fa-solid fa-user-doctor text-lg"></i>
+                    <i class="fa-solid fa-user-doctor text-lg" aria-hidden="true"></i>
                 </div>
                 <div class="flex-1">
                     <h4 class="text-sm font-bold text-[var(--text)] mb-1">Doctor Pre-Consultation Lobby</h4>
@@ -102,7 +102,7 @@
                 class="w-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 rounded-2xl p-4 mb-6 text-left flex items-start gap-3">
                 <div
                     class="w-10 h-10 rounded-xl bg-brand-soft text-brand flex items-center justify-center shrink-0 mt-0.5">
-                    <i class="fa-solid fa-clock text-lg animate-spin"></i>
+                    <i class="fa-solid fa-clock text-lg animate-spin" aria-hidden="true"></i>
                 </div>
                 <div>
                     <h4 class="text-sm font-bold text-[var(--text)] mb-1">Waiting for your Doctor...</h4>
@@ -126,7 +126,7 @@
                             <span class="truncate min-w-0 flex-1 text-left font-medium">{{ getSelectedCameraLabel()
                                 }}</span>
                             <i class="fa-solid fa-chevron-down text-[10px] text-muted transition-transform duration-200"
-                                [class.rotate-180]="activeDropdown === 'lobby-camera'"></i>
+                                [class.rotate-180]="activeDropdown === 'lobby-camera'" aria-hidden="true"></i>
                         </button>
 
                         <div *ngIf="activeDropdown === 'lobby-camera'"
@@ -137,7 +137,7 @@
                                 <span class="truncate min-w-0 flex-1" [title]="dev.label || ''">{{ dev.label || 'Camera'
                                     }}</span>
                                 <i *ngIf="selectedCameraId === dev.deviceId"
-                                    class="fa-solid fa-check text-xs text-brand shrink-0"></i>
+                                    class="fa-solid fa-check text-xs text-brand shrink-0" aria-hidden="true"></i>
                             </button>
                         </div>
                     </div>
@@ -153,7 +153,7 @@
                             <span class="truncate min-w-0 flex-1 text-left font-medium">{{ getSelectedMicLabel()
                                 }}</span>
                             <i class="fa-solid fa-chevron-down text-[10px] text-muted transition-transform duration-200"
-                                [class.rotate-180]="activeDropdown === 'lobby-mic'"></i>
+                                [class.rotate-180]="activeDropdown === 'lobby-mic'" aria-hidden="true"></i>
                         </button>
 
                         <div *ngIf="activeDropdown === 'lobby-mic'"
@@ -164,7 +164,7 @@
                                 <span class="truncate min-w-0 flex-1" [title]="dev.label || ''">{{ dev.label ||
                                     'Microphone' }}</span>
                                 <i *ngIf="selectedMicId === dev.deviceId"
-                                    class="fa-solid fa-check text-xs text-brand shrink-0"></i>
+                                    class="fa-solid fa-check text-xs text-brand shrink-0" aria-hidden="true"></i>
                             </button>
                         </div>
                     </div>
@@ -175,13 +175,13 @@
             <div class="w-full flex flex-col sm:flex-row items-center gap-3">
                 <button (click)="connectToRoom()"
                     class="w-full sm:flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm transition-all shadow-lg shadow-blue-500/25 active:scale-98 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-video"></i>
+                    <i class="fa-solid fa-video" aria-hidden="true"></i>
                     <span>{{ auth.role() === 'DOCTOR' ? 'Launch Consultation Room' : 'Join Consultation Room' }}</span>
                 </button>
 
                 <button (click)="leaveConsultation()"
                     class="btn-secondary w-full sm:w-auto">
-                    <i class="fa-solid fa-xmark"></i>
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
                     <span>Cancel</span>
                 </button>
             </div>
@@ -232,14 +232,14 @@
                             </div>
                             <div class="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-600 flex items-center justify-center text-white text-4xl sm:text-5xl font-black shadow-2xl ring-4 transition-all duration-300"
                                 [ngClass]="hasRemoteParticipant ? 'ring-emerald-500/80 shadow-blue-500/20' : 'ring-gray-900'">
-                                <i class="fa-solid fa-user-doctor" *ngIf="auth.role() === 'PATIENT'"></i>
-                                <i class="fa-solid fa-user-injured" *ngIf="auth.role() === 'DOCTOR'"></i>
+                                <i class="fa-solid fa-user-doctor" *ngIf="auth.role() === 'PATIENT'" aria-hidden="true"></i>
+                                <i class="fa-solid fa-user-injured" *ngIf="auth.role() === 'DOCTOR'" aria-hidden="true"></i>
                             </div>
                             <!-- Status Indicator Badge -->
                             <div class="absolute bottom-1 right-1 w-7 h-7 rounded-full border-3 border-gray-900 flex items-center justify-center text-xs shadow-md"
                                 [ngClass]="hasRemoteParticipant ? 'bg-blue-500 text-white' : 'bg-amber-500 text-white'">
                                 <i class="fa-solid"
-                                    [ngClass]="hasRemoteParticipant ? 'fa-video-slash' : 'fa-clock'"></i>
+                                    [ngClass]="hasRemoteParticipant ? 'fa-video-slash' : 'fa-clock'" aria-hidden="true"></i>
                             </div>
                         </div>
 
@@ -280,7 +280,7 @@
                 <!-- Remote Participant Name Tag Overlay when Video is Live -->
                 <div *ngIf="hasRemoteParticipant && hasRemoteVideo"
                     class="absolute bottom-4 left-4 bg-gray-950/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-gray-800 text-xs font-semibold text-white flex items-center gap-2 shadow-lg">
-                    <i class="fa-solid fa-circle text-[8px] text-emerald-400"></i>
+                    <i class="fa-solid fa-circle text-[8px] text-emerald-400" aria-hidden="true"></i>
                     <span>{{ remoteParticipantName }}</span>
                 </div>
             </div>
@@ -296,11 +296,11 @@
                     class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-slate-900 to-gray-950 text-gray-300 p-2 text-center relative border border-gray-800/50">
                     <div
                         class="w-9 h-9 rounded-full bg-brand-soft border border-brand/30 flex items-center justify-center text-brand text-xs font-bold mb-1 shadow-sm">
-                        <i class="fa-solid fa-user"></i>
+                        <i class="fa-solid fa-user" aria-hidden="true"></i>
                     </div>
                     <span class="text-[10px] font-bold text-white tracking-wide">You</span>
                     <span class="text-[8px] font-medium text-red-400 flex items-center gap-1 mt-0.5">
-                        <i class="fa-solid fa-video-slash text-[7px]"></i> Off
+                        <i class="fa-solid fa-video-slash text-[7px]" aria-hidden="true"></i> Off
                     </span>
                 </div>
 
@@ -314,7 +314,7 @@
             <!-- Reconnecting Toast Overlay -->
             <div *ngIf="isReconnecting"
                 class="absolute top-20 left-1/2 -translate-x-1/2 z-30 bg-amber-500/90 text-gray-950 px-4 py-2 rounded-full shadow-xl flex items-center gap-2 font-bold text-xs">
-                <i class="fa-solid fa-rotate animate-spin"></i>
+                <i class="fa-solid fa-rotate animate-spin" aria-hidden="true"></i>
                 <span>Network unstable. Reconnecting...</span>
             </div>
 
@@ -330,7 +330,7 @@
                 [ngClass]="micEnabled ? 'bg-gray-800 hover:bg-gray-700 text-white' : 'bg-red-500 text-white shadow-lg shadow-red-500/30'"
                 [title]="micEnabled ? 'Mute Mic' : 'Unmute Mic'">
                 <i class="fa-solid text-sm sm:text-base"
-                    [ngClass]="micEnabled ? 'fa-microphone' : 'fa-microphone-slash'"></i>
+                    [ngClass]="micEnabled ? 'fa-microphone' : 'fa-microphone-slash'" aria-hidden="true"></i>
             </button>
 
             <!-- Camera Toggle -->
@@ -338,29 +338,29 @@
                 class="w-10 sm:w-11 h-10 sm:h-11 rounded-full flex items-center justify-center transition-all active:scale-95"
                 [ngClass]="cameraEnabled ? 'bg-gray-800 hover:bg-gray-700 text-white' : 'bg-red-500 text-white shadow-lg shadow-red-500/30'"
                 [title]="cameraEnabled ? 'Turn Off Camera' : 'Turn On Camera'">
-                <i class="fa-solid text-sm sm:text-base" [ngClass]="cameraEnabled ? 'fa-video' : 'fa-video-slash'"></i>
+                <i class="fa-solid text-sm sm:text-base" [ngClass]="cameraEnabled ? 'fa-video' : 'fa-video-slash'" aria-hidden="true"></i>
             </button>
 
             <!-- Screen Share Toggle -->
             <button (click)="toggleScreenShare()"
                 class="w-10 sm:w-11 h-10 sm:h-11 rounded-full flex items-center justify-center transition-all active:scale-95"
                 [ngClass]="screenShareEnabled ? 'bg-brand text-white shadow-lg shadow-blue-500/30' : 'bg-gray-800 hover:bg-gray-700 text-gray-300'"
-                title="Share Screen">
-                <i class="fa-solid fa-desktop text-sm sm:text-base"></i>
+                title="Share Screen" aria-label="Share Screen">
+                <i class="fa-solid fa-desktop text-sm sm:text-base" aria-hidden="true"></i>
             </button>
 
             <!-- Device Settings Picker Modal Toggle -->
             <button (click)="showDeviceModal = !showDeviceModal"
                 class="w-10 sm:w-11 h-10 sm:h-11 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 flex items-center justify-center transition-all active:scale-95"
-                title="Audio/Video Settings">
-                <i class="fa-solid fa-gear text-sm sm:text-base"></i>
+                title="Audio/Video Settings" aria-label="Audio/Video Settings">
+                <i class="fa-solid fa-gear text-sm sm:text-base" aria-hidden="true"></i>
             </button>
 
             <!-- Chat Toggle -->
             <button (click)="showChat = !showChat"
                 class="w-10 sm:w-11 h-10 sm:h-11 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 flex items-center justify-center transition-all active:scale-95 relative"
-                title="In-call Chat">
-                <i class="fa-solid fa-comments text-sm sm:text-base"></i>
+                title="In-call Chat" aria-label="In-call Chat">
+                <i class="fa-solid fa-comments text-sm sm:text-base" aria-hidden="true"></i>
                 <span *ngIf="unreadChatCount > 0"
                     class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-blue-500 text-white text-[10px] font-black flex items-center justify-center border-2 border-gray-900">
                     {{ unreadChatCount }}
@@ -371,17 +371,17 @@
 
             <!-- Doctor: End Consultation Button -->
             <button *ngIf="auth.role() === 'DOCTOR'" (click)="endConsultation()"
-                class="px-4 py-2.5 rounded-full bg-red-600 hover:bg-red-700 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-red-600/30 transition-all active:scale-95"
-                title="End Consultation for both participants">
-                <i class="fa-solid fa-phone-slash"></i>
+                class="btn-size-lg px-4 rounded-full bg-red-600 hover:bg-red-700 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-red-600/30 transition-all active:scale-95"
+                title="End Consultation for both participants" aria-label="End Consultation for both participants">
+                <i class="fa-solid fa-phone-slash" aria-hidden="true"></i>
                 <span class="hidden sm:inline">End Consultation</span>
             </button>
 
             <!-- Patient / General Leave Button -->
             <button *ngIf="auth.role() !== 'DOCTOR'" (click)="leaveConsultation()"
                 class="w-10 sm:w-11 h-10 sm:h-11 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-lg shadow-red-600/30 transition-all active:scale-95"
-                title="Leave Consultation">
-                <i class="fa-solid fa-phone-slash text-sm sm:text-base"></i>
+                title="Leave Consultation" aria-label="Leave Consultation">
+                <i class="fa-solid fa-phone-slash text-sm sm:text-base" aria-hidden="true"></i>
             </button>
         </div>
 
@@ -394,11 +394,11 @@
             class="fixed md:relative right-0 bottom-0 top-16 md:top-0 w-full md:w-80 h-[calc(100%-4rem)] md:h-full bg-gray-900 border-t md:border-t-0 md:border-l border-gray-800 flex flex-col z-30 shadow-2xl transition-all duration-300 animate-in slide-in-from-right-full">
             <div class="p-4 border-b border-gray-800 flex items-center justify-between bg-gray-950/50">
                 <h4 class="text-xs font-bold uppercase tracking-wider text-gray-300 flex items-center gap-2">
-                    <i class="fa-solid fa-comments text-blue-400"></i>
+                    <i class="fa-solid fa-comments text-blue-400" aria-hidden="true"></i>
                     Consultation Chat
                 </h4>
                 <button (click)="showChat = false" class="text-gray-400 hover:text-white text-sm">
-                    <i class="fa-solid fa-xmark"></i>
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
                 </button>
             </div>
 
@@ -424,7 +424,7 @@
                         class="flex-1 bg-gray-900 border border-gray-800 text-xs text-white rounded-xl px-3 py-2 focus:outline-none focus:border-brand" />
                     <button type="submit" [disabled]="!chatInput.trim()"
                         class="w-9 h-9 rounded-xl bg-brand hover:brightness-110 disabled:opacity-50 text-white flex items-center justify-center transition-colors">
-                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                        <i class="fa-solid fa-paper-plane text-xs" aria-hidden="true"></i>
                     </button>
                 </form>
             </div>
@@ -443,7 +443,7 @@
                             class="form-input flex items-center justify-between gap-2 text-left">
                             <span class="truncate min-w-0 flex-1 text-left font-medium">{{ getSelectedCameraLabel() }}</span>
                             <i class="fa-solid fa-chevron-down text-[10px] text-muted transition-transform duration-200"
-                                [class.rotate-180]="activeDropdown === 'camera'"></i>
+                                [class.rotate-180]="activeDropdown === 'camera'" aria-hidden="true"></i>
                         </button>
                         <div *ngIf="activeDropdown === 'camera'"
                             class="absolute left-0 right-0 mt-1 z-50 bg-[var(--panel)] border border-[var(--border)] rounded-xl shadow-lg p-1.5 space-y-1 max-h-48 overflow-y-auto">
@@ -452,7 +452,7 @@
                                 [ngClass]="selectedCameraId === dev.deviceId ? 'bg-brand-soft text-brand font-bold border border-brand/30' : 'text-[var(--text)] hover:bg-[var(--bg)]'">
                                 <span class="truncate min-w-0 flex-1" [title]="dev.label || ''">{{ dev.label || 'Camera' }}</span>
                                 <i *ngIf="selectedCameraId === dev.deviceId"
-                                    class="fa-solid fa-check text-xs text-brand shrink-0"></i>
+                                    class="fa-solid fa-check text-xs text-brand shrink-0" aria-hidden="true"></i>
                             </button>
                         </div>
                     </div>
@@ -464,7 +464,7 @@
                             class="form-input flex items-center justify-between gap-2 text-left">
                             <span class="truncate min-w-0 flex-1 text-left font-medium">{{ getSelectedMicLabel() }}</span>
                             <i class="fa-solid fa-chevron-down text-[10px] text-muted transition-transform duration-200"
-                                [class.rotate-180]="activeDropdown === 'mic'"></i>
+                                [class.rotate-180]="activeDropdown === 'mic'" aria-hidden="true"></i>
                         </button>
                         <div *ngIf="activeDropdown === 'mic'"
                             class="absolute left-0 right-0 mt-1 z-50 bg-[var(--panel)] border border-[var(--border)] rounded-xl shadow-lg p-1.5 space-y-1 max-h-48 overflow-y-auto">
@@ -473,7 +473,7 @@
                                 [ngClass]="selectedMicId === dev.deviceId ? 'bg-brand-soft text-brand font-bold border border-brand/30' : 'text-[var(--text)] hover:bg-[var(--bg)]'">
                                 <span class="truncate min-w-0 flex-1" [title]="dev.label || ''">{{ dev.label || 'Microphone' }}</span>
                                 <i *ngIf="selectedMicId === dev.deviceId"
-                                    class="fa-solid fa-check text-xs text-brand shrink-0"></i>
+                                    class="fa-solid fa-check text-xs text-brand shrink-0" aria-hidden="true"></i>
                             </button>
                         </div>
                     </div>
@@ -490,8 +490,8 @@
         ariaLabel="Consultation room access restricted" (close)="showToastError = false">
         <div
             class="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-700 dark:text-amber-400 text-2xl mb-4">
-            <i class="fa-solid fa-clock-rotate-left" *ngIf="toastErrorMessage?.includes('scheduled')"></i>
-            <i class="fa-solid fa-calendar-xmark" *ngIf="!toastErrorMessage?.includes('scheduled')"></i>
+            <i class="fa-solid fa-clock-rotate-left" *ngIf="toastErrorMessage?.includes('scheduled')" aria-hidden="true"></i>
+            <i class="fa-solid fa-calendar-xmark" *ngIf="!toastErrorMessage?.includes('scheduled')" aria-hidden="true"></i>
         </div>
         <h3 class="text-base sm:text-lg font-bold text-[var(--text)] mb-2">Consultation Room Access Restricted</h3>
         <p class="text-xs text-muted leading-relaxed mb-0 bg-[var(--bg)] p-4 rounded-2xl border border-[var(--border)]">
@@ -499,7 +499,7 @@
         </p>
         <div modalFooter class="flex items-center gap-3 w-full">
             <button type="button" (click)="goBack()" class="btn-primary flex-1">
-                <i class="fa-solid fa-arrow-left mr-1.5"></i>
+                <i class="fa-solid fa-arrow-left mr-1.5" aria-hidden="true"></i>
                 Return to Dashboard
             </button>
             <button type="button" (click)="showToastError = false" class="btn-secondary">Dismiss</button>
@@ -512,7 +512,7 @@
         <div
             class="w-14 h-14 border-4 border-brand border-t-transparent rounded-full animate-spin mb-4 shadow-lg shadow-blue-500/20">
         </div>
-        <h3 class="text-lg font-bold text-[var(--text)] mb-1">Securing LiveKit Connection</h3>
+        <h3 class="text-lg font-bold text-[var(--text)] mb-1">Securing video connection</h3>
         <p class="text-xs text-muted max-w-xs">{{ loadingStatusText }}</p>
     </div>
 

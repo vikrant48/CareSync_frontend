@@ -7,13 +7,16 @@ import { ToastService, Toast } from '../core/services/toast.service';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './toast-container.component.html',
-  styleUrl: './toast-container.component.css'
 })
 export class ToastContainerComponent {
   toasts: (Toast & { dismissed?: boolean })[] = [];
 
   constructor(private toast: ToastService) {
     this.toast.toasts$.subscribe(list => (this.toasts = list));
+  }
+
+  trackToast(_: number, t: Toast): number {
+    return t.id;
   }
 
   dismiss(id: number) {

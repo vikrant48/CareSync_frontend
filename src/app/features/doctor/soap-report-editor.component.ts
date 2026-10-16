@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
@@ -7,6 +7,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { SoapReportDto } from '../../core/models/appointment.models';
 import { ClinicalDictationComponent } from '../../shared/clinical-dictation.component';
 import { ClinicalDictationResponse } from '../../core/models/ai.models';
+import { markForCheckOn } from '../../shared/utils/mark-for-check';
 
 @Component({
     selector: 'app-soap-report-editor',
@@ -18,6 +19,8 @@ import { ClinicalDictationResponse } from '../../core/models/ai.models';
 export class SoapReportEditorComponent {
     private appointmentApi = inject(AppointmentApiService);
     private toast = inject(ToastService);
+    // Hosted by an OnPush page: HTTP results request a check via markForCheckOn
+    private cdr = inject(ChangeDetectorRef);
 
     @Input() isOpen: boolean = false;
     @Input() appointmentId: number = 0;
@@ -34,7 +37,6 @@ export class SoapReportEditorComponent {
     };
 
     @Output() close = new EventEmitter<void>();
-    @Output() reportSigned = new EventEmitter<SoapReportDto>();
 
     transcriptInput: string = '';
     generating: boolean = false;
@@ -48,8 +50,11 @@ export class SoapReportEditorComponent {
     }
 
     private loadSavedSoapDraft(): void {
+        // Never carry a previous patient's transcript into this appointment
+        this.transcriptInput = '';
+
         // 1. Always load pre-visit intake summary to auto-populate transcriptInput
-        this.appointmentApi.getPreVisitIntakeSummary(this.appointmentId).subscribe({
+        this.appointmentApi.getPreVisitIntakeSummary(this.appointmentId).pipe(markForCheckOn(this.cdr)).subscribe({
             next: (intake: any) => {
                 if (intake) {
                     const aiSummary = intake.aiTriageSummary || intake.preVisitSummary || '';
@@ -68,7 +73,7 @@ export class SoapReportEditorComponent {
         });
 
         // 2. Load existing saved SOAP draft to re-populate saved fields
-        this.appointmentApi.getSoapDraft(this.appointmentId).subscribe({
+        this.appointmentApi.getSoapDraft(this.appointmentId).pipe(markForCheckOn(this.cdr)).subscribe({
             next: (res: SoapReportDto) => {
                 if (res) {
                     this.soapReport = {
@@ -91,7 +96,7 @@ export class SoapReportEditorComponent {
         }
 
         this.generating = true;
-        this.appointmentApi.generateSoapDraft(this.appointmentId, this.transcriptInput).subscribe({
+        this.appointmentApi.generateSoapDraft(this.appointmentId, this.transcriptInput).pipe(markForCheckOn(this.cdr)).subscribe({
             next: (res: SoapReportDto) => {
                 this.generating = false;
                 this.soapReport = res;
@@ -136,7 +141,7 @@ export class SoapReportEditorComponent {
 
         this.signing = true;
         this.soapReport.transcript = this.transcriptInput;
-        this.appointmentApi.saveSoapDraft(this.appointmentId, this.soapReport).subscribe({
+        this.appointmentApi.saveSoapDraft(this.appointmentId, this.soapReport).pipe(markForCheckOn(this.cdr)).subscribe({
             next: (res: SoapReportDto) => {
                 this.signing = false;
                 this.soapReport = res;

@@ -1,6 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PatientDto, MedicalHistoryItem } from '../core/services/patient-profile.service';
+import { PatientDto, MedicalHistoryItem, PatientProfileService } from '../core/services/patient-profile.service';
+import { ToastService } from '../core/services/toast.service';
 import { RouterModule } from '@angular/router';
 import { PatientProfileHistoryComponent } from './patient-profile-history.component';
 
@@ -43,13 +44,13 @@ export interface AppointmentCounts {
             
             <div class="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 text-xs text-[var(--muted)]">
               <span class="flex items-center gap-1 font-mono">
-                <i class="fa-solid fa-hashtag text-[10px]"></i> {{ patient.id }}
+                <i class="fa-solid fa-hashtag text-[10px]" aria-hidden="true"></i> {{ patient.id }}
               </span>
               <span class="flex items-center gap-1">
-                <i class="fa-solid fa-envelope text-[10px]"></i> {{ patient.email || 'NA' }}
+                <i class="fa-solid fa-envelope text-[10px]" aria-hidden="true"></i> {{ patient.email || 'NA' }}
               </span>
               <span class="flex items-center gap-1">
-                <i class="fa-solid fa-phone text-[10px]"></i> {{ patient.contactInfo || 'NA' }}
+                <i class="fa-solid fa-phone text-[10px]" aria-hidden="true"></i> {{ patient.contactInfo || 'NA' }}
               </span>
             </div>
           </div>
@@ -66,7 +67,7 @@ export interface AppointmentCounts {
           <!-- DONE -->
           <div class="bg-emerald-500/10 border border-emerald-500/20 p-3 sm:p-4 rounded-xl text-center shadow-sm min-w-[85px]">
             <div class="text-[9px] sm:text-[10px] text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider flex items-center justify-center gap-1">
-              <i class="fa-solid fa-circle-check text-[8px]"></i> DONE
+              <i class="fa-solid fa-circle-check text-[8px]" aria-hidden="true"></i> DONE
             </div>
             <div class="text-lg sm:text-xl font-extrabold text-emerald-700 dark:text-emerald-400 mt-0.5">{{ appointmentCounts?.completed ?? 0 }}</div>
           </div>
@@ -74,7 +75,7 @@ export interface AppointmentCounts {
           <!-- UPCOMING -->
           <div class="bg-amber-500/10 border border-amber-500/20 p-3 sm:p-4 rounded-xl text-center shadow-sm min-w-[85px]">
             <div class="text-[9px] sm:text-[10px] text-amber-700 dark:text-amber-400 font-bold uppercase tracking-wider flex items-center justify-center gap-1">
-              <i class="fa-solid fa-clock text-[8px]"></i> UPCOMING
+              <i class="fa-solid fa-clock text-[8px]" aria-hidden="true"></i> UPCOMING
             </div>
             <div class="text-lg sm:text-xl font-extrabold text-amber-700 dark:text-amber-400 mt-0.5">{{ appointmentCounts?.upcoming ?? 0 }}</div>
           </div>
@@ -82,7 +83,7 @@ export interface AppointmentCounts {
           <!-- CANCELLED -->
           <div class="bg-rose-500/10 border border-rose-500/20 p-3 sm:p-4 rounded-xl text-center shadow-sm min-w-[85px]">
             <div class="text-[9px] sm:text-[10px] text-rose-700 dark:text-rose-400 font-bold uppercase tracking-wider flex items-center justify-center gap-1">
-              <i class="fa-solid fa-circle-xmark text-[8px]"></i> CANCELLED
+              <i class="fa-solid fa-circle-xmark text-[8px]" aria-hidden="true"></i> CANCELLED
             </div>
             <div class="text-lg sm:text-xl font-extrabold text-rose-700 dark:text-rose-400 mt-0.5">{{ appointmentCounts?.cancelled ?? 0 }}</div>
           </div>
@@ -100,7 +101,7 @@ export interface AppointmentCounts {
                 ? 'border-b-2 border-[var(--primary)] text-[var(--primary)] font-bold' 
                 : 'text-[var(--muted)] hover:text-[var(--text)] font-semibold'"
               class="px-4 py-3 text-xs sm:text-sm transition-colors whitespace-nowrap outline-none flex items-center gap-2">
-              <i class="fa-solid fa-user text-xs"></i>
+              <i class="fa-solid fa-user text-xs" aria-hidden="true"></i>
               <span>Overview</span>
             </button>
 
@@ -109,27 +110,27 @@ export interface AppointmentCounts {
                 ? 'border-b-2 border-[var(--primary)] text-[var(--primary)] font-bold' 
                 : 'text-[var(--muted)] hover:text-[var(--text)] font-semibold'"
               class="px-4 py-3 text-xs sm:text-sm transition-colors whitespace-nowrap outline-none flex items-center gap-2">
-              <i class="fa-solid fa-notes-medical text-xs"></i>
+              <i class="fa-solid fa-notes-medical text-xs" aria-hidden="true"></i>
               <span>Medical History</span>
             </button>
 
             <a routerLink="/patient/appointments"
               class="px-4 py-3 text-xs sm:text-sm font-semibold text-[var(--muted)] hover:text-[var(--text)] transition-colors whitespace-nowrap flex items-center gap-2">
-              <i class="fa-solid fa-calendar-days text-xs"></i>
+              <i class="fa-solid fa-calendar-days text-xs" aria-hidden="true"></i>
               <span>Appointments</span>
             </a>
 
             <a routerLink="/patient/lab-bookings"
               class="px-4 py-3 text-xs sm:text-sm font-semibold text-[var(--muted)] hover:text-[var(--text)] transition-colors whitespace-nowrap flex items-center gap-2">
-              <i class="fa-solid fa-flask text-xs"></i>
+              <i class="fa-solid fa-flask text-xs" aria-hidden="true"></i>
               <span>Lab Tests</span>
             </a>
           </div>
 
           <!-- Edit Button in Tab Bar: Only visible when activeTab === 'overview' -->
           <a *ngIf="activeTab === 'overview'" routerLink="/patient/profile/edit" 
-            class="shrink-0 bg-[var(--primary)] hover:bg-indigo-600 active:scale-95 text-white font-bold text-xs sm:text-sm px-4 py-2 sm:mb-2 rounded-xl shadow-md shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 animate-in fade-in duration-200">
-            <i class="fa-solid fa-pen-to-square text-xs"></i>
+            class="btn-size-lg shrink-0 bg-[var(--primary)] hover:bg-indigo-600 active:scale-95 text-white font-bold text-xs sm:text-sm px-4 sm:mb-2 rounded-xl shadow-md shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 animate-in fade-in duration-200">
+            <i class="fa-solid fa-pen-to-square text-xs" aria-hidden="true"></i>
             <span>Edit</span>
           </a>
         </div>
@@ -145,7 +146,7 @@ export interface AppointmentCounts {
               <div class="lg:col-span-6 bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 space-y-5 shadow-sm">
                 <div class="flex items-center justify-between border-b border-[var(--border)] pb-4">
                   <div class="flex items-center gap-2.5">
-                    <i class="fa-solid fa-user text-[var(--primary)] text-sm"></i>
+                    <i class="fa-solid fa-user text-[var(--primary)] text-sm" aria-hidden="true"></i>
                     <h2 class="text-base font-bold text-[var(--text)] tracking-tight">Personal Details</h2>
                   </div>
                 </div>
@@ -187,14 +188,14 @@ export interface AppointmentCounts {
               <div class="lg:col-span-6 bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 space-y-5 shadow-sm">
                 <div class="flex items-center justify-between border-b border-[var(--border)] pb-4">
                   <div class="flex items-center gap-2.5">
-                    <i class="fa-solid fa-shield-halved text-emerald-700 dark:text-emerald-400 text-sm"></i>
+                    <i class="fa-solid fa-shield-halved text-emerald-700 dark:text-emerald-400 text-sm" aria-hidden="true"></i>
                     <h2 class="text-base font-bold text-[var(--text)] tracking-tight">Account Status</h2>
                   </div>
                   <span class="border text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5"
                         [ngClass]="patient.isActive === false
                           ? 'bg-rose-500/10 text-rose-600 border-rose-500/20'
                           : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'">
-                    <i class="fa-solid text-[10px]" [ngClass]="patient.isActive === false ? 'fa-circle-xmark' : 'fa-circle-check'"></i>
+                    <i class="fa-solid text-[10px]" [ngClass]="patient.isActive === false ? 'fa-circle-xmark' : 'fa-circle-check'" aria-hidden="true"></i>
                     <span>{{ accountStatus(patient) }}</span>
                   </span>
                 </div>
@@ -249,14 +250,14 @@ export interface AppointmentCounts {
               <div class="lg:col-span-6 bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 space-y-4 shadow-sm">
                 <div class="flex items-center justify-between border-b border-[var(--border)] pb-4">
                   <div class="flex items-center gap-2.5">
-                    <i class="fa-solid fa-file-medical text-rose-500 text-sm"></i>
+                    <i class="fa-solid fa-file-medical text-rose-500 text-sm" aria-hidden="true"></i>
                     <h2 class="text-base font-bold text-[var(--text)] tracking-tight">Critical Info</h2>
                   </div>
                 </div>
 
                 <div class="bg-rose-500/5 border border-rose-500/20 rounded-xl p-4 space-y-1">
                   <div class="text-[10px] font-bold uppercase text-rose-700 dark:text-rose-400 tracking-wider">ILLNESS DETAILS</div>
-                  <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                  <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                     {{ patient.illnessDetails || 'No critical illness details recorded.' }}
                   </p>
                 </div>
@@ -265,7 +266,7 @@ export interface AppointmentCounts {
               <!-- Row 2 Right (6-col): Quick Actions Card -->
               <div class="lg:col-span-6 bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 space-y-4 shadow-sm">
                 <div class="flex items-center gap-2.5 border-b border-[var(--border)] pb-4">
-                  <i class="fa-solid fa-bolt text-amber-700 dark:text-amber-400 text-sm"></i>
+                  <i class="fa-solid fa-bolt text-amber-700 dark:text-amber-400 text-sm" aria-hidden="true"></i>
                   <h2 class="text-base font-bold text-[var(--text)] tracking-tight">Quick Actions</h2>
                 </div>
 
@@ -274,12 +275,12 @@ export interface AppointmentCounts {
                   <a routerLink="/patient/change-password" 
                     class="bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3.5 transition-all group flex flex-col justify-between space-y-3">
                     <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-[var(--primary)]">
-                      <i class="fa-solid fa-lock text-xs"></i>
+                      <i class="fa-solid fa-lock text-xs" aria-hidden="true"></i>
                     </div>
                     <div>
                       <div class="text-xs font-bold text-[var(--text)] group-hover:text-[var(--primary)] transition-colors flex items-center justify-between">
                         <span>Change Password</span>
-                        <i class="fa-solid fa-chevron-right text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                        <i class="fa-solid fa-chevron-right text-[10px] opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true"></i>
                       </div>
                       <p class="text-[10px] text-[var(--muted)] mt-0.5 line-clamp-1">Update your account password</p>
                     </div>
@@ -287,31 +288,32 @@ export interface AppointmentCounts {
 
                   <!-- Action 2: Notification Settings -->
                   <div class="bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3.5 transition-all group flex flex-col justify-between space-y-3 cursor-pointer">
-                    <div class="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
-                      <i class="fa-solid fa-bell text-xs"></i>
+                    <div class="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-700 dark:text-indigo-400">
+                      <i class="fa-solid fa-bell text-xs" aria-hidden="true"></i>
                     </div>
                     <div>
                       <div class="text-xs font-bold text-[var(--text)] group-hover:text-indigo-400 transition-colors flex items-center justify-between">
                         <span>Notification</span>
-                        <i class="fa-solid fa-chevron-right text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                        <i class="fa-solid fa-chevron-right text-[10px] opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true"></i>
                       </div>
                       <p class="text-[10px] text-[var(--muted)] mt-0.5 line-clamp-1">Manage your preferences</p>
                     </div>
                   </div>
 
-                  <!-- Action 3: Privacy Settings -->
-                  <div class="bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3.5 transition-all group flex flex-col justify-between space-y-3 cursor-pointer">
+                  <!-- Action 3: Download my data (copy of everything CareSync holds about the patient) -->
+                  <button type="button" (click)="downloadMyData()" [disabled]="downloadingData"
+                    class="text-left bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3.5 transition-all group flex flex-col justify-between space-y-3 cursor-pointer disabled:opacity-60">
                     <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
-                      <i class="fa-solid fa-shield-halved text-xs"></i>
+                      <i class="fa-solid fa-shield-halved text-xs" aria-hidden="true"></i>
                     </div>
                     <div>
                       <div class="text-xs font-bold text-[var(--text)] group-hover:text-emerald-700 dark:text-emerald-400 transition-colors flex items-center justify-between">
-                        <span>Privacy Settings</span>
-                        <i class="fa-solid fa-chevron-right text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                        <span>{{ downloadingData ? 'Preparing…' : 'Download My Data' }}</span>
+                        <i class="fa-solid fa-download text-[10px] opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true"></i>
                       </div>
-                      <p class="text-[10px] text-[var(--muted)] mt-0.5 line-clamp-1">Control your data & privacy</p>
+                      <p class="text-[10px] text-[var(--muted)] mt-0.5 line-clamp-1">Get a copy of your records</p>
                     </div>
-                  </div>
+                  </button>
                 </div>
               </div>
 
@@ -344,6 +346,32 @@ export class PatientProfilePageComponent {
   @Input() extraTabs: { id: string; label: string; content: any }[] = [];
 
   activeTab = 'overview';
+  downloadingData = false;
+
+  private patientProfileService = inject(PatientProfileService);
+  private toast = inject(ToastService);
+
+  /** Saves the patient's data export (profile, visits, records, documents, payments...) as a JSON file. */
+  downloadMyData() {
+    if (this.downloadingData) return;
+    this.downloadingData = true;
+    this.patientProfileService.exportMyData().subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `caresync-my-data-${new Date().toISOString().slice(0, 10)}.json`;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 10_000);
+        this.downloadingData = false;
+        this.toast.showSuccess('Your data has been downloaded');
+      },
+      error: () => {
+        this.downloadingData = false;
+        this.toast.showError('Could not prepare your data. Please try again.');
+      },
+    });
+  }
 
   fullName(p?: PatientDto | null) {
     if (!p) return 'Patient';

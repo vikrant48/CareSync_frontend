@@ -1,87 +1,16 @@
 <section class="mt-3">
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <!-- Pending Feedback Card -->
-        <div (click)="openFeedback.emit()"
-            class="surface p-3 flex items-center justify-between cursor-pointer transition-all hover:scale-[1.01] shadow-sm hover:border-purple-500/40 group">
-            <div class="flex items-center gap-2.5 min-w-0">
-                <div
-                    class="w-9 h-9 rounded-lg bg-purple-500/10 text-purple-700 dark:text-purple-400 flex items-center justify-center text-base shrink-0 group-hover:scale-105 transition-transform">
-                    <i class="fa-solid fa-file-signature"></i>
-                </div>
-                <div class="min-w-0">
-                    <div class="text-[11px] font-semibold text-muted truncate">Pending Feedback</div>
-                    <div *ngIf="loadingPending"
-                        class="animate-spin h-3.5 w-3.5 border-2 border-purple-500 border-t-transparent rounded-full mt-0.5">
-                    </div>
-                    <div *ngIf="!loadingPending" class="text-xl font-bold text-[var(--text)] leading-none mt-0.5">{{
-                        pendingFeedbackCount }}</div>
-                </div>
-            </div>
-            <i
-                class="fa-solid fa-chevron-right text-muted text-xs group-hover:text-purple-700 dark:text-purple-400 group-hover:translate-x-0.5 transition-all"></i>
-        </div>
-
-        <!-- My Appointments Card -->
-        <div (click)="openMyAppointments.emit()"
-            class="surface p-3 flex items-center justify-between cursor-pointer transition-all hover:scale-[1.01] shadow-sm hover:border-blue-500/40 group">
-            <div class="flex items-center gap-2.5 min-w-0">
-                <div
-                    class="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-700 dark:text-blue-400 flex items-center justify-center text-base shrink-0 group-hover:scale-105 transition-transform">
-                    <i class="fa-solid fa-calendar-days"></i>
-                </div>
-                <div class="min-w-0">
-                    <div class="text-[11px] font-semibold text-muted truncate">My Appointments</div>
-                    <div *ngIf="loadingAppointments"
-                        class="animate-spin h-3.5 w-3.5 border-2 border-blue-500 border-t-transparent rounded-full mt-0.5">
-                    </div>
-                    <div *ngIf="!loadingAppointments" class="text-xl font-bold text-[var(--text)] leading-none mt-0.5">{{
-                        (appointments || []).length }}</div>
-                </div>
-            </div>
-            <i
-                class="fa-solid fa-chevron-right text-muted text-xs group-hover:text-blue-700 dark:text-blue-400 group-hover:translate-x-0.5 transition-all"></i>
-        </div>
-
-        <!-- Today Appointments Card -->
-        <div (click)="openTodayAppointments.emit()"
-            class="surface p-3 flex items-center justify-between cursor-pointer transition-all hover:scale-[1.01] shadow-sm hover:border-amber-500/40 group">
-            <div class="flex items-center gap-2.5 min-w-0">
-                <div
-                    class="w-9 h-9 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-400 flex items-center justify-center text-base shrink-0 group-hover:scale-105 transition-transform">
-                    <i class="fa-solid fa-calendar-day"></i>
-                </div>
-                <div class="min-w-0">
-                    <div class="text-[11px] font-semibold text-muted truncate">Today</div>
-                    <div *ngIf="loadingAppointments"
-                        class="animate-spin h-3.5 w-3.5 border-2 border-amber-500 border-t-transparent rounded-full mt-0.5">
-                    </div>
-                    <div *ngIf="!loadingAppointments" class="text-xl font-bold text-[var(--text)] leading-none mt-0.5">{{
-                        todayAppointmentsCount }}</div>
-                </div>
-            </div>
-            <i
-                class="fa-solid fa-chevron-right text-muted text-xs group-hover:text-amber-700 dark:text-amber-400 group-hover:translate-x-0.5 transition-all"></i>
-        </div>
-
-        <!-- Lab Tests Card -->
-        <div (click)="openLabTests.emit()"
-            class="surface p-3 flex items-center justify-between cursor-pointer transition-all hover:scale-[1.01] shadow-sm hover:border-emerald-500/40 group">
-            <div class="flex items-center gap-2.5 min-w-0">
-                <div
-                    class="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-base shrink-0 group-hover:scale-105 transition-transform">
-                    <i class="fa-solid fa-vial-virus"></i>
-                </div>
-                <div class="min-w-0">
-                    <div class="text-[11px] font-semibold text-muted truncate">Lab Tests</div>
-                    <div *ngIf="loadingLabTests"
-                        class="animate-spin h-3.5 w-3.5 border-2 border-emerald-500 border-t-transparent rounded-full mt-0.5">
-                    </div>
-                    <div *ngIf="!loadingLabTests" class="text-xl font-bold text-[var(--text)] leading-none mt-0.5">{{
-                        labTestCount }}</div>
-                </div>
-            </div>
-            <i
-                class="fa-solid fa-chevron-right text-muted text-xs group-hover:text-emerald-700 dark:text-emerald-400 group-hover:translate-x-0.5 transition-all"></i>
-        </div>
+        <app-stat-card label="Pending Feedback" icon="fa-solid fa-file-signature" tone="primary"
+            [value]="pendingFeedbackCount" [loading]="loadingPending" [clickable]="true"
+            (cardClick)="openFeedback.emit()"></app-stat-card>
+        <app-stat-card label="My Appointments" icon="fa-solid fa-calendar-days" tone="info"
+            [value]="(appointments || []).length" [loading]="loadingAppointments" [clickable]="true"
+            (cardClick)="openMyAppointments.emit()"></app-stat-card>
+        <app-stat-card label="Today" icon="fa-solid fa-calendar-day" tone="warning"
+            [value]="todayAppointmentsCount" [loading]="loadingAppointments" [clickable]="true"
+            (cardClick)="openTodayAppointments.emit()"></app-stat-card>
+        <app-stat-card label="Lab Tests" icon="fa-solid fa-vial-virus" tone="success"
+            [value]="labTestCount" [loading]="loadingLabTests" [clickable]="true"
+            (cardClick)="openLabTests.emit()"></app-stat-card>
     </div>
 </section>

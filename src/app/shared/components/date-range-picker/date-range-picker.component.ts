@@ -31,7 +31,7 @@ export type PresetRangeKey = 'today' | 'tomorrow' | 'last7' | 'last30' | 'thisMo
         ]"
       >
         <div class="flex items-center gap-2.5 truncate">
-          <i class="fa-solid fa-calendar-range text-[#5b6cf0] text-sm"></i>
+          <i class="fa-solid fa-calendar-range text-[#5b6cf0] text-sm" aria-hidden="true"></i>
           <span *ngIf="displayText" class="font-medium text-white text-xs">
             {{ displayText }}
           </span>
@@ -46,11 +46,10 @@ export type PresetRangeKey = 'today' | 'tomorrow' | 'last7' | 'last30' | 'thisMo
             type="button"
             (click)="clearRange($event)"
             class="hover:text-white transition-colors focus:outline-none"
-            title="Clear range"
-          >
-            <i class="fa-solid fa-xmark text-xs"></i>
+            title="Clear range" aria-label="Clear range">
+            <i class="fa-solid fa-xmark text-xs" aria-hidden="true"></i>
           </button>
-          <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200" [class.rotate-180]="isOpen"></i>
+          <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200" [class.rotate-180]="isOpen" aria-hidden="true"></i>
         </div>
       </div>
 

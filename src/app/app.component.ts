@@ -7,14 +7,13 @@ import { ThemeService } from './core/services/theme.service';
 import { BackendStatusService } from './core/services/backend-status.service';
 import { OfflineBannerComponent } from './shared/offline-banner.component';
 import { ConfirmDialogComponent } from './shared/ui/confirm-dialog.component';
-import { PatientNotificationComponent } from './features/patient/patient-notification.component';
+import { ToastContainerComponent } from './shared/toast-container.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, CommonModule, OfflineBannerComponent, ConfirmDialogComponent],
+  imports: [RouterOutlet, RouterLink, CommonModule, OfflineBannerComponent, ConfirmDialogComponent, ToastContainerComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
 })
 export class AppComponent {
   title = 'caresync-frontend';

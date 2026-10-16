@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ElementRef, ViewChild, forwardRef } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, Output, EventEmitter, OnInit, OnDestroy, ElementRef, ViewChild, forwardRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { SpecializationService } from '../core/services/specialization.service';
@@ -32,7 +32,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
           autocomplete="off"
         />
         <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-           <i class="fa-solid fa-chevron-down text-xs text-gray-600 transition-transform duration-300" [class.rotate-180]="showDropdown"></i>
+           <i class="fa-solid fa-chevron-down text-xs text-gray-600 transition-transform duration-300" [class.rotate-180]="showDropdown" aria-hidden="true"></i>
         </div>
       </div>
       
@@ -56,7 +56,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
             (mouseenter)="selectedIndex = i"
           >
             <span>{{ spec }}</span>
-            <i class="fa-solid fa-check text-sm opacity-0 group-hover/item:opacity-100 transition-opacity" [class.opacity-100]="selectedIndex === i" *ngIf="selectedIndex === i"></i>
+            <i class="fa-solid fa-check text-sm opacity-0 group-hover/item:opacity-100 transition-opacity" [class.opacity-100]="selectedIndex === i" *ngIf="selectedIndex === i" aria-hidden="true"></i>
           </div>
           
           <!-- Add new option -->
@@ -69,7 +69,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
             (mouseenter)="selectedIndex = filteredSpecializations.length"
           >
             <div class="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center text-xs">
-               <i class="fa-solid fa-plus"></i>
+               <i class="fa-solid fa-plus" aria-hidden="true"></i>
             </div>
             <span>Add "<span class="font-bold border-b border-emerald-500/30">{{ inputValue.trim() }}</span>"</span>
           </div>
@@ -113,6 +113,9 @@ export class SpecializationAutocompleteComponent implements OnInit, OnDestroy, C
   private onChange = (value: string) => { };
   private onTouched = () => { };
 
+  // Hosts may be OnPush: debounced/async updates below request a check
+  private cdr = inject(ChangeDetectorRef);
+
   constructor(private specializationService: SpecializationService) { }
 
   ngOnInit(): void {
@@ -123,12 +126,14 @@ export class SpecializationAutocompleteComponent implements OnInit, OnDestroy, C
       takeUntil(this.destroy$)
     ).subscribe(query => {
       this.filterSpecializations(query);
+      this.cdr.markForCheck();
     });
 
     this.specializationService.getAllSpecializations()
       .pipe(takeUntil(this.destroy$))
       .subscribe(list => {
         this.allSpecializations = list || [];
+        this.cdr.markForCheck();
       });
   }
 
@@ -173,6 +178,7 @@ export class SpecializationAutocompleteComponent implements OnInit, OnDestroy, C
     setTimeout(() => {
       this.showDropdown = false;
       this.onTouched();
+      this.cdr.markForCheck();
     }, 150);
   }
 

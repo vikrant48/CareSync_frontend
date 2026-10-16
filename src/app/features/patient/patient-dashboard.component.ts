@@ -1,3 +1,4 @@
+import { DocumentOpenerService } from '../../core/services/document-opener.service';
 import { Component, OnInit, OnDestroy, inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
@@ -16,17 +17,20 @@ import { RescheduleAppointmentModalComponent } from '../../shared/reschedule-app
 import { MedicalHistoryDetailModalComponent } from '../../shared/medical-history-detail-modal.component';
 import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.component';
 import { getAppointmentEpochMs, isAppointmentToday, isAppointmentFuture } from '../../shared/appointment-utils';
-import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { PatientNotificationComponent } from './patient-notification.component';
 import { PatientDashboardMetricsCardsComponent } from './patient-dashboard-metrics-cards.component';
 import { PatientMyHealthComponent } from './patient-my-health.component';
 import { PatientDashboardAppointmentListComponent } from './patient-dashboard-appointment-list.component';
 import { ButtonComponent } from '../../shared/components';
+import { PageContainerComponent } from '../../shared/ui/page-container.component';
+import { InrPipe } from '../../shared/utils/inr.pipe';
+import { memoByDeps } from '../../shared/utils/memo';
+import { toLocalDateKey } from '../../shared/utils/format.util';
 
 @Component({
   selector: 'app-patient-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, RescheduleAppointmentModalComponent, PatientNotificationComponent, MedicalHistoryDetailModalComponent, PatientDashboardMetricsCardsComponent, PatientMyHealthComponent, PatientDashboardAppointmentListComponent, SharedChatModalComponent, ButtonComponent],
+  imports: [InrPipe, PageContainerComponent, CommonModule, RouterModule, FormsModule, RescheduleAppointmentModalComponent, PatientNotificationComponent, MedicalHistoryDetailModalComponent, PatientDashboardMetricsCardsComponent, PatientMyHealthComponent, PatientDashboardAppointmentListComponent, SharedChatModalComponent, ButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './patient-dashboard.component.html',
   styleUrl: './patient-dashboard.component.css'
@@ -80,6 +84,7 @@ export class PatientDashboardComponent {
 
   // Services via inject to avoid undefined DI
   private auth = inject(AuthService);
+  private documentOpener = inject(DocumentOpenerService);
   private reportsApi = inject(ReportsApiService);
   private analyticsApi = inject(AnalyticsApiService);
   private feedbackApi = inject(FeedbackService);
@@ -125,7 +130,7 @@ export class PatientDashboardComponent {
 
   refreshDoctors() {
     this.loadingDoctors = true;
-    this.doctorApi.getAllForPatients(0, 50).subscribe({
+    this.doctorApi.getDirectory().subscribe({
       next: (res) => {
         const active = (res || []).filter((d) => d.isActive !== false);
         this.doctors = active;
@@ -172,12 +177,24 @@ export class PatientDashboardComponent {
 
   // Date helper moved to shared utils
 
-  todayAppointments() {
+  // Memoised: same array instance until appointments (or the day) change, so the OnPush list child doesn't re-render every cycle
+  todayAppointments = memoByDeps<PatientAppointmentItem[]>(
+    () => this.computeTodayAppointments(),
+    () => [this.appointments, toLocalDateKey()],
+  );
+
+  private computeTodayAppointments(): PatientAppointmentItem[] {
     const s = (this.appointments || []).filter((a) => isAppointmentToday(a));
     return s.sort((x, y) => getAppointmentEpochMs(x) - getAppointmentEpochMs(y));
   }
 
-  upcomingAppointments() {
+  // Memoised: same array instance until appointments (or the day) change, so the OnPush list child doesn't re-render every cycle
+  upcomingAppointments = memoByDeps<PatientAppointmentItem[]>(
+    () => this.computeUpcomingAppointments(),
+    () => [this.appointments, toLocalDateKey()],
+  );
+
+  private computeUpcomingAppointments(): PatientAppointmentItem[] {
     const list = (this.appointments || []).filter((a) => {
       const s = (a.status || '').toUpperCase();
       return s !== 'CANCELLED' && s !== 'COMPLETED' && isAppointmentFuture(a);
@@ -185,10 +202,6 @@ export class PatientDashboardComponent {
     return list.sort((x, y) => getAppointmentEpochMs(x) - getAppointmentEpochMs(y)).slice(0, 4);
   }
 
-
-  openDoctor(d: Doctor) {
-    this.router.navigate(['/patient/doctor', d.username]);
-  }
 
   goToBookAppointment() {
     this.router.navigate(['/patient/book-appointment']);
@@ -279,20 +292,6 @@ export class PatientDashboardComponent {
     });
   }
 
-  statusClass(status: string) {
-    const s = (status || '').toUpperCase();
-    return {
-      'bg-green-100 text-green-800 dark:bg-green-700 dark:text-white': s === 'CONFIRMED' || s === 'COMPLETED',
-      'bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-white': s === 'BOOKED' || s === 'SCHEDULED',
-      'bg-red-100 text-red-800 dark:bg-red-700 dark:text-white': s === 'CANCELLED',
-      'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-white': !s,
-    } as any;
-  }
-
-  toggleDetails(a: PatientAppointmentItem) {
-    this.detailsOpen[a.appointmentId] = !this.detailsOpen[a.appointmentId];
-  }
-
   startReschedule(a: PatientAppointmentItem) {
     this.rescheduleTarget = a;
     this.rescheduleDateISO = a.appointmentDate || null;
@@ -308,11 +307,6 @@ export class PatientDashboardComponent {
     this.rescheduleTimeSlot = null;
     this.availableSlots = [];
     this.rescheduleError = null;
-  }
-
-  private findDoctorIdByName(name: string | undefined) {
-    const d = this.doctors.find((x) => (x.name || `${x.firstName} ${x.lastName}`) === name);
-    return d?.id ?? null;
   }
 
   onRescheduleConfirmed(iso: string) {
@@ -335,56 +329,6 @@ export class PatientDashboardComponent {
     });
   }
 
-  viewDoctorFromAppointment(a: PatientAppointmentItem) {
-    // Attempt to find the doctor by display name to get username
-    const target = this.doctors?.find((d) => {
-      const display = d.name || `${d.firstName || ''} ${d.lastName || ''}`.trim();
-      return display === a.doctorName;
-    });
-    if (target?.username) {
-      this.router.navigate(['/patient/doctor', target.username]);
-    } else {
-      // Fallback: go to doctor search/book page
-      this.goToBookAppointment();
-    }
-  }
-
-  onStatusChange(a: PatientAppointmentItem, status: string) {
-    const s = (status || '').toUpperCase();
-    if (s === 'CANCELLED') {
-      this.cancelAppointment(a);
-      return;
-    }
-    // Patients cannot directly set CONFIRMED/RESCHEDULED; BOOKED is default.
-    // If user selects RESCHEDULED, prompt to use reschedule.
-    if (s === 'RESCHEDULED') {
-      this.startReschedule(a);
-      return;
-    }
-  }
-
-  // Label mapping to reflect who cancelled
-  statusLabel(a: PatientAppointmentItem) {
-    const s = (a.status || '').toUpperCase();
-    if (s === 'CANCELLED') {
-      const me = (this.auth.username() || '').toLowerCase();
-      const by = (a.statusChangedBy || '').toLowerCase();
-      return me && by && me === by ? 'CANCELLED_BY_PATIENT' : 'CANCELLED_BY_DOCTOR';
-    }
-    return s;
-  }
-
-  // Backend allows reschedule only when status is BOOKED
-  canPatientReschedule(a: PatientAppointmentItem) {
-    return (a.status || '').toUpperCase() === 'BOOKED';
-  }
-
-  // Backend allows cancel when status is BOOKED or CONFIRMED
-  canPatientCancel(a: PatientAppointmentItem) {
-    const s = (a.status || '').toUpperCase();
-    return s === 'BOOKED' || s === 'CONFIRMED';
-  }
-
   loadFinancialStats() {
     if (this.patientId == null) return;
     this.analyticsApi.getPatientFinancialStats(this.patientId).subscribe({
@@ -393,29 +337,6 @@ export class PatientDashboardComponent {
         this.cdr.markForCheck();
       },
       error: () => { }
-    });
-  }
-
-  loadPatientAnalytics() {
-    if (this.patientId == null) return;
-    this.reportsApi.getPatientAnalytics(this.patientId).subscribe({
-      next: (res) => {
-        this.patientAnalytics = res || null;
-        const visits = (this.patientAnalytics?.doctorVisitCount) || {};
-        const labels = Object.keys(visits);
-        this.doctorVisitLabels = labels;
-        this.doctorVisitData = labels.map((k) => Number(visits[k] || 0));
-
-        const total = Number(this.patientAnalytics?.totalAppointments || 0);
-        const cancelled = Number(this.patientAnalytics?.cancelledAppointments || 0);
-        const completed = Math.max(total - cancelled, 0);
-        this.appointmentStatusData = [completed, cancelled];
-        this.cdr.markForCheck();
-      },
-      error: () => {
-        this.patientAnalytics = null;
-        this.cdr.markForCheck();
-      },
     });
   }
 
@@ -483,13 +404,8 @@ export class PatientDashboardComponent {
   // Lab reports handling
   patientLabReports: PatientDocumentItem[] = [];
   openDocument(d: PatientDocumentItem) {
-    try {
-      window.open(d.cloudinaryUrl || d.url, '_blank');
-    } catch { }
-  }
-
-  joinConsultation(a: PatientAppointmentItem) {
-    this.router.navigate(['/patient/consultation', a.appointmentId]);
+    // Fetched fresh: private files are served through short-lived signed links
+    this.documentOpener.open(d.id, d.cloudinaryUrl || d.url);
   }
 
   // Chat Logic
@@ -497,13 +413,6 @@ export class PatientDashboardComponent {
   chatAppointmentId: number | null = null;
   chatParticipantName: string | null = null;
   chatParticipantImage: string | null = null;
-
-  openChat(a: PatientAppointmentItem) {
-    this.chatAppointmentId = a.appointmentId;
-    this.chatParticipantName = a.doctorName || 'Doctor';
-    this.chatParticipantImage = a.doctorProfileImageUrl || null;
-    this.chatOpen = true;
-  }
 
   closeChat() {
     this.chatOpen = false;

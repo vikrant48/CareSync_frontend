@@ -3,6 +3,7 @@ import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Doctor } from '../core/services/doctor.service';
 import { ToastService } from '../core/services/toast.service';
+import { doctorDisplayName, doctorInitial as getDoctorInitial } from './utils/doctor-name.util';
 
 @Component({
   selector: 'doctor-details-panel',
@@ -14,8 +15,8 @@ import { ToastService } from '../core/services/toast.service';
       <!-- Back Button Row -->
       <div class="mb-4">
         <button type="button" (click)="goBack()"
-                class="bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs sm:text-sm font-bold px-4 py-2 rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm w-fit">
-          <i class="fa-solid fa-arrow-left text-xs"></i>
+                class="btn-size-md bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs sm:text-sm font-bold px-4 rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm w-fit">
+          <i class="fa-solid fa-arrow-left text-xs" aria-hidden="true"></i>
           <span>Back</span>
         </button>
       </div>
@@ -59,25 +60,25 @@ import { ToastService } from '../core/services/toast.service';
               <span class="text-[var(--primary)] font-bold">{{ displayValue(doctor.specialization) }}</span>
               <span class="text-[var(--border)]" *ngIf="hospitalName">•</span>
               <span class="text-[var(--muted)] flex items-center gap-1.5" *ngIf="hospitalName">
-                <i class="fa-solid fa-building-columns text-xs text-[var(--primary)]"></i> {{ hospitalName }}
+                <i class="fa-solid fa-building-columns text-xs text-[var(--primary)]" aria-hidden="true"></i> {{ hospitalName }}
               </span>
             </div>
 
             <!-- Ratings, Fee, Languages Pills -->
             <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 pt-1">
               <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--bg)] border border-[var(--border)] text-xs font-semibold text-[var(--text)]">
-                <i class="fa-solid fa-star text-amber-700 dark:text-amber-400 text-xs"></i>
+                <i class="fa-solid fa-star text-amber-700 dark:text-amber-400 text-xs" aria-hidden="true"></i>
                 <span>{{ (avgRating ?? doctor.averageRating || 0).toFixed(1) }}</span>
                 <span class="text-[var(--muted)] text-[11px]">({{ doctor.reviewCount ?? 0 }} reviews)</span>
               </div>
               <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--bg)] border border-[var(--border)] text-xs font-semibold text-[var(--text)]">
-                <i class="fa-solid fa-money-bill-wave text-emerald-700 dark:text-emerald-400 text-xs"></i>
+                <i class="fa-solid fa-money-bill-wave text-emerald-700 dark:text-emerald-400 text-xs" aria-hidden="true"></i>
                 <span>₹{{ doctor.consultationFees }}</span>
                 <span class="text-[var(--muted)] text-[11px]">Consultation Fee</span>
               </div>
 
               <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--bg)] border border-[var(--border)] text-xs font-semibold text-[var(--text)]">
-                <i class="fa-solid fa-language text-[var(--primary)] text-xs"></i>
+                <i class="fa-solid fa-language text-[var(--primary)] text-xs" aria-hidden="true"></i>
                 <span>{{ languagesText() }}</span>
               </div>
             </div>
@@ -87,21 +88,21 @@ import { ToastService } from '../core/services/toast.service';
         <!-- Right Side Actions -->
         <div class="w-full lg:w-auto flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0 items-stretch sm:items-center lg:items-end">
           <button *ngIf="enableBooking" type="button" (click)="openBooking.emit()" [disabled]="doctor.isActive === false"
-                  class="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-xl shadow-lg shadow-[var(--primary)]/20 transition-all flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed">
-            <i class="fa-regular fa-calendar-check text-xs"></i>
+                  class="btn-size-lg bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold text-xs sm:text-sm px-6 rounded-xl shadow-lg shadow-[var(--primary)]/20 transition-all flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed">
+            <i class="fa-regular fa-calendar-check text-xs" aria-hidden="true"></i>
             <span>{{ doctor.isActive === false ? 'Doctor Inactive' : 'Book Appointment' }}</span>
           </button>
 
           <div class="flex items-center gap-2 w-full sm:w-auto justify-center">
             <button type="button" (click)="toggleSave()"
-                    class="flex-1 sm:flex-initial bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs font-semibold px-4 py-2 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-all">
-              <i class="fa-regular fa-heart" [class.fa-solid]="saved" [class.text-rose-500]="saved"></i>
+                    class="btn-size-md flex-1 sm:flex-initial bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs font-semibold px-4 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-all">
+              <i class="fa-regular fa-heart" [class.fa-solid]="saved" [class.text-rose-500]="saved" aria-hidden="true"></i>
               <span>{{ saved ? 'Saved' : 'Save' }}</span>
             </button>
 
             <button type="button" (click)="shareDoctor()"
-                    class="flex-1 sm:flex-initial bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs font-semibold px-4 py-2 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-all">
-              <i class="fa-solid fa-share-nodes"></i>
+                    class="btn-size-md flex-1 sm:flex-initial bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs font-semibold px-4 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-all">
+              <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
               <span>Share</span>
             </button>
           </div>
@@ -113,7 +114,7 @@ import { ToastService } from '../core/services/toast.service';
         <!-- Email Card -->
         <div class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 flex items-center gap-3.5 shadow-md">
           <div class="w-10 h-10 rounded-xl bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center text-sm shrink-0">
-            <i class="fa-regular fa-envelope"></i>
+            <i class="fa-regular fa-envelope" aria-hidden="true"></i>
           </div>
           <div class="min-w-0">
             <div class="text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider">Email</div>
@@ -124,7 +125,7 @@ import { ToastService } from '../core/services/toast.service';
         <!-- Contact Card -->
         <div class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 flex items-center gap-3.5 shadow-md">
           <div class="w-10 h-10 rounded-xl bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center text-sm shrink-0">
-            <i class="fa-solid fa-phone"></i>
+            <i class="fa-solid fa-phone" aria-hidden="true"></i>
           </div>
           <div class="min-w-0">
             <div class="text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider">Contact Number</div>
@@ -135,7 +136,7 @@ import { ToastService } from '../core/services/toast.service';
         <!-- Address Card -->
         <div class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 flex items-center gap-3.5 shadow-md">
           <div class="w-10 h-10 rounded-xl bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center text-sm shrink-0">
-            <i class="fa-solid fa-location-dot"></i>
+            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
           </div>
           <div class="min-w-0">
             <div class="text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider">Address</div>
@@ -148,29 +149,29 @@ import { ToastService } from '../core/services/toast.service';
       <div class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl px-3 py-2 flex items-center gap-2 overflow-x-auto shadow-md scrollbar-none">
         <button type="button" (click)="activeTab = 'overview'"
                 [ngClass]="activeTab === 'overview' ? 'bg-[var(--primary)]/10 text-[var(--primary)] border-b-2 border-[var(--primary)] font-bold' : 'text-[var(--muted)] hover:text-[var(--text)] font-semibold'"
-                class="px-4 py-2 rounded-lg text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
-          <i class="fa-solid fa-user-doctor text-xs"></i>
+                class="btn-size-sm px-4 rounded-lg text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
+          <i class="fa-solid fa-user-doctor text-xs" aria-hidden="true"></i>
           <span>Overview</span>
         </button>
 
         <button type="button" (click)="activeTab = 'availability'"
                 [ngClass]="activeTab === 'availability' ? 'bg-[var(--primary)]/10 text-[var(--primary)] border-b-2 border-[var(--primary)] font-bold' : 'text-[var(--muted)] hover:text-[var(--text)] font-semibold'"
-                class="px-4 py-2 rounded-lg text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
-          <i class="fa-regular fa-calendar-days text-xs"></i>
+                class="btn-size-sm px-4 rounded-lg text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
+          <i class="fa-regular fa-calendar-days text-xs" aria-hidden="true"></i>
           <span>Availability</span>
         </button>
 
         <button type="button" (click)="activeTab = 'reviews'"
                 [ngClass]="activeTab === 'reviews' ? 'bg-[var(--primary)]/10 text-[var(--primary)] border-b-2 border-[var(--primary)] font-bold' : 'text-[var(--muted)] hover:text-[var(--text)] font-semibold'"
-                class="px-4 py-2 rounded-lg text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
-          <i class="fa-regular fa-star text-xs"></i>
+                class="btn-size-sm px-4 rounded-lg text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
+          <i class="fa-regular fa-star text-xs" aria-hidden="true"></i>
           <span>Reviews</span>
         </button>
 
         <button type="button" (click)="activeTab = 'clinic'"
                 [ngClass]="activeTab === 'clinic' ? 'bg-[var(--primary)]/10 text-[var(--primary)] border-b-2 border-[var(--primary)] font-bold' : 'text-[var(--muted)] hover:text-[var(--text)] font-semibold'"
-                class="px-4 py-2 rounded-lg text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
-          <i class="fa-solid fa-hospital-user text-xs"></i>
+                class="btn-size-sm px-4 rounded-lg text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
+          <i class="fa-solid fa-hospital-user text-xs" aria-hidden="true"></i>
           <span>Clinic Info</span>
         </button>
       </div>
@@ -184,7 +185,7 @@ import { ToastService } from '../core/services/toast.service';
           <div class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-xl space-y-5">
             <div class="flex items-center gap-2.5 pb-3 border-b border-[var(--border)]">
               <div class="w-7 h-7 rounded-lg bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center text-sm shrink-0">
-                <i class="fa-solid fa-graduation-cap"></i>
+                <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
               </div>
               <h3 class="text-base font-bold text-[var(--text)]">Education</h3>
             </div>
@@ -200,7 +201,7 @@ import { ToastService } from '../core/services/toast.service';
                   <div class="flex items-start justify-between gap-2">
                     <h4 class="font-bold text-[var(--text)] text-sm sm:text-base">{{ ed.degree }}</h4>
                     <span *ngIf="isGoldMedalist(ed)" class="bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 px-2.5 py-0.5 rounded-lg text-[10px] font-bold flex items-center gap-1 shrink-0">
-                      <i class="fa-solid fa-trophy text-[10px]"></i> Gold Medalist
+                      <i class="fa-solid fa-trophy text-[10px]" aria-hidden="true"></i> Gold Medalist
                     </span>
                   </div>
                   <div class="text-[var(--primary)] text-xs sm:text-sm font-semibold">{{ ed.institution }}</div>
@@ -217,7 +218,7 @@ import { ToastService } from '../core/services/toast.service';
           <div class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-xl space-y-5">
             <div class="flex items-center gap-2.5 pb-3 border-b border-[var(--border)]">
               <div class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-400 flex items-center justify-center text-sm shrink-0">
-                <i class="fa-solid fa-award"></i>
+                <i class="fa-solid fa-award" aria-hidden="true"></i>
               </div>
               <h3 class="text-base font-bold text-[var(--text)]">Certificates</h3>
             </div>
@@ -243,13 +244,13 @@ import { ToastService } from '../core/services/toast.service';
 
                 <div class="flex items-center gap-2 shrink-0">
                   <a *ngIf="c.credentialUrl || c.url" [href]="c.credentialUrl || c.url" target="_blank"
-                     class="bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all">
-                    <i class="fa-regular fa-eye text-xs"></i>
+                     class="btn-size-md bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs font-semibold px-3 rounded-lg flex items-center gap-1.5 transition-all" rel="noopener noreferrer">
+                    <i class="fa-regular fa-eye text-xs" aria-hidden="true"></i>
                     <span>View</span>
                   </a>
                   <a *ngIf="c.credentialUrl || c.url" [href]="c.credentialUrl || c.url" download
                      class="bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs font-semibold p-1.5 rounded-lg transition-all" title="Download">
-                    <i class="fa-solid fa-download text-xs"></i>
+                    <i class="fa-solid fa-download text-xs" aria-hidden="true"></i>
                   </a>
                 </div>
               </div>
@@ -263,7 +264,7 @@ import { ToastService } from '../core/services/toast.service';
           <div class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-xl space-y-5">
             <div class="flex items-center gap-2.5 pb-3 border-b border-[var(--border)]">
               <div class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-sm shrink-0">
-                <i class="fa-solid fa-briefcase"></i>
+                <i class="fa-solid fa-briefcase" aria-hidden="true"></i>
               </div>
               <h3 class="text-base font-bold text-[var(--text)]">Experience</h3>
             </div>
@@ -293,14 +294,14 @@ import { ToastService } from '../core/services/toast.service';
           <div class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
             <div class="flex items-center gap-2.5 pb-3 border-b border-[var(--border)]">
               <div class="w-7 h-7 rounded-lg bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center text-sm shrink-0">
-                <i class="fa-solid fa-user-doctor"></i>
+                <i class="fa-solid fa-user-doctor" aria-hidden="true"></i>
               </div>
               <h3 class="text-base font-bold text-[var(--text)]">Specialties</h3>
             </div>
 
             <div class="flex flex-wrap gap-2 pt-1" *ngIf="specialtiesList.length; else specialtiesMissing">
               <span *ngFor="let s of specialtiesList"
-                    class="bg-[var(--bg)] border border-[var(--border)] text-xs font-semibold text-gray-300 px-3.5 py-2 rounded-xl hover:border-[var(--primary)] transition-colors">
+                    class="bg-[var(--bg)] border border-[var(--border)] text-xs font-semibold text-gray-600 dark:text-gray-300 px-3.5 py-2 rounded-xl hover:border-[var(--primary)] transition-colors">
                 {{ s }}
               </span>
             </div>
@@ -313,7 +314,7 @@ import { ToastService } from '../core/services/toast.service';
           <div class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-xl space-y-3">
             <div class="flex items-center gap-2.5 pb-3 border-b border-[var(--border)]">
               <div class="w-7 h-7 rounded-lg bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center text-sm shrink-0">
-                <i class="fa-solid fa-notes-medical"></i>
+                <i class="fa-solid fa-notes-medical" aria-hidden="true"></i>
               </div>
               <h3 class="text-base font-bold text-[var(--text)]">About</h3>
             </div>
@@ -399,15 +400,11 @@ export class DoctorDetailsPanelComponent {
   }
 
   doctorInitial(): string {
-    const base = (this.doctor?.name || `${this.doctor?.firstName || ''} ${this.doctor?.lastName || ''}`).trim();
-    const stripped = base.replace(/^dr\.?\s+/i, '');
-    return stripped.charAt(0) || '?';
+    return getDoctorInitial(this.doctor);
   }
 
   formatDoctorName(): string {
-    const base = (this.doctor?.name || `${this.doctor?.firstName || ''} ${this.doctor?.lastName || ''}`).trim();
-    if (!base) return '';
-    return /^dr\.?\s+/i.test(base) ? base : `Dr ${base}`;
+    return doctorDisplayName(this.doctor);
   }
 
   displayValue(value: unknown): string {

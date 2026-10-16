@@ -1,4 +1,4 @@
-import { Component, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, TemplateRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -6,23 +6,34 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
 import { MasterDataService } from '../../core/services/master-data.service';
 import { AppointmentService } from '../../core/services/appointment.service';
 import { ToastService } from '../../core/services/toast.service';
-import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { EmergencyAppointmentModalComponent } from '../../shared/emergency-appointment-modal.component';
 import { SpecializationAutocompleteComponent } from '../../shared/specialization-autocomplete.component';
 import { SelectOption } from '../../shared/select-dropdown.component';
 import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 import { ButtonComponent, FilterBarComponent, FilterConfig } from '../../shared/components';
+import { PageContainerComponent } from '../../shared/ui/page-container.component';
+import { PaginatorComponent } from '../../shared/ui/paginator.component';
+import { StickyActionBarComponent } from '../../shared/ui/sticky-action-bar.component';
+import { doctorDisplayName, doctorInitial as getDoctorInitial } from '../../shared/utils/doctor-name.util';
+import { InrPipe } from '../../shared/utils/inr.pipe';
+import { trackById } from '../../shared/utils/track-by';
+import { markForCheckOn } from '../../shared/utils/mark-for-check';
 
 @Component({
   selector: 'app-patient-book-appointment',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent, PageLoaderComponent, EmptyStateComponent, ButtonComponent, FilterBarComponent],
+  imports: [InrPipe, StickyActionBarComponent, PaginatorComponent, PageContainerComponent, CommonModule, RouterModule, FormsModule, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent, PageLoaderComponent, EmptyStateComponent, ButtonComponent, FilterBarComponent],
+  // OnPush: HTTP results go through markForCheckOn; child modals/autocomplete request their own checks
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './patient-book-appointment.component.html',
   styleUrl: './patient-book-appointment.component.css'
 })
 export class PatientBookAppointmentComponent {
-  @ViewChild('specializationTpl')
+  private cdr = inject(ChangeDetectorRef);
+  readonly trackById = trackById;
+  // static: resolved before the first check, so the filter bar has the template on first render (needed under OnPush)
+  @ViewChild('specializationTpl', { static: true })
   set specializationTpl(tpl: TemplateRef<unknown> | undefined) {
     const spec = this.bookFilterConfigs.find((c) => c.key === 'specializationFilter');
     if (spec && tpl) spec.customTemplate = tpl;
@@ -106,10 +117,6 @@ export class PatientBookAppointmentComponent {
 
   isFilterExpanded = false;
 
-  toggleFilter() {
-    this.isFilterExpanded = !this.isFilterExpanded;
-  }
-
   get activeFilterCount(): number {
     let count = 0;
     if (this.specializationFilter) count++;
@@ -138,18 +145,13 @@ export class PatientBookAppointmentComponent {
     private toast: ToastService
   ) {
     this.searchDoctors();
-    this.masterDataService.getGenders().subscribe({
+    this.masterDataService.getGenders().pipe(markForCheckOn(this.cdr)).subscribe({
       next: (g) => {
         this.genders = g || [];
         const gender = this.bookFilterConfigs.find((c) => c.key === 'genderFilter');
         if (gender) gender.options = this.genderOptions;
       }
     });
-  }
-
-  refreshDoctors() {
-    this.page = 0;
-    this.searchDoctors();
   }
 
   searchDoctors() {
@@ -166,7 +168,7 @@ export class PatientBookAppointmentComponent {
     };
 
     // Fetch doctors for current page
-    this.doctorApi.searchDoctors(searchParams).subscribe({
+    this.doctorApi.searchDoctors(searchParams).pipe(markForCheckOn(this.cdr)).subscribe({
       next: (res) => {
         if (requestId !== this.doctorSearchId) return;
         this.doctors = res || [];
@@ -182,7 +184,7 @@ export class PatientBookAppointmentComponent {
     });
 
     // Fetch total doctor count for filtered query
-    this.doctorApi.countDoctors(searchParams).subscribe({
+    this.doctorApi.countDoctors(searchParams).pipe(markForCheckOn(this.cdr)).subscribe({
       next: (count) => {
         this.totalDoctorsCount = count || 0;
       },
@@ -190,34 +192,8 @@ export class PatientBookAppointmentComponent {
     });
   }
 
-  get startItemIndex(): number {
-    if (this.totalDoctorsCount === 0) return 0;
-    return this.page * this.size + 1;
-  }
-
-  get endItemIndex(): number {
-    return Math.min((this.page + 1) * this.size, this.totalDoctorsCount);
-  }
-
   get totalPages(): number {
     return Math.max(1, Math.ceil(this.totalDoctorsCount / this.size));
-  }
-
-  get paginationPages(): number[] {
-    const total = this.totalPages;
-    const pages: number[] = [];
-    const maxVisible = 5;
-    let start = Math.max(0, this.page - Math.floor(maxVisible / 2));
-    let end = Math.min(total, start + maxVisible);
-
-    if (end - start < maxVisible) {
-      start = Math.max(0, end - maxVisible);
-    }
-
-    for (let i = start; i < end; i++) {
-      pages.push(i);
-    }
-    return pages;
   }
 
   goToPage(p: number) {
@@ -249,34 +225,16 @@ export class PatientBookAppointmentComponent {
     this.onFilterChange();
   }
 
-  nextPage() {
-    if (this.page < this.totalPages - 1) {
-      this.page++;
-      this.searchDoctors();
-    }
-  }
-
-  prevPage() {
-    if (this.page > 0) {
-      this.page--;
-      this.searchDoctors();
-    }
-  }
-
   openDoctor(d: Doctor) {
     this.router.navigate(['/patient/doctor', d.username]);
   }
 
   formatDoctorName(d: Doctor) {
-    const base = (d.name || `${d.firstName || ''} ${d.lastName || ''}`).trim();
-    const hasPrefix = /^dr\.?\s/i.test(base);
-    return hasPrefix ? base : `Dr. ${base}`;
+    return doctorDisplayName(d);
   }
 
   doctorInitial(d: Doctor) {
-    const base = (d.name || `${d.firstName || ''} ${d.lastName || ''}`).trim();
-    const stripped = base.replace(/^dr\.?\s+/i, '');
-    return stripped.charAt(0) || '?';
+    return getDoctorInitial(d);
   }
 
   formatExperience(d: Doctor): string {

@@ -42,15 +42,15 @@
           </span>
           <div class="hidden sm:flex items-center gap-3 text-[11px] text-muted mt-1.5">
             <span *ngIf="showAge && p.age" class="inline-flex items-center gap-1.5 font-medium whitespace-nowrap">
-              <i class="fa-solid fa-user text-[var(--primary)]"></i>
+              <i class="fa-solid fa-user text-[var(--primary)]" aria-hidden="true"></i>
               {{ p.age }}
             </span>
             <span class="inline-flex items-center gap-1.5 font-medium whitespace-nowrap">
-              <i class="fa-regular fa-calendar text-[var(--primary)]"></i>
+              <i class="fa-regular fa-calendar text-[var(--primary)]" aria-hidden="true"></i>
               {{ p.lastVisit }}
             </span>
             <span *ngIf="p.appointment?.appointmentTime" class="inline-flex items-center gap-1.5 font-medium whitespace-nowrap">
-              <i class="fa-regular fa-clock text-[var(--primary)]"></i>
+              <i class="fa-regular fa-clock text-[var(--primary)]" aria-hidden="true"></i>
               {{ p.appointment.appointmentTime }}
             </span>
           </div>
@@ -58,22 +58,22 @@
       </div>
       <div class="flex sm:hidden items-center gap-2 min-w-0 flex-nowrap">
         <span *ngIf="showAge && p.age" class="inline-flex items-center gap-1 font-medium whitespace-nowrap text-[11px] text-muted shrink-0">
-          <i class="fa-solid fa-user text-[var(--primary)]"></i>
+          <i class="fa-solid fa-user text-[var(--primary)]" aria-hidden="true"></i>
           {{ p.age }}
         </span>
         <span class="inline-flex items-center gap-1 font-medium whitespace-nowrap text-[11px] text-muted shrink-0">
-          <i class="fa-regular fa-calendar text-[var(--primary)]"></i>
+          <i class="fa-regular fa-calendar text-[var(--primary)]" aria-hidden="true"></i>
           {{ p.lastVisit }}
         </span>
         <span *ngIf="p.appointment?.appointmentTime" class="inline-flex items-center gap-1 font-medium whitespace-nowrap text-[11px] text-muted shrink-0">
-          <i class="fa-regular fa-clock text-[var(--primary)]"></i>
+          <i class="fa-regular fa-clock text-[var(--primary)]" aria-hidden="true"></i>
           {{ p.appointment.appointmentTime }}
         </span>
         <app-status-badge *ngIf="p.status" class="ml-auto shrink-0" [status]="p.status" size="sm"></app-status-badge>
       </div>
       <div class="hidden sm:flex items-center gap-2.5 shrink-0 ml-2" *ngIf="p.status">
         <app-status-badge [status]="p.status" size="md"></app-status-badge>
-        <i class="fa-solid fa-chevron-right text-muted group-hover:text-[var(--text)] text-xs group-hover:translate-x-0.5 transition-all"></i>
+        <i class="fa-solid fa-chevron-right text-muted group-hover:text-[var(--text)] text-xs group-hover:translate-x-0.5 transition-all" aria-hidden="true"></i>
       </div>
     </div>
   </div>

@@ -7,8 +7,6 @@ import { StatusStepperComponent } from './status-stepper.component';
 import { AppointmentOverviewTabComponent } from './appointment-overview-tab.component';
 import { AppointmentProcessTabComponent } from './appointment-process-tab.component';
 import { MedicalHistoryTabComponent } from './medical-history-tab.component';
-import { DoctorLayoutComponent } from '../../doctor-layout.component';
-import { PatientLayoutComponent } from '../../patient-layout.component';
 import { AuthService } from '../../../core/services/auth.service';
 
 import { IntakeSummaryModalComponent } from '../../../features/doctor/intake-summary-modal.component';
@@ -28,8 +26,6 @@ import { PaymentPopupComponent, PaymentDetails } from '../../payment-popup.compo
     standalone: true,
     imports: [
         CommonModule,
-        DoctorLayoutComponent,
-        PatientLayoutComponent,
         AppointmentHeaderComponent,
         StatusStepperComponent,
         AppointmentOverviewTabComponent,
@@ -45,7 +41,6 @@ import { PaymentPopupComponent, PaymentDetails } from '../../payment-popup.compo
         PaymentPopupComponent
     ],
     templateUrl: './appointment-details-page.component.html',
-    styleUrl: './appointment-details-page.component.css'
 })
 export class AppointmentDetailsPageComponent implements OnInit {
     public auth = inject(AuthService);

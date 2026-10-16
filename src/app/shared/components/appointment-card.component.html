@@ -1,5 +1,6 @@
-<div (click)="onViewAppointment()"
-x    class="bg-[var(--panel)] border border-[var(--border)] hover:border-[var(--border)] rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-xl transition-all duration-200 flex flex-col justify-between h-full cursor-pointer group hover:shadow-2xl">
+<div (click)="onViewAppointment()" role="link" tabindex="0"
+    (keydown.enter)="$event.target === $event.currentTarget && onViewAppointment()" [attr.aria-label]="'View appointment with ' + otherPersonName"
+    class="bg-[var(--panel)] border border-[var(--border)] hover:border-[var(--border)] rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-xl transition-all duration-200 flex flex-col justify-between h-full cursor-pointer group hover:shadow-2xl">
 
     <div class="space-y-3.5">
         <!-- Header: Avatar + Person Info + (Receipt Icon & Status Badge) -->
@@ -24,9 +25,9 @@ x    class="bg-[var(--panel)] border border-[var(--border)] hover:border-[var(--
             <!-- Receipt Download Icon & Stage Status Badge on top right -->
             <div class="shrink-0 flex items-center gap-1.5">
                 <button *ngIf="viewerRole === 'PATIENT'" type="button" (click)="onDownloadReceipt($event)"
-                    class="p-1.5 text-[var(--muted)] hover:text-[var(--primary)] hover:bg-[var(--bg)] border border-transparent hover:border-[var(--border)] rounded-lg transition-all flex items-center justify-center"
+                    class="w-[38px] h-[38px] shrink-0 text-[var(--muted)] hover:text-[var(--primary)] hover:bg-[var(--bg)] border border-transparent hover:border-[var(--border)] rounded-lg transition-all flex items-center justify-center"
                     title="Download Booking Receipt" aria-label="Download Booking Receipt">
-                    <i class="fa-solid fa-download text-xs"></i>
+                    <i class="fa-solid fa-download text-xs" aria-hidden="true"></i>
                 </button>
                 <app-status-badge [status]="appointment.status"></app-status-badge>
             </div>
@@ -36,12 +37,12 @@ x    class="bg-[var(--panel)] border border-[var(--border)] hover:border-[var(--
         <div
             class="bg-[var(--bg)] border border-[var(--border)] rounded-xl px-2.5 sm:px-3 py-2 flex items-center justify-between gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-[var(--muted)]">
             <div class="flex items-center gap-2 min-w-0">
-                <i class="fa-solid fa-calendar text-[var(--primary)] text-xs shrink-0"></i>
+                <i class="fa-solid fa-calendar text-[var(--primary)] text-xs shrink-0" aria-hidden="true"></i>
                 <span class="font-medium text-[var(--text)] truncate">{{ appointment.appointmentDate | date:'EEE, dd MMM yyyy'
                     }}</span>
             </div>
             <div class="flex items-center gap-1.5 sm:gap-2 shrink-0 border-l border-[var(--border)] pl-2 sm:pl-3">
-                <i class="fa-solid fa-clock text-[var(--primary)] text-xs shrink-0"></i>
+                <i class="fa-solid fa-clock text-[var(--primary)] text-xs shrink-0" aria-hidden="true"></i>
                 <span class="font-mono text-[var(--text)]">{{ appointment.appointmentTime }}</span>
             </div>
         </div>
@@ -53,8 +54,8 @@ x    class="bg-[var(--panel)] border border-[var(--border)] hover:border-[var(--
             <!-- DOCTOR COMPLETED ACTIONS -->
             <ng-container *ngIf="viewerRole === 'DOCTOR'">
                 <button type="button" (click)="onViewMedicalRecord($event)"
-                    class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-file-medical"></i>
+                    class="h-[38px] py-0 w-full px-4 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-file-medical" aria-hidden="true"></i>
                     <span>View Medical Record</span>
                 </button>
             </ng-container>
@@ -63,52 +64,52 @@ x    class="bg-[var(--panel)] border border-[var(--border)] hover:border-[var(--
             <ng-container *ngIf="viewerRole === 'PATIENT'">
                 <div class="grid grid-cols-2 gap-2 w-full">
                     <button type="button" (click)="onViewPrescription($event)"
-                        class="py-2 px-3 bg-[var(--bg)] hover:bg-[var(--border)] text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-eye text-xs"></i>
+                        class="h-[38px] py-0 px-3 bg-[var(--bg)] hover:bg-[var(--border)] text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-eye text-xs" aria-hidden="true"></i>
                         <span>View Rx</span>
                     </button>
                     <button type="button" (click)="onDownloadPrescription($event)"
-                        class="py-2 px-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-file-pdf text-xs"></i>
+                        class="h-[38px] py-0 px-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-file-pdf text-xs" aria-hidden="true"></i>
                         <span>Download Rx</span>
                     </button>
                 </div>
                 <button *ngIf="!appointment.feedbackSubmitted" type="button" (click)="onGiveFeedback($event)"
-                    class="w-full py-2 px-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-star text-amber-700 dark:text-amber-400 text-xs"></i>
+                    class="h-[38px] py-0 w-full px-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-star text-amber-700 dark:text-amber-400 text-xs" aria-hidden="true"></i>
                     <span>Give Feedback</span>
                 </button>
             </ng-container>
 
             <!-- Secondary button for details -->
             <button type="button" (click)="onViewAppointment(); $event.stopPropagation()"
-                class="w-full py-2 px-3 bg-[var(--bg)] hover:bg-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] text-xs font-medium rounded-xl transition-all flex items-center justify-center gap-1.5">
+                class="h-[38px] py-0 w-full px-3 bg-[var(--bg)] hover:bg-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] text-xs font-medium rounded-xl transition-all flex items-center justify-center gap-1.5">
                 <span>View Details</span>
-                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                <i class="fa-solid fa-chevron-right text-[10px]" aria-hidden="true"></i>
             </button>
         </ng-container>
 
         <ng-template #defaultAction>
             <button type="button" (click)="onViewAppointment(); $event.stopPropagation()"
-                class="w-full min-h-[44px] py-2.5 px-4 bg-[var(--primary)] hover:bg-[var(--primary-hover)] active:scale-[0.99] text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-[var(--primary)]/20 flex items-center justify-center gap-1.5">
+                class="h-[38px] py-0 w-full px-4 bg-[var(--primary)] hover:bg-[var(--primary-hover)] active:scale-[0.99] text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-[var(--primary)]/20 flex items-center justify-center gap-1.5">
                 <span>View Appointment</span>
-                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                <i class="fa-solid fa-chevron-right text-[10px]" aria-hidden="true"></i>
             </button>
             <div *ngIf="viewerRole === 'PATIENT' && (canPatientReschedule || canOpenChat)" class="space-y-2"
                 (click)="$event.stopPropagation()">
                 <div *ngIf="canPatientReschedule" class="grid grid-cols-2 gap-2">
                     <button type="button" (click)="onReschedule($event)"
-                        class="min-h-[36px] py-1.5 px-3 bg-[var(--bg)] hover:bg-[var(--border)] text-[var(--text)] text-xs font-bold rounded-xl transition-all">
+                        class="h-[38px] py-0 px-3 bg-[var(--bg)] hover:bg-[var(--border)] text-[var(--text)] text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1.5">
                         Reschedule
                     </button>
                     <button type="button" (click)="onCancel($event)" [disabled]="!canPatientCancel"
-                        class="min-h-[36px] py-1.5 px-3 bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/30 text-xs font-bold rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                        class="h-[38px] py-0 px-3 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-300 border border-red-500/30 text-xs font-bold rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center justify-center gap-1.5"
                         aria-label="Cancel appointment">
                         Cancel
                     </button>
                 </div>
                 <button *ngIf="canOpenChat" type="button" (click)="onOpenChat($event)"
-                    class="w-full min-h-[44px] py-2 px-3 bg-[var(--bg)] hover:bg-[var(--border)] text-[var(--text)] text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5">
+                    class="h-[38px] py-0 w-full px-3 bg-[var(--bg)] hover:bg-[var(--border)] text-[var(--text)] text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5">
                     <i class="fa-solid fa-comments text-xs" aria-hidden="true"></i>
                     <span>Chat with Doctor</span>
                 </button>

@@ -3,6 +3,15 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
+export interface SavedPaymentMethod {
+  paymentMethod: 'UPI' | 'CARD' | 'QR_CODE' | string;
+  upiId?: string;
+  cardLastFour?: string;
+  cardBrand?: string;
+  cardholderName?: string;
+  updatedAt?: string;
+}
+
 export interface PaymentRequest {
   amount: number;
   description?: string; // Optional - will be auto-generated if not provided
@@ -160,8 +169,10 @@ export class PaymentService {
   /**
    * Get payment by booking ID
    */
-  getPaymentByBookingId(bookingId: number): Observable<PaymentStatusResponse> {
-    return this.http.get<PaymentStatusResponse>(`${this.baseUrl}/api/payments/booking/${bookingId}`);
+  getPaymentByBookingId(bookingId: number, type?: 'BOOKING' | 'APPOINTMENT'): Observable<PaymentStatusResponse> {
+    // Booking and appointment ids overlap, so say which one this is
+    const params = type ? { params: { type } } : {};
+    return this.http.get<PaymentStatusResponse>(`${this.baseUrl}/api/payments/booking/${bookingId}`, params);
   }
 
   /**
@@ -169,6 +180,18 @@ export class PaymentService {
    */
   getPatientPayments(patientId: number): Observable<PaymentStatusResponse[]> {
     return this.http.get<PaymentStatusResponse[]>(`${this.baseUrl}/api/payments/patient/${patientId}`);
+  }
+
+  /**
+   * The patient's last used payment method (safe details only; never the full card number).
+   * The backend answers 204 when nothing is saved, which arrives here as null.
+   */
+  getMySavedPaymentMethod(): Observable<SavedPaymentMethod | null> {
+    return this.http.get<SavedPaymentMethod | null>(`${this.baseUrl}/api/payments/preferences/me`);
+  }
+
+  forgetMySavedPaymentMethod(): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/api/payments/preferences/me`);
   }
 
   /**

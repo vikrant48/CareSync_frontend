@@ -62,6 +62,8 @@ export class ChatComponent implements OnInit, OnDestroy {
             .subscribe(msgs => {
                 this.messages = msgs;
                 this.scrollToBottom();
+                // Host pages may be OnPush: request a check so the history renders
+                this.cdr.markForCheck();
             });
     }
 

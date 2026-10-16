@@ -12,7 +12,7 @@ import { AiAssistantService } from '../core/services/ai-assistant.service';
       <div class="px-5 py-4 bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-            <i class="fas fa-file-medical-alt text-indigo-600 dark:text-indigo-400"></i>
+            <i class="fas fa-file-medical-alt text-indigo-600 dark:text-indigo-400" aria-hidden="true"></i>
           </div>
           <div>
             <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100 italic">AI Medical Summary</h3>
@@ -24,7 +24,7 @@ import { AiAssistantService } from '../core/services/ai-assistant.service';
           [disabled]="isLoading()"
           class="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1.5 transition-colors disabled:opacity-50"
         >
-          <i class="fas fa-sync-alt" [class.animate-spin]="isLoading()"></i>
+          <i class="fas fa-sync-alt" [class.animate-spin]="isLoading()" aria-hidden="true"></i>
           <span>{{ summary() ? 'Refresh' : 'Generate' }}</span>
         </button>
       </div>
@@ -48,15 +48,15 @@ import { AiAssistantService } from '../core/services/ai-assistant.service';
 
         <!-- Empty State -->
         <div *ngIf="!isLoading() && !summary() && !error()" class="py-8 text-center">
-          <div class="w-12 h-12 rounded-full bg-gray-50 dark:bg-gray-900 flex items-center justify-center mx-auto mb-3 text-gray-300">
-            <i class="fas fa-magic text-xl"></i>
+          <div class="w-12 h-12 rounded-full bg-gray-50 dark:bg-gray-900 flex items-center justify-center mx-auto mb-3 text-gray-600 dark:text-gray-300">
+            <i class="fas fa-magic text-xl" aria-hidden="true"></i>
           </div>
           <p class="text-sm text-gray-500">Click generate to see an AI-powered summary of the patient's history.</p>
         </div>
 
         <!-- Error State -->
         <div *ngIf="error()" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-lg flex gap-3">
-          <i class="fas fa-exclamation-circle text-red-500 mt-0.5"></i>
+          <i class="fas fa-exclamation-circle text-red-500 mt-0.5" aria-hidden="true"></i>
           <div>
             <h4 class="text-sm font-bold text-red-800 dark:text-red-300">Summarization Failed</h4>
             <p class="text-xs text-red-700 dark:text-red-400 mt-1">{{ error() }}</p>
@@ -70,7 +70,7 @@ import { AiAssistantService } from '../core/services/ai-assistant.service';
 
         <!-- Disclaimer -->
         <div *ngIf="summary()" class="mt-6 p-3 bg-blue-50/50 dark:bg-blue-900/10 rounded border border-blue-100/50 dark:border-blue-800/30 flex gap-3">
-          <i class="fas fa-info-circle text-blue-500 text-xs mt-0.5"></i>
+          <i class="fas fa-info-circle text-blue-500 text-xs mt-0.5" aria-hidden="true"></i>
           <p class="text-[10px] text-blue-700 dark:text-blue-400 leading-tight">
             <strong>Medical Disclaimer:</strong> This summary is AI-generated and intended for informational purposes. Please verify all critical clinical information with source records before making medical decisions.
           </p>

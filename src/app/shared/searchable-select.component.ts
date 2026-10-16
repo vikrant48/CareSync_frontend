@@ -49,6 +49,10 @@ export class SearchableSelectComponent implements OnInit, OnDestroy {
     @Input() emptyText: string = 'No options available';
     @Input() noResultsText: string = 'No results found';
     @Input() hint: string = '';
+    /** Trigger icon (Font Awesome classes). Defaults to the patient picker's icon. */
+    @Input() icon: string = 'fa-solid fa-user-injured';
+    /** Extra line under "no results" */
+    @Input() noResultsHint: string = 'Try searching with a different name or email';
 
     @Output() selectionChange = new EventEmitter<any>();
     @Output() clearSelection = new EventEmitter<void>();

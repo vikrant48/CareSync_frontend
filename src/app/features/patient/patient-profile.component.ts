@@ -1,6 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { PatientProfilePageComponent, AppointmentCounts } from '../../shared/patient-profile-page.component';
 import { PatientProfileService, PatientDto, MedicalHistoryItem } from '../../core/services/patient-profile.service';
 import { AppointmentService } from '../../core/services/appointment.service';
@@ -9,7 +8,7 @@ import { AuthService } from '../../core/services/auth.service';
 @Component({
   selector: 'app-patient-profile',
   standalone: true,
-  imports: [CommonModule, PatientLayoutComponent, PatientProfilePageComponent],
+  imports: [CommonModule, PatientProfilePageComponent],
   templateUrl: './patient-profile.component.html',
   styleUrl: './patient-profile.component.css'
 })

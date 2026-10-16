@@ -7,7 +7,7 @@
           'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400': isNoShow
         }">
         <div class="flex items-center gap-2">
-            <i class="fa-solid fa-triangle-exclamation text-sm"></i>
+            <i class="fa-solid fa-triangle-exclamation text-sm" aria-hidden="true"></i>
             <span>Appointment Terminal State: {{ currentStatusLabel }}</span>
         </div>
         <span class="px-2 py-0.5 rounded bg-[var(--bg)] text-[10px] tracking-wider uppercase">
@@ -30,9 +30,9 @@
                 'bg-emerald-500 text-gray-950 ring-4 ring-emerald-500/20': stage.state === 'COMPLETED',
                 'bg-indigo-600 text-white ring-4 ring-indigo-500/40 animate-pulse': stage.state === 'CURRENT',
                 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 border border-gray-300 dark:border-gray-700': stage.state === 'UPCOMING',
-                'bg-rose-900/40 text-rose-400 border border-rose-700': stage.state === 'CANCELLED'
+                'bg-rose-900/40 text-rose-700 dark:text-rose-400 border border-rose-700': stage.state === 'CANCELLED'
               }">
-                    <i *ngIf="stage.state === 'COMPLETED'" class="fa-solid fa-check text-xs font-black"></i>
+                    <i *ngIf="stage.state === 'COMPLETED'" class="fa-solid fa-check text-xs font-black" aria-hidden="true"></i>
                     <span *ngIf="stage.state !== 'COMPLETED'">{{ i + 1 }}</span>
                 </div>
 

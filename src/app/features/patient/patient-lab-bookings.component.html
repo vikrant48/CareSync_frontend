@@ -1,18 +1,12 @@
-<app-patient-layout>
-    <div class="max-w-[1400px] mx-auto p-3 sm:p-5 space-y-4 pb-24">
-        <!-- Header Banner Card Box -->
-        <header
-            class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
-            <div class="space-y-1">
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">Lab Test Bookings</h1>
-                <p class="text-xs sm:text-sm text-[var(--muted)]">View and manage your diagnostic test appointments</p>
-            </div>
+    <app-page-container extraClass="pb-24">
+        <app-page-header variant="hero" title="Lab Test Bookings"
+            subtitle="View and manage your diagnostic test appointments" [hasActions]="true">
             <button type="button" (click)="navigateToBooking()"
-                class="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-lg shadow-[var(--primary)]/20 transition-all flex items-center gap-2 w-fit cursor-pointer">
-                <i class="fas fa-plus text-xs"></i>
+                class="btn-size-lg bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold text-xs sm:text-sm px-4 rounded-xl shadow-lg shadow-[var(--primary)]/20 transition-all flex items-center gap-2 w-fit cursor-pointer">
+                <i class="fas fa-plus text-xs" aria-hidden="true"></i>
                 <span>New Test</span>
             </button>
-        </header>
+        </app-page-header>
 
         <app-page-loader *ngIf="isLoading()" label="Loading lab bookings..."></app-page-loader>
 
@@ -20,7 +14,7 @@
         <div *ngIf="errorMessage() && !isLoading()"
             class="bg-red-500/10 border border-red-500/40 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 flex items-start gap-3 sm:gap-4">
             <div class="p-1.5 sm:p-2 bg-red-500/20 rounded-lg text-red-500 text-xs sm:text-base">
-                <i class="fas fa-exclamation-triangle"></i>
+                <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
             </div>
             <div>
                 <h3 class="font-bold text-xs sm:text-base text-red-600 dark:text-red-400">Error Loading Bookings</h3>
@@ -45,10 +39,10 @@
         </div>
 
         <!-- Bookings Horizontal List Cards -->
-        <div *ngIf="!isLoading() && !errorMessage() && filteredBookings.length > 0"
+        <div *ngIf="!isLoading() && !errorMessage() && filteredBookings().length > 0"
             class="space-y-4 animate-in fade-in duration-200">
 
-            <div *ngFor="let booking of filteredBookings"
+            <div *ngFor="let booking of filteredBookings(); trackBy: trackById"
                 class="bg-[var(--panel)] border border-[var(--border)] hover:border-[var(--primary)]/40 rounded-xl sm:rounded-2xl p-3 sm:p-6 transition-all duration-300 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6">
 
                 <!-- Col 1: Icon, Booking ID, Status, Date -->
@@ -61,7 +55,7 @@
                             'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20': (booking.status || '').toUpperCase() === 'IN_PROGRESS'
                         }"
                         class="w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl border shrink-0 flex items-center justify-center text-lg sm:text-2xl shadow-inner">
-                        <i class="fa-solid fa-flask"></i>
+                        <i class="fa-solid fa-flask" aria-hidden="true"></i>
                     </div>
 
                     <!-- ID & Status & Date -->
@@ -83,7 +77,7 @@
                         </div>
 
                         <div class="flex items-center gap-1.5 text-xs text-[var(--muted)]">
-                            <i class="fa-regular fa-calendar-days text-[11px]"></i>
+                            <i class="fa-regular fa-calendar-days text-[11px]" aria-hidden="true"></i>
                             <span>{{ formatDate(booking.createdAt) }}</span>
                         </div>
                     </div>
@@ -104,9 +98,9 @@
                         <span>Prescribed By</span>
                         <span class="text-[var(--text)] font-semibold flex items-center gap-1">
                             <i class="fa-solid fa-user-doctor text-[10px] text-[var(--primary)]"
-                                *ngIf="booking.prescribedBy && booking.prescribedBy !== 'Self'"></i>
+                                *ngIf="booking.prescribedBy && booking.prescribedBy !== 'Self'" aria-hidden="true"></i>
                             <i class="fa-solid fa-user text-[10px] text-[var(--muted)]"
-                                *ngIf="!booking.prescribedBy || booking.prescribedBy === 'Self'"></i>
+                                *ngIf="!booking.prescribedBy || booking.prescribedBy === 'Self'" aria-hidden="true"></i>
                             {{ booking.prescribedBy || 'Self' }}
                         </span>
                     </div>
@@ -116,8 +110,7 @@
                 <div class="lg:px-4 border-t lg:border-t-0 lg:border-l border-[var(--border)]/60 pt-4 lg:pt-0 shrink-0">
                     <span class="block text-[10px] font-bold uppercase tracking-wider text-[var(--muted)] mb-0.5">Total
                         Amount</span>
-                    <span class="text-xl sm:text-2xl font-black text-[#00e676] font-mono tracking-tight">₹{{
-                        booking.totalPrice }}</span>
+                    <span class="text-xl sm:text-2xl font-black text-[#00e676] font-mono tracking-tight">{{ booking.totalPrice | inr }}</span>
                 </div>
 
                 <!-- Col 4: Action Buttons -->
@@ -125,24 +118,24 @@
                     class="flex flex-wrap items-center justify-end gap-2.5 border-t lg:border-t-0 border-[var(--border)]/60 pt-4 lg:pt-0 shrink-0">
 
                     <!-- View Report -->
-                    <a *ngIf="booking.labReports && booking.labReports.length > 0"
-                        [href]="booking.labReports[0].cloudinaryUrl || booking.labReports[0].url" target="_blank"
-                        class="bg-[var(--bg)] hover:bg-[var(--bg)] border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold px-4 py-2 rounded-xl transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-eye text-xs"></i>
+                    <button type="button" *ngIf="booking.labReports && booking.labReports.length > 0"
+                        (click)="openLabReport(booking)"
+                        class="btn-size-md bg-[var(--bg)] hover:bg-[var(--bg)] border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold px-4 rounded-xl transition-all flex items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-eye text-xs" aria-hidden="true"></i>
                         <span>View Report</span>
-                    </a>
+                    </button>
 
                     <!-- Download Receipt -->
                     <button type="button" (click)="downloadReceipt(booking)"
-                        class="bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-slate-200 hover:text-[var(--text)] text-xs font-bold px-4 py-2 rounded-xl transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-download text-xs"></i>
+                        class="btn-size-lg bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-slate-700 dark:text-slate-200 hover:text-[var(--text)] text-xs font-bold px-4 rounded-xl transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-download text-xs" aria-hidden="true"></i>
                         <span>Download</span>
                     </button>
 
                     <!-- Pay Now -->
                     <button *ngIf="booking.status === 'PENDING'" (click)="payForBooking(booking)"
-                        class="bg-amber-500 hover:bg-amber-600 text-[var(--text)] font-bold text-xs px-4 py-2 rounded-xl shadow-lg shadow-amber-500/20 transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-credit-card text-xs"></i>
+                        class="btn-size-lg bg-amber-500 hover:bg-amber-600 text-[var(--text)] font-bold text-xs px-4 rounded-xl shadow-lg shadow-amber-500/20 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-credit-card text-xs" aria-hidden="true"></i>
                         <span>Pay Now</span>
                     </button>
 
@@ -150,10 +143,10 @@
                     <button
                         *ngIf="(booking.status === 'COMPLETED' || booking.status === 'IN_PROGRESS') && (!booking.labReports || booking.labReports.length === 0)"
                         (click)="fileInput.click()"
-                        class="bg-[var(--primary)]/10 hover:bg-[var(--primary)]/20 border border-[var(--primary)]/30 text-[var(--primary)] text-xs font-bold px-4 py-2 rounded-xl transition-all flex items-center gap-2">
+                        class="btn-size-lg bg-[var(--primary)]/10 hover:bg-[var(--primary)]/20 border border-[var(--primary)]/30 text-[var(--primary)] text-xs font-bold px-4 rounded-xl transition-all flex items-center gap-2">
                         <i class="fa-solid fa-upload text-xs"
                             [class.fa-spinner]="isUploading() && uploadBookingId() === booking.id"
-                            [class.fa-spin]="isUploading() && uploadBookingId() === booking.id"></i>
+                            [class.fa-spin]="isUploading() && uploadBookingId() === booking.id" aria-hidden="true"></i>
                         <span>{{ isUploading() && uploadBookingId() === booking.id ? 'Uploading...' : 'Upload Report'
                             }}</span>
                     </button>
@@ -176,8 +169,8 @@
 
                     <!-- Cancel Booking -->
                     <button *ngIf="canCancelBooking(booking)" type="button" (click)="cancelBooking(booking)"
-                        class="bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-700 dark:text-rose-400 text-xs font-bold px-4 py-2 rounded-xl transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-circle-xmark text-xs"></i>
+                        class="btn-size-md bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-700 dark:text-rose-400 text-xs font-bold px-4 rounded-xl transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-circle-xmark text-xs" aria-hidden="true"></i>
                         <span>Cancel</span>
                     </button>
 
@@ -193,7 +186,7 @@
             </div>
 
         </div>
-    </div>
+    </app-page-container>
 
     <!-- Details Modal -->
     <app-modal-shell [open]="showDetailsModal()" title="Booking Details"
@@ -264,7 +257,7 @@
                 <div>
                     <h3
                         class="text-base sm:text-lg font-bold text-gray-800 dark:text-gray-200 mb-2.5 flex items-center gap-2">
-                        <i class="fas fa-list-ul text-brand text-xs sm:text-base"></i> Selected Tests
+                        <i class="fas fa-list-ul text-brand text-xs sm:text-base" aria-hidden="true"></i> Selected Tests
                     </h3>
                     <div
                         class="bg-white dark:bg-gray-800/50 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700/50 shadow-sm">
@@ -273,14 +266,13 @@
                             <span
                                 class="text-gray-800 dark:text-gray-200 font-medium text-xs sm:text-sm truncate min-w-0">{{
                                 test.testName }}</span>
-                            <span class="text-gray-600 dark:text-gray-300 font-mono text-xs sm:text-sm shrink-0">₹{{
-                                test.price }}</span>
+                            <span class="text-gray-600 dark:text-gray-300 font-mono text-xs sm:text-sm shrink-0">{{ test.price | inr }}</span>
                         </div>
                         <div
                             class="p-3 sm:p-4 bg-gray-50 dark:bg-gray-800/80 flex justify-between items-center border-t border-gray-200 dark:border-gray-700">
                             <span class="font-bold text-xs sm:text-sm text-gray-700 dark:text-gray-400">Total
                                 Amount</span>
-                            <span class="text-lg sm:text-xl font-black text-brand">₹{{ booking.totalPrice }}</span>
+                            <span class="text-lg sm:text-xl font-black text-brand">{{ booking.totalPrice | inr }}</span>
                         </div>
                     </div>
                 </div>
@@ -302,5 +294,4 @@
         [amount]="paymentBooking()?.totalPrice || 0" [title]="'Payment for Booking #' + (paymentBooking()?.id || 0)"
         [patientId]="getPatientIdForPayment()" [bookingId]="paymentBooking()?.id" [paymentType]="'LAB_TEST'"
         (paymentSuccess)="onPaymentSuccess($event)" (paymentCancel)="onPaymentCancelled()">
-    </app-payment-popup>
-</app-patient-layout>
+    </app-payment-popup>

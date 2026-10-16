@@ -5,14 +5,18 @@ import { AuthService } from '../../core/services/auth.service';
 import { AnalyticsApiService, OverallAnalytics } from '../../core/services/analytics.service';
 import { ReportsApiService } from '../../core/services/reports.service';
 import { AppointmentService, DoctorAppointmentItem } from '../../core/services/appointment.service';
-import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 import { DoctorReportsSummaryComponent } from './doctor-reports-summary.component';
 import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
+import { PageContainerComponent } from '../../shared/ui/page-container.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { toLocalDateKey } from '../../shared/utils/format.util';
+import { appointmentDayKey, consultationKind, firstVisitByPatient } from '../../shared/utils/appointment-analytics';
+import { memoByDeps } from '../../shared/utils/memo';
 
 @Component({
   selector: 'app-doctor-reports',
   standalone: true,
-  imports: [CommonModule, ChartWidgetComponent, DoctorLayoutComponent, DoctorReportsSummaryComponent,PageLoaderComponent ],
+  imports: [PageHeaderComponent, PageContainerComponent, CommonModule, ChartWidgetComponent, DoctorReportsSummaryComponent,PageLoaderComponent ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './doctor-reports.component.html',
   styleUrl: './doctor-reports.component.css'
@@ -105,12 +109,12 @@ export class DoctorReportsComponent implements OnInit {
   private isoDaysAgo(days: number) {
     const d = new Date();
     d.setDate(d.getDate() - days);
-    return d.toISOString().slice(0, 10);
+    return toLocalDateKey(d);
   }
 
   loadAnalytics() {
     if (this.doctorId == null) return;
-    const end = new Date().toISOString().slice(0, 10);
+    const end = toLocalDateKey();
     const start = this.rangeStart();
     this.analyticsRangeText = `${start}  ${end}`;
     // Initialize all loading flags
@@ -254,7 +258,16 @@ export class DoctorReportsComponent implements OnInit {
     return Number(dist[day] ?? dist[day.toUpperCase()] ?? dist[title] ?? 0);
   }
 
+  private readonly _overviewChart = memoByDeps<{ labels: string[]; data: number[] }>(
+    () => this.computeOverviewChart(),
+    () => [this.doctorAppointments, this.reportRange, toLocalDateKey()],
+  );
+
   get overviewChart(): { labels: string[]; data: number[] } {
+    return this._overviewChart();
+  }
+
+  private computeOverviewChart(): { labels: string[]; data: number[] } {
     const counts = new Map<string, number>();
     for (const appointment of this.activeAppointmentsInRange()) {
       const day = this.dayKey(appointment.appointmentDate);
@@ -269,7 +282,16 @@ export class DoctorReportsComponent implements OnInit {
     };
   }
 
+  private readonly _visitTrend = memoByDeps<{ labels: string[]; data: number[] }>(
+    () => this.computeVisitTrend(),
+    () => [this.seasonalTrends, this.currentYear, toLocalDateKey().slice(0, 7)],
+  );
+
   get visitTrend(): { labels: string[]; data: number[] } {
+    return this._visitTrend();
+  }
+
+  private computeVisitTrend(): { labels: string[]; data: number[] } {
     const names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const short = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const dist = this.seasonalTrends?.monthlyDistribution || {};
@@ -293,7 +315,16 @@ export class DoctorReportsComponent implements OnInit {
     return this.visitTrend.data.some((count) => count > 0);
   }
 
+  private readonly _appointmentTypeBars = memoByDeps<{ label: string; count: number; percent: number; color: string; icon: string }[]>(
+    () => this.computeAppointmentTypeBars(),
+    () => [this.doctorAppointments, this.reportRange, toLocalDateKey()],
+  );
+
   get appointmentTypeBars(): { label: string; count: number; percent: number; color: string; icon: string }[] {
+    return this._appointmentTypeBars();
+  }
+
+  private computeAppointmentTypeBars(): { label: string; count: number; percent: number; color: string; icon: string }[] {
     const firstVisits = this.firstVisitByPatient();
     const counts = new Map<string, number>([
       ['New Patient', 0],
@@ -322,7 +353,16 @@ export class DoctorReportsComponent implements OnInit {
     return this.appointmentTypeBars.reduce((sum, item) => sum + item.count, 0);
   }
 
+  private readonly _satisfaction = memoByDeps<{ total: number; average: number | null; percents: Record<string, number> }>(
+    () => this.computeSatisfaction(),
+    () => [this.feedbackSentiment],
+  );
+
   get satisfaction(): { total: number; average: number | null; percents: Record<string, number> } {
+    return this._satisfaction();
+  }
+
+  private computeSatisfaction(): { total: number; average: number | null; percents: Record<string, number> } {
     const excellent = this.ratingCount(5);
     const good = this.ratingCount(4);
     const average = this.ratingCount(3);
@@ -349,7 +389,16 @@ export class DoctorReportsComponent implements OnInit {
     return this.demographicsData.reduce((sum, count) => sum + count, 0);
   }
 
+  private readonly _demographicRows = memoByDeps<{ label: string; percent: number; color: string }[]>(
+    () => this.computeDemographicRows(),
+    () => [this.demographicsData, this.demographicsLabels],
+  );
+
   get demographicRows(): { label: string; percent: number; color: string }[] {
+    return this._demographicRows();
+  }
+
+  private computeDemographicRows(): { label: string; percent: number; color: string }[] {
     const total = this.demographicsData.reduce((sum, count) => sum + count, 0);
     return this.demographicsLabels.map((label, index) => ({
       label,
@@ -363,7 +412,16 @@ export class DoctorReportsComponent implements OnInit {
     return `${Math.round(Number(this.cancellationPatterns.cancellationRate || 0))}%`;
   }
 
+  private readonly _cancellationRows = memoByDeps<{ label: string; count: number; percent: number | null; color: string }[]>(
+    () => this.computeCancellationRows(),
+    () => [this.cancellationPatterns],
+  );
+
   get cancellationRows(): { label: string; count: number; percent: number | null; color: string }[] {
+    return this._cancellationRows();
+  }
+
+  private computeCancellationRows(): { label: string; count: number; percent: number | null; color: string }[] {
     const source = this.cancellationPatterns || {};
     const patient = Number(source.patientCancelled || 0);
     const doctor = Number(source.doctorCancelled || 0);
@@ -378,7 +436,16 @@ export class DoctorReportsComponent implements OnInit {
     ];
   }
 
+  private readonly _cancellationTiming = memoByDeps<{ label: string; count: number }[]>(
+    () => this.computeCancellationTiming(),
+    () => [this.cancellationPatterns],
+  );
+
   get cancellationTiming(): { label: string; count: number }[] {
+    return this._cancellationTiming();
+  }
+
+  private computeCancellationTiming(): { label: string; count: number }[] {
     const timing = this.cancellationPatterns?.cancellationTiming || {};
     return Object.keys(timing)
       .map((label) => ({ label, count: Number(timing[label] || 0) }))
@@ -392,7 +459,7 @@ export class DoctorReportsComponent implements OnInit {
 
   private activeAppointmentsInRange(): DoctorAppointmentItem[] {
     const start = this.rangeStart();
-    const end = new Date().toISOString().slice(0, 10);
+    const end = toLocalDateKey();
     return this.doctorAppointments.filter((appointment) => {
       if (String(appointment.status || '').toUpperCase().includes('CANCEL')) return false;
       const day = this.dayKey(appointment.appointmentDate);
@@ -401,34 +468,15 @@ export class DoctorReportsComponent implements OnInit {
   }
 
   private firstVisitByPatient(): Map<number, string> {
-    const first = new Map<number, string>();
-    for (const appointment of this.doctorAppointments) {
-      if (String(appointment.status || '').toUpperCase().includes('CANCEL') || appointment.patientId == null) continue;
-      const day = this.dayKey(appointment.appointmentDate);
-      if (!day) continue;
-      const current = first.get(appointment.patientId);
-      if (!current || day < current) first.set(appointment.patientId, day);
-    }
-    return first;
+    return firstVisitByPatient(this.doctorAppointments);
   }
 
   private consultationKind(appointment: DoctorAppointmentItem, firstVisits: Map<number, string>): string {
-    const reason = (appointment.reason || '').toLowerCase();
-    if (reason.includes('lab')) return 'Lab Review';
-    const day = this.dayKey(appointment.appointmentDate);
-    const earliest = firstVisits.get(appointment.patientId);
-    if (reason.includes('follow') || (earliest && day && day !== earliest)) return 'Follow-up';
-    if (earliest && day === earliest) return 'New Patient';
-    return 'Others';
+    return consultationKind(appointment, firstVisits);
   }
 
   private dayKey(value: string | undefined): string | null {
-    if (!value) return null;
-    const iso = value.slice(0, 10);
-    if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso;
-    const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) return null;
-    return `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, '0')}-${String(parsed.getDate()).padStart(2, '0')}`;
+    return appointmentDayKey(value);
   }
 
   private formatBucket(key: string): string {

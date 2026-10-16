@@ -1,31 +1,14 @@
-<app-doctor-layout>
-  <div
-    class="max-w-[1400px] mx-auto p-3 sm:p-6 space-y-5 text-[var(--text)] font-sans selection:bg-[var(--accent)]/30 pb-16">
+  <app-page-container paddingClass="p-3 sm:p-6" spacingClass="space-y-5" extraClass="font-sans selection:bg-[var(--accent)]/30 pb-16">
 
-    <!-- Header Banner -->
-    <div
-      class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--accent-soft)] via-[var(--panel)] to-[var(--primary-soft)] border border-[var(--border)] p-5 sm:p-7 shadow-2xl">
-      <!-- Ambient Backdrop Glow -->
-      <div class="absolute -top-16 -right-16 w-72 h-72 bg-[var(--accent)]/10 rounded-full blur-3xl pointer-events-none">
-      </div>
-
-      <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div class="space-y-1.5">
-          <h1 class="text-xl sm:text-3xl font-black text-[var(--text)] tracking-tight">My Documents</h1>
-          <p class="text-xs sm:text-sm text-[var(--muted)] font-medium max-w-xl">
-            Manage your medical certificates, education records, and other professional documents.
-          </p>
-        </div>
-
-        <div class="flex items-center gap-2 self-end sm:self-auto">
-          <span
-            class="bg-[var(--bg)] border border-[var(--border)] text-[var(--accent)] px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 shadow-lg">
-            <i class="fa-solid fa-file-lines text-xs"></i>
+    <app-page-header variant="hero" title="My Documents"
+        subtitle="Manage your medical certificates, education records, and other professional documents."
+        [hasActions]="true">
+        <span
+            class="bg-[var(--bg)] border border-[var(--border)] text-[var(--accent)] px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 shadow-lg shrink-0">
+            <i class="fa-solid fa-file-lines text-xs" aria-hidden="true"></i>
             <span>{{ documents.length }} Documents</span>
-          </span>
-        </div>
-      </div>
-    </div>
+        </span>
+    </app-page-header>
 
     <!-- Upload New Document Card -->
     <div class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 sm:p-7 shadow-2xl space-y-6">
@@ -33,7 +16,7 @@
       <div class="flex items-center gap-3">
         <div
           class="w-9 h-9 rounded-xl bg-[var(--accent)]/15 border border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)]">
-          <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
+          <i class="fa-solid fa-cloud-arrow-up text-sm" aria-hidden="true"></i>
         </div>
         <h2 class="text-base sm:text-lg font-black text-[var(--text)] tracking-tight">Upload New Document</h2>
       </div>
@@ -52,7 +35,7 @@
             <div *ngIf="!selectedFile" class="space-y-2">
               <div
                 class="w-12 h-12 rounded-2xl bg-[var(--accent)]/15 border border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)] mx-auto md:mx-0 group-hover:scale-110 transition-transform">
-                <i class="fa-solid fa-cloud-arrow-up text-xl"></i>
+                <i class="fa-solid fa-cloud-arrow-up text-xl" aria-hidden="true"></i>
               </div>
               <div>
                 <p class="text-sm font-bold text-[var(--text)]">Click to browse or drag file here</p>
@@ -63,7 +46,7 @@
             <div *ngIf="selectedFile" class="flex items-center gap-3 animate-in zoom-in duration-300">
               <div
                 class="w-12 h-12 rounded-2xl bg-[#10b981]/15 border border-[#10b981]/30 flex items-center justify-center text-[#10b981] shrink-0">
-                <i class="fa-solid fa-circle-check text-xl"></i>
+                <i class="fa-solid fa-circle-check text-xl" aria-hidden="true"></i>
               </div>
               <div class="text-left">
                 <p class="text-sm font-black text-[var(--text)] truncate max-w-xs">{{ selectedFile.name }}</p>
@@ -78,7 +61,7 @@
             class="hidden sm:flex items-center justify-center relative shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
             <div
               class="w-28 h-20 bg-gradient-to-br from-[var(--accent)]/20 to-transparent border border-[var(--accent)]/30 rounded-2xl flex items-center justify-center relative overflow-hidden shadow-xl">
-              <i class="fa-solid fa-file-shield text-4xl text-[var(--accent)]/60"></i>
+              <i class="fa-solid fa-file-shield text-4xl text-[var(--accent)]/60" aria-hidden="true"></i>
               <div class="absolute inset-0 bg-gradient-to-t from-[var(--panel)] via-transparent to-transparent"></div>
             </div>
           </div>
@@ -140,7 +123,7 @@
             <span class="text-[10px] text-[var(--muted)] font-medium">{{ uploadDescription.length }}/300</span>
           </div>
           <div class="relative">
-            <i class="fa-solid fa-file-lines absolute left-3 top-3 text-xs text-[var(--muted)]"></i>
+            <i class="fa-solid fa-file-lines absolute left-3 top-3 text-xs text-[var(--muted)]" aria-hidden="true"></i>
             <textarea [(ngModel)]="uploadDescription" rows="2" maxlength="300"
               placeholder="Add an optional description or note about this document..."
               class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl pl-8 pr-3 py-2.5 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)] placeholder:text-[var(--muted)] resize-none"></textarea>
@@ -153,14 +136,14 @@
         <div>
           <span *ngIf="successMessage"
             class="text-xs text-[#10b981] font-bold flex items-center gap-1.5 animate-in fade-in">
-            <i class="fa-solid fa-circle-check"></i> {{ successMessage }}
+            <i class="fa-solid fa-circle-check" aria-hidden="true"></i> {{ successMessage }}
           </span>
         </div>
 
         <button type="button" (click)="uploadDocument()" [disabled]="!selectedFile || uploading"
-          class="px-6 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs sm:text-sm rounded-xl shadow-xl shadow-[var(--accent)]/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-2 transform hover:-translate-y-0.5">
-          <i *ngIf="!uploading" class="fa-solid fa-cloud-arrow-up"></i>
-          <i *ngIf="uploading" class="fa-solid fa-circle-notch fa-spin"></i>
+          class="btn-size-lg px-6 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs sm:text-sm rounded-xl shadow-xl shadow-[var(--accent)]/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-2 transform hover:-translate-y-0.5">
+          <i *ngIf="!uploading" class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i>
+          <i *ngIf="uploading" class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>
           <span>{{ uploading ? 'Uploading...' : 'Upload Document' }}</span>
         </button>
       </div>
@@ -195,7 +178,7 @@
             <!-- Icon Badge -->
             <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0"
               [ngClass]="getDocIconBgClass(d)">
-              <i class="fa-solid" [ngClass]="getDocIconClass(d)"></i>
+              <i class="fa-solid" [ngClass]="getDocIconClass(d)" aria-hidden="true"></i>
             </div>
 
             <!-- Status Pill -->
@@ -242,7 +225,7 @@
             <!-- View Eye Button -->
             <a [href]="d.filePath" target="_blank"
               class="w-8 h-8 rounded-lg bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--muted)] hover:text-[var(--accent)] flex items-center justify-center transition-all cursor-pointer"
-              aria-label="Preview document">
+              aria-label="Preview document" rel="noopener noreferrer">
               <i class="fa-solid fa-eye text-xs" aria-hidden="true"></i>
             </a>
 
@@ -258,13 +241,13 @@
       </div>
     </div>
 
-  </div>
+  </app-page-container>
 
   <!-- Error Alert -->
   <div *ngIf="error()" class="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-4">
     <div
       class="bg-[var(--panel)] border border-[#ef4444]/50 p-4 rounded-2xl shadow-2xl flex items-start gap-3 max-w-md backdrop-blur-md text-[var(--text)]">
-      <i class="fa-solid fa-circle-exclamation text-[#ef4444] mt-0.5"></i>
+      <i class="fa-solid fa-circle-exclamation text-[#ef4444] mt-0.5" aria-hidden="true"></i>
       <div>
         <h3 class="text-xs font-bold text-[#ef4444]">Error</h3>
         <p class="text-xs text-[var(--muted)] mt-1">{{ error() }}</p>
@@ -274,5 +257,4 @@
         <i class="fa-solid fa-xmark" aria-hidden="true"></i>
       </button>
     </div>
-  </div>
-</app-doctor-layout>
+  </div>

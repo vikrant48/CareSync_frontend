@@ -1,15 +1,8 @@
-<app-patient-layout>
-    <div class="max-w-[1400px] mx-auto p-3 sm:p-5 space-y-4">
-        <!-- Top Page Header -->
-        <section
-            class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-            <div class="space-y-1">
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">Analytics & Insights
-                </h2>
-                <p class="text-xs sm:text-sm text-[var(--muted)]">Track your health journey and appointment history.</p>
-            </div>
+    <app-page-container>
+        <app-page-header variant="hero" title="Analytics & Insights"
+            subtitle="Track your health journey and appointment history." [hasActions]="true">
             <p class="text-xs font-medium text-[var(--muted)] shrink-0">All appointments</p>
-        </section>
+        </app-page-header>
 
         <app-page-loader *ngIf="loadingReports" label="Loading reports..."></app-page-loader>
 
@@ -25,7 +18,7 @@
                         <div class="flex items-center gap-3">
                             <div
                                 class="w-10 h-10 rounded-xl bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-[var(--primary)]">
-                                <i class="fa-regular fa-calendar-check text-base"></i>
+                                <i class="fa-regular fa-calendar-check text-base" aria-hidden="true"></i>
                             </div>
                             <div>
                                 <span class="text-xs text-[var(--muted)] font-medium block">Total Appointments</span>
@@ -37,7 +30,7 @@
                     </div>
                     <div class="flex items-center justify-between mt-3 pt-2 relative z-10">
                         <div class="text-[11px] font-medium text-[var(--primary)] flex items-center gap-1.5">
-                            <i class="fa-solid fa-calendar text-[10px]"></i>
+                            <i class="fa-solid fa-calendar text-[10px]" aria-hidden="true"></i>
                             <span>All time record</span>
                         </div>
                     </div>
@@ -50,7 +43,7 @@
                         <div class="flex items-center gap-3">
                             <div
                                 class="w-10 h-10 rounded-xl bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-emerald-700 dark:text-emerald-400">
-                                <i class="fa-solid fa-user-group text-base"></i>
+                                <i class="fa-solid fa-user-group text-base" aria-hidden="true"></i>
                             </div>
                             <div>
                                 <span class="text-xs text-[var(--muted)] font-medium block">Avg. Visits / Month</span>
@@ -63,7 +56,7 @@
                     <div class="flex items-center justify-between mt-3 pt-2 relative z-10">
                         <div
                             class="text-[11px] font-medium text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
-                            <i class="fa-solid fa-chart-line text-[10px]"></i>
+                            <i class="fa-solid fa-chart-line text-[10px]" aria-hidden="true"></i>
                             <span>Activity Level</span>
                         </div>
                     </div>
@@ -76,7 +69,7 @@
                         <div class="flex items-center gap-3">
                             <div
                                 class="w-10 h-10 rounded-xl bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-rose-700 dark:text-rose-400">
-                                <i class="fa-solid fa-circle-xmark text-base"></i>
+                                <i class="fa-solid fa-circle-xmark text-base" aria-hidden="true"></i>
                             </div>
                             <div>
                                 <span class="text-xs text-[var(--muted)] font-medium block">Cancelled</span>
@@ -88,7 +81,7 @@
                     </div>
                     <div class="flex items-center justify-between mt-3 pt-2 relative z-10">
                         <div class="text-[11px] font-medium text-rose-700 dark:text-rose-400 flex items-center gap-1.5">
-                            <i class="fa-solid fa-ban text-[10px]"></i>
+                            <i class="fa-solid fa-ban text-[10px]" aria-hidden="true"></i>
                             <span>Missed consultations</span>
                         </div>
                     </div>
@@ -101,7 +94,7 @@
                         <div class="flex items-center gap-3">
                             <div
                                 class="w-10 h-10 rounded-xl bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-emerald-700 dark:text-emerald-400">
-                                <i class="fa-solid fa-circle-check text-base"></i>
+                                <i class="fa-solid fa-circle-check text-base" aria-hidden="true"></i>
                             </div>
                             <div>
                                 <span class="text-xs text-[var(--muted)] font-medium block">Completed</span>
@@ -114,7 +107,7 @@
                     <div class="flex items-center justify-between mt-3 pt-2 relative z-10">
                         <div
                             class="text-[11px] font-medium text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
-                            <i class="fa-solid fa-check-double text-[10px]"></i>
+                            <i class="fa-solid fa-check-double text-[10px]" aria-hidden="true"></i>
                             <span>Successful visits</span>
                         </div>
                     </div>
@@ -129,19 +122,19 @@
                     <div class="flex items-center gap-3 relative z-10">
                         <div
                             class="w-10 h-10 rounded-xl bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-amber-700 dark:text-amber-400">
-                            <i class="fa-solid fa-wallet text-base"></i>
+                            <i class="fa-solid fa-wallet text-base" aria-hidden="true"></i>
                         </div>
                         <div>
                             <span class="text-xs text-[var(--muted)] font-medium block">Total Spend</span>
                             <span class="text-2xl font-extrabold text-[var(--text)] leading-tight block mt-0.5">
-                                ₹{{ financialStats?.totalSpend || 0 }}
+                                {{ (financialStats?.totalSpend || 0) | inr }}
                             </span>
                         </div>
                     </div>
                     <div class="flex items-center justify-between mt-3 pt-2 relative z-10">
                         <div
                             class="text-[11px] font-medium text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
-                            <i class="fa-solid fa-coins text-[10px]"></i>
+                            <i class="fa-solid fa-coins text-[10px]" aria-hidden="true"></i>
                             <span>Lifetime spending</span>
                         </div>
                     </div>
@@ -153,18 +146,18 @@
                     <div class="flex items-center gap-3 relative z-10">
                         <div
                             class="w-10 h-10 rounded-xl bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-[var(--primary)]">
-                            <i class="fa-solid fa-user-doctor text-base"></i>
+                            <i class="fa-solid fa-user-doctor text-base" aria-hidden="true"></i>
                         </div>
                         <div>
                             <span class="text-xs text-[var(--muted)] font-medium block">Appointment Spend</span>
                             <span class="text-2xl font-extrabold text-[var(--text)] leading-tight block mt-0.5">
-                                ₹{{ financialStats?.totalAppointmentSpend || 0 }}
+                                {{ (financialStats?.totalAppointmentSpend || 0) | inr }}
                             </span>
                         </div>
                     </div>
                     <div class="flex items-center justify-between mt-3 pt-2 relative z-10">
                         <div class="text-[11px] font-medium text-[var(--primary)] flex items-center gap-1.5">
-                            <i class="fa-solid fa-user-doctor text-[10px]"></i>
+                            <i class="fa-solid fa-user-doctor text-[10px]" aria-hidden="true"></i>
                             <span>Doctor consultations</span>
                         </div>
                     </div>
@@ -176,19 +169,19 @@
                     <div class="flex items-center gap-3 relative z-10">
                         <div
                             class="w-10 h-10 rounded-xl bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-purple-700 dark:text-purple-400">
-                            <i class="fa-solid fa-flask text-base"></i>
+                            <i class="fa-solid fa-flask text-base" aria-hidden="true"></i>
                         </div>
                         <div>
                             <span class="text-xs text-[var(--muted)] font-medium block">Lab Test Spend</span>
                             <span class="text-2xl font-extrabold text-[var(--text)] leading-tight block mt-0.5">
-                                ₹{{ financialStats?.totalLabTestSpend || 0 }}
+                                {{ (financialStats?.totalLabTestSpend || 0) | inr }}
                             </span>
                         </div>
                     </div>
                     <div class="flex items-center justify-between mt-3 pt-2 relative z-10">
                         <div
                             class="text-[11px] font-medium text-purple-700 dark:text-purple-400 flex items-center gap-1.5">
-                            <i class="fa-solid fa-flask text-[10px]"></i>
+                            <i class="fa-solid fa-flask text-[10px]" aria-hidden="true"></i>
                             <span>Tests & Diagnostics</span>
                         </div>
                     </div>
@@ -202,7 +195,7 @@
                     class="lg:col-span-7 bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 flex flex-col shadow-sm">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2">
-                            <i class="fa-solid fa-user-doctor text-[var(--primary)] text-sm"></i>
+                            <i class="fa-solid fa-user-doctor text-[var(--primary)] text-sm" aria-hidden="true"></i>
                             <h3 class="text-sm font-bold text-[var(--text)] tracking-wide">Visits by Doctor</h3>
                         </div>
                         <a routerLink="/patient/appointments"
@@ -243,7 +236,7 @@
 
                     <ng-template #noDataDocs>
                         <div class="h-56 flex flex-col items-center justify-center text-[var(--muted)]">
-                            <i class="fa-solid fa-user-doctor text-3xl mb-2 opacity-30"></i>
+                            <i class="fa-solid fa-user-doctor text-3xl mb-2 opacity-30" aria-hidden="true"></i>
                             <p class="text-xs">No doctor visit records found</p>
                         </div>
                     </ng-template>
@@ -254,7 +247,7 @@
                     class="lg:col-span-5 bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-5 flex flex-col shadow-sm">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2">
-                            <i class="fa-solid fa-chart-pie text-[var(--primary)] text-sm"></i>
+                            <i class="fa-solid fa-chart-pie text-[var(--primary)] text-sm" aria-hidden="true"></i>
                             <h3 class="text-sm font-bold text-[var(--text)] tracking-wide">Appointment Status</h3>
                         </div>
                         <a routerLink="/patient/appointments"
@@ -333,5 +326,4 @@
                 (view)="viewAppointment($event)"></app-patient-reports-activity>
         </div>
 
-    </div>
-</app-patient-layout>
+    </app-page-container>

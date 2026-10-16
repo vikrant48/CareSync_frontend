@@ -56,7 +56,7 @@ export class FeatureCarouselComponent implements OnInit, OnDestroy {
       id: 'ai-ready',
       title: 'AI Diagnostics & Triage',
       tabLabel: 'AI Triage',
-      badge: 'Groq + Gemini AI',
+      badge: 'AI-assisted',
       description: 'Real-time symptom evaluation, intelligent appointment sorting, and automated patient triaging.',
       icon: 'fa-solid fa-brain',
       image: '/assets/features/ai-ready.png'
@@ -120,6 +120,10 @@ export class FeatureCarouselComponent implements OnInit, OnDestroy {
   currentSlide = 0;
   private autoPlayTimer: any = null;
   readonly autoPlayInterval = 5000; // 5 seconds
+  /** User pressed Pause (WCAG 2.2.2): stays paused until they press Play */
+  userPaused = false;
+  /** Temporarily paused while hovered / focused */
+  private interactionPaused = false;
 
   // Drag / Swipe State
   isDragging = false;
@@ -138,6 +142,7 @@ export class FeatureCarouselComponent implements OnInit, OnDestroy {
   startAutoPlay() {
     if (!isPlatformBrowser(this.platformId)) return;
     this.stopAutoPlay();
+    if (this.userPaused || this.interactionPaused || this.prefersReducedMotion()) return;
     this.autoPlayTimer = setInterval(() => {
       this.nextSlide(false); // don't reset timer on auto advance
     }, this.autoPlayInterval);
@@ -148,6 +153,23 @@ export class FeatureCarouselComponent implements OnInit, OnDestroy {
       clearInterval(this.autoPlayTimer);
       this.autoPlayTimer = null;
     }
+  }
+
+  toggleUserPause() {
+    this.userPaused = !this.userPaused;
+    this.userPaused ? this.stopAutoPlay() : this.startAutoPlay();
+    this.cdr.markForCheck();
+  }
+
+  /** Pause while the pointer or keyboard focus is inside the carousel */
+  setInteractionPaused(paused: boolean) {
+    if (this.interactionPaused === paused) return;
+    this.interactionPaused = paused;
+    paused ? this.stopAutoPlay() : this.startAutoPlay();
+  }
+
+  private prefersReducedMotion(): boolean {
+    return typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   }
 
   restartAutoPlay() {
@@ -214,6 +236,7 @@ export class FeatureCarouselComponent implements OnInit, OnDestroy {
     if (this.isDragging) {
       this.endDrag();
     }
+    this.setInteractionPaused(false);
   }
 
   onTouchStart(event: TouchEvent) {

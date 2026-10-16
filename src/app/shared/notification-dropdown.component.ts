@@ -1,9 +1,10 @@
-import { Component, Input, inject, ChangeDetectionStrategy, ChangeDetectorRef, OnInit, OnChanges, SimpleChanges, ElementRef, HostListener } from '@angular/core';
+import { Component, Input, inject, ChangeDetectionStrategy, ChangeDetectorRef, DestroyRef, OnInit, OnChanges, SimpleChanges, ElementRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
 import { NotificationService, NotificationItem } from '../core/services/notification.service';
 import { EmptyStateComponent } from './ui/empty-state.component';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 export type NotificationTab = 'all' | 'appointments' | 'lab' | 'system';
 
@@ -24,12 +25,12 @@ export type NotificationTab = 'all' | 'appointments' | 'lab' | 'system';
         aria-label="Notifications"
         [attr.aria-expanded]="notifOpen"
         aria-haspopup="true">
-        <i class="fa-solid fa-bell text-base sm:text-lg text-[var(--muted)] group-hover:text-[var(--text)] transition-colors"></i>
+        <i class="fa-solid fa-bell text-base sm:text-lg text-[var(--muted)] group-hover:text-[var(--text)] transition-colors" aria-hidden="true"></i>
         
         <!-- Unread Badge (Clean Circle / Pill) -->
         <span *ngIf="unreadCount > 0" class="absolute -top-1 -right-1 z-20 flex">
            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-           <span class="relative inline-flex items-center justify-center rounded-full bg-rose-500 text-[10px] font-extrabold text-white shadow-md border border-[var(--bg)] leading-none px-1.5 py-0.5 min-w-[18px] h-4.5">
+           <span class="relative inline-flex items-center justify-center rounded-full bg-rose-500 text-[10px] font-extrabold text-white shadow-md border border-[var(--bg)] leading-none px-1.5 py-0.5 min-w-[18px] h-[18px]">
              {{ unreadCount > 9 ? '9+' : unreadCount }}
            </span>
         </span>
@@ -55,7 +56,7 @@ export type NotificationTab = 'all' | 'appointments' | 'lab' | 'system';
               (click)="markAllRead($event)"
               class="text-xs text-[var(--primary)] hover:text-[var(--primary-hover)] font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
             >
-              <i class="fa-solid fa-circle-check text-[11px]"></i>
+              <i class="fa-solid fa-circle-check text-[11px]" aria-hidden="true"></i>
               <span>Mark all as read</span>
             </button>
           </div>
@@ -63,28 +64,28 @@ export type NotificationTab = 'all' | 'appointments' | 'lab' | 'system';
           <!-- Filter Tabs Row -->
           <div class="flex items-center gap-1 px-3 py-2 bg-[var(--panel)] border-b border-[var(--border)] overflow-x-auto no-scrollbar text-xs">
             <button (click)="setTab('all')"
-              class="px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+              class="btn-size-sm px-3 rounded-lg font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
               [ngClass]="activeTab === 'all' ? 'bg-[var(--primary)] text-white shadow-sm shadow-[var(--primary)]/30' : 'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--bg)]'">
               <span>All</span>
               <span class="px-1.5 py-0.2 rounded-full text-[10px]" [ngClass]="activeTab === 'all' ? 'bg-white/20 text-[var(--text)]' : 'bg-[var(--bg)] text-[var(--muted)]'">{{ feed.length }}</span>
             </button>
 
             <button (click)="setTab('appointments')"
-              class="px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+              class="btn-size-sm px-3 rounded-lg font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
               [ngClass]="activeTab === 'appointments' ? 'bg-[var(--primary)] text-white shadow-sm shadow-[var(--primary)]/30' : 'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--bg)]'">
               <span>Appointments</span>
               <span class="px-1.5 py-0.2 rounded-full text-[10px]" [ngClass]="activeTab === 'appointments' ? 'bg-white/20 text-[var(--text)]' : 'bg-[var(--bg)] text-[var(--muted)]'">{{ appointmentsCount }}</span>
             </button>
 
             <button (click)="setTab('lab')"
-              class="px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+              class="btn-size-sm px-3 rounded-lg font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
               [ngClass]="activeTab === 'lab' ? 'bg-[var(--primary)] text-white shadow-sm shadow-[var(--primary)]/30' : 'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--bg)]'">
               <span>Lab Tests</span>
               <span class="px-1.5 py-0.2 rounded-full text-[10px]" [ngClass]="activeTab === 'lab' ? 'bg-white/20 text-[var(--text)]' : 'bg-[var(--bg)] text-[var(--muted)]'">{{ labCount }}</span>
             </button>
 
             <button (click)="setTab('system')"
-              class="px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+              class="btn-size-sm px-3 rounded-lg font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
               [ngClass]="activeTab === 'system' ? 'bg-[var(--primary)] text-white shadow-sm shadow-[var(--primary)]/30' : 'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--bg)]'">
               <span>System</span>
               <span class="px-1.5 py-0.2 rounded-full text-[10px]" [ngClass]="activeTab === 'system' ? 'bg-white/20 text-[var(--text)]' : 'bg-[var(--bg)] text-[var(--muted)]'">{{ systemCount }}</span>
@@ -109,6 +110,8 @@ export type NotificationTab = 'all' | 'appointments' | 'lab' | 'system';
             <div 
               *ngFor="let n of filteredFeed; trackBy: trackNotif" 
               (click)="onNotificationClick(n)"
+              role="button" tabindex="0"
+              (keydown.enter)="$event.target === $event.currentTarget && onNotificationClick(n)" (keydown.space)="$event.target === $event.currentTarget && $event.preventDefault(); $event.target === $event.currentTarget && onNotificationClick(n)"
               class="bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--border)] rounded-xl p-3.5 transition-all cursor-pointer group relative shadow-sm"
               [ngClass]="!n.read ? 'ring-1 ring-[var(--primary)]/40' : ''">
               
@@ -117,7 +120,7 @@ export type NotificationTab = 'all' | 'appointments' | 'lab' | 'system';
                 <!-- Icon Box with Status Dot -->
                 <div class="relative shrink-0">
                   <div class="w-10 h-10 rounded-xl flex items-center justify-center text-base" [ngClass]="getIconBgClass(n.type)">
-                    <i class="fa-solid" [ngClass]="getIconClass(n.type)"></i>
+                    <i class="fa-solid" [ngClass]="getIconClass(n.type)" aria-hidden="true"></i>
                   </div>
                   <!-- Corner Status Dot -->
                   <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[var(--panel)]"
@@ -143,11 +146,11 @@ export type NotificationTab = 'all' | 'appointments' | 'lab' | 'system';
                   <div class="flex items-center justify-between pt-2 mt-1">
                     <ng-container [ngSwitch]="getActionButtonType(n)">
                       <button *ngSwitchCase="'view-report'" type="button"
-                        class="bg-[var(--primary)]/15 hover:bg-[var(--primary)] border border-[var(--primary)]/30 text-[var(--primary)] hover:text-white text-[11px] font-bold px-3 py-1 rounded-lg transition-all cursor-pointer">
+                        class="btn-size-sm bg-[var(--primary)]/15 hover:bg-[var(--primary)] border border-[var(--primary)]/30 text-[var(--primary)] hover:text-white text-[11px] font-bold px-3 rounded-lg transition-all cursor-pointer inline-flex items-center justify-center">
                         View Report
                       </button>
                       <button *ngSwitchCase="'give-feedback'" type="button"
-                        class="bg-[var(--primary)]/15 hover:bg-[var(--primary)] border border-[var(--primary)]/30 text-[var(--primary)] hover:text-white text-[11px] font-bold px-3 py-1 rounded-lg transition-all cursor-pointer">
+                        class="btn-size-sm bg-[var(--primary)]/15 hover:bg-[var(--primary)] border border-[var(--primary)]/30 text-[var(--primary)] hover:text-white text-[11px] font-bold px-3 rounded-lg transition-all cursor-pointer inline-flex items-center justify-center">
                         Give Feedback
                       </button>
                     </ng-container>
@@ -166,7 +169,7 @@ export type NotificationTab = 'all' | 'appointments' | 'lab' | 'system';
             <a routerLink="/notifications" (click)="notifOpen=false" 
               class="inline-flex items-center justify-center gap-2 text-xs font-bold text-[var(--primary)] hover:text-[var(--primary-hover)] transition-colors">
               <span>View All Notifications</span>
-              <i class="fa-solid fa-arrow-right text-[11px]"></i>
+              <i class="fa-solid fa-arrow-right text-[11px]" aria-hidden="true"></i>
             </a>
           </div>
 
@@ -210,6 +213,7 @@ export class NotificationDropdownComponent implements OnInit, OnChanges {
   private notifApi = inject(NotificationService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private destroyRef = inject(DestroyRef);
 
   constructor(private el: ElementRef) { }
 
@@ -217,7 +221,7 @@ export class NotificationDropdownComponent implements OnInit, OnChanges {
     const uid = this.userId ?? (this.auth.userId() ? Number(this.auth.userId()) : null);
     this.refreshUnreadCount(uid);
 
-    this.notifApi.listenForRealTimeNotifications().subscribe((notification: NotificationItem) => {
+    this.notifApi.listenForRealTimeNotifications().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((notification: NotificationItem) => {
       this.unreadCount = (this.unreadCount || 0) + 1;
       this.feed = [notification, ...this.feed];
       this.cdr.markForCheck();
@@ -373,7 +377,7 @@ export class NotificationDropdownComponent implements OnInit, OnChanges {
       case 'appointment': return 'bg-[var(--primary)]/20 text-[var(--primary)]';
       case 'cancellation': return 'bg-rose-500/20 text-rose-700 dark:text-rose-400';
       case 'lab': case 'report': case 'lab_report': return 'bg-purple-500/20 text-purple-700 dark:text-purple-400';
-      case 'feedback': case 'message': return 'bg-indigo-500/20 text-indigo-400';
+      case 'feedback': case 'message': return 'bg-indigo-500/20 text-indigo-700 dark:text-indigo-400';
       case 'system': case 'security': return 'bg-blue-500/20 text-blue-700 dark:text-blue-400';
       default: return 'bg-[var(--bg)] text-[var(--muted)]';
     }

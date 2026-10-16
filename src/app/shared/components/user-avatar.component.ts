@@ -6,7 +6,6 @@ import { CommonModule } from '@angular/common';
     standalone: true,
     imports: [CommonModule],
     templateUrl: './user-avatar.component.html',
-    styleUrl: './user-avatar.component.css'
 })
 export class UserAvatarComponent {
     @Input() imageUrl?: string;

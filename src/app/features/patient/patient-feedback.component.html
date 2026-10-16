@@ -1,5 +1,4 @@
-<app-patient-layout>
-    <div class="max-w-[1400px] mx-auto p-3 sm:p-5 space-y-4">
+    <app-page-container>
 
         <!-- Hero Header Card -->
         <header
@@ -18,7 +17,7 @@
                     class="bg-[var(--bg)] border border-[var(--border)] rounded-2xl p-3 px-4 flex items-center gap-3 shadow-lg">
                     <div
                         class="w-10 h-10 rounded-xl bg-[var(--primary)]/10 border border-[var(--primary)]/20 flex items-center justify-center text-[var(--primary)]">
-                        <i class="fa-solid fa-star text-lg text-amber-700 dark:text-amber-400"></i>
+                        <i class="fa-solid fa-star text-lg text-amber-700 dark:text-amber-400" aria-hidden="true"></i>
                     </div>
                     <div>
                         <div class="text-xs font-bold text-[var(--text)]">Share Experience</div>
@@ -44,7 +43,7 @@
                 <div class="flex items-center gap-3 border-b border-[var(--border)] pb-4">
                     <div
                         class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-[var(--primary)] shrink-0">
-                        <i class="fa-regular fa-[var(--primary)] fa-pen-to-square text-base"></i>
+                        <i class="fa-regular fa-[var(--primary)] fa-pen-to-square text-base" aria-hidden="true"></i>
                     </div>
                     <div>
                         <h2 class="text-base sm:text-lg font-bold text-[var(--text)] tracking-tight">Give Your Feedback
@@ -70,7 +69,7 @@
                                 </option>
                             </select>
                             <i
-                                class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)] text-xs pointer-events-none"></i>
+                                class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)] text-xs pointer-events-none" aria-hidden="true"></i>
                         </div>
                     </div>
 
@@ -104,7 +103,7 @@
                                 (click)="setRating(activeAppointment.appointmentId, star)"
                                 class="text-2xl sm:text-3xl transition-transform hover:scale-125 focus:outline-none p-1">
                                 <i class="fa-star"
-                                    [ngClass]="isStarActive(activeAppointment.appointmentId, star) ? 'fa-solid text-amber-700 dark:text-amber-400' : 'fa-regular text-slate-700 hover:text-amber-300'"></i>
+                                    [ngClass]="isStarActive(activeAppointment.appointmentId, star) ? 'fa-solid text-amber-700 dark:text-amber-400' : 'fa-regular text-slate-700 hover:text-amber-300'" aria-hidden="true"></i>
                             </button>
                         </div>
                         <div class="text-xs font-bold text-[var(--primary)] mt-1">
@@ -114,9 +113,9 @@
 
                     <!-- Optional Comment Textarea -->
                     <div class="relative">
-                        <label class="block text-xs font-semibold text-[var(--muted)] mb-1.5">Share your experience
+                        <label class="block text-xs font-semibold text-[var(--muted)] mb-1.5" for="patient-feedback-share-your-experience-op-1">Share your experience
                             (optional)</label>
-                        <textarea [(ngModel)]="form[activeAppointment.appointmentId].comment"
+                        <textarea id="patient-feedback-share-your-experience-op-1" [(ngModel)]="form[activeAppointment.appointmentId].comment"
                             [attr.maxLength]="maxCommentLength" rows="2"
                             class="w-full bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs sm:text-sm rounded-xl p-3 focus:outline-none focus:border-[var(--primary)] resize-none placeholder:text-slate-600"
                             placeholder="Great experience! Doctor explained everything clearly and was very supportive."></textarea>
@@ -127,8 +126,8 @@
 
                     <!-- Error Alert -->
                     <div *ngIf="errors[activeAppointment.appointmentId]"
-                        class="p-2.5 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-400 flex items-center gap-2">
-                        <i class="fa-solid fa-circle-exclamation text-xs"></i>
+                        class="p-2.5 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-700 dark:text-red-400 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-exclamation text-xs" aria-hidden="true"></i>
                         <span>{{ errors[activeAppointment.appointmentId] }}</span>
                     </div>
 
@@ -143,13 +142,13 @@
 
                         <div class="flex items-center gap-2">
                             <button (click)="skip(activeAppointment)"
-                                class="px-3 py-2 text-xs font-semibold text-[var(--muted)] hover:text-[var(--text)] border border-[var(--border)] rounded-xl hover:bg-[var(--bg)] transition-colors">
+                                class="btn-size-lg px-3 text-xs font-semibold text-[var(--muted)] hover:text-[var(--text)] border border-[var(--border)] rounded-xl hover:bg-[var(--bg)] transition-colors inline-flex items-center justify-center">
                                 Cancel
                             </button>
                             <button (click)="submit(activeAppointment)"
                                 [disabled]="!form[activeAppointment.appointmentId].rating"
-                                class="px-4 sm:px-5 py-2 rounded-xl bg-[var(--primary)] hover:bg-indigo-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs shadow-lg shadow-indigo-500/25 transition-all flex items-center gap-2">
-                                <i class="fa-solid fa-paper-plane text-xs"></i>
+                                class="btn-size-lg px-4 sm:px-5 rounded-xl bg-[var(--primary)] hover:bg-indigo-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs shadow-lg shadow-indigo-500/25 transition-all flex items-center gap-2">
+                                <i class="fa-solid fa-paper-plane text-xs" aria-hidden="true"></i>
                                 <span>Submit Feedback</span>
                             </button>
                         </div>
@@ -160,7 +159,7 @@
                 <div *ngIf="items.length === 0" class="py-12 text-center space-y-3 my-auto">
                     <div
                         class="w-12 h-12 rounded-full bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-emerald-700 dark:text-emerald-400 mx-auto">
-                        <i class="fa-solid fa-circle-check text-xl"></i>
+                        <i class="fa-solid fa-circle-check text-xl" aria-hidden="true"></i>
                     </div>
                     <h3 class="text-sm font-bold text-[var(--text)]">All Caught Up!</h3>
                     <p class="text-xs text-[var(--muted)] max-w-xs mx-auto">You have submitted feedback for all your
@@ -179,7 +178,7 @@
                         <div class="flex items-center justify-between">
                             <div
                                 class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-[var(--primary)]">
-                                <i class="fa-solid fa-message text-xs"></i>
+                                <i class="fa-solid fa-message text-xs" aria-hidden="true"></i>
                             </div>
                         </div>
                         <div>
@@ -195,7 +194,7 @@
                         <div class="flex items-center justify-between">
                             <div
                                 class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-700 dark:text-amber-400">
-                                <i class="fa-solid fa-star text-xs"></i>
+                                <i class="fa-solid fa-star text-xs" aria-hidden="true"></i>
                             </div>
                         </div>
                         <div>
@@ -211,13 +210,13 @@
                         <div class="flex items-center justify-between">
                             <div
                                 class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
-                                <i class="fa-solid fa-user-group text-xs"></i>
+                                <i class="fa-solid fa-user-group text-xs" aria-hidden="true"></i>
                             </div>
                         </div>
                         <div>
                             <div class="text-[10px] sm:text-xs text-[var(--muted)] font-medium flex items-center gap-1">
                                 <span>Responses</span>
-                                <i class="fa-regular fa-circle-question text-[9px]"></i>
+                                <i class="fa-regular fa-circle-question text-[9px]" aria-hidden="true"></i>
                             </div>
                             <div class="text-xl sm:text-2xl font-extrabold text-[var(--text)] tracking-tight mt-0.5">
                                 {{ totalFeedbacksCount }}
@@ -225,7 +224,7 @@
                         </div>
                         <div
                             class="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold flex items-center gap-1">
-                            <i class="fa-solid fa-check text-[8px]"></i>
+                            <i class="fa-solid fa-check text-[8px]" aria-hidden="true"></i>
                             <span>Submitted</span>
                         </div>
                     </div>
@@ -315,37 +314,37 @@
                         <div class="flex flex-wrap gap-2">
                             <span
                                 class="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 text-[11px] font-semibold px-2.5 py-1 rounded-xl flex items-center gap-1.5">
-                                <i class="fa-solid fa-thumbs-up text-[10px]"></i>
+                                <i class="fa-solid fa-thumbs-up text-[10px]" aria-hidden="true"></i>
                                 <span>Good Communication</span>
                             </span>
                             <span
-                                class="bg-teal-500/10 text-teal-400 border border-teal-500/20 text-[11px] font-semibold px-2.5 py-1 rounded-xl flex items-center gap-1.5">
-                                <i class="fa-solid fa-user-doctor text-[10px]"></i>
+                                class="bg-teal-500/10 text-teal-700 dark:text-teal-400 border border-teal-500/20 text-[11px] font-semibold px-2.5 py-1 rounded-xl flex items-center gap-1.5">
+                                <i class="fa-solid fa-user-doctor text-[10px]" aria-hidden="true"></i>
                                 <span>Friendly Staff</span>
                             </span>
                             <span
                                 class="bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-500/20 text-[11px] font-semibold px-2.5 py-1 rounded-xl flex items-center gap-1.5">
-                                <i class="fa-solid fa-shield-halved text-[10px]"></i>
+                                <i class="fa-solid fa-shield-halved text-[10px]" aria-hidden="true"></i>
                                 <span>Clean Facility</span>
                             </span>
                             <span
-                                class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[11px] font-semibold px-2.5 py-1 rounded-xl flex items-center gap-1.5">
-                                <i class="fa-solid fa-calendar-check text-[10px]"></i>
+                                class="bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-500/20 text-[11px] font-semibold px-2.5 py-1 rounded-xl flex items-center gap-1.5">
+                                <i class="fa-solid fa-calendar-check text-[10px]" aria-hidden="true"></i>
                                 <span>Easy Appointment</span>
                             </span>
                             <span
                                 class="bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 text-[11px] font-semibold px-2.5 py-1 rounded-xl flex items-center gap-1.5">
-                                <i class="fa-solid fa-clock text-[10px]"></i>
+                                <i class="fa-solid fa-clock text-[10px]" aria-hidden="true"></i>
                                 <span>Short Waiting Time</span>
                             </span>
                             <span
-                                class="bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 text-[11px] font-semibold px-2.5 py-1 rounded-xl flex items-center gap-1.5">
-                                <i class="fa-solid fa-file-lines text-[10px]"></i>
+                                class="bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border border-yellow-500/20 text-[11px] font-semibold px-2.5 py-1 rounded-xl flex items-center gap-1.5">
+                                <i class="fa-solid fa-file-lines text-[10px]" aria-hidden="true"></i>
                                 <span>Clear Explanation</span>
                             </span>
                             <span
                                 class="bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20 text-[11px] font-semibold px-2.5 py-1 rounded-xl flex items-center gap-1.5">
-                                <i class="fa-solid fa-triangle-exclamation text-[10px]"></i>
+                                <i class="fa-solid fa-triangle-exclamation text-[10px]" aria-hidden="true"></i>
                                 <span>Needs Better Scheduling</span>
                             </span>
                         </div>
@@ -363,7 +362,7 @@
                 <div class="flex items-center gap-3">
                     <div
                         class="w-10 h-10 rounded-xl bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-[var(--primary)]">
-                        <i class="fa-solid fa-clock-rotate-left text-base"></i>
+                        <i class="fa-solid fa-clock-rotate-left text-base" aria-hidden="true"></i>
                     </div>
                     <div>
                         <h2 class="text-base font-bold text-[var(--text)] tracking-tight">Feedback History</h2>
@@ -381,7 +380,7 @@
                         <option value="ANONYMOUS">Anonymous</option>
                     </select>
                     <i
-                        class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] text-xs pointer-events-none"></i>
+                        class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] text-xs pointer-events-none" aria-hidden="true"></i>
                 </div>
             </div>
 
@@ -391,7 +390,7 @@
             <!-- Empty History State -->
             <div *ngIf="!loadingGiven && filteredGivenFeedback.length === 0"
                 class="py-12 text-center text-xs text-[var(--muted)] space-y-2">
-                <i class="fa-regular fa-comment-dots text-2xl text-slate-600"></i>
+                <i class="fa-regular fa-comment-dots text-2xl text-slate-600" aria-hidden="true"></i>
                 <p>No past feedback submissions found.</p>
             </div>
 
@@ -435,7 +434,7 @@
                             <td class="px-4 py-3.5 whitespace-nowrap">
                                 <div class="flex items-center gap-1 text-amber-700 dark:text-amber-400 text-xs">
                                     <i *ngFor="let star of [1,2,3,4,5]" class="fa-star"
-                                        [ngClass]="star <= item.rating ? 'fa-solid' : 'fa-regular text-slate-700'"></i>
+                                        [ngClass]="star <= item.rating ? 'fa-solid' : 'fa-regular text-slate-700'" aria-hidden="true"></i>
                                 </div>
                             </td>
 
@@ -448,12 +447,12 @@
                             <td class="px-4 py-3.5 whitespace-nowrap">
                                 <span *ngIf="!item.anonymous"
                                     class="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 w-max">
-                                    <i class="fa-solid fa-check text-[9px]"></i>
+                                    <i class="fa-solid fa-check text-[9px]" aria-hidden="true"></i>
                                     <span>Published</span>
                                 </span>
                                 <span *ngIf="item.anonymous"
-                                    class="bg-slate-700/30 text-slate-300 border border-slate-700 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 w-max">
-                                    <i class="fa-solid fa-user-secret text-[9px]"></i>
+                                    class="bg-slate-700/30 text-slate-600 dark:text-slate-300 border border-slate-700 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 w-max">
+                                    <i class="fa-solid fa-user-secret text-[9px]" aria-hidden="true"></i>
                                     <span>Anonymous</span>
                                 </span>
                             </td>
@@ -461,9 +460,9 @@
                             <!-- Actions -->
                             <td class="px-4 py-3.5 whitespace-nowrap text-right">
                                 <button (click)="openDetailsModal(item)"
-                                    class="bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 ml-auto">
+                                    class="btn-size-sm bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-[11px] font-semibold px-3 rounded-lg transition-colors flex items-center gap-1 ml-auto">
                                     <span>View Details</span>
-                                    <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                                    <i class="fa-solid fa-chevron-right text-[9px]" aria-hidden="true"></i>
                                 </button>
                             </td>
                         </tr>
@@ -488,7 +487,7 @@
                             Published
                         </span>
                         <span *ngIf="item.anonymous"
-                            class="bg-slate-700/30 text-slate-300 border border-slate-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                            class="bg-slate-700/30 text-slate-600 dark:text-slate-300 border border-slate-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
                             Anonymous
                         </span>
                     </div>
@@ -497,11 +496,11 @@
                         <span>{{ formatDate(item.submittedAt) }}</span>
                         <div class="flex items-center gap-1 text-amber-700 dark:text-amber-400 text-xs">
                             <i *ngFor="let star of [1,2,3,4,5]" class="fa-star"
-                                [ngClass]="star <= item.rating ? 'fa-solid' : 'fa-regular text-slate-700'"></i>
+                                [ngClass]="star <= item.rating ? 'fa-solid' : 'fa-regular text-slate-700'" aria-hidden="true"></i>
                         </div>
                     </div>
 
-                    <p class="text-xs text-slate-300 line-clamp-2">
+                    <p class="text-xs text-slate-600 dark:text-slate-300 line-clamp-2">
                         {{ item.comment || 'No comment provided.' }}
                     </p>
 
@@ -513,7 +512,7 @@
             </div>
 
         </section>
-    </div>
+    </app-page-container>
 
     <app-modal-shell [open]="!!selectedFeedbackForDetails" [title]="selectedFeedbackForDetails?.doctorName || 'Doctor'"
         [subtitle]="selectedFeedbackForDetails ? formatDate(selectedFeedbackForDetails.submittedAt) : ''"
@@ -525,7 +524,7 @@
             <div class="flex items-center justify-between bg-[var(--bg)] p-3 rounded-xl border border-[var(--border)]">
                 <div class="flex items-center gap-1 text-amber-700 dark:text-amber-400 text-sm">
                     <i *ngFor="let star of [1,2,3,4,5]; trackBy: trackStar" class="fa-star"
-                        [ngClass]="star <= selectedFeedbackForDetails.rating ? 'fa-solid' : 'fa-regular text-slate-500 dark:text-slate-400'"></i>
+                        [ngClass]="star <= selectedFeedbackForDetails.rating ? 'fa-solid' : 'fa-regular text-slate-500 dark:text-slate-400'" aria-hidden="true"></i>
                     <span class="text-xs font-bold text-[var(--text)] ml-2">{{ selectedFeedbackForDetails.rating
                         }}/5</span>
                 </div>
@@ -547,5 +546,4 @@
             </div>
         </ng-container>
         <button modalFooter type="button" (click)="closeDetailsModal()" class="btn-primary">Close</button>
-    </app-modal-shell>
-</app-patient-layout>
+    </app-modal-shell>

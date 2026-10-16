@@ -5,7 +5,6 @@ import { RouterModule, Router } from '@angular/router';
 import { PatientDetailsModalComponent } from '../../shared/patient-details-modal.component';
 import { MedicalHistoryDetailModalComponent } from '../../shared/medical-history-detail-modal.component';
 import { MedicalHistoryFormModalComponent } from '../../shared/medical-history-form-modal.component';
-import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 import { DoctorNotificationComponent } from './doctor-notification.component';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
@@ -18,17 +17,20 @@ import { DoctorDashboardScheduleComponent } from './doctor-dashboard-schedule.co
 import { DoctorDashboardPatientsComponent } from './doctor-dashboard-patients.component';
 
 import { LeaveService, DoctorLeave } from '../../core/services/leave.service';
-import { ConfirmService } from '../../core/services/confirm.service';
+import { PageContainerComponent } from '../../shared/ui/page-container.component';
+import { toLocalDateKey } from '../../shared/utils/format.util';
+import { appointmentDayKey, consultationKind, firstVisitByPatient, isCancelledStatus } from '../../shared/utils/appointment-analytics';
+import { memoByDeps } from '../../shared/utils/memo';
 
 type DashboardTrend = { text: string; direction: 'up' | 'down' | 'flat' };
 
 @Component({
   selector: 'app-doctor-dashboard',
   standalone: true,
-  imports: [
+  imports: [PageContainerComponent, 
     CommonModule, RouterModule, FormsModule, PatientDetailsModalComponent,
     MedicalHistoryDetailModalComponent, MedicalHistoryFormModalComponent,
-    DoctorLayoutComponent, DoctorNotificationComponent, DatePickerComponent,
+    DoctorNotificationComponent, DatePickerComponent,
     ModalShellComponent, DoctorDashboardScheduleComponent, DoctorDashboardPatientsComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -45,7 +47,6 @@ export class DoctorDashboardComponent implements OnInit {
   private patientApi = inject(PatientProfileService);
 
   private leaveApi = inject(LeaveService);
-  private confirm = inject(ConfirmService);
   public router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
 
@@ -80,17 +81,22 @@ export class DoctorDashboardComponent implements OnInit {
   historyFormModalOpen = false;
 
   // Leave Management
-  leaveModalOpen = false;
   upcomingLeaves: any[] = [];
-  leafForm: any = { startDate: '', endDate: '', reason: '' };
-  savingLeave = false;
-  leaveError: string | null = null;
 
   metrics: DoctorDashboardMetrics | null = null;
   loadingMetrics = false;
   metricsUnavailable = false;
 
+  private readonly _isOnLeaveToday = memoByDeps<boolean>(
+    () => this.computeIsOnLeaveToday(),
+    () => [this.upcomingLeaves, toLocalDateKey()],
+  );
+
   get isOnLeaveToday(): boolean {
+    return this._isOnLeaveToday();
+  }
+
+  private computeIsOnLeaveToday(): boolean {
     const today = this.todayISO();
     return this.upcomingLeaves.some(l => l.startDate <= today && l.endDate >= today);
   }
@@ -99,11 +105,29 @@ export class DoctorDashboardComponent implements OnInit {
   selectedCalendarDay: string | null = null;
   calendarAppointments: DoctorAppointmentItem[] = [];
 
+  private readonly _mockOrRealAppointments = memoByDeps<any[]>(
+    () => this.computeMockOrRealAppointments(),
+    () => [this.todayAppointments],
+  );
+
   get mockOrRealAppointments(): any[] {
+    return this._mockOrRealAppointments();
+  }
+
+  private computeMockOrRealAppointments(): any[] {
     return (this.todayAppointments || []).map(a => ({ ...a, isReal: true }));
   }
 
+  private readonly _recentPatientsList = memoByDeps<any[]>(
+    () => this.computeRecentPatientsList(),
+    () => [this.todayAppointments],
+  );
+
   get recentPatientsList(): any[] {
+    return this._recentPatientsList();
+  }
+
+  private computeRecentPatientsList(): any[] {
     return (this.todayAppointments || []).slice(0, 4).map(a => ({
       name: a.patientName,
       age: this.patientAge(a),
@@ -139,7 +163,16 @@ export class DoctorDashboardComponent implements OnInit {
     return this.consultationInsights.reduce((sum, item) => sum + item.count, 0);
   }
 
+  private readonly _consultationInsights = memoByDeps<{ label: string; count: number; percent: number; colorClass: string; dotClass: string; offset: number }[]>(
+    () => this.computeConsultationInsights(),
+    () => [this.calendarAppointments, this.insightRange, toLocalDateKey()],
+  );
+
   get consultationInsights(): { label: string; count: number; percent: number; colorClass: string; dotClass: string; offset: number }[] {
+    return this._consultationInsights();
+  }
+
+  private computeConsultationInsights(): { label: string; count: number; percent: number; colorClass: string; dotClass: string; offset: number }[] {
     const palette = [
       { label: 'Follow-up', colorClass: 'text-[var(--accent)]', dotClass: 'bg-[var(--accent)]' },
       { label: 'New Patient', colorClass: 'text-[var(--primary)]', dotClass: 'bg-[var(--primary)]' },
@@ -182,29 +215,15 @@ export class DoctorDashboardComponent implements OnInit {
   }
 
   private firstVisitByPatient(): Map<number, string> {
-    const first = new Map<number, string>();
-    for (const appointment of this.calendarAppointments || []) {
-      if (this.isCancelledStatus(appointment.status) || appointment.patientId == null) continue;
-      const day = this.appointmentDayKey(appointment.appointmentDate);
-      if (!day) continue;
-      const current = first.get(appointment.patientId);
-      if (!current || day < current) first.set(appointment.patientId, day);
-    }
-    return first;
+    return firstVisitByPatient(this.calendarAppointments || []);
   }
 
   private consultationKind(appointment: DoctorAppointmentItem, firstVisits: Map<number, string>): string {
-    const reason = (appointment.reason || '').toLowerCase();
-    if (reason.includes('lab')) return 'Lab Review';
-    const day = this.appointmentDayKey(appointment.appointmentDate);
-    const earliest = firstVisits.get(appointment.patientId);
-    if (reason.includes('follow') || (earliest && day && day !== earliest)) return 'Follow-up';
-    if (earliest && day === earliest) return 'New Patient';
-    return 'Others';
+    return consultationKind(appointment, firstVisits);
   }
 
   private isCancelledStatus(status?: string): boolean {
-    return String(status || '').toUpperCase().includes('CANCEL');
+    return isCancelledStatus(status);
   }
 
   private dateKey(date: Date): string {
@@ -215,7 +234,16 @@ export class DoctorDashboardComponent implements OnInit {
     return this.calendarMonth.toLocaleString('en-US', { month: 'long', year: 'numeric' });
   }
 
+  private readonly _calendarCells = memoByDeps<{ label: string; key: string; today: boolean; hasAppointment: boolean }[]>(
+    () => this.computeCalendarCells(),
+    () => [this.calendarMonth, this.calendarAppointments, toLocalDateKey()],
+  );
+
   get calendarCells(): { label: string; key: string; today: boolean; hasAppointment: boolean }[] {
+    return this._calendarCells();
+  }
+
+  private computeCalendarCells(): { label: string; key: string; today: boolean; hasAppointment: boolean }[] {
     const year = this.calendarMonth.getFullYear();
     const month = this.calendarMonth.getMonth();
     const firstWeekday = new Date(year, month, 1).getDay();
@@ -242,12 +270,7 @@ export class DoctorDashboardComponent implements OnInit {
   }
 
   private appointmentDayKey(value: string | undefined): string | null {
-    if (!value) return null;
-    const iso = value.slice(0, 10);
-    if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso;
-    const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) return null;
-    return `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, '0')}-${String(parsed.getDate()).padStart(2, '0')}`;
+    return appointmentDayKey(value);
   }
 
   shiftCalendar(delta: number): void {
@@ -273,7 +296,16 @@ export class DoctorDashboardComponent implements OnInit {
     return new Date(year, month - 1, day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
 
+  private readonly _selectedDayAppointments = memoByDeps<DoctorAppointmentItem[]>(
+    () => this.computeSelectedDayAppointments(),
+    () => [this.selectedCalendarDay, this.calendarAppointments],
+  );
+
   get selectedDayAppointments(): DoctorAppointmentItem[] {
+    return this._selectedDayAppointments();
+  }
+
+  private computeSelectedDayAppointments(): DoctorAppointmentItem[] {
     if (!this.selectedCalendarDay) return [];
     return (this.calendarAppointments || []).filter(a =>
       this.appointmentDayKey(a.appointmentDate) === this.selectedCalendarDay
@@ -317,38 +349,6 @@ export class DoctorDashboardComponent implements OnInit {
     });
   }
 
-  addLeave() {
-    if (!this.leafForm.startDate || !this.leafForm.endDate) return;
-    this.savingLeave = true;
-    this.leaveError = null;
-    this.leaveApi.addLeave(this.leafForm.startDate, this.leafForm.endDate, this.leafForm.reason).subscribe({
-      next: () => {
-        this.savingLeave = false;
-        this.leafForm = { startDate: '', endDate: '', reason: '' };
-        this.refreshLeaves();
-      },
-      error: (e: any) => {
-        this.savingLeave = false;
-        this.leaveError = e.error?.error || 'Failed to add leave';
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  async deleteLeave(id: number) {
-    const ok = await this.confirm.ask({
-      title: 'Delete leave',
-      message: 'Are you sure you want to delete this leave record?',
-      confirmLabel: 'Delete',
-      cancelLabel: 'Keep',
-      danger: true,
-    });
-    if (!ok) return;
-    this.leaveApi.deleteLeave(id).subscribe({
-      next: () => this.refreshLeaves()
-    });
-  }
-
   loadCalendarAppointments() {
     this.loadingCalendar = true;
     this.apptApi.getDoctorAllAppointments().subscribe({
@@ -381,7 +381,16 @@ export class DoctorDashboardComponent implements OnInit {
     });
   }
 
+  private readonly _nextAppointment = memoByDeps<DoctorAppointmentItem | null>(
+    () => this.computeNextAppointment(),
+    () => [this.todayAppointments],
+  );
+
   get nextAppointment(): DoctorAppointmentItem | null {
+    return this._nextAppointment();
+  }
+
+  private computeNextAppointment(): DoctorAppointmentItem | null {
     if (!this.todayAppointments) return null;
     const inProgress = this.todayAppointments.find(a => a.status === 'IN_PROGRESS');
     if (inProgress) return inProgress;
@@ -405,7 +414,7 @@ export class DoctorDashboardComponent implements OnInit {
   }
 
   public todayISO() {
-    return new Date().toISOString().slice(0, 10);
+    return toLocalDateKey();
   }
 
   openPatient(a: DoctorAppointmentItem | null) {
@@ -538,12 +547,22 @@ export class DoctorDashboardComponent implements OnInit {
     });
   }
 
-  appointmentTrend(): DashboardTrend {
+  appointmentTrend = memoByDeps<DashboardTrend>(
+    () => this.computeAppointmentTrend(),
+    () => [this.loadingMetrics, this.metricsUnavailable, this.metrics],
+  );
+
+  private computeAppointmentTrend(): DashboardTrend {
     if (this.loadingMetrics) return { text: '', direction: 'flat' };
     return this.countTrend(this.metrics?.appointmentChangeFromYesterday, 'yesterday');
   }
 
-  patientTrend(): DashboardTrend {
+  patientTrend = memoByDeps<DashboardTrend>(
+    () => this.computePatientTrend(),
+    () => [this.loadingMetrics, this.metricsUnavailable, this.metrics],
+  );
+
+  private computePatientTrend(): DashboardTrend {
     if (this.loadingMetrics) return { text: '', direction: 'flat' };
     if (this.metricsUnavailable || !this.metrics) {
       return { text: 'Not available', direction: 'flat' };
@@ -564,7 +583,12 @@ export class DoctorDashboardComponent implements OnInit {
     };
   }
 
-  pendingReportTrend(): DashboardTrend {
+  pendingReportTrend = memoByDeps<DashboardTrend>(
+    () => this.computePendingReportTrend(),
+    () => [this.loadingMetrics, this.metricsUnavailable, this.metrics],
+  );
+
+  private computePendingReportTrend(): DashboardTrend {
     if (this.loadingMetrics) return { text: '', direction: 'flat' };
     return this.countTrend(this.metrics?.pendingReportChangeFromYesterday, 'yesterday');
   }
@@ -576,7 +600,12 @@ export class DoctorDashboardComponent implements OnInit {
     return `${this.metrics.satisfactionRating.toFixed(1)} / 5`;
   }
 
-  satisfactionTrend(): DashboardTrend {
+  satisfactionTrend = memoByDeps<DashboardTrend>(
+    () => this.computeSatisfactionTrend(),
+    () => [this.loadingMetrics, this.metricsUnavailable, this.metrics],
+  );
+
+  private computeSatisfactionTrend(): DashboardTrend {
     if (this.loadingMetrics) return { text: '', direction: 'flat' };
     if (this.metricsUnavailable || !this.metrics) {
       return { text: 'Not available', direction: 'flat' };
@@ -617,7 +646,4 @@ export class DoctorDashboardComponent implements OnInit {
     return Number.isInteger(value) ? String(value) : value.toFixed(1);
   }
 
-  trackLeave(index: number, leave: { id?: number; startDate?: string }): number | string {
-    return leave?.id ?? leave?.startDate ?? index;
-  }
 }

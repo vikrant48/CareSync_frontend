@@ -1,21 +1,24 @@
-import { Component, OnInit, OnDestroy, inject, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { VitalsService, VitalLog } from '../../core/services/vitals.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Chart, registerables } from 'chart.js';
-import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 import { PatientVitalsHistoryComponent } from './patient-vitals-history.component';
 import { getBPStatus as bpStatus, getSugarStatus as sugarStatus, getTempStatus as tempStatus, getWeightStatus as weightStatus } from './vitals-status';
+import { PageContainerComponent } from '../../shared/ui/page-container.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-patient-vitals',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, PatientLayoutComponent, PatientVitalsHistoryComponent, ModalShellComponent],
+  imports: [PageHeaderComponent, PageContainerComponent, CommonModule, FormsModule, ReactiveFormsModule, PatientVitalsHistoryComponent, ModalShellComponent],
+  // Charts are drawn imperatively on <canvas>; template state changed in async callbacks calls markForCheck
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './patient-vitals.component.html',
   styleUrl: './patient-vitals.component.css'
 })
@@ -121,6 +124,7 @@ export class VitalsTrackingComponent implements OnInit, OnDestroy {
         this.showLogForm = false;
         this.vitalsForm.reset();
         this.loading = false;
+        this.cdr.markForCheck();
         this.loadVitals();
       },
       error: () => {

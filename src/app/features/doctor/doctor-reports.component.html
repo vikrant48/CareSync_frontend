@@ -1,34 +1,23 @@
-<app-doctor-layout>
-    <div
-        class="max-w-[1400px] mx-auto p-4 sm:p-6 space-y-6 text-[var(--text)] font-sans selection:bg-[var(--accent)]/30 pb-16">
+    <app-page-container paddingClass="p-4 sm:p-6" spacingClass="space-y-6" extraClass="font-sans selection:bg-[var(--accent)]/30 pb-16">
 
-        <!-- Page Header -->
-        <div
-            class="relative overflow-hidden bg-gradient-to-r from-[var(--accent-soft)] via-[var(--panel)] to-[var(--primary-soft)] border border-[var(--border)] p-5 sm:p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
-            <div>
-                <h1 class="text-xl sm:text-2xl font-black text-[var(--text)] tracking-tight">Analytics & Insights</h1>
-                <p class="text-xs sm:text-sm text-[var(--muted)] mt-0.5 font-medium">Track your performance and patient
-                    engagement metrics</p>
-            </div>
+        <app-page-header variant="hero" title="Analytics & Insights"
+            subtitle="Track your performance and patient engagement metrics" [hasActions]="true">
+            <label
+                class="bg-[var(--bg)] border border-[var(--border)] rounded-xl px-3 py-2 text-xs font-semibold text-[var(--text)] flex items-center gap-2">
+                <i class="fa-solid fa-calendar-days text-[var(--accent)]" aria-hidden="true"></i>
+                <select [value]="reportRange" (change)="setReportRange($any($event.target).value)" aria-label="Report period"
+                    class="bg-transparent font-semibold focus:outline-none">
+                    <option value="month">This Month</option>
+                    <option value="sixMonths">Last 6 Months</option>
+                </select>
+            </label>
 
-            <div class="flex items-center gap-3 self-end sm:self-auto">
-                <label
-                    class="bg-[var(--bg)] border border-[var(--border)] rounded-xl px-3 py-2 text-xs font-semibold text-[var(--text)] flex items-center gap-2">
-                    <i class="fa-solid fa-calendar-days text-[var(--accent)]"></i>
-                    <select [value]="reportRange" (change)="setReportRange($any($event.target).value)"
-                        class="bg-transparent font-semibold focus:outline-none">
-                        <option value="month">This Month</option>
-                        <option value="sixMonths">Last 6 Months</option>
-                    </select>
-                </label>
-
-                <button type="button" (click)="exportReport()"
-                    class="px-4 py-2 bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--text)] font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-2 shadow-sm">
-                    <i class="fa-solid fa-download text-[var(--accent)]"></i>
-                    <span>Export Report</span>
-                </button>
-            </div>
-        </div>
+            <button type="button" (click)="exportReport()"
+                class="btn-size-md px-4 bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-2 shadow-sm">
+                <i class="fa-solid fa-download text-[var(--accent)]" aria-hidden="true"></i>
+                <span>Export Report</span>
+            </button>
+        </app-page-header>
 
         <app-doctor-reports-summary [appointmentCount]="performance?.totalAppointments"
             [doctorRating]="satisfaction.average" [retention]="retention"></app-doctor-reports-summary>
@@ -115,7 +104,7 @@
                             <span class="text-3xl font-black text-[var(--text)]">{{ satisfaction.average }}</span>
                             <div class="flex gap-0.5 text-xs text-[#f59e0b] mt-0.5">
                                 <i *ngFor="let star of [1,2,3,4,5]" class="fa-solid fa-star"
-                                    [class.opacity-25]="star > filledStars"></i>
+                                    [class.opacity-25]="star > filledStars" aria-hidden="true"></i>
                             </div>
                         </div>
                     </div>
@@ -124,7 +113,7 @@
                         <div *ngFor="let row of satisfactionRows" class="space-y-1">
                             <div class="flex justify-between text-xs font-semibold">
                                 <span class="text-[var(--muted)] flex items-center gap-1.5">
-                                    <i class="fa-solid" [ngClass]="row.icon" [style.color]="row.color"></i> {{ row.label
+                                    <i class="fa-solid" [ngClass]="row.icon" [style.color]="row.color" aria-hidden="true"></i> {{ row.label
                                     }}
                                 </span>
                                 <span class="text-[var(--text)]">{{ satisfaction.percents[row.key] }}%</span>
@@ -191,7 +180,7 @@
                     <div *ngFor="let row of appointmentTypeBars" class="space-y-1.5">
                         <div class="flex justify-between text-xs font-semibold">
                             <span class="text-[var(--muted)] flex items-center gap-2">
-                                <i class="fa-solid text-xs" [ngClass]="row.icon" [style.color]="row.color"></i> {{
+                                <i class="fa-solid text-xs" [ngClass]="row.icon" [style.color]="row.color" aria-hidden="true"></i> {{
                                 row.label }}
                             </span>
                             <span class="text-[var(--text)]">{{ row.count }} ({{ row.percent }}%)</span>
@@ -265,5 +254,4 @@
                 </div>
             </div>
         </div>
-    </div>
-</app-doctor-layout>
+    </app-page-container>

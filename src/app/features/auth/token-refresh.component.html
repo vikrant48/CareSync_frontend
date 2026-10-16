@@ -19,7 +19,7 @@
             <div class="mb-6">
                 <div
                     class="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-6 text-blue-500">
-                    <i class="fa-solid fa-arrows-rotate text-3xl" [class.fa-spin]="isRefreshing"></i>
+                    <i class="fa-solid fa-arrows-rotate text-3xl" [class.fa-spin]="isRefreshing" aria-hidden="true"></i>
                 </div>
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Refreshing Session</h2>
                 <p class="text-gray-600 dark:text-gray-400">
@@ -38,7 +38,7 @@
             <div *ngIf="refreshError" class="mb-6 space-y-4 animate-in fade-in slide-in-from-top-2">
                 <div
                     class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 flex items-start text-left gap-3">
-                    <i class="fa-solid fa-circle-exclamation text-red-500 mt-1"></i>
+                    <i class="fa-solid fa-circle-exclamation text-red-500 mt-1" aria-hidden="true"></i>
                     <div>
                         <h3 class="text-sm font-semibold text-red-800 dark:text-red-200">Refresh Failed</h3>
                         <p class="text-sm text-red-700 dark:text-red-300 mt-1">{{ refreshError }}</p>
@@ -46,18 +46,18 @@
                 </div>
 
                 <button (click)="retryRefresh()"
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-xl font-medium transition-colors shadow-lg shadow-blue-500/20">
-                    <i class="fa-solid fa-arrow-rotate-right mr-2"></i> Try Again
+                    class="btn-size-lg w-full bg-blue-600 hover:bg-blue-700 text-white px-4 rounded-xl font-medium transition-colors shadow-lg shadow-blue-500/20 inline-flex items-center justify-center">
+                    <i class="fa-solid fa-arrow-rotate-right mr-2" aria-hidden="true"></i> Try Again
                 </button>
 
                 <button (click)="goToLogin()"
-                    class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 py-3 px-4 rounded-xl font-medium transition-colors">
+                    class="btn-size-lg w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 rounded-xl font-medium transition-colors inline-flex items-center justify-center">
                     Go to Login
                 </button>
             </div>
 
             <div *ngIf="!isRefreshing && !refreshError" class="text-sm text-gray-400 dark:text-gray-500 mt-4">
-                <i class="fa-regular fa-clock mr-1"></i> If this takes too long, you may need to log in again.
+                <i class="fa-regular fa-clock mr-1" aria-hidden="true"></i> If this takes too long, you may need to log in again.
             </div>
 
         </div>

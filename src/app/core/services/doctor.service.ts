@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, shareReplay, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 export interface Doctor {
@@ -55,6 +56,23 @@ export class DoctorService {
     if (sortDirection) params = params.set('sortDirection', sortDirection);
 
     return this.http.get<Doctor[]>(`${this.baseUrl}/api/doctors/for-patients`, { params });
+  }
+
+  private directory$?: Observable<Doctor[]>;
+  private directoryLoadedAt = 0;
+  private static readonly DIRECTORY_TTL_MS = 5 * 60 * 1000;
+  private static readonly DIRECTORY_SIZE = 50;
+
+  getDirectory(force = false): Observable<Doctor[]> {
+    const fresh = Date.now() - this.directoryLoadedAt < DoctorService.DIRECTORY_TTL_MS;
+    if (!force && this.directory$ && fresh) return this.directory$;
+
+    this.directoryLoadedAt = Date.now();
+    this.directory$ = this.getAllForPatients(0, DoctorService.DIRECTORY_SIZE).pipe(
+      tap({ error: () => { this.directory$ = undefined; } }),
+      shareReplay({ bufferSize: 1, refCount: false })
+    );
+    return this.directory$;
   }
 
   searchDoctors(searchParams: SearchDoctorsParams) {

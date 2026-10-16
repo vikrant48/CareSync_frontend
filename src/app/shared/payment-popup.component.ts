@@ -1,8 +1,8 @@
-import { Component, EventEmitter, Input, Output, signal, inject, OnInit, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal, inject, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
-import { PaymentService, PaymentRequest } from '../core/services/payment.service';
+import { PaymentService, PaymentRequest, SavedPaymentMethod } from '../core/services/payment.service';
 import { AppointmentService } from '../core/services/appointment.service';
 import { LabTestService, BookingRequest } from '../core/services/lab-test.service';
 import { AuthService } from '../core/services/auth.service';
@@ -61,7 +61,7 @@ export interface PaymentDetails {
             aria-label="Close payment"
             class="text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--bg)] p-2 rounded-full transition-colors focus:outline-none flex items-center justify-center cursor-pointer"
           >
-            <i class="fa-solid fa-xmark text-lg"></i>
+            <i class="fa-solid fa-xmark text-lg" aria-hidden="true"></i>
           </button>
         </div>
       </div>
@@ -83,7 +83,7 @@ export interface PaymentDetails {
             >
               <div class="flex items-center gap-3 min-w-0">
                 <div class="w-9 h-9 rounded-xl bg-[var(--primary)]/15 text-[var(--primary)] flex items-center justify-center text-base shrink-0">
-                  <i class="fa-solid fa-mobile-screen-button"></i>
+                  <i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i>
                 </div>
                 <div class="min-w-0">
                   <h3 class="font-bold text-xs sm:text-sm text-[var(--text)] truncate">UPI Payment</h3>
@@ -105,8 +105,8 @@ export interface PaymentDetails {
               class="w-full p-3.5 rounded-2xl flex items-center justify-between transition-all duration-200 text-left cursor-pointer group"
             >
               <div class="flex items-center gap-3 min-w-0">
-                <div class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-base shrink-0">
-                  <i class="fa-regular fa-credit-card"></i>
+                <div class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-700 dark:text-purple-400 flex items-center justify-center text-base shrink-0">
+                  <i class="fa-regular fa-credit-card" aria-hidden="true"></i>
                 </div>
                 <div class="min-w-0">
                   <h3 class="font-bold text-xs sm:text-sm text-[var(--text)] truncate">Card Payment</h3>
@@ -127,8 +127,8 @@ export interface PaymentDetails {
               class="w-full p-3.5 rounded-2xl flex items-center justify-between transition-all duration-200 text-left cursor-pointer group"
             >
               <div class="flex items-center gap-3 min-w-0">
-                <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-base shrink-0">
-                  <i class="fa-solid fa-qrcode"></i>
+                <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-base shrink-0">
+                  <i class="fa-solid fa-qrcode" aria-hidden="true"></i>
                 </div>
                 <div class="min-w-0">
                   <h3 class="font-bold text-xs sm:text-sm text-[var(--text)] truncate">Scan QR</h3>
@@ -145,6 +145,24 @@ export interface PaymentDetails {
 
         <!-- RIGHT COLUMN: Payment Method Form Details -->
         <div class="md:col-span-7 p-5 sm:p-6 space-y-4 bg-[var(--panel)] flex flex-col justify-between">
+
+          <!-- Last used payment method (saved by the backend after a successful payment) -->
+          <div *ngIf="savedMethod() as saved"
+               class="flex items-center justify-between gap-3 bg-[var(--bg)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 text-xs">
+            <div class="min-w-0">
+              <div class="font-bold text-[var(--text)] flex items-center gap-1.5">
+                <i class="fa-solid fa-clock-rotate-left text-[var(--primary)]" aria-hidden="true"></i>
+                Last used: {{ savedMethodLabel(saved) }}
+              </div>
+              <div *ngIf="saved.paymentMethod === 'CARD'" class="text-[11px] text-[var(--muted)] mt-0.5">
+                For your security the full card number is never stored. Please enter it again.
+              </div>
+            </div>
+            <button type="button" (click)="forgetSavedMethod()" [disabled]="isProcessing()"
+                    class="shrink-0 text-[11px] font-bold text-[var(--muted)] hover:text-rose-600 underline cursor-pointer">
+              Forget
+            </button>
+          </div>
           
           <!-- UPI FLOW PANEL -->
           <div *ngIf="selectedMethod() === 'upi'" class="space-y-4 animate-in fade-in duration-300">
@@ -152,17 +170,17 @@ export interface PaymentDetails {
             <div class="flex items-start justify-between gap-3">
               <div class="space-y-0.5">
                 <h3 class="font-bold text-[var(--text)] text-sm sm:text-base flex items-center gap-2">
-                  <i class="fa-solid fa-mobile-screen-button text-[var(--primary)]"></i> UPI Payment
+                  <i class="fa-solid fa-mobile-screen-button text-[var(--primary)]" aria-hidden="true"></i> UPI Payment
                 </h3>
                 <p class="text-xs text-[var(--muted)]">Pay securely using any UPI app</p>
               </div>
 
               <!-- UPI App Icons -->
               <div class="flex items-center gap-1.5 shrink-0">
-                <span class="bg-[var(--panel)] border border-[var(--border)] px-2 py-1 rounded-lg text-[10px] font-extrabold text-blue-400">GPay</span>
-                <span class="bg-[var(--panel)] border border-[var(--border)] px-2 py-1 rounded-lg text-[10px] font-extrabold text-purple-400">Pe</span>
-                <span class="bg-[var(--panel)] border border-[var(--border)] px-2 py-1 rounded-lg text-[10px] font-extrabold text-sky-400">Paytm</span>
-                <span class="bg-[var(--panel)] border border-[var(--border)] px-2 py-1 rounded-lg text-[10px] font-extrabold text-amber-400">BHIM</span>
+                <span class="bg-[var(--panel)] border border-[var(--border)] px-2 py-1 rounded-lg text-[10px] font-extrabold text-blue-700 dark:text-blue-400">GPay</span>
+                <span class="bg-[var(--panel)] border border-[var(--border)] px-2 py-1 rounded-lg text-[10px] font-extrabold text-purple-700 dark:text-purple-400">Pe</span>
+                <span class="bg-[var(--panel)] border border-[var(--border)] px-2 py-1 rounded-lg text-[10px] font-extrabold text-sky-700 dark:text-sky-400">Paytm</span>
+                <span class="bg-[var(--panel)] border border-[var(--border)] px-2 py-1 rounded-lg text-[10px] font-extrabold text-amber-700 dark:text-amber-400">BHIM</span>
               </div>
             </div>
 
@@ -177,7 +195,7 @@ export interface PaymentDetails {
               <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider">UPI ID</label>
               <div class="relative flex items-center">
                 <div class="absolute left-3.5 text-[var(--primary)] pointer-events-none text-sm">
-                  <i class="fa-solid fa-at"></i>
+                  <i class="fa-solid fa-at" aria-hidden="true"></i>
                 </div>
                 <input 
                   type="text" 
@@ -188,7 +206,7 @@ export interface PaymentDetails {
                   [class.border-rose-500]="errorMessage()"
                 />
                 <button *ngIf="upiId" type="button" (click)="clearUpiId()" class="absolute right-3 text-[var(--muted)] hover:text-[var(--text)] text-xs cursor-pointer">
-                  <i class="fa-solid fa-circle-xmark"></i>
+                  <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
                 </button>
               </div>
 
@@ -208,7 +226,7 @@ export interface PaymentDetails {
 
               <div class="flex items-center justify-between text-[11px] pt-0.5">
                 <span class="text-[var(--muted)]">Enter your UPI ID (e.g. name&#64;bank)</span>
-                <span *ngIf="errorMessage()" class="text-rose-400 font-semibold">{{ errorMessage() }}</span>
+                <span *ngIf="errorMessage()" class="text-rose-700 dark:text-rose-400 font-semibold">{{ errorMessage() }}</span>
               </div>
 
               <!-- Pay Button -->
@@ -219,7 +237,7 @@ export interface PaymentDetails {
                   [disabled]="!canProcessPayment() || isProcessing()"
                   class="w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold text-xs sm:text-sm py-3 rounded-xl shadow-lg shadow-[var(--primary)]/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
-                  <i *ngIf="isProcessing()" class="fa-solid fa-circle-notch animate-spin text-xs"></i>
+                  <i *ngIf="isProcessing()" class="fa-solid fa-circle-notch animate-spin text-xs" aria-hidden="true"></i>
                   <span>Pay ₹{{ amount | number:'1.2-2' }}</span>
                 </button>
               </div>
@@ -241,11 +259,11 @@ export interface PaymentDetails {
                 <h4 class="text-xs sm:text-sm font-bold text-[var(--text)]">Scan with your UPI app</h4>
                 <p class="text-[11px] text-[var(--muted)] leading-tight">Open Google Pay, PhonePe, Paytm or any UPI app and scan this QR code to pay.</p>
                 <div class="flex items-center justify-between pt-1 flex-wrap gap-2">
-                  <span class="text-[11px] text-amber-400 font-semibold flex items-center gap-1">
-                    <i class="fa-regular fa-clock"></i> QR expires in {{ formatTimer(qrCountdown) }}
+                  <span class="text-[11px] text-amber-700 dark:text-amber-400 font-semibold flex items-center gap-1">
+                    <i class="fa-regular fa-clock" aria-hidden="true"></i> QR expires in {{ formatTimer(qrCountdown()) }}
                   </span>
-                  <button type="button" (click)="downloadQR()" class="bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-[11px] font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1 transition-all cursor-pointer">
-                    <i class="fa-solid fa-download text-[10px]"></i> Download QR
+                  <button type="button" (click)="downloadQR()" class="btn-size-sm bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-[11px] font-semibold px-2.5 rounded-lg flex items-center gap-1 transition-all cursor-pointer">
+                    <i class="fa-solid fa-download text-[10px]" aria-hidden="true"></i> Download QR
                   </button>
                 </div>
               </div>
@@ -256,15 +274,15 @@ export interface PaymentDetails {
           <div *ngIf="selectedMethod() === 'card'" class="space-y-4 animate-in fade-in duration-300">
             <div class="space-y-0.5">
               <h3 class="font-bold text-[var(--text)] text-sm sm:text-base flex items-center gap-2">
-                <i class="fa-regular fa-credit-card text-purple-400"></i> Card Payment
+                <i class="fa-regular fa-credit-card text-purple-700 dark:text-purple-400" aria-hidden="true"></i> Card Payment
               </h3>
               <p class="text-xs text-[var(--muted)]">Pay securely using your Credit or Debit Card</p>
             </div>
 
             <div class="bg-[var(--panel)] border border-[var(--border)] rounded-xl p-4 space-y-3.5">
               <div>
-                <label class="block text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1">Card Number</label>
-                <input 
+                <label class="block text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1" for="payment-popup-card-number-1">Card Number</label>
+                <input id="payment-popup-card-number-1" 
                   type="text" 
                   [(ngModel)]="cardDetails.cardNumber"
                   placeholder="0000 0000 0000 0000"
@@ -274,8 +292,8 @@ export interface PaymentDetails {
               </div>
 
               <div>
-                <label class="block text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1">Cardholder Name</label>
-                <input 
+                <label class="block text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1" for="payment-popup-cardholder-name-2">Cardholder Name</label>
+                <input id="payment-popup-cardholder-name-2" 
                   type="text" 
                   [(ngModel)]="cardDetails.cardholderName"
                   placeholder="NAME ON CARD"
@@ -285,8 +303,8 @@ export interface PaymentDetails {
 
               <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <label class="block text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1">Expiry Date</label>
-                  <input 
+                  <label class="block text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1" for="payment-popup-expiry-date-3">Expiry Date</label>
+                  <input id="payment-popup-expiry-date-3" 
                     type="text" 
                     [(ngModel)]="cardDetails.expiryDate"
                     placeholder="MM/YY"
@@ -295,8 +313,8 @@ export interface PaymentDetails {
                   />
                 </div>
                 <div>
-                  <label class="block text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1">CVV</label>
-                  <input 
+                  <label class="block text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1" for="payment-popup-cvv-4">CVV</label>
+                  <input id="payment-popup-cvv-4" 
                     type="password" 
                     [(ngModel)]="cardDetails.cvv"
                     placeholder="123"
@@ -313,7 +331,7 @@ export interface PaymentDetails {
               [disabled]="!canProcessPayment() || isProcessing()"
               class="w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold text-xs sm:text-sm py-3 rounded-xl shadow-lg shadow-[var(--primary)]/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              <i *ngIf="isProcessing()" class="fa-solid fa-circle-notch animate-spin text-xs"></i>
+              <i *ngIf="isProcessing()" class="fa-solid fa-circle-notch animate-spin text-xs" aria-hidden="true"></i>
               <span>Pay ₹{{ amount | number:'1.2-2' }}</span>
             </button>
           </div>
@@ -322,7 +340,7 @@ export interface PaymentDetails {
           <div *ngIf="selectedMethod() === 'qr'" class="space-y-4 animate-in fade-in duration-300 text-center flex flex-col items-center justify-center py-4">
             <div class="space-y-1">
               <h3 class="font-bold text-[var(--text)] text-base flex items-center justify-center gap-2">
-                <i class="fa-solid fa-qrcode text-emerald-400"></i> Scan to Pay
+                <i class="fa-solid fa-qrcode text-emerald-700 dark:text-emerald-400" aria-hidden="true"></i> Scan to Pay
               </h3>
               <p class="text-xs text-[var(--muted)]">Scan this QR code using any UPI app</p>
             </div>
@@ -342,7 +360,7 @@ export interface PaymentDetails {
               [disabled]="isProcessing()"
               class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <i class="fa-solid fa-circle-check"></i>
+              <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
               <span>I Have Made the Payment</span>
             </button>
           </div>
@@ -361,16 +379,16 @@ export interface PaymentDetails {
           
           <!-- Floating Orbit Security Icons -->
           <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)] flex items-center justify-center text-xs shadow-md">
-            <i class="fa-solid fa-shield-halved"></i>
+            <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
           </div>
-          <div class="absolute top-1/4 -right-2 w-8 h-8 rounded-full bg-[var(--bg)] border border-[var(--border)] text-purple-400 flex items-center justify-center text-xs shadow-md">
-            <i class="fa-regular fa-credit-card"></i>
+          <div class="absolute top-1/4 -right-2 w-8 h-8 rounded-full bg-[var(--bg)] border border-[var(--border)] text-purple-700 dark:text-purple-400 flex items-center justify-center text-xs shadow-md">
+            <i class="fa-regular fa-credit-card" aria-hidden="true"></i>
           </div>
-          <div class="absolute bottom-1/4 -left-2 w-8 h-8 rounded-full bg-[var(--bg)] border border-[var(--border)] text-amber-400 flex items-center justify-center text-xs shadow-md">
-            <i class="fa-solid fa-building-columns"></i>
+          <div class="absolute bottom-1/4 -left-2 w-8 h-8 rounded-full bg-[var(--bg)] border border-[var(--border)] text-amber-700 dark:text-amber-400 flex items-center justify-center text-xs shadow-md">
+            <i class="fa-solid fa-building-columns" aria-hidden="true"></i>
           </div>
-          <div class="absolute bottom-1 right-1/4 w-8 h-8 rounded-full bg-[var(--bg)] border border-[var(--border)] text-sky-400 flex items-center justify-center text-xs shadow-md">
-            <i class="fa-solid fa-mobile-screen-button"></i>
+          <div class="absolute bottom-1 right-1/4 w-8 h-8 rounded-full bg-[var(--bg)] border border-[var(--border)] text-sky-700 dark:text-sky-400 flex items-center justify-center text-xs shadow-md">
+            <i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i>
           </div>
 
           <!-- Floating Sparks -->
@@ -380,7 +398,7 @@ export interface PaymentDetails {
           <!-- Central Glowing Lock Circle -->
           <div class="w-20 h-20 rounded-full bg-[var(--primary-soft)] border-2 border-[var(--primary)] flex items-center justify-center shadow-xl shadow-[var(--primary)]/30 relative z-10">
             <div class="w-14 h-14 rounded-full bg-[var(--primary)] flex items-center justify-center text-white text-xl shadow-inner">
-              <i class="fa-solid fa-lock"></i>
+              <i class="fa-solid fa-lock" aria-hidden="true"></i>
             </div>
           </div>
         </div>
@@ -400,7 +418,7 @@ export interface PaymentDetails {
             <!-- Step 1: Verifying -->
             <div class="flex flex-col items-center space-y-1.5 relative z-10 w-1/3 text-center">
               <div class="w-8 h-8 rounded-full bg-[var(--primary)] text-white flex items-center justify-center text-xs font-bold shadow-md">
-                <i class="fa-solid fa-check"></i>
+                <i class="fa-solid fa-check" aria-hidden="true"></i>
               </div>
               <div class="text-xs font-bold text-[var(--text)]">Verifying</div>
               <div class="text-[10px] text-[var(--muted)]">payment details</div>
@@ -429,7 +447,7 @@ export interface PaymentDetails {
 
         <!-- Security Footer Badge Pill -->
         <div class="bg-[var(--panel)] border border-[var(--border)] px-4 py-2 rounded-xl text-xs text-[var(--muted)] flex items-center justify-center gap-2 shadow-sm">
-          <i class="fa-solid fa-lock text-[var(--primary)] text-xs"></i>
+          <i class="fa-solid fa-lock text-[var(--primary)] text-xs" aria-hidden="true"></i>
           <span>Secure payment powered by trusted partners</span>
         </div>
 
@@ -446,7 +464,7 @@ export interface PaymentDetails {
     </app-payment-success-modal>
   `
 })
-export class PaymentPopupComponent implements OnInit, OnDestroy, OnChanges {
+export class PaymentPopupComponent implements OnDestroy, OnChanges {
   @Input() isVisible = false;
   @Input() amount = 0;
   @Input() title = 'Appointment Booking Payment';
@@ -475,6 +493,7 @@ export class PaymentPopupComponent implements OnInit, OnDestroy, OnChanges {
   private toast = inject(ToastService);
 
   selectedMethod = signal<'upi' | 'card' | 'qr'>('upi');
+  savedMethod = signal<SavedPaymentMethod | null>(null);
   isProcessing = signal<boolean>(false);
   errorMessage = signal<string>('');
 
@@ -484,12 +503,13 @@ export class PaymentPopupComponent implements OnInit, OnDestroy, OnChanges {
   merchantUpiId = environment.merchantUpiId || 'careSync@business';
 
   // UPI Form
-  upiId = 'yourUPI@oksbi';
+  upiId = '';
   upiSuggestions: string[] = [];
   showUpiSuggestions = signal<boolean>(false);
 
   // Timer & QR Code
-  qrCountdown = 300;
+  // Signal so the countdown re-renders even when the host page uses OnPush
+  qrCountdown = signal(300);
   private qrTimerInterval: any;
 
   // Card Form
@@ -502,14 +522,16 @@ export class PaymentPopupComponent implements OnInit, OnDestroy, OnChanges {
 
   private readonly UPI_HANDLES = ['@okicici', '@oksbi', '@okhdfcbank', '@okaxis', '@paytm', '@ybl', '@upi', '@ibl', '@axl'];
 
-  ngOnInit() {
-    this.startQrTimer();
-  }
-
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['isVisible'] && this.isVisible) {
-      this.selectedMethod.set('upi');
-      this.startQrTimer();
+    // The QR countdown only runs while the popup is visible
+    if (changes['isVisible']) {
+      if (this.isVisible) {
+        this.selectedMethod.set('upi');
+        this.startQrTimer();
+        this.loadSavedMethod();
+      } else {
+        this.stopQrTimer();
+      }
     }
   }
 
@@ -517,12 +539,62 @@ export class PaymentPopupComponent implements OnInit, OnDestroy, OnChanges {
     this.stopQrTimer();
   }
 
+  /** Pre-select the patient's last used method and fill in what was saved (UPI ID, cardholder name). */
+  private loadSavedMethod() {
+    if (this.authService.role() !== 'PATIENT') {
+      this.savedMethod.set(null);
+      return;
+    }
+    this.paymentService.getMySavedPaymentMethod().subscribe({
+      next: (saved) => {
+        this.savedMethod.set(saved || null);
+        if (!saved || this.isProcessing()) return;
+        if (saved.paymentMethod === 'UPI' && saved.upiId) {
+          this.selectedMethod.set('upi');
+          this.upiId = saved.upiId;
+        } else if (saved.paymentMethod === 'CARD') {
+          this.selectedMethod.set('card');
+          this.cardDetails.cardholderName = saved.cardholderName || '';
+        } else if (saved.paymentMethod === 'QR_CODE') {
+          this.selectedMethod.set('qr');
+        }
+      },
+      // Prefill is a convenience: if it fails, the popup works as before
+      error: () => this.savedMethod.set(null),
+    });
+  }
+
+  savedMethodLabel(saved: SavedPaymentMethod): string {
+    switch (saved.paymentMethod) {
+      case 'UPI':
+        return `UPI · ${saved.upiId || ''}`;
+      case 'CARD':
+        return `${saved.cardBrand || 'Card'} •••• ${saved.cardLastFour || ''}`;
+      case 'QR_CODE':
+        return 'UPI QR code';
+      default:
+        return String(saved.paymentMethod || '');
+    }
+  }
+
+  forgetSavedMethod() {
+    this.paymentService.forgetMySavedPaymentMethod().subscribe({
+      next: () => {
+        this.savedMethod.set(null);
+        this.upiId = '';
+        this.cardDetails.cardholderName = '';
+        this.toast.showSuccess('Saved payment method removed');
+      },
+      error: () => this.toast.showError('Could not remove the saved payment method. Please try again.'),
+    });
+  }
+
   startQrTimer() {
     this.stopQrTimer();
-    this.qrCountdown = 298;
+    this.qrCountdown.set(298);
     this.qrTimerInterval = setInterval(() => {
-      if (this.qrCountdown > 0) {
-        this.qrCountdown--;
+      if (this.qrCountdown() > 0) {
+        this.qrCountdown.update((s) => s - 1);
       } else {
         this.stopQrTimer();
       }
@@ -598,11 +670,7 @@ export class PaymentPopupComponent implements OnInit, OnDestroy, OnChanges {
 
     switch (method) {
       case 'upi':
-        const validFormat = /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(this.upiId);
-        if (this.upiId && !validFormat && this.upiId.includes('@')) {
-          return true;
-        }
-        return validFormat;
+        return /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(this.upiId);
       case 'qr':
         return true;
       case 'card':
@@ -718,6 +786,7 @@ export class PaymentPopupComponent implements OnInit, OnDestroy, OnChanges {
         };
         this.showSuccessModal.set(true);
         this.isVisible = false;
+        this.stopQrTimer();
         this.paymentSuccess.emit(this.successPaymentDetails);
         this.resetForm();
       } else {
@@ -744,6 +813,7 @@ export class PaymentPopupComponent implements OnInit, OnDestroy, OnChanges {
     if (this.isProcessing()) return;
     this.paymentCancel.emit();
     this.isVisible = false;
+    this.stopQrTimer();
     this.resetForm();
   }
 
@@ -751,7 +821,7 @@ export class PaymentPopupComponent implements OnInit, OnDestroy, OnChanges {
     this.selectedMethod.set('upi');
     this.isProcessing.set(false);
     this.errorMessage.set('');
-    this.upiId = 'yourUPI@oksbi';
+    this.upiId = '';
     this.upiSuggestions = [];
     this.cardDetails = { cardNumber: '', expiryDate: '', cvv: '', cardholderName: '' };
   }

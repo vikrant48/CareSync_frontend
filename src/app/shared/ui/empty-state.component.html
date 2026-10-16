@@ -1,10 +1,10 @@
 <div class="flex flex-col items-center justify-center text-center animate-fade-in" [class.py-10]="!compact"
     [class.py-6]="compact" [class.sm:py-16]="!compact" [class.min-h-[240px]]="!compact" [ngClass]="containerClass"
-    role="status">
+    [attr.role]="variant === 'error' ? 'alert' : 'status'">
     <div class="rounded-full flex items-center justify-center mb-3 sm:mb-4 shadow-inner" [class.w-14]="compact"
         [class.h-14]="compact" [class.w-20]="!compact" [class.h-20]="!compact" [class.sm:w-24]="!compact"
-        [class.sm:h-24]="!compact" [ngClass]="iconWrapClass">
-        <i [class]="icon" [class.text-2xl]="compact" [class.text-3xl]="!compact" [class.sm:text-4xl]="!compact"
+        [class.sm:h-24]="!compact" [ngClass]="resolvedIconWrapClass">
+        <i [class]="resolvedIcon" [class.text-2xl]="compact" [class.text-3xl]="!compact" [class.sm:text-4xl]="!compact"
             aria-hidden="true"></i>
     </div>
 
@@ -14,11 +14,15 @@
     </h3>
 
     <p *ngIf="message" class="text-gray-500 dark:text-gray-400 max-w-md mx-auto" [class.text-xs]="compact"
-        [class.sm:text-sm]="compact" [class.text-sm]="!compact" [class.mb-4]="hasAction" [class.mb-0]="!hasAction">
+        [class.sm:text-sm]="compact" [class.text-sm]="!compact"
+        [class.mb-4]="hasAction || variant === 'error'" [class.mb-0]="!hasAction && variant !== 'error'">
         {{ message }}
     </p>
 
-    <div *ngIf="hasAction" class="mt-2 flex flex-wrap items-center justify-center gap-2">
+    <div *ngIf="hasAction || variant === 'error'" class="mt-2 flex flex-wrap items-center justify-center gap-2">
+        <button *ngIf="variant === 'error' && showRetry" type="button" class="btn-secondary" (click)="retry.emit()">
+            <i class="fa-solid fa-rotate-right" aria-hidden="true"></i> {{ retryLabel }}
+        </button>
         <ng-content></ng-content>
     </div>
 </div>

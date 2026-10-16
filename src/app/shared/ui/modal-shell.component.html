@@ -2,9 +2,11 @@
     zIndexClass,
     backdropClass,
     fullScreenMobile ? 'items-end sm:items-center' : 'items-center'
-  ]" role="dialog" aria-modal="true" [attr.aria-labelledby]="title ? titleId : null"
-    [attr.aria-label]="!title ? ariaLabel : null" (click)="onBackdrop()">
-    <div class="w-full flex flex-col overflow-hidden shadow-2xl safe-bottom animate-scale-in" [ngClass]="panelClasses"
+  ]" role="presentation" (click)="onBackdrop()" (keydown)="onKeydown($event)">
+    <div #panel role="dialog" aria-modal="true" tabindex="-1"
+        [attr.aria-labelledby]="title && showHeader ? resolvedTitleId : null"
+        [attr.aria-label]="!(title && showHeader) ? ariaLabel : null"
+        class="w-full flex flex-col overflow-hidden shadow-2xl safe-bottom animate-scale-in outline-none" [ngClass]="panelClasses"
         (click)="$event.stopPropagation()">
         <!-- Built-in header -->
         <div *ngIf="showHeader"
@@ -16,7 +18,7 @@
                     <i [class]="icon" aria-hidden="true"></i>
                 </div>
                 <div class="min-w-0">
-                    <h3 *ngIf="title" [id]="titleId" class="font-bold text-gray-900 dark:text-gray-100 truncate"
+                    <h3 *ngIf="title" [id]="resolvedTitleId" class="font-bold text-gray-900 dark:text-gray-100 truncate"
                         [class.text-base]="!!subtitle" [class.text-lg]="!subtitle">
                         {{ title }}
                     </h3>

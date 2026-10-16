@@ -32,7 +32,7 @@ export interface SavedChatSession {
       (click)="toggleChat()"
       class="fixed bottom-20 right-4 xl:bottom-8 xl:right-8 w-12 h-12 xl:w-14 xl:h-14 bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-[60] group"
     >
-      <i class="fas fa-robot text-xl md:text-2xl group-hover:rotate-12 transition-transform"></i>
+      <i class="fas fa-robot text-xl md:text-2xl group-hover:rotate-12 transition-transform" aria-hidden="true"></i>
       <span class="absolute -top-1 -right-1 flex h-3 w-3" *ngIf="messages().length === 0">
         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
         <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
@@ -48,7 +48,7 @@ export interface SavedChatSession {
       <div class="p-3.5 sm:p-4 bg-gradient-to-r from-[var(--primary)] via-indigo-600 to-indigo-700 text-white flex items-center justify-between shrink-0 shadow-md">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shadow-inner">
-            <i class="fas fa-robot text-xl"></i>
+            <i class="fas fa-robot text-xl" aria-hidden="true"></i>
           </div>
           <div>
             <h3 class="font-bold text-sm tracking-wide">{{ isDoctor() ? 'Clinical AI Assistant' : 'CareSync AI Assistant' }}</h3>
@@ -59,17 +59,17 @@ export interface SavedChatSession {
           </div>
         </div>
         <div class="flex items-center gap-1.5">
-           <button (click)="expandChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-1.5 rounded-lg hover:bg-white/10 transition-all" title="Expand Assistant (Fullscreen)">
-             <i class="fas fa-expand text-xs sm:text-sm"></i>
+           <button (click)="expandChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-1.5 rounded-lg hover:bg-white/10 transition-all" title="Expand Assistant (Fullscreen)" aria-label="Expand Assistant (Fullscreen)">
+             <i class="fas fa-expand text-xs sm:text-sm" aria-hidden="true"></i>
            </button>
-           <button (click)="isVisionScannerOpen.set(true)" class="text-[var(--text)]/80 hover:text-[var(--text)] p-1.5 rounded-lg hover:bg-white/10 transition-all" title="Scan Prescription / Lab Report (Vision AI)">
-             <i class="fas fa-camera text-sm"></i>
+           <button (click)="isVisionScannerOpen.set(true)" class="text-[var(--text)]/80 hover:text-[var(--text)] p-1.5 rounded-lg hover:bg-white/10 transition-all" title="Scan Prescription / Lab Report (Vision AI)" aria-label="Scan Prescription / Lab Report (Vision AI)">
+             <i class="fas fa-camera text-sm" aria-hidden="true"></i>
            </button>
-           <button (click)="clearChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-1.5 rounded-lg hover:bg-white/10 transition-all" title="Clear Chat">
-             <i class="fas fa-trash-alt text-sm"></i>
+           <button (click)="clearChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-1.5 rounded-lg hover:bg-white/10 transition-all" title="Clear Chat" aria-label="Clear Chat">
+             <i class="fas fa-trash-alt text-sm" aria-hidden="true"></i>
            </button>
-           <button (click)="toggleChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-1.5 rounded-lg hover:bg-white/10 transition-all" title="Close Assistant">
-             <i class="fas fa-times text-base"></i>
+           <button (click)="toggleChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-1.5 rounded-lg hover:bg-white/10 transition-all" title="Close Assistant" aria-label="Close Assistant">
+             <i class="fas fa-times text-base" aria-hidden="true"></i>
            </button>
         </div>
       </div>
@@ -97,9 +97,8 @@ export interface SavedChatSession {
               (click)="isVisionScannerOpen.set(true)"
               [disabled]="isLoading()"
               class="w-8 h-8 flex items-center justify-center text-[var(--muted)] hover:text-[var(--text)] hover:bg-white/10 rounded-lg transition-all"
-              title="Scan Prescription / Lab Report (Vision AI)"
-            >
-              <i class="fas fa-camera text-sm"></i>
+              title="Scan Prescription / Lab Report (Vision AI)" aria-label="Scan Prescription / Lab Report (Vision AI)">
+              <i class="fas fa-camera text-sm" aria-hidden="true"></i>
             </button>
             <button
               type="button"
@@ -108,16 +107,15 @@ export interface SavedChatSession {
               [class.text-red-400]="isListening()"
               [class.animate-pulse]="isListening()"
               class="w-8 h-8 flex items-center justify-center text-[var(--muted)] hover:text-[var(--text)] hover:bg-white/10 rounded-lg transition-all"
-              title="Voice Input"
-            >
-              <i class="fas" [class.fa-microphone]="!isListening()" [class.fa-microphone-slash]="isListening()"></i>
+              title="Voice Input" aria-label="Voice Input">
+              <i class="fas" [class.fa-microphone]="!isListening()" [class.fa-microphone-slash]="isListening()" aria-hidden="true"></i>
             </button>
             <button
               type="submit"
               [disabled]="!userInput.trim() || isLoading() || isListening()"
               class="w-8 h-8 flex items-center justify-center bg-[var(--primary)] hover:bg-indigo-600 disabled:bg-[var(--border)] text-white disabled:text-[var(--muted)] rounded-xl transition-all shadow-md shadow-[var(--primary)]/20"
             >
-              <i class="fas fa-paper-plane text-xs"></i>
+              <i class="fas fa-paper-plane text-xs" aria-hidden="true"></i>
             </button>
           </div>
         </form>
@@ -137,7 +135,7 @@ export interface SavedChatSession {
         <div class="p-3.5 sm:p-4 bg-gradient-to-r from-[var(--primary)] via-indigo-600 to-indigo-700 text-white flex items-center justify-between shrink-0 shadow-md">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shadow-inner">
-              <i class="fas fa-robot text-xl"></i>
+              <i class="fas fa-robot text-xl" aria-hidden="true"></i>
             </div>
             <div>
               <h3 class="font-bold text-sm sm:text-base tracking-wide">{{ isDoctor() ? 'Clinical AI Assistant' : 'CareSync AI Assistant' }}</h3>
@@ -148,18 +146,18 @@ export interface SavedChatSession {
             </div>
           </div>
           <div class="flex items-center gap-2">
-             <button (click)="isVisionScannerOpen.set(true)" class="text-[var(--text)]/80 hover:text-[var(--text)] p-2 rounded-lg hover:bg-white/10 transition-all flex items-center gap-1.5 text-xs font-semibold" title="Scan Prescription / Lab Report (Vision AI)">
-               <i class="fas fa-camera text-sm"></i>
+             <button (click)="isVisionScannerOpen.set(true)" class="text-[var(--text)]/80 hover:text-[var(--text)] p-2 rounded-lg hover:bg-white/10 transition-all flex items-center gap-1.5 text-xs font-semibold" title="Scan Prescription / Lab Report (Vision AI)" aria-label="Scan Prescription / Lab Report (Vision AI)">
+               <i class="fas fa-camera text-sm" aria-hidden="true"></i>
                <span class="hidden sm:inline">Scan Vision</span>
              </button>
-             <button (click)="clearChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-2 rounded-lg hover:bg-white/10 transition-all" title="Clear Chat">
-               <i class="fas fa-trash-alt text-sm"></i>
+             <button (click)="clearChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-2 rounded-lg hover:bg-white/10 transition-all" title="Clear Chat" aria-label="Clear Chat">
+               <i class="fas fa-trash-alt text-sm" aria-hidden="true"></i>
              </button>
-             <button (click)="minimizeChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-2 rounded-lg hover:bg-white/10 transition-all" title="Minimize Window">
-               <i class="fas fa-compress text-sm"></i>
+             <button (click)="minimizeChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-2 rounded-lg hover:bg-white/10 transition-all" title="Minimize Window" aria-label="Minimize Window">
+               <i class="fas fa-compress text-sm" aria-hidden="true"></i>
              </button>
-             <button (click)="toggleChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-2 rounded-lg hover:bg-white/10 transition-all" title="Close Assistant">
-               <i class="fas fa-times text-base"></i>
+             <button (click)="toggleChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-2 rounded-lg hover:bg-white/10 transition-all" title="Close Assistant" aria-label="Close Assistant">
+               <i class="fas fa-times text-base" aria-hidden="true"></i>
              </button>
           </div>
         </div>
@@ -173,9 +171,9 @@ export interface SavedChatSession {
               <!-- New Chat Button -->
               <button 
                 (click)="clearChat()"
-                class="w-full bg-[var(--primary)] hover:bg-indigo-600 active:scale-95 text-white font-bold text-sm py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-[var(--primary)]/25"
+                class="btn-size-lg w-full bg-[var(--primary)] hover:bg-indigo-600 active:scale-95 text-white font-bold text-sm px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-[var(--primary)]/25"
               >
-                <i class="fas fa-plus text-xs"></i>
+                <i class="fas fa-plus text-xs" aria-hidden="true"></i>
                 <span>New Chat</span>
               </button>
 
@@ -183,14 +181,14 @@ export interface SavedChatSession {
               <div class="flex items-center justify-between px-1 mb-1">
                 <span class="text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider">Recent Chats</span>
                 <span class="text-[9px] bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)] px-1.5 py-0.5 rounded-md font-semibold flex items-center gap-1" title="Cloud chat backup will be available in future updates">
-                  <i class="fa-solid fa-cloud-arrow-up text-[9px]"></i> Cloud Sync Soon
+                  <i class="fa-solid fa-cloud-arrow-up text-[9px]" aria-hidden="true"></i> Cloud Sync Soon
                 </span>
               </div>
 
               <!-- Recent Chats List -->
               <div class="space-y-1.5 overflow-y-auto max-h-[calc(88vh-260px)] no-scrollbar pr-1">
                 <div *ngIf="recentChats().length === 0" class="p-3 text-center bg-[var(--bg)]/50 border border-dashed border-[var(--border)] rounded-xl">
-                  <i class="fa-regular fa-comments text-lg text-[var(--muted)] mb-1"></i>
+                  <i class="fa-regular fa-comments text-lg text-[var(--muted)] mb-1" aria-hidden="true"></i>
                   <p class="text-[11px] text-[var(--muted)]">No past local chats yet.</p>
                   <span class="text-[9px] text-gray-500">Your conversations will be saved here automatically.</span>
                 </div>
@@ -202,7 +200,7 @@ export interface SavedChatSession {
                   [ngClass]="activeSessionId === chat.id ? 'bg-[var(--bg)] border-[var(--primary)]/60 shadow-md' : 'bg-transparent border-transparent hover:bg-[var(--bg)]/60 hover:border-[var(--border)]'"
                 >
                   <div class="flex items-center gap-3 min-w-0">
-                    <i class="fa-regular fa-comments text-xs" [ngClass]="activeSessionId === chat.id ? 'text-[var(--primary)]' : 'text-[var(--muted)]'"></i>
+                    <i class="fa-regular fa-comments text-xs" [ngClass]="activeSessionId === chat.id ? 'text-[var(--primary)]' : 'text-[var(--muted)]'" aria-hidden="true"></i>
                     <div class="min-w-0">
                       <h5 class="text-xs font-bold truncate" [ngClass]="activeSessionId === chat.id ? 'text-[var(--text)]' : 'text-[var(--muted)] group-hover:text-[var(--text)]'">{{ chat.title }}</h5>
                       <span class="text-[10px] text-[var(--muted)] opacity-80 truncate block">{{ chat.time }}</span>
@@ -211,9 +209,8 @@ export interface SavedChatSession {
                   <button 
                     (click)="deleteRecentChat(chat.id, $event)" 
                     class="text-[var(--muted)] hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity" 
-                    title="Delete Chat Session"
-                  >
-                    <i class="fa-solid fa-trash-can text-xs"></i>
+                    title="Delete Chat Session" aria-label="Delete Chat Session">
+                    <i class="fa-solid fa-trash-can text-xs" aria-hidden="true"></i>
                   </button>
                 </div>
               </div>
@@ -221,8 +218,8 @@ export interface SavedChatSession {
 
             <!-- Tip Card at Bottom of Sidebar -->
             <div class="p-3.5 bg-[var(--bg)] border border-[var(--border)] rounded-2xl">
-              <div class="flex items-center gap-1.5 text-amber-400 font-bold text-xs mb-1">
-                <i class="fa-regular fa-lightbulb"></i>
+              <div class="flex items-center gap-1.5 text-amber-700 dark:text-amber-400 font-bold text-xs mb-1">
+                <i class="fa-regular fa-lightbulb" aria-hidden="true"></i>
                 <span>Tip</span>
               </div>
               <p class="text-[11px] text-[var(--muted)] leading-relaxed">
@@ -244,8 +241,8 @@ export interface SavedChatSession {
                   <!-- Symptoms -->
                   <div (click)="askTopic('What symptoms should I get checked by a doctor?')" 
                        class="p-3.5 bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--primary)]/50 rounded-2xl cursor-pointer transition-all flex items-center gap-3 group">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg group-hover:scale-110 transition-transform shrink-0">
-                      <i class="fa-solid fa-stethoscope"></i>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-lg group-hover:scale-110 transition-transform shrink-0">
+                      <i class="fa-solid fa-stethoscope" aria-hidden="true"></i>
                     </div>
                     <div class="min-w-0">
                       <h5 class="text-xs font-bold text-[var(--text)] group-hover:text-[var(--primary)] transition-colors">Symptoms</h5>
@@ -256,8 +253,8 @@ export interface SavedChatSession {
                   <!-- Lab Tests -->
                   <div (click)="askTopic('How do I view or book lab tests?')" 
                        class="p-3.5 bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--primary)]/50 rounded-2xl cursor-pointer transition-all flex items-center gap-3 group">
-                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center text-lg group-hover:scale-110 transition-transform shrink-0">
-                      <i class="fa-solid fa-flask"></i>
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-400 flex items-center justify-center text-lg group-hover:scale-110 transition-transform shrink-0">
+                      <i class="fa-solid fa-flask" aria-hidden="true"></i>
                     </div>
                     <div class="min-w-0">
                       <h5 class="text-xs font-bold text-[var(--text)] group-hover:text-[var(--primary)] transition-colors">Lab Tests</h5>
@@ -268,8 +265,8 @@ export interface SavedChatSession {
                   <!-- Medications -->
                   <div (click)="askTopic('Can you explain medication usage and side effects?')" 
                        class="p-3.5 bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--primary)]/50 rounded-2xl cursor-pointer transition-all flex items-center gap-3 group">
-                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-lg group-hover:scale-110 transition-transform shrink-0">
-                      <i class="fa-solid fa-pills"></i>
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center text-lg group-hover:scale-110 transition-transform shrink-0">
+                      <i class="fa-solid fa-pills" aria-hidden="true"></i>
                     </div>
                     <div class="min-w-0">
                       <h5 class="text-xs font-bold text-[var(--text)] group-hover:text-[var(--primary)] transition-colors">Medications</h5>
@@ -280,8 +277,8 @@ export interface SavedChatSession {
                   <!-- Health Records -->
                   <div (click)="askTopic('How can I view my past medical records?')" 
                        class="p-3.5 bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--primary)]/50 rounded-2xl cursor-pointer transition-all flex items-center gap-3 group">
-                    <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center text-lg group-hover:scale-110 transition-transform shrink-0">
-                      <i class="fa-solid fa-file-medical"></i>
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-700 dark:text-purple-400 flex items-center justify-center text-lg group-hover:scale-110 transition-transform shrink-0">
+                      <i class="fa-solid fa-file-medical" aria-hidden="true"></i>
                     </div>
                     <div class="min-w-0">
                       <h5 class="text-xs font-bold text-[var(--text)] group-hover:text-[var(--primary)] transition-colors">Health Records</h5>
@@ -292,8 +289,8 @@ export interface SavedChatSession {
                   <!-- Doctor Suggestions -->
                   <div (click)="startBooking()" 
                        class="p-3.5 bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--primary)]/50 rounded-2xl cursor-pointer transition-all flex items-center gap-3 group">
-                    <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-lg group-hover:scale-110 transition-transform shrink-0">
-                      <i class="fa-solid fa-user-doctor"></i>
+                    <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-400 flex items-center justify-center text-lg group-hover:scale-110 transition-transform shrink-0">
+                      <i class="fa-solid fa-user-doctor" aria-hidden="true"></i>
                     </div>
                     <div class="min-w-0">
                       <h5 class="text-xs font-bold text-[var(--text)] group-hover:text-[var(--primary)] transition-colors">Doctor Suggestions</h5>
@@ -304,8 +301,8 @@ export interface SavedChatSession {
                   <!-- Lifestyle Advice -->
                   <div (click)="askTopic('Give me general tips for healthy living and wellness.')" 
                        class="p-3.5 bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--primary)]/50 rounded-2xl cursor-pointer transition-all flex items-center gap-3 group">
-                    <div class="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center text-lg group-hover:scale-110 transition-transform shrink-0">
-                      <i class="fa-solid fa-heart-pulse"></i>
+                    <div class="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-400 flex items-center justify-center text-lg group-hover:scale-110 transition-transform shrink-0">
+                      <i class="fa-solid fa-heart-pulse" aria-hidden="true"></i>
                     </div>
                     <div class="min-w-0">
                       <h5 class="text-xs font-bold text-[var(--text)] group-hover:text-[var(--primary)] transition-colors">Lifestyle Advice</h5>
@@ -338,9 +335,8 @@ export interface SavedChatSession {
                     (click)="isVisionScannerOpen.set(true)"
                     [disabled]="isLoading()"
                     class="w-9 h-9 flex items-center justify-center text-[var(--muted)] hover:text-[var(--text)] hover:bg-white/10 rounded-xl transition-all"
-                    title="Scan Prescription / Lab Report (Vision AI)"
-                  >
-                    <i class="fas fa-camera text-sm"></i>
+                    title="Scan Prescription / Lab Report (Vision AI)" aria-label="Scan Prescription / Lab Report (Vision AI)">
+                    <i class="fas fa-camera text-sm" aria-hidden="true"></i>
                   </button>
                   <button
                     type="button"
@@ -349,16 +345,15 @@ export interface SavedChatSession {
                     [class.text-red-400]="isListening()"
                     [class.animate-pulse]="isListening()"
                     class="w-9 h-9 flex items-center justify-center text-[var(--muted)] hover:text-[var(--text)] hover:bg-white/10 rounded-xl transition-all"
-                    title="Voice Input"
-                  >
-                    <i class="fas" [class.fa-microphone]="!isListening()" [class.fa-microphone-slash]="isListening()"></i>
+                    title="Voice Input" aria-label="Voice Input">
+                    <i class="fas" [class.fa-microphone]="!isListening()" [class.fa-microphone-slash]="isListening()" aria-hidden="true"></i>
                   </button>
                   <button
                     type="submit"
                     [disabled]="!userInput.trim() || isLoading() || isListening()"
                     class="w-9 h-9 flex items-center justify-center bg-[var(--primary)] hover:bg-indigo-600 disabled:bg-[var(--border)] text-white disabled:text-[var(--muted)] rounded-xl transition-all shadow-md shadow-[var(--primary)]/20"
                   >
-                    <i class="fas fa-paper-plane text-xs"></i>
+                    <i class="fas fa-paper-plane text-xs" aria-hidden="true"></i>
                   </button>
                 </div>
               </form>
@@ -375,7 +370,7 @@ export interface SavedChatSession {
       <!-- Welcome Message -->
       <div class="flex gap-2.5 max-w-[92%]">
         <div class="w-9 h-9 rounded-full bg-[var(--primary)]/20 border border-[var(--primary)]/40 flex items-center justify-center shrink-0">
-          <i class="fas fa-robot text-xs text-[var(--primary)]"></i>
+          <i class="fas fa-robot text-xs text-[var(--primary)]" aria-hidden="true"></i>
         </div>
         <div class="bg-[var(--panel)] p-3.5 rounded-2xl rounded-tl-none shadow-md border border-[var(--border)] text-[var(--text)]">
           <p class="text-sm" *ngIf="!isDoctor()">Hello! I'm your CareSync Assistant. How can I help you with your health today?</p>
@@ -386,26 +381,26 @@ export interface SavedChatSession {
             <button 
               *ngIf="!isDoctor()"
               (click)="startBooking()"
-              class="flex items-center gap-2 px-3.5 py-2 bg-[var(--primary)] hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-all transform active:scale-95 shadow-md shadow-[var(--primary)]/20"
+              class="btn-size-lg flex items-center gap-2 px-3.5 bg-[var(--primary)] hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-all transform active:scale-95 shadow-md shadow-[var(--primary)]/20"
             >
-              <i class="fas fa-calendar-plus"></i>
+              <i class="fas fa-calendar-plus" aria-hidden="true"></i>
               Book Appointment
             </button>
 
             <button 
               (click)="isVisionScannerOpen.set(true)"
-              class="flex items-center gap-2 px-3.5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition-all transform active:scale-95 shadow-md shadow-purple-500/20"
+              class="btn-size-lg flex items-center gap-2 px-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition-all transform active:scale-95 shadow-md shadow-purple-500/20"
             >
-              <i class="fas fa-camera"></i>
+              <i class="fas fa-camera" aria-hidden="true"></i>
               Scan Prescription
             </button>
 
             <button 
               *ngIf="isDoctor()"
               (click)="isClinicalDictationOpen.set(true)"
-              class="flex items-center gap-2 px-3.5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition-all transform active:scale-95 shadow-md shadow-blue-500/20"
+              class="btn-size-lg flex items-center gap-2 px-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition-all transform active:scale-95 shadow-md shadow-blue-500/20"
             >
-              <i class="fas fa-microphone-alt"></i>
+              <i class="fas fa-microphone-alt" aria-hidden="true"></i>
               Voice Dictation (SOAP)
             </button>
           </div>
@@ -417,7 +412,7 @@ export interface SavedChatSession {
         <div class="flex gap-2.5" [ngClass]="msg.isAi ? '' : 'flex-row-reverse text-right'">
           <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-md" 
                [ngClass]="msg.isAi ? 'bg-[var(--primary)]/20 border border-[var(--primary)]/40' : 'bg-[var(--primary)]'">
-            <i class="fas" [ngClass]="msg.isAi ? 'fa-robot text-xs text-[var(--primary)]' : 'fa-user text-xs text-[var(--text)]'"></i>
+            <i class="fas" [ngClass]="msg.isAi ? 'fa-robot text-xs text-[var(--primary)]' : 'fa-user text-xs text-[var(--text)]'" aria-hidden="true"></i>
           </div>
           <div class="p-3.5 rounded-2xl shadow-md border" 
                [ngClass]="msg.isAi ? 'bg-[var(--panel)] text-[var(--text)] rounded-tl-none border-[var(--border)]' : 'bg-[var(--primary)] text-white rounded-tr-none border-[var(--primary)]'">
@@ -434,7 +429,7 @@ export interface SavedChatSession {
            <div *ngIf="msg.suggestion.type === 'SPECIALIZATIONS'" class="flex flex-wrap gap-2 py-1">
               <button *ngFor="let spec of msg.suggestion.specializations" 
                       (click)="selectSpecialization(spec, msg.suggestion.reason)"
-                      class="px-3 py-1.5 bg-[var(--panel)] border border-[var(--border)] text-[var(--text)] rounded-lg text-[11px] font-semibold hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all shadow-sm">
+                      class="btn-size-sm px-3 bg-[var(--panel)] border border-[var(--border)] text-[var(--text)] rounded-lg text-[11px] font-semibold hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all shadow-sm inline-flex items-center justify-center">
                  {{ spec }}
               </button>
            </div>
@@ -448,13 +443,13 @@ export interface SavedChatSession {
                    <div class="flex items-start gap-3 mb-3">
                       <div class="w-12 h-12 rounded-full bg-[var(--bg)] flex items-center justify-center overflow-hidden shrink-0 border border-[var(--border)]">
                          <img *ngIf="doc.profileImageUrl" [src]="doc.profileImageUrl" class="w-full h-full object-cover">
-                         <i *ngIf="!doc.profileImageUrl" class="fas fa-user-md text-xl text-[var(--primary)]"></i>
+                         <i *ngIf="!doc.profileImageUrl" class="fas fa-user-md text-xl text-[var(--primary)]" aria-hidden="true"></i>
                       </div>
                        <div class="overflow-hidden">
                           <div class="text-[12px] font-bold truncate flex items-center gap-1.5 text-[var(--text)]">
                              {{ doc.name }}
-                             <i *ngIf="doc.isVerified" class="fa-solid fa-circle-check text-[var(--primary)] text-[10px]" title="Verified"></i>
-                             <span *ngIf="doc['isOnLeave']" class="px-1.5 py-0.5 bg-red-900/40 text-red-400 text-[8px] font-black uppercase rounded-md border border-red-800 shrink-0">Away</span>
+                             <i *ngIf="doc.isVerified" class="fa-solid fa-circle-check text-[var(--primary)] text-[10px]" title="Verified" aria-hidden="true"></i>
+                             <span *ngIf="doc['isOnLeave']" class="px-1.5 py-0.5 bg-red-900/40 text-red-700 dark:text-red-400 text-[8px] font-black uppercase rounded-md border border-red-800 shrink-0">Away</span>
                           </div>
                           <div class="text-[10px] text-[var(--primary)] font-medium truncate">{{ doc.specialization }}</div>
                        </div>
@@ -462,29 +457,29 @@ export interface SavedChatSession {
                    
                    <div class="space-y-1.5 mb-3">
                       <div class="flex items-center gap-1.5 text-[10px] text-[var(--muted)]">
-                         <i class="fas fa-star text-amber-400"></i>
+                         <i class="fas fa-star text-amber-700 dark:text-amber-400" aria-hidden="true"></i>
                          <span>{{ doc.experience }} Years Experience</span>
                       </div>
                       <div class="flex items-center gap-1.5 text-[10px] text-[var(--muted)]">
-                         <i class="fas fa-language text-indigo-400"></i>
+                         <i class="fas fa-language text-indigo-700 dark:text-indigo-400" aria-hidden="true"></i>
                          <span class="truncate">{{ doctorLanguages(doc.languages) }}</span>
                       </div>
                    </div>
 
                    <div class="flex items-center justify-between pt-2 border-t border-[var(--border)]">
                       <span class="text-[10px] text-[var(--muted)]">Consultation Fee</span>
-                      <span class="text-[12px] font-bold text-emerald-400">₹{{ doc.consultationFee }}</span>
+                      <span class="text-[12px] font-bold text-emerald-700 dark:text-emerald-400">₹{{ doc.consultationFee }}</span>
                    </div>
                    <div *ngIf="doc.recommendedDate && doc.recommendedSlot"
                         class="mt-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 p-2 text-[10px] text-emerald-700 dark:text-emerald-300">
-                      <i class="fa-solid fa-calendar-check mr-1"></i>
+                      <i class="fa-solid fa-calendar-check mr-1" aria-hidden="true"></i>
                       Earliest: {{ doc.recommendedDate | date:'mediumDate' }} at {{ doc.recommendedSlot }}
                    </div>
                 </div>
              </div>
              
              <button (click)="startBooking()" class="text-xs text-[var(--primary)] hover:text-indigo-300 hover:underline flex items-center gap-1 pl-1">
-                <i class="fas fa-arrow-left"></i> Change Specialization
+                <i class="fas fa-arrow-left" aria-hidden="true"></i> Change Specialization
              </button>
            </div>
 
@@ -492,8 +487,8 @@ export interface SavedChatSession {
            <div *ngIf="msg.suggestion.type === 'DATES'" class="bg-[var(--panel)] border border-[var(--border)] p-4 rounded-xl shadow-md">
               <div class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest mb-3">Select Appointment Date</div>
               <div class="flex flex-wrap gap-2 mb-3">
-                  <button (click)="selectRelativeDate(msg.suggestion.doctorId!, 0, msg.suggestion.reason)" class="px-4 py-2 bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)] rounded-lg text-xs font-bold hover:bg-[var(--primary)] hover:text-white transition-all">Today</button>
-                 <button (click)="selectRelativeDate(msg.suggestion.doctorId!, 1, msg.suggestion.reason)" class="px-4 py-2 bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)] rounded-lg text-xs font-bold hover:bg-[var(--primary)] hover:text-white transition-all">Tomorrow</button>
+                  <button (click)="selectRelativeDate(msg.suggestion.doctorId!, 0, msg.suggestion.reason)" class="btn-size-md px-4 bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)] rounded-lg text-xs font-bold hover:bg-[var(--primary)] hover:text-white transition-all inline-flex items-center justify-center">Today</button>
+                 <button (click)="selectRelativeDate(msg.suggestion.doctorId!, 1, msg.suggestion.reason)" class="btn-size-md px-4 bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)] rounded-lg text-xs font-bold hover:bg-[var(--primary)] hover:text-white transition-all inline-flex items-center justify-center">Tomorrow</button>
                  
                  <div class="mt-2 text-[var(--text)]">
                     <app-date-picker
@@ -506,7 +501,7 @@ export interface SavedChatSession {
                  </div>
               </div>
               <button (click)="selectSpecialization(msg.suggestion.specialization!, msg.suggestion.reason)" class="text-xs text-[var(--primary)] hover:text-indigo-300 hover:underline flex items-center gap-1 pl-1">
-                <i class="fas fa-arrow-left"></i> Change Doctor
+                <i class="fas fa-arrow-left" aria-hidden="true"></i> Change Doctor
              </button>
            </div>
 
@@ -519,12 +514,12 @@ export interface SavedChatSession {
               <div class="grid grid-cols-3 gap-2 mb-3">
                  <button *ngFor="let slot of msg.suggestion.slots" 
                          (click)="selectFinalSlot(msg.suggestion.doctorId!, msg.suggestion.date!, slot, msg.suggestion.reason)"
-                         class="py-2 px-2 bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] rounded-lg text-[10px] font-bold hover:bg-[var(--primary)] hover:text-white hover:border-[var(--primary)] transition-all">
+                         class="btn-size-sm px-2 bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] rounded-lg text-[10px] font-bold hover:bg-[var(--primary)] hover:text-white hover:border-[var(--primary)] transition-all inline-flex items-center justify-center">
                     {{ slot }}
                  </button>
               </div>
               <button (click)="selectDoctor(msg.suggestion.doctorId!, msg.suggestion.reason)" class="text-xs text-[var(--primary)] hover:text-indigo-300 hover:underline flex items-center gap-1 pl-1">
-                <i class="fas fa-arrow-left"></i> Change Date
+                <i class="fas fa-arrow-left" aria-hidden="true"></i> Change Date
              </button>
            </div>
 
@@ -541,21 +536,21 @@ export interface SavedChatSession {
                     <div *ngIf="msg.suggestion.reason?.startsWith('RESCHEDULE')" class="p-2 bg-white/10 rounded-lg mb-3 border border-white/20">
                        <div class="text-[9px] uppercase tracking-tighter opacity-70 mb-1">Rescheduling from</div>
                        <div class="text-[11px] font-medium flex items-center gap-2">
-                         <i class="fas fa-history opacity-50"></i>
+                         <i class="fas fa-history opacity-50" aria-hidden="true"></i>
                          {{ msg.suggestion.originalDate | date:'mediumDate' }} at {{ msg.suggestion.originalSlot }}
                        </div>
                     </div>
 
                     <div class="flex items-center gap-3 text-xs">
-                       <i class="fas fa-calendar-day opacity-70"></i>
+                       <i class="fas fa-calendar-day opacity-70" aria-hidden="true"></i>
                        <span>{{ msg.suggestion.date | date:'fullDate' }}</span>
                     </div>
                     <div class="flex items-center gap-3 text-xs">
-                       <i class="fas fa-clock opacity-70"></i>
+                       <i class="fas fa-clock opacity-70" aria-hidden="true"></i>
                        <span>{{ msg.suggestion.slot }}</span>
                     </div>
                     <div *ngIf="!msg.suggestion.reason?.startsWith('RESCHEDULE')" class="flex items-center gap-3 text-xs">
-                       <i class="fas fa-wallet opacity-70"></i>
+                       <i class="fas fa-wallet opacity-70" aria-hidden="true"></i>
                        <span class="font-bold">₹{{ msg.suggestion.consultationFee }}</span>
                     </div>
                     
@@ -572,15 +567,15 @@ export interface SavedChatSession {
                    (click)="openPaymentPopup(msg.suggestion)"
                    class="w-full py-3 bg-white text-indigo-700 rounded-xl text-xs font-bold shadow-xl hover:bg-blue-50 transition-all active:scale-95 flex items-center justify-center gap-2 mb-3"
                  >
-                   <i class="fas fa-check-circle"></i>
+                   <i class="fas fa-check-circle" aria-hidden="true"></i>
                    {{ msg.suggestion.reason?.startsWith('RESCHEDULE') ? 'Confirm Reschedule' : 'Confirm & Pay Now' }}
                  </button>
                  
                  <button (click)="onDateSelected(msg.suggestion.doctorId!, msg.suggestion.date!, msg.suggestion.reason)" class="w-full text-xs text-[var(--text)]/70 hover:text-[var(--text)] flex items-center justify-center gap-1">
-                    <i class="fas fa-arrow-left"></i> Change Slot
+                    <i class="fas fa-arrow-left" aria-hidden="true"></i> Change Slot
                  </button>
               </div>
-              <i class="fas fa-calendar-check absolute -bottom-4 -right-4 text-8xl opacity-10 rotate-12"></i>
+              <i class="fas fa-calendar-check absolute -bottom-4 -right-4 text-8xl opacity-10 rotate-12" aria-hidden="true"></i>
            </div>
 
            <!-- MY APPOINTMENTS -->
@@ -594,16 +589,16 @@ export interface SavedChatSession {
                     </div>
                     <span class="px-2 py-0.5 rounded-full text-[8px] font-bold uppercase"
                           [ngClass]="{
-                             'bg-emerald-900/40 text-emerald-400': appt.status === 'CONFIRMED',
-                             'bg-yellow-900/40 text-yellow-400': appt.status === 'PENDING',
-                             'bg-red-900/40 text-red-400': appt.status === 'CANCELLED'
+                             'bg-emerald-900/40 text-emerald-700 dark:text-emerald-400': appt.status === 'CONFIRMED',
+                             'bg-yellow-900/40 text-yellow-700 dark:text-yellow-400': appt.status === 'PENDING',
+                             'bg-red-900/40 text-red-700 dark:text-red-400': appt.status === 'CANCELLED'
                           }">
                        {{ appt.status }}
                     </span>
                  </div>
                  <div class="flex gap-2">
                     <button (click)="cancelAppointment(appt.id)" 
-                            class="flex-1 py-2 bg-red-900/30 text-red-400 border border-red-800 rounded-lg text-[10px] font-bold hover:bg-red-600 hover:text-[var(--text)] transition-all">
+                            class="flex-1 py-2 bg-red-900/30 text-red-700 dark:text-red-400 border border-red-800 rounded-lg text-[10px] font-bold hover:bg-red-600 hover:text-[var(--text)] transition-all">
                        Cancel
                     </button>
                     <button (click)="rescheduleAppointment(appt.id)" 
@@ -620,7 +615,7 @@ export interface SavedChatSession {
       <!-- Loading State -->
       <div *ngIf="isLoading()" class="flex gap-2 max-w-[85%]">
         <div class="w-8 h-8 rounded-full bg-[var(--primary)]/20 border border-[var(--primary)]/40 flex items-center justify-center shrink-0">
-          <i class="fas fa-robot text-xs text-[var(--primary)]"></i>
+          <i class="fas fa-robot text-xs text-[var(--primary)]" aria-hidden="true"></i>
         </div>
         <div class="bg-[var(--panel)] p-3 rounded-2xl rounded-tl-none shadow-sm border border-[var(--border)] flex items-center gap-1.5">
           <span class="w-1.5 h-1.5 rounded-full bg-[var(--primary)] animate-bounce"></span>
@@ -747,10 +742,18 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
     };
   }
 
+  /** Chat history is stored per user so accounts sharing a device never see each other's chats. */
+  private get sessionsStorageKey(): string {
+    const id = this.authService.user()?.id ?? this.authService.userId() ?? 'anonymous';
+    return `caresync_ai_sessions_${id}`;
+  }
+
   private loadRecentChatsFromStorage() {
     if (typeof localStorage === 'undefined') return;
     try {
-      const raw = localStorage.getItem('caresync_ai_sessions');
+      // Legacy shared key (not attributable to a user): remove it
+      localStorage.removeItem('caresync_ai_sessions');
+      const raw = localStorage.getItem(this.sessionsStorageKey);
       if (raw) {
         const parsed = JSON.parse(raw);
         this.recentChats.set(parsed);
@@ -761,7 +764,7 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
   private persistRecentChats() {
     if (typeof localStorage === 'undefined') return;
     try {
-      localStorage.setItem('caresync_ai_sessions', JSON.stringify(this.recentChats()));
+      localStorage.setItem(this.sessionsStorageKey, JSON.stringify(this.recentChats()));
     } catch (e) { }
   }
 
@@ -1089,7 +1092,7 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
 
     formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-[var(--text)]">$1</strong>');
     formatted = formatted.replace(/^### (.*$)/gim, '<h3 class="text-xs font-bold text-[var(--primary)] mt-2 mb-1 flex items-center gap-1.5"><i class="fas fa-notes-medical"></i> $1</h3>');
-    formatted = formatted.replace(/^## (.*$)/gim, '<h2 class="text-sm font-bold text-indigo-300 mt-3 mb-1 border-b border-[var(--border)] pb-1 flex items-center gap-1.5"><i class="fas fa-file-medical-alt"></i> $1</h2>');
+    formatted = formatted.replace(/^## (.*$)/gim, '<h2 class="text-sm font-bold text-indigo-600 dark:text-indigo-300 mt-3 mb-1 border-b border-[var(--border)] pb-1 flex items-center gap-1.5"><i class="fas fa-file-medical-alt"></i> $1</h2>');
     formatted = formatted.replace(/^[ \t]*[\*\-] (.*$)/gim, '<li class="ml-2 mb-1 flex items-start gap-1.5"><span class="text-[var(--primary)] font-bold mt-0.5">•</span><span>$1</span></li>');
     formatted = formatted.replace(/(<li[\s\S]*?<\/li>)+/g, '<ul class="my-2 space-y-1 bg-[var(--bg)] p-2.5 rounded-xl border border-[var(--border)]">$&</ul>');
     formatted = formatted.replace(/\n{2,}/g, '<div class="my-1.5"></div>');

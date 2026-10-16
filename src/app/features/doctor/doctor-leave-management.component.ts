@@ -1,7 +1,6 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DoctorLayoutComponent } from '../../shared/doctor-layout.component';
 import { LeaveService, DoctorLeave } from '../../core/services/leave.service';
 import { ToastService } from '../../core/services/toast.service';
 import { ConfirmService } from '../../core/services/confirm.service';
@@ -9,11 +8,15 @@ import { DatePickerComponent } from '../../shared/date-picker.component';
 import { SelectDropdownComponent, SelectOption } from '../../shared/select-dropdown.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
+import { PageContainerComponent } from '../../shared/ui/page-container.component';
+import { StatCardComponent } from '../../shared/ui/stat-card.component';
+import { toLocalDateKey } from '../../shared/utils/format.util';
 
 @Component({
   selector: 'app-doctor-leave-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, DoctorLayoutComponent, DatePickerComponent, SelectDropdownComponent, EmptyStateComponent, PageLoaderComponent],
+  imports: [StatCardComponent, PageContainerComponent, CommonModule, FormsModule, DatePickerComponent, SelectDropdownComponent, EmptyStateComponent, PageLoaderComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './doctor-leave-management.component.html',
   styleUrl: './doctor-leave-management.component.css'
 })
@@ -21,12 +24,13 @@ export class DoctorLeaveManagementComponent implements OnInit {
   private leaveService = inject(LeaveService);
   private toast = inject(ToastService);
   private confirm = inject(ConfirmService);
+  private cdr = inject(ChangeDetectorRef);
 
   leaves: DoctorLeave[] = [];
   loading = true;
   submitting = false;
   deletingId: number | null = null;
-  minDate = new Date().toISOString().split('T')[0];
+  minDate = toLocalDateKey();
 
   form = {
     startDate: '',
@@ -58,19 +62,65 @@ export class DoctorLeaveManagementComponent implements OnInit {
         const past = this.leaves.filter(l => new Date(l.startDate).getTime() < now).sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
         this.leaves = [...upcoming, ...past];
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.loading = false;
         this.toast.showError('Failed to load leave history');
+        this.cdr.markForCheck();
       }
     });
   }
 
   isFormValid() {
-    return this.form.startDate && this.form.endDate && this.form.reason;
+    return ['startDate', 'endDate', 'range', 'leaveType', 'reason'].every((k) => !this.validateField(k));
+  }
+
+  // ================= Inline validation =================
+  private touched = new Set<string>();
+  submitAttempted = false;
+
+  markTouched(key: string) {
+    this.touched.add(key);
+  }
+
+  /** Message for a field, shown once it was touched or Apply was pressed. */
+  fieldError(key: string): string {
+    const relevant = key === 'range' ? (this.touched.has('startDate') && this.touched.has('endDate')) : this.touched.has(key);
+    if (!this.submitAttempted && !relevant) return '';
+    return this.validateField(key);
+  }
+
+  private validateField(key: string): string {
+    const { startDate, endDate, leaveType, reason } = this.form;
+    const today = toLocalDateKey();
+    switch (key) {
+      case 'startDate':
+        if (!startDate) return 'Choose a start date.';
+        return startDate < today ? "Start date can't be in the past." : '';
+      case 'endDate':
+        if (!endDate) return 'Choose an end date.';
+        return startDate && endDate < startDate ? "End date can't be before the start date." : '';
+      case 'range': {
+        if (!startDate || !endDate || endDate < startDate) return '';
+        const clash = this.leaves.find((l) => this.isUpcoming(l) && l.startDate <= endDate && l.endDate >= startDate);
+        return clash ? `These dates overlap an existing leave (${clash.startDate} to ${clash.endDate}).` : '';
+      }
+      case 'leaveType':
+        return leaveType ? '' : 'Choose a leave type.';
+      case 'reason': {
+        const text = (reason || '').trim();
+        if (!text) return 'Add a reason for the leave.';
+        return text.length > 300 ? 'Keep the reason under 300 characters.' : '';
+      }
+      default:
+        return '';
+    }
   }
 
   clearForm() {
+    this.touched.clear();
+    this.submitAttempted = false;
     this.form = {
       startDate: '',
       endDate: '',
@@ -80,10 +130,9 @@ export class DoctorLeaveManagementComponent implements OnInit {
   }
 
   applyLeave() {
-    if (!this.isFormValid()) return;
-
-    if (this.form.endDate < this.form.startDate) {
-      this.toast.showError('End date cannot be before start date');
+    this.submitAttempted = true;
+    if (!this.isFormValid()) {
+      this.cdr.markForCheck();
       return;
     }
 
@@ -97,11 +146,13 @@ export class DoctorLeaveManagementComponent implements OnInit {
         this.submitting = false;
         this.clearForm();
         this.refresh();
+        this.cdr.markForCheck();
       },
       error: (e) => {
         this.submitting = false;
         const msg = typeof e?.error?.error === 'string' ? e.error.error : 'Failed to apply leave';
         this.toast.showError(msg);
+        this.cdr.markForCheck();
       }
     });
   }
@@ -118,15 +169,18 @@ export class DoctorLeaveManagementComponent implements OnInit {
     if (!ok) return;
 
     this.deletingId = leave.id;
+    this.cdr.markForCheck();
     this.leaveService.deleteLeave(leave.id).subscribe({
       next: () => {
         this.toast.showSuccess('Leave cancelled successfully');
         this.deletingId = null;
         this.refresh();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.toast.showError('Failed to cancel leave');
         this.deletingId = null;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -169,34 +223,22 @@ export class DoctorLeaveManagementComponent implements OnInit {
     return this.leaves.length;
   }
 
-  getApprovedCount(): number {
-    const now = new Date().setHours(0, 0, 0, 0);
-    return this.leaves.filter(l => new Date(l.startDate).getTime() < now).length;
+  getUpcomingCount(): number {
+    return this.leaves.filter((l) => this.isUpcoming(l)).length;
   }
 
-  getApprovedPercentage(): number {
+  getUpcomingPercentage(): number {
     const total = this.getTotalLeavesCount();
-    if (total === 0) return 0;
-    return Math.round((this.getApprovedCount() / total) * 100);
+    return total === 0 ? 0 : Math.round((this.getUpcomingCount() / total) * 100);
   }
 
-  getPendingCount(): number {
-    const now = new Date().setHours(0, 0, 0, 0);
-    return this.leaves.filter(l => new Date(l.startDate).getTime() >= now).length;
+  getPastCount(): number {
+    return this.getTotalLeavesCount() - this.getUpcomingCount();
   }
 
-  getPendingPercentage(): number {
+  getPastPercentage(): number {
     const total = this.getTotalLeavesCount();
-    if (total === 0) return 0;
-    return Math.round((this.getPendingCount() / total) * 100);
-  }
-
-  getRejectedCount(): number {
-    return 0; // standard backend doesn't store rejected, set to 0 or derived
-  }
-
-  getRejectedPercentage(): number {
-    return 0;
+    return total === 0 ? 0 : Math.round((this.getPastCount() / total) * 100);
   }
 
   trackByLeaveId(_index: number, leave: DoctorLeave): number | undefined {

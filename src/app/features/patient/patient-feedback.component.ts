@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -6,19 +6,23 @@ import { FeedbackService, CreateFeedbackRequest, PatientFeedbackItem } from '../
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { PatientAppointmentItem } from '../../core/services/appointment.service';
-import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 import { DoctorService, Doctor } from '../../core/services/doctor.service';
+import { PageContainerComponent } from '../../shared/ui/page-container.component';
+import { memoByDeps } from '../../shared/utils/memo';
 
 @Component({
   selector: 'app-patient-feedback',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, PatientLayoutComponent, ModalShellComponent, PageLoaderComponent],
+  imports: [PageContainerComponent, CommonModule, FormsModule, RouterModule, ModalShellComponent, PageLoaderComponent],
+  // OnPush: every async callback that changes view state calls markForCheck
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './patient-feedback.component.html',
   styleUrl: './patient-feedback.component.css'
 })
 export class PatientFeedbackComponent {
+  private cdr = inject(ChangeDetectorRef);
   loading = false;
   items: PatientAppointmentItem[] = [];
   selectedAppointmentId: number | null = null;
@@ -46,7 +50,7 @@ export class PatientFeedbackComponent {
     private doctorApi: DoctorService
   ) {
     // Preload doctors so we can resolve names from ids in feedback
-    this.doctorApi.getAllForPatients(0, 50).subscribe({
+    this.doctorApi.getDirectory().subscribe({
       next: (res) => {
         this.doctors = res || [];
         this.doctorNameById = {};
@@ -59,18 +63,16 @@ export class PatientFeedbackComponent {
         });
         this.load();
         this.loadGiven();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.doctors = [];
         this.doctorNameById = {};
         this.load();
         this.loadGiven();
+        this.cdr.markForCheck();
       },
     });
-  }
-
-  goBack() {
-    this.router.navigate(['/patient/dashboard']);
   }
 
   load() {
@@ -100,12 +102,25 @@ export class PatientFeedbackComponent {
           this.selectedAppointmentId = list[0].appointmentId;
         }
         this.loading = false;
+        this.cdr.markForCheck();
       },
-      error: () => (this.loading = false),
+      error: () => {
+        this.loading = false;
+        this.cdr.markForCheck();
+      },
     });
   }
 
+  private readonly _activeAppointment = memoByDeps<PatientAppointmentItem | null>(
+    () => this.computeActiveAppointment(),
+    () => [this.items, this.selectedAppointmentId],
+  );
+
   get activeAppointment(): PatientAppointmentItem | null {
+    return this._activeAppointment();
+  }
+
+  private computeActiveAppointment(): PatientAppointmentItem | null {
     if (!this.items || this.items.length === 0) return null;
     if (!this.selectedAppointmentId) return this.items[0];
     return this.items.find(item => item.appointmentId === Number(this.selectedAppointmentId)) || this.items[0];
@@ -158,11 +173,13 @@ export class PatientFeedbackComponent {
         }
         this.toast.showSuccess('Feedback submitted successfully');
         this.loadGiven();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         const msg = (err?.error?.error as string) || 'Failed to submit feedback';
         this.errors[a.appointmentId] = msg;
         this.toast.showError(msg);
+        this.cdr.markForCheck();
       },
     });
   }
@@ -207,10 +224,12 @@ export class PatientFeedbackComponent {
           } as PatientFeedbackItem;
         });
         this.loadingGiven = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.loadingGiven = false;
         this.givenError = 'Failed to load your feedback.';
+        this.cdr.markForCheck();
       },
     });
   }
@@ -226,7 +245,16 @@ export class PatientFeedbackComponent {
     return (sum / this.givenFeedback.length).toFixed(1);
   }
 
+  private readonly _ratingDistribution = memoByDeps<Record<number, { count: number; percent: number }>>(
+    () => this.computeRatingDistribution(),
+    () => [this.givenFeedback],
+  );
+
   get ratingDistribution(): Record<number, { count: number; percent: number }> {
+    return this._ratingDistribution();
+  }
+
+  private computeRatingDistribution(): Record<number, { count: number; percent: number }> {
     const total = this.givenFeedback.length;
     const dist: Record<number, { count: number; percent: number }> = {
       5: { count: 0, percent: 0 },
@@ -249,7 +277,16 @@ export class PatientFeedbackComponent {
   }
 
   // History filtering
+  private readonly _filteredGivenFeedback = memoByDeps<PatientFeedbackItem[]>(
+    () => this.computeFilteredGivenFeedback(),
+    () => [this.givenFeedback, this.historyFilter],
+  );
+
   get filteredGivenFeedback(): PatientFeedbackItem[] {
+    return this._filteredGivenFeedback();
+  }
+
+  private computeFilteredGivenFeedback(): PatientFeedbackItem[] {
     const list = [...this.givenFeedback];
     if (this.historyFilter === '5_STAR') {
       return list.filter(f => f.rating === 5);

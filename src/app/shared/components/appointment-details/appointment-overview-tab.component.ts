@@ -8,7 +8,6 @@ import { AppointmentBookingSource, AppointmentDetails, DoctorEducationSummary } 
     standalone: true,
     imports: [CommonModule, StatusBadgeComponent],
     templateUrl: './appointment-overview-tab.component.html',
-    styleUrl: './appointment-overview-tab.component.css'
 })
 export class AppointmentOverviewTabComponent {
     @Input() appointment: AppointmentDetails | null = null;

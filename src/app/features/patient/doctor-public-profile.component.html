@@ -1,5 +1,4 @@
-<app-patient-layout>
-    <div class="max-w-[1400px] mx-auto p-3 sm:p-5">
+    <app-page-container spacingClass="">
         <doctor-details-panel *ngIf="doctor; else loadingTpl" [doctor]="doctor" [avgRating]="avgRating" [age]="age"
             [educations]="educations" [experiences]="experiences" [certificates]="certificates" [enableBooking]="true"
             (openBooking)="startBooking()"></doctor-details-panel>
@@ -18,5 +17,4 @@
         <ng-template #loadingTpl>
             <app-page-loader label="Loading doctor profile..."></app-page-loader>
         </ng-template>
-    </div>
-</app-patient-layout>
+    </app-page-container>

@@ -10,11 +10,10 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   host: { class: 'block' },
   templateUrl: './skeleton.component.html',
-  styleUrl: './skeleton.component.css'
 })
 export class SkeletonComponent {
-  /** card | list | metrics | line | table | focus */
-  @Input() variant: 'card' | 'list' | 'metrics' | 'line' | 'table' | 'focus' = 'card';
+  /** card | list | metrics | line | table | focus | history */
+  @Input() variant: 'card' | 'list' | 'metrics' | 'line' | 'table' | 'focus' | 'history' = 'card';
   @Input() count = 3;
   @Input() width = '100%';
   @Input() height = '0.75rem';

@@ -2,6 +2,7 @@ import { Injectable, signal, inject, computed } from '@angular/core';
 import { PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { Observable, finalize, shareReplay } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
 import { AuthenticationResponse, LoginRequest, RefreshTokenRequest, RegisterRequest, Role } from '../models/auth.models';
@@ -70,11 +71,21 @@ export class AuthService {
     return this.http.post<AuthenticationResponse>(`${this.baseUrl}/api/auth/google`, { idToken, role });
   }
 
+  // Refresh tokens are single-use, so parallel requests must share one refresh call
+  private refreshInFlight: Observable<{ accessToken: string; refreshToken: string }> | null = null;
+
   refresh() {
+    if (this.refreshInFlight) {
+      return this.refreshInFlight;
+    }
     const rt = this.refreshToken();
-    return this.http.post<{ accessToken: string; refreshToken: string }>(`${this.baseUrl}/api/auth/refresh`, {
+    this.refreshInFlight = this.http.post<{ accessToken: string; refreshToken: string }>(`${this.baseUrl}/api/auth/refresh`, {
       refreshToken: rt,
-    } as RefreshTokenRequest);
+    } as RefreshTokenRequest).pipe(
+      finalize(() => (this.refreshInFlight = null)),
+      shareReplay(1)
+    );
+    return this.refreshInFlight;
   }
 
   getCurrentUser() {
@@ -176,6 +187,10 @@ export class AuthService {
     }
     if (this.isBrowser()) {
       ['accessToken', 'refreshToken', 'role', 'username', 'user', 'userId'].forEach((k) => localStorage.removeItem(k));
+      // AI assistant chat history can contain health details: clear it (all users' keys) on logout
+      Object.keys(localStorage)
+        .filter((k) => k.startsWith('caresync_ai_sessions'))
+        .forEach((k) => localStorage.removeItem(k));
     }
     this.accessToken.set(null);
     this.refreshToken.set(null);

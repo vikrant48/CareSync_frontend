@@ -1,6 +1,4 @@
-<app-doctor-layout>
-    <div
-        class="max-w-[1400px] mx-auto p-3 sm:p-6 space-y-5 text-[var(--text)] font-sans selection:bg-[var(--accent)]/30 pb-16">
+    <app-page-container paddingClass="p-3 sm:p-6" spacingClass="space-y-5" extraClass="font-sans selection:bg-[var(--accent)]/30 pb-16">
 
         <!-- Header Banner -->
         <div
@@ -23,7 +21,7 @@
                     class="bg-[var(--panel)]/80 border border-[var(--border)] rounded-2xl p-3 sm:px-4 sm:py-2.5 flex items-center gap-3 backdrop-blur-md shadow-xl self-end sm:self-auto">
                     <div
                         class="w-8 h-8 rounded-xl bg-[var(--accent)]/15 border border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)]">
-                        <i class="fa-solid fa-leaf text-xs"></i>
+                        <i class="fa-solid fa-leaf text-xs" aria-hidden="true"></i>
                     </div>
                     <div>
                         <p class="text-xs font-bold text-[var(--text)] leading-snug">Take time to recharge for</p>
@@ -33,94 +31,14 @@
             </div>
         </div>
 
-        <!-- KPI Stat Cards Row (4 Columns) -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
-            <!-- Card 1: Total Leaves -->
-            <div
-                class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-3 sm:p-5 shadow-xl flex items-center justify-between min-w-0 group hover:border-[var(--accent)]/40 transition-all">
-                <div class="flex items-center gap-2 sm:gap-3.5 min-w-0">
-                    <div
-                        class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl shrink-0 bg-[var(--primary)]/15 border border-[var(--primary)]/30 flex items-center justify-center text-[var(--primary)]">
-                        <i class="fa-solid fa-calendar-days text-base"></i>
-                    </div>
-                    <div>
-                        <span class="text-xs font-bold text-[var(--muted)]">Total Leaves</span>
-                        <div class="flex flex-col items-start sm:flex-row sm:items-baseline gap-0 sm:gap-2 mt-0.5">
-                            <span class="text-xl sm:text-2xl font-black text-[var(--text)] tracking-tight">{{ getTotalLeavesCount()
-                                }}</span>
-                            <span class="text-[10px] text-[var(--muted)] font-medium">in this year</span>
-                        </div>
-                    </div>
-                </div>
-                <i
-                    class="hidden sm:inline fa-solid fa-chevron-right text-xs text-[var(--muted)] group-hover:text-[var(--text)] transition-colors shrink-0"></i>
-            </div>
-
-            <!-- Card 2: Approved -->
-            <div
-                class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-3 sm:p-5 shadow-xl flex items-center justify-between min-w-0 group hover:border-[#10b981]/40 transition-all">
-                <div class="flex items-center gap-2 sm:gap-3.5 min-w-0">
-                    <div
-                        class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl shrink-0 bg-[#10b981]/15 border border-[#10b981]/30 flex items-center justify-center text-[#10b981]">
-                        <i class="fa-solid fa-circle-check text-base"></i>
-                    </div>
-                    <div>
-                        <span class="text-xs font-bold text-[var(--muted)]">Approved</span>
-                        <div class="flex flex-col items-start sm:flex-row sm:items-baseline gap-0 sm:gap-2 mt-0.5">
-                            <span class="text-xl sm:text-2xl font-black text-[var(--text)] tracking-tight">{{ getApprovedCount()
-                                }}</span>
-                            <span class="text-[10px] text-[#10b981] font-medium">{{ getApprovedPercentage() }}% of
-                                total</span>
-                        </div>
-                    </div>
-                </div>
-                <i
-                    class="hidden sm:inline fa-solid fa-chevron-right text-xs text-[var(--muted)] group-hover:text-[var(--text)] transition-colors shrink-0"></i>
-            </div>
-
-            <!-- Card 3: Pending -->
-            <div
-                class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-3 sm:p-5 shadow-xl flex items-center justify-between min-w-0 group hover:border-[#f59e0b]/40 transition-all">
-                <div class="flex items-center gap-2 sm:gap-3.5 min-w-0">
-                    <div
-                        class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl shrink-0 bg-[#f59e0b]/15 border border-[#f59e0b]/30 flex items-center justify-center text-[#f59e0b]">
-                        <i class="fa-solid fa-hourglass-half text-base"></i>
-                    </div>
-                    <div>
-                        <span class="text-xs font-bold text-[var(--muted)]">Pending</span>
-                        <div class="flex flex-col items-start sm:flex-row sm:items-baseline gap-0 sm:gap-2 mt-0.5">
-                            <span class="text-xl sm:text-2xl font-black text-[var(--text)] tracking-tight">{{ getPendingCount()
-                                }}</span>
-                            <span class="text-[10px] text-[#f59e0b] font-medium">{{ getPendingPercentage() }}% of
-                                total</span>
-                        </div>
-                    </div>
-                </div>
-                <i
-                    class="hidden sm:inline fa-solid fa-chevron-right text-xs text-[var(--muted)] group-hover:text-[var(--text)] transition-colors shrink-0"></i>
-            </div>
-
-            <!-- Card 4: Rejected -->
-            <div
-                class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-3 sm:p-5 shadow-xl flex items-center justify-between min-w-0 group hover:border-[#ef4444]/40 transition-all">
-                <div class="flex items-center gap-2 sm:gap-3.5 min-w-0">
-                    <div
-                        class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl shrink-0 bg-[#ef4444]/15 border border-[#ef4444]/30 flex items-center justify-center text-[#ef4444]">
-                        <i class="fa-solid fa-circle-xmark text-base"></i>
-                    </div>
-                    <div>
-                        <span class="text-xs font-bold text-[var(--muted)]">Rejected</span>
-                        <div class="flex flex-col items-start sm:flex-row sm:items-baseline gap-0 sm:gap-2 mt-0.5">
-                            <span class="text-xl sm:text-2xl font-black text-[var(--text)] tracking-tight">{{ getRejectedCount()
-                                }}</span>
-                            <span class="text-[10px] text-[#ef4444] font-medium">{{ getRejectedPercentage() }}% of
-                                total</span>
-                        </div>
-                    </div>
-                </div>
-                <i
-                    class="hidden sm:inline fa-solid fa-chevron-right text-xs text-[var(--muted)] group-hover:text-[var(--text)] transition-colors shrink-0"></i>
-            </div>
+        <!-- KPI row. Leaves have no approval workflow in the backend, so they are shown as Upcoming / Past. -->
+        <div class="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">
+            <app-stat-card class="col-span-2 lg:col-span-1" label="Total leaves" icon="fa-solid fa-calendar-days"
+                tone="primary" [value]="getTotalLeavesCount()" hint="All time"></app-stat-card>
+            <app-stat-card label="Upcoming" icon="fa-solid fa-hourglass-half" tone="warning"
+                [value]="getUpcomingCount()" [hint]="getUpcomingPercentage() + '% of total'"></app-stat-card>
+            <app-stat-card label="Past" icon="fa-solid fa-circle-check" tone="success"
+                [value]="getPastCount()" [hint]="getPastPercentage() + '% of total'"></app-stat-card>
         </div>
 
         <!-- Main Content Layout (Form Left, History Table Right) -->
@@ -133,7 +51,7 @@
                 <div class="flex items-center gap-3">
                     <div
                         class="w-9 h-9 rounded-xl bg-[var(--accent)]/15 border border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)]">
-                        <i class="fa-solid fa-calendar-plus text-sm"></i>
+                        <i class="fa-solid fa-calendar-plus text-sm" aria-hidden="true"></i>
                     </div>
                     <div>
                         <h2 class="text-base font-black text-[var(--text)] tracking-tight">Apply for Leave</h2>
@@ -142,49 +60,56 @@
                 </div>
 
                 <!-- Form Body -->
-                <form (ngSubmit)="applyLeave()" class="space-y-4">
+                <form (ngSubmit)="applyLeave()" novalidate class="space-y-4">
                     <!-- From Date & To Date Grid -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                         <!-- From Date -->
                         <div class="space-y-1">
                             <label class="block text-xs font-semibold text-[var(--muted)]">From Date <span
-                                    class="text-[#ef4444]">*</span></label>
+                                    class="text-[#ef4444]" aria-hidden="true">*</span></label>
                             <app-date-picker [(ngModel)]="form.startDate" name="startDate" placeholder="Select Date"
-                                [minDate]="'today'">
+                                [minDate]="'today'" [error]="fieldError('startDate')" (ngModelChange)="markTouched('startDate')">
                             </app-date-picker>
                         </div>
 
                         <!-- To Date -->
                         <div class="space-y-1">
                             <label class="block text-xs font-semibold text-[var(--muted)]">To Date <span
-                                    class="text-[#ef4444]">*</span></label>
+                                    class="text-[#ef4444]" aria-hidden="true">*</span></label>
                             <app-date-picker [(ngModel)]="form.endDate" name="endDate" placeholder="Select Date"
-                                [minDate]="form.startDate || 'today'">
+                                [minDate]="form.startDate || 'today'" [error]="fieldError('endDate')" (ngModelChange)="markTouched('endDate')">
                             </app-date-picker>
                         </div>
                     </div>
 
+                    <p *ngIf="fieldError('range')" role="alert" class="form-error -mt-2">{{ fieldError('range') }}</p>
+
                     <!-- Leave Type Dropdown -->
                     <div class="space-y-1">
                         <label class="block text-xs font-semibold text-[var(--muted)]">Leave Type <span
-                                class="text-[#ef4444]">*</span></label>
+                                class="text-[#ef4444]" aria-hidden="true">*</span></label>
                         <app-select-dropdown [(ngModel)]="form.leaveType" name="leaveType" [options]="leaveTypeOptions"
-                            placeholder="Select Leave Type">
+                            placeholder="Select Leave Type" [required]="true" [errorMessage]="fieldError('leaveType')"
+                            (selectionChange)="markTouched('leaveType')">
                         </app-select-dropdown>
                     </div>
 
                     <!-- Reason Textarea -->
                     <div class="space-y-1">
                         <div class="flex items-center justify-between">
-                            <label class="block text-xs font-semibold text-[var(--muted)]">Reason <span
-                                    class="text-[#ef4444]">*</span></label>
+                            <label class="block text-xs font-semibold text-[var(--muted)]" for="leave-reason">Reason <span
+                                    class="text-[#ef4444]" aria-hidden="true">*</span></label>
                             <span class="text-[10px] text-[var(--muted)] font-medium">{{ form.reason.length
                                 }}/300</span>
                         </div>
-                        <textarea [(ngModel)]="form.reason" name="reason" rows="3" maxlength="300"
+                        <textarea id="leave-reason" [(ngModel)]="form.reason" name="reason" rows="3" maxlength="300"
+                            (blur)="markTouched('reason')" [attr.aria-invalid]="fieldError('reason') ? true : null"
+                            [attr.aria-describedby]="fieldError('reason') ? 'leave-reason-error' : null"
+                            [class.!border-rose-500]="!!fieldError('reason')"
                             placeholder="Provide details about your leave request..."
                             class="w-full bg-[var(--bg)] text-[var(--text)] text-xs rounded-xl p-3 border border-[var(--bg)] focus:outline-none focus:border-[var(--accent)] placeholder:text-[var(--muted)] resize-none"
                             required></textarea>
+                        <p *ngIf="fieldError('reason')" id="leave-reason-error" role="alert" class="form-error">{{ fieldError('reason') }}</p>
                     </div>
 
                     <!-- Action Buttons Row -->
@@ -193,10 +118,10 @@
                             class="flex-1 py-2.5 bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--text)] font-bold text-xs rounded-xl transition-all cursor-pointer">
                             Clear
                         </button>
-                        <button type="submit" [disabled]="submitting || !isFormValid()"
+                        <button type="submit" [disabled]="submitting"
                             class="flex-[2] py-2.5 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs sm:text-sm rounded-xl shadow-xl shadow-[var(--accent)]/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2 transform hover:-translate-y-0.5">
-                            <i *ngIf="!submitting" class="fa-solid fa-paper-plane text-xs"></i>
-                            <i *ngIf="submitting" class="fa-solid fa-circle-notch fa-spin text-xs"></i>
+                            <i *ngIf="!submitting" class="fa-solid fa-paper-plane text-xs" aria-hidden="true"></i>
+                            <i *ngIf="submitting" class="fa-solid fa-circle-notch fa-spin text-xs" aria-hidden="true"></i>
                             <span>{{ submitting ? 'Applying...' : 'Apply Leave' }}</span>
                         </button>
                     </div>
@@ -211,7 +136,7 @@
                     <div class="flex items-center gap-3">
                         <div
                             class="w-9 h-9 rounded-xl bg-[var(--accent)]/15 border border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)]">
-                            <i class="fa-solid fa-clock-rotate-left text-sm"></i>
+                            <i class="fa-solid fa-clock-rotate-left text-sm" aria-hidden="true"></i>
                         </div>
                         <div>
                             <h2 class="text-base font-black text-[var(--text)] tracking-tight">Leave History</h2>
@@ -258,7 +183,7 @@
                                 <td class="py-3.5 px-4 font-semibold text-[var(--text)] whitespace-nowrap">
                                     <div class="flex items-center gap-1.5">
                                         <span>{{ leave.startDate | date:'mediumDate' }}</span>
-                                        <i class="fa-solid fa-arrow-right text-[10px] text-[var(--muted)]"></i>
+                                        <i class="fa-solid fa-arrow-right text-[10px] text-[var(--muted)]" aria-hidden="true"></i>
                                         <span>{{ leave.endDate | date:'mediumDate' }}</span>
                                     </div>
                                     <div class="text-[10px] text-[var(--muted)] font-medium mt-0.5">
@@ -283,7 +208,7 @@
                                     <span
                                         [class]="isUpcoming(leave) ? 'bg-[#f59e0b]/15 border-[#f59e0b]/30 text-[#f59e0b]' : 'bg-[#10b981]/15 border-[#10b981]/30 text-[#10b981]'"
                                         class="px-2.5 py-0.5 rounded-full text-[10px] font-bold border tracking-wider uppercase inline-block">
-                                        {{ isUpcoming(leave) ? 'Pending' : 'Approved' }}
+                                        {{ isUpcoming(leave) ? 'Upcoming' : 'Past' }}
                                     </span>
                                 </td>
 
@@ -293,15 +218,15 @@
                                         <button *ngIf="isUpcoming(leave)" type="button" (click)="deleteLeave(leave)"
                                             [disabled]="deletingId === leave.id"
                                             class="w-7 h-7 rounded-lg bg-[var(--bg)] hover:bg-[#ef4444]/20 border border-[var(--bg)] hover:border-[#ef4444]/40 text-[var(--muted)] hover:text-[#ef4444] flex items-center justify-center transition-all cursor-pointer"
-                                            title="Cancel Leave">
-                                            <i *ngIf="deletingId !== leave.id" class="fa-solid fa-trash text-xs"></i>
+                                            title="Cancel Leave" aria-label="Cancel Leave">
+                                            <i *ngIf="deletingId !== leave.id" class="fa-solid fa-trash text-xs" aria-hidden="true"></i>
                                             <i *ngIf="deletingId === leave.id"
-                                                class="fa-solid fa-circle-notch fa-spin text-xs"></i>
+                                                class="fa-solid fa-circle-notch fa-spin text-xs" aria-hidden="true"></i>
                                         </button>
                                         <button *ngIf="!isUpcoming(leave)" type="button"
                                             class="w-7 h-7 rounded-lg bg-[var(--bg)] text-[var(--muted)] flex items-center justify-center cursor-not-allowed"
-                                            title="Completed Leave">
-                                            <i class="fa-solid fa-check text-xs"></i>
+                                            title="Completed Leave" aria-label="Completed Leave">
+                                            <i class="fa-solid fa-check text-xs" aria-hidden="true"></i>
                                         </button>
                                     </div>
                                 </td>
@@ -319,13 +244,12 @@
             <div class="flex items-start gap-4">
                 <div
                     class="w-10 h-10 rounded-2xl bg-[var(--accent)]/15 border border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)] shrink-0">
-                    <i class="fa-solid fa-info text-base"></i>
+                    <i class="fa-solid fa-info text-base" aria-hidden="true"></i>
                 </div>
                 <div class="space-y-1">
                     <h3 class="text-sm font-black text-[var(--text)]">Did you know?</h3>
                     <p class="text-xs text-[var(--muted)] font-medium leading-relaxed max-w-2xl">
-                        You can cancel or modify pending leave requests anytime before they are approved. Past leave
-                        records are kept for your history and reporting.
+                        You can cancel an upcoming leave at any time. Past leave can't be changed.
                     </p>
                 </div>
             </div>
@@ -334,10 +258,9 @@
             <div class="hidden md:flex items-center justify-center shrink-0 opacity-80">
                 <div
                     class="w-28 h-16 bg-gradient-to-br from-[var(--accent)]/15 to-transparent border border-[var(--accent)]/25 rounded-2xl flex items-center justify-center">
-                    <i class="fa-solid fa-calendar-check text-3xl text-[var(--accent)]/50"></i>
+                    <i class="fa-solid fa-calendar-check text-3xl text-[var(--accent)]/50" aria-hidden="true"></i>
                 </div>
             </div>
         </div>
 
-    </div>
-</app-doctor-layout>
+    </app-page-container>

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
@@ -8,7 +8,6 @@ import { AppointmentCardComponent } from '../../shared/components/appointment-ca
 import { RescheduleAppointmentModalComponent } from '../../shared/reschedule-appointment-modal.component';
 import { CancellationModalComponent } from '../../shared/cancellation-modal.component';
 import { getAppointmentEpochMs, isAppointmentToday } from '../../shared/appointment-utils';
-import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { ToastService } from '../../core/services/toast.service';
 import { MasterDataService } from '../../core/services/master-data.service';
 import { SelectOption } from '../../shared/select-dropdown.component';
@@ -16,15 +15,23 @@ import { SharedChatModalComponent } from '../../shared/chat/shared-chat-modal.co
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 import { FilterBarComponent, FilterConfig } from '../../shared/components';
+import { PageContainerComponent } from '../../shared/ui/page-container.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { memoByDeps } from '../../shared/utils/memo';
+import { trackByAppointmentId } from '../../shared/utils/track-by';
 
 @Component({
   selector: 'app-my-appointments',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, AppointmentCardComponent, RescheduleAppointmentModalComponent, CancellationModalComponent, SharedChatModalComponent, EmptyStateComponent, PageLoaderComponent, FilterBarComponent],
+  imports: [PageHeaderComponent, PageContainerComponent, CommonModule, RouterModule, FormsModule, AppointmentCardComponent, RescheduleAppointmentModalComponent, CancellationModalComponent, SharedChatModalComponent, EmptyStateComponent, PageLoaderComponent, FilterBarComponent],
+  // OnPush: async callbacks below call markForCheck; children (cards, modals, chat) request their own checks
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './my-appointments.component.html',
   styleUrl: './my-appointments.component.css'
 })
 export class MyAppointmentsComponent {
+  private cdr = inject(ChangeDetectorRef);
+  readonly trackByAppointmentId = trackByAppointmentId;
   appointments: PatientAppointmentItem[] = [];
   loading = false;
   detailsOpen: Record<number, boolean> = {};
@@ -122,6 +129,7 @@ export class MyAppointmentsComponent {
         this.statuses = s || [];
         const statusFilter = this.patientFilterConfigs.find((c) => c.key === 'statusFilter');
         if (statusFilter) statusFilter.options = this.statusOptions;
+        this.cdr.markForCheck();
       }
     });
     // Apply default filters from query params if provided
@@ -147,12 +155,16 @@ export class MyAppointmentsComponent {
       rangeFilter: this.rangeFilter
     };
     // Preload doctors list to enable navigation to doctor profile from appointments
-    this.doctorApi.getAllForPatients(0, 50).subscribe({
+    this.doctorApi.getDirectory().subscribe({
       next: (res) => {
         this.doctors = res || [];
         this.enrichAppointments();
+        this.cdr.markForCheck();
       },
-      error: () => (this.doctors = []),
+      error: () => {
+        this.doctors = [];
+        this.cdr.markForCheck();
+      },
     });
   }
 
@@ -163,8 +175,12 @@ export class MyAppointmentsComponent {
         this.appointments = res || [];
         this.enrichAppointments();
         this.loading = false;
+        this.cdr.markForCheck();
       },
-      error: () => (this.loading = false),
+      error: () => {
+        this.loading = false;
+        this.cdr.markForCheck();
+      },
     });
   }
 
@@ -184,10 +200,6 @@ export class MyAppointmentsComponent {
     });
   }
 
-  setRange(v: 'upcoming' | 'today' | 'past') {
-    this.rangeFilter = this.rangeFilter === v ? '' : v;
-  }
-
   clearFilters() {
     this.statusFilter = '';
     this.specializationFilter = '';
@@ -201,7 +213,12 @@ export class MyAppointmentsComponent {
 
   // Date helpers moved to shared utils
 
-  filtered() {
+  filtered = memoByDeps<PatientAppointmentItem[]>(
+    () => this.computeFiltered(),
+    () => [this.appointments, this.statusFilter, this.specializationFilter, this.rangeFilter, Math.floor(Date.now() / 60000)],
+  );
+
+  private computeFiltered(): PatientAppointmentItem[] {
     const list = [...this.appointments];
     const nowMs = new Date().getTime();
 
@@ -235,20 +252,6 @@ export class MyAppointmentsComponent {
 
   // Status class moved to shared utils (cards consume it internally)
 
-  viewDoctorFromAppointment(a: PatientAppointmentItem) {
-    // Try to find the doctor entity by display name to get username
-    const target = this.doctors.find((d) => {
-      const display = d.name || `${d.firstName || ''} ${d.lastName || ''}`.trim();
-      return display === a.doctorName;
-    });
-    if (target?.username) {
-      this.router.navigate(['/patient/doctor', target.username]);
-    } else {
-      // Fallback: navigate to book appointment page
-      this.router.navigate(['/patient/book-appointment']);
-    }
-  }
-
   startReschedule(a: PatientAppointmentItem) {
     this.rescheduleTarget = a;
     this.rescheduleDateISO = null;
@@ -272,10 +275,12 @@ export class MyAppointmentsComponent {
         this.toast.showSuccess('Appointment rescheduled successfully');
         this.closeReschedule();
         this.refresh();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.rescheduleError = 'Unable to reschedule';
         this.toast.showError('Failed to reschedule appointment');
+        this.cdr.markForCheck();
       },
     });
   }
@@ -295,11 +300,13 @@ export class MyAppointmentsComponent {
         this.toast.showSuccess('Appointment cancelled successfully');
         this.closeCancellation();
         this.refresh();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Cancellation failed', err);
         this.toast.showError('Failed to cancel appointment. Please try again.');
         this.closeCancellation(); // modifying this to close regardless, or maybe keep open? User said "not able to cancel" so maybe good to close and let them try again.
+        this.cdr.markForCheck();
       }
     });
   }
@@ -309,10 +316,6 @@ export class MyAppointmentsComponent {
     const target = this.cancellationTarget;
     this.closeCancellation();
     this.startReschedule(target);
-  }
-
-  joinConsultation(a: PatientAppointmentItem) {
-    this.router.navigate(['/patient/consultation', a.appointmentId]);
   }
 
   // Chat Logic

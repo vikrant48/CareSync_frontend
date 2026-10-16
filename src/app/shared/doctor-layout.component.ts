@@ -1,7 +1,7 @@
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router } from '@angular/router';
+import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router, RouterOutlet } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
 import { DoctorProfileService } from '../core/services/doctor-profile.service';
 import { AppShellComponent, AppShellLink, AppShellTab } from './app-shell.component';
@@ -11,7 +11,7 @@ import { PageLoaderComponent } from './ui/page-loader.component';
   selector: 'app-doctor-layout',
   standalone: true,
   host: { class: 'block h-full w-full' },
-  imports: [CommonModule, AppShellComponent, PageLoaderComponent],
+  imports: [CommonModule, AppShellComponent, PageLoaderComponent, RouterOutlet],
   template: `
     <app-shell variant="doctor" [sidebarLinks]="sidebarLinks" [tabs]="tabs" [menuLinks]="menuLinks"
                [assistantInside]="true" (logout)="onLogout()">
@@ -27,14 +27,15 @@ import { PageLoaderComponent } from './ui/page-loader.component';
           <div class="flex flex-col min-w-0">
             <span class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate leading-snug">{{ displayName }}</span>
             <span class="text-xs text-gray-500 dark:text-gray-400 font-medium flex items-center gap-1 mt-0.5">
-              <i class="fa-solid fa-circle text-[6px] text-emerald-500"></i> Doctor
+              <i class="fa-solid fa-circle text-[6px] text-emerald-500" aria-hidden="true"></i> Doctor
             </span>
           </div>
         </div>
       </div>
       <app-page-loader *ngIf="pageNavigating" label="Loading..." accent="doctor"></app-page-loader>
       <div [hidden]="pageNavigating">
-        <ng-content></ng-content>
+        <!-- Routed layout: role pages render here, so the shell persists across navigation -->
+        <router-outlet></router-outlet>
       </div>
     </app-shell>
   `,
@@ -44,8 +45,9 @@ export class DoctorLayoutComponent implements OnInit {
   private doctorApi = inject(DoctorProfileService);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
+  // The layout is rendered inside each page; pages may be OnPush, so async updates here must request a check.
+  private cdr = inject(ChangeDetectorRef);
   pageNavigating = false;
-  private navTimer?: ReturnType<typeof setTimeout>;
 
   doctorName: string | null = typeof localStorage !== 'undefined' ? localStorage.getItem('caresync_doctor_name') : null;
   profileImageUrl: string | null = typeof localStorage !== 'undefined' ? localStorage.getItem('caresync_doctor_avatar') : null;
@@ -97,16 +99,14 @@ export class DoctorLayoutComponent implements OnInit {
   ];
 
   ngOnInit() {
-    this.destroyRef.onDestroy(() => clearTimeout(this.navTimer));
     this.router.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
       if (event instanceof NavigationStart) {
-        clearTimeout(this.navTimer);
         this.pageNavigating = true;
       }
       if (event instanceof NavigationEnd || event instanceof NavigationCancel || event instanceof NavigationError) {
-        clearTimeout(this.navTimer);
         this.pageNavigating = false;
       }
+      this.cdr.markForCheck();
     });
 
     if (typeof localStorage !== 'undefined') {
@@ -128,6 +128,7 @@ export class DoctorLayoutComponent implements OnInit {
         const finalImage = p?.profileImageUrl || null;
         this.doctorName = finalName;
         this.profileImageUrl = finalImage;
+        this.cdr.markForCheck();
         if (typeof localStorage !== 'undefined') {
           if (finalName) localStorage.setItem('caresync_doctor_name', finalName);
           if (finalImage) localStorage.setItem('caresync_doctor_avatar', finalImage);

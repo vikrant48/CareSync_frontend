@@ -40,6 +40,18 @@
   --danger-hover: #dc2626;
   --danger-soft: rgba(239, 68, 68, 0.12);
 
+  --success: #10b981;
+  --success-hover: #059669;
+  --success-soft: rgba(16, 185, 129, 0.12);
+
+  --warning: #f59e0b;
+  --warning-hover: #d97706;
+  --warning-soft: rgba(245, 158, 11, 0.14);
+
+  --info: #0ea5e9;
+  --info-hover: #0284c7;
+  --info-soft: rgba(14, 165, 233, 0.12);
+
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-top: env(safe-area-inset-top, 0px);
   --touch-min: 44px;
@@ -454,10 +466,33 @@ body.dark .skeleton-circle,
   }
 }
 
-/* ---- Unified button system (primary = emerald brand) ---- */
+/* ---- Button size scale ----
+   sm 26px: small inline actions, chips, tabs
+   md 32px: secondary actions (Cancel, Clear, Edit, View)
+   lg 38px: primary actions (Save, Submit, Book, Apply)
+   The .btn-* colour classes below default to lg; .btn-sm is sm. */
+@layer components {
+  .btn-size-sm,
+  .btn-size-md,
+  .btn-size-lg {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  .btn-size-sm { min-height: 26px; height: 26px; }
+  .btn-size-md { min-height: 32px; height: 32px; }
+  .btn-size-lg { min-height: 38px; height: 38px; }
+}
+
+/* ---- Unified button system (primary = blue brand) ----
+   Inside @layer components so Tailwind utilities on the same element
+   (e.g. `btn-primary bg-red-600`) win over these defaults. */
+@layer components {
 .btn-primary,
 .btn-modern-primary {
-  @apply inline-flex items-center justify-center gap-2 rounded-xl text-white font-semibold px-4 py-2.5 transition min-h-[44px] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply inline-flex items-center justify-center gap-2 rounded-xl text-white font-semibold px-4 py-0 transition min-h-[38px] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
   background-color: var(--primary);
   box-shadow: 0 10px 20px -8px var(--primary-shadow);
 }
@@ -469,7 +504,7 @@ body.dark .skeleton-circle,
 
 .btn-secondary,
 .btn-modern-secondary {
-  @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold px-4 py-2.5 transition min-h-[44px] active:scale-95 border;
+  @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold px-4 py-0 transition min-h-[38px] active:scale-95 border;
   background-color: rgba(55, 65, 81, 0.9);
   color: #fff;
   border-color: #4b5563;
@@ -480,8 +515,12 @@ body.dark .skeleton-circle,
   background-color: #4b5563;
 }
 
+html.theme-light .btn-secondary,
+html.light .btn-secondary,
 body.theme-light .btn-secondary,
 body.light .btn-secondary,
+html.theme-light .btn-modern-secondary,
+html.light .btn-modern-secondary,
 body.theme-light .btn-modern-secondary,
 body.light .btn-modern-secondary {
   background-color: #fff;
@@ -489,8 +528,12 @@ body.light .btn-modern-secondary {
   border-color: #e5e7eb;
 }
 
+html.theme-light .btn-secondary:hover,
+html.light .btn-secondary:hover,
 body.theme-light .btn-secondary:hover,
 body.light .btn-secondary:hover,
+html.theme-light .btn-modern-secondary:hover,
+html.light .btn-modern-secondary:hover,
 body.theme-light .btn-modern-secondary:hover,
 body.light .btn-modern-secondary:hover {
   background-color: #f9fafb;
@@ -498,7 +541,7 @@ body.light .btn-modern-secondary:hover {
 
 .btn-danger,
 .btn-modern-danger {
-  @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold px-4 py-2 transition min-h-[44px] active:scale-95;
+  @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold px-4 py-0 transition min-h-[38px] active:scale-95;
   background-color: var(--danger-soft);
   color: var(--danger);
 }
@@ -509,7 +552,9 @@ body.light .btn-modern-secondary:hover {
 }
 
 .btn-sm {
-  @apply px-3 py-1.5 text-xs min-h-0 h-8 font-bold rounded-lg uppercase tracking-wider;
+  @apply px-3 py-0 text-xs min-h-[26px] h-auto font-bold rounded-lg uppercase tracking-wider;
+}
+
 }
 
 .link {
@@ -540,7 +585,9 @@ select.input:focus {
   box-shadow: 0 0 0 3px var(--primary-muted);
 }
 
-/* Light theme overrides */
+/* Light theme overrides (html is set before first paint by the script in index.html) */
+html.theme-light,
+html.light,
 body.theme-light,
 body.light {
   --bg: #f8fafc;
@@ -554,8 +601,12 @@ body.light {
   --accent-fg: #ffffff;
 }
 
+html.theme-light .input,
+html.light .input,
 body.theme-light .input,
 body.light .input,
+html.theme-light select.input,
+html.light select.input,
 body.theme-light select.input,
 body.light select.input {
   background: #ffffff;
@@ -564,6 +615,8 @@ body.light select.input {
 }
 
 /* Dark theme hook */
+html.theme-dark,
+html.dark,
 body.theme-dark,
 body.dark {
   --bg: #0b1220;
@@ -623,6 +676,13 @@ select.input-modern:focus {
    ============================================================ */
 .filter-label {
   @apply block text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1 leading-tight;
+}
+
+/* Filter bars: every control in a filter row is exactly this tall (search, text, select, date, segmented, buttons). */
+.filter-control {
+  height: 38px !important;
+  min-height: 38px !important;
+  max-height: 38px !important;
 }
 
 .filter-control-height {
@@ -722,6 +782,28 @@ select.input-modern:focus {
   }
 }
 
+/* Phones: let button labels wrap instead of overflowing (long labels such as
+   "Verify & Approve Doctor"). Scrolling strips keep single-line labels. */
+@media (max-width: 639px) {
+  button,
+  button > span,
+  [role="button"],
+  [role="button"] > span {
+    white-space: normal;
+  }
+
+  .responsive-action-row button,
+  .responsive-action-row button > span,
+  .no-scrollbar button,
+  .no-scrollbar button > span,
+  .overflow-x-auto button,
+  .overflow-x-auto button > span {
+    white-space: nowrap;
+  }
+}
+
+/* Same defaults-vs-utilities layering as the main button system; min-height stays 44px. */
+@layer components {
 @media (max-width: 639px) {
   .btn-primary,
   .btn-secondary,
@@ -729,13 +811,15 @@ select.input-modern:focus {
   .btn-modern-primary,
   .btn-modern-secondary,
   .btn-modern-danger {
-    min-height: 40px;
-    padding: 0.5rem 0.75rem;
+    padding: 0 0.75rem;
     gap: 0.375rem;
     border-radius: 0.625rem;
     font-size: 0.75rem;
   }
+}
+}
 
+@media (max-width: 639px) {
   .mobile-compact-card {
     padding: 0.75rem !important;
     border-radius: 0.75rem !important;
@@ -744,4 +828,89 @@ select.input-modern:focus {
   .mobile-compact-grid {
     gap: 0.5rem !important;
   }
+}
+/* ============================================================
+   Enter-animation helpers (animate-in + fade-in / zoom-in / slide-in-from-*)
+   Lightweight stand-in for the tailwindcss-animate class names already used
+   in templates; no extra dependency. Fixed 250ms duration.
+   ============================================================ */
+@keyframes cs-enter {
+  from {
+    opacity: var(--cs-enter-opacity, 1);
+    transform: translate3d(var(--cs-enter-x, 0), var(--cs-enter-y, 0), 0) scale(var(--cs-enter-scale, 1));
+  }
+}
+
+.animate-in {
+  animation: cs-enter 0.25s ease-out both;
+}
+
+.animate-in.fade-in { --cs-enter-opacity: 0; }
+.animate-in.zoom-in { --cs-enter-scale: 0.9; }
+.animate-in.zoom-in-95 { --cs-enter-scale: 0.95; }
+
+.animate-in.slide-in-from-top { --cs-enter-y: -100%; }
+.animate-in.slide-in-from-top-1 { --cs-enter-y: -0.25rem; }
+.animate-in.slide-in-from-top-2 { --cs-enter-y: -0.5rem; }
+.animate-in.slide-in-from-top-4 { --cs-enter-y: -1rem; }
+.animate-in.slide-in-from-bottom-2 { --cs-enter-y: 0.5rem; }
+.animate-in.slide-in-from-bottom-4 { --cs-enter-y: 1rem; }
+.animate-in.slide-in-from-bottom-5 { --cs-enter-y: 1.25rem; }
+.animate-in.slide-in-from-left-2 { --cs-enter-x: -0.5rem; }
+.animate-in.slide-in-from-right { --cs-enter-x: 100%; }
+.animate-in.slide-in-from-right-2 { --cs-enter-x: 0.5rem; }
+.animate-in.slide-in-from-right-4 { --cs-enter-x: 1rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-in {
+    animation: none !important;
+  }
+}
+
+/* ============================================================
+   Accessibility foundation (batch 11)
+   ============================================================ */
+
+/* Respect "reduce motion": stop decorative animation everywhere (pulse/ping/bounce, carousels,
+   slide/zoom-ins). Spinners still show; they just don't spin. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Phones: 16px text in form fields so iOS Safari doesn't zoom the page on focus. */
+@media (max-width: 639px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Visible keyboard focus for inputs and custom tabbable elements (buttons/links already have one). */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Screen-reader-only text helper (Tailwind's sr-only equivalent for plain CSS use) */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }

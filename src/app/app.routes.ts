@@ -1,218 +1,109 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './features/auth/login.component';
-import { RegisterComponent } from './features/auth/register.component';
-import { TokenRefreshComponent } from './features/auth/token-refresh.component';
-import { SessionExpiredComponent } from './features/auth/session-expired.component';
-import { DoctorDashboardComponent } from './features/doctor/doctor-dashboard.component';
-import { PatientDashboardComponent } from './features/patient/patient-dashboard.component';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
-import { DoctorProfileComponent } from './features/doctor/doctor-profile.component';
-import { PatientProfileComponent } from './features/patient/patient-profile.component';
-import { PatientEditPageComponent } from './shared/patient-edit-page.component';
-import { DoctorPublicProfileComponent } from './features/patient/doctor-public-profile.component';
-import { DoctorLeaveManagementComponent } from './features/doctor/doctor-leave-management.component';
-import { DoctorScheduleComponent } from './features/doctor/doctor-schedule.component';
-import { PatientBookAppointmentComponent } from './features/patient/patient-book-appointment.component';
-import { MyAppointmentsComponent } from './features/patient/my-appointments.component';
-import { PatientFeedbackComponent } from './features/patient/patient-feedback.component';
-import { DoctorAppointmentsComponent } from './features/doctor/doctor-appointments.component';
-import { DoctorChangePasswordComponent } from './features/doctor/doctor-change-password.component';
-import { PatientChangePasswordComponent } from './features/patient/patient-change-password.component';
-import { ResetPasswordComponent } from './features/auth/reset-password.component';
-import { DoctorReportsComponent } from './features/doctor/doctor-reports.component';
-import { PatientReportsComponent } from './features/patient/patient-reports.component';
-import { DoctorDocumentsComponent } from './features/doctor/doctor-document.component';
-import { SettingsComponent } from './features/settings/settings.component';
-import { LabTestsComponent } from './features/lab-tests/lab-tests.component';
-import { LabTestManagementComponent } from './features/doctor/lab-test-management.component';
-import { PatientLabBookingsComponent } from './features/patient/patient-lab-bookings.component';
-import { VideoConsultationComponent } from './shared/video-consultation.component';
-import { VitalsTrackingComponent } from './features/patient/patient-vitals.component';
-
-import { AdminDashboardComponent } from './features/admin/admin-dashboard.component';
-import { AppointmentAnalyticsDashboardComponent } from './features/admin/appointment-analytics-dashboard.component';
-import { NotFoundComponent } from './shared/not-found.component';
-
-import { PreVisitIntakeComponent } from './features/patient/pre-visit-intake.component';
-import { AppointmentDetailsPageComponent } from './shared/components/appointment-details/appointment-details-page.component';
+import { unsavedChangesGuard } from './core/guards/unsaved-changes.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'register', pathMatch: 'full' },
-  { path: 'login', component: LoginComponent },
-  { path: 'reset-password', component: ResetPasswordComponent },
-  { path: 'register', component: RegisterComponent },
-  { path: 'auth/token-refresh', component: TokenRefreshComponent },
-  { path: 'auth/session-expired', component: SessionExpiredComponent },
-  { path: 'settings', component: SettingsComponent, canActivate: [authGuard] },
+  { path: 'login', loadComponent: () => import('./features/auth/login.component').then((m) => m.LoginComponent) },
+  { path: 'reset-password', loadComponent: () => import('./features/auth/reset-password.component').then((m) => m.ResetPasswordComponent) },
+  { path: 'register', loadComponent: () => import('./features/auth/register.component').then((m) => m.RegisterComponent) },
+  { path: 'auth/token-refresh', loadComponent: () => import('./features/auth/token-refresh.component').then((m) => m.TokenRefreshComponent) },
+  { path: 'auth/session-expired', loadComponent: () => import('./features/auth/session-expired.component').then((m) => m.SessionExpiredComponent) },
+
+  // ---- Admin ----
   {
     path: 'admin',
     pathMatch: 'full',
-    component: AdminDashboardComponent,
+    loadComponent: () => import('./features/admin/admin-dashboard.component').then((m) => m.AdminDashboardComponent),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['ADMIN'] }
   },
   {
     path: 'admin/appointment-analytics',
-    component: AppointmentAnalyticsDashboardComponent,
+    loadComponent: () => import('./features/admin/appointment-analytics-dashboard.component').then((m) => m.AppointmentAnalyticsDashboardComponent),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['ADMIN'] }
   },
-  {
-    path: 'lab-tests',
-    component: LabTestsComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['DOCTOR', 'PATIENT'] }
-  },
-  {
-    path: 'doctor',
-    component: DoctorDashboardComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['DOCTOR'] }
-  },
-  {
-    path: 'doctor/appointments',
-    component: DoctorAppointmentsComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['DOCTOR'] }
-  },
-  {
-    path: 'doctor/appointments/:id',
-    component: AppointmentDetailsPageComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['DOCTOR'] }
-  },
-  {
-    path: 'doctor/profile',
-    component: DoctorProfileComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['DOCTOR'] }
-  },
-  {
-    path: 'doctor/change-password',
-    component: DoctorChangePasswordComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['DOCTOR'] }
-  },
-  {
-    path: 'doctor/reports',
-    component: DoctorReportsComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['DOCTOR'] }
-  },
-  {
-    path: 'doctor/documents',
-    component: DoctorDocumentsComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['DOCTOR'] }
-  },
-  {
-    path: 'doctor/lab-test-management',
-    component: LabTestManagementComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['DOCTOR'] }
-  },
-  {
-    path: 'doctor/leaves',
-    component: DoctorLeaveManagementComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['DOCTOR'] }
-  },
-  {
-    path: 'doctor/schedule',
-    component: DoctorScheduleComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['DOCTOR'] }
-  },
+
+  // ---- Full-screen pages (no layout): declared before the role trees so they match first ----
   {
     path: 'doctor/consultation/:id',
-    component: VideoConsultationComponent,
+    loadComponent: () => import('./shared/video-consultation.component').then((m) => m.VideoConsultationComponent),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['DOCTOR'] }
   },
   {
-    path: 'patient',
-    component: PatientDashboardComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['PATIENT'] }
-  },
-  {
-    path: 'patient/profile',
-    component: PatientProfileComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['PATIENT'] }
-  },
-  {
-    path: 'patient/profile/edit',
-    component: PatientEditPageComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['PATIENT'] }
-  },
-  {
-    path: 'patient/change-password',
-    component: PatientChangePasswordComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['PATIENT'] }
-  },
-  {
-    path: 'patient/book-appointment',
-    component: PatientBookAppointmentComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['PATIENT'] }
-  },
-  {
-    path: 'patient/appointments',
-    component: MyAppointmentsComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['PATIENT'] }
-  },
-  {
-    path: 'patient/appointments/:id',
-    component: AppointmentDetailsPageComponent,
+    path: 'patient/consultation/:id',
+    loadComponent: () => import('./shared/video-consultation.component').then((m) => m.VideoConsultationComponent),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['PATIENT'] }
   },
   {
     path: 'patient/intake/:id',
-    component: PreVisitIntakeComponent,
+    loadComponent: () => import('./features/patient/pre-visit-intake.component').then((m) => m.PreVisitIntakeComponent),
     canActivate: [authGuard, roleGuard],
+    canDeactivate: [unsavedChangesGuard],
     data: { roles: ['PATIENT'] }
   },
+
+  // ---- Doctor (routed layout) ----
   {
-    path: 'patient/reports',
-    component: PatientReportsComponent,
+    path: 'doctor',
+    loadComponent: () => import('./shared/doctor-layout.component').then((m) => m.DoctorLayoutComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['PATIENT'] }
+    data: { roles: ['DOCTOR'] },
+    children: [
+      { path: '', pathMatch: 'full', loadComponent: () => import('./features/doctor/doctor-dashboard.component').then((m) => m.DoctorDashboardComponent) },
+      { path: 'appointments', loadComponent: () => import('./features/doctor/doctor-appointments.component').then((m) => m.DoctorAppointmentsComponent) },
+      { path: 'appointments/:id', loadComponent: () => import('./shared/components/appointment-details/appointment-details-page.component').then((m) => m.AppointmentDetailsPageComponent) },
+      { path: 'profile', loadComponent: () => import('./features/doctor/doctor-profile.component').then((m) => m.DoctorProfileComponent), canDeactivate: [unsavedChangesGuard] },
+      { path: 'change-password', loadComponent: () => import('./features/doctor/doctor-change-password.component').then((m) => m.DoctorChangePasswordComponent) },
+      { path: 'reports', loadComponent: () => import('./features/doctor/doctor-reports.component').then((m) => m.DoctorReportsComponent) },
+      { path: 'documents', loadComponent: () => import('./features/doctor/doctor-document.component').then((m) => m.DoctorDocumentsComponent) },
+      { path: 'lab-test-management', loadComponent: () => import('./features/doctor/lab-test-management.component').then((m) => m.LabTestManagementComponent) },
+      { path: 'leaves', loadComponent: () => import('./features/doctor/doctor-leave-management.component').then((m) => m.DoctorLeaveManagementComponent) },
+      { path: 'schedule', loadComponent: () => import('./features/doctor/doctor-schedule.component').then((m) => m.DoctorScheduleComponent) },
+    ]
   },
+
+  // ---- Patient (routed layout) ----
   {
-    path: 'patient/lab-bookings',
-    component: PatientLabBookingsComponent,
+    path: 'patient',
+    loadComponent: () => import('./shared/patient-layout.component').then((m) => m.PatientLayoutComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['PATIENT'] }
+    data: { roles: ['PATIENT'] },
+    children: [
+      { path: '', pathMatch: 'full', loadComponent: () => import('./features/patient/patient-dashboard.component').then((m) => m.PatientDashboardComponent) },
+      { path: 'profile', loadComponent: () => import('./features/patient/patient-profile.component').then((m) => m.PatientProfileComponent) },
+      { path: 'profile/edit', loadComponent: () => import('./shared/patient-edit-page.component').then((m) => m.PatientEditPageComponent), canDeactivate: [unsavedChangesGuard] },
+      { path: 'change-password', loadComponent: () => import('./features/patient/patient-change-password.component').then((m) => m.PatientChangePasswordComponent) },
+      { path: 'book-appointment', loadComponent: () => import('./features/patient/patient-book-appointment.component').then((m) => m.PatientBookAppointmentComponent) },
+      { path: 'appointments', loadComponent: () => import('./features/patient/my-appointments.component').then((m) => m.MyAppointmentsComponent) },
+      { path: 'appointments/:id', loadComponent: () => import('./shared/components/appointment-details/appointment-details-page.component').then((m) => m.AppointmentDetailsPageComponent) },
+      { path: 'reports', loadComponent: () => import('./features/patient/patient-reports.component').then((m) => m.PatientReportsComponent) },
+      { path: 'lab-bookings', loadComponent: () => import('./features/patient/patient-lab-bookings.component').then((m) => m.PatientLabBookingsComponent) },
+      { path: 'feedback', loadComponent: () => import('./features/patient/patient-feedback.component').then((m) => m.PatientFeedbackComponent) },
+      { path: 'doctor/:username', loadComponent: () => import('./features/patient/doctor-public-profile.component').then((m) => m.DoctorPublicProfileComponent) },
+      { path: 'vitals', loadComponent: () => import('./features/patient/patient-vitals.component').then((m) => m.VitalsTrackingComponent) },
+    ]
   },
+
+  // ---- Pages shared by both roles: layout chosen by the user's role ----
   {
-    path: 'patient/feedback',
-    component: PatientFeedbackComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['PATIENT'] }
+    path: '',
+    loadComponent: () => import('./shared/role-layout.component').then((m) => m.RoleLayoutComponent),
+    canActivate: [authGuard],
+    children: [
+      { path: 'settings', loadComponent: () => import('./features/settings/settings.component').then((m) => m.SettingsComponent) },
+      {
+        path: 'lab-tests',
+        loadComponent: () => import('./features/lab-tests/lab-tests.component').then((m) => m.LabTestsComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['DOCTOR', 'PATIENT'] }
+      },
+    ]
   },
-  {
-    path: 'patient/doctor/:username',
-    component: DoctorPublicProfileComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['PATIENT'] }
-  },
-  {
-    path: 'patient/consultation/:id',
-    component: VideoConsultationComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['PATIENT'] }
-  },
-  {
-    path: 'patient/vitals',
-    component: VitalsTrackingComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['PATIENT'] }
-  },
-  { path: '**', component: NotFoundComponent }
+
+  { path: '**', loadComponent: () => import('./shared/not-found.component').then((m) => m.NotFoundComponent) }
 ];

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, Output, OnInit, OnDestroy, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AppointmentService } from '../core/services/appointment.service';
@@ -6,6 +6,7 @@ import { Doctor } from '../core/services/doctor.service';
 import { ToastService } from '../core/services/toast.service';
 import { SelectDropdownComponent, SelectOption } from './select-dropdown.component';
 import { ModalShellComponent } from './ui/modal-shell.component';
+import { doctorDisplayName, doctorInitial as getDoctorInitial } from './utils/doctor-name.util';
 
 @Component({
   selector: 'app-emergency-appointment-modal',
@@ -29,8 +30,8 @@ import { ModalShellComponent } from './ui/modal-shell.component';
       <!-- Header -->
       <div modalHeader class="bg-gradient-to-r from-[#53131c] via-[#6d1825] to-[#801b2a] px-4 sm:px-5 py-3 flex items-center justify-between border-b border-red-900/40 shrink-0 relative overflow-hidden">
         <div class="flex items-center gap-2.5 z-10">
-          <div class="w-8 h-8 rounded-xl bg-red-500/20 border border-red-500/30 flex items-center justify-center text-red-400 shrink-0 shadow-inner">
-            <i class="fa-solid fa-bell-exclamation text-sm"></i>
+          <div class="w-8 h-8 rounded-xl bg-red-500/20 border border-red-500/30 flex items-center justify-center text-red-700 dark:text-red-400 shrink-0 shadow-inner">
+            <i class="fa-solid fa-bell-exclamation text-sm" aria-hidden="true"></i>
           </div>
           <div>
             <h2 class="text-sm sm:text-base font-bold text-white tracking-tight">Emergency Booking Confirmation</h2>
@@ -40,7 +41,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
         <div class="flex items-center gap-2 z-10">
           <!-- Live Time Display on Top Right Header -->
           <div class="px-2.5 py-1 rounded-lg bg-red-950/60 border border-red-500/30 text-red-100 text-[11px] font-bold tracking-wide flex items-center gap-1.5 shadow-sm">
-            <i class="fa-regular fa-clock text-red-400 text-[10px]"></i>
+            <i class="fa-regular fa-clock text-red-700 dark:text-red-400 text-[10px]" aria-hidden="true"></i>
             <span>{{ currentTime }}</span>
           </div>
           <button 
@@ -49,7 +50,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
             class="w-7 h-7 rounded-lg bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-100 hover:text-white transition-all flex items-center justify-center shrink-0 cursor-pointer" 
             (click)="close()"
           >
-            <i class="fa-solid fa-xmark text-xs"></i>
+            <i class="fa-solid fa-xmark text-xs" aria-hidden="true"></i>
           </button>
         </div>
       </div>
@@ -59,8 +60,8 @@ import { ModalShellComponent } from './ui/modal-shell.component';
         
         <!-- Vital Information Warning Notice Card -->
         <div class="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-red-900/60 rounded-xl p-2.5 sm:p-3 flex gap-2.5 text-rose-800 dark:text-red-200 shadow-sm">
-          <div class="w-7 h-7 rounded-lg bg-red-500/20 border border-red-500/30 text-red-400 flex items-center justify-center text-xs shrink-0 mt-0.5">
-            <i class="fa-solid fa-triangle-exclamation"></i>
+          <div class="w-7 h-7 rounded-lg bg-red-500/20 border border-red-500/30 text-red-700 dark:text-red-400 flex items-center justify-center text-xs shrink-0 mt-0.5">
+            <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
           </div>
           <div class="space-y-0.5 min-w-0">
             <h4 class="font-bold text-[var(--text)] text-xs">Vital Information</h4>
@@ -81,7 +82,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
             [class.border-red-500]="showValidation && !selectedDoctorId"
           >
             <div class="w-7 h-7 rounded-lg bg-[var(--panel)] border border-[var(--border)] text-[var(--primary)] flex items-center justify-center text-[11px] shrink-0 mr-2">
-              <i class="fa-solid fa-user-doctor"></i>
+              <i class="fa-solid fa-user-doctor" aria-hidden="true"></i>
             </div>
             <app-select-dropdown 
               label="" 
@@ -93,7 +94,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
             >
             </app-select-dropdown>
           </div>
-          <p *ngIf="showValidation && !selectedDoctorId" class="text-red-400 text-[11px] ml-1 animate-pulse">
+          <p *ngIf="showValidation && !selectedDoctorId" class="text-red-700 dark:text-red-400 text-[11px] ml-1 animate-pulse">
             Please select a doctor to proceed.
           </p>
         </div>
@@ -101,7 +102,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
         <!-- Doctor Details Bar (Short: Name, Specialization, Fees in one line) -->
         <div *ngIf="selectedDoctor" class="bg-[var(--panel)] rounded-xl px-3 py-2 border border-[var(--border)] shadow-sm flex items-center justify-between gap-2.5 text-xs">
           <div class="flex items-center gap-1.5 min-w-0">
-            <i class="fa-solid fa-user-doctor text-[var(--primary)] text-[11px] shrink-0"></i>
+            <i class="fa-solid fa-user-doctor text-[var(--primary)] text-[11px] shrink-0" aria-hidden="true"></i>
             <span class="font-bold text-[var(--text)] truncate">
               {{ formatDoctorName(selectedDoctor) }}
             </span>
@@ -130,7 +131,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
             class="relative bg-[var(--bg)] border border-[var(--border)] rounded-xl px-3 py-1.5 flex items-center gap-2 focus-within:border-[var(--primary)] transition-colors"
             [class.border-red-500]="showValidation && !reason.trim()"
           >
-            <i class="fa-solid fa-file-lines text-[var(--primary)] text-[11px] shrink-0"></i>
+            <i class="fa-solid fa-file-lines text-[var(--primary)] text-[11px] shrink-0" aria-hidden="true"></i>
             <input 
               type="text"
               class="w-full bg-transparent text-[var(--text)] text-xs placeholder-[var(--muted)] focus:outline-none font-medium truncate" 
@@ -139,7 +140,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
               placeholder="Enter emergency reason..."
             />
           </div>
-          <p *ngIf="showValidation && !reason.trim()" class="text-red-400 text-[11px] ml-1 animate-pulse">
+          <p *ngIf="showValidation && !reason.trim()" class="text-red-700 dark:text-red-400 text-[11px] ml-1 animate-pulse">
             Emergency reason is required.
           </p>
         </div>
@@ -159,7 +160,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
               ? 'border-rose-600 bg-rose-600 text-white shadow-sm shadow-rose-500/50 scale-105' 
               : 'border-gray-400 dark:border-gray-500 bg-transparent group-hover:border-rose-400'"
           >
-            <i *ngIf="isConfirmed" class="fa-solid fa-check text-[8px]"></i>
+            <i *ngIf="isConfirmed" class="fa-solid fa-check text-[8px]" aria-hidden="true"></i>
           </div>
 
           <!-- Label Text -->
@@ -179,17 +180,17 @@ import { ModalShellComponent } from './ui/modal-shell.component';
       <div modalFooter class="p-3 sm:p-3.5 border-t border-[var(--border)] bg-[var(--bg)] flex items-center justify-end gap-2.5 rounded-b-2xl shrink-0">
         <button 
           type="button"
-          class="px-3 py-1.5 text-xs font-medium rounded-xl border border-[var(--border)] bg-[var(--panel)] text-[var(--text)] hover:bg-[var(--bg)] transition-all flex items-center gap-1.5 cursor-pointer" 
+          class="btn-size-md px-3 text-xs font-medium rounded-xl border border-[var(--border)] bg-[var(--panel)] text-[var(--text)] hover:bg-[var(--bg)] transition-all flex items-center gap-1.5 cursor-pointer" 
           (click)="close()" 
           [disabled]="booking"
         >
-          <i class="fa-solid fa-xmark text-[10px]"></i>
+          <i class="fa-solid fa-xmark text-[10px]" aria-hidden="true"></i>
           <span>Cancel Request</span>
         </button>
 
         <button 
           type="button"
-          class="px-3.5 py-1.5 rounded-xl font-bold text-xs text-white transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+          class="btn-size-sm px-3.5 rounded-xl font-bold text-xs text-white transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
           [disabled]="booking || !isConfirmed || !selectedDoctorId"
           [ngClass]="{
             'opacity-40 !cursor-not-allowed bg-gray-500': !isConfirmed || !selectedDoctorId,
@@ -197,8 +198,8 @@ import { ModalShellComponent } from './ui/modal-shell.component';
           }"
           (click)="bookEmergencyAppointment()" 
         >
-          <i *ngIf="booking" class="fa-solid fa-circle-notch fa-spin text-[10px]"></i>
-          <i *ngIf="!booking" class="fa-solid fa-bell text-[10px]"></i>
+          <i *ngIf="booking" class="fa-solid fa-circle-notch fa-spin text-[10px]" aria-hidden="true"></i>
+          <i *ngIf="!booking" class="fa-solid fa-bell text-[10px]" aria-hidden="true"></i>
           <span>{{ booking ? 'Processing Emergency Request...' : 'Confirm Emergency Booking' }}</span>
         </button>
       </div>
@@ -224,15 +225,22 @@ export class EmergencyAppointmentModalComponent implements OnInit, OnDestroy, On
   currentTime = '';
   private timer: any;
 
+  // Hosted by OnPush pages: the clock tick and booking result request a check
+  private cdr = inject(ChangeDetectorRef);
+
   constructor(private appointmentService: AppointmentService, private toast: ToastService) { }
 
   ngOnInit() {
     this.updateClock();
-    this.timer = setInterval(() => this.updateClock(), 1000);
     this.syncDoctorSelection();
   }
 
   ngOnChanges(changes: SimpleChanges) {
+    // The clock only ticks while the modal is open (it is always mounted on the booking page)
+    if (changes['isOpen']) {
+      if (this.isOpen) this.startClock();
+      else this.stopClock();
+    }
     if (changes['isOpen'] && this.isOpen) {
       this.syncDoctorSelection();
       this.reason = 'Emergency booking';
@@ -245,8 +253,22 @@ export class EmergencyAppointmentModalComponent implements OnInit, OnDestroy, On
   }
 
   ngOnDestroy() {
+    this.stopClock();
+  }
+
+  private startClock() {
+    if (this.timer) return;
+    this.updateClock();
+    this.timer = setInterval(() => {
+      this.updateClock();
+      this.cdr.markForCheck();
+    }, 1000);
+  }
+
+  private stopClock() {
     if (this.timer) {
       clearInterval(this.timer);
+      this.timer = null;
     }
   }
 
@@ -284,17 +306,11 @@ export class EmergencyAppointmentModalComponent implements OnInit, OnDestroy, On
   }
 
   formatDoctorName(d: Doctor): string {
-    if (!d) return '';
-    const parts = [d.firstName, d.lastName].filter(Boolean);
-    if (parts.length > 0) {
-      return `Dr. ${parts.join(' ')}`;
-    }
-    return d.name ? `Dr. ${d.name}` : (d.username ? `Dr. ${d.username}` : 'Doctor');
+    return doctorDisplayName(d) || 'Doctor';
   }
 
   doctorInitial(d: Doctor): string {
-    if (!d) return 'D';
-    return (d.firstName?.charAt(0) || d.name?.charAt(0) || 'D').toUpperCase();
+    return getDoctorInitial(d);
   }
 
   close() {
@@ -354,12 +370,14 @@ export class EmergencyAppointmentModalComponent implements OnInit, OnDestroy, On
 
           // Close modal
           this.close();
+          this.cdr.markForCheck();
         },
         error: (err) => {
           this.booking = false;
           const msg = err.error?.error || 'Failed to book emergency appointment. Please try again.';
           this.error = msg;
           this.toast.showError(msg);
+          this.cdr.markForCheck();
         }
       });
   }

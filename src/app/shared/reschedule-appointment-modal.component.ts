@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SelectDropdownComponent } from './select-dropdown.component';
@@ -17,7 +17,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
       title="Reschedule Appointment"
       titleId="reschedule-modal-title"
       icon="fa-regular fa-calendar-check text-xl"
-      iconWrapClass="bg-blue-500/10 text-blue-400"
+      iconWrapClass="bg-blue-500/10 text-blue-700 dark:text-blue-400"
       maxWidthClass="max-w-md"
       panelClass="panel border border-gray-700/50 rounded-2xl"
       bodyClass="p-6"
@@ -26,10 +26,10 @@ import { ModalShellComponent } from './ui/modal-shell.component';
     >
       <div *ngIf="appointment" class="space-y-4">
         <div class="bg-gray-800/50 rounded-lg p-3 text-sm flex items-start gap-3 border border-gray-700/50">
-           <i class="fa-solid fa-user-doctor text-blue-400 mt-0.5"></i>
+           <i class="fa-solid fa-user-doctor text-blue-700 dark:text-blue-400 mt-0.5" aria-hidden="true"></i>
            <div>
-              <span class="text-gray-400 block text-xs uppercase tracking-wider">With Doctor</span>
-              <span class="font-semibold text-gray-200">{{ appointment?.doctorName }}</span>
+              <span class="text-gray-700 dark:text-gray-400 block text-xs uppercase tracking-wider">With Doctor</span>
+              <span class="font-semibold text-gray-700 dark:text-gray-200">{{ appointment?.doctorName }}</span>
            </div>
         </div>
 
@@ -57,8 +57,8 @@ import { ModalShellComponent } from './ui/modal-shell.component';
           </button>
         </div>
 
-        <div *ngIf="error" class="p-3 rounded bg-red-900/20 border border-red-500/30 text-red-400 text-sm flex items-center gap-2">
-           <i class="fa-solid fa-circle-exclamation"></i> {{ error }}
+        <div *ngIf="error" class="p-3 rounded bg-red-900/20 border border-red-500/30 text-red-700 dark:text-red-400 text-sm flex items-center gap-2">
+           <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i> {{ error }}
         </div>
       </div>
     </app-modal-shell>
@@ -76,7 +76,8 @@ export class RescheduleAppointmentModalComponent {
   availableSlots: string[] = [];
   error: string | null = null;
 
-  constructor(private apptApi: AppointmentService) { }
+  // Used inside OnPush pages (dashboard, my-appointments): slot results request a check
+  constructor(private apptApi: AppointmentService, private cdr: ChangeDetectorRef) { }
 
   onClose() {
     this.reset();
@@ -108,8 +109,12 @@ export class RescheduleAppointmentModalComponent {
         } else {
           this.availableSlots = resp.availableSlots || [];
         }
+        this.cdr.markForCheck();
       },
-      error: () => (this.error = 'Unable to load slots'),
+      error: () => {
+        this.error = 'Unable to load slots';
+        this.cdr.markForCheck();
+      },
     });
   }
 

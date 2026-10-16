@@ -6,18 +6,19 @@ import { DoctorService, Doctor } from '../../core/services/doctor.service';
 import { DoctorProfileService } from '../../core/services/doctor-profile.service';
 import { AppointmentService } from '../../core/services/appointment.service';
 import { DoctorDetailsPanelComponent } from '../../shared/doctor-details-panel.component';
-import { PatientLayoutComponent } from '../../shared/patient-layout.component';
 import { PaymentPopupComponent, PaymentDetails } from '../../shared/payment-popup.component';
 import { DoctorBookingModalComponent } from '../../shared/doctor-booking-modal.component';
 import { ToastService } from '../../core/services/toast.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PaymentService } from '../../core/services/payment.service';
 import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
+import { PageContainerComponent } from '../../shared/ui/page-container.component';
+import { doctorDisplayName } from '../../shared/utils/doctor-name.util';
 
 @Component({
   selector: 'app-doctor-public-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PatientLayoutComponent, DoctorDetailsPanelComponent, PaymentPopupComponent, DoctorBookingModalComponent, PageLoaderComponent],
+  imports: [PageContainerComponent, CommonModule, RouterModule, FormsModule, DoctorDetailsPanelComponent, PaymentPopupComponent, DoctorBookingModalComponent, PageLoaderComponent],
   templateUrl: './doctor-public-profile.component.html',
   styleUrl: './doctor-public-profile.component.css'
 })
@@ -76,7 +77,7 @@ export class DoctorPublicProfileComponent {
     this.doctors.getByUsername(username).subscribe({
       next: (d) => {
         this.doctor = d;
-        this.age = this.computeAge(d?.dateOfBirth);
+        this.age = (d as any)?.age ?? this.computeAge(d?.dateOfBirth);
         this.avgRating = d?.averageRating ?? null;
 
         // Populate detail fields from the enriched DTO
@@ -124,10 +125,6 @@ export class DoctorPublicProfileComponent {
     });
   }
 
-
-  selectSlot(slot: string) {
-    this.selectedSlot = slot;
-  }
 
   toIso(date: string, time: string) {
     // Ensure seconds present
@@ -207,16 +204,8 @@ export class DoctorPublicProfileComponent {
     this.bookingOpen = false;
   }
 
-  doctorInitial(d: Doctor) {
-    const base = (d.name || `${d.firstName || ''} ${d.lastName || ''}`).trim();
-    const stripped = base.replace(/^dr\.?\s+/i, '');
-    return stripped.charAt(0) || '?';
-  }
-
   formatDoctorName(d: Doctor) {
-    const base = (d.name || `${d.firstName || ''} ${d.lastName || ''}`).trim();
-    if (!base) return '';
-    return /^dr\.?\s+/i.test(base) ? base : `Dr ${base}`;
+    return doctorDisplayName(d);
   }
 
   getAppointmentInfo(): string {
