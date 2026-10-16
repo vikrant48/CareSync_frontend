@@ -11,7 +11,7 @@ import { SpecializationAutocompleteComponent } from '../../shared/specialization
 import { SelectOption } from '../../shared/select-dropdown.component';
 import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
-import { ButtonComponent, FilterBarComponent, FilterConfig } from '../../shared/components';
+import { FilterBarComponent, FilterConfig } from '../../shared/components';
 import { PageContainerComponent } from '../../shared/ui/page-container.component';
 import { PaginatorComponent } from '../../shared/ui/paginator.component';
 import { StickyActionBarComponent } from '../../shared/ui/sticky-action-bar.component';
@@ -23,7 +23,7 @@ import { markForCheckOn } from '../../shared/utils/mark-for-check';
 @Component({
   selector: 'app-patient-book-appointment',
   standalone: true,
-  imports: [InrPipe, StickyActionBarComponent, PaginatorComponent, PageContainerComponent, CommonModule, RouterModule, FormsModule, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent, PageLoaderComponent, EmptyStateComponent, ButtonComponent, FilterBarComponent],
+  imports: [InrPipe, StickyActionBarComponent, PaginatorComponent, PageContainerComponent, CommonModule, RouterModule, FormsModule, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent, PageLoaderComponent, EmptyStateComponent, FilterBarComponent],
   // OnPush: HTTP results go through markForCheckOn; child modals/autocomplete request their own checks
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './patient-book-appointment.component.html',

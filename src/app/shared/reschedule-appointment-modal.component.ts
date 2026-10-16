@@ -29,7 +29,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
            <i class="fa-solid fa-user-doctor text-blue-700 dark:text-blue-400 mt-0.5" aria-hidden="true"></i>
            <div>
               <span class="text-gray-700 dark:text-gray-400 block text-xs uppercase tracking-wider">With Doctor</span>
-              <span class="font-semibold text-gray-700 dark:text-gray-200">{{ appointment?.doctorName }}</span>
+              <span class="font-semibold text-gray-700 dark:text-gray-200">{{ appointment.doctorName }}</span>
            </div>
         </div>
 

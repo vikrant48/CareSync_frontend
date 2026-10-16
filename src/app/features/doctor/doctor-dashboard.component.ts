@@ -11,8 +11,6 @@ import { AuthService } from '../../core/services/auth.service';
 import { DoctorProfileService } from '../../core/services/doctor-profile.service';
 import { AppointmentService, DoctorAppointmentItem, DoctorDashboardMetrics } from '../../core/services/appointment.service';
 import { PatientProfileService, PatientDto, MedicalHistoryItem, MedicalHistoryWithDoctorItem } from '../../core/services/patient-profile.service';
-import { DatePickerComponent } from '../../shared/date-picker.component';
-import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 import { DoctorDashboardScheduleComponent } from './doctor-dashboard-schedule.component';
 import { DoctorDashboardPatientsComponent } from './doctor-dashboard-patients.component';
 
@@ -30,8 +28,8 @@ type DashboardTrend = { text: string; direction: 'up' | 'down' | 'flat' };
   imports: [PageContainerComponent, 
     CommonModule, RouterModule, FormsModule, PatientDetailsModalComponent,
     MedicalHistoryDetailModalComponent, MedicalHistoryFormModalComponent,
-    DoctorNotificationComponent, DatePickerComponent,
-    ModalShellComponent, DoctorDashboardScheduleComponent, DoctorDashboardPatientsComponent
+    DoctorNotificationComponent,
+    DoctorDashboardScheduleComponent, DoctorDashboardPatientsComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './doctor-dashboard.component.html',
