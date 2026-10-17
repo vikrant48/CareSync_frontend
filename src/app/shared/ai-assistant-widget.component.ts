@@ -89,7 +89,7 @@ export interface SavedChatSession {
             [(ngModel)]="userInput"
             name="compactUserInput"
             [disabled]="isLoading() || isListening()"
-            [placeholder]="isListening() ? 'Listening...' : 'Type your health question...'"
+            [placeholder]="isListening() ? 'Listening...' : (isDoctor() ? 'Type your clinical question...' : 'Ask anything, e.g. book a skin doctor tomorrow after 5pm')"
             class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl py-3 pl-4 pr-24 text-sm text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] disabled:opacity-50 transition-all"
           />
           <div class="absolute right-2.5 flex items-center gap-1">
@@ -327,7 +327,7 @@ export interface SavedChatSession {
                   [(ngModel)]="userInput"
                   name="expandedUserInput"
                   [disabled]="isLoading() || isListening()"
-                  [placeholder]="isListening() ? 'Listening...' : 'Type your health question...'"
+                  [placeholder]="isListening() ? 'Listening...' : (isDoctor() ? 'Type your clinical question...' : 'Ask anything, e.g. book a skin doctor tomorrow after 5pm')"
                   class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-2xl py-3.5 pl-5 pr-28 text-sm text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] disabled:opacity-50 transition-all"
                 />
                 <div class="absolute right-3 flex items-center gap-1.5">
@@ -374,7 +374,7 @@ export interface SavedChatSession {
           <i class="fas fa-robot text-xs text-[var(--primary)]" aria-hidden="true"></i>
         </div>
         <div class="bg-[var(--panel)] p-3.5 rounded-2xl rounded-tl-none shadow-md border border-[var(--border)] text-[var(--text)]">
-          <p class="text-sm" *ngIf="!isDoctor()">Hello! I'm your CareSync Assistant. How can I help you with your health today?</p>
+          <p class="text-sm" *ngIf="!isDoctor()">Hello! I'm your CareSync Assistant. Tell me what you need in your own words: I can find doctors, check open slots, book, move or cancel appointments (you confirm every change), and explain health topics.</p>
           <p class="text-sm" *ngIf="isDoctor()">Hello Doctor. I'm your Clinical Assistant. How can I assist you with patient history or clinical queries today?</p>
           <p class="text-[10px] text-[var(--muted)] mt-2 italic font-medium">{{ isDoctor() ? 'This AI assistant is for clinical guidance and does not replace medical evidence.' : 'CareSync AI can provide health guidance but is not a substitute for professional medical advice.' }}</p>
           
