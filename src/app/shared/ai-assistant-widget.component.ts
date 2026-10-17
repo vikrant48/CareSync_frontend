@@ -1,4 +1,5 @@
 import { Component, inject, signal, ElementRef, ViewChild, AfterViewChecked, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AiAssistantService } from '../core/services/ai-assistant.service';
@@ -423,6 +424,34 @@ export interface SavedChatSession {
           </div>
         </div>
 
+        <!-- Emergency / urgent-care notice (from the server's red-flag rules or the AI's triage) -->
+        <div *ngIf="msg.emergency as em" role="alert" class="ml-10 rounded-xl border p-3.5 space-y-2.5 shadow-md"
+             [ngClass]="em.level === 'EMERGENCY'
+               ? 'bg-rose-50 border-rose-300 text-rose-900 dark:bg-rose-950/60 dark:border-rose-500/60 dark:text-rose-100'
+               : 'bg-amber-50 border-amber-300 text-amber-900 dark:bg-amber-950/50 dark:border-amber-500/50 dark:text-amber-100'">
+          <div class="flex items-start gap-2">
+            <i class="fas mt-0.5" [ngClass]="em.category === 'MENTAL_HEALTH' ? 'fa-hand-holding-heart' : (em.level === 'EMERGENCY' ? 'fa-triangle-exclamation' : 'fa-clock')" aria-hidden="true"></i>
+            <div class="min-w-0">
+              <div class="text-sm font-bold">{{ em.title }}</div>
+              <p class="text-xs mt-0.5 leading-relaxed">{{ em.message }}</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <a *ngFor="let c of em.contacts; let first = first" [href]="'tel:' + c.number"
+               class="h-9 px-3 rounded-lg text-xs font-bold inline-flex items-center gap-1.5 transition-colors"
+               [ngClass]="first && em.level === 'EMERGENCY'
+                 ? 'bg-rose-600 hover:bg-rose-700 text-white'
+                 : 'bg-white/80 dark:bg-white/10 border border-black/10 dark:border-white/20 hover:bg-white dark:hover:bg-white/20'">
+              <i class="fas fa-phone" aria-hidden="true"></i> {{ c.label }}: {{ c.number }}
+            </a>
+            <button *ngIf="em.emergencyBooking && !isDoctor()" type="button" (click)="openEmergencyBooking()"
+                    class="h-9 px-3 rounded-lg text-xs font-bold inline-flex items-center gap-1.5 bg-white/80 dark:bg-white/10 border border-black/10 dark:border-white/20 hover:bg-white dark:hover:bg-white/20 transition-colors">
+              <i class="fas fa-bolt" aria-hidden="true"></i> Emergency booking
+            </button>
+          </div>
+          <p *ngIf="em.reasons?.length" class="text-[10px] opacity-80">Flagged for: {{ em.reasons!.join(', ') }}</p>
+        </div>
+
         <!-- Suggestion Cards based on type -->
         <div *ngIf="msg.suggestion" class="ml-10 space-y-2 animate-in zoom-in-95 duration-200">
            
@@ -673,6 +702,15 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
   private appointmentService = inject(AppointmentService);
   private authService = inject(AuthService);
   private toast = inject(ToastService);
+  private router = inject(Router);
+
+  /** Emergency banner shortcut: Find & Book with the emergency booking form open */
+  openEmergencyBooking() {
+    if (this.isOpen()) {
+      this.toggleChat();
+    }
+    this.router.navigate(['/patient/book-appointment'], { queryParams: { emergency: 1 } });
+  }
 
   isOpen = signal(false);
   isExpanded = signal(false);
@@ -939,7 +977,8 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
             text: res.response!,
             isAi: true,
             timestamp: new Date(),
-            suggestion: res.suggestion
+            suggestion: res.suggestion,
+            emergency: res.emergency
           }]);
           this.saveCurrentSession();
         } else {

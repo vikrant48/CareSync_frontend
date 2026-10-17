@@ -9,6 +9,19 @@ export interface AiChatResponse {
     error?: string;
     conversationId?: string;
     suggestion?: AiBookingSuggestion;
+    /** Emergency or urgent-care notice to show above the answer */
+    emergency?: AiEmergencyInfo;
+}
+
+export interface AiEmergencyInfo {
+    /** EMERGENCY: act now. URGENT: see a doctor today. */
+    level: 'EMERGENCY' | 'URGENT';
+    category: 'MEDICAL' | 'MENTAL_HEALTH';
+    title: string;
+    message: string;
+    reasons?: string[];
+    contacts: { label: string; number: string }[];
+    emergencyBooking: boolean;
 }
 
 export type SuggestionType = 'SPECIALIZATIONS' | 'DOCTORS' | 'DATES' | 'SLOTS' | 'CONFIRM' | 'MY_APPOINTMENTS';
@@ -51,6 +64,7 @@ export interface ChatMessage {
     isAi: boolean;
     timestamp: Date;
     suggestion?: AiBookingSuggestion;
+    emergency?: AiEmergencyInfo;
 }
 
 export interface MedicalSummaryResponse {

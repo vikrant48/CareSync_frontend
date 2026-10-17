@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, TemplateRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DoctorService, Doctor } from '../../core/services/doctor.service';
 import { MasterDataService } from '../../core/services/master-data.service';
@@ -191,8 +191,13 @@ export class PatientBookAppointmentComponent {
     private router: Router,
     private masterDataService: MasterDataService,
     private appointmentService: AppointmentService,
-    private toast: ToastService
+    private toast: ToastService,
+    route: ActivatedRoute
   ) {
+    // Opened from the AI chat's emergency notice: show the emergency booking form straight away
+    if (route.snapshot.queryParamMap.get('emergency') === '1') {
+      setTimeout(() => this.openEmergencyModal());
+    }
     this.searchDoctors();
     // Hearts on the cards need to know which doctors are saved
     this.loadSaved(false);
