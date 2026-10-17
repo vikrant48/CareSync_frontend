@@ -1,845 +1,687 @@
-<div class="h-[calc(100vh-3.5rem)] overflow-y-auto custom-scrollbar bg-[var(--bg)] text-[var(--text)] flex flex-col">
-    <app-admin-chrome [section]="activeTab" [userCount]="users.length" [doctorCount]="doctorTotalElements"
-        [blockedCount]="blockedIPs.length"></app-admin-chrome>
+<app-admin-chrome [section]="activeTab" [userCount]="loadingUsers ? null : users.length"
+    [pendingDoctorCount]="totalPendingDoctorsCount" [blockedCount]="blockedIPs.length">
 
-    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-24 sm:pb-36">
-        <!-- System KPI Widgets Bar -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-8 mobile-compact-grid">
-            <button type="button" (click)="openSection('users')"
-                class="bg-[var(--panel)]/60 border border-[var(--border)]/60 rounded-xl p-2.5 sm:p-4 flex items-center gap-2 sm:gap-3 text-left cursor-pointer hover:border-[var(--primary)]/40 transition mobile-compact-card">
-                <div
-                    class="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-700 dark:text-blue-400 shrink-0 text-lg">
-                    <i class="fa-solid fa-users" aria-hidden="true"></i>
-                </div>
-                <div>
-                    <div class="text-[11px] sm:text-xs text-muted font-medium">Total Users</div>
-                    <div class="text-base sm:text-xl font-bold text-[var(--text)]">{{ totalUsersCount }}</div>
-                </div>
-            </button>
-            <button type="button" (click)="openSection('doctors', 'VERIFIED')"
-                class="bg-[var(--panel)]/60 border border-[var(--border)]/60 rounded-xl p-2.5 sm:p-4 flex items-center gap-2 sm:gap-3 text-left cursor-pointer hover:border-[var(--primary)]/40 transition mobile-compact-card">
-                <div
-                    class="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-700 dark:text-indigo-300 shrink-0 text-lg">
-                    <i class="fa-solid fa-user-doctor" aria-hidden="true"></i>
-                </div>
-                <div>
-                    <div class="text-[11px] sm:text-xs text-muted font-medium">Verified Doctors</div>
-                    <div class="text-base sm:text-xl font-bold text-[var(--text)]">{{ activeDoctorsCount }}</div>
-                </div>
-            </button>
-            <button type="button" (click)="openSection('doctors', 'UNVERIFIED')"
-                class="bg-[var(--panel)]/60 border border-[var(--border)]/60 rounded-xl p-2.5 sm:p-4 flex items-center gap-2 sm:gap-3 text-left cursor-pointer hover:border-[var(--primary)]/40 transition mobile-compact-card">
-                <div
-                    class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-700 dark:text-amber-400 shrink-0 text-lg">
-                    <i class="fa-solid fa-user-clock" aria-hidden="true"></i>
-                </div>
-                <div>
-                    <div class="text-[11px] sm:text-xs text-muted font-medium">Pending Verifications</div>
-                    <div class="text-base sm:text-xl font-bold text-[var(--text)]">{{ pendingDoctorsCount }}</div>
-                </div>
-            </button>
-            <button type="button" (click)="openSection('security')"
-                class="bg-[var(--panel)]/60 border border-[var(--border)]/60 rounded-xl p-2.5 sm:p-4 flex items-center gap-2 sm:gap-3 text-left cursor-pointer hover:border-[var(--primary)]/40 transition mobile-compact-card">
-                <div
-                    class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-rose-700 dark:text-rose-400 shrink-0 text-lg">
-                    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
-                </div>
-                <div>
-                    <div class="text-[11px] sm:text-xs text-muted font-medium">Blocked IPs</div>
-                    <div class="text-base sm:text-xl font-bold text-[var(--text)]">{{ blockedIPsCount }}</div>
-                </div>
-            </button>
-        </div>
+    <div class="max-w-7xl mx-auto p-3 sm:p-6 pb-24 space-y-4 sm:space-y-6">
 
-        <!-- TAB 1: USER MANAGEMENT -->
-        <div *ngIf="activeTab === 'users'"
-            class="bg-[var(--panel)]/50 border border-[var(--border)]/60 rounded-xl sm:rounded-2xl p-3 sm:p-6 mb-8 sm:mb-16">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 mb-4 sm:mb-6">
-                <div>
-                    <h2 class="font-display text-base sm:text-lg font-bold text-[var(--text)]">System Users Directory</h2>
-                    <p class="text-[11px] sm:text-xs text-muted">View user accounts, manage active status, and reset
-                        passwords</p>
-                </div>
+        <!-- ============================================================ OVERVIEW -->
+        <ng-container *ngIf="activeTab === 'overview'">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <app-stat-card label="Total users" icon="fa-solid fa-users" tone="primary" [clickable]="true"
+                    [loading]="loadingUsers" [value]="totalUsersCount"
+                    [hint]="countUsers('DOCTOR') + ' doctors · ' + countUsers('PATIENT') + ' patients'"
+                    (cardClick)="openSection('users')"></app-stat-card>
+                <app-stat-card label="Verified doctors" icon="fa-solid fa-user-check" tone="success" [clickable]="true"
+                    [loading]="loadingDoctors" [value]="totalVerifiedDoctorsCount" hint="Visible as verified to patients"
+                    (cardClick)="openSection('doctors', 'VERIFIED')"></app-stat-card>
+                <app-stat-card label="Waiting for verification" icon="fa-solid fa-user-clock" tone="warning"
+                    [clickable]="true" [loading]="loadingDoctors" [value]="totalPendingDoctorsCount"
+                    hint="Doctors to review" (cardClick)="openSection('doctors', 'UNVERIFIED')"></app-stat-card>
+                <app-stat-card label="Blocked IPs" icon="fa-solid fa-shield-halved" tone="danger" [clickable]="true"
+                    [loading]="loadingBlockedIPs" [value]="blockedIPs.length" hint="Blocked from signing in"
+                    (cardClick)="openSection('security')"></app-stat-card>
             </div>
 
-            <app-filter-bar class="mb-4 sm:mb-6 block" [filters]="userFilterConfigs" [values]="userFilterValues"
-                [theme]="'doctor'" (filterChange)="onUserFilterChange($event)">
-            </app-filter-bar>
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6">
+                <!-- Needs attention -->
+                <section class="adm-card p-4 sm:p-5 lg:col-span-3">
+                    <h2 class="adm-section-title">Needs your attention</h2>
+                    <p class="adm-section-subtitle mb-4">Things waiting for an admin decision.</p>
 
-            <app-skeleton *ngIf="loadingUsers" variant="table" [count]="6"
-                panelClass="!bg-[var(--bg)]/40 !border-[var(--border)]/50"></app-skeleton>
+                    <div class="space-y-2.5">
+                        <div *ngIf="totalPendingDoctorsCount > 0" class="flex items-center gap-3 p-3 rounded-xl border border-amber-500/30 bg-amber-500/5">
+                            <div class="w-9 h-9 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-user-clock" aria-hidden="true"></i>
+                            </div>
+                            <div class="flex-1 min-w-0 text-sm">
+                                <div class="font-semibold">{{ totalPendingDoctorsCount }} {{ totalPendingDoctorsCount === 1 ? 'doctor is' : 'doctors are' }} waiting for verification</div>
+                                <div class="text-xs text-[var(--muted)]">Check their credentials and certificates.</div>
+                            </div>
+                            <button type="button" class="adm-btn adm-btn--warning shrink-0" (click)="openSection('doctors', 'UNVERIFIED')">Review</button>
+                        </div>
 
-            <!-- Mobile card rows -->
-            <div *ngIf="!loadingUsers" class="xl:hidden space-y-2.5">
-                <article *ngFor="let u of filteredUsers"
-                    class="rounded-xl border border-[var(--border)]/50 bg-[var(--bg)]/50 p-3.5 space-y-3 active:scale-[0.99] transition-transform">
-                    <div class="flex items-start justify-between gap-3">
-                        <div class="min-w-0 flex items-center gap-3">
-                            <div
-                                class="w-10 h-10 rounded-full bg-[var(--panel)] border border-[var(--border)] flex items-center justify-center text-sm font-bold text-blue-700 dark:text-blue-300 shrink-0 uppercase">
+                        <div *ngIf="blockedIPs.length > 0" class="flex items-center gap-3 p-3 rounded-xl border border-rose-500/30 bg-rose-500/5">
+                            <div class="w-9 h-9 rounded-lg bg-rose-500/15 text-rose-700 dark:text-rose-400 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-ban" aria-hidden="true"></i>
+                            </div>
+                            <div class="flex-1 min-w-0 text-sm">
+                                <div class="font-semibold">{{ blockedIPs.length }} IP {{ blockedIPs.length === 1 ? 'address is' : 'addresses are' }} blocked</div>
+                                <div class="text-xs text-[var(--muted)]">Usually after too many failed sign-ins.</div>
+                            </div>
+                            <button type="button" class="adm-btn adm-btn--danger shrink-0" (click)="openSection('security')">View</button>
+                        </div>
+
+                        <div *ngIf="inactiveUsersCount > 0" class="flex items-center gap-3 p-3 rounded-xl border border-[var(--border)] bg-[var(--bg)]">
+                            <div class="w-9 h-9 rounded-lg bg-[var(--panel)] border border-[var(--border)] text-[var(--muted)] flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-user-slash" aria-hidden="true"></i>
+                            </div>
+                            <div class="flex-1 min-w-0 text-sm">
+                                <div class="font-semibold">{{ inactiveUsersCount }} inactive {{ inactiveUsersCount === 1 ? 'account' : 'accounts' }}</div>
+                                <div class="text-xs text-[var(--muted)]">These users cannot sign in.</div>
+                            </div>
+                            <button type="button" class="adm-btn adm-btn--ghost shrink-0" (click)="openSection('users')">Open</button>
+                        </div>
+
+                        <div *ngIf="!loadingDoctors && !loadingBlockedIPs && !loadingUsers && totalPendingDoctorsCount === 0 && blockedIPs.length === 0 && inactiveUsersCount === 0"
+                            class="flex items-center gap-3 p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 text-sm">
+                            <i class="fa-solid fa-circle-check text-emerald-600 dark:text-emerald-400 text-lg" aria-hidden="true"></i>
+                            <span class="font-semibold">All clear. Nothing is waiting for you.</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Quick actions -->
+                <section class="adm-card p-4 sm:p-5 lg:col-span-2">
+                    <h2 class="adm-section-title">Quick actions</h2>
+                    <p class="adm-section-subtitle mb-4">Common admin tasks.</p>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <button type="button" class="quick-action" (click)="openSection('users')">
+                            <i class="fa-solid fa-key text-[var(--primary)]" aria-hidden="true"></i>
+                            <span>Reset a password</span>
+                        </button>
+                        <button type="button" class="quick-action" (click)="openSection('master')">
+                            <i class="fa-solid fa-plus text-[var(--primary)]" aria-hidden="true"></i>
+                            <span>Add master data</span>
+                        </button>
+                        <button type="button" class="quick-action" (click)="openSection('appointments')">
+                            <i class="fa-solid fa-calendar-check text-[var(--primary)]" aria-hidden="true"></i>
+                            <span>Find an appointment</span>
+                        </button>
+                        <button type="button" class="quick-action" (click)="openSection('security')">
+                            <i class="fa-solid fa-lock text-[var(--primary)]" aria-hidden="true"></i>
+                            <span>Check encryption</span>
+                        </button>
+                    </div>
+                </section>
+            </div>
+
+            <app-admin-platform-stats class="block"></app-admin-platform-stats>
+        </ng-container>
+
+        <!-- ============================================================ USERS -->
+        <section *ngIf="activeTab === 'users'" class="adm-card p-4 sm:p-5 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+                <div>
+                    <h2 class="adm-section-title">Users</h2>
+                    <p class="adm-section-subtitle">
+                        {{ filteredUsers.length }} of {{ users.length }} accounts · deactivate, reset passwords and manage sign-ins
+                    </p>
+                </div>
+                <button type="button" class="adm-btn adm-btn--ghost self-start sm:self-auto" (click)="loadUsers()" [disabled]="loadingUsers">
+                    <i class="fa-solid fa-rotate" [class.fa-spin]="loadingUsers" aria-hidden="true"></i> Refresh
+                </button>
+            </div>
+
+            <app-filter-bar [filters]="userFilterConfigs" [values]="userFilterValues" [theme]="'doctor'"
+                containerClass="!shadow-none" (filterChange)="onUserFilterChange($event)"></app-filter-bar>
+
+            <app-page-loader *ngIf="loadingUsers" label="Loading users..."></app-page-loader>
+
+            <ng-container *ngIf="!loadingUsers">
+                <div *ngIf="filteredUsers.length === 0" class="py-12 text-center text-sm text-[var(--muted)]">
+                    <i class="fa-solid fa-user-xmark text-xl mb-2 block" aria-hidden="true"></i>
+                    No users match these filters.
+                </div>
+
+                <!-- Table (laptop and up) -->
+                <div *ngIf="filteredUsers.length > 0" class="hidden lg:block adm-table-wrap">
+                    <table class="adm-table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let u of pagedUsers">
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-xs font-bold uppercase shrink-0">
+                                            {{ (u.username || '?').charAt(0) }}
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="font-semibold truncate">{{ u.username }}</div>
+                                            <div class="text-[11px] font-mono text-[var(--muted)]">#{{ u.userId }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="adm-badge" [ngClass]="roleBadgeClass(u.role)">{{ roleLabel(u.role) }}</span></td>
+                                <td>
+                                    <span class="adm-badge" [ngClass]="u.isActive ? 'adm-badge--success' : 'adm-badge--danger'">
+                                        <span class="adm-badge__dot"></span>{{ u.isActive ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="flex items-center justify-end gap-1.5">
+                                        <button type="button" class="adm-btn adm-btn--sm adm-btn--ghost" (click)="openSessions(u)" title="See where this user is signed in">
+                                            <i class="fa-solid fa-laptop" aria-hidden="true"></i> Sign-ins
+                                        </button>
+                                        <button type="button" class="adm-btn adm-btn--sm adm-btn--ghost" (click)="openPasswordResetModal(u)">
+                                            <i class="fa-solid fa-key" aria-hidden="true"></i> Reset password
+                                        </button>
+                                        <button type="button" class="adm-btn adm-btn--sm w-[104px]" [disabled]="togglingUsername === u.username"
+                                            [ngClass]="u.isActive ? 'adm-btn--danger' : 'adm-btn--success'" (click)="toggleUserStatus(u)">
+                                            {{ togglingUsername === u.username ? 'Saving...' : (u.isActive ? 'Deactivate' : 'Activate') }}
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Cards (phones and tablets) -->
+                <div *ngIf="filteredUsers.length > 0" class="lg:hidden space-y-2.5">
+                    <article *ngFor="let u of pagedUsers" class="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg)] space-y-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-[var(--panel)] border border-[var(--border)] flex items-center justify-center text-sm font-bold uppercase shrink-0">
                                 {{ (u.username || '?').charAt(0) }}
                             </div>
-                            <div class="min-w-0">
-                                <div class="font-semibold text-[var(--text)] truncate">{{ u.username }}</div>
-                                <div class="text-[11px] font-mono text-muted">#{{ u.userId }}</div>
+                            <div class="min-w-0 flex-1">
+                                <div class="font-semibold truncate">{{ u.username }}</div>
+                                <div class="text-[11px] font-mono text-[var(--muted)]">#{{ u.userId }}</div>
+                            </div>
+                            <div class="flex flex-col items-end gap-1">
+                                <span class="adm-badge" [ngClass]="roleBadgeClass(u.role)">{{ roleLabel(u.role) }}</span>
+                                <span class="adm-badge" [ngClass]="u.isActive ? 'adm-badge--success' : 'adm-badge--danger'">
+                                    <span class="adm-badge__dot"></span>{{ u.isActive ? 'Active' : 'Inactive' }}
+                                </span>
                             </div>
                         </div>
-                        <span
-                            class="shrink-0 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide rounded-md border"
-                            [ngClass]="{
-                'bg-blue-500/20 border-blue-500/30 text-blue-700 dark:text-blue-300': u.role === 'DOCTOR',
-                'bg-sky-500/20 border-sky-500/30 text-sky-700 dark:text-sky-300': u.role === 'PATIENT',
-                'bg-purple-500/20 border-purple-500/30 text-purple-700 dark:text-purple-300': u.role === 'ADMIN'
-              }">
-                            {{ u.role }}
-                        </span>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-2">
-                        <span
-                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border"
-                            [ngClass]="{
-                'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400': u.isActive,
-                'bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-400': !u.isActive
-              }">
-                            <span class="w-1.5 h-1.5 rounded-full"
-                                [ngClass]="u.isActive ? 'bg-emerald-400' : 'bg-rose-400'"></span>
-                            {{ u.isActive ? 'Active' : 'Inactive' }}
-                        </span>
-                        <div class="grid grid-cols-2 gap-2 w-full">
-                        <button type="button" (click)="toggleUserStatus(u)" [disabled]="togglingUsername === u.username"
-                            class="btn-size-lg flex-1 px-3 rounded-xl text-xs font-semibold transition border shadow-sm inline-flex items-center justify-center"
-                            [ngClass]="{
-                'bg-rose-500/20 hover:bg-rose-500/30 text-rose-700 dark:text-rose-300 border-rose-500/40': u.isActive,
-                'bg-blue-500/20 hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border-blue-500/40': !u.isActive
-              }">
-                            {{ togglingUsername === u.username ? 'Updating...' : (u.isActive ? 'Set Inactive' : 'Set
-                            Active') }}
-                        </button>
-                        <button type="button" (click)="openPasswordResetModal(u)" title="Change User Password"
-                            class="btn-size-lg px-2.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md shadow-amber-500/20 transition flex items-center justify-center gap-1.5 min-w-0" aria-label="Change User Password">
-                            <i class="fa-solid fa-key text-xs" aria-hidden="true"></i>
-                            <span>Change Password</span>
-                        </button>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button type="button" class="adm-btn adm-btn--sm adm-btn--ghost" (click)="openSessions(u)">
+                                <i class="fa-solid fa-laptop" aria-hidden="true"></i> Sign-ins
+                            </button>
+                            <button type="button" class="adm-btn adm-btn--sm adm-btn--ghost" (click)="openPasswordResetModal(u)">
+                                <i class="fa-solid fa-key" aria-hidden="true"></i> Password
+                            </button>
+                            <button type="button" class="adm-btn adm-btn--sm" [disabled]="togglingUsername === u.username"
+                                [ngClass]="u.isActive ? 'adm-btn--danger' : 'adm-btn--success'" (click)="toggleUserStatus(u)">
+                                {{ togglingUsername === u.username ? 'Saving...' : (u.isActive ? 'Deactivate' : 'Activate') }}
+                            </button>
                         </div>
-                    </div>
-                </article>
-                <div *ngIf="filteredUsers.length === 0" class="py-10 text-center text-muted text-sm">No users match
-                    your criteria.</div>
-            </div>
+                    </article>
+                </div>
 
-            <!-- Desktop table -->
-            <div *ngIf="!loadingUsers"
-                class="hidden xl:block overflow-x-auto max-h-[min(60vh,480px)] overflow-y-auto custom-scrollbar rounded-xl border border-[var(--border)]/50">
-                <table class="w-full text-left text-sm text-[var(--text)] border-collapse">
-                    <thead
-                        class="bg-[var(--bg)] sticky top-0 z-10 text-xs uppercase text-muted font-semibold border-b border-[var(--border)] shadow-sm">
-                        <tr>
-                            <th class="py-3.5 px-4 bg-[var(--bg)]">User ID</th>
-                            <th class="py-3.5 px-4 bg-[var(--bg)]">Username</th>
-                            <th class="py-3.5 px-4 bg-[var(--bg)]">Role</th>
-                            <th class="py-3.5 px-4 bg-[var(--bg)]">Status</th>
-                            <th class="py-3.5 px-4 text-right bg-[var(--bg)]">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-[var(--border)]/50">
-                        <tr *ngFor="let u of filteredUsers" class="hover:bg-[var(--panel)]/40 transition">
-                            <td class="py-3.5 px-4 font-mono text-muted">#{{ u.userId }}</td>
-                            <td class="py-3.5 px-4 font-semibold text-[var(--text)]">{{ u.username }}</td>
-                            <td class="py-3.5 px-4">
-                                <span class="px-2.5 py-1 text-xs font-semibold rounded-md border" [ngClass]="{
-                    'bg-blue-500/20 border-blue-500/30 text-blue-700 dark:text-blue-300': u.role === 'DOCTOR',
-                    'bg-sky-500/20 border-sky-500/30 text-sky-700 dark:text-sky-300': u.role === 'PATIENT',
-                    'bg-purple-500/20 border-purple-500/30 text-purple-700 dark:text-purple-300': u.role === 'ADMIN'
-                  }">
-                                    {{ u.role }}
-                                </span>
-                            </td>
-                            <td class="py-3.5 px-4">
-                                <span
-                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border"
-                                    [ngClass]="{
-                    'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400': u.isActive,
-                    'bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-400': !u.isActive
-                  }">
-                                    <span class="w-1.5 h-1.5 rounded-full"
-                                        [ngClass]="u.isActive ? 'bg-emerald-400' : 'bg-rose-400'"></span>
-                                    {{ u.isActive ? 'Active' : 'Inactive' }}
-                                </span>
-                            </td>
-                            <td class="py-3.5 px-4 text-right">
-                                <div class="flex items-center justify-end gap-2">
-                                    <button (click)="toggleUserStatus(u)" [disabled]="togglingUsername === u.username"
-                                        class="btn-size-lg px-3 rounded-xl text-xs font-semibold transition border shadow-sm inline-flex items-center justify-center"
-                                        [ngClass]="{
-                        'bg-rose-500/20 hover:bg-rose-500/30 text-rose-700 dark:text-rose-300 border-rose-500/40': u.isActive,
-                        'bg-blue-500/20 hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border-blue-500/40': !u.isActive
-                      }">
-                                        {{ togglingUsername === u.username ? 'Updating...' : (u.isActive ? 'Set
-                                        Inactive' : 'Set Active') }}
-                                    </button>
-                                    <button (click)="openPasswordResetModal(u)" title="Change User Password"
-                                        class="btn-size-lg px-3 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md shadow-amber-500/20 transition flex items-center gap-1.5" aria-label="Change User Password">
-                                        <i class="fa-solid fa-key text-xs" aria-hidden="true"></i>
-                                        <span>Change Password</span>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr *ngIf="filteredUsers.length === 0">
-                            <td colspan="5" class="py-8 text-center text-muted">No users match your criteria.</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                <app-paginator [page]="userPage" [pageSize]="userPageSize" [total]="filteredUsers.length"
+                    (pageChange)="userPage = $event"></app-paginator>
+            </ng-container>
+        </section>
 
-        <!-- TAB 2: DOCTOR VERIFICATION -->
-        <div *ngIf="activeTab === 'doctors'"
-            class="bg-[var(--panel)]/50 border border-[var(--border)]/60 rounded-xl sm:rounded-2xl p-3 sm:p-6 mb-8 sm:mb-16">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 mb-4 sm:mb-6">
+        <!-- ============================================================ DOCTORS -->
+        <section *ngIf="activeTab === 'doctors'" class="adm-card p-4 sm:p-5 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
                 <div>
-                    <h2 class="font-display text-base sm:text-lg font-bold text-[var(--text)]">Doctor Credential Verification
-                    </h2>
-                    <p class="text-[11px] sm:text-xs text-muted">Verify or unverify registered medical practitioners
+                    <h2 class="adm-section-title">Doctor verification</h2>
+                    <p class="adm-section-subtitle">
+                        {{ totalVerifiedDoctorsCount }} verified · {{ totalPendingDoctorsCount }} waiting · open a profile to check credentials before verifying
                     </p>
                 </div>
+                <button type="button" class="adm-btn adm-btn--ghost self-start sm:self-auto" (click)="loadDoctors()" [disabled]="loadingDoctors">
+                    <i class="fa-solid fa-rotate" [class.fa-spin]="loadingDoctors" aria-hidden="true"></i> Refresh
+                </button>
             </div>
 
-            <app-filter-bar class="mb-4 sm:mb-6 block" [filters]="doctorFilterConfigs" [values]="doctorFilterValues"
-                [theme]="'doctor'" (filterChange)="onDoctorFilterChange($event)">
-            </app-filter-bar>
+            <app-filter-bar [filters]="doctorFilterConfigs" [values]="doctorFilterValues" [theme]="'doctor'"
+                containerClass="!shadow-none" (filterChange)="onDoctorFilterChange($event)"></app-filter-bar>
 
-            <app-skeleton *ngIf="loadingDoctors" variant="table" [count]="6"
-                panelClass="!bg-[var(--bg)]/40 !border-[var(--border)]/50"></app-skeleton>
+            <app-page-loader *ngIf="loadingDoctors" label="Loading doctors..."></app-page-loader>
 
-            <!-- Mobile card rows -->
-            <div *ngIf="!loadingDoctors" class="xl:hidden space-y-2.5">
-                <article *ngFor="let doc of filteredDoctors"
-                    class="rounded-xl border border-[var(--border)]/50 bg-[var(--bg)]/50 p-3.5 space-y-3">
-                    <div class="flex items-start gap-3">
-                        <div
-                            class="w-10 h-10 rounded-full bg-[var(--panel)] border border-[var(--border)] flex items-center justify-center text-sm font-bold text-indigo-700 dark:text-indigo-300 shrink-0">
-                            {{ (doc.firstName || doc.name || doc.username || '?').charAt(0) }}
-                        </div>
-                        <div class="min-w-0 flex-1">
-                            <div class="font-semibold text-[var(--text)] leading-tight">Dr. {{ doc.name || ((doc.firstName ||
-                                '') + ' ' + (doc.lastName || '')) }}</div>
-                            <div class="text-[11px] text-muted mt-0.5">&#64;{{ doc.username }} · #{{ doc.id }}</div>
-                            <div class="text-xs text-[var(--text)] mt-1">{{ doc.specialization || 'Not provided' }}
+            <ng-container *ngIf="!loadingDoctors">
+                <div *ngIf="doctors.length === 0" class="py-12 text-center text-sm text-[var(--muted)]">
+                    <i class="fa-solid fa-user-doctor text-xl mb-2 block" aria-hidden="true"></i>
+                    {{ selectedDoctorVerificationFilter === 'UNVERIFIED' ? 'No doctors are waiting for verification.' : 'No doctors match these filters.' }}
+                </div>
+
+                <!-- Table (laptop and up) -->
+                <div *ngIf="doctors.length > 0" class="hidden lg:block adm-table-wrap">
+                    <table class="adm-table">
+                        <thead>
+                            <tr>
+                                <th>Doctor</th>
+                                <th>Specialization</th>
+                                <th>Account</th>
+                                <th>Verification</th>
+                                <th class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let doc of doctors">
+                                <td>
+                                    <div class="font-semibold">Dr. {{ doctorName(doc) }}</div>
+                                    <div class="text-[11px] text-[var(--muted)]">&#64;{{ doc.username }} · #{{ doc.id }}</div>
+                                </td>
+                                <td>{{ doc.specialization || '—' }}</td>
+                                <td>
+                                    <span class="adm-badge" [ngClass]="doc.isActive ? 'adm-badge--success' : 'adm-badge--danger'">
+                                        <span class="adm-badge__dot"></span>{{ doc.isActive ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="adm-badge" [ngClass]="doc.isVerified ? 'adm-badge--primary' : 'adm-badge--warning'">
+                                        <i class="fa-solid" [ngClass]="doc.isVerified ? 'fa-circle-check' : 'fa-hourglass-half'" aria-hidden="true"></i>
+                                        {{ doc.isVerified ? 'Verified' : 'Waiting' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="flex items-center justify-end gap-1.5">
+                                        <button type="button" class="adm-btn adm-btn--sm adm-btn--ghost" (click)="openDoctorModal(doc)">
+                                            <i class="fa-solid fa-id-card" aria-hidden="true"></i> Review profile
+                                        </button>
+                                        <button *ngIf="!doc.isVerified" type="button" class="adm-btn adm-btn--sm adm-btn--success w-[96px]"
+                                            [disabled]="verifyingDoctorId === doc.id" (click)="toggleDoctorVerification(doc, true)">
+                                            {{ verifyingDoctorId === doc.id ? 'Saving...' : 'Verify' }}
+                                        </button>
+                                        <button *ngIf="doc.isVerified" type="button" class="adm-btn adm-btn--sm adm-btn--ghost w-[96px]"
+                                            [disabled]="verifyingDoctorId === doc.id" (click)="toggleDoctorVerification(doc, false)">
+                                            {{ verifyingDoctorId === doc.id ? 'Saving...' : 'Unverify' }}
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Cards (phones and tablets) -->
+                <div *ngIf="doctors.length > 0" class="lg:hidden space-y-2.5">
+                    <article *ngFor="let doc of doctors" class="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg)] space-y-3">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 rounded-full bg-[var(--panel)] border border-[var(--border)] flex items-center justify-center text-sm font-bold shrink-0">
+                                {{ doctorName(doc).charAt(0) }}
                             </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="font-semibold leading-tight">Dr. {{ doctorName(doc) }}</div>
+                                <div class="text-[11px] text-[var(--muted)] mt-0.5">{{ doc.specialization || 'No specialization' }} · #{{ doc.id }}</div>
+                            </div>
+                            <span class="adm-badge shrink-0" [ngClass]="doc.isVerified ? 'adm-badge--primary' : 'adm-badge--warning'">
+                                {{ doc.isVerified ? 'Verified' : 'Waiting' }}
+                            </span>
                         </div>
-                        <span
-                            class="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border"
-                            [ngClass]="{
-                'bg-blue-500/10 border-blue-500/30 text-blue-700 dark:text-blue-300': doc.isVerified,
-                'bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300': !doc.isVerified
-              }">
-                            {{ doc.isVerified ? 'Verified' : 'Pending' }}
-                        </span>
-                    </div>
-                    <div class="flex items-center gap-2 text-[11px] font-semibold"
-                        [ngClass]="doc.isActive ? 'text-emerald-600' : 'text-rose-600'">
-                        <span class="w-2 h-2 rounded-full"
-                            [ngClass]="doc.isActive ? 'bg-emerald-500' : 'bg-rose-500'"></span>
-                        {{ doc.isActive ? 'Active account' : 'Inactive account' }}
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button type="button" (click)="openDoctorModal(doc)"
-                            class="btn-size-md px-3 rounded-xl text-xs font-semibold bg-[var(--panel)] hover:bg-[var(--border)] text-[var(--text)] border border-[var(--border)] transition inline-flex items-center justify-center">
-                            View Profile
-                        </button>
-                        <button type="button" *ngIf="!doc.isVerified" (click)="toggleDoctorVerification(doc, true)"
-                            [disabled]="verifyingDoctorId === doc.id"
-                            class="btn-size-md px-3 rounded-xl text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-500/40 transition inline-flex items-center justify-center">
-                            Verify
-                        </button>
-                        <button type="button" *ngIf="doc.isVerified" (click)="toggleDoctorVerification(doc, false)"
-                            [disabled]="verifyingDoctorId === doc.id"
-                            class="btn-size-md px-3 rounded-xl text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 dark:text-amber-300 border border-amber-500/40 transition inline-flex items-center justify-center">
-                            Unverify
-                        </button>
-                    </div>
-                </article>
-                <div *ngIf="filteredDoctors.length === 0" class="py-10 text-center text-muted text-sm">No doctors
-                    found.</div>
-            </div>
-
-            <!-- Desktop table -->
-            <div *ngIf="!loadingDoctors"
-                class="hidden xl:block overflow-x-auto max-h-[min(60vh,480px)] overflow-y-auto custom-scrollbar rounded-xl border border-[var(--border)]/50">
-                <table class="w-full text-left text-sm text-[var(--text)] border-collapse">
-                    <thead
-                        class="bg-[var(--bg)] sticky top-0 z-10 text-xs uppercase text-muted font-semibold border-b border-[var(--border)] shadow-sm">
-                        <tr>
-                            <th class="py-3.5 px-4 bg-[var(--bg)]">Doctor ID</th>
-                            <th class="py-3.5 px-4 bg-[var(--bg)]">Name</th>
-                            <th class="py-3.5 px-4 bg-[var(--bg)]">Specialization</th>
-                            <th class="py-3.5 px-4 bg-[var(--bg)]">Account</th>
-                            <th class="py-3.5 px-4 bg-[var(--bg)]">Verification</th>
-                            <th class="py-3.5 px-4 text-right bg-[var(--bg)]">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-[var(--border)]/50">
-                        <tr *ngFor="let doc of filteredDoctors" class="hover:bg-[var(--panel)]/40 transition">
-                            <td class="py-3.5 px-4 font-mono text-muted">#{{ doc.id }}</td>
-                            <td class="py-3.5 px-4">
-                                <div class="font-semibold text-[var(--text)]">Dr. {{ doc.name || ((doc.firstName || '') + ' ' +
-                                    (doc.lastName || '')) }}</div>
-                                <div class="text-xs text-muted">&#64;{{ doc.username }}</div>
-                            </td>
-                            <td class="py-3.5 px-4 text-[var(--text)]">{{ doc.specialization || 'Not provided' }}
-                            </td>
-                            <td class="py-3.5 px-4">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border"
-                                    [ngClass]="doc.isActive
-                                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600'
-                                      : 'bg-rose-500/10 border-rose-500/30 text-rose-600'">
-                                    <span class="w-1.5 h-1.5 rounded-full"
-                                        [ngClass]="doc.isActive ? 'bg-emerald-500' : 'bg-rose-500'"></span>
-                                    {{ doc.isActive ? 'Active' : 'Inactive' }}
-                                </span>
-                            </td>
-                            <td class="py-3.5 px-4">
-                                <span
-                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border"
-                                    [ngClass]="{
-                    'bg-blue-500/10 border-blue-500/30 text-blue-700 dark:text-blue-300': doc.isVerified,
-                    'bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300': !doc.isVerified
-                  }">
-                                    <span>{{ doc.isVerified ? '✓ Verified' : '⏳ Pending / Unverified' }}</span>
-                                </span>
-                            </td>
-                            <td class="py-3.5 px-4 text-right">
-                                <div class="flex items-center justify-end gap-2 flex-wrap">
-                                    <button (click)="openDoctorModal(doc)"
-                                        class="btn-size-md px-2.5 rounded-xl text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-500/40 transition flex items-center gap-1">
-                                        <span>View Profile</span>
-                                    </button>
-                                    <button *ngIf="!doc.isVerified" (click)="toggleDoctorVerification(doc, true)"
-                                        [disabled]="verifyingDoctorId === doc.id"
-                                        class="btn-size-md px-3 rounded-xl text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-500/40 transition inline-flex items-center justify-center">
-                                        Verify Doctor
-                                    </button>
-                                    <button *ngIf="doc.isVerified" (click)="toggleDoctorVerification(doc, false)"
-                                        [disabled]="verifyingDoctorId === doc.id"
-                                        class="btn-size-md px-3 rounded-xl text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 dark:text-amber-300 border border-amber-500/40 transition inline-flex items-center justify-center">
-                                        Unverify
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr *ngIf="filteredDoctors.length === 0">
-                            <td colspan="5" class="py-8 text-center text-muted">No doctors found.</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination Controls -->
-            <div *ngIf="!loadingDoctors && doctorTotalElements > 0"
-                class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-[var(--border)]/50 text-xs text-muted">
-                <div>
-                    Showing page <span class="font-bold text-[var(--text)]">{{ doctorPage + 1 }}</span> of <span
-                        class="font-bold text-[var(--text)]">{{ doctorTotalPages }}</span> (<span
-                        class="font-bold text-[var(--text)]">{{ doctorTotalElements }}</span> total doctors)
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" class="adm-btn adm-btn--sm adm-btn--ghost" (click)="openDoctorModal(doc)">Review profile</button>
+                            <button *ngIf="!doc.isVerified" type="button" class="adm-btn adm-btn--sm adm-btn--success"
+                                [disabled]="verifyingDoctorId === doc.id" (click)="toggleDoctorVerification(doc, true)">Verify</button>
+                            <button *ngIf="doc.isVerified" type="button" class="adm-btn adm-btn--sm adm-btn--ghost"
+                                [disabled]="verifyingDoctorId === doc.id" (click)="toggleDoctorVerification(doc, false)">Unverify</button>
+                        </div>
+                    </article>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button (click)="goToDoctorPage(doctorPage - 1)" [disabled]="doctorPage === 0"
-                        class="btn-size-md px-3 rounded-lg bg-[var(--panel)] hover:bg-[var(--border)] border border-[var(--border)] text-[var(--text)] disabled:opacity-40 disabled:cursor-not-allowed transition inline-flex items-center justify-center">
-                        <i class="fa-solid fa-chevron-left mr-1" aria-hidden="true"></i> Previous
+
+                <app-paginator [page]="doctorPage" [pageSize]="doctorSize" [total]="doctorTotalElements"
+                    (pageChange)="goToDoctorPage($event)"></app-paginator>
+            </ng-container>
+        </section>
+
+        <!-- ============================================================ MASTER DATA -->
+        <ng-container *ngIf="activeTab === 'master'">
+            <div class="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)] gap-4 sm:gap-6 items-start">
+                <!-- Type list -->
+                <nav class="adm-card p-2 flex lg:flex-col gap-1 overflow-x-auto no-scrollbar" aria-label="Master data types">
+                    <button *ngFor="let t of masterTypes" type="button" (click)="selectMasterType(t.key)"
+                        class="master-type" [class.master-type--active]="t.key === selectedMasterType"
+                        [attr.aria-pressed]="t.key === selectedMasterType">
+                        <i [class]="t.icon + ' w-4 text-center'" aria-hidden="true"></i>
+                        <span>{{ t.label }}</span>
                     </button>
-                    <button (click)="goToDoctorPage(doctorPage + 1)" [disabled]="doctorPage >= doctorTotalPages - 1"
-                        class="btn-size-md px-3 rounded-lg bg-[var(--panel)] hover:bg-[var(--border)] border border-[var(--border)] text-[var(--text)] disabled:opacity-40 disabled:cursor-not-allowed transition inline-flex items-center justify-center">
-                        Next <i class="fa-solid fa-chevron-right ml-1" aria-hidden="true"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
+                </nav>
 
-        <!-- TAB 3: MASTER DATA ENTRY -->
-        <div *ngIf="activeTab === 'master'"
-            class="bg-[var(--panel)]/50 border border-[var(--border)]/60 rounded-xl sm:rounded-2xl p-3 sm:p-6 mb-8 sm:mb-16">
-            <div class="mb-4 sm:mb-6">
-                <h2 class="font-display text-base sm:text-lg font-bold text-[var(--text)]">Master Data Entry Management</h2>
-                <p class="text-[11px] sm:text-xs text-muted">Add new dropdown options to any master table across the
-                    system</p>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-                <!-- Left Form: Add Entry -->
-                <div class="bg-[var(--bg)]/60 border border-[var(--border)]/60 rounded-xl p-4 sm:p-5">
-                    <h3 class="text-sm font-bold text-[var(--text)] mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-plus text-blue-700 dark:text-blue-400" aria-hidden="true"></i>
-                        <span>Add Master Data Item</span>
-                    </h3>
-
-                    <form (ngSubmit)="submitMasterData()" class="space-y-4">
+                <section class="adm-card p-4 sm:p-5 space-y-4 min-w-0">
+                    <div class="flex items-start justify-between gap-3">
                         <div>
-                            <label class="block text-xs font-semibold text-muted mb-1" for="admin-dashboard-mastertype-1">Master Data Type</label>
-                            <select id="admin-dashboard-mastertype-1" [(ngModel)]="selectedMasterType" name="masterType"
-                                (change)="loadCurrentMasterItems()"
-                                class="w-full px-3 py-2.5 bg-[var(--panel)] border border-[var(--border)] rounded-xl text-sm text-[var(--text)] focus:outline-none focus:border-blue-500 min-h-touch">
-                                <option value="specializations">Specializations</option>
-                                <option value="hospitals">Hospitals</option>
-                                <option value="degrees">Degrees</option>
-                                <option value="institutions">Institutions</option>
-                                <option value="positions">Positions</option>
-                                <option value="languages">Languages</option>
-                                <option value="blood-groups">Blood Groups</option>
-                                <option value="genders">Genders</option>
-                                <option value="statuses">Statuses</option>
-                            </select>
+                            <h2 class="adm-section-title">{{ selectedMasterLabel }}</h2>
+                            <p class="adm-section-subtitle">{{ masterItems.length }} options shown in dropdowns across the app</p>
                         </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold text-muted mb-1" for="admin-dashboard-mastervalue-2">New Item Value</label>
-                            <input id="admin-dashboard-mastervalue-2" type="text" [(ngModel)]="newMasterValue" name="masterValue"
-                                placeholder="e.g. Cardiology, City Hospital..." required
-                                class="w-full px-3 py-2.5 bg-[var(--panel)] border border-[var(--border)] rounded-xl text-sm text-[var(--text)] placeholder-slate-500 focus:outline-none focus:border-blue-500 min-h-touch" />
-                        </div>
-
-                        <button type="submit" [disabled]="isSubmittingMaster || !newMasterValue.trim()"
-                            class="btn-size-lg w-full px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-sm rounded-xl shadow-lg shadow-blue-500/20 disabled:opacity-50 transition inline-flex items-center justify-center">
-                            {{ isSubmittingMaster ? 'Saving Entry...' : 'Add Master Entry' }}
+                        <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" (click)="loadCurrentMasterItems()" [disabled]="loadingMaster">
+                            <i class="fa-solid fa-rotate" [class.fa-spin]="loadingMaster" aria-hidden="true"></i> Refresh
                         </button>
+                    </div>
+
+                    <!-- Add -->
+                    <form (ngSubmit)="submitMasterData()" class="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg)] space-y-1.5">
+                        <label class="adm-label" for="admin-master-new">Add a new option</label>
+                        <div class="flex gap-2">
+                            <input id="admin-master-new" name="masterValue" class="adm-input !bg-[var(--panel)]" [(ngModel)]="newMasterValue"
+                                [placeholder]="'Type a new option, e.g. ' + masterExample" autocomplete="off" maxlength="100" />
+                            <button type="submit" class="adm-btn adm-btn--primary shrink-0" style="height: 38px"
+                                [disabled]="isSubmittingMaster || !newMasterValue.trim() || masterValueExists">
+                                <i class="fa-solid fa-plus" aria-hidden="true"></i> {{ isSubmittingMaster ? 'Adding...' : 'Add' }}
+                            </button>
+                        </div>
+                        <p *ngIf="masterValueExists" class="text-[11px] text-amber-700 dark:text-amber-400">
+                            "{{ newMasterValue.trim() }}" is already in the list.
+                        </p>
                     </form>
-                </div>
 
-                <!-- Right Column: Current Master List -->
-                <div class="lg:col-span-2 bg-[var(--bg)]/60 border border-[var(--border)]/60 rounded-xl p-4 sm:p-5">
-                    <div class="flex items-center justify-between mb-4 gap-2">
-                        <h3 class="text-sm font-bold text-[var(--text)] capitalize truncate">
-                            Current {{ selectedMasterType }} ({{ masterItems.length }})
-                        </h3>
-                        <button type="button" (click)="loadCurrentMasterItems()"
-                            class="text-xs text-blue-700 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-200 font-semibold shrink-0 min-h-touch px-2 inline-flex items-center gap-1">
-                            <i class="fa-solid fa-rotate" aria-hidden="true"></i> Refresh
-                        </button>
+                    <!-- Search -->
+                    <div *ngIf="masterItems.length > 8" class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[var(--muted)]" aria-hidden="true"></i>
+                        <input class="adm-input !pl-8" [(ngModel)]="masterSearch" [placeholder]="'Search ' + selectedMasterLabel.toLowerCase() + '...'"
+                            aria-label="Search options" />
                     </div>
 
-                    <!-- Mobile: stacked rows -->
-                    <div class="xl:hidden space-y-2">
-                        <div *ngFor="let item of masterItems"
-                            class="flex items-center justify-between gap-3 px-3 py-3 rounded-xl bg-[var(--panel)]/80 border border-[var(--border)]">
-                            <span class="text-sm text-[var(--text)] truncate">{{ item }}</span>
-                            <button type="button" (click)="openDeleteConfirmation(item)"
-                                [attr.aria-label]="'Delete ' + item"
-                                class="w-9 h-9 rounded-lg bg-[var(--border)]/80 hover:bg-rose-500/20 text-muted hover:text-rose-700 dark:hover:text-rose-300 flex items-center justify-center transition border border-[var(--border)]/50 hover:border-rose-500/40 shrink-0">
-                                <i class="fa-solid fa-trash text-xs" aria-hidden="true"></i>
+                    <app-page-loader *ngIf="loadingMaster && masterItems.length === 0" label="Loading options..." [compact]="true"></app-page-loader>
+
+                    <div *ngIf="!loadingMaster && filteredMasterItems.length === 0" class="py-10 text-center text-sm text-[var(--muted)]">
+                        {{ masterItems.length === 0 ? 'No options yet. Add the first one above.' : 'No options match your search.' }}
+                    </div>
+
+                    <ul *ngIf="filteredMasterItems.length > 0" class="flex flex-wrap gap-2 max-h-[50vh] overflow-y-auto custom-scrollbar p-0.5">
+                        <li *ngFor="let item of filteredMasterItems"
+                            class="group inline-flex items-center gap-1 pl-3 pr-1 h-8 rounded-lg border border-[var(--border)] bg-[var(--bg)] text-xs font-medium">
+                            <span class="max-w-[16rem] truncate">{{ item }}</span>
+                            <button type="button" (click)="openDeleteConfirmation(item)" [attr.aria-label]="'Delete ' + item" [title]="'Delete ' + item"
+                                class="w-6 h-6 rounded-md text-[var(--muted)] hover:bg-rose-500/15 hover:text-rose-600 inline-flex items-center justify-center transition">
+                                <i class="fa-solid fa-xmark text-[11px]" aria-hidden="true"></i>
                             </button>
-                        </div>
-                        <div *ngIf="masterItems.length === 0" class="py-8 text-center text-muted text-xs">
-                            No items configured for this master type yet.
-                        </div>
-                    </div>
-
-                    <!-- Desktop: chip wrap -->
-                    <div class="hidden xl:flex flex-wrap gap-2 max-h-80 overflow-y-auto p-1">
-                        <span *ngFor="let item of masterItems"
-                            class="px-3 py-1.5 rounded-lg bg-[var(--panel)] border border-[var(--border)] text-xs font-medium text-[var(--text)] flex items-center gap-2 hover:border-[var(--border)] transition">
-                            <span>{{ item }}</span>
-                            <button (click)="openDeleteConfirmation(item)" title="Delete {{ item }}"
-                                class="w-4 h-4 rounded-full bg-[var(--border)]/80 hover:bg-rose-500/20 text-muted hover:text-rose-700 dark:hover:text-rose-300 flex items-center justify-center text-[10px] font-bold transition border border-[var(--border)]/50 hover:border-rose-500/40" attr.aria-label="Delete {{ item }}">
-                                ✕
-                            </button>
-                        </span>
-                        <div *ngIf="masterItems.length === 0" class="py-8 text-center text-muted text-xs w-full">
-                            No items configured for this master type yet.
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- MASTER DATA DELETE CONFIRMATION MODAL -->
-        <app-modal-shell [open]="!!itemToDelete" [showHeader]="false" maxWidthClass="max-w-md"
-            panelClass="bg-[var(--bg)] border border-[var(--border)]/80 rounded-2xl" bodyClass="px-6 pb-2" [hasFooter]="true"
-            footerClass="px-6 pb-6 border-0" backdropClass="bg-[var(--bg)]/80" [fullScreenMobile]="false"
-            ariaLabel="Delete master data item" (close)="itemToDelete = null">
-            <div modalHeader class="px-6 pt-6 flex items-center gap-3">
-                <div
-                    class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-rose-700 dark:text-rose-400 shrink-0">
-                    <i class="fa-solid fa-trash text-sm" aria-hidden="true"></i>
-                </div>
-                <div>
-                    <h3 class="text-base font-bold text-[var(--text)]">Delete Master Data Item</h3>
-                    <p class="text-xs text-muted">Confirmation Required</p>
-                </div>
-            </div>
-
-            <p class="text-sm text-[var(--text)] mb-4 leading-relaxed">
-                Are you sure you want to delete <span
-                    class="font-semibold text-[var(--text)] px-2 py-0.5 bg-[var(--panel)] border border-[var(--border)] rounded-md">{{
-                    itemToDelete }}</span> from <span class="font-semibold text-blue-700 dark:text-blue-300 capitalize">{{
-                    selectedMasterType }}</span>?
-            </p>
-
-            <div modalFooter class="flex items-center justify-end gap-3">
-                <button type="button" (click)="itemToDelete = null"
-                    class="btn-size-lg px-4 text-xs font-semibold text-muted hover:text-[var(--text)] bg-[var(--panel)] hover:bg-[var(--border)] rounded-xl border border-[var(--border)] transition inline-flex items-center justify-center">
-                    Cancel
-                </button>
-                <button type="button" (click)="confirmDeleteMasterItem()" [disabled]="isDeletingMaster"
-                    class="btn-size-lg px-4 text-xs font-bold bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white rounded-xl shadow-lg shadow-rose-600/20 transition disabled:opacity-50 flex items-center gap-2">
-                    <span *ngIf="isDeletingMaster"
-                        class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    <span>{{ isDeletingMaster ? 'Deleting...' : 'Save & Confirm Delete' }}</span>
-                </button>
-            </div>
-        </app-modal-shell>
-
-        <!-- TAB 4: SECURITY & BLOCKED IPS -->
-        <div *ngIf="activeTab === 'security'"
-            class="bg-[var(--panel)]/50 border border-[var(--border)]/60 rounded-xl sm:rounded-2xl p-3 sm:p-6 mb-8 sm:mb-16">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
-                <div>
-                    <h2 class="font-display text-base sm:text-lg font-bold text-[var(--text)]">Blocked IP Addresses</h2>
-                    <p class="text-[11px] sm:text-xs text-muted">View and remove IP blocks imposed by security rules
-                    </p>
-                </div>
-
-                <button *ngIf="blockedIPs.length > 0" type="button" (click)="unblockAllIPs()"
-                    class="btn-size-md w-full sm:w-auto px-4 bg-rose-500/20 hover:bg-rose-500/30 text-rose-700 dark:text-rose-300 border border-rose-500/40 rounded-xl text-xs font-semibold transition inline-flex items-center justify-center">
-                    Clear / Unblock All IPs
-                </button>
-            </div>
-
-            <!-- Mobile card rows -->
-            <div class="xl:hidden space-y-2.5">
-                <article *ngFor="let ip of blockedIPs"
-                    class="rounded-xl border border-[var(--border)]/50 bg-[var(--bg)]/50 p-3.5 space-y-2.5">
-                    <div class="font-mono font-bold text-rose-700 dark:text-rose-300 text-sm break-all">{{ ip.ipAddress }}</div>
-                    <div class="text-xs text-[var(--text)] leading-relaxed">{{ ip.reason || 'Exceeded failed login attempt
-                        threshold' }}</div>
-                    <div class="flex items-center gap-2">
-                        <div class="text-[11px] text-muted flex-1">{{ ip.blockedAt || 'Recent' }}</div>
-                        <button type="button" (click)="unblockSingleIP(ip.ipAddress)"
-                            class="btn-size-md px-3 rounded-xl text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-500/40 transition inline-flex items-center justify-center">
-                            Unblock
-                        </button>
-                    </div>
-                </article>
-                <div *ngIf="blockedIPs.length === 0" class="py-10 text-center text-muted text-sm">No blocked IPs
-                    right now.</div>
-            </div>
-
-            <!-- Desktop table -->
-            <div
-                class="hidden xl:block overflow-x-auto max-h-[min(60vh,480px)] overflow-y-auto custom-scrollbar rounded-xl border border-[var(--border)]/50">
-                <table class="w-full text-left text-sm text-[var(--text)] border-collapse">
-                    <thead
-                        class="bg-[var(--bg)] sticky top-0 z-10 text-xs uppercase text-muted font-semibold border-b border-[var(--border)] shadow-sm">
-                        <tr>
-                            <th class="py-3.5 px-4 bg-[var(--bg)]">IP Address</th>
-                            <th class="py-3.5 px-4 bg-[var(--bg)]">Block Reason</th>
-                            <th class="py-3.5 px-4 bg-[var(--bg)]">Blocked At</th>
-                            <th class="py-3.5 px-4 text-right bg-[var(--bg)]">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-[var(--border)]/50">
-                        <tr *ngFor="let ip of blockedIPs" class="hover:bg-[var(--panel)]/40 transition">
-                            <td class="py-3.5 px-4 font-mono font-bold text-rose-700 dark:text-rose-300">{{ ip.ipAddress }}</td>
-                            <td class="py-3.5 px-4 text-[var(--text)]">{{ ip.reason || 'Exceeded failed login attempt
-                                threshold' }}</td>
-                            <td class="py-3.5 px-4 text-xs text-muted">{{ ip.blockedAt || 'Recent' }}</td>
-                            <td class="py-3.5 px-4 text-right">
-                                <button (click)="unblockSingleIP(ip.ipAddress)"
-                                    class="btn-size-md px-3 rounded-xl text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-500/40 transition inline-flex items-center justify-center">
-                                    Unblock IP
-                                </button>
-                            </td>
-                        </tr>
-                        <tr *ngIf="blockedIPs.length === 0">
-                            <td colspan="4" class="py-8 text-center text-muted">No IP addresses are currently
-                                blocked.</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </main>
-
-    <!-- DOCTOR DETAIL VIEW MODAL -->
-    <app-modal-shell *ngIf="selectedDoctor" [open]="true" [showHeader]="false" [hasFooter]="true"
-        maxWidthClass="max-w-3xl" panelClass="bg-[var(--bg)] border border-[var(--border)]/80 rounded-2xl"
-        bodyClass="p-6 space-y-6 text-sm text-[var(--text)]"
-        footerClass="px-6 py-4 bg-[var(--panel)]/80 border-t border-[var(--border)]/60" backdropClass="bg-[var(--bg)]/80"
-        ariaLabel="Doctor details" (close)="closeDoctorModal()">
-        <div modalHeader
-            class="px-6 py-4 bg-[var(--panel)]/80 border-b border-[var(--border)]/60 flex items-center justify-between shrink-0">
-            <div class="flex items-center gap-3 min-w-0">
-                <div
-                    class="relative w-12 h-12 rounded-xl bg-[var(--border)] overflow-hidden border border-[var(--border)] flex-shrink-0">
-                    <img *ngIf="selectedDoctorProfile?.profileImageUrl" [src]="selectedDoctorProfile.profileImageUrl"
-                        alt="Doctor Photo" class="w-full h-full object-cover" />
-                    <div *ngIf="!selectedDoctorProfile?.profileImageUrl"
-                        class="w-full h-full flex items-center justify-center text-muted font-bold text-lg">
-                        {{ selectedDoctor.firstName?.charAt(0) || 'D' }}
-                    </div>
-                </div>
-                <div class="min-w-0">
-                    <h3 class="text-lg font-bold text-[var(--text)] flex items-center gap-2 flex-wrap">
-                        Dr. {{ selectedDoctorProfile?.firstName || selectedDoctor.firstName }} {{
-                        selectedDoctorProfile?.lastName || selectedDoctor.lastName }}
-                        <span class="text-xs px-2.5 py-0.5 rounded-full border font-semibold" [ngClass]="{
-                  'bg-blue-500/10 border-blue-500/30 text-blue-700 dark:text-blue-300': selectedDoctor.isVerified,
-                  'bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300': !selectedDoctor.isVerified
-                }">
-                            {{ selectedDoctor.isVerified ? '✓ Verified' : '⏳ Pending' }}
-                        </span>
-                    </h3>
-                    <p class="text-xs text-muted">
-                        Specialization: <span class="text-blue-700 dark:text-blue-300 font-medium">{{ selectedDoctorProfile?.specialization
-                            || selectedDoctor.specialization || 'Not provided' }}</span>
-                        | &#64;{{ selectedDoctor.username }}
-                    </p>
-                </div>
-            </div>
-            <button type="button" (click)="closeDoctorModal()"
-                class="w-8 h-8 rounded-xl bg-[var(--border)]/50 hover:bg-[var(--border)] text-muted hover:text-[var(--text)] flex items-center justify-center transition border border-[var(--border)] shrink-0"
-                aria-label="Close">
-                ✕
-            </button>
-        </div>
-
-        <div *ngIf="loadingDoctorDetails" class="py-12 text-center text-muted flex flex-col items-center gap-3">
-            <div class="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            <span>Fetching full doctor credentials & background data...</span>
-        </div>
-
-        <ng-container *ngIf="!loadingDoctorDetails">
-            <!-- Section 1: Personal & Contact Information -->
-            <div class="bg-[var(--panel)]/40 border border-[var(--border)]/50 rounded-xl p-4">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400 mb-3 flex items-center gap-2">
-                    📋 Personal & Account Information
-                </h4>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                    <div>
-                        <span class="text-muted block">Full Name</span>
-                        <span class="font-semibold text-[var(--text)]">Dr. {{ selectedDoctorProfile?.firstName ||
-                            selectedDoctor.firstName }} {{ selectedDoctorProfile?.lastName || selectedDoctor.lastName
-                            }}</span>
-                    </div>
-                    <div>
-                        <span class="text-muted block">Email Address</span>
-                        <span class="font-semibold text-[var(--text)]">{{ selectedDoctorProfile?.email ||
-                            selectedDoctor.email || 'N/A' }}</span>
-                    </div>
-                    <div>
-                        <span class="text-muted block">Contact Phone</span>
-                        <span class="font-semibold text-[var(--text)]">{{ selectedDoctorProfile?.contactInfo ||
-                            selectedDoctor.contactInfo || 'N/A' }}</span>
-                    </div>
-                    <div>
-                        <span class="text-muted block">Gender & DOB</span>
-                        <span class="font-semibold text-[var(--text)]">{{ selectedDoctorProfile?.gender ||
-                            selectedDoctor.gender || 'N/A' }} | {{ selectedDoctorProfile?.dateOfBirth ||
-                            selectedDoctor.dateOfBirth || 'N/A' }}</span>
-                    </div>
-                    <div>
-                        <span class="text-muted block">Consultation Fees</span>
-                        <span class="font-semibold text-blue-700 dark:text-blue-400">₹{{ selectedDoctorProfile?.consultationFees ||
-                            selectedDoctor.consultationFees || '0.00' }}</span>
-                    </div>
-                    <div>
-                        <span class="text-muted block">Languages Spoken</span>
-                        <span class="font-semibold text-[var(--text)]">{{ formatLanguages(selectedDoctorProfile?.languages) }}</span>
-                    </div>
-                    <div class="sm:col-span-2">
-                        <span class="text-muted block">Clinic Address</span>
-                        <span class="font-semibold text-[var(--text)]">{{ selectedDoctorProfile?.address ||
-                            selectedDoctor.address || 'Not Provided' }}</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Section 2: Experience Records -->
-            <div class="bg-[var(--panel)]/40 border border-[var(--border)]/50 rounded-xl p-4">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400 mb-3 flex items-center gap-2">
-                    🏥 Experience & Employment History ({{ selectedDoctorExperiences.length }})
-                </h4>
-                <div *ngIf="selectedDoctorExperiences.length === 0" class="text-xs text-muted italic">
-                    No experience records added yet.
-                </div>
-                <div *ngIf="selectedDoctorExperiences.length > 0" class="space-y-3">
-                    <div *ngFor="let exp of selectedDoctorExperiences"
-                        class="p-3 bg-[var(--bg)]/60 rounded-lg border border-[var(--border)]/40">
-                        <div class="flex justify-between items-start font-semibold text-[var(--text)]">
-                            <span>{{ exp.position }}</span>
-                            <span class="text-xs text-blue-700 dark:text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md">{{
-                                exp.yearsOfService }} Years</span>
-                        </div>
-                        <div class="text-xs text-muted mt-1 font-medium">{{ exp.hospitalName }}</div>
-                        <p *ngIf="exp.details" class="text-xs text-muted mt-1.5">{{ exp.details }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Section 3: Education & Academic Qualifications -->
-            <div class="bg-[var(--panel)]/40 border border-[var(--border)]/50 rounded-xl p-4">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400 mb-3 flex items-center gap-2">
-                    🎓 Education & Degrees ({{ selectedDoctorEducations.length }})
-                </h4>
-                <div *ngIf="selectedDoctorEducations.length === 0" class="text-xs text-muted italic">
-                    No education records added yet.
-                </div>
-                <div *ngIf="selectedDoctorEducations.length > 0" class="space-y-3">
-                    <div *ngFor="let edu of selectedDoctorEducations"
-                        class="p-3 bg-[var(--bg)]/60 rounded-lg border border-[var(--border)]/40">
-                        <div class="flex justify-between items-start font-semibold text-[var(--text)]">
-                            <span>{{ edu.degree }}</span>
-                            <span class="text-xs text-teal-700 dark:text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded-md">Year: {{
-                                edu.yearOfCompletion }}</span>
-                        </div>
-                        <div class="text-xs text-muted mt-1 font-medium">{{ edu.institution }}</div>
-                        <p *ngIf="edu.details" class="text-xs text-muted mt-1.5">{{ edu.details }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Section 4: Certificates & Documents -->
-            <div class="bg-[var(--panel)]/40 border border-[var(--border)]/50 rounded-xl p-4">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400 mb-3 flex items-center gap-2">
-                    📜 Medical Licenses & Certificates ({{ selectedDoctorCertificates.length }})
-                </h4>
-                <div *ngIf="selectedDoctorCertificates.length === 0" class="text-xs text-muted italic">
-                    No certificates or medical licenses uploaded.
-                </div>
-                <div *ngIf="selectedDoctorCertificates.length > 0" class="space-y-3">
-                    <div *ngFor="let cert of selectedDoctorCertificates"
-                        class="p-3 bg-[var(--bg)]/60 rounded-lg border border-[var(--border)]/40 space-y-3">
-                        <div class="flex items-center justify-between gap-4">
-                        <div>
-                            <div class="font-semibold text-[var(--text)]">{{ cert.name }}</div>
-                            <div class="text-xs text-muted">{{ cert.issuingOrganization || 'Not provided' }} | {{
-                                cert.issueDate }}</div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                        <a *ngIf="cert.url" [href]="cert.url" target="_blank"
-                            class="btn-size-md px-2.5 text-xs font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border border-blue-500/40 rounded-lg transition inline-flex items-center justify-center" rel="noopener noreferrer">
-                            View Doc 🔗
-                        </a>
-                        <button type="button" (click)="reviewCertificate(cert)" [disabled]="reviewingCertificateId === cert.id"
-                            class="btn-size-md px-2.5 text-xs font-semibold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 rounded-lg inline-flex items-center justify-center">
-                            {{ reviewingCertificateId === cert.id ? 'Checking…' : 'Check details' }}
-                        </button>
-                        </div>
-                        </div>
-                    <div *ngIf="certificateReviews[cert.id] as review" class="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 space-y-1">
-                        <div class="text-[11px] font-bold text-[var(--text)]">Extracted certificate details</div>
-                        <div class="text-[11px] text-[var(--muted)]">Holder: {{ review.extractedHolderName || 'Not found' }}</div>
-                        <div class="text-[11px] text-[var(--muted)]">Organization: {{ review.extractedOrganization || 'Not found' }}</div>
-                        <div class="text-[11px] text-[var(--muted)]">Credential: {{ review.extractedCredentialId || 'Not found' }}</div>
-                        <div class="text-[11px] text-[var(--muted)]">Dates: {{ review.extractedIssueDate || 'Not found' }} – {{ review.extractedExpiryDate || 'Not found' }}</div>
-                        <div *ngIf="review.mismatches.length === 0" class="text-[11px] text-emerald-700 dark:text-emerald-300">No mismatches were flagged.</div>
-                        <ul *ngIf="review.mismatches.length > 0" class="list-disc pl-4 text-[11px] text-amber-800 dark:text-amber-200">
-                            <li *ngFor="let mismatch of review.mismatches">{{ mismatch }}</li>
-                        </ul>
-                        <div class="text-[11px] font-semibold text-[var(--text)]">The admin still approves or rejects this doctor.</div>
-                    </div>
-                </div>
-            </div>
+                        </li>
+                    </ul>
+                </section>
             </div>
         </ng-container>
 
-        <div modalFooter class="flex items-center justify-between gap-4">
-            <button type="button" (click)="closeDoctorModal()"
-                class="btn-size-md px-4 text-xs font-semibold text-muted hover:text-[var(--text)] bg-[var(--border)]/50 hover:bg-[var(--border)] rounded-xl border border-[var(--border)] transition inline-flex items-center justify-center">
-                Close
-            </button>
+        <!-- ============================================================ SECURITY -->
+        <ng-container *ngIf="activeTab === 'security'">
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6 items-start">
+                <!-- Blocked IPs -->
+                <section class="adm-card p-4 sm:p-5 space-y-4 xl:col-span-2 min-w-0">
+                    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+                        <div>
+                            <h2 class="adm-section-title">Blocked IP addresses</h2>
+                            <p class="adm-section-subtitle">Blocked automatically after repeated failed sign-ins, or by an admin.</p>
+                        </div>
+                        <button *ngIf="blockedIPs.length > 1" type="button" class="adm-btn adm-btn--danger self-start sm:self-auto" (click)="unblockAllIPs()">
+                            Unblock all
+                        </button>
+                    </div>
 
-            <div class="flex items-center gap-3">
-                <button type="button" *ngIf="!selectedDoctor.isVerified"
-                    (click)="toggleDoctorVerification(selectedDoctor, true); closeDoctorModal()"
-                    [disabled]="verifyingDoctorId === selectedDoctor.id"
-                    class="btn-size-lg px-4 text-xs font-bold bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-400 hover:to-indigo-400 text-slate-950 rounded-xl shadow-lg shadow-blue-500/20 transition transform active:scale-95 inline-flex items-center justify-center">
-                    ✓ Verify & Approve Doctor
-                </button>
-                <button type="button" *ngIf="selectedDoctor.isVerified"
-                    (click)="toggleDoctorVerification(selectedDoctor, false); closeDoctorModal()"
-                    [disabled]="verifyingDoctorId === selectedDoctor.id"
-                    class="btn-size-lg px-4 text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 dark:text-amber-300 border border-amber-500/40 rounded-xl transition inline-flex items-center justify-center">
-                    Diverify (Unverify Doctor)
-                </button>
+                    <app-page-loader *ngIf="loadingBlockedIPs" label="Loading blocked IPs..." [compact]="true"></app-page-loader>
+
+                    <div *ngIf="!loadingBlockedIPs && blockedIPs.length === 0" class="py-10 text-center text-sm text-[var(--muted)]">
+                        <i class="fa-solid fa-shield-heart text-xl mb-2 block text-emerald-500" aria-hidden="true"></i>
+                        No IP addresses are blocked right now.
+                    </div>
+
+                    <div *ngIf="!loadingBlockedIPs && blockedIPs.length > 0" class="hidden md:block adm-table-wrap">
+                        <table class="adm-table">
+                            <thead>
+                                <tr><th>IP address</th><th>Reason</th><th>Blocked</th><th>Until</th><th class="text-right">Action</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let ip of blockedIPs">
+                                    <td class="font-mono font-semibold">{{ ip.ipAddress }}</td>
+                                    <td class="text-xs">{{ ip.reason || 'Too many failed sign-ins' }}</td>
+                                    <td class="text-xs text-[var(--muted)] whitespace-nowrap">{{ ip.blockedAt ? (ip.blockedAt | date: 'MMM d, h:mm a') : '—' }}</td>
+                                    <td class="text-xs text-[var(--muted)] whitespace-nowrap">{{ ip.expiresAt ? (ip.expiresAt | date: 'MMM d, h:mm a') : '—' }}</td>
+                                    <td class="text-right">
+                                        <button type="button" class="adm-btn adm-btn--sm adm-btn--soft" [disabled]="unblockingIp === ip.ipAddress"
+                                            (click)="unblockSingleIP(ip.ipAddress)">
+                                            {{ unblockingIp === ip.ipAddress ? 'Unblocking...' : 'Unblock' }}
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div *ngIf="!loadingBlockedIPs && blockedIPs.length > 0" class="md:hidden space-y-2">
+                        <article *ngFor="let ip of blockedIPs" class="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg)] space-y-2">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="font-mono font-semibold text-sm break-all">{{ ip.ipAddress }}</span>
+                                <button type="button" class="adm-btn adm-btn--sm adm-btn--soft" [disabled]="unblockingIp === ip.ipAddress"
+                                    (click)="unblockSingleIP(ip.ipAddress)">Unblock</button>
+                            </div>
+                            <div class="text-xs">{{ ip.reason || 'Too many failed sign-ins' }}</div>
+                            <div class="text-[11px] text-[var(--muted)]" *ngIf="ip.expiresAt">Until {{ ip.expiresAt | date: 'MMM d, h:mm a' }}</div>
+                        </article>
+                    </div>
+                </section>
+
+                <!-- Block an IP -->
+                <section class="adm-card p-4 sm:p-5 space-y-4">
+                    <div>
+                        <h2 class="adm-section-title">Block an IP address</h2>
+                        <p class="adm-section-subtitle">Stop sign-ins from a suspicious address.</p>
+                    </div>
+                    <form class="space-y-3" (ngSubmit)="submitBlockIp()">
+                        <div>
+                            <label class="adm-label" for="admin-block-ip">IP address</label>
+                            <input id="admin-block-ip" name="ip" class="adm-input font-mono" [(ngModel)]="blockIpAddress" placeholder="e.g. 203.0.113.7" autocomplete="off" />
+                            <p *ngIf="blockIpAddress.trim() && !blockIpValid" class="mt-1 text-[11px] text-rose-600 dark:text-rose-400">This is not a valid IP address.</p>
+                        </div>
+                        <div>
+                            <label class="adm-label" for="admin-block-reason">Reason <span class="font-normal">(optional)</span></label>
+                            <input id="admin-block-reason" name="reason" class="adm-input" [(ngModel)]="blockReason" placeholder="e.g. Repeated suspicious requests" maxlength="200" />
+                        </div>
+                        <div>
+                            <span class="adm-label">Block for</span>
+                            <div class="grid grid-cols-4 gap-1.5" role="radiogroup" aria-label="Block duration">
+                                <button *ngFor="let d of blockDurations" type="button" role="radio" [attr.aria-checked]="blockHours === d.value"
+                                    class="adm-btn adm-btn--sm" [ngClass]="blockHours === d.value ? 'adm-btn--soft' : 'adm-btn--ghost'"
+                                    (click)="blockHours = d.value">{{ d.label }}</button>
+                            </div>
+                        </div>
+                        <button type="submit" class="adm-btn adm-btn--danger w-full" style="height: 38px" [disabled]="isBlockingIp || !blockIpValid">
+                            <i class="fa-solid fa-ban" aria-hidden="true"></i> {{ isBlockingIp ? 'Blocking...' : 'Block IP address' }}
+                        </button>
+                    </form>
+                </section>
             </div>
+
+            <app-admin-reencryption-card class="block"></app-admin-reencryption-card>
+        </ng-container>
+
+        <!-- ============================================================ SPECIALIZATIONS -->
+        <app-admin-specialization-stats *ngIf="activeTab === 'specializations'" class="block"></app-admin-specialization-stats>
+
+        <!-- ============================================================ APPOINTMENTS / LAB TESTS -->
+        <app-admin-appointments *ngIf="activeTab === 'appointments'" class="block space-y-4 sm:space-y-6"></app-admin-appointments>
+        <app-admin-lab-tests *ngIf="activeTab === 'labtests'"></app-admin-lab-tests>
+    </div>
+
+    <!-- ============================================================ DIALOGS -->
+
+    <!-- Delete master data option -->
+    <app-modal-shell [open]="!!itemToDelete" title="Delete option" [subtitle]="selectedMasterLabel"
+        icon="fa-solid fa-trash" iconWrapClass="bg-rose-500/15 text-rose-600 dark:text-rose-400" maxWidthClass="max-w-md"
+        [fullScreenMobile]="false" [hasFooter]="true" footerClass="px-4 sm:px-6 py-3 flex justify-end gap-2"
+        (close)="itemToDelete = null">
+        <p class="text-sm leading-relaxed">
+            Delete <span class="font-semibold px-1.5 py-0.5 rounded-md bg-[var(--bg)] border border-[var(--border)]">{{ itemToDelete }}</span>
+            from {{ selectedMasterLabel.toLowerCase() }}? It will no longer appear in dropdowns.
+        </p>
+        <div modalFooter class="contents">
+            <button type="button" class="adm-btn adm-btn--ghost" (click)="itemToDelete = null">Cancel</button>
+            <button type="button" class="adm-btn adm-btn--danger" [disabled]="isDeletingMaster" (click)="confirmDeleteMasterItem()">
+                <i *ngIf="isDeletingMaster" class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>
+                {{ isDeletingMaster ? 'Deleting...' : 'Delete' }}
+            </button>
         </div>
     </app-modal-shell>
 
-    <!-- ADMIN CHANGE PASSWORD MODAL -->
-    <app-modal-shell [open]="!!selectedUserForPasswordReset" [showHeader]="false" maxWidthClass="max-w-md"
-        panelClass="bg-[var(--bg)] border border-[var(--border)]/80 rounded-2xl" bodyClass="px-6 py-4 space-y-4"
-        [hasFooter]="true" footerClass="px-6 pb-6 border-0" backdropClass="bg-[var(--bg)]/80" [fullScreenMobile]="false"
-        ariaLabel="Change User Password" (close)="closePasswordResetModal()">
-
-        <div modalHeader class="px-6 pt-6 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div
-                    class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-700 dark:text-amber-400 shrink-0">
-                    <i class="fa-solid fa-key text-base" aria-hidden="true"></i>
+    <!-- Doctor profile review -->
+    <app-modal-shell *ngIf="selectedDoctor" [open]="true" [showHeader]="false" [hasFooter]="true" maxWidthClass="max-w-3xl"
+        bodyClass="p-4 sm:p-6 space-y-4 text-sm" footerClass="px-4 sm:px-6 py-3 border-t border-[var(--border)]"
+        ariaLabel="Doctor profile" (close)="closeDoctorModal()">
+        <div modalHeader class="px-4 sm:px-6 py-4 border-b border-[var(--border)] flex items-center justify-between gap-3 shrink-0">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="w-12 h-12 rounded-xl bg-[var(--bg)] overflow-hidden border border-[var(--border)] shrink-0 flex items-center justify-center font-bold text-lg text-[var(--muted)]">
+                    <img *ngIf="selectedDoctorProfile?.profileImageUrl; else docInitial" [src]="selectedDoctorProfile.profileImageUrl" alt="" class="w-full h-full object-cover" />
+                    <ng-template #docInitial>{{ doctorName(selectedDoctor).charAt(0) }}</ng-template>
                 </div>
-                <div>
-                    <h3 class="text-base font-bold text-[var(--text)]">Reset User Password</h3>
-                    <p class="text-xs text-muted">User: <span class="font-semibold text-blue-700 dark:text-blue-300">{{
-                            selectedUserForPasswordReset?.username }}</span> (#{{ selectedUserForPasswordReset?.userId
-                        }})</p>
+                <div class="min-w-0">
+                    <h3 class="text-base sm:text-lg font-bold flex items-center gap-2 flex-wrap">
+                        Dr. {{ doctorName(selectedDoctorProfile || selectedDoctor) }}
+                        <span class="adm-badge" [ngClass]="selectedDoctor.isVerified ? 'adm-badge--primary' : 'adm-badge--warning'">
+                            {{ selectedDoctor.isVerified ? 'Verified' : 'Waiting' }}
+                        </span>
+                    </h3>
+                    <p class="text-xs text-[var(--muted)] truncate">
+                        {{ selectedDoctorProfile?.specialization || selectedDoctor.specialization || 'No specialization' }} · &#64;{{ selectedDoctor.username }}
+                    </p>
                 </div>
             </div>
-            <button type="button" (click)="closePasswordResetModal()"
-                class="w-8 h-8 rounded-xl bg-[var(--panel)] hover:bg-[var(--border)] text-muted hover:text-[var(--text)] flex items-center justify-center transition border border-[var(--border)]">
-                ✕
+            <button type="button" (click)="closeDoctorModal()" aria-label="Close" class="adm-btn adm-btn--ghost adm-btn--icon shrink-0">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
             </button>
         </div>
 
-        <div
-            class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 text-xs text-amber-200/90 leading-relaxed">
-            <i class="fa-solid fa-triangle-exclamation mr-1 text-amber-700 dark:text-amber-400" aria-hidden="true"></i>
-            This will update the user's password and immediately deactivate all active sessions and refresh tokens for
-            security.
+        <app-page-loader *ngIf="loadingDoctorDetails" label="Loading profile, experience and certificates..." [compact]="true"></app-page-loader>
+
+        <ng-container *ngIf="!loadingDoctorDetails">
+            <section class="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg)]">
+                <h4 class="doc-section-title"><i class="fa-solid fa-user" aria-hidden="true"></i> Personal and account details</h4>
+                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-xs">
+                    <div><dt class="text-[var(--muted)]">Email</dt><dd class="font-semibold break-all">{{ selectedDoctorProfile?.email || 'Not provided' }}</dd></div>
+                    <div><dt class="text-[var(--muted)]">Phone</dt><dd class="font-semibold">{{ selectedDoctorProfile?.contactInfo || 'Not provided' }}</dd></div>
+                    <div><dt class="text-[var(--muted)]">Gender</dt><dd class="font-semibold">{{ selectedDoctorProfile?.gender || 'Not provided' }}</dd></div>
+                    <div><dt class="text-[var(--muted)]">Date of birth</dt><dd class="font-semibold">{{ selectedDoctorProfile?.dateOfBirth || 'Not provided' }}</dd></div>
+                    <div><dt class="text-[var(--muted)]">Consultation fee</dt><dd class="font-semibold">₹{{ selectedDoctorProfile?.consultationFees || '0.00' }}</dd></div>
+                    <div><dt class="text-[var(--muted)]">Languages</dt><dd class="font-semibold">{{ formatLanguages(selectedDoctorProfile?.languages) }}</dd></div>
+                    <div class="sm:col-span-2"><dt class="text-[var(--muted)]">Clinic address</dt><dd class="font-semibold">{{ selectedDoctorProfile?.address || 'Not provided' }}</dd></div>
+                </dl>
+            </section>
+
+            <section class="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg)]">
+                <h4 class="doc-section-title"><i class="fa-solid fa-hospital" aria-hidden="true"></i> Experience ({{ selectedDoctorExperiences.length }})</h4>
+                <p *ngIf="selectedDoctorExperiences.length === 0" class="text-xs text-[var(--muted)]">No experience added.</p>
+                <div class="space-y-2">
+                    <div *ngFor="let exp of selectedDoctorExperiences" class="p-3 rounded-lg border border-[var(--border)] bg-[var(--panel)]">
+                        <div class="flex justify-between items-start gap-2 font-semibold">
+                            <span>{{ exp.position }}</span>
+                            <span class="adm-badge adm-badge--primary">{{ exp.yearsOfService }} yrs</span>
+                        </div>
+                        <div class="text-xs text-[var(--muted)] mt-0.5">{{ exp.hospitalName }}</div>
+                        <p *ngIf="exp.details" class="text-xs text-[var(--muted)] mt-1">{{ exp.details }}</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg)]">
+                <h4 class="doc-section-title"><i class="fa-solid fa-graduation-cap" aria-hidden="true"></i> Education ({{ selectedDoctorEducations.length }})</h4>
+                <p *ngIf="selectedDoctorEducations.length === 0" class="text-xs text-[var(--muted)]">No education added.</p>
+                <div class="space-y-2">
+                    <div *ngFor="let edu of selectedDoctorEducations" class="p-3 rounded-lg border border-[var(--border)] bg-[var(--panel)]">
+                        <div class="flex justify-between items-start gap-2 font-semibold">
+                            <span>{{ edu.degree }}</span>
+                            <span class="adm-badge adm-badge--neutral">{{ edu.yearOfCompletion }}</span>
+                        </div>
+                        <div class="text-xs text-[var(--muted)] mt-0.5">{{ edu.institution }}</div>
+                        <p *ngIf="edu.details" class="text-xs text-[var(--muted)] mt-1">{{ edu.details }}</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg)]">
+                <h4 class="doc-section-title"><i class="fa-solid fa-certificate" aria-hidden="true"></i> Licenses and certificates ({{ selectedDoctorCertificates.length }})</h4>
+                <p *ngIf="selectedDoctorCertificates.length === 0" class="text-xs text-[var(--muted)]">No certificates uploaded.</p>
+                <div class="space-y-2">
+                    <div *ngFor="let cert of selectedDoctorCertificates" class="p-3 rounded-lg border border-[var(--border)] bg-[var(--panel)] space-y-3">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div class="min-w-0">
+                                <div class="font-semibold">{{ cert.name }}</div>
+                                <div class="text-xs text-[var(--muted)]">{{ cert.issuingOrganization || 'Issuer not provided' }}<span *ngIf="cert.issueDate"> · {{ cert.issueDate }}</span></div>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <a *ngIf="cert.url" [href]="cert.url" target="_blank" rel="noopener noreferrer" class="adm-btn adm-btn--sm adm-btn--ghost">
+                                    <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> Open
+                                </a>
+                                <button type="button" class="adm-btn adm-btn--sm adm-btn--soft" (click)="reviewCertificate(cert)" [disabled]="reviewingCertificateId === cert.id">
+                                    <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
+                                    {{ reviewingCertificateId === cert.id ? 'Checking...' : 'Check details' }}
+                                </button>
+                            </div>
+                        </div>
+                        <div *ngIf="certificateReviews[cert.id] as review" class="adm-notice adm-notice--info flex-col !gap-1">
+                            <div class="font-bold">Details read from the certificate</div>
+                            <div>Holder: {{ review.extractedHolderName || 'Not found' }}</div>
+                            <div>Organization: {{ review.extractedOrganization || 'Not found' }}</div>
+                            <div>Credential: {{ review.extractedCredentialId || 'Not found' }}</div>
+                            <div>Dates: {{ review.extractedIssueDate || 'Not found' }} – {{ review.extractedExpiryDate || 'Not found' }}</div>
+                            <div *ngIf="review.mismatches.length === 0" class="font-semibold text-emerald-700 dark:text-emerald-300">No mismatches found.</div>
+                            <ul *ngIf="review.mismatches.length > 0" class="list-disc pl-4 font-semibold text-amber-800 dark:text-amber-200">
+                                <li *ngFor="let mismatch of review.mismatches">{{ mismatch }}</li>
+                            </ul>
+                            <div class="text-[11px] opacity-80">This is a helper only. You decide whether to verify the doctor.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </ng-container>
+
+        <div modalFooter class="flex items-center justify-between gap-3">
+            <button type="button" class="adm-btn adm-btn--ghost" (click)="closeDoctorModal()">Close</button>
+            <button *ngIf="!selectedDoctor.isVerified" type="button" class="adm-btn adm-btn--success" style="height: 38px"
+                [disabled]="verifyingDoctorId === selectedDoctor.id || loadingDoctorDetails" (click)="toggleDoctorVerification(selectedDoctor, true)">
+                <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                {{ verifyingDoctorId === selectedDoctor.id ? 'Verifying...' : 'Verify doctor' }}
+            </button>
+            <button *ngIf="selectedDoctor.isVerified" type="button" class="adm-btn adm-btn--ghost" style="height: 38px"
+                [disabled]="verifyingDoctorId === selectedDoctor.id || loadingDoctorDetails" (click)="toggleDoctorVerification(selectedDoctor, false)">
+                {{ verifyingDoctorId === selectedDoctor.id ? 'Saving...' : 'Remove verification' }}
+            </button>
+        </div>
+    </app-modal-shell>
+
+    <!-- Reset password -->
+    <app-modal-shell [open]="!!selectedUserForPasswordReset" title="Reset password"
+        [subtitle]="(selectedUserForPasswordReset?.username || '') + ' · #' + (selectedUserForPasswordReset?.userId || '')"
+        icon="fa-solid fa-key" iconWrapClass="bg-amber-500/15 text-amber-700 dark:text-amber-400" maxWidthClass="max-w-md"
+        bodyClass="p-4 sm:p-6 space-y-4" [fullScreenMobile]="false" [hasFooter]="true"
+        footerClass="px-4 sm:px-6 py-3 flex justify-end gap-2" (close)="closePasswordResetModal()">
+
+        <div class="adm-notice adm-notice--warning">
+            <i class="fa-solid fa-triangle-exclamation mt-0.5" aria-hidden="true"></i>
+            <span>The user is signed out everywhere and must use the new password.</span>
         </div>
 
-        <div class="space-y-3">
+        <form class="space-y-3" (ngSubmit)="submitPasswordReset()" id="admin-reset-password-form">
             <div>
-                <label class="block text-xs font-semibold text-[var(--text)] mb-1">New Password</label>
+                <label class="adm-label" for="admin-new-password">New password</label>
                 <div class="relative">
-                    <input [type]="showNewPasswordText ? 'text' : 'password'" [(ngModel)]="newPasswordInput"
-                        placeholder="Min 8 chars (1 upper, 1 lower, 1 digit, 1 spec)"
-                        class="w-full px-3 py-2.5 bg-[var(--panel)] border border-[var(--border)] rounded-xl text-sm text-[var(--text)] placeholder-slate-500 focus:outline-none focus:border-amber-500 pr-10 min-h-touch" />
+                    <input id="admin-new-password" name="newPassword" [type]="showNewPasswordText ? 'text' : 'password'"
+                        [(ngModel)]="newPasswordInput" class="adm-input !pr-10" autocomplete="new-password" />
                     <button type="button" (click)="showNewPasswordText = !showNewPasswordText"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-[var(--text)] text-xs"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 text-[var(--muted)] hover:text-[var(--text)]"
                         [attr.aria-label]="showNewPasswordText ? 'Hide password' : 'Show password'">
                         <i class="fa-solid" [ngClass]="showNewPasswordText ? 'fa-eye-slash' : 'fa-eye'" aria-hidden="true"></i>
                     </button>
                 </div>
+                <ul class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
+                    <li *ngFor="let c of passwordChecks" class="flex items-center gap-1.5"
+                        [ngClass]="c.ok ? 'text-emerald-700 dark:text-emerald-400' : 'text-[var(--muted)]'">
+                        <i class="fa-solid" [ngClass]="c.ok ? 'fa-circle-check' : 'fa-circle text-[8px]'" aria-hidden="true"></i>
+                        {{ c.label }}
+                    </li>
+                </ul>
             </div>
 
             <div>
-                <label class="block text-xs font-semibold text-[var(--text)] mb-1">Confirm New Password</label>
+                <label class="adm-label" for="admin-confirm-password">Confirm new password</label>
                 <div class="relative">
-                    <input [type]="showConfirmPasswordText ? 'text' : 'password'" [(ngModel)]="confirmPasswordInput"
-                        placeholder="Re-enter new password"
-                        class="w-full px-3 py-2.5 bg-[var(--panel)] border border-[var(--border)] rounded-xl text-sm text-[var(--text)] placeholder-slate-500 focus:outline-none focus:border-amber-500 pr-10 min-h-touch" />
+                    <input id="admin-confirm-password" name="confirmPassword" [type]="showConfirmPasswordText ? 'text' : 'password'"
+                        [(ngModel)]="confirmPasswordInput" class="adm-input !pr-10" autocomplete="new-password" />
                     <button type="button" (click)="showConfirmPasswordText = !showConfirmPasswordText"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-[var(--text)] text-xs"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 text-[var(--muted)] hover:text-[var(--text)]"
                         [attr.aria-label]="showConfirmPasswordText ? 'Hide password' : 'Show password'">
                         <i class="fa-solid" [ngClass]="showConfirmPasswordText ? 'fa-eye-slash' : 'fa-eye'" aria-hidden="true"></i>
                     </button>
                 </div>
+                <p *ngIf="confirmPasswordInput && !passwordsMatch" class="mt-1 text-[11px] text-rose-600 dark:text-rose-400">Passwords do not match.</p>
             </div>
-        </div>
+        </form>
 
-        <div modalFooter class="flex items-center justify-end gap-3">
-            <button type="button" (click)="closePasswordResetModal()"
-                class="btn-size-lg px-4 text-xs font-semibold text-muted hover:text-[var(--text)] bg-[var(--panel)] hover:bg-[var(--border)] rounded-xl border border-[var(--border)] transition inline-flex items-center justify-center">
-                Cancel
-            </button>
-            <button type="button" (click)="submitPasswordReset()"
-                [disabled]="isSubmittingPasswordReset || !newPasswordInput || !confirmPasswordInput"
-                class="btn-size-lg px-4 text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 rounded-xl shadow-lg shadow-amber-500/20 transition disabled:opacity-50 flex items-center gap-2">
-                <span *ngIf="isSubmittingPasswordReset"
-                    class="w-3.5 h-3.5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></span>
-                <span>{{ isSubmittingPasswordReset ? 'Updating Password...' : 'Update Password & Revoke Sessions'
-                    }}</span>
+        <div modalFooter class="contents">
+            <button type="button" class="adm-btn adm-btn--ghost" (click)="closePasswordResetModal()">Cancel</button>
+            <button type="submit" form="admin-reset-password-form" class="adm-btn adm-btn--primary"
+                [disabled]="isSubmittingPasswordReset || !passwordsMatch">
+                <i *ngIf="isSubmittingPasswordReset" class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>
+                {{ isSubmittingPasswordReset ? 'Saving...' : 'Set new password' }}
             </button>
         </div>
     </app-modal-shell>
-</div>
+
+    <!-- Sign-ins of a user -->
+    <app-admin-sessions-modal [username]="sessionsForUsername" (closed)="sessionsForUsername = null"></app-admin-sessions-modal>
+</app-admin-chrome>

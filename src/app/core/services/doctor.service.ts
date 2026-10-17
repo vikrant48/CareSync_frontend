@@ -36,6 +36,8 @@ export interface SearchDoctorsParams {
   specialization?: string;
   location?: string;
   gender?: string;
+  /** true = verified doctors only, false = not verified only, undefined = all */
+  verified?: boolean;
   page?: number;
   size?: number;
   sortBy?: string;
@@ -81,6 +83,7 @@ export class DoctorService {
     if (searchParams.specialization) params = params.set('specialization', searchParams.specialization);
     if (searchParams.location) params = params.set('location', searchParams.location);
     if (searchParams.gender) params = params.set('gender', searchParams.gender);
+    if (searchParams.verified !== undefined) params = params.set('verified', String(searchParams.verified));
     if (searchParams.page !== undefined && searchParams.page !== null) {
       params = params.set('page', searchParams.page.toString());
     }
@@ -99,6 +102,7 @@ export class DoctorService {
     if (searchParams.specialization) params = params.set('specialization', searchParams.specialization);
     if (searchParams.location) params = params.set('location', searchParams.location);
     if (searchParams.gender) params = params.set('gender', searchParams.gender);
+    if (searchParams.verified !== undefined) params = params.set('verified', String(searchParams.verified));
 
     return this.http.get<number>(`${this.baseUrl}/api/doctors/search/count`, { params });
   }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { Doctor } from './doctor.service';
 
@@ -15,6 +15,28 @@ export interface BlockedIP {
   reason: string;
   blockedAt?: string;
   expiresAt?: string;
+}
+
+/** One login session of a user (GET /api/admin/sessions/{username}) */
+export interface AdminUserSession {
+  id: number;
+  username: string;
+  sessionId: string;
+  ipAddress?: string;
+  loginTime?: string;
+  lastActivity?: string;
+  active: boolean;
+  userAgent?: string;
+  userType?: string;
+}
+
+/** Result of POST /api/admin/security/reencrypt-fields (dry run reports valuesToRewrite, real run valuesRewritten) */
+export interface ReencryptionReport {
+  dryRun: boolean;
+  valuesToRewrite?: number;
+  valuesRewritten?: number;
+  failed: number;
+  columns: Record<string, { alreadyCurrent: number; legacyEcb: number; plaintext: number; rewritten: number; failed: number }>;
 }
 
 export interface AdminDoctorListItem {
@@ -37,6 +59,25 @@ export interface AdminDoctorPagedResponse {
   empty: boolean;
   totalVerifiedCount?: number;
   totalPendingCount?: number;
+}
+
+/** Fields the admin appointment lookup shows (GET /api/appointments/admin/{id} returns more, incl. medical data, which is not displayed) */
+export interface AdminAppointment {
+  appointmentId: number;
+  patientId: number;
+  patientName?: string;
+  doctorName?: string;
+  doctorSpecialization?: string;
+  appointmentDate?: string;
+  appointmentTime?: string;
+  status: string;
+  createdAt?: string;
+  updatedAt?: string;
+  statusChangedAt?: string;
+  statusChangedBy?: string;
+  consultationFees?: number;
+  transactionId?: string;
+  isActive?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -109,6 +150,42 @@ export class AdminService {
       value,
       orgId
     });
+  }
+
+  blockIP(ipAddress: string, reason: string, hoursToBlock: number) {
+    const params = new HttpParams()
+      .set('ipAddress', ipAddress)
+      .set('reason', reason)
+      .set('hoursToBlock', String(hoursToBlock));
+    return this.http.post<{ message: string }>(`${this.baseUrl}/api/admin/block-ip`, null, { params });
+  }
+
+  getUserSessions(username: string) {
+    return this.http.get<AdminUserSession[]>(`${this.baseUrl}/api/admin/sessions/${encodeURIComponent(username)}`);
+  }
+
+  deactivateSession(sessionId: string) {
+    return this.http.post<{ message: string }>(
+      `${this.baseUrl}/api/admin/sessions/deactivate/${encodeURIComponent(sessionId)}`, {});
+  }
+
+  deactivateAllSessions(username: string) {
+    return this.http.post<{ message: string }>(
+      `${this.baseUrl}/api/admin/sessions/deactivate-all/${encodeURIComponent(username)}`, {});
+  }
+
+  reencryptFields(dryRun: boolean) {
+    const params = new HttpParams().set('dryRun', String(dryRun));
+    return this.http.post<ReencryptionReport>(`${this.baseUrl}/api/admin/security/reencrypt-fields`, null, { params });
+  }
+
+  getAppointmentForAdmin(appointmentId: number) {
+    return this.http.get<AdminAppointment>(`${this.baseUrl}/api/appointments/admin/${appointmentId}`);
+  }
+
+  /** Refused by the backend when the appointment has clinical, payment or chat records */
+  deleteAppointment(appointmentId: number) {
+    return this.http.delete<{ message: string }>(`${this.baseUrl}/api/appointments/admin/${appointmentId}`);
   }
 
   changeUserPassword(userId: number, newPassword: string, confirmPassword: string) {

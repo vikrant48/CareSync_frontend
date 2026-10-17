@@ -3,7 +3,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup, FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
-import { RegisterRequest } from '../../core/models/auth.models';
+import { RegisterRequest, Role } from '../../core/models/auth.models';
 import { ToastService } from '../../core/services/toast.service';
 import { SelectDropdownComponent } from '../../shared/select-dropdown.component';
 import { SpecializationService } from '../../core/services/specialization.service';
@@ -28,6 +28,18 @@ export class RegisterComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
 
   specializations: string[] = [];
+
+  /** Shown when the user arrived from a shared doctor link */
+  get doctorLinkHint(): boolean {
+    return (this.auth.pendingReturnUrl() || '').startsWith('/patient/doctor/');
+  }
+
+  /** Open the remembered page (e.g. a shared doctor) or the dashboard */
+  private continueAfterAuth(role: Role | null) {
+    if (this.auth.redirectAfterAuth(role)) {
+      this.toast.showInfo('That link is for patients, so you were taken to your dashboard.');
+    }
+  }
 
   constructor(private fb: FormBuilder) {
     // Initialize reactive forms inside constructor to avoid using 'fb' before assignment
@@ -344,7 +356,7 @@ export class RegisterComponent implements OnInit {
       next: (resp) => {
         this.auth.storeAuth(resp);
         this.toast.showSuccess('Registration successful. Redirecting...');
-        this.auth.redirectToDashboard(resp.role);
+        this.continueAfterAuth(resp.role);
       },
       error: (err) => {
         this.error = err?.error?.error || 'Registration failed';
@@ -480,7 +492,7 @@ export class RegisterComponent implements OnInit {
         this.auth.storeAuth(resp);
         this.toast.showSuccess(`Google Sign Up successful as ${resp.role}!`);
         setTimeout(() => {
-          this.auth.redirectToDashboard(resp.role);
+          this.continueAfterAuth(resp.role);
         }, 800);
       },
       error: (err) => {

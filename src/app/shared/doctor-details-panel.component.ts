@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Doctor } from '../core/services/doctor.service';
 import { ToastService } from '../core/services/toast.service';
 import { doctorDisplayName, doctorInitial as getDoctorInitial } from './utils/doctor-name.util';
+import { SavedDoctorsService } from '../core/services/saved-doctors.service';
+import { shareDoctorProfile } from './utils/doctor-share.util';
 
 @Component({
   selector: 'doctor-details-panel',
@@ -94,9 +96,10 @@ import { doctorDisplayName, doctorInitial as getDoctorInitial } from './utils/do
           </button>
 
           <div class="flex items-center gap-2 w-full sm:w-auto justify-center">
-            <button type="button" (click)="toggleSave()"
-                    class="btn-size-md flex-1 sm:flex-initial bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs font-semibold px-4 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-all">
-              <i class="fa-regular fa-heart" [class.fa-solid]="saved" [class.text-rose-500]="saved" aria-hidden="true"></i>
+            <button type="button" (click)="toggleSave()" [disabled]="savingFavorite" [attr.aria-pressed]="saved"
+                    [attr.aria-label]="saved ? 'Remove from saved doctors' : 'Save doctor'"
+                    class="btn-size-md flex-1 sm:flex-initial bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs font-semibold px-4 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-all disabled:opacity-60">
+              <i class="fa-heart" [ngClass]="saved ? 'fa-solid text-rose-500' : 'fa-regular'" aria-hidden="true"></i>
               <span>{{ saved ? 'Saved' : 'Save' }}</span>
             </button>
 
@@ -375,28 +378,43 @@ export class DoctorDetailsPanelComponent {
   @Output() openBooking = new EventEmitter<void>();
 
   activeTab: 'overview' | 'availability' | 'reviews' | 'clinic' = 'overview';
-  saved = false;
+  private savedDoctors = inject(SavedDoctorsService);
+  savingFavorite = false;
+
+  constructor() {
+    // Know whether this doctor is already saved (the list is loaded once per session)
+    this.savedDoctors.load().subscribe({ error: () => { } });
+  }
+
+  get saved(): boolean {
+    return this.savedDoctors.isSaved(this.doctor?.id);
+  }
 
   goBack() {
     this.location.back();
   }
 
   toggleSave() {
-    this.saved = !this.saved;
-    if (this.saved) {
-      this.toast.showSuccess('Doctor saved to your favorites.');
-    } else {
-      this.toast.showInfo('Doctor removed from favorites.');
-    }
+    const doctor = this.doctor;
+    if (!doctor || this.savingFavorite) return;
+    const wasSaved = this.saved;
+    this.savingFavorite = true;
+    const call = wasSaved ? this.savedDoctors.remove(doctor.id) : this.savedDoctors.save(doctor);
+    call.subscribe({
+      next: () => {
+        this.savingFavorite = false;
+        if (wasSaved) this.toast.showInfo('Removed from your saved doctors.');
+        else this.toast.showSuccess('Saved. Find it under Saved in Find & Book Appointments.');
+      },
+      error: (err) => {
+        this.savingFavorite = false;
+        this.toast.showError(err?.error?.error || err?.error?.message || 'Could not update your saved doctors.');
+      },
+    });
   }
 
   shareDoctor() {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(window.location.href);
-      this.toast.showSuccess('Doctor profile link copied to clipboard!');
-    } else {
-      this.toast.showInfo('Copy link: ' + window.location.href);
-    }
+    if (this.doctor) shareDoctorProfile(this.doctor, this.toast);
   }
 
   doctorInitial(): string {

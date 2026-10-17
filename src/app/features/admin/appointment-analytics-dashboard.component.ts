@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { AppointmentApiService } from '../../core/services/appointment-api.service';
 import { AppointmentAnalyticsResponse } from '../../core/models/appointment.models';
 import { AdminChromeComponent } from './admin-chrome.component';
+import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 import { FilterBarComponent, FilterConfig } from '../../shared/components';
 
 interface FunnelStep {
@@ -19,7 +20,7 @@ interface StatusCountItem {
 @Component({
     selector: 'app-appointment-analytics-dashboard',
     standalone: true,
-    imports: [CommonModule, AdminChromeComponent, FilterBarComponent],
+    imports: [CommonModule, AdminChromeComponent, FilterBarComponent, PageLoaderComponent],
     templateUrl: './appointment-analytics-dashboard.component.html',
     styleUrl: './appointment-analytics-dashboard.component.css'
 })

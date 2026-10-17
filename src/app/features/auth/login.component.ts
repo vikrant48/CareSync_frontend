@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
-import { LoginRequest } from '../../core/models/auth.models';
+import { LoginRequest, Role } from '../../core/models/auth.models';
 import { ToastService } from '../../core/services/toast.service';
 import { FeatureCarouselComponent } from './feature-carousel.component';
 import { environment } from '../../../../environments/environment';
@@ -24,6 +24,18 @@ export class LoginComponent {
   model: LoginRequest = { username: '', password: '' };
   selectedRole: 'PATIENT' | 'DOCTOR' = 'PATIENT';
 
+  /** Shown when the user arrived from a shared doctor link */
+  get doctorLinkHint(): boolean {
+    return (this.auth.pendingReturnUrl() || '').startsWith('/patient/doctor/');
+  }
+
+  /** Open the remembered page (e.g. a shared doctor) or the dashboard */
+  private continueAfterAuth(role: Role | null) {
+    if (this.auth.redirectAfterAuth(role)) {
+      this.toast.showInfo('That link is for patients, so you were taken to your dashboard.');
+    }
+  }
+
   onSubmit() {
     this.loading = true;
     this.error = '';
@@ -32,7 +44,7 @@ export class LoginComponent {
         this.auth.storeAuth(resp);
         this.toast.showSuccess('Logged in successfully. Redirecting...');
         setTimeout(() => {
-          this.auth.redirectToDashboard(resp.role);
+          this.continueAfterAuth(resp.role);
         }, 800);
       },
       error: (err) => {
@@ -89,7 +101,7 @@ export class LoginComponent {
         this.auth.storeAuth(resp);
         this.toast.showSuccess('Google Login successful!');
         setTimeout(() => {
-          this.auth.redirectToDashboard(resp.role);
+          this.continueAfterAuth(resp.role);
         }, 800);
       },
       error: (err) => {

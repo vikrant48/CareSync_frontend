@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { AppointmentApiService } from '../../core/services/appointment-api.service';
 import { AppointmentStatusLogDto } from '../../core/models/appointment.models';
 import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
+import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 
 @Component({
     selector: 'app-appointment-audit-trail-modal',
     standalone: true,
-    imports: [CommonModule, ModalShellComponent],
+    imports: [CommonModule, ModalShellComponent, PageLoaderComponent],
     templateUrl: './appointment-audit-trail-modal.component.html',
 })
 export class AppointmentAuditTrailModalComponent implements OnChanges {

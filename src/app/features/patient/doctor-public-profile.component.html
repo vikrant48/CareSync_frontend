@@ -15,6 +15,12 @@
             (paymentCancel)="closePaymentModal()" (paymentError)="onPaymentError($event)"></app-payment-popup>
 
         <ng-template #loadingTpl>
-            <app-page-loader label="Loading doctor profile..."></app-page-loader>
+            <app-empty-state *ngIf="notFound; else stillLoading" icon="fa-solid fa-user-doctor" title="Doctor not found"
+                message="This doctor's profile is no longer available. The link may be old or mistyped." [hasAction]="true">
+                <a routerLink="/patient/book-appointment" class="btn-primary">Find other doctors</a>
+            </app-empty-state>
+            <ng-template #stillLoading>
+                <app-page-loader label="Loading doctor profile..."></app-page-loader>
+            </ng-template>
         </ng-template>
     </app-page-container>

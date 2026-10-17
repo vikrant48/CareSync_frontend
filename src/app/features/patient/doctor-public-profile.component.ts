@@ -12,19 +12,22 @@ import { ToastService } from '../../core/services/toast.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PaymentService } from '../../core/services/payment.service';
 import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
+import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
 import { PageContainerComponent } from '../../shared/ui/page-container.component';
 import { doctorDisplayName } from '../../shared/utils/doctor-name.util';
 
 @Component({
   selector: 'app-doctor-public-profile',
   standalone: true,
-  imports: [PageContainerComponent, CommonModule, RouterModule, FormsModule, DoctorDetailsPanelComponent, PaymentPopupComponent, DoctorBookingModalComponent, PageLoaderComponent],
+  imports: [PageContainerComponent, CommonModule, RouterModule, FormsModule, DoctorDetailsPanelComponent, PaymentPopupComponent, DoctorBookingModalComponent, PageLoaderComponent, EmptyStateComponent],
   templateUrl: './doctor-public-profile.component.html',
   styleUrl: './doctor-public-profile.component.css'
 })
 export class DoctorPublicProfileComponent {
   username: string | null = null;
   doctor: Doctor | null = null;
+  /** The link points to a doctor that does not exist (or no longer exists) */
+  notFound = false;
   avgRating: number | null = null;
   age: number | null = null;
 
@@ -88,6 +91,9 @@ export class DoctorPublicProfileComponent {
         if (this.autoBookOnLoad) {
           this.startBooking();
         }
+      },
+      error: () => {
+        this.notFound = true;
       },
     });
   }

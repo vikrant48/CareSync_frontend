@@ -20,6 +20,7 @@ import { doctorDisplayName, doctorInitial as getDoctorInitial } from '../../shar
 import { InrPipe } from '../../shared/utils/inr.pipe';
 import { trackById } from '../../shared/utils/track-by';
 import { markForCheckOn } from '../../shared/utils/mark-for-check';
+import { SavedDoctorsService } from '../../core/services/saved-doctors.service';
 
 @Component({
   selector: 'app-patient-book-appointment',
@@ -33,6 +34,45 @@ import { markForCheckOn } from '../../shared/utils/mark-for-check';
 export class PatientBookAppointmentComponent {
   private cdr = inject(ChangeDetectorRef);
   readonly trackById = trackById;
+
+  // ---- Saved doctors ("Saved" view and the heart on each card) ----
+  private savedDoctors = inject(SavedDoctorsService);
+  view: 'all' | 'saved' = 'all';
+  savedLoading = false;
+
+  get savedCount(): number {
+    return this.savedDoctors.doctors().length;
+  }
+
+  get visibleDoctors(): Doctor[] {
+    return this.view === 'saved' ? this.savedDoctors.doctors() : this.doctors;
+  }
+
+  get listLoading(): boolean {
+    return this.view === 'saved' ? this.savedLoading : this.loadingDoctors;
+  }
+
+  setView(view: 'all' | 'saved') {
+    if (view === this.view) return;
+    this.view = view;
+    // Fresh list when opening Saved (a doctor may have been saved on another device)
+    if (view === 'saved') this.loadSaved(true);
+  }
+
+  private loadSaved(force: boolean) {
+    this.savedLoading = force || !this.savedDoctors.loaded();
+    this.savedDoctors.load(force).pipe(markForCheckOn(this.cdr)).subscribe({
+      next: (list) => {
+        (list || []).forEach((d) => (this.ratings[d.id] = { avg: d.averageRating || 0, count: d.reviewCount || 0 }));
+        this.savedLoading = false;
+      },
+      error: () => {
+        this.savedLoading = false;
+        if (force) this.toast.showError('Could not load your saved doctors.');
+      },
+    });
+  }
+
   // static: resolved before the first check, so the filter bar has the template on first render (needed under OnPush)
   @ViewChild('specializationTpl', { static: true })
   set specializationTpl(tpl: TemplateRef<unknown> | undefined) {
@@ -44,6 +84,8 @@ export class PatientBookAppointmentComponent {
   nameFilter = '';
   genderFilter = '';
   addressFilter = '';
+  /** '' = all doctors, 'true' = verified only, 'false' = not verified only */
+  verifiedFilter = '';
 
   readonly bookFilterConfigs: FilterConfig[] = [
     {
@@ -78,6 +120,20 @@ export class PatientBookAppointmentComponent {
       icon: 'fa-solid fa-location-dot',
       placeholder: 'Select location...',
       defaultValue: ''
+    },
+    {
+      type: 'select',
+      key: 'verifiedFilter',
+      label: 'Verification',
+      icon: 'fa-solid fa-circle-check',
+      placeholder: 'All doctors',
+      defaultValue: '',
+      width: 'w-full sm:w-48',
+      options: [
+        { label: 'All doctors', value: '' },
+        { label: 'Verified only', value: 'true' },
+        { label: 'Not verified', value: 'false' }
+      ]
     }
   ];
 
@@ -85,7 +141,8 @@ export class PatientBookAppointmentComponent {
     specializationFilter: '',
     nameFilter: '',
     genderFilter: '',
-    addressFilter: ''
+    addressFilter: '',
+    verifiedFilter: ''
   };
   loadingDoctors = true;
   private doctorSearchId = 0;
@@ -114,6 +171,7 @@ export class PatientBookAppointmentComponent {
     if (this.nameFilter) count++;
     if (this.genderFilter) count++;
     if (this.addressFilter) count++;
+    if (this.verifiedFilter) count++;
     return count;
   }
 
@@ -136,6 +194,8 @@ export class PatientBookAppointmentComponent {
     private toast: ToastService
   ) {
     this.searchDoctors();
+    // Hearts on the cards need to know which doctors are saved
+    this.loadSaved(false);
     this.masterDataService.getGenders().pipe(markForCheckOn(this.cdr)).subscribe({
       next: (g) => {
         this.genders = g || [];
@@ -153,6 +213,7 @@ export class PatientBookAppointmentComponent {
       specialization: this.specializationFilter || undefined,
       location: this.addressFilter || undefined,
       gender: this.genderFilter || undefined,
+      verified: this.verifiedFilter ? this.verifiedFilter === 'true' : undefined,
       page: this.page,
       size: this.size,
       sortBy: this.sortBy !== 'relevance' ? this.sortBy : undefined
@@ -213,6 +274,7 @@ export class PatientBookAppointmentComponent {
     this.nameFilter = values['nameFilter'] || '';
     this.genderFilter = values['genderFilter'] || '';
     this.addressFilter = values['addressFilter'] || '';
+    this.verifiedFilter = values['verifiedFilter'] || '';
     this.onFilterChange();
   }
 
@@ -270,11 +332,13 @@ export class PatientBookAppointmentComponent {
     this.nameFilter = '';
     this.genderFilter = '';
     this.addressFilter = '';
+    this.verifiedFilter = '';
     this.bookFilterValues = {
       specializationFilter: '',
       nameFilter: '',
       genderFilter: '',
-      addressFilter: ''
+      addressFilter: '',
+      verifiedFilter: ''
     };
     this.sortBy = 'relevance';
     this.page = 0;

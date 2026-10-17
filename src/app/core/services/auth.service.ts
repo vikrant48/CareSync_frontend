@@ -6,11 +6,14 @@ import { Observable, finalize, shareReplay } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
 import { AuthenticationResponse, LoginRequest, RefreshTokenRequest, RegisterRequest, Role } from '../models/auth.models';
+import { SavedDoctorsService } from './saved-doctors.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private baseUrl = environment.apiBaseUrl;
   private platformId = inject(PLATFORM_ID);
+  private savedDoctors = inject(SavedDoctorsService);
+  private static readonly RETURN_URL_KEY = 'cs_return_url';
 
   private isBrowser(): boolean {
     return isPlatformBrowser(this.platformId);
@@ -164,6 +167,8 @@ export class AuthService {
   }
 
   storeAuth(resp: AuthenticationResponse) {
+    // A different account on this browser must not see the previous patient's saved doctors
+    if (this.username() && this.username() !== resp.username) this.savedDoctors.clear();
     this.setStored('accessToken', resp.accessToken);
     this.setStored('refreshToken', resp.refreshToken);
     this.setStored('role', resp.role);
@@ -198,6 +203,8 @@ export class AuthService {
     this.username.set(null);
     this.userId.set(null);
     this.user.set(null);
+    this.savedDoctors.clear();
+    this.clearReturnUrl();
     this.stopInactivityTimer();
     this.router.navigate(['/login']);
   }
@@ -209,6 +216,67 @@ export class AuthService {
     else if (role === 'DOCTOR') this.router.navigate(['/doctor']);
     else if (role === 'PATIENT') this.router.navigate(['/patient']);
     else this.router.navigate(['/login']);
+  }
+
+  /**
+   * Remember an app page to open after login or sign-up (e.g. a shared doctor link). Only paths inside this app are
+   * kept, so a crafted link can never send someone to another site. Kept per browser tab.
+   */
+  rememberReturnUrl(url: string) {
+    if (!this.isBrowser() || !AuthService.isSafeReturnUrl(url)) return;
+    try {
+      sessionStorage.setItem(AuthService.RETURN_URL_KEY, url);
+    } catch {
+      // storage blocked: the user simply lands on the dashboard
+    }
+  }
+
+  /** The remembered page, if any (not cleared) */
+  pendingReturnUrl(): string | null {
+    if (!this.isBrowser()) return null;
+    try {
+      const url = sessionStorage.getItem(AuthService.RETURN_URL_KEY);
+      return url && AuthService.isSafeReturnUrl(url) ? url : null;
+    } catch {
+      return null;
+    }
+  }
+
+  clearReturnUrl() {
+    if (!this.isBrowser()) return;
+    try {
+      sessionStorage.removeItem(AuthService.RETURN_URL_KEY);
+    } catch {
+      // nothing to clear
+    }
+  }
+
+  /**
+   * After login or sign-up: open the remembered page when this role may see it, otherwise the dashboard.
+   * Returns true when a remembered page was skipped because it is for another role (callers can explain why).
+   */
+  redirectAfterAuth(role: Role | null): boolean {
+    const url = this.pendingReturnUrl();
+    this.clearReturnUrl();
+    if (url && role && AuthService.roleCanOpen(role, url)) {
+      this.router.navigateByUrl(url);
+      return false;
+    }
+    this.redirectToDashboard(role);
+    return !!url;
+  }
+
+  /** "/patient/..." style paths only: no other sites ("//x", "/\x", "https:"), no login pages */
+  static isSafeReturnUrl(url: string | null | undefined): boolean {
+    if (!url || !url.startsWith('/') || url.startsWith('//') || url.startsWith('/\\')) return false;
+    return !/^\/(login|register|reset-password|auth)(\/|\?|$)/.test(url);
+  }
+
+  private static roleCanOpen(role: Role, url: string): boolean {
+    if (url.startsWith('/patient')) return role === 'PATIENT';
+    if (url.startsWith('/doctor')) return role === 'DOCTOR';
+    if (url.startsWith('/admin')) return role === 'ADMIN';
+    return true;
   }
 
   private getStored(key: string): string | null {

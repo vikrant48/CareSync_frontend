@@ -9,6 +9,21 @@
             </button>
         </app-page-header>
 
+        <!-- All doctors / Saved -->
+        <div class="inline-flex p-1 rounded-xl border border-[var(--border)] bg-[var(--panel)]" role="tablist" aria-label="Which doctors">
+            <button type="button" role="tab" [attr.aria-selected]="view === 'all'" (click)="setView('all')"
+                class="h-[32px] px-4 rounded-lg text-xs font-bold inline-flex items-center gap-1.5 transition-colors"
+                [ngClass]="view === 'all' ? 'bg-[var(--primary)] text-white shadow-sm' : 'text-[var(--muted)] hover:text-[var(--text)]'">
+                <i class="fa-solid fa-user-doctor" aria-hidden="true"></i> All doctors
+            </button>
+            <button type="button" role="tab" [attr.aria-selected]="view === 'saved'" (click)="setView('saved')"
+                class="h-[32px] px-4 rounded-lg text-xs font-bold inline-flex items-center gap-1.5 transition-colors"
+                [ngClass]="view === 'saved' ? 'bg-[var(--primary)] text-white shadow-sm' : 'text-[var(--muted)] hover:text-[var(--text)]'">
+                <i class="fa-solid fa-heart" [ngClass]="view === 'saved' ? '' : 'text-rose-500'" aria-hidden="true"></i>
+                Saved<span *ngIf="savedCount > 0"> ({{ savedCount }})</span>
+            </button>
+        </div>
+
         <ng-template #specializationTpl>
             <app-specialization-autocomplete class="block w-full" [(ngModel)]="specializationFilter"
                 (ngModelChange)="onSpecializationChange($event)" placeholder="All Specializations"
@@ -17,20 +32,21 @@
             </app-specialization-autocomplete>
         </ng-template>
 
-        <app-filter-bar [filters]="bookFilterConfigs" [values]="bookFilterValues" [theme]="'patient'" [clearAllStyle]="'danger'"
+        <app-filter-bar *ngIf="view === 'all'" [filters]="bookFilterConfigs" [values]="bookFilterValues" [theme]="'patient'" [clearAllStyle]="'danger'"
             (filterChange)="onFilterBarChange($event)">
         </app-filter-bar>
 
-        <app-page-loader *ngIf="loadingDoctors" label="Loading doctors..."></app-page-loader>
+        <app-page-loader *ngIf="listLoading" [label]="view === 'saved' ? 'Loading saved doctors...' : 'Loading doctors...'"></app-page-loader>
 
         <!-- Doctors Found Toolbar -->
-        <div *ngIf="!loadingDoctors" class="flex items-center justify-between py-1">
+        <div *ngIf="!listLoading" class="flex items-center justify-between py-1">
             <div class="text-sm font-extrabold text-[var(--text)] flex items-center gap-2">
-                <span>{{ totalDoctorsCount }} Doctors Found</span>
+                <span *ngIf="view === 'all'">{{ totalDoctorsCount }} Doctors Found</span>
+                <span *ngIf="view === 'saved'">{{ savedCount }} Saved {{ savedCount === 1 ? 'Doctor' : 'Doctors' }}</span>
             </div>
 
             <!-- Sort Selector -->
-            <div class="flex items-center gap-2">
+            <div *ngIf="view === 'all'" class="flex items-center gap-2">
                 <span class="text-xs text-[var(--muted)] font-medium">Sort By</span>
                 <select [(ngModel)]="sortBy" (ngModelChange)="onFilterChange()"
                     class="h-[38px] py-0 bg-[var(--panel)] border border-[var(--border)] rounded-xl px-3 text-xs text-[var(--text)] font-semibold focus:outline-none focus:border-[var(--primary)] cursor-pointer">
@@ -39,16 +55,22 @@
             </div>
         </div>
 
-        <app-empty-state *ngIf="!loadingDoctors && doctors.length === 0" icon="fa-solid fa-face-frown"
+        <app-empty-state *ngIf="view === 'saved' && !savedLoading && savedCount === 0" icon="fa-regular fa-heart"
+            title="No saved doctors yet" message="Tap the heart on a doctor to save them here for later." [hasAction]="true">
+            <button type="button" class="h-6 py-0 rounded-lg text-[var(--primary)] text-xs font-bold px-3 inline-flex items-center justify-center"
+                (click)="setView('all')">Browse doctors</button>
+        </app-empty-state>
+
+        <app-empty-state *ngIf="view === 'all' && !loadingDoctors && doctors.length === 0" icon="fa-solid fa-face-frown"
             title="No doctors found" message="No doctors found matching your criteria." [hasAction]="true">
             <button type="button" class="h-6 py-0 rounded-lg text-[var(--primary)] hover:text-indigo-300 text-xs font-bold px-3 inline-flex items-center justify-center"
                 (click)="resetFilters()">Clear Filters</button>
         </app-empty-state>
 
         <!-- Doctors Grid (3 Columns on Desktop matching Reference Screenshot 1) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="!loadingDoctors && doctors.length > 0">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="!listLoading && visibleDoctors.length > 0">
             <div class="bg-[var(--panel)] border border-[var(--border)] hover:border-[var(--border)] rounded-2xl p-4 sm:p-4.5 flex flex-col justify-between hover:shadow-2xl transition-all duration-200 relative group cursor-pointer"
-                *ngFor="let d of doctors; trackBy: trackById" (click)="openDoctor(d)"
+                *ngFor="let d of visibleDoctors; trackBy: trackById" (click)="openDoctor(d)"
                 role="link" tabindex="0" (keydown.enter)="$event.target === $event.currentTarget && openDoctor(d)" [attr.aria-label]="'View profile of ' + formatDoctorName(d)">
 
                 <!-- Rating Badge (Top Right) -->
@@ -153,7 +175,7 @@
     </app-page-container>
 
     <!-- Pagination: always visible, pinned to the bottom of the screen -->
-    <app-sticky-action-bar *ngIf="!loadingDoctors && totalDoctorsCount > 0" [pinned]="true" [compact]="true">
+    <app-sticky-action-bar *ngIf="view === 'all' && !loadingDoctors && totalDoctorsCount > 0" [pinned]="true" [compact]="true">
         <app-paginator [page]="page" [pageSize]="size" [total]="totalDoctorsCount" [showSummaryAlways]="true" [compact]="true"
             (pageChange)="goToPage($event)"></app-paginator>
     </app-sticky-action-bar>
