@@ -17,15 +17,25 @@ import { LabReportExplainerComponent } from '../../shared/lab-report-explainer.c
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section *ngIf="brief() as b" class="surface p-3.5 shadow-sm" aria-label="AI health brief">
-      <div class="flex items-center justify-between gap-2 mb-3 border-b border-[var(--border)] pb-1.5">
+      <div class="flex items-center justify-between gap-2 border-[var(--border)]"
+           [ngClass]="expanded() ? 'mb-3 border-b pb-1.5' : ''">
         <h2 class="font-bold text-xs text-[var(--text)] uppercase tracking-wide flex items-center gap-2">
           <i class="fa-solid fa-wand-magic-sparkles text-indigo-600 dark:text-indigo-400" aria-hidden="true"></i>
           AI health brief
         </h2>
-        <span class="text-[10px] text-[var(--muted)]">{{ b.note }}</span>
+        <div class="flex items-center gap-2 min-w-0">
+          <span *ngIf="expanded()" class="hidden sm:inline text-[10px] text-[var(--muted)] truncate">{{ b.note }}</span>
+          <button type="button" (click)="toggle()"
+                  class="w-7 h-7 shrink-0 flex items-center justify-center rounded-lg text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--bg)] transition-colors"
+                  [attr.aria-expanded]="expanded()" aria-controls="healthBriefBody"
+                  [attr.aria-label]="expanded() ? 'Collapse AI health brief' : 'Expand AI health brief'"
+                  [title]="expanded() ? 'Collapse' : 'Expand'">
+            <i class="fa-solid text-xs" [ngClass]="expanded() ? 'fa-chevron-up' : 'fa-chevron-down'" aria-hidden="true"></i>
+          </button>
+        </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+      <div *ngIf="expanded()" id="healthBriefBody" class="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <!-- Next appointment and how to prepare -->
         <div class="inset-surface rounded-lg p-3">
           <div class="text-[10px] font-bold uppercase tracking-wider text-[var(--muted)] mb-1.5">Next appointment</div>
@@ -99,6 +109,26 @@ export class PatientHealthBriefComponent implements OnInit {
   private documentOpener = inject(DocumentOpenerService);
 
   brief = signal<PatientHealthBrief | null>(null);
+  /** Open or closed; remembered in this browser */
+  expanded = signal(this.savedExpanded());
+
+  private static readonly EXPANDED_KEY = 'caresync_health_brief_expanded';
+
+  toggle() {
+    const next = !this.expanded();
+    this.expanded.set(next);
+    try {
+      localStorage.setItem(PatientHealthBriefComponent.EXPANDED_KEY, next ? '1' : '0');
+    } catch { }
+  }
+
+  private savedExpanded(): boolean {
+    try {
+      return typeof localStorage === 'undefined' || localStorage.getItem(PatientHealthBriefComponent.EXPANDED_KEY) !== '0';
+    } catch {
+      return true;
+    }
+  }
 
   ngOnInit() {
     // Optional card: if the brief can't load, the dashboard simply doesn't show it

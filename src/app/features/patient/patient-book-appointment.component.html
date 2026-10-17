@@ -11,7 +11,7 @@
 
         <!-- Describe your problem: AI suggests the specialization and doctors, the list below is filtered -->
         <app-symptom-search (specializationFound)="onAiSpecialization($event)" (showDoctor)="onAiDoctor($event)"
-            (emergencyBooking)="openEmergencyModal()"></app-symptom-search>
+            (emergencyBooking)="openEmergencyModal()" (cleared)="onAiCleared()"></app-symptom-search>
 
         <!-- All doctors / Saved -->
         <div class="inline-flex p-1 rounded-xl border border-[var(--border)] bg-[var(--panel)]" role="tablist" aria-label="Which doctors">

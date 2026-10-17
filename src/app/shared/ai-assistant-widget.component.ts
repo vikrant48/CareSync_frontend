@@ -25,6 +25,50 @@ export interface SavedChatSession {
   conversationId?: string | null;
 }
 
+/** One suggestion tile in the chat */
+interface ChatSuggestion {
+  label: string;
+  hint: string;
+  icon: string;
+  /** Icon colours (light and dark) */
+  tone: string;
+  prompt?: string;
+  action?: 'BOOK' | 'PICK_PATIENT';
+}
+
+const TONE = {
+  emerald: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400',
+  blue: 'bg-blue-500/10 border-blue-500/20 text-blue-700 dark:text-blue-400',
+  amber: 'bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400',
+  purple: 'bg-purple-500/10 border-purple-500/20 text-purple-700 dark:text-purple-400',
+  indigo: 'bg-indigo-500/10 border-indigo-500/20 text-indigo-700 dark:text-indigo-400',
+  rose: 'bg-rose-500/10 border-rose-500/20 text-rose-700 dark:text-rose-400',
+  cyan: 'bg-cyan-500/10 border-cyan-500/20 text-cyan-700 dark:text-cyan-400',
+  slate: 'bg-slate-500/10 border-slate-500/20 text-slate-700 dark:text-slate-300'
+};
+
+const PATIENT_SUGGESTIONS: ChatSuggestion[] = [
+  { label: 'Find a doctor', hint: 'Book by specialization', icon: 'fa-user-doctor', tone: TONE.indigo, action: 'BOOK' },
+  { label: 'My appointments', hint: 'See what is coming up', icon: 'fa-calendar-check', tone: TONE.blue, prompt: 'Show my upcoming appointments' },
+  { label: 'Move or cancel', hint: 'Reschedule a visit', icon: 'fa-calendar-xmark', tone: TONE.amber, prompt: 'I want to reschedule or cancel an appointment' },
+  { label: 'Saved doctors', hint: 'Your favourites', icon: 'fa-heart', tone: TONE.rose, prompt: 'Show my saved doctors' },
+  { label: 'Symptoms', hint: 'Which doctor to see', icon: 'fa-stethoscope', tone: TONE.emerald, prompt: 'I have some symptoms. Which kind of doctor should I see?' },
+  { label: 'Lab tests', hint: 'Tests and prices', icon: 'fa-flask', tone: TONE.purple, prompt: 'Which lab tests can I book and what do they cost?' },
+  { label: 'Medicines', hint: 'Usage & side effects', icon: 'fa-pills', tone: TONE.cyan, prompt: 'Can you explain how to take medicines safely and what side effects to watch for?' },
+  { label: 'Healthy living', hint: 'Everyday tips', icon: 'fa-heart-pulse', tone: TONE.slate, prompt: 'Give me general tips for healthy living and wellness.' }
+];
+
+const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
+  { label: 'Next patient', hint: 'Brief before the visit', icon: 'fa-user-clock', tone: TONE.indigo, prompt: 'Brief me on my next patient' },
+  { label: "Today's schedule", hint: 'Who is coming today', icon: 'fa-calendar-day', tone: TONE.blue, prompt: 'What is my schedule today?' },
+  { label: "Tomorrow's schedule", hint: 'Plan ahead', icon: 'fa-calendar-plus', tone: TONE.cyan, prompt: 'What is my schedule tomorrow?' },
+  { label: 'My patients', hint: 'Recent patients', icon: 'fa-users', tone: TONE.emerald, prompt: 'List my recent patients' },
+  { label: 'Patient summary', hint: 'Pick a patient with @', icon: 'fa-file-medical', tone: TONE.purple, action: 'PICK_PATIENT', prompt: "Summarize this patient's history, recent vitals and medicines" },
+  { label: 'Drug interactions', hint: 'Check a combination', icon: 'fa-pills', tone: TONE.amber, prompt: 'Help me check a drug interaction. Which medicines should I compare?' },
+  { label: 'Differential', hint: 'Build a differential', icon: 'fa-diagram-project', tone: TONE.rose, prompt: 'Help me build a differential diagnosis. I will describe the case.' },
+  { label: 'Guidelines', hint: 'Evidence-based answers', icon: 'fa-book-medical', tone: TONE.slate, prompt: 'What are the current first-line treatment recommendations for hypertension?' }
+];
+
 @Component({
   selector: 'app-ai-assistant-widget',
   standalone: true,
@@ -80,7 +124,7 @@ export interface SavedChatSession {
       </div>
 
       <!-- Messages Area -->
-      <div #messageContainer class="flex-1 overflow-y-auto p-4 space-y-4 bg-[var(--bg)] scroll-smooth no-scrollbar">
+      <div #messageContainer (scroll)="onChatScroll($event)" class="flex-1 overflow-y-auto p-4 space-y-4 bg-[var(--bg)] no-scrollbar">
         <!-- Messages Content Template -->
         <ng-container *ngTemplateOutlet="chatMessagesContent"></ng-container>
       </div>
@@ -94,6 +138,7 @@ export interface SavedChatSession {
             [(ngModel)]="userInput"
             (ngModelChange)="onUserInputChange($event)"
             name="compactUserInput"
+            [attr.maxlength]="maxMessageLength"
             [disabled]="isLoading() || isListening()"
             [placeholder]="isListening() ? 'Listening...' : (isDoctor() ? 'Ask about a patient (type @ to pick one) or your schedule...' : 'Ask anything, e.g. book a skin doctor tomorrow after 5pm')"
             class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl py-3 pl-4 pr-24 text-sm text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] disabled:opacity-50 transition-all"
@@ -251,7 +296,9 @@ export interface SavedChatSession {
                 <span>Tip</span>
               </div>
               <p class="text-[11px] text-[var(--muted)] leading-relaxed">
-                You can ask me about appointments, medications, lab tests, and general health information.
+                {{ isDoctor()
+                  ? 'Type @ to pick one of your patients, then ask about their history, vitals, medicines or lab reports. Every fact comes with its date.'
+                  : 'Just type what you need, e.g. "book a skin doctor tomorrow after 5pm". You confirm every booking or change.' }}
               </p>
             </div>
           </div>
@@ -259,85 +306,24 @@ export interface SavedChatSession {
           <!-- Right Column: Main Chat & Guidance Cards -->
           <div class="flex-1 flex flex-col min-w-0 bg-[var(--bg)] relative">
             <!-- Messages Container -->
-            <div #expandedMessageContainer class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 scroll-smooth custom-scrollbar">
+            <div #expandedMessageContainer (scroll)="onChatScroll($event)" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar">
               
-              <!-- Topic Guidance Cards Grid (Shown when conversation has no user messages) -->
+              <!-- Suggestions for the user's role (shown until the chat starts) -->
               <div *ngIf="messages().length === 0" class="mb-4">
-                <div class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-3 px-1">You can also ask me about:</div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  
-                  <!-- Symptoms -->
-                  <div (click)="askTopic('What symptoms should I get checked by a doctor?')" 
-                       class="p-3.5 bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--primary)]/50 rounded-2xl cursor-pointer transition-all flex items-center gap-3 group">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-lg group-hover:scale-110 transition-transform shrink-0">
-                      <i class="fa-solid fa-stethoscope" aria-hidden="true"></i>
-                    </div>
-                    <div class="min-w-0">
-                      <h5 class="text-xs font-bold text-[var(--text)] group-hover:text-[var(--primary)] transition-colors">Symptoms</h5>
-                      <p class="text-[11px] text-[var(--muted)] truncate">Get general guidance</p>
-                    </div>
-                  </div>
-
-                  <!-- Lab Tests -->
-                  <div (click)="askTopic('How do I view or book lab tests?')" 
-                       class="p-3.5 bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--primary)]/50 rounded-2xl cursor-pointer transition-all flex items-center gap-3 group">
-                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-400 flex items-center justify-center text-lg group-hover:scale-110 transition-transform shrink-0">
-                      <i class="fa-solid fa-flask" aria-hidden="true"></i>
-                    </div>
-                    <div class="min-w-0">
-                      <h5 class="text-xs font-bold text-[var(--text)] group-hover:text-[var(--primary)] transition-colors">Lab Tests</h5>
-                      <p class="text-[11px] text-[var(--muted)] truncate">Understand your reports</p>
-                    </div>
-                  </div>
-
-                  <!-- Medications -->
-                  <div (click)="askTopic('Can you explain medication usage and side effects?')" 
-                       class="p-3.5 bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--primary)]/50 rounded-2xl cursor-pointer transition-all flex items-center gap-3 group">
-                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center text-lg group-hover:scale-110 transition-transform shrink-0">
-                      <i class="fa-solid fa-pills" aria-hidden="true"></i>
-                    </div>
-                    <div class="min-w-0">
-                      <h5 class="text-xs font-bold text-[var(--text)] group-hover:text-[var(--primary)] transition-colors">Medications</h5>
-                      <p class="text-[11px] text-[var(--muted)] truncate">Usage & side effects</p>
-                    </div>
-                  </div>
-
-                  <!-- Health Records -->
-                  <div (click)="askTopic('How can I view my past medical records?')" 
-                       class="p-3.5 bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--primary)]/50 rounded-2xl cursor-pointer transition-all flex items-center gap-3 group">
-                    <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-700 dark:text-purple-400 flex items-center justify-center text-lg group-hover:scale-110 transition-transform shrink-0">
-                      <i class="fa-solid fa-file-medical" aria-hidden="true"></i>
-                    </div>
-                    <div class="min-w-0">
-                      <h5 class="text-xs font-bold text-[var(--text)] group-hover:text-[var(--primary)] transition-colors">Health Records</h5>
-                      <p class="text-[11px] text-[var(--muted)] truncate">View & explain</p>
-                    </div>
-                  </div>
-
-                  <!-- Doctor Suggestions -->
-                  <div (click)="startBooking()" 
-                       class="p-3.5 bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--primary)]/50 rounded-2xl cursor-pointer transition-all flex items-center gap-3 group">
-                    <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-400 flex items-center justify-center text-lg group-hover:scale-110 transition-transform shrink-0">
-                      <i class="fa-solid fa-user-doctor" aria-hidden="true"></i>
-                    </div>
-                    <div class="min-w-0">
-                      <h5 class="text-xs font-bold text-[var(--text)] group-hover:text-[var(--primary)] transition-colors">Doctor Suggestions</h5>
-                      <p class="text-[11px] text-[var(--muted)] truncate">Find the right specialist</p>
-                    </div>
-                  </div>
-
-                  <!-- Lifestyle Advice -->
-                  <div (click)="askTopic('Give me general tips for healthy living and wellness.')" 
-                       class="p-3.5 bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--primary)]/50 rounded-2xl cursor-pointer transition-all flex items-center gap-3 group">
-                    <div class="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-400 flex items-center justify-center text-lg group-hover:scale-110 transition-transform shrink-0">
-                      <i class="fa-solid fa-heart-pulse" aria-hidden="true"></i>
-                    </div>
-                    <div class="min-w-0">
-                      <h5 class="text-xs font-bold text-[var(--text)] group-hover:text-[var(--primary)] transition-colors">Lifestyle Advice</h5>
-                      <p class="text-[11px] text-[var(--muted)] truncate">Tips for better health</p>
-                    </div>
-                  </div>
-
+                <div class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-2.5 px-1">You can also ask me about:</div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                  <button *ngFor="let s of suggestions()" type="button" (click)="useSuggestion(s)" [disabled]="isLoading()"
+                          class="p-2.5 bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--primary)]/50 rounded-xl text-left transition-all flex items-center gap-2.5 group disabled:opacity-60 min-w-0"
+                          [title]="s.prompt || s.hint">
+                    <span class="w-7 h-7 rounded-lg border flex items-center justify-center text-xs shrink-0 group-hover:scale-110 transition-transform"
+                          [ngClass]="s.tone">
+                      <i class="fa-solid" [ngClass]="s.icon" aria-hidden="true"></i>
+                    </span>
+                    <span class="min-w-0">
+                      <span class="block text-[11px] font-bold text-[var(--text)] group-hover:text-[var(--primary)] transition-colors truncate">{{ s.label }}</span>
+                      <span class="block text-[10px] text-[var(--muted)] truncate">{{ s.hint }}</span>
+                    </span>
+                  </button>
                 </div>
               </div>
 
@@ -355,6 +341,7 @@ export interface SavedChatSession {
                   [(ngModel)]="userInput"
                   (ngModelChange)="onUserInputChange($event)"
                   name="expandedUserInput"
+                  [attr.maxlength]="maxMessageLength"
                   [disabled]="isLoading() || isListening()"
                   [placeholder]="isListening() ? 'Listening...' : (isDoctor() ? 'Ask about a patient (type @ to pick one) or your schedule...' : 'Ask anything, e.g. book a skin doctor tomorrow after 5pm')"
                   class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-2xl py-3.5 pl-5 pr-28 text-sm text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] disabled:opacity-50 transition-all"
@@ -1002,6 +989,7 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
     if (this.streaming() || this.isLoading()) return;
     this.aiService.getConversation(session.id).subscribe({
       next: conv => {
+        this.followLatest = true;
         this.activeSessionId = conv.id;
         // Continue that chat's own conversation, so contexts never mix
         this.aiService.useConversation(conv.id);
@@ -1108,6 +1096,21 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
     this.isExpanded.set(false);
   }
 
+  /** Suggestion tiles: a prompt to send, or an action (start booking, pick a patient) */
+  readonly suggestions = computed<ChatSuggestion[]>(() => (this.isDoctor() ? DOCTOR_SUGGESTIONS : PATIENT_SUGGESTIONS));
+
+  useSuggestion(s: ChatSuggestion) {
+    if (this.isLoading()) return;
+    if (s.action === 'BOOK') {
+      this.startBooking();
+    } else if (s.action === 'PICK_PATIENT') {
+      this.userInput = s.prompt ?? '';
+      this.openPatientPicker();
+    } else if (s.prompt) {
+      this.askTopic(s.prompt);
+    }
+  }
+
   askTopic(topicPrompt: string) {
     this.sendMessage(topicPrompt);
   }
@@ -1121,6 +1124,7 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
     this.messages.set([]);
     this.userInput = '';
     this.clearCopilotPatient();
+    this.followLatest = true;
   }
 
   startBooking() {
@@ -1194,8 +1198,17 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
 
   private sendingInternalAction = false;
 
+  /** Same limit as the server (AiChatRequest.MAX_MESSAGE_LENGTH) */
+  readonly maxMessageLength = 2000;
+
   sendMessage(text: string = this.userInput.trim()) {
     if (!text || this.isLoading()) return;
+    // Typed text is capped by maxlength; voice input fills the box in code, so check here too
+    if (text.length > this.maxMessageLength) {
+      this.toast.showError(`Your message is too long. Please keep it under ${this.maxMessageLength} characters.`);
+      return;
+    }
+    this.followLatest = true;
 
     // Add user message to UI (unless it's a hidden action)
     const isAction = text.startsWith('ACTION_');
@@ -1432,8 +1445,45 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
     }]);
   }
 
+  /**
+   * Follow new messages only while the user is at the bottom. Any scroll up stops the following at once;
+   * scrolling back down near the end (or sending a message) starts it again.
+   */
+  private followLatest = true;
+  private static readonly BOTTOM_SLACK_PX = 80;
+  private readonly lastScrollTop = new WeakMap<HTMLElement, number>();
+  private readonly lastContentHeight = new WeakMap<HTMLElement, number>();
+
+  onChatScroll(event: Event) {
+    const el = event.target as HTMLElement;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    const movedUp = el.scrollTop < (this.lastScrollTop.get(el) ?? el.scrollTop) - 1;
+    this.lastScrollTop.set(el, el.scrollTop);
+    if (distanceFromBottom <= 4) {
+      this.followLatest = true; // at the very end (also after the content got shorter)
+    } else if (movedUp) {
+      this.followLatest = false; // reading older messages: even a small scroll up counts
+    } else if (distanceFromBottom < AiAssistantWidgetComponent.BOTTOM_SLACK_PX) {
+      this.followLatest = true; // scrolled back down to the end
+    }
+  }
+
+  /**
+   * Jump to the latest message only when the content changed (new message, streamed text, a card), never just
+   * because the screen was checked: scroll events trigger checks too, and jumping then undid the user's scrolling.
+   */
   ngAfterViewChecked() {
-    this.scrollToBottom();
+    for (const ref of [this.messageContainer, this.expandedMessageContainer]) {
+      const el = ref?.nativeElement as HTMLElement | undefined;
+      if (!el) continue;
+      const height = el.scrollHeight;
+      if (height === this.lastContentHeight.get(el)) continue;
+      this.lastContentHeight.set(el, height);
+      if (this.followLatest) {
+        el.scrollTop = height;
+        this.lastScrollTop.set(el, el.scrollTop);
+      }
+    }
   }
 
   formatAiMessage(text: string): string {
@@ -1460,20 +1510,5 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
     };
     this.messages.update(m => [...m, soapMsg]);
     this.toast.showSuccess('Structured SOAP dictation added to consultation');
-  }
-
-  private scrollToBottom(): void {
-    if (this.messageContainer) {
-      try {
-        const el = this.messageContainer.nativeElement;
-        el.scrollTop = el.scrollHeight;
-      } catch (err) { }
-    }
-    if (this.expandedMessageContainer) {
-      try {
-        const el = this.expandedMessageContainer.nativeElement;
-        el.scrollTop = el.scrollHeight;
-      } catch (err) { }
-    }
   }
 }

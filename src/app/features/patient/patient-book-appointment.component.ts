@@ -292,6 +292,14 @@ export class PatientBookAppointmentComponent {
     this.onFilterChange();
   }
 
+  /** The AI search was cleared: undo the specialization / doctor filter it applied */
+  onAiCleared() {
+    this.specializationFilter = '';
+    this.nameFilter = '';
+    this.bookFilterValues = { ...this.bookFilterValues, specializationFilter: '', nameFilter: '' };
+    this.onFilterChange();
+  }
+
   onFilterBarChange(values: Record<string, string>) {
     this.specializationFilter = values['specializationFilter'] || '';
     this.nameFilter = values['nameFilter'] || '';
