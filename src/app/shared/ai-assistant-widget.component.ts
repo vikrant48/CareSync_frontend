@@ -11,6 +11,7 @@ import { DatePickerComponent } from './date-picker.component';
 import { VisionScannerComponent } from './vision-scanner.component';
 import { ClinicalDictationComponent } from './clinical-dictation.component';
 import { ClinicalDictationResponse } from '../core/models/ai.models';
+import { escapeHtml } from './utils/escape-html';
 
 export interface SavedChatSession {
   id: string;
@@ -1088,7 +1089,8 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
 
   formatAiMessage(text: string): string {
     if (!text) return '';
-    let formatted = text;
+    // Escape first: only the tags added below may appear in the message
+    let formatted = escapeHtml(text);
 
     formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-[var(--text)]">$1</strong>');
     formatted = formatted.replace(/^### (.*$)/gim, '<h3 class="text-xs font-bold text-[var(--primary)] mt-2 mb-1 flex items-center gap-1.5"><i class="fas fa-notes-medical"></i> $1</h3>');

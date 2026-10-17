@@ -1,6 +1,7 @@
 import { Component, Input, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AiAssistantService } from '../core/services/ai-assistant.service';
+import { escapeHtml } from './utils/escape-html';
 
 @Component({
   selector: 'app-medical-summary',
@@ -120,8 +121,10 @@ export class MedicalSummaryComponent implements OnInit {
   }
 
   formattedSummary() {
-    let text = this.summary();
-    if (!text) return '';
+    const raw = this.summary();
+    if (!raw) return '';
+    // Escape first: only the tags added below may appear in the summary
+    let text = escapeHtml(raw);
 
     // Convert bold syntax **text** -> <strong>
     text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-gray-900 dark:text-gray-100">$1</strong>');
