@@ -1,13 +1,14 @@
-import { Component, inject, signal, ElementRef, ViewChild, AfterViewChecked, OnInit } from '@angular/core';
+import { Component, computed, inject, signal, ElementRef, ViewChild, AfterViewChecked, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AiAssistantService } from '../core/services/ai-assistant.service';
-import { ChatMessage, AiBookingSuggestion, DoctorSuggestion } from '../core/models/ai.models';
+import { ChatMessage, AiBookingSuggestion, AiCopilotPatient, DoctorSuggestion } from '../core/models/ai.models';
 import { AppointmentService } from '../core/services/appointment.service';
 import { AuthService } from '../core/services/auth.service';
 import { PaymentPopupComponent, PaymentDetails } from './payment-popup.component';
 import { ToastService } from '../core/services/toast.service';
+import { ConfirmService } from '../core/services/confirm.service';
 import { DatePickerComponent } from './date-picker.component';
 import { VisionScannerComponent } from './vision-scanner.component';
 import { ClinicalDictationComponent } from './clinical-dictation.component';
@@ -20,6 +21,8 @@ export interface SavedChatSession {
   time: string;
   timestamp: number;
   messages: ChatMessage[];
+  /** Server conversation (chat memory) this chat belongs to */
+  conversationId?: string | null;
 }
 
 @Component({
@@ -84,13 +87,15 @@ export interface SavedChatSession {
 
       <!-- Input Area -->
       <div class="p-3.5 bg-[var(--panel)] border-t border-[var(--border)] shrink-0">
+        <ng-container *ngTemplateOutlet="copilotPatientBar"></ng-container>
         <form (submit)="sendMessage(); $event.preventDefault()" class="relative flex items-center">
           <input
             type="text"
             [(ngModel)]="userInput"
+            (ngModelChange)="onUserInputChange($event)"
             name="compactUserInput"
             [disabled]="isLoading() || isListening()"
-            [placeholder]="isListening() ? 'Listening...' : (isDoctor() ? 'Type your clinical question...' : 'Ask anything, e.g. book a skin doctor tomorrow after 5pm')"
+            [placeholder]="isListening() ? 'Listening...' : (isDoctor() ? 'Ask about a patient (type @ to pick one) or your schedule...' : 'Ask anything, e.g. book a skin doctor tomorrow after 5pm')"
             class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl py-3 pl-4 pr-24 text-sm text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] disabled:opacity-50 transition-all"
           />
           <div class="absolute right-2.5 flex items-center gap-1">
@@ -112,7 +117,12 @@ export interface SavedChatSession {
               title="Voice Input" aria-label="Voice Input">
               <i class="fas" [class.fa-microphone]="!isListening()" [class.fa-microphone-slash]="isListening()" aria-hidden="true"></i>
             </button>
+            <button *ngIf="streaming()" type="button" (click)="stopStreaming()" title="Stop" aria-label="Stop the answer"
+              class="w-8 h-8 flex items-center justify-center bg-rose-600 hover:bg-rose-700 text-white rounded-xl transition-all shadow-md">
+              <i class="fas fa-stop text-xs" aria-hidden="true"></i>
+            </button>
             <button
+              *ngIf="!streaming()"
               type="submit"
               [disabled]="!userInput.trim() || isLoading() || isListening()"
               class="w-8 h-8 flex items-center justify-center bg-[var(--primary)] hover:bg-indigo-600 disabled:bg-[var(--border)] text-white disabled:text-[var(--muted)] rounded-xl transition-all shadow-md shadow-[var(--primary)]/20"
@@ -182,17 +192,23 @@ export interface SavedChatSession {
               <!-- Recent Chats Header -->
               <div class="flex items-center justify-between px-1 mb-1">
                 <span class="text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider">Recent Chats</span>
-                <span class="text-[9px] bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)] px-1.5 py-0.5 rounded-md font-semibold flex items-center gap-1" title="Cloud chat backup will be available in future updates">
-                  <i class="fa-solid fa-cloud-arrow-up text-[9px]" aria-hidden="true"></i> Cloud Sync Soon
-                </span>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-[9px] bg-[var(--bg)] border border-[var(--border)] text-emerald-700 dark:text-emerald-400 px-1.5 py-0.5 rounded-md font-semibold flex items-center gap-1" title="Your chats are saved securely and available on every device">
+                    <i class="fa-solid fa-cloud text-[9px]" aria-hidden="true"></i> Synced
+                  </span>
+                  <button *ngIf="recentChats().length > 0" type="button" (click)="deleteAllChats()"
+                          class="text-[9px] font-semibold text-[var(--muted)] hover:text-red-500 px-1" title="Delete all chats" aria-label="Delete all chats">
+                    Delete all
+                  </button>
+                </div>
               </div>
 
               <!-- Recent Chats List -->
               <div class="space-y-1.5 overflow-y-auto max-h-[calc(88vh-260px)] no-scrollbar pr-1">
                 <div *ngIf="recentChats().length === 0" class="p-3 text-center bg-[var(--bg)]/50 border border-dashed border-[var(--border)] rounded-xl">
                   <i class="fa-regular fa-comments text-lg text-[var(--muted)] mb-1" aria-hidden="true"></i>
-                  <p class="text-[11px] text-[var(--muted)]">No past local chats yet.</p>
-                  <span class="text-[9px] text-gray-500">Your conversations will be saved here automatically.</span>
+                  <p class="text-[11px] text-[var(--muted)]">No saved chats yet.</p>
+                  <span class="text-[9px] text-gray-500">Your chats are saved here automatically, on every device.</span>
                 </div>
 
                 <div 
@@ -204,10 +220,20 @@ export interface SavedChatSession {
                   <div class="flex items-center gap-3 min-w-0">
                     <i class="fa-regular fa-comments text-xs" [ngClass]="activeSessionId === chat.id ? 'text-[var(--primary)]' : 'text-[var(--muted)]'" aria-hidden="true"></i>
                     <div class="min-w-0">
-                      <h5 class="text-xs font-bold truncate" [ngClass]="activeSessionId === chat.id ? 'text-[var(--text)]' : 'text-[var(--muted)] group-hover:text-[var(--text)]'">{{ chat.title }}</h5>
+                      <input *ngIf="renamingId === chat.id" type="text" [(ngModel)]="renameDraft" maxlength="80"
+                             (click)="$event.stopPropagation()" (keydown.enter)="saveRename(chat)" (keydown.escape)="cancelRename()"
+                             (blur)="saveRename(chat)" aria-label="Chat name"
+                             class="w-full text-xs font-bold bg-[var(--bg)] border border-[var(--primary)] rounded px-1.5 py-0.5 text-[var(--text)] focus:outline-none" />
+                      <h5 *ngIf="renamingId !== chat.id" class="text-xs font-bold truncate" [ngClass]="activeSessionId === chat.id ? 'text-[var(--text)]' : 'text-[var(--muted)] group-hover:text-[var(--text)]'">{{ chat.title }}</h5>
                       <span class="text-[10px] text-[var(--muted)] opacity-80 truncate block">{{ chat.time }}</span>
                     </div>
                   </div>
+                  <button *ngIf="renamingId !== chat.id"
+                    (click)="startRename(chat, $event)"
+                    class="text-[var(--muted)] hover:text-[var(--primary)] p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    title="Rename chat" aria-label="Rename chat">
+                    <i class="fa-solid fa-pen text-[10px]" aria-hidden="true"></i>
+                  </button>
                   <button 
                     (click)="deleteRecentChat(chat.id, $event)" 
                     class="text-[var(--muted)] hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity" 
@@ -322,13 +348,15 @@ export interface SavedChatSession {
 
             <!-- Fixed Bottom Input Bar -->
             <div class="p-4 bg-[var(--panel)] border-t border-[var(--border)] shrink-0">
+              <ng-container *ngTemplateOutlet="copilotPatientBar"></ng-container>
               <form (submit)="sendMessage(); $event.preventDefault()" class="relative flex items-center">
                 <input
                   type="text"
                   [(ngModel)]="userInput"
+                  (ngModelChange)="onUserInputChange($event)"
                   name="expandedUserInput"
                   [disabled]="isLoading() || isListening()"
-                  [placeholder]="isListening() ? 'Listening...' : (isDoctor() ? 'Type your clinical question...' : 'Ask anything, e.g. book a skin doctor tomorrow after 5pm')"
+                  [placeholder]="isListening() ? 'Listening...' : (isDoctor() ? 'Ask about a patient (type @ to pick one) or your schedule...' : 'Ask anything, e.g. book a skin doctor tomorrow after 5pm')"
                   class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-2xl py-3.5 pl-5 pr-28 text-sm text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] disabled:opacity-50 transition-all"
                 />
                 <div class="absolute right-3 flex items-center gap-1.5">
@@ -350,7 +378,12 @@ export interface SavedChatSession {
                     title="Voice Input" aria-label="Voice Input">
                     <i class="fas" [class.fa-microphone]="!isListening()" [class.fa-microphone-slash]="isListening()" aria-hidden="true"></i>
                   </button>
+                  <button *ngIf="streaming()" type="button" (click)="stopStreaming()" title="Stop" aria-label="Stop the answer"
+                    class="w-9 h-9 flex items-center justify-center bg-rose-600 hover:bg-rose-700 text-white rounded-xl transition-all shadow-md">
+                    <i class="fas fa-stop text-xs" aria-hidden="true"></i>
+                  </button>
                   <button
+                    *ngIf="!streaming()"
                     type="submit"
                     [disabled]="!userInput.trim() || isLoading() || isListening()"
                     class="w-9 h-9 flex items-center justify-center bg-[var(--primary)] hover:bg-indigo-600 disabled:bg-[var(--border)] text-white disabled:text-[var(--muted)] rounded-xl transition-all shadow-md shadow-[var(--primary)]/20"
@@ -368,6 +401,54 @@ export interface SavedChatSession {
 
 
     <!-- REUSABLE CHAT MESSAGES CONTENT TEMPLATE -->
+    <!-- Doctor co-pilot: the patient picked with @patient, and the picker itself -->
+    <ng-template #copilotPatientBar>
+      <div *ngIf="isDoctor()" class="relative mb-2">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span *ngIf="copilotPatient() as picked"
+                class="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/30 rounded-full pl-2.5 pr-1 py-0.5">
+            <i class="fas fa-user-injured text-[10px]" aria-hidden="true"></i>
+            About: {{ picked.name }}
+            <button type="button" (click)="clearCopilotPatient()" [disabled]="isLoading()"
+                    class="w-4 h-4 flex items-center justify-center rounded-full hover:bg-[var(--primary)]/20"
+                    title="Stop asking about this patient" aria-label="Stop asking about this patient">
+              <i class="fas fa-times text-[9px]" aria-hidden="true"></i>
+            </button>
+          </span>
+          <button *ngIf="!copilotPatient()" type="button" (click)="openPatientPicker()" [disabled]="isLoading()"
+                  class="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-full px-2.5 py-0.5 transition-colors"
+                  title="Pick one of your patients (or type @ in the message)">
+            <i class="fas fa-at text-[10px]" aria-hidden="true"></i> Patient
+          </button>
+        </div>
+
+        <div *ngIf="patientPickerOpen()"
+             class="absolute bottom-full left-0 mb-2 w-full max-w-sm bg-[var(--panel)] border border-[var(--border)] rounded-xl shadow-xl z-20 overflow-hidden"
+             role="listbox" aria-label="Your patients">
+          <div class="p-2 border-b border-[var(--border)]">
+            <input type="text" [ngModel]="patientQuery()" (ngModelChange)="patientQuery.set($event)" name="copilotPatientQuery"
+                   (keydown.escape)="closePatientPicker()" (keydown.enter)="pickFirstPatient($event)"
+                   placeholder="Search your patients..." aria-label="Search your patients"
+                   class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--primary)]" />
+          </div>
+          <div class="max-h-52 overflow-y-auto">
+            <p *ngIf="copilotPatientsLoading()" class="px-3 py-2 text-xs text-[var(--muted)]">Loading your patients...</p>
+            <p *ngIf="!copilotPatientsLoading() && filteredCopilotPatients().length === 0" class="px-3 py-2 text-xs text-[var(--muted)]">
+              {{ copilotPatients().length === 0 ? 'You have no patients yet.' : 'No patient matches.' }}
+            </p>
+            <button *ngFor="let p of filteredCopilotPatients()" type="button" (click)="selectCopilotPatient(p)" role="option"
+                    class="w-full text-left px-3 py-2 hover:bg-[var(--bg)] flex items-center justify-between gap-2 transition-colors">
+              <span class="text-xs font-semibold text-[var(--text)] truncate">{{ p.name }}</span>
+              <span *ngIf="p.lastAppointment" class="text-[10px] text-[var(--muted)] shrink-0">Last: {{ p.lastAppointment | date:'d MMM y' }}</span>
+            </button>
+          </div>
+          <div class="px-3 py-1.5 border-t border-[var(--border)] text-[10px] text-[var(--muted)]">
+            Only your own patients. Contact details are never sent to the AI.
+          </div>
+        </div>
+      </div>
+    </ng-template>
+
     <ng-template #chatMessagesContent>
       <!-- Welcome Message -->
       <div class="flex gap-2.5 max-w-[92%]">
@@ -376,7 +457,7 @@ export interface SavedChatSession {
         </div>
         <div class="bg-[var(--panel)] p-3.5 rounded-2xl rounded-tl-none shadow-md border border-[var(--border)] text-[var(--text)]">
           <p class="text-sm" *ngIf="!isDoctor()">Hello! I'm your CareSync Assistant. Tell me what you need in your own words: I can find doctors, check open slots, book, move or cancel appointments (you confirm every change), and explain health topics.</p>
-          <p class="text-sm" *ngIf="isDoctor()">Hello Doctor. I'm your Clinical Assistant. How can I assist you with patient history or clinical queries today?</p>
+          <p class="text-sm" *ngIf="isDoctor()">Hello Doctor. I'm your clinical co-pilot. Pick a patient with &#64; and ask about their history, vitals, medicines or lab reports, or ask about your schedule. I cite the record and date for every fact, and I only see your own patients.</p>
           <p class="text-[10px] text-[var(--muted)] mt-2 italic font-medium">{{ isDoctor() ? 'This AI assistant is for clinical guidance and does not replace medical evidence.' : 'CareSync AI can provide health guidance but is not a substitute for professional medical advice.' }}</p>
           
           <div class="flex flex-wrap gap-2 mt-3">
@@ -395,6 +476,18 @@ export interface SavedChatSession {
             >
               <i class="fas fa-camera" aria-hidden="true"></i>
               Scan Prescription
+            </button>
+
+            <button *ngIf="isDoctor()" type="button" (click)="askTopic('Brief me on my next patient')" [disabled]="isLoading()"
+              class="btn-size-lg flex items-center gap-2 px-3.5 bg-[var(--primary)] hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-all transform active:scale-95 shadow-md shadow-[var(--primary)]/20">
+              <i class="fas fa-user-clock" aria-hidden="true"></i>
+              Brief my next patient
+            </button>
+
+            <button *ngIf="isDoctor()" type="button" (click)="askTopic('What is my schedule today?')" [disabled]="isLoading()"
+              class="btn-size-lg flex items-center gap-2 px-3.5 bg-transparent border border-[var(--border)] hover:border-[var(--primary)] text-[var(--text)] rounded-xl text-xs font-bold transition-all transform active:scale-95">
+              <i class="fas fa-calendar-day" aria-hidden="true"></i>
+              Today's schedule
             </button>
 
             <button 
@@ -418,7 +511,11 @@ export interface SavedChatSession {
           </div>
           <div class="p-3.5 rounded-2xl shadow-md border" 
                [ngClass]="msg.isAi ? 'bg-[var(--panel)] text-[var(--text)] rounded-tl-none border-[var(--border)]' : 'bg-[var(--primary)] text-white rounded-tr-none border-[var(--primary)]'">
-            <div *ngIf="msg.isAi" [innerHTML]="formatAiMessage(msg.text)" class="text-sm"></div>
+            <div *ngIf="msg.isAi && msg.status && !msg.text" class="flex items-center gap-2 text-xs text-[var(--muted)]">
+              <i class="fas fa-circle-notch fa-spin text-[var(--primary)]" aria-hidden="true"></i> {{ msg.status }}
+            </div>
+            <div *ngIf="msg.isAi" [innerHTML]="formatAiMessage(msg.text)" class="text-sm" [attr.aria-busy]="msg.streaming || null"></div>
+            <span *ngIf="msg.streaming && msg.text" class="inline-block w-1.5 h-3.5 align-middle bg-[var(--primary)] animate-pulse rounded-sm" aria-hidden="true"></span>
             <p *ngIf="!msg.isAi" class="text-sm whitespace-pre-wrap">{{ msg.text }}</p>
             <span class="text-[9px] mt-1 block opacity-60 text-right">{{ msg.timestamp | date:'shortTime' }}</span>
           </div>
@@ -530,7 +627,7 @@ export interface SavedChatSession {
                     </app-date-picker>
                  </div>
               </div>
-              <button (click)="selectSpecialization(msg.suggestion.specialization!, msg.suggestion.reason)" class="text-xs text-[var(--primary)] hover:text-indigo-300 hover:underline flex items-center gap-1 pl-1">
+              <button (click)="changeDoctor(msg.suggestion)" class="text-xs text-[var(--primary)] hover:text-indigo-300 hover:underline flex items-center gap-1 pl-1">
                 <i class="fas fa-arrow-left" aria-hidden="true"></i> Change Doctor
              </button>
            </div>
@@ -643,7 +740,7 @@ export interface SavedChatSession {
       </div>
 
       <!-- Loading State -->
-      <div *ngIf="isLoading()" class="flex gap-2 max-w-[85%]">
+      <div *ngIf="isLoading() && !streaming()" class="flex gap-2 max-w-[85%]">
         <div class="w-8 h-8 rounded-full bg-[var(--primary)]/20 border border-[var(--primary)]/40 flex items-center justify-center shrink-0">
           <i class="fas fa-robot text-xs text-[var(--primary)]" aria-hidden="true"></i>
         </div>
@@ -703,6 +800,7 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
   private authService = inject(AuthService);
   private toast = inject(ToastService);
   private router = inject(Router);
+  private confirm = inject(ConfirmService);
 
   /** Emergency banner shortcut: Find & Book with the emergency booking form open */
   openEmergencyBooking() {
@@ -740,6 +838,78 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
   isListening = signal(false);
   private recognition: any;
 
+  // ---- Doctor co-pilot: the patient picked with @patient (own patients only; checked again on the server)
+  copilotPatient = signal<AiCopilotPatient | null>(null);
+  copilotPatients = signal<AiCopilotPatient[]>([]);
+  copilotPatientsLoading = signal(false);
+  patientPickerOpen = signal(false);
+  patientQuery = signal('');
+  private copilotPatientsLoaded = false;
+
+  filteredCopilotPatients = computed(() => {
+    const query = this.patientQuery().trim().toLowerCase();
+    const list = this.copilotPatients();
+    return (query ? list.filter(p => p.name.toLowerCase().includes(query)) : list).slice(0, 30);
+  });
+
+  openPatientPicker(query = '') {
+    if (!this.isDoctor()) return;
+    this.patientQuery.set(query);
+    this.patientPickerOpen.set(true);
+    if (this.copilotPatientsLoaded || this.copilotPatientsLoading()) return;
+    this.copilotPatientsLoading.set(true);
+    this.aiService.listCopilotPatients().subscribe({
+      next: list => {
+        this.copilotPatients.set(list);
+        this.copilotPatientsLoaded = true;
+        this.copilotPatientsLoading.set(false);
+      },
+      error: () => {
+        this.copilotPatientsLoading.set(false);
+        this.toast.showError('Could not load your patients.');
+      }
+    });
+  }
+
+  closePatientPicker() {
+    this.patientPickerOpen.set(false);
+  }
+
+  /** "@" plus letters at the end of the message opens the picker with those letters as the search */
+  onUserInputChange(value: string) {
+    if (!this.isDoctor()) return;
+    const mention = /(^|\s)@([\p{L} .'-]{0,40})$/u.exec(value ?? '');
+    if (mention) {
+      this.openPatientPicker(mention[2]);
+    } else if (this.patientPickerOpen() && !(value ?? '').includes('@')) {
+      this.closePatientPicker();
+    }
+  }
+
+  selectCopilotPatient(patient: AiCopilotPatient) {
+    this.copilotPatient.set(patient);
+    // Drop the typed "@name" from the message: the chip shows who the question is about
+    this.userInput = this.userInput.replace(/(^|\s)@[\p{L} .'-]{0,40}$/u, '$1').trimStart();
+    this.closePatientPicker();
+  }
+
+  pickFirstPatient(event: Event) {
+    event.preventDefault();
+    const first = this.filteredCopilotPatients()[0];
+    if (first) this.selectCopilotPatient(first);
+  }
+
+  clearCopilotPatient() {
+    this.copilotPatient.set(null);
+    this.closePatientPicker();
+  }
+
+  /** The picked patient's id for a typed doctor message (never for button actions) */
+  private copilotPatientId(text: string): number | undefined {
+    if (!this.isDoctor() || text.startsWith('ACTION_')) return undefined;
+    return this.copilotPatient()?.id ?? undefined;
+  }
+
   currentSuggestion: AiBookingSuggestion | null = null;
   patientId = () => this.authService.user()?.id || 0;
 
@@ -748,7 +918,8 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
   ngOnInit() {
     this.isDoctor.set(this.authService.user()?.role === 'DOCTOR');
     this.initVoiceRecognition();
-    this.loadRecentChatsFromStorage();
+    this.clearOldLocalChats();
+    this.loadRecentChats();
   }
 
   private initVoiceRecognition() {
@@ -781,76 +952,129 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
     };
   }
 
-  /** Chat history is stored per user so accounts sharing a device never see each other's chats. */
-  private get sessionsStorageKey(): string {
-    const id = this.authService.user()?.id ?? this.authService.userId() ?? 'anonymous';
-    return `caresync_ai_sessions_${id}`;
-  }
+  // ---- Saved chats: kept on the server (encrypted) so they follow the user to every device
 
-  private loadRecentChatsFromStorage() {
+  renamingId: string | null = null;
+  renameDraft = '';
+  private refreshTimer: ReturnType<typeof setTimeout> | null = null;
+
+  /** Chats used to be kept in this browser; those copies (with health details) are removed */
+  private clearOldLocalChats() {
     if (typeof localStorage === 'undefined') return;
     try {
-      // Legacy shared key (not attributable to a user): remove it
       localStorage.removeItem('caresync_ai_sessions');
-      const raw = localStorage.getItem(this.sessionsStorageKey);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        this.recentChats.set(parsed);
-      }
+      const id = this.authService.user()?.id ?? this.authService.userId();
+      if (id != null) localStorage.removeItem(`caresync_ai_sessions_${id}`);
     } catch (e) { }
   }
 
-  private persistRecentChats() {
-    if (typeof localStorage === 'undefined') return;
-    try {
-      localStorage.setItem(this.sessionsStorageKey, JSON.stringify(this.recentChats()));
-    } catch (e) { }
-  }
-
-  saveCurrentSession() {
-    const currentMsgs = this.messages();
-    if (!currentMsgs || currentMsgs.length === 0) return;
-
-    const firstUserMsg = currentMsgs.find(m => !m.isAi);
-    const title = firstUserMsg ? (firstUserMsg.text.length > 22 ? firstUserMsg.text.substring(0, 22) + '...' : firstUserMsg.text) : 'General Health';
-    const now = new Date();
-    const time = `Today, ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-    const id = this.activeSessionId || ('session_' + Date.now());
-
-    this.activeSessionId = id;
-
-    const session: SavedChatSession = {
-      id,
-      title,
-      time,
-      timestamp: Date.now(),
-      messages: currentMsgs
-    };
-
-    this.recentChats.update(chats => {
-      const filtered = chats.filter(c => c.id !== id);
-      return [session, ...filtered];
+  loadRecentChats() {
+    if (!this.authService.isAuthenticated()) return;
+    this.aiService.listConversations().subscribe({
+      next: list => this.recentChats.set(list.map(c => ({
+        id: c.id,
+        title: c.title || 'New chat',
+        time: this.chatTime(c.updatedAt),
+        timestamp: new Date(c.updatedAt).getTime(),
+        messages: [],
+        conversationId: c.id
+      }))),
+      error: () => { }
     });
+  }
 
-    this.persistRecentChats();
+  private chatTime(iso: string): string {
+    const date = new Date(iso);
+    const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toDateString() === new Date().toDateString()
+      ? `Today, ${time}`
+      : `${date.toLocaleDateString([], { day: 'numeric', month: 'short' })}, ${time}`;
+  }
+
+  /** After an answer: the server has saved it already, so just refresh the list (once per burst) */
+  saveCurrentSession() {
+    this.activeSessionId = this.aiService.currentConversationId();
+    if (this.refreshTimer) clearTimeout(this.refreshTimer);
+    this.refreshTimer = setTimeout(() => this.loadRecentChats(), 400);
   }
 
   selectRecentChat(session: SavedChatSession) {
-    if (this.messages().length > 0) {
-      this.saveCurrentSession();
-    }
-    this.activeSessionId = session.id;
-    this.messages.set(session.messages || []);
+    if (this.streaming() || this.isLoading()) return;
+    this.aiService.getConversation(session.id).subscribe({
+      next: conv => {
+        this.activeSessionId = conv.id;
+        // Continue that chat's own conversation, so contexts never mix
+        this.aiService.useConversation(conv.id);
+        this.messages.set(conv.messages.map(m => ({
+          text: m.text,
+          isAi: m.role === 'assistant',
+          timestamp: new Date(m.createdAt),
+          suggestion: m.suggestion ?? undefined,
+          emergency: m.emergency ?? undefined
+        })));
+      },
+      error: () => {
+        this.toast.showError('Could not open this chat.');
+        this.loadRecentChats();
+      }
+    });
   }
 
   deleteRecentChat(sessionId: string, event: Event) {
     event.stopPropagation();
-    this.recentChats.update(chats => chats.filter(c => c.id !== sessionId));
-    if (this.activeSessionId === sessionId) {
-      this.activeSessionId = null;
-      this.messages.set([]);
-    }
-    this.persistRecentChats();
+    this.aiService.deleteConversation(sessionId).subscribe({
+      next: () => {
+        this.recentChats.update(chats => chats.filter(c => c.id !== sessionId));
+        if (this.activeSessionId === sessionId) {
+          this.activeSessionId = null;
+          this.messages.set([]);
+          this.aiService.resetConversation();
+        }
+      },
+      error: () => this.toast.showError('Could not delete this chat.')
+    });
+  }
+
+  async deleteAllChats() {
+    const ok = await this.confirm.ask({
+      title: 'Delete all chats',
+      message: 'Delete all your saved AI chats on every device? This cannot be undone.',
+      confirmLabel: 'Delete all',
+      cancelLabel: 'Keep them',
+      danger: true
+    });
+    if (!ok) return;
+    this.aiService.deleteAllConversations().subscribe({
+      next: () => {
+        this.recentChats.set([]);
+        this.activeSessionId = null;
+        this.messages.set([]);
+        this.aiService.resetConversation();
+        this.toast.showSuccess('All chats deleted.');
+      },
+      error: () => this.toast.showError('Could not delete your chats.')
+    });
+  }
+
+  startRename(chat: SavedChatSession, event: Event) {
+    event.stopPropagation();
+    this.renamingId = chat.id;
+    this.renameDraft = chat.title;
+  }
+
+  cancelRename() {
+    this.renamingId = null;
+  }
+
+  saveRename(chat: SavedChatSession) {
+    if (this.renamingId !== chat.id) return;
+    const title = this.renameDraft.trim().slice(0, 80);
+    this.renamingId = null;
+    if (!title || title === chat.title) return;
+    this.aiService.renameConversation(chat.id, title).subscribe({
+      next: saved => this.recentChats.update(chats => chats.map(c => (c.id === chat.id ? { ...c, title: saved.title } : c))),
+      error: () => this.toast.showError('Could not rename this chat.')
+    });
   }
 
   toggleVoiceInput() {
@@ -896,6 +1120,7 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
     this.activeSessionId = null;
     this.messages.set([]);
     this.userInput = '';
+    this.clearCopilotPatient();
   }
 
   startBooking() {
@@ -940,9 +1165,26 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
     this.sendMessage(`ACTION_SELECT_SLOT_${doctorId}_${date}_${slot}${reason ? '_' + reason : ''}`);
   }
 
-  cancelAppointment(apptId: number) {
+  async cancelAppointment(apptId: number) {
+    const ok = await this.confirm.ask({
+      title: 'Cancel appointment',
+      message: 'Cancel this appointment? This cannot be undone.',
+      confirmLabel: 'Cancel appointment',
+      cancelLabel: 'Keep it',
+      danger: true
+    });
+    if (!ok) return;
     this.sendingInternalAction = true;
     this.sendMessage(`ACTION_CANCEL_APPOINTMENT_${apptId}`);
+  }
+
+  /** "Change Doctor" on the date card: back to the doctor list (or the specializations when none is known) */
+  changeDoctor(suggestion: AiBookingSuggestion) {
+    if (suggestion.specialization) {
+      this.selectSpecialization(suggestion.specialization, suggestion.reason);
+    } else {
+      this.startBooking();
+    }
   }
 
   rescheduleAppointment(apptId: number) {
@@ -968,7 +1210,75 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
 
     this.isLoading.set(true);
 
-    this.aiService.sendMessage(text).subscribe({
+    if (!isAction && typeof fetch === 'function' && typeof AbortController !== 'undefined') {
+      this.streamAnswer(text);
+      return;
+    }
+    this.requestAnswer(text);
+  }
+
+  /** Whether an answer is streaming in right now (the Send button becomes Stop) */
+  readonly streaming = signal(false);
+  private streamAbort: AbortController | null = null;
+
+  stopStreaming() {
+    this.streamAbort?.abort();
+  }
+
+  /** Typed message: the answer appears as it is written; cards and emergency notice arrive at the end */
+  private async streamAnswer(text: string) {
+    const abort = new AbortController();
+    this.streamAbort = abort;
+    this.streaming.set(true);
+    const placeholder: ChatMessage = { text: '', isAi: true, timestamp: new Date(), streaming: true, status: 'Thinking...' };
+    this.messages.update(msgs => [...msgs, placeholder]);
+    let received = false;
+    let fellBack = false;
+    const updateLast = (change: (m: ChatMessage) => ChatMessage) =>
+      this.messages.update(msgs => msgs.map((m, i) => (i === msgs.length - 1 ? change(m) : m)));
+
+    try {
+      const res = await this.aiService.streamChat(text, {
+        onDelta: piece => {
+          received = true;
+          updateLast(m => ({ ...m, text: m.text + piece, status: undefined }));
+        },
+        onStatus: status => updateLast(m => ({ ...m, status }))
+      }, abort.signal, this.copilotPatientId(text));
+
+      if (res.success && res.response) {
+        updateLast(m => ({ ...m, text: res.response!, suggestion: res.suggestion, emergency: res.emergency, streaming: false, status: undefined }));
+      } else {
+        updateLast(m => ({ ...m, text: res.error || res.response || 'Sorry, I encountered an error. Please try again later.', streaming: false, status: undefined }));
+      }
+      this.saveCurrentSession();
+    } catch (err) {
+      if (abort.signal.aborted) {
+        updateLast(m => ({ ...m, text: (m.text ? m.text + '\n\n' : '') + '(Stopped)', streaming: false, status: undefined }));
+        this.saveCurrentSession();
+      } else if (!received) {
+        // Streaming not possible (e.g. login needs a refresh): ask again the normal way
+        this.messages.update(msgs => msgs.filter(m => m !== msgs[msgs.length - 1] || !m.streaming));
+        fellBack = true;
+        this.requestAnswer(text);
+      } else {
+        updateLast(m => ({ ...m, text: m.text + '\n\n(Connection lost. Please try again.)', streaming: false, status: undefined }));
+      }
+    } finally {
+      if (this.streamAbort === abort) {
+        this.streamAbort = null;
+      }
+      this.streaming.set(false);
+      if (!fellBack) {
+        this.isLoading.set(false); // the fallback request clears it when it finishes
+      }
+    }
+  }
+
+  /** Button actions (and the fallback): one request, the whole answer at once */
+  private requestAnswer(text: string) {
+    this.isLoading.set(true);
+    this.aiService.sendMessage(text, undefined, this.copilotPatientId(text)).subscribe({
       next: (res) => {
         this.isLoading.set(false);
         this.sendingInternalAction = false;

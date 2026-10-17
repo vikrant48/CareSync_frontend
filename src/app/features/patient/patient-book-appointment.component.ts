@@ -8,6 +8,7 @@ import { AppointmentService } from '../../core/services/appointment.service';
 import { ToastService } from '../../core/services/toast.service';
 import { EmergencyAppointmentModalComponent } from '../../shared/emergency-appointment-modal.component';
 import { SpecializationAutocompleteComponent } from '../../shared/specialization-autocomplete.component';
+import { SymptomSearchComponent } from './symptom-search.component';
 import { SelectOption } from '../../shared/select-dropdown.component';
 import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
@@ -25,7 +26,7 @@ import { SavedDoctorsService } from '../../core/services/saved-doctors.service';
 @Component({
   selector: 'app-patient-book-appointment',
   standalone: true,
-  imports: [PageHeaderComponent, InrPipe, StickyActionBarComponent, PaginatorComponent, PageContainerComponent, CommonModule, RouterModule, FormsModule, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent, PageLoaderComponent, EmptyStateComponent, FilterBarComponent],
+  imports: [SymptomSearchComponent, PageHeaderComponent, InrPipe, StickyActionBarComponent, PaginatorComponent, PageContainerComponent, CommonModule, RouterModule, FormsModule, EmergencyAppointmentModalComponent, SpecializationAutocompleteComponent, PageLoaderComponent, EmptyStateComponent, FilterBarComponent],
   // OnPush: HTTP results go through markForCheckOn; child modals/autocomplete request their own checks
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './patient-book-appointment.component.html',
@@ -271,6 +272,23 @@ export class PatientBookAppointmentComponent {
       ...this.bookFilterValues,
       specializationFilter: this.specializationFilter
     };
+    this.onFilterChange();
+  }
+
+  /** "Describe your problem" found a specialization: show those doctors */
+  onAiSpecialization(specialization: string) {
+    this.setView('all');
+    this.specializationFilter = specialization;
+    this.nameFilter = '';
+    this.bookFilterValues = { ...this.bookFilterValues, specializationFilter: specialization, nameFilter: '' };
+    this.onFilterChange();
+  }
+
+  /** A doctor the AI suggested was clicked: show just that doctor in the list */
+  onAiDoctor(name: string) {
+    this.setView('all');
+    this.nameFilter = name;
+    this.bookFilterValues = { ...this.bookFilterValues, nameFilter: name };
     this.onFilterChange();
   }
 

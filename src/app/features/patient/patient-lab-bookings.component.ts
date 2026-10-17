@@ -7,6 +7,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { PdfService, PaymentReceiptData } from '../../core/services/pdf.service';
 import { PaymentService } from '../../core/services/payment.service';
 import { PaymentPopupComponent, PaymentDetails } from '../../shared/payment-popup.component';
+import { LabReportExplainerComponent } from '../../shared/lab-report-explainer.component';
 import { ToastService } from '../../core/services/toast.service';
 import { AiAssistantService } from '../../core/services/ai-assistant.service';
 import { VisionScanResponse } from '../../core/models/ai.models';
@@ -25,7 +26,7 @@ import { trackById } from '../../shared/utils/track-by';
 @Component({
   selector: 'app-patient-lab-bookings',
   standalone: true,
-  imports: [InrPipe, PageHeaderComponent, PageContainerComponent, CommonModule, PaymentPopupComponent, PageLoaderComponent, StatusBadgeComponent, EmptyStateComponent, ModalShellComponent, FilterBarComponent],
+  imports: [InrPipe, PageHeaderComponent, PageContainerComponent, CommonModule, PaymentPopupComponent, PageLoaderComponent, StatusBadgeComponent, EmptyStateComponent, ModalShellComponent, FilterBarComponent, LabReportExplainerComponent],
   // View state is all signals (bookings, filters, upload/scan, payment), so OnPush needs no manual markForCheck
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './patient-lab-bookings.component.html',

@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MedicalHistoryItem, PatientDocumentItem } from '../../core/services/patient-profile.service';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
+import { LabReportExplainerComponent } from '../../shared/lab-report-explainer.component';
 
 @Component({
   selector: 'app-patient-my-health',
   standalone: true,
-  imports: [CommonModule, RouterModule, EmptyStateComponent],
+  imports: [CommonModule, RouterModule, EmptyStateComponent, LabReportExplainerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './patient-my-health.component.html',
   styleUrl: './patient-my-health.component.css'

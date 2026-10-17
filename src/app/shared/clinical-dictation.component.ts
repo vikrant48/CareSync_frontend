@@ -268,6 +268,8 @@ export class ClinicalDictationComponent implements OnInit, OnDestroy {
     copiedText = signal(false);
 
     private recognition: any = null;
+    /** Text confirmed so far in this recording (typed text plus finished spoken phrases) */
+    private committedTranscript = '';
 
     ngOnInit() {
         this.initSpeechRecognition();
@@ -289,16 +291,23 @@ export class ClinicalDictationComponent implements OnInit, OnDestroy {
             this.recognition.interimResults = true;
             this.recognition.lang = 'en-US';
 
+            // Finished phrases are added once; the phrase still being spoken is only shown (it used to be
+            // appended again on every update, repeating text)
             this.recognition.onresult = (event: any) => {
-                let currentTranscript = '';
+                let interim = '';
                 for (let i = event.resultIndex; i < event.results.length; i++) {
-                    currentTranscript += event.results[i][0].transcript;
+                    const piece = event.results[i][0].transcript.trim();
+                    if (!piece) continue;
+                    if (event.results[i].isFinal) {
+                        this.committedTranscript = this.committedTranscript ? this.committedTranscript + ' ' + piece : piece;
+                    } else {
+                        interim = interim ? interim + ' ' + piece : piece;
+                    }
                 }
-                if (currentTranscript) {
-                    const prev = this.transcriptText();
-                    this.transcriptText.set(prev ? prev + ' ' + currentTranscript : currentTranscript);
-                    this.cdr.detectChanges();
-                }
+                this.transcriptText.set(interim
+                    ? (this.committedTranscript ? this.committedTranscript + ' ' + interim : interim)
+                    : this.committedTranscript);
+                this.cdr.detectChanges();
             };
 
             this.recognition.onerror = (err: any) => {
@@ -326,6 +335,8 @@ export class ClinicalDictationComponent implements OnInit, OnDestroy {
         } else {
             this.errorMessage.set(null);
             try {
+                // Keep whatever is in the box (typed or earlier dictation) and add to it
+                this.committedTranscript = this.transcriptText().trim();
                 this.recognition.start();
                 this.isRecording.set(true);
             } catch (e) {
@@ -336,6 +347,7 @@ export class ClinicalDictationComponent implements OnInit, OnDestroy {
     }
 
     clearTranscript() {
+        this.committedTranscript = '';
         this.transcriptText.set('');
         this.dictationResult.set(null);
         this.errorMessage.set(null);

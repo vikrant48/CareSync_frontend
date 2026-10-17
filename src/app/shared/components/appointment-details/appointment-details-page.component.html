@@ -60,6 +60,11 @@
                 </div>
                 <pre *ngIf="followThrough?.plainLanguageSummary"
                     class="whitespace-pre-wrap font-sans text-xs leading-relaxed text-[var(--text)]">{{ followThrough?.plainLanguageSummary }}</pre>
+                <p *ngIf="followThrough?.plainLanguageSummarySavedAt" class="text-[10px] text-[var(--muted)]">
+                    <i class="fa-solid fa-floppy-disk mr-1" aria-hidden="true"></i>Summary saved with this visit on
+                    {{ followThrough?.plainLanguageSummarySavedAt | date:'d MMM y' }}. Not a diagnosis: ask your doctor
+                    if anything is unclear.
+                </p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div *ngIf="followThrough?.suggestedFollowUp"
                         class="rounded-xl border border-[var(--border)] bg-[var(--panel)] p-3 space-y-2">

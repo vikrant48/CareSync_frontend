@@ -20,6 +20,7 @@ import { getAppointmentEpochMs, isAppointmentToday, isAppointmentFuture } from '
 import { PatientNotificationComponent } from './patient-notification.component';
 import { PatientDashboardMetricsCardsComponent } from './patient-dashboard-metrics-cards.component';
 import { PatientMyHealthComponent } from './patient-my-health.component';
+import { PatientHealthBriefComponent } from './patient-health-brief.component';
 import { PatientDashboardAppointmentListComponent } from './patient-dashboard-appointment-list.component';
 import { ButtonComponent } from '../../shared/components';
 import { PageContainerComponent } from '../../shared/ui/page-container.component';
@@ -30,7 +31,7 @@ import { toLocalDateKey } from '../../shared/utils/format.util';
 @Component({
   selector: 'app-patient-dashboard',
   standalone: true,
-  imports: [InrPipe, PageContainerComponent, CommonModule, RouterModule, FormsModule, RescheduleAppointmentModalComponent, PatientNotificationComponent, MedicalHistoryDetailModalComponent, PatientDashboardMetricsCardsComponent, PatientMyHealthComponent, PatientDashboardAppointmentListComponent, SharedChatModalComponent, ButtonComponent],
+  imports: [InrPipe, PageContainerComponent, CommonModule, RouterModule, FormsModule, RescheduleAppointmentModalComponent, PatientNotificationComponent, MedicalHistoryDetailModalComponent, PatientDashboardMetricsCardsComponent, PatientMyHealthComponent, PatientDashboardAppointmentListComponent, SharedChatModalComponent, ButtonComponent, PatientHealthBriefComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './patient-dashboard.component.html',
   styleUrl: './patient-dashboard.component.css'

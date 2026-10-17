@@ -1,6 +1,46 @@
 export interface AiChatRequest {
     message: string;
     conversationId?: string;
+    /** Doctors only: the patient picked with @patient (checked on the server) */
+    patientId?: number;
+}
+
+/** Patient dashboard "AI health brief" (facts from the records; tips from the AI or a standard checklist) */
+export interface PatientHealthBrief {
+    nextAppointment: {
+        appointmentId: number;
+        doctorName: string;
+        specialization?: string | null;
+        dateTime: string;
+        status?: string | null;
+        preVisitFormDone: boolean;
+    } | null;
+    preparationTips: string[];
+    tipsFromAi: boolean;
+    pendingFollowUps: {
+        type: 'PRE_VISIT_FORM' | 'LAB_RESULTS_PENDING';
+        text: string;
+        appointmentId?: number | null;
+        bookingId?: number | null;
+        date?: string | null;
+    }[];
+    unreadLabReports: { documentId: number; filename: string; uploadedAt: string; explained: boolean }[];
+    note: string;
+}
+
+/** A saved plain-language lab report explanation, always shown with its note */
+export interface LabReportExplanation {
+    documentId: number;
+    explanation: string;
+    note: string;
+    explainedAt: string;
+}
+
+/** A patient the doctor can pick in the co-pilot chat (their own patients only) */
+export interface AiCopilotPatient {
+    id: number;
+    name: string;
+    lastAppointment: string | null;
 }
 
 export interface AiChatResponse {
@@ -11,6 +51,28 @@ export interface AiChatResponse {
     suggestion?: AiBookingSuggestion;
     /** Emergency or urgent-care notice to show above the answer */
     emergency?: AiEmergencyInfo;
+}
+
+/** One row of the saved AI chats list */
+export interface AiConversationSummary {
+    id: string;
+    title: string;
+    updatedAt: string;
+    messageCount: number;
+}
+
+/** A saved AI chat with its messages (role 'user' or 'assistant') */
+export interface AiConversationDetail {
+    id: string;
+    title: string;
+    updatedAt: string;
+    messages: {
+        role: 'user' | 'assistant';
+        text: string;
+        suggestion?: AiBookingSuggestion | null;
+        emergency?: AiEmergencyInfo | null;
+        createdAt: string;
+    }[];
 }
 
 export interface AiEmergencyInfo {
@@ -65,6 +127,10 @@ export interface ChatMessage {
     timestamp: Date;
     suggestion?: AiBookingSuggestion;
     emergency?: AiEmergencyInfo;
+    /** True while the answer is still streaming in */
+    streaming?: boolean;
+    /** What the assistant is doing right now ("Finding doctors...") while streaming */
+    status?: string;
 }
 
 export interface MedicalSummaryResponse {

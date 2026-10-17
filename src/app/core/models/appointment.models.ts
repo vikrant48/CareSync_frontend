@@ -282,6 +282,8 @@ export interface FollowUpSlot {
 
 export interface AppointmentFollowThrough {
     plainLanguageSummary?: string;
+    /** When the summary was saved; missing when the AI was unavailable (recorded facts shown) */
+    plainLanguageSummarySavedAt?: string | null;
     feedbackRequested: boolean;
     suggestedFollowUp?: FollowUpSlot;
     replacementOffer?: FollowUpSlot;
