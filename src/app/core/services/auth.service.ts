@@ -33,6 +33,7 @@ export class AuthService {
     if (this.isAuthenticated()) {
       this.initInactivityTimer();
     }
+    this.watchOtherTabs();
   }
 
   register(payload: RegisterRequest) {
@@ -81,7 +82,8 @@ export class AuthService {
     if (this.refreshInFlight) {
       return this.refreshInFlight;
     }
-    const rt = this.refreshToken();
+    // Another tab may have refreshed already (refresh tokens are single-use): use the newest stored one
+    const rt = this.getStored('refreshToken') ?? this.refreshToken();
     this.refreshInFlight = this.http.post<{ accessToken: string; refreshToken: string }>(`${this.baseUrl}/api/auth/refresh`, {
       refreshToken: rt,
     } as RefreshTokenRequest).pipe(
@@ -190,12 +192,23 @@ export class AuthService {
     if (rt) {
       this.http.post(`${this.baseUrl}/api/auth/logout`, { refreshToken: rt }).subscribe();
     }
+    this.clearSession();
+    this.router.navigate(['/login']);
+  }
+
+  /**
+   * Forgets the session in this tab (storage and memory) without calling the server or navigating. Used by
+   * logout, and by the guards when stored login data is incomplete, so a login page never shows a logged-in nav.
+   */
+  clearSession() {
     if (this.isBrowser()) {
-      ['accessToken', 'refreshToken', 'role', 'username', 'user', 'userId'].forEach((k) => localStorage.removeItem(k));
-      // AI assistant chat history can contain health details: clear it (all users' keys) on logout
-      Object.keys(localStorage)
-        .filter((k) => k.startsWith('caresync_ai_sessions'))
-        .forEach((k) => localStorage.removeItem(k));
+      try {
+        ['accessToken', 'refreshToken', 'role', 'username', 'user', 'userId'].forEach((k) => localStorage.removeItem(k));
+        // AI assistant chat history can contain health details: clear it (all users' keys) on logout
+        Object.keys(localStorage)
+          .filter((k) => k.startsWith('caresync_ai_sessions'))
+          .forEach((k) => localStorage.removeItem(k));
+      } catch { }
     }
     this.accessToken.set(null);
     this.refreshToken.set(null);
@@ -206,10 +219,14 @@ export class AuthService {
     this.savedDoctors.clear();
     this.clearReturnUrl();
     this.stopInactivityTimer();
-    this.router.navigate(['/login']);
   }
 
   isAuthenticated = computed(() => !!this.accessToken());
+
+  /** A usable session: a token and the role it belongs to (a token alone means the stored data is broken) */
+  hasValidSession(): boolean {
+    return !!this.accessToken() && !!this.role();
+  }
 
   redirectToDashboard(role: Role | null) {
     if (role === 'ADMIN') this.router.navigate(['/admin']);
@@ -298,20 +315,34 @@ export class AuthService {
 
   // --- HIPAA Inactivity Logic ---
 
+  // One function object, so removeEventListener really removes it (a new arrow function each time never matched,
+  // and the listeners kept restarting the logout timer after logout)
+  private readonly onUserActivity = () => this.resetInactivityTimer();
+  private static readonly ACTIVITY_EVENTS = ['mousemove', 'keydown', 'click', 'scroll'];
+
   private initInactivityTimer() {
     if (!this.isBrowser()) return;
     this.stopInactivityTimer();
     this.resetInactivityTimer();
+    AuthService.ACTIVITY_EVENTS.forEach((e) => window.addEventListener(e, this.onUserActivity, { passive: true }));
+  }
 
-    // Listen for user activity
-    window.addEventListener('mousemove', () => this.resetInactivityTimer());
-    window.addEventListener('keydown', () => this.resetInactivityTimer());
-    window.addEventListener('click', () => this.resetInactivityTimer());
-    window.addEventListener('scroll', () => this.resetInactivityTimer());
+  /** While something holds the session (e.g. a video call where nobody touches the screen), no idle logout */
+  private sessionHolds = 0;
+
+  holdSession() {
+    this.sessionHolds++;
+    if (this.logoutTimer) clearTimeout(this.logoutTimer);
+  }
+
+  releaseSession() {
+    this.sessionHolds = Math.max(0, this.sessionHolds - 1);
+    if (this.sessionHolds === 0) this.resetInactivityTimer();
   }
 
   private resetInactivityTimer() {
     if (this.logoutTimer) clearTimeout(this.logoutTimer);
+    if (!this.accessToken() || this.sessionHolds > 0) return; // nothing to time out, or a call is in progress
     this.logoutTimer = setTimeout(() => {
       console.log('User inactive for 15 minutes. Logging out for security.');
       this.logout();
@@ -320,11 +351,31 @@ export class AuthService {
 
   private stopInactivityTimer() {
     if (this.logoutTimer) clearTimeout(this.logoutTimer);
+    this.logoutTimer = null;
     if (!this.isBrowser()) return;
-    window.removeEventListener('mousemove', () => this.resetInactivityTimer());
-    window.removeEventListener('keydown', () => this.resetInactivityTimer());
-    window.removeEventListener('click', () => this.resetInactivityTimer());
-    window.removeEventListener('scroll', () => this.resetInactivityTimer());
+    AuthService.ACTIVITY_EVENTS.forEach((e) => window.removeEventListener(e, this.onUserActivity));
+  }
+
+  /**
+   * Keeps open tabs in step: logging out in another tab (or the session expiring there) logs this tab out too, and
+   * tokens refreshed by another tab are used here (the old refresh token no longer works once it has been used).
+   */
+  private watchOtherTabs() {
+    if (!this.isBrowser()) return;
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'accessToken') {
+        if (!event.newValue) {
+          if (this.accessToken()) {
+            this.clearSession();
+            this.router.navigate(['/login']);
+          }
+        } else {
+          this.accessToken.set(event.newValue);
+        }
+      } else if (event.key === 'refreshToken' && event.newValue) {
+        this.refreshToken.set(event.newValue);
+      }
+    });
   }
 
   private getStoredJson(key: string) {

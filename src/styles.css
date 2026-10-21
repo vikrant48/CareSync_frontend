@@ -926,6 +926,11 @@ select.input-modern:focus {
   textarea {
     font-size: 16px !important;
   }
+
+  /* Small toolbar selects (e.g. "Sort by") stay small on phones */
+  select.compact-select {
+    font-size: 12px !important;
+  }
 }
 
 /* Visible keyboard focus for inputs and custom tabbable elements (buttons/links already have one). */

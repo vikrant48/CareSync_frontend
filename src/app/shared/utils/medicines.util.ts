@@ -14,7 +14,9 @@ export function parseMedicines(medicine?: string | null, doses?: string | null):
   const names = splitItems(medicine, true);
   if (names.length === 0) return [];
 
-  let dosages = splitItems(doses, false);
+  // One dose line per medicine: keep empty lines so a medicine without a dose doesn't take the next one's
+  const doseText = String(doses ?? '').replace(/\r/g, '').trim();
+  let dosages = doseText.includes('\n') ? doseText.split('\n').map(s => s.trim()) : splitItems(doses, false);
   if (dosages.length === 1 && names.length > 1) {
     const byComma = dosages[0].split(',').map(s => s.trim()).filter(Boolean);
     if (byComma.length === names.length) dosages = byComma;
@@ -22,7 +24,7 @@ export function parseMedicines(medicine?: string | null, doses?: string | null):
 
   return names.map((name, i) => ({
     name,
-    dosage: dosages[i] ?? (dosages.length === 1 ? dosages[0] : undefined)
+    dosage: dosages[i] || (dosages.length === 1 ? dosages[0] : undefined)
   }));
 }
 

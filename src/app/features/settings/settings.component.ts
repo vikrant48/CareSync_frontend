@@ -83,41 +83,41 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
                 </div>
               </div>
 
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2" role="group" aria-label="Theme">
+              <div class="grid grid-cols-3 gap-2 sm:gap-3 pt-2" role="group" aria-label="Theme">
                 <button type="button" (click)="setTheme('light')"
-                  class="theme-option p-3 sm:p-4 transition-all flex flex-col items-center justify-center gap-2 text-center cursor-pointer"
+                  class="theme-option p-2.5 sm:p-4 transition-all flex flex-col items-center justify-center gap-1.5 sm:gap-2 text-center cursor-pointer"
                   [class.is-selected]="currentTheme === 'light'"
                   [attr.aria-pressed]="currentTheme === 'light'">
-                  <div class="w-10 h-10 rounded-full bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-yellow-500 text-base shadow-sm">
+                  <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-yellow-500 text-base shadow-sm">
                     <i class="fa-solid fa-sun" aria-hidden="true"></i>
                   </div>
                   <span class="text-xs sm:text-sm font-bold">Light</span>
-                  <span class="text-xs text-muted leading-snug">Clean and bright for daytime use</span>
-                  <span *ngIf="currentTheme === 'light'" class="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-brand text-white text-[10px] flex items-center justify-center font-bold" aria-hidden="true">✓</span>
+                  <span class="hidden sm:block text-xs text-muted leading-snug">Clean and bright for daytime use</span>
+                  <span *ngIf="currentTheme === 'light'" class="absolute top-1.5 right-1.5 sm:top-2.5 sm:right-2.5 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-brand text-white text-[9px] sm:text-[10px] flex items-center justify-center font-bold" aria-hidden="true">✓</span>
                 </button>
 
                 <button type="button" (click)="setTheme('dark')"
-                  class="theme-option p-3 sm:p-4 transition-all flex flex-col items-center justify-center gap-2 text-center cursor-pointer"
+                  class="theme-option p-2.5 sm:p-4 transition-all flex flex-col items-center justify-center gap-1.5 sm:gap-2 text-center cursor-pointer"
                   [class.is-selected]="currentTheme === 'dark'"
                   [attr.aria-pressed]="currentTheme === 'dark'">
-                  <div class="w-10 h-10 rounded-full bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-brand text-base shadow-sm">
+                  <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-brand text-base shadow-sm">
                     <i class="fa-solid fa-moon" aria-hidden="true"></i>
                   </div>
                   <span class="text-xs sm:text-sm font-bold">Dark</span>
-                  <span class="text-xs text-muted leading-snug">Easy on eyes for low light</span>
-                  <span *ngIf="currentTheme === 'dark'" class="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-brand text-white text-[10px] flex items-center justify-center font-bold" aria-hidden="true">✓</span>
+                  <span class="hidden sm:block text-xs text-muted leading-snug">Easy on eyes for low light</span>
+                  <span *ngIf="currentTheme === 'dark'" class="absolute top-1.5 right-1.5 sm:top-2.5 sm:right-2.5 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-brand text-white text-[9px] sm:text-[10px] flex items-center justify-center font-bold" aria-hidden="true">✓</span>
                 </button>
 
                 <button type="button" (click)="setTheme('system')"
-                  class="theme-option p-3 sm:p-4 transition-all flex flex-col items-center justify-center gap-2 text-center cursor-pointer"
+                  class="theme-option p-2.5 sm:p-4 transition-all flex flex-col items-center justify-center gap-1.5 sm:gap-2 text-center cursor-pointer"
                   [class.is-selected]="currentTheme === 'system'"
                   [attr.aria-pressed]="currentTheme === 'system'">
-                  <div class="w-10 h-10 rounded-full bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-muted text-base shadow-sm">
+                  <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-muted text-base shadow-sm">
                     <i class="fa-solid fa-desktop" aria-hidden="true"></i>
                   </div>
                   <span class="text-xs sm:text-sm font-bold">System</span>
-                  <span class="text-xs text-muted leading-snug">Follow your device settings</span>
-                  <span *ngIf="currentTheme === 'system'" class="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-brand text-white text-[10px] flex items-center justify-center font-bold" aria-hidden="true">✓</span>
+                  <span class="hidden sm:block text-xs text-muted leading-snug">Follow your device settings</span>
+                  <span *ngIf="currentTheme === 'system'" class="absolute top-1.5 right-1.5 sm:top-2.5 sm:right-2.5 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-brand text-white text-[9px] sm:text-[10px] flex items-center justify-center font-bold" aria-hidden="true">✓</span>
                 </button>
               </div>
             </div>
@@ -183,7 +183,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
                     </div>
                   </div>
                   <select id="settings-language" [(ngModel)]="selectedLanguage" (change)="persistPref('language', selectedLanguage)"
-                    class="form-input lang-select text-xs sm:text-sm font-semibold cursor-pointer">
+                    class="compact-select form-input lang-select text-xs sm:text-sm font-semibold cursor-pointer">
                     <option value="English">English</option>
                     <option value="Hindi">Hindi</option>
                     <option value="Spanish">Spanish</option>

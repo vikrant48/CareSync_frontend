@@ -53,7 +53,7 @@
             <div *ngIf="view === 'all'" class="flex items-center gap-2">
                 <span class="text-xs text-[var(--muted)] font-medium">Sort By</span>
                 <select [(ngModel)]="sortBy" (ngModelChange)="onFilterChange()"
-                    class="h-[38px] py-0 bg-[var(--panel)] border border-[var(--border)] rounded-xl px-3 text-xs text-[var(--text)] font-semibold focus:outline-none focus:border-[var(--primary)] cursor-pointer">
+                    class="compact-select h-[38px] py-0 bg-[var(--panel)] border border-[var(--border)] rounded-xl px-3 text-xs text-[var(--text)] font-semibold focus:outline-none focus:border-[var(--primary)] cursor-pointer">
                     <option *ngFor="let opt of sortByOptions" [value]="opt.value">{{ opt.label }}</option>
                 </select>
             </div>

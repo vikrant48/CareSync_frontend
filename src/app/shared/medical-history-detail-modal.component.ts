@@ -64,11 +64,11 @@ import { ModalShellComponent } from './ui/modal-shell.component';
                <div class="bg-blue-500/5 rounded-xl p-4 border border-blue-500/10 space-y-4">
                   <div>
                       <div class="text-xs text-blue-300/70 uppercase tracking-wider mb-1">Medicines</div>
-                      <div class="text-gray-700 dark:text-gray-200 font-medium">{{ detail.medicine || '—' }}</div>
+                      <div class="text-gray-700 dark:text-gray-200 font-medium whitespace-pre-line">{{ detail.medicine || '—' }}</div>
                   </div>
                    <div>
                       <div class="text-xs text-blue-300/70 uppercase tracking-wider mb-1">Dosage</div>
-                      <div class="text-gray-700 dark:text-gray-200">{{ detail.doses || '—' }}</div>
+                      <div class="text-gray-700 dark:text-gray-200 whitespace-pre-line">{{ detail.doses || '—' }}</div>
                   </div>
                </div>
              </div>

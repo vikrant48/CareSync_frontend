@@ -142,6 +142,18 @@ export class ModalShellComponent implements OnChanges, OnDestroy {
     }
   }
 
+  /**
+   * Phone Back button: an open modal adds a history entry for the same page, so Back closes the modal instead of
+   * leaving the page. Only the top-most modal reacts.
+   */
+  @HostListener('window:popstate')
+  onBrowserBack() {
+    if (!this.ownsHistoryEntry || !this.open || !this.isTop) return;
+    if (this.currentHistoryMarker() === this.autoTitleId) return; // our entry is still there: not a Back for us
+    this.ownsHistoryEntry = false;
+    this.emitClose();
+  }
+
   onBackdrop() {
     if (this.closeOnBackdrop) {
       this.emitClose();
@@ -173,8 +185,42 @@ export class ModalShellComponent implements OnChanges, OnDestroy {
     const active = this.doc.activeElement as HTMLElement | null;
     this.returnFocusTo = active && active !== body ? active : null;
 
+    this.addHistoryEntry();
+
     // The panel is rendered by *ngIf, so wait for it before moving focus.
     setTimeout(() => this.moveFocusIntoPanel());
+  }
+
+  // ---- History entry for the phone Back button
+
+  private ownsHistoryEntry = false;
+  private static readonly HISTORY_KEY = 'caresyncModal';
+
+  private addHistoryEntry(): void {
+    const history = this.doc.defaultView?.history;
+    if (!history) return;
+    try {
+      // Same URL: the router ignores it; existing state (the router's navigation id) is kept
+      history.pushState({ ...(history.state ?? {}), [ModalShellComponent.HISTORY_KEY]: this.autoTitleId }, '');
+      this.ownsHistoryEntry = true;
+    } catch {
+      // History not available (e.g. sandboxed frame): Back simply behaves as before
+    }
+  }
+
+  /** Closed by its own button, the backdrop or Esc: remove our entry so Back later goes where the user expects */
+  private removeHistoryEntry(): void {
+    if (!this.ownsHistoryEntry) return;
+    this.ownsHistoryEntry = false;
+    const history = this.doc.defaultView?.history;
+    // Only step back if our entry is still the current one (a page change has already moved past it)
+    if (history && this.currentHistoryMarker() === this.autoTitleId) {
+      history.back();
+    }
+  }
+
+  private currentHistoryMarker(): string | undefined {
+    return this.doc.defaultView?.history?.state?.[ModalShellComponent.HISTORY_KEY];
   }
 
   private onClosed(): void {
@@ -184,6 +230,8 @@ export class ModalShellComponent implements OnChanges, OnDestroy {
     const stack = ModalShellComponent.stack;
     const idx = stack.indexOf(this);
     if (idx >= 0) stack.splice(idx, 1);
+
+    this.removeHistoryEntry();
 
     const body = this.doc.body;
     if (body && ModalShellComponent.scrollLocks > 0 && --ModalShellComponent.scrollLocks === 0) {

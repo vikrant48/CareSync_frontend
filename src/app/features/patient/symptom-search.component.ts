@@ -24,7 +24,7 @@ import { AiEmergencyInfo, DoctorSuggestion } from '../../core/models/ai.models';
           <input #symptomInput id="symptomSearchInput" type="text" [(ngModel)]="description" name="description" maxlength="500"
                  [disabled]="loading()"
                  placeholder="Describe your problem, e.g. itchy rash on my arm for a week"
-                 class="w-full h-[38px] bg-[var(--bg)] border border-[var(--border)] rounded-xl pl-3 pr-9 text-sm text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] disabled:opacity-60" />
+                 class="w-full h-[38px] bg-[var(--bg)] border border-[var(--border)] rounded-xl pl-3 pr-9 text-sm text-[var(--text)] placeholder-[var(--muted)] placeholder:text-[13px] focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] disabled:opacity-60" />
           <button *ngIf="(description || hasResult()) && !loading()" type="button" (click)="clear(symptomInput)"
                   class="absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded-lg text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--panel)] transition-colors"
                   title="Clear" aria-label="Clear and start a new search">

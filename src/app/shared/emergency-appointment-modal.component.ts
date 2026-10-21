@@ -29,20 +29,14 @@ import { doctorDisplayName, doctorInitial as getDoctorInitial } from './utils/do
     >
       <!-- Header -->
       <div modalHeader class="bg-gradient-to-r from-[#53131c] via-[#6d1825] to-[#801b2a] px-4 sm:px-5 py-3 flex items-center justify-between border-b border-red-900/40 shrink-0 relative overflow-hidden">
-        <div class="flex items-center gap-2.5 z-10">
-          <div class="w-8 h-8 rounded-xl bg-red-500/20 border border-red-500/30 flex items-center justify-center text-red-700 dark:text-red-400 shrink-0 shadow-inner">
-            <i class="fa-solid fa-bell-exclamation text-sm" aria-hidden="true"></i>
-          </div>
-          <div>
-            <h2 class="text-sm sm:text-base font-bold text-white tracking-tight">Emergency Booking Confirmation</h2>
-            <p class="text-red-100 text-[11px] font-medium">Review and confirm immediate consultation</p>
-          </div>
+        <div class="min-w-0 z-10">
+          <h2 class="text-sm sm:text-base font-bold text-white tracking-tight">Emergency Booking Confirmation</h2>
+          <p class="text-red-100 text-[11px] font-medium">Review and confirm immediate consultation</p>
         </div>
-        <div class="flex items-center gap-2 z-10">
+        <div class="flex items-center gap-2 z-10 shrink-0 ml-2">
           <!-- Live Time Display on Top Right Header -->
-          <div class="px-2.5 py-1 rounded-lg bg-red-950/60 border border-red-500/30 text-red-100 text-[11px] font-bold tracking-wide flex items-center gap-1.5 shadow-sm">
-            <i class="fa-regular fa-clock text-red-700 dark:text-red-400 text-[10px]" aria-hidden="true"></i>
-            <span>{{ currentTime }}</span>
+          <div class="px-2.5 py-1 rounded-lg bg-red-950/60 border border-red-500/30 text-red-100 text-[11px] font-bold tracking-wide whitespace-nowrap shadow-sm">
+            {{ currentTime }}
           </div>
           <button 
             type="button" 
@@ -59,10 +53,7 @@ import { doctorDisplayName, doctorInitial as getDoctorInitial } from './utils/do
       <div class="overflow-y-auto p-3.5 sm:p-4 space-y-3 bg-[var(--bg)] custom-scrollbar flex-1 min-h-0">
         
         <!-- Vital Information Warning Notice Card -->
-        <div class="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-red-900/60 rounded-xl p-2.5 sm:p-3 flex gap-2.5 text-rose-800 dark:text-red-200 shadow-sm">
-          <div class="w-7 h-7 rounded-lg bg-red-500/20 border border-red-500/30 text-red-700 dark:text-red-400 flex items-center justify-center text-xs shrink-0 mt-0.5">
-            <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-          </div>
+        <div class="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-red-900/60 rounded-xl p-2.5 sm:p-3 text-rose-800 dark:text-red-200 shadow-sm">
           <div class="space-y-0.5 min-w-0">
             <h4 class="font-bold text-[var(--text)] text-xs">Vital Information</h4>
             <ul class="text-[11px] text-red-200/80 space-y-0.5 ml-3.5 list-disc leading-tight">
@@ -190,11 +181,11 @@ import { doctorDisplayName, doctorInitial as getDoctorInitial } from './utils/do
 
         <button 
           type="button"
-          class="btn-size-sm px-3.5 rounded-xl font-bold text-xs text-white transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+          class="btn-size-md px-3 rounded-xl font-bold text-xs text-white transition-all shadow-sm flex items-center gap-1.5 cursor-pointer border"
           [disabled]="booking || !isConfirmed || !selectedDoctorId"
           [ngClass]="{
-            'opacity-40 !cursor-not-allowed bg-gray-500': !isConfirmed || !selectedDoctorId,
-            'bg-gradient-to-r from-[#63141f] to-[#7f1a28] hover:from-[#761825] hover:to-[#911e2e] active:scale-[0.98] border border-[#9b2232]/50 shadow-sm': isConfirmed && selectedDoctorId
+            'opacity-40 !cursor-not-allowed bg-gray-500 border-transparent': !isConfirmed || !selectedDoctorId,
+            'bg-gradient-to-r from-[#63141f] to-[#7f1a28] hover:from-[#761825] hover:to-[#911e2e] active:scale-[0.98] border-[#9b2232]/50 shadow-sm': isConfirmed && selectedDoctorId
           }"
           (click)="bookEmergencyAppointment()" 
         >

@@ -179,9 +179,10 @@
 
         <!-- Actions & Progress Buttons -->
         <div class="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-[var(--border)]">
-            <button *ngIf="activeStep > 1" (click)="previousStep()"
-                class="btn-size-md px-4 rounded-xl bg-[var(--bg)] hover:bg-[var(--border)] text-[var(--text)] text-xs font-semibold transition-all inline-flex items-center justify-center">
-                Previous
+            <button *ngIf="activeStep > 1" (click)="previousStep()" aria-label="Previous step" title="Previous step"
+                class="btn-size-md px-3 sm:px-4 shrink-0 rounded-xl bg-[var(--bg)] hover:bg-[var(--border)] border border-[var(--border)] sm:border-transparent text-[var(--text)] text-xs font-semibold transition-all inline-flex items-center justify-center">
+                <i class="fa-solid fa-arrow-left sm:hidden" aria-hidden="true"></i>
+                <span class="hidden sm:inline">Previous</span>
             </button>
             <div *ngIf="activeStep === 1"></div>
 
@@ -200,7 +201,8 @@
                     [disabled]="submitting || !intakeData.consentGiven"
                     class="btn-size-lg px-6 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 disabled:opacity-50 text-gray-950 font-bold text-xs transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
                     <i *ngIf="submitting" class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
-                    <span>Submit Pre-Visit Intake</span>
+                    <span class="sm:hidden">Submit</span>
+                    <span class="hidden sm:inline">Submit Pre-Visit Intake</span>
                 </button>
             </div>
         </div>

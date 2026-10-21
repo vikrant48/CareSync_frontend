@@ -7,6 +7,7 @@ import { DatePickerComponent } from './date-picker.component';
 import { ClinicalDictationComponent } from './clinical-dictation.component';
 import { ModalShellComponent } from './ui/modal-shell.component';
 import { AppValidators } from './utils/validators';
+import { parseMedicines } from './utils/medicines.util';
 import { AbstractControl } from '@angular/forms';
 
 export interface MedicationItem {
@@ -259,20 +260,11 @@ export class MedicalHistoryFormModalComponent implements OnChanges {
    }
 
    initMedicationList(): void {
-      const medStr = (this.form && this.form.medicine) ? String(this.form.medicine) : '';
-      const doseStr = (this.form && this.form.doses) ? String(this.form.doses) : '';
-
-      const meds = medStr.split(',').map(s => s.trim()).filter(Boolean);
-      const doses = doseStr.split(',').map(s => s.trim()).filter(Boolean);
-
-      if (meds.length > 0) {
-         this.medicationList = meds.map((m, idx) => ({
-            medicine: m,
-            doses: doses[idx] || (doses.length === 1 ? doses[0] : '')
-         }));
-      } else {
-         this.medicationList = [{ medicine: medStr, doses: doseStr }];
-      }
+      // One row per medicine (records store one medicine per line; older ones used "," or ";")
+      const rows = parseMedicines(this.form?.medicine, this.form?.doses);
+      this.medicationList = rows.length > 0
+         ? rows.map(r => ({ medicine: r.name, doses: r.dosage || '' }))
+         : [{ medicine: '', doses: String(this.form?.doses ?? '') }];
    }
 
    addMedication(): void {
@@ -392,13 +384,12 @@ export class MedicalHistoryFormModalComponent implements OnChanges {
       }
    }
 
-   /** Row-level message: a dose needs a medicine name; commas would split one medicine into several on save. */
+   /** Row-level message: a dose needs a medicine name. Commas are fine: rows are saved one per line. */
    medError(i: number): string {
       if (!this.shows('med-' + i)) return '';
       const m = this.medicationList[i];
       if (!m) return '';
       if (!m.medicine.trim() && m.doses.trim()) return 'Enter the medication name for this dosage.';
-      if (m.medicine.includes(',') || m.doses.includes(',')) return 'Use one medication per row (no commas).';
       return '';
    }
 
@@ -422,8 +413,9 @@ export class MedicalHistoryFormModalComponent implements OnChanges {
       }
       if (!this.isValid()) return;
       const validMeds = this.medicationList.filter(m => m.medicine.trim() || m.doses.trim());
-      this.form.medicine = validMeds.map(m => m.medicine.trim()).join(', ');
-      this.form.doses = validMeds.map(m => m.doses.trim()).join(', ');
+      // One medicine per line, its dose on the matching line (empty when not given)
+      this.form.medicine = validMeds.map(m => m.medicine.trim()).join('\n');
+      this.form.doses = validMeds.map(m => m.doses.trim()).join('\n');
       this.submit.emit();
    }
 }

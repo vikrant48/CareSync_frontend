@@ -2,6 +2,7 @@ import { Component, Input, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PatientProfileService } from '../../../core/services/patient-profile.service';
+import { MedicineRow, parseMedicines } from '../../utils/medicines.util';
 
 @Component({
     selector: 'app-medical-history-tab',
@@ -15,6 +16,11 @@ export class MedicalHistoryTabComponent implements OnInit {
     @Input() patientId?: number;
     @Input() viewerRole: 'PATIENT' | 'DOCTOR' = 'PATIENT';
     @Input() appointmentStatus?: string;
+
+    /** One row per prescribed medicine with its dose */
+    medicineRows(record: { medicine?: string | null; doses?: string | null }): MedicineRow[] {
+        return parseMedicines(record?.medicine, record?.doses);
+    }
 
     loading: boolean = false;
     searchQuery: string = '';

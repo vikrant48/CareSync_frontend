@@ -75,17 +75,27 @@
         <div>
             <div class="text-xs font-bold uppercase text-emerald-700 dark:text-emerald-300">Prescription draft</div>
             <div class="text-[11px] text-[var(--muted)]">AI-extracted medication details remain editable and are not final until the visit is electronically signed.</div>
+            <div *ngIf="soapReport.prescriptionSuggested && soapReport.medicine" role="note"
+                class="mt-2 flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-[11px] font-semibold text-amber-800 dark:text-amber-200">
+                <i class="fa-solid fa-triangle-exclamation mt-0.5" aria-hidden="true"></i>
+                AI-suggested prescription: check every medicine and dose against the patient's allergies, current medicines and condition before signing.
+            </div>
+            <div *ngIf="!soapReport.medicine?.trim() && soapReport.prescriptionNote" role="note"
+                class="mt-2 flex items-start gap-2 rounded-lg border border-sky-500/40 bg-sky-500/10 px-3 py-2 text-[11px] font-semibold text-sky-800 dark:text-sky-200">
+                <i class="fa-solid fa-circle-info mt-0.5" aria-hidden="true"></i>
+                <span>No medicine suggested by AI: {{ soapReport.prescriptionNote === 'No medicine suggested by AI for this visit.' ? 'nothing additional is needed for this visit.' : soapReport.prescriptionNote }} Add a prescription below if you want one.</span>
+            </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="space-y-1.5">
                 <label class="text-xs font-bold text-[var(--text)]" for="soap-report-editor-medicines-5">Medicines</label>
                 <textarea id="soap-report-editor-medicines-5" [(ngModel)]="soapReport.medicine" [disabled]="soapReport.isSigned || false" rows="3"
-                    placeholder="Medication names" class="form-input disabled:opacity-60"></textarea>
+                    placeholder="One medicine per line, e.g. Paracetamol 500 mg" class="form-input disabled:opacity-60"></textarea>
             </div>
             <div class="space-y-1.5">
                 <label class="text-xs font-bold text-[var(--text)]" for="soap-report-editor-dose-frequency-duration--6">Dose, frequency, duration & instructions</label>
                 <textarea id="soap-report-editor-dose-frequency-duration--6" [(ngModel)]="soapReport.doses" [disabled]="soapReport.isSigned || false" rows="3"
-                    placeholder="Review dosage and instructions carefully" class="form-input disabled:opacity-60"></textarea>
+                    placeholder="One line per medicine, same order, e.g. 1 tablet twice daily after meals for 5 days" class="form-input disabled:opacity-60"></textarea>
             </div>
         </div>
     </div>

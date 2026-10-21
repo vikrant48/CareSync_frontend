@@ -407,9 +407,28 @@
                 <div *ngFor="let msg of messages" [ngClass]="msg.isSelf ? 'text-right' : 'text-left'">
                     <div class="inline-block max-w-[85%] text-xs p-2.5 rounded-2xl"
                         [ngClass]="msg.isSelf ? 'bg-brand text-white rounded-br-none' : 'bg-gray-800 text-gray-200 rounded-bl-none'">
-                        <div class="text-[9px] font-bold text-white/70 mb-0.5">{{ msg.senderName }}</div>
-                        <div class="leading-relaxed break-words">{{ msg.text }}</div>
-                        <div class="text-[8px] text-white/50 text-right mt-1">{{ msg.timestamp }}</div>
+                        <div class="text-[9px] font-bold text-white/70 mb-0.5 text-left">{{ msg.senderName }}</div>
+                        <!-- Shared file (kept in this tab only, never uploaded) -->
+                        <ng-container *ngIf="msg.file as f">
+                            <a *ngIf="f.mimeType.startsWith('image/')" [href]="f.url" target="_blank" rel="noopener" class="block mb-1">
+                                <img [src]="f.url" [alt]="f.name" class="max-h-40 max-w-full rounded-lg object-cover" />
+                            </a>
+                            <a [href]="f.url" [attr.download]="f.name" class="flex items-center gap-2 mb-1 rounded-lg px-2 py-1.5 text-left"
+                                [ngClass]="msg.isSelf ? 'bg-white/15 hover:bg-white/25' : 'bg-black/25 hover:bg-black/35'"
+                                [attr.aria-label]="'Download ' + f.name">
+                                <i class="fa-solid text-sm" [ngClass]="f.mimeType === 'application/pdf' ? 'fa-file-pdf' : 'fa-file-image'" aria-hidden="true"></i>
+                                <span class="min-w-0">
+                                    <span class="block truncate font-semibold">{{ f.name }}</span>
+                                    <span class="block text-[9px] opacity-70">{{ fileSizeLabel(f.size) }}</span>
+                                </span>
+                                <i class="fa-solid fa-download text-[10px] opacity-70 ml-auto" aria-hidden="true"></i>
+                            </a>
+                        </ng-container>
+                        <!-- Message and time on one row (time sits at the end, like WhatsApp) -->
+                        <div class="flex items-end gap-2 text-left" [class.justify-end]="!msg.text">
+                            <span *ngIf="msg.text" class="leading-relaxed break-words whitespace-pre-wrap min-w-0">{{ msg.text }}</span>
+                            <span class="text-[8px] text-white/50 shrink-0 whitespace-nowrap translate-y-0.5">{{ msg.timestamp }}</span>
+                        </div>
                     </div>
                 </div>
                 <div *ngIf="messages.length === 0" class="text-center text-xs text-gray-500 mt-10">
@@ -419,7 +438,15 @@
 
             <!-- Chat Input -->
             <div class="p-3 border-t border-gray-800 bg-gray-950">
+                <p *ngIf="chatFileError" class="text-[10px] text-rose-400 mb-1.5" role="alert">{{ chatFileError }}</p>
                 <form (ngSubmit)="sendChatMessage()" class="flex items-center gap-2">
+                    <input #chatFileInput type="file" class="hidden" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                        (change)="onChatFileSelected($event)" />
+                    <button type="button" (click)="chatFileInput.click()" [disabled]="sendingFile || !connected"
+                        class="w-9 h-9 shrink-0 rounded-xl border border-gray-800 text-gray-400 hover:text-white hover:border-gray-600 disabled:opacity-50 flex items-center justify-center transition-colors"
+                        title="Attach an image or PDF (max 5 MB, not saved after the call)" aria-label="Attach a file">
+                        <i class="fa-solid text-xs" [ngClass]="sendingFile ? 'fa-circle-notch fa-spin' : 'fa-paperclip'" aria-hidden="true"></i>
+                    </button>
                     <input type="text" [(ngModel)]="chatInput" name="chatInput" placeholder="Type a message..."
                         class="flex-1 bg-gray-900 border border-gray-800 text-xs text-white rounded-xl px-3 py-2 focus:outline-none focus:border-brand" />
                     <button type="submit" [disabled]="!chatInput.trim()"

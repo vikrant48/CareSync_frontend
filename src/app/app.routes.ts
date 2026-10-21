@@ -1,13 +1,14 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
+import { guestGuard } from './core/guards/guest.guard';
 import { unsavedChangesGuard } from './core/guards/unsaved-changes.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'register', pathMatch: 'full' },
-  { path: 'login', loadComponent: () => import('./features/auth/login.component').then((m) => m.LoginComponent) },
+  { path: 'login', canActivate: [guestGuard], loadComponent: () => import('./features/auth/login.component').then((m) => m.LoginComponent) },
   { path: 'reset-password', loadComponent: () => import('./features/auth/reset-password.component').then((m) => m.ResetPasswordComponent) },
-  { path: 'register', loadComponent: () => import('./features/auth/register.component').then((m) => m.RegisterComponent) },
+  { path: 'register', canActivate: [guestGuard], loadComponent: () => import('./features/auth/register.component').then((m) => m.RegisterComponent) },
   { path: 'auth/token-refresh', loadComponent: () => import('./features/auth/token-refresh.component').then((m) => m.TokenRefreshComponent) },
   { path: 'auth/session-expired', loadComponent: () => import('./features/auth/session-expired.component').then((m) => m.SessionExpiredComponent) },
 

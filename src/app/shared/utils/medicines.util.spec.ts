@@ -19,6 +19,15 @@ describe('parseMedicines', () => {
       .toEqual([{ name: 'Paracetamol 500 mg', dosage: '1 tablet, twice daily, for 5 days' }]);
   });
 
+  it('keeps doses aligned when a medicine has no dose', () => {
+    expect(parseMedicines('Paracetamol\nCetirizine\nORS', '1 tab BD\n\n1 sachet after each loose stool'))
+      .toEqual([
+        { name: 'Paracetamol', dosage: '1 tab BD' },
+        { name: 'Cetirizine', dosage: undefined },
+        { name: 'ORS', dosage: '1 sachet after each loose stool' }
+      ]);
+  });
+
   it('drops list markers and empty lines', () => {
     expect(parseMedicines('- Paracetamol\n\n2. Cetirizine', null).map(r => r.name)).toEqual(['Paracetamol', 'Cetirizine']);
     expect(parseMedicines('', '')).toEqual([]);

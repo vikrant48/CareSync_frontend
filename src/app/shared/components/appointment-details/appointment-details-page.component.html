@@ -58,8 +58,24 @@
                         payment
                         and feedback.</p>
                 </div>
-                <pre *ngIf="followThrough?.plainLanguageSummary"
-                    class="whitespace-pre-wrap font-sans text-xs leading-relaxed text-[var(--text)]">{{ followThrough?.plainLanguageSummary }}</pre>
+                <!-- Visit summary as labelled sections (AI Markdown parsed into plain text) -->
+                <dl *ngIf="summaryItems().length; else rawSummary" class="space-y-2">
+                    <div *ngFor="let item of summaryItems()"
+                        class="rounded-xl border bg-[var(--panel)] px-3 py-2.5"
+                        [ngClass]="item.suggestion ? 'border-amber-500/30' : 'border-[var(--border)]'">
+                        <dt *ngIf="item.label || item.suggestion"
+                            class="flex flex-wrap items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--muted)] mb-1">
+                            <span>{{ item.label }}</span>
+                            <span *ngIf="item.suggestion"
+                                class="normal-case tracking-normal rounded-full border border-amber-500/30 bg-amber-500/10 px-1.5 py-px text-[9px] font-bold text-amber-700 dark:text-amber-300">AI suggestion</span>
+                        </dt>
+                        <dd class="text-xs leading-relaxed text-[var(--text)] whitespace-pre-line">{{ item.text }}</dd>
+                    </div>
+                </dl>
+                <ng-template #rawSummary>
+                    <pre *ngIf="followThrough?.plainLanguageSummary"
+                        class="whitespace-pre-wrap font-sans text-xs leading-relaxed text-[var(--text)]">{{ followThrough?.plainLanguageSummary }}</pre>
+                </ng-template>
                 <p *ngIf="followThrough?.plainLanguageSummarySavedAt" class="text-[10px] text-[var(--muted)]">
                     <i class="fa-solid fa-floppy-disk mr-1" aria-hidden="true"></i>Summary saved with this visit on
                     {{ followThrough?.plainLanguageSummarySavedAt | date:'d MMM y' }}. Not a diagnosis: ask your doctor
@@ -170,8 +186,8 @@
 
                     <!-- Loaded Content -->
                     <ng-container *ngIf="!preVisitBriefLoading && preVisitBriefLoaded">
-                        <pre
-                            class="whitespace-pre-wrap font-sans text-xs leading-relaxed text-[var(--text)] bg-[var(--panel)]/40 p-3.5 rounded-xl border border-[var(--border)]">{{ preVisitBrief }}</pre>
+                        <app-ai-text [text]="preVisitBrief"
+                            class="block bg-[var(--panel)]/40 p-3.5 rounded-xl border border-[var(--border)]"></app-ai-text>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div class="rounded-xl border border-[var(--border)] bg-[var(--panel)] p-3">
                                 <div class="text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">
