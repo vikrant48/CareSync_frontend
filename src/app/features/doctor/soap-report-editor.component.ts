@@ -122,10 +122,11 @@ export class SoapReportEditorComponent {
             plan: result.soapNote?.plan || this.soapReport.plan,
             symptoms: result.chiefComplaint || this.soapReport.symptoms,
             diagnosis: result.diagnosis || this.soapReport.diagnosis,
-            medicine: result.prescriptions?.map(item => item.name).filter(Boolean).join(', ') || this.soapReport.medicine,
-            doses: result.prescriptions?.map(item =>
-                [item.name, item.dosage, item.frequency, item.duration, item.instructions].filter(Boolean).join(' ')
-            ).filter(Boolean).join('\n') || this.soapReport.doses,
+            // One medicine per line, with its dose on the matching line (each becomes its own row)
+            medicine: result.prescriptions?.filter(item => item.name).map(item => item.name).join('\n') || this.soapReport.medicine,
+            doses: result.prescriptions?.filter(item => item.name).map(item =>
+                [item.dosage, item.frequency, item.duration, item.instructions].filter(Boolean).join(' ') || 'Not specified'
+            ).join('\n') || this.soapReport.doses,
             transcript: result.transcript || this.transcriptInput
         };
         this.toast.showSuccess('Dictation draft applied. Review and edit every field before saving.');

@@ -1,3 +1,4 @@
+import { parseMedicines } from '../utils/medicines.util';
 import { ChangeDetectorRef, Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -211,22 +212,7 @@ export class AppointmentCardComponent {
     }
 
     private buildAndDownloadPdf(aptId: number, medHistory: any, soap: any) {
-        const medicinesList: Array<{ name: string; dosage?: string; duration?: string; instructions?: string }> = [];
-
-        const medString = medHistory?.medicine || soap?.medicine || '';
-        const doseString = medHistory?.doses || soap?.doses || '';
-
-        if (medString) {
-            const medNames = String(medString).split(',').map((s: string) => s.trim()).filter(Boolean);
-            const dosages = String(doseString).split(',').map((s: string) => s.trim()).filter(Boolean);
-            medNames.forEach((name: string, idx: number) => {
-                medicinesList.push({
-                    name: name,
-                    dosage: dosages[idx] || (dosages.length === 1 ? dosages[0] : undefined),
-                    duration: undefined
-                });
-            });
-        }
+        const medicinesList = parseMedicines(medHistory?.medicine || soap?.medicine, medHistory?.doses || soap?.doses);
 
         const soapReport = (soap && (soap.subjective || soap.objective || soap.assessment || soap.plan || soap.notes)) ? {
             subjective: soap.subjective || undefined,
