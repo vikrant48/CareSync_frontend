@@ -28,7 +28,14 @@ export interface ChatMessage {
   text: string;
   timestamp: string;
   isSelf: boolean;
+  /** A file shared during the call: kept in memory only, never uploaded to the server */
+  file?: { name: string; size: number; mimeType: string; url: string };
 }
+
+/** Files in the consultation chat go peer-to-peer through LiveKit and are not saved anywhere */
+const CHAT_FILE_TOPIC = 'consultation-file';
+const CHAT_FILE_MAX_BYTES = 5 * 1024 * 1024;
+const CHAT_FILE_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
 
 @Component({
   standalone: true,
@@ -312,6 +319,9 @@ export class VideoConsultationComponent implements OnInit, OnDestroy {
 
     this.room = new Room(roomOptions);
     this.setupRoomEventListeners();
+    this.room.registerByteStreamHandler(CHAT_FILE_TOPIC, (reader, participantInfo) => {
+      this.receiveChatFile(reader, participantInfo.identity);
+    });
 
     this.loadingStatusText = 'Connecting to WebRTC media server...';
     await this.room.connect(url, token);
@@ -321,6 +331,7 @@ export class VideoConsultationComponent implements OnInit, OnDestroy {
       this.loading = false;
       this.isWaitingScreen = false;
       this.stopPreviewCamera();
+      this.startCallKeepAlive();
     });
 
     // Publish local camera & mic according to pre-join toggles
@@ -547,6 +558,77 @@ export class VideoConsultationComponent implements OnInit, OnDestroy {
     this.messages.push(selfMsg);
   }
 
+  // ---- File attachments (live only: peer-to-peer during the call, never stored on the server)
+
+  chatFileError: string | null = null;
+  sendingFile = false;
+  private chatFileUrls: string[] = [];
+
+  async onChatFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file || !this.room) return;
+    this.chatFileError = null;
+    if (!CHAT_FILE_TYPES.includes(file.type)) {
+      this.chatFileError = 'Only JPG, PNG or PDF files can be shared.';
+      return;
+    }
+    if (file.size > CHAT_FILE_MAX_BYTES) {
+      this.chatFileError = 'Files must be 5 MB or smaller.';
+      return;
+    }
+    this.sendingFile = true;
+    try {
+      await this.room.localParticipant.sendFile(file, { topic: CHAT_FILE_TOPIC, mimeType: file.type });
+      this.zone.run(() => this.messages.push(this.fileMessage('You', this.auth.role() || 'USER', true, file, file.type, file.name)));
+    } catch (e) {
+      console.warn('Could not send the file:', e);
+      this.zone.run(() => this.chatFileError = 'Could not send the file. Please try again.');
+    } finally {
+      this.zone.run(() => this.sendingFile = false);
+    }
+  }
+
+  private async receiveChatFile(reader: any, identity: string) {
+    const info = reader.info as { name: string; mimeType: string; size?: number };
+    // Ignore anything we don't accept, before and after reading
+    if (!CHAT_FILE_TYPES.includes(info.mimeType) || (info.size ?? 0) > CHAT_FILE_MAX_BYTES) return;
+    try {
+      const chunks: Uint8Array[] = await reader.readAll();
+      const blob = new Blob(chunks as BlobPart[], { type: info.mimeType });
+      if (blob.size > CHAT_FILE_MAX_BYTES) return;
+      const sender = this.room?.remoteParticipants.get(identity);
+      this.zone.run(() => {
+        this.messages.push(this.fileMessage(sender?.name || identity || 'Participant', 'REMOTE', false, blob, info.mimeType, info.name));
+        if (!this.showChat) this.unreadChatCount++;
+      });
+    } catch (e) {
+      console.warn('Could not receive a shared file:', e);
+    }
+  }
+
+  private fileMessage(senderName: string, senderRole: string, isSelf: boolean, data: Blob, mimeType: string, name: string): ChatMessage {
+    const url = URL.createObjectURL(data);
+    this.chatFileUrls.push(url);
+    return {
+      senderName, senderRole, isSelf,
+      text: '',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      file: { name: name || 'file', size: data.size, mimeType, url }
+    };
+  }
+
+  /** Shared files live only in this tab's memory; release them when the call ends */
+  private releaseChatFiles() {
+    this.chatFileUrls.forEach(url => URL.revokeObjectURL(url));
+    this.chatFileUrls = [];
+  }
+
+  fileSizeLabel(bytes: number): string {
+    return bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
   async endConsultation() {
     const ok = await this.confirm.ask({
       title: 'End consultation',
@@ -585,13 +667,58 @@ export class VideoConsultationComponent implements OnInit, OnDestroy {
     }
   }
 
+  // ---- During a call: keep the phone screen on and don't log out for inactivity (nobody touches the screen)
+
+  private wakeLock: any = null;
+  private holdingSession = false;
+  private readonly onVisibilityChange = () => {
+    // The browser drops the wake lock when the tab is hidden; take it again when the call is visible
+    if (document.visibilityState === 'visible' && this.connected) this.requestWakeLock();
+  };
+
+  private startCallKeepAlive() {
+    if (!this.holdingSession) {
+      this.auth.holdSession();
+      this.holdingSession = true;
+    }
+    this.requestWakeLock();
+    if (typeof document !== 'undefined') document.addEventListener('visibilitychange', this.onVisibilityChange);
+  }
+
+  private async requestWakeLock() {
+    try {
+      const nav = navigator as any;
+      if (nav?.wakeLock && !this.wakeLock) {
+        this.wakeLock = await nav.wakeLock.request('screen');
+        this.wakeLock.addEventListener?.('release', () => (this.wakeLock = null));
+      }
+    } catch {
+      // Not supported or not allowed (e.g. low battery): the call still works, the screen may just dim
+    }
+  }
+
+  private stopCallKeepAlive() {
+    if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', this.onVisibilityChange);
+    try {
+      this.wakeLock?.release?.();
+    } catch { }
+    this.wakeLock = null;
+    if (this.holdingSession) {
+      this.auth.releaseSession();
+      this.holdingSession = false;
+    }
+  }
+
   cleanUp() {
+    this.stopCallKeepAlive();
     this.pollSub?.unsubscribe();
     this.stopPreviewCamera();
     if (this.room) {
+      this.room.unregisterByteStreamHandler(CHAT_FILE_TOPIC);
       this.room.disconnect();
       this.room = undefined;
     }
+    this.releaseChatFiles();
     this.connected = false;
   }
 

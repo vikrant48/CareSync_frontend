@@ -98,11 +98,11 @@ import { CompletionPreview } from '../../core/models/appointment.models';
             </div>
             <div class="bg-[var(--panel)] p-3 rounded-lg border border-[var(--border)]">
               <div class="text-muted font-semibold mb-1">Prescribed Medicines:</div>
-              <div class="text-[var(--text)]">{{ previewData.medicalHistory?.medicine || 'None' }}</div>
+              <div class="text-[var(--text)] whitespace-pre-line">{{ previewData.medicalHistory?.medicine || 'None' }}</div>
             </div>
             <div class="bg-[var(--panel)] p-3 rounded-lg border border-[var(--border)]">
               <div class="text-muted font-semibold mb-1">Dosage & Frequency:</div>
-              <div class="text-[var(--text)]">{{ previewData.medicalHistory?.doses || 'N/A' }}</div>
+              <div class="text-[var(--text)] whitespace-pre-line">{{ previewData.medicalHistory?.doses || 'N/A' }}</div>
             </div>
           </div>
         </div>

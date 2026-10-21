@@ -64,7 +64,7 @@
                         class="w-fit text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 border border-rose-500/20">
                         Doctor inactive
                     </span>
-                    <div class="flex flex-wrap items-center gap-3 text-[11px] text-muted mt-1">
+                    <div class="hidden sm:flex flex-wrap items-center gap-3 text-[11px] text-muted mt-1">
                         <span class="flex items-center gap-1.5 font-medium">
                             <i class="fa-regular fa-calendar text-[var(--primary)]" aria-hidden="true"></i>
                             {{ a.appointmentDate }}
@@ -77,7 +77,15 @@
                 </div>
             </div>
             <div class="flex items-center gap-2.5 shrink-0 ml-2">
-                <app-status-badge [status]="a.status" size="md"></app-status-badge>
+                <!-- Mobile: status on top, date and time in one row below it -->
+                <div class="flex flex-col items-end gap-1 sm:hidden">
+                    <app-status-badge [status]="a.status" size="sm"></app-status-badge>
+                    <span class="flex items-center gap-1.5 text-[10px] text-muted font-medium whitespace-nowrap">
+                        <i class="fa-regular fa-calendar text-[var(--primary)]" aria-hidden="true"></i>{{ a.appointmentDate }}
+                        <i class="fa-regular fa-clock text-[var(--primary)] ml-1" aria-hidden="true"></i>{{ a.appointmentTime }}
+                    </span>
+                </div>
+                <app-status-badge class="hidden sm:block" [status]="a.status" size="md"></app-status-badge>
                 <i
                     class="fa-solid fa-chevron-right text-muted group-hover:text-[var(--text)] text-xs group-hover:translate-x-0.5 transition-all" aria-hidden="true"></i>
             </div>

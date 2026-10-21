@@ -1,6 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { SummaryItem, parseVisitSummary } from '../../utils/visit-summary.util';
+import { AiTextComponent } from '../../ui/ai-text.component';
 import { AppointmentApiService } from '../../../core/services/appointment-api.service';
 import { AppointmentHeaderComponent } from './appointment-header.component';
 import { StatusStepperComponent } from './status-stepper.component';
@@ -26,6 +28,7 @@ import { PaymentPopupComponent, PaymentDetails } from '../../payment-popup.compo
     standalone: true,
     imports: [
         CommonModule,
+        AiTextComponent,
         AppointmentHeaderComponent,
         StatusStepperComponent,
         AppointmentOverviewTabComponent,
@@ -145,6 +148,18 @@ export class AppointmentDetailsPageComponent implements OnInit {
             error: () => this.followThrough = null
         });
     }
+
+    /** The visit summary as labelled items (parsed once per summary text) */
+    summaryItems(): SummaryItem[] {
+        const text = this.followThrough?.plainLanguageSummary || '';
+        if (text !== this.parsedSummaryText) {
+            this.parsedSummaryText = text;
+            this.parsedSummary = parseVisitSummary(text);
+        }
+        return this.parsedSummary;
+    }
+    private parsedSummaryText = '';
+    private parsedSummary: SummaryItem[] = [];
 
     hasFollowThrough(): boolean {
         const item = this.followThrough;

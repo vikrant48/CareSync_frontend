@@ -13,6 +13,10 @@ export const roleGuard: CanActivateFn = (route, state) => {
   if (userRole && state.url.startsWith('/patient/doctor/')) {
     inject(ToastService).showInfo('This link is for patients.');
   }
+  // A token without its role is broken login data: clear it, so the login page shows a logged-out nav
+  if (!userRole && auth.isAuthenticated()) {
+    auth.clearSession();
+  }
   auth.redirectToDashboard(userRole);
   return false;
 };

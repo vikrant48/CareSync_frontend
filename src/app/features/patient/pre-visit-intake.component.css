@@ -2,3 +2,15 @@
 textarea {
     resize: vertical;
 }
+
+/* Phones: smaller example text and dropdowns (typed text keeps 16px so iOS doesn't zoom while typing) */
+@media (max-width: 639px) {
+    textarea::placeholder,
+    input::placeholder {
+        font-size: 13px;
+    }
+
+    select {
+        font-size: 13px !important;
+    }
+}

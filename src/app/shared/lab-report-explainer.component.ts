@@ -1,4 +1,4 @@
-import { Component, Input, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AiAssistantService } from '../core/services/ai-assistant.service';
 import { LabReportExplanation } from '../core/models/ai.models';
@@ -15,13 +15,14 @@ import { extractApiError } from './utils/api-error.util';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <button type="button" (click)="open($event)" [disabled]="loading()"
-      class="inline-flex items-center gap-1.5 text-[11px] font-bold text-indigo-700 dark:text-indigo-300 bg-transparent border border-indigo-500/30 hover:border-indigo-500/60 rounded-lg px-2.5 py-1 transition-colors disabled:opacity-60"
+      [class]="buttonClass || 'inline-flex items-center gap-1.5 text-[11px] font-bold text-indigo-700 dark:text-indigo-300 bg-transparent border border-indigo-500/30 hover:border-indigo-500/60 rounded-lg px-2.5 py-1 transition-colors disabled:opacity-60'"
+      [attr.aria-expanded]="inline ? expanded : null"
       [attr.aria-label]="'Explain ' + (filename || 'this lab report') + ' in plain language'">
       <i class="fa-solid" [ngClass]="loading() ? 'fa-circle-notch fa-spin' : 'fa-wand-magic-sparkles'" aria-hidden="true"></i>
       {{ loading() ? 'Explaining...' : 'Explain' }}
     </button>
 
-    <div *ngIf="isOpen()" class="fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+    <div *ngIf="isOpen() && !inline" class="fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
          (click)="close($event)" role="dialog" aria-modal="true" aria-label="Lab report explanation">
       <div class="w-full max-w-lg max-h-[85vh] flex flex-col bg-[var(--panel)] border border-[var(--border)] rounded-2xl shadow-2xl"
            (click)="$event.stopPropagation()">
@@ -51,12 +52,23 @@ import { extractApiError } from './utils/api-error.util';
       </div>
     </div>
 
-    <p *ngIf="error()" class="mt-1 text-[10px] text-red-600 dark:text-red-400" role="alert">{{ error() }}</p>
+    <p *ngIf="error() && !inline" class="mt-1 text-[10px] text-red-600 dark:text-red-400" role="alert">{{ error() }}</p>
   `
 })
 export class LabReportExplainerComponent {
   @Input({ required: true }) documentId!: number;
   @Input() filename?: string;
+
+  /** Inline: no popup; the result goes to (explained) and the page shows it (e.g. below a card) */
+  @Input() inline = false;
+  /** Inline only: whether the page is showing the result (each click toggles it) */
+  @Input() expanded = false;
+  /** Replaces the default small button style, to match neighbouring buttons */
+  @Input() buttonClass = '';
+  @Output() explained = new EventEmitter<LabReportExplanation>();
+  @Output() toggled = new EventEmitter<boolean>();
+  /** Inline only: the explanation could not be made; the page shows this message below the card */
+  @Output() failed = new EventEmitter<string>();
 
   private ai = inject(AiAssistantService);
 
@@ -68,8 +80,12 @@ export class LabReportExplainerComponent {
   open(event: Event) {
     // The button may sit inside a clickable card (which opens the file)
     event.stopPropagation();
+    if (this.inline && this.expanded) {
+      this.toggled.emit(false);
+      return;
+    }
     if (this.explanation()) {
-      this.isOpen.set(true);
+      this.show(this.explanation()!);
       return;
     }
     this.loading.set(true);
@@ -85,7 +101,12 @@ export class LabReportExplainerComponent {
       next: result => this.show(result),
       error: err => {
         this.loading.set(false);
-        this.error.set(extractApiError(err, 'The explanation is unavailable right now. Please try again later.'));
+        const message = extractApiError(err, 'The explanation is unavailable right now. Please try again later.');
+        this.error.set(message);
+        if (this.inline) {
+          this.failed.emit(message);
+          this.toggled.emit(true);
+        }
       }
     });
   }
@@ -93,6 +114,11 @@ export class LabReportExplainerComponent {
   private show(result: LabReportExplanation) {
     this.explanation.set(result);
     this.loading.set(false);
+    if (this.inline) {
+      this.explained.emit(result);
+      this.toggled.emit(true);
+      return;
+    }
     this.isOpen.set(true);
   }
 

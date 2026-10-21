@@ -176,6 +176,10 @@ export interface SoapReportDto {
     treatment?: string;
     medicine?: string;
     doses?: string;
+    /** True when the medicines were suggested by the AI, not prescribed in the visit notes */
+    prescriptionSuggested?: boolean;
+    /** Why the AI suggested no medicine */
+    prescriptionNote?: string;
     notes?: string;
     transcript?: string;
     isDraft?: boolean;

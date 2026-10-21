@@ -72,8 +72,8 @@ export interface AppShellTab {
            [ngClass]="variant === 'doctor'
              ? 'bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] overflow-hidden'
              : 'border-t bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700'"
-           style="min-height: calc(4rem + env(safe-area-inset-bottom, 0px));">
-        <div class="grid items-center h-16" [class.text-sm]="variant === 'patient'" [class.grid-cols-3]="variant === 'patient'" [class.grid-cols-5]="variant === 'doctor'">
+           style="min-height: calc(3.25rem + env(safe-area-inset-bottom, 0px));">
+        <div class="grid items-center h-[3.25rem]"[class.text-sm]="variant === 'patient'" [class.grid-cols-3]="variant === 'patient'" [class.grid-cols-5]="variant === 'doctor'">
           <ng-container *ngFor="let tab of tabs">
             <button *ngIf="tab.opensMenu" type="button" (click)="menuOpen = !menuOpen"
                     [attr.aria-label]="variant === 'doctor' ? 'Open menu' : 'Open Menu'"
@@ -81,26 +81,26 @@ export interface AppShellTab {
                     [class.text-brand]="menuOpen"
                     [class]="tabClass">
               <ng-container *ngIf="variant === 'doctor'; else plainMenuIcon">
-                <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-1 transition-transform" [class.rotate-90]="menuOpen">
+                <div class="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-0.5 transition-transform" [class.rotate-90]="menuOpen">
                   <i class="fa-solid" [class.fa-bars]="!menuOpen" [class.fa-xmark]="menuOpen" aria-hidden="true"></i>
                 </div>
                 <span class="text-[10px] font-medium">{{ tab.label }}</span>
               </ng-container>
               <ng-template #plainMenuIcon>
                 <i class="fa-solid" [class.fa-bars]="!menuOpen" [class.fa-xmark]="menuOpen" aria-hidden="true"></i>
-                <span class="text-xs mt-1">{{ tab.label }}</span>
+                <span class="text-xs mt-0.5">{{ tab.label }}</span>
               </ng-template>
             </button>
             <a *ngIf="!tab.opensMenu" [routerLink]="tab.link" routerLinkActive="nav-active"
                [routerLinkActiveOptions]="{ exact: !!tab.exact }" [class]="tabClass">
-              <i [class]="tab.icon + (variant === 'doctor' ? ' text-lg mb-1' : '')"></i>
-              <span [class]="variant === 'doctor' ? 'text-[10px] font-medium' : 'text-xs mt-1'">{{ tab.label }}</span>
+              <i [class]="tab.icon + (variant === 'doctor' ? ' text-base mb-0.5' : '')"></i>
+              <span [class]="variant === 'doctor' ? 'text-[10px] font-medium' : 'text-xs mt-0.5'">{{ tab.label }}</span>
             </a>
           </ng-container>
         </div>
       </nav>
 
-      <div *ngIf="variant === 'patient' && menuOpen" class="xl:hidden fixed inset-x-0 top-0 z-40" style="bottom: calc(4rem + env(safe-area-inset-bottom, 0px));">
+      <div *ngIf="variant === 'patient' && menuOpen" class="xl:hidden fixed inset-x-0 top-0 z-40" style="bottom: calc(3.25rem + env(safe-area-inset-bottom, 0px));">
         <div class="absolute inset-x-0 top-0 bottom-0 bg-black/50" (click)="menuOpen = false"></div>
         <div class="absolute left-0 right-0 bottom-0 max-h-[min(70dvh,32rem)] overflow-y-auto bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 rounded-t-xl shadow-xl p-3 space-y-1">
           <div class="flex items-center justify-between px-2 py-1">
@@ -127,7 +127,7 @@ export interface AppShellTab {
       <ng-container *ngIf="variant === 'doctor'">
         <div *ngIf="menuOpen" class="xl:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" (click)="menuOpen = false" aria-hidden="true"></div>
         <div class="xl:hidden fixed inset-x-0 z-[45] bg-white dark:bg-gray-900 rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.12)] transform transition-transform duration-300 ease-out max-h-[calc(100dvh-7.5rem)] overflow-y-auto"
-             style="bottom: calc(4rem + env(safe-area-inset-bottom, 0px));"
+             style="bottom: calc(3.25rem + env(safe-area-inset-bottom, 0px));"
              [class.translate-y-0]="menuOpen" [class.translate-y-full]="!menuOpen">
           <div class="sticky top-0 bg-white dark:bg-gray-900 z-10 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
             <span class="bg-gray-200 dark:bg-gray-700 w-12 h-1.5 rounded-full absolute top-2 left-1/2 -translate-x-1/2"></span>

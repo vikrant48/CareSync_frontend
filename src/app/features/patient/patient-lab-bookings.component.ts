@@ -10,7 +10,8 @@ import { PaymentPopupComponent, PaymentDetails } from '../../shared/payment-popu
 import { LabReportExplainerComponent } from '../../shared/lab-report-explainer.component';
 import { ToastService } from '../../core/services/toast.service';
 import { AiAssistantService } from '../../core/services/ai-assistant.service';
-import { VisionScanResponse } from '../../core/models/ai.models';
+import { LabReportExplanation, VisionScanResponse } from '../../core/models/ai.models';
+import { shrinkImageIfLarge } from '../../shared/utils/image-shrink.util';
 import { ConfirmService } from '../../core/services/confirm.service';
 import { PageLoaderComponent } from '../../shared/ui/page-loader.component';
 import { StatusBadgeComponent } from '../../shared/ui/status-badge.component';
@@ -97,6 +98,26 @@ export class PatientLabBookingsComponent implements OnInit {
   classifyingReport = signal<boolean>(false);
   extractedReport = signal<VisionScanResponse | null>(null);
   extractedBookingId = signal<number | null>(null);
+
+  /** AI explanation shown below a booking card (one open at a time) */
+  explanations = signal<Record<number, LabReportExplanation>>({});
+  expandedExplanationId = signal<number | null>(null);
+
+  /** Why a report could not be explained, shown in the same place below the card */
+  explanationErrors = signal<Record<number, string>>({});
+
+  onReportExplained(bookingId: number, explanation: LabReportExplanation) {
+    this.explanations.update(all => ({ ...all, [bookingId]: explanation }));
+    this.explanationErrors.update(all => ({ ...all, [bookingId]: '' }));
+  }
+
+  onExplanationFailed(bookingId: number, message: string) {
+    this.explanationErrors.update(all => ({ ...all, [bookingId]: message }));
+  }
+
+  onExplanationToggled(bookingId: number, open: boolean) {
+    this.expandedExplanationId.set(open ? bookingId : null);
+  }
 
   // Computed counts
   get totalCount(): number {
@@ -380,10 +401,12 @@ export class PatientLabBookingsComponent implements OnInit {
   /**
    * Handle file selection for lab report upload
    */
-  onFileSelected(event: any, booking: BookingResponse) {
-    const file = event.target.files[0];
-    if (!file) return;
+  async onFileSelected(event: any, booking: BookingResponse) {
+    const picked: File | undefined = event.target.files[0];
+    if (!picked) return;
     event.target.value = '';
+    // Camera photos are often bigger than the limit: shrink large images first
+    const file = await shrinkImageIfLarge(picked);
     if (file.size > 5 * 1024 * 1024) {
       this.toast.showError('File size exceeds 5MB limit');
       return;

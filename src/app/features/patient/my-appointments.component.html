@@ -15,16 +15,17 @@
         </app-filter-bar>
 
         <!-- Summary & Sort Toolbar -->
-        <div class="flex items-center justify-between py-1">
-            <div class="text-xs font-medium text-[var(--muted)]">
-                Showing <span class="font-bold text-[var(--text)]">{{ filtered().length }}</span> of <span
-                    class="font-bold text-[var(--primary)]">{{ appointments.length }}</span> appointments
+        <div class="flex items-center justify-between gap-2 py-1">
+            <div class="text-xs font-medium text-[var(--muted)] whitespace-nowrap">
+                <span class="hidden sm:inline">Showing </span><span class="font-bold text-[var(--text)]">{{ filtered().length }}</span> of <span
+                    class="font-bold text-[var(--primary)]">{{ appointments.length }}</span>
+                <span class="hidden sm:inline"> appointments</span><span class="sm:hidden"> appts</span>
             </div>
 
-            <div class="flex items-center gap-2">
-                <span class="text-xs text-[var(--muted)] font-medium">Sort by</span>
+            <div class="flex items-center gap-2 shrink-0">
+                <span class="text-xs text-[var(--muted)] font-medium whitespace-nowrap">Sort by</span>
                 <select
-                    class="bg-[var(--panel)] border border-[var(--border)] rounded-xl px-3 py-1.5 text-xs text-[var(--text)] font-semibold focus:outline-none focus:border-[var(--primary)] cursor-pointer">
+                    class="compact-select bg-[var(--panel)] border border-[var(--border)] rounded-xl px-2.5 sm:px-3 py-1.5 text-xs text-[var(--text)] font-semibold focus:outline-none focus:border-[var(--primary)] cursor-pointer">
                     <option value="upcoming">Upcoming First</option>
                     <option value="recent">Most Recent</option>
                 </select>

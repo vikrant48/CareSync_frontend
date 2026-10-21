@@ -93,9 +93,12 @@
                 <div class="space-y-1 bg-[var(--bg)]/50 p-3 rounded-xl border border-[var(--border)]">
                     <span class="font-bold text-[var(--muted)] uppercase tracking-wider text-[10px] block">Prescribed
                         Medication & Doses</span>
-                    <p class="text-emerald-600 dark:text-emerald-400 font-semibold leading-relaxed">{{ record.medicine
-                        }} - {{ record.doses }}
-                    </p>
+                    <ul *ngIf="medicineRows(record).length; else noMedicines" class="space-y-0.5">
+                        <li *ngFor="let row of medicineRows(record)" class="text-emerald-600 dark:text-emerald-400 font-semibold leading-relaxed">
+                            {{ row.name }}<span *ngIf="row.dosage" class="font-normal text-[var(--text)]"> - {{ row.dosage }}</span>
+                        </li>
+                    </ul>
+                    <ng-template #noMedicines><p class="text-[var(--muted)]">None prescribed</p></ng-template>
                 </div>
             </div>
 
