@@ -171,10 +171,10 @@ export class DoctorPublicProfileComponent {
 
     // Set minimum date to today to prevent past date selection
     const today = new Date();
-    this.minDate = today.toISOString().slice(0, 10);
 
     // Set default date to today with proper timezone handling
     const localToday = new Date(today.getTime() - (today.getTimezoneOffset() * 60000));
+    this.minDate = localToday.toISOString().slice(0, 10);
     this.selectedDate = localToday.toISOString().slice(0, 10);
 
     // Store current time for slot filtering

@@ -169,8 +169,8 @@ export class DoctorBookingModalComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if ((changes['open'] || changes['doctor']) && this.open && this.doctor) {
       const today = new Date();
-      this.minDate = today.toISOString().slice(0, 10);
       const localToday = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
+      this.minDate = localToday.toISOString().slice(0, 10);
       this.selectedDate = localToday.toISOString().slice(0, 10);
       this.selectedSlot = null;
       this.loadSlots();
