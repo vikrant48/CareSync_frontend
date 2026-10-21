@@ -1,3 +1,4 @@
+import { parseMedicines } from '../../shared/utils/medicines.util';
 import { Injectable, inject } from '@angular/core';
 // Type-only import: the jspdf library itself is loaded on demand (see loadJsPdf) to keep it out of page bundles
 import type { jsPDF } from 'jspdf';
@@ -633,13 +634,7 @@ export class PdfService {
     if (data.medicines && data.medicines.length > 0) {
       medicinesList = data.medicines;
     } else if (data.medicine) {
-      const medNames = String(data.medicine).split(',').map(s => s.trim()).filter(Boolean);
-      const dosages = String(data.doses || '').split(',').map(s => s.trim()).filter(Boolean);
-      medicinesList = medNames.map((name, idx) => ({
-        name: name,
-        dosage: dosages[idx] || (dosages.length === 1 ? dosages[0] : undefined),
-        duration: undefined
-      }));
+      medicinesList = parseMedicines(data.medicine, data.doses);
     }
 
     if (medicinesList.length > 0) {
