@@ -10,12 +10,14 @@ export const tokenInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next:
   const router = Router && inject(Router);
   const statusService = inject(BackendStatusService);
 
-  // Skip token logic for auth endpoints (login, register, refresh, etc.) EXCEPT logout, current-user, and change-password
+  // Skip token logic for auth endpoints (login, register, refresh, etc.) EXCEPT logout, current-user,
+  // change-password and the signed-in devices list
   if (req.url.includes('/api/auth/') &&
     !req.url.includes('/api/auth/logout') &&
     !req.url.includes('/api/auth/email-verification') &&
     !req.url.includes('/api/auth/current-user') &&
-    !req.url.includes('/api/auth/change-password')) {
+    !req.url.includes('/api/auth/change-password') &&
+    !req.url.includes('/api/auth/sessions')) {
     // We still want to intercept errors to check if server went offline during an unauthenticated request (like login or check availability)
     return next(req).pipe(
       catchError((error: HttpErrorResponse) => {

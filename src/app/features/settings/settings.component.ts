@@ -7,12 +7,13 @@ import { AuthService } from '../../core/services/auth.service';
 import { PatientProfileService, PatientDto } from '../../core/services/patient-profile.service';
 import { ToastService } from '../../core/services/toast.service';
 import { ChangePasswordFormComponent } from '../../shared/change-password-form.component';
+import { SignedInDevicesComponent } from './signed-in-devices.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ChangePasswordFormComponent, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ChangePasswordFormComponent, PageHeaderComponent, SignedInDevicesComponent],
   styles: [`
     .theme-option {
       position: relative;
@@ -207,6 +208,9 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
             
             <!-- Account & Security Component -->
             <app-change-password-form></app-change-password-form>
+
+            <!-- Signed-in devices: see and sign out sessions -->
+            <app-signed-in-devices></app-signed-in-devices>
 
           </div>
 

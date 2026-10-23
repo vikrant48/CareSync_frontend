@@ -2,6 +2,7 @@ import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PatientDto, MedicalHistoryItem, PatientProfileService } from '../core/services/patient-profile.service';
 import { ToastService } from '../core/services/toast.service';
+import { MyDataPdfService } from '../core/services/my-data-pdf.service';
 import { RouterModule } from '@angular/router';
 import { PatientProfileHistoryComponent } from './patient-profile-history.component';
 import { PageLoaderComponent } from './ui/page-loader.component';
@@ -273,7 +274,7 @@ export interface AppointmentCounts {
                   <h2 class="text-base font-bold text-[var(--text)] tracking-tight">Quick Actions</h2>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <!-- Action 1: Change Password -->
                   <a routerLink="/patient/change-password" 
                     class="bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3.5 transition-all group flex flex-col justify-between space-y-3">
@@ -303,9 +304,10 @@ export interface AppointmentCounts {
                     </div>
                   </div>
 
-                  <!-- Action 3: Download my data (copy of everything CareSync holds about the patient) -->
+                  <!-- Action 3: Download my data (copy of everything CareSync holds about the patient): readable PDF, raw JSON copy below -->
+                  <div class="bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3.5 flex flex-col justify-between space-y-2">
                   <button type="button" (click)="downloadMyData()" [disabled]="downloadingData"
-                    class="text-left bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3.5 transition-all group flex flex-col justify-between space-y-3 cursor-pointer disabled:opacity-60">
+                    class="text-left transition-all group flex flex-col justify-between space-y-3 cursor-pointer disabled:opacity-60">
                     <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
                       <i class="fa-solid fa-shield-halved text-xs" aria-hidden="true"></i>
                     </div>
@@ -314,7 +316,27 @@ export interface AppointmentCounts {
                         <span>{{ downloadingData ? 'Preparing…' : 'Download My Data' }}</span>
                         <i class="fa-solid fa-download text-[10px] opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true"></i>
                       </div>
-                      <p class="text-[10px] text-[var(--muted)] mt-0.5 line-clamp-1">Get a copy of your records</p>
+                      <p class="text-[10px] text-[var(--muted)] mt-0.5 line-clamp-1">Your records as a PDF</p>
+                    </div>
+                  </button>
+                  <button type="button" (click)="downloadMyDataJson()" [disabled]="downloadingData"
+                    class="self-start text-[10px] font-semibold text-[var(--primary)] hover:underline disabled:opacity-60">
+                    or get the JSON copy
+                  </button>
+                  </div>
+
+                  <!-- Action 4: Health record in FHIR format (for other health apps / ABHA later) -->
+                  <button type="button" (click)="downloadFhirRecord()" [disabled]="downloadingFhir"
+                    class="text-left bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3.5 transition-all group flex flex-col justify-between space-y-3 cursor-pointer disabled:opacity-60">
+                    <div class="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-700 dark:text-sky-400">
+                      <i class="fa-solid fa-file-medical text-xs" aria-hidden="true"></i>
+                    </div>
+                    <div>
+                      <div class="text-xs font-bold text-[var(--text)] group-hover:text-sky-700 dark:group-hover:text-sky-400 transition-colors flex items-center justify-between">
+                        <span>{{ downloadingFhir ? 'Preparing…' : 'Health Record (FHIR)' }}</span>
+                        <i class="fa-solid fa-download text-[10px] opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true"></i>
+                      </div>
+                      <p class="text-[10px] text-[var(--muted)] mt-0.5 line-clamp-1">JSON file for other health apps</p>
                     </div>
                   </button>
                 </div>
@@ -347,12 +369,35 @@ export class PatientProfilePageComponent {
 
   activeTab = 'overview';
   downloadingData = false;
+  downloadingFhir = false;
 
   private patientProfileService = inject(PatientProfileService);
   private toast = inject(ToastService);
+  private myDataPdf = inject(MyDataPdfService);
 
-  /** Saves the patient's data export (profile, visits, records, documents, payments...) as a JSON file. */
+  /** Saves the patient's data export (profile, visits, records, documents, payments...) as a readable PDF. */
   downloadMyData() {
+    if (this.downloadingData) return;
+    this.downloadingData = true;
+    this.patientProfileService.exportMyData().subscribe({
+      next: async (blob) => {
+        try {
+          await this.myDataPdf.download(JSON.parse(await blob.text()));
+          this.toast.showSuccess('Your data has been downloaded');
+        } catch {
+          this.toast.showError('Could not create the PDF. Please try the JSON copy.');
+        }
+        this.downloadingData = false;
+      },
+      error: () => {
+        this.downloadingData = false;
+        this.toast.showError('Could not prepare your data. Please try again.');
+      },
+    });
+  }
+
+  /** The same export as the raw JSON file. */
+  downloadMyDataJson() {
     if (this.downloadingData) return;
     this.downloadingData = true;
     this.patientProfileService.exportMyData().subscribe({
@@ -369,6 +414,28 @@ export class PatientProfilePageComponent {
       error: () => {
         this.downloadingData = false;
         this.toast.showError('Could not prepare your data. Please try again.');
+      },
+    });
+  }
+
+  /** Saves the patient's signed health record as a FHIR R4 file other health apps can read. */
+  downloadFhirRecord() {
+    if (this.downloadingFhir) return;
+    this.downloadingFhir = true;
+    this.patientProfileService.exportMyFhirRecord().subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `caresync-health-record-fhir-${new Date().toISOString().slice(0, 10)}.json`;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 10_000);
+        this.downloadingFhir = false;
+        this.toast.showSuccess('Your health record has been downloaded');
+      },
+      error: () => {
+        this.downloadingFhir = false;
+        this.toast.showError('Could not prepare your health record. Please try again.');
       },
     });
   }

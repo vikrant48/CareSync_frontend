@@ -158,4 +158,9 @@ export class PatientProfileService {
   exportMyData() {
     return this.http.get(`${this.baseUrl}/api/patients/me/export`, { responseType: 'blob' });
   }
+
+  /** The logged-in patient's signed health record as a FHIR R4 Bundle (JSON). */
+  exportMyFhirRecord() {
+    return this.http.get(`${this.baseUrl}/api/patients/me/export/fhir`, { responseType: 'blob' });
+  }
 }

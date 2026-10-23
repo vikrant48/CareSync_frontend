@@ -26,7 +26,32 @@
 
             <div
                 class="bg-white dark:bg-gray-800 py-5 sm:py-6 px-4 sm:px-8 shadow-xl shadow-gray-200/50 dark:shadow-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-700 backdrop-blur-sm">
-                <form class="space-y-3.5" (ngSubmit)="onSubmit()" #f="ngForm">
+                <!-- Admins: second step with the emailed code -->
+                <form *ngIf="codeStep" class="space-y-3.5" (ngSubmit)="onSubmitCode()" aria-label="Enter login code">
+                    <div class="flex items-start gap-2 rounded-xl border border-emerald-200 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-2 text-xs text-emerald-800 dark:text-emerald-200">
+                        <i class="fa-solid fa-shield-halved mt-0.5" aria-hidden="true"></i>
+                        <span>{{ codeMessage }}</span>
+                    </div>
+                    <div>
+                        <label for="loginCode" class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Login code</label>
+                        <input id="loginCode" name="loginCode" [(ngModel)]="loginCode" inputmode="numeric" autocomplete="one-time-code"
+                            maxlength="6" pattern="\d{6}" required autofocus
+                            class="block w-full px-3 py-2.5 min-h-touch border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-center text-lg tracking-[0.5em] font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:text-white"
+                            placeholder="••••••">
+                        <p *ngIf="error" class="mt-1.5 text-xs text-red-600 dark:text-red-400" role="alert">{{ error }}</p>
+                    </div>
+                    <button type="submit" [disabled]="loading || loginCode.length !== 6"
+                        class="btn-size-lg w-full flex justify-center px-4 rounded-xl shadow-md text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span *ngIf="!loading">Verify and sign in</span>
+                        <span *ngIf="loading" class="flex items-center"><i class="fa-solid fa-circle-notch fa-spin mr-2" aria-hidden="true"></i> Verifying...</span>
+                    </button>
+                    <button type="button" (click)="cancelCodeStep()" [disabled]="loading"
+                        class="w-full text-center text-xs font-semibold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                        Didn't get a code? Sign in again
+                    </button>
+                </form>
+
+                <form *ngIf="!codeStep" class="space-y-3.5" (ngSubmit)="onSubmit()" #f="ngForm">
 
                     <!-- Username Input -->
                     <div>
