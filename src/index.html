@@ -20,30 +20,8 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
     rel="stylesheet">
-  <script>
-    (function () {
-      try {
-        var t = localStorage.getItem('theme') || 'dark';
-        if (t === 'system') {
-          t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        }
-        var isDark = t !== 'light';
-        var d = document.documentElement;
-        if (isDark) {
-          d.classList.add('dark', 'theme-dark');
-          d.classList.remove('light', 'theme-light');
-        } else {
-          d.classList.add('light', 'theme-light');
-          d.classList.remove('dark', 'theme-dark');
-        }
-      } catch (e) { }
-    })();
-  </script>
-  <script>
-    if (typeof global === 'undefined') {
-      window.global = window;
-    }
-  </script>
+  <!-- Theme + SockJS shim before the app starts (a file, not inline: the CSP blocks inline scripts) -->
+  <script src="boot.js"></script>
 </head>
 
 <body class="dark:bg-gray-950 dark:text-white">

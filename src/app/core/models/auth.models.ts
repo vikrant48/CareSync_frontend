@@ -8,6 +8,16 @@ export interface AuthenticationResponse {
   role: Role;
   message?: string;
   user?: any; // Backend returns Doctor/Patient entity
+  mfaRequired?: boolean;
+  mfaChallengeId?: string;
+}
+export interface SignedInDevice {
+  id: number;
+  device: string;
+  ipAddress: string;
+  signedInAt: string;
+  lastActiveAt: string;
+  current: boolean;
 }
 
 export interface LoginRequest {

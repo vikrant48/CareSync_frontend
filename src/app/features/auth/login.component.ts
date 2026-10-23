@@ -36,11 +36,25 @@ export class LoginComponent {
     }
   }
 
+  codeStep = false;
+  codeChallengeId = '';
+  codeMessage = '';
+  loginCode = '';
+
   onSubmit() {
     this.loading = true;
     this.error = '';
     this.auth.login(this.model).subscribe({
       next: (resp) => {
+        if (resp.mfaRequired && resp.mfaChallengeId) {
+          // Password was right; no tokens until the code is entered
+          this.codeStep = true;
+          this.codeChallengeId = resp.mfaChallengeId;
+          this.codeMessage = resp.message || 'Enter the 6-digit code we emailed you.';
+          this.loginCode = '';
+          this.loading = false;
+          return;
+        }
         this.auth.storeAuth(resp);
         this.toast.showSuccess('Logged in successfully. Redirecting...');
         setTimeout(() => {
@@ -53,6 +67,36 @@ export class LoginComponent {
         this.loading = false;
       },
     });
+  }
+
+  onSubmitCode() {
+    const code = this.loginCode.trim();
+    if (!/^\d{6}$/.test(code)) {
+      this.error = 'Enter the 6-digit code from the email.';
+      return;
+    }
+    this.loading = true;
+    this.error = '';
+    this.auth.verifyLoginCode(this.codeChallengeId, code).subscribe({
+      next: (resp) => {
+        this.auth.storeAuth(resp);
+        this.toast.showSuccess('Logged in successfully. Redirecting...');
+        setTimeout(() => this.continueAfterAuth(resp.role), 800);
+      },
+      error: (err) => {
+        this.error = err?.error?.error || 'Invalid or expired code.';
+        this.toast.showError(this.error);
+        this.loading = false;
+      },
+    });
+  }
+
+  cancelCodeStep() {
+    this.codeStep = false;
+    this.codeChallengeId = '';
+    this.loginCode = '';
+    this.error = '';
+    this.model.password = '';
   }
 
   onGoogleLogin() {

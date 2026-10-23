@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, finalize, shareReplay } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
-import { AuthenticationResponse, LoginRequest, RefreshTokenRequest, RegisterRequest, Role } from '../models/auth.models';
+import { AuthenticationResponse, LoginRequest, RefreshTokenRequest, RegisterRequest, Role, SignedInDevice } from '../models/auth.models';
 import { SavedDoctorsService } from './saved-doctors.service';
 
 @Injectable({ providedIn: 'root' })
@@ -69,6 +69,22 @@ export class AuthService {
 
   login(payload: LoginRequest) {
     return this.http.post<AuthenticationResponse>(`${this.baseUrl}/api/auth/login`, payload);
+  }
+
+  listSessions() {
+    return this.http.get<SignedInDevice[]>(`${this.baseUrl}/api/auth/sessions`);
+  }
+
+  signOutSession(id: number) {
+    return this.http.delete<void>(`${this.baseUrl}/api/auth/sessions/${id}`);
+  }
+
+  signOutOtherSessions() {
+    return this.http.post<{ signedOut: number }>(`${this.baseUrl}/api/auth/sessions/sign-out-others`, {});
+  }
+
+  verifyLoginCode(challengeId: string, code: string) {
+    return this.http.post<AuthenticationResponse>(`${this.baseUrl}/api/auth/login/verify-code`, { challengeId, code });
   }
 
   loginWithGoogle(idToken: string, role?: string) {
