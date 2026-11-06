@@ -3,7 +3,7 @@
     <app-page-header variant="hero" title="Lab Test Management"
       subtitle="Create, update, and manage the catalog of lab tests available for your patients." [hasActions]="true">
       <button type="button" (click)="openAddDrawer()"
-        class="btn-size-md px-5 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs sm:text-sm rounded-xl shadow-md shadow-[var(--accent)]/20 transition-all cursor-pointer flex items-center gap-2">
+        class="btn-size-md px-5 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs sm:text-sm rounded-xl shadow-md shadow-[var(--accent)]/20 transition cursor-pointer flex items-center gap-2">
         <i class="fa-solid fa-plus" aria-hidden="true"></i>
         <span>Add New Test</span>
       </button>
@@ -34,12 +34,12 @@
         <div class="flex items-center bg-[var(--panel)] border border-[var(--border)] rounded-xl p-1 gap-1">
           <button type="button" (click)="viewMode.set('GRID')"
             [class]="viewMode() === 'GRID' ? 'bg-[var(--accent)]/20 text-[var(--accent)]' : 'text-[var(--muted)] hover:text-[var(--text)]'"
-            class="w-7 h-7 rounded-lg flex items-center justify-center transition-all cursor-pointer" title="Grid View" aria-label="Grid View">
+            class="w-7 h-7 rounded-lg flex items-center justify-center transition cursor-pointer" title="Grid View" aria-label="Grid View">
             <i class="fa-solid fa-border-all text-xs" aria-hidden="true"></i>
           </button>
           <button type="button" (click)="viewMode.set('LIST')"
             [class]="viewMode() === 'LIST' ? 'bg-[var(--accent)]/20 text-[var(--accent)]' : 'text-[var(--muted)] hover:text-[var(--text)]'"
-            class="w-7 h-7 rounded-lg flex items-center justify-center transition-all cursor-pointer" title="List View" aria-label="List View">
+            class="w-7 h-7 rounded-lg flex items-center justify-center transition cursor-pointer" title="List View" aria-label="List View">
             <i class="fa-solid fa-list text-xs" aria-hidden="true"></i>
           </button>
         </div>
@@ -70,7 +70,7 @@
     <div *ngIf="!isLoading() && filteredLabTests().length > 0 && viewMode() === 'GRID'"
       class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <div *ngFor="let test of filteredLabTests(); trackBy: trackByTestId"
-        class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 sm:p-5 shadow-xl group hover:border-[var(--accent)]/40 transition-all flex flex-col justify-between space-y-3 relative overflow-hidden">
+        class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 sm:p-5 shadow-xl group hover:border-[var(--accent)]/40 transition flex flex-col justify-between space-y-3 relative overflow-hidden">
 
         <div class="space-y-2.5">
           <!-- Top Row: Icon + Status Badge -->
@@ -82,7 +82,7 @@
 
             <span
               [class]="test.isActive ? 'bg-[#10b981]/15 text-[#10b981] border-[#10b981]/30' : 'bg-[var(--muted)]/15 text-[var(--muted)] border-[var(--muted)]/30'"
-              class="px-2.5 py-0.5 rounded-full text-[10px] font-bold border tracking-wider uppercase">
+ class="px-2.5 py-0.5 rounded-full text-[10px] font-bold border">
               {{ test.isActive ? 'ACTIVE' : 'INACTIVE' }}
             </span>
           </div>
@@ -107,7 +107,7 @@
           <div class="flex items-center gap-2">
             <!-- Edit Button -->
             <button type="button" (click)="openEditDrawer(test)"
-              class="w-7 h-7 rounded-lg bg-[var(--bg)] hover:bg-[var(--bg)] text-[var(--muted)] hover:text-[var(--accent)] flex items-center justify-center transition-all cursor-pointer"
+              class="w-7 h-7 rounded-lg bg-[var(--bg)] hover:bg-[var(--bg)] text-[var(--muted)] hover:text-[var(--accent)] flex items-center justify-center transition cursor-pointer"
               aria-label="Edit test">
               <i class="fa-solid fa-pen text-xs" aria-hidden="true"></i>
             </button>
@@ -115,7 +115,7 @@
             <!-- Status Toggle Switch -->
             <button type="button" (click)="toggleTestStatus(test)"
               [class]="test.isActive ? 'text-[var(--accent)]' : 'text-[var(--muted)]'"
-              class="text-lg transition-all cursor-pointer"
+              class="text-lg transition cursor-pointer"
               [attr.aria-label]="test.isActive ? 'Deactivate test' : 'Activate test'">
               <i class="fa-solid" [class.fa-toggle-on]="test.isActive" [class.fa-toggle-off]="!test.isActive"
                 aria-hidden="true"></i>
@@ -129,7 +129,7 @@
     <!-- LIST VIEW Layout -->
     <div *ngIf="!isLoading() && filteredLabTests().length > 0 && viewMode() === 'LIST'" class="flex flex-col gap-3">
       <div *ngFor="let test of filteredLabTests(); trackBy: trackByTestId"
-        class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-3 sm:p-4 shadow-md flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between group hover:border-[var(--accent)]/40 transition-all">
+        class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-3 sm:p-4 shadow-md flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between group hover:border-[var(--accent)]/40 transition">
 
         <!-- Left: Icon + Test Details -->
         <div class="flex items-center gap-3.5 min-w-0 flex-1">
@@ -145,7 +145,7 @@
               </h3>
               <span
                 [class]="test.isActive ? 'bg-[#10b981]/15 text-[#10b981] border-[#10b981]/30' : 'bg-[var(--muted)]/15 text-[var(--muted)] border-[var(--muted)]/30'"
-                class="px-2 py-0.2 rounded-full text-[9px] font-bold border tracking-wider uppercase shrink-0">
+ class="px-2 py-0.2 rounded-full text-[9px] font-bold border shrink-0">
                 {{ test.isActive ? 'ACTIVE' : 'INACTIVE' }}
               </span>
             </div>
@@ -163,14 +163,14 @@
 
           <div class="flex items-center gap-2">
             <button type="button" (click)="openEditDrawer(test)"
-              class="w-8 h-8 rounded-lg bg-[var(--bg)] hover:bg-[var(--bg)] text-[var(--muted)] hover:text-[var(--accent)] flex items-center justify-center transition-all cursor-pointer"
+              class="w-8 h-8 rounded-lg bg-[var(--bg)] hover:bg-[var(--bg)] text-[var(--muted)] hover:text-[var(--accent)] flex items-center justify-center transition cursor-pointer"
               aria-label="Edit test">
               <i class="fa-solid fa-pen text-xs" aria-hidden="true"></i>
             </button>
 
             <button type="button" (click)="toggleTestStatus(test)"
               [class]="test.isActive ? 'text-[var(--accent)]' : 'text-[var(--muted)]'"
-              class="text-xl transition-all cursor-pointer"
+              class="text-xl transition cursor-pointer"
               [attr.aria-label]="test.isActive ? 'Deactivate test' : 'Activate test'">
               <i class="fa-solid" [class.fa-toggle-on]="test.isActive" [class.fa-toggle-off]="!test.isActive"
                 aria-hidden="true"></i>
@@ -260,6 +260,6 @@
     <button modalFooter type="submit" form="lab-test-editor-form" [disabled]="labTestForm.invalid || isSubmitting()"
       class="btn-size-lg inline-flex items-center justify-center gap-2 px-5 rounded-xl bg-[var(--accent)] text-[var(--accent-fg)] font-bold text-xs shadow-lg shadow-[var(--accent)]/20 disabled:opacity-40 disabled:cursor-not-allowed">
       <i *ngIf="isSubmitting()" class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>
-      <span>{{ isSubmitting() ? 'Saving...' : (editingTest() ? 'Update Changes' : 'Create Test') }}</span>
+      <span>{{ isSubmitting() ? 'Saving…' : (editingTest() ? 'Update Changes' : 'Create Test') }}</span>
     </button>
   </app-modal-shell>

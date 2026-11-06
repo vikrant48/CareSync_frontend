@@ -2,7 +2,7 @@
         <app-page-header variant="hero" title="Find & Book Appointments"
             subtitle="Search for specialized doctors and book your slot." [hasActions]="true">
             <button type="button"
-                class="h-[38px] py-0 px-3.5 rounded-xl bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-xs font-bold shadow-md inline-flex items-center gap-2 transition-all"
+                class="h-[38px] py-0 px-3.5 rounded-xl bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-xs font-bold shadow-md inline-flex items-center gap-2 transition"
                 (click)="openEmergencyModal()">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <span>Emergency Booking</span>
@@ -73,7 +73,7 @@
 
         <!-- Doctors Grid (3 Columns on Desktop matching Reference Screenshot 1) -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="!listLoading && visibleDoctors.length > 0">
-            <div class="bg-[var(--panel)] border border-[var(--border)] hover:border-[var(--border)] rounded-2xl p-4 sm:p-4.5 flex flex-col justify-between hover:shadow-2xl transition-all duration-200 relative group cursor-pointer"
+            <div class="bg-[var(--panel)] border border-[var(--border)] hover:border-[var(--border)] rounded-2xl p-4 sm:p-4.5 flex flex-col justify-between hover:shadow-2xl transition duration-200 relative group cursor-pointer"
                 *ngFor="let d of visibleDoctors; trackBy: trackById" (click)="openDoctor(d)"
                 role="link" tabindex="0" (keydown.enter)="$event.target === $event.currentTarget && openDoctor(d)" [attr.aria-label]="'View profile of ' + formatDoctorName(d)">
 
@@ -90,7 +90,7 @@
                     <div class="flex items-start gap-3.5 mb-3">
                         <div class="relative shrink-0">
                             <div
-                                class="w-14 h-14 rounded-full ring-2 ring-[var(--border)] group-hover:ring-[var(--primary)] transition-all overflow-hidden bg-[var(--bg)] flex items-center justify-center shadow-md">
+                                class="w-14 h-14 rounded-full ring-2 ring-[var(--border)] group-hover:ring-[var(--primary)] transition overflow-hidden bg-[var(--bg)] flex items-center justify-center shadow-md">
                                 <img *ngIf="d.profileImageUrl; else defaultDocAvatar" [src]="d.profileImageUrl"
                                     [alt]="formatDoctorName(d)" class="w-full h-full object-cover"
                                     (error)="d.profileImageUrl = ''" />
@@ -119,7 +119,7 @@
                                 <span *ngIf="d.isVerified"
                                     class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-500 text-white shrink-0 shadow-sm"
                                     title="Verified Doctor">
-                                    <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                    <svg aria-hidden="true" focusable="false" class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                         stroke-width="3.5">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M4.5 12.75l6 6 9-13.5" />
@@ -161,14 +161,14 @@
                 <div class="mt-3 pt-2 flex items-center gap-2">
                     <button type="button" [disabled]="d.isActive === false"
                         (click)="goToDoctorAndBook(d); $event.stopPropagation()"
-                        class="h-[38px] py-0 flex-1 min-w-0 px-3 bg-[#5b6cf0]/25 hover:bg-[#5b6cf0]/40 text-indigo-700 dark:text-indigo-100 border border-[#5b6cf0]/45 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed font-semibold rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 text-xs sm:text-sm truncate cursor-pointer">
+                        class="h-[38px] py-0 flex-1 min-w-0 px-3 bg-[#5b6cf0]/25 hover:bg-[#5b6cf0]/40 text-indigo-700 dark:text-indigo-100 border border-[#5b6cf0]/45 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed font-semibold rounded-xl transition shadow-md flex items-center justify-center gap-1.5 text-xs sm:text-sm truncate cursor-pointer">
                         <span class="truncate">{{ d.isActive === false ? 'Doctor Inactive' : 'View & Book Appointment'
                             }}</span>
                     </button>
 
                     <button type="button" [disabled]="d.isActive === false"
                         (click)="bookEmergencyDoctor(d); $event.stopPropagation()"
-                        class="h-[38px] py-0 shrink-0 px-3 bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed font-semibold rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 text-xs sm:text-sm cursor-pointer whitespace-nowrap"
+                        class="h-[38px] py-0 shrink-0 px-3 bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed font-semibold rounded-xl transition shadow-md flex items-center justify-center gap-1.5 text-xs sm:text-sm cursor-pointer whitespace-nowrap"
                         [title]="'Book Emergency Appointment with ' + formatDoctorName(d)">
                         <i class="fa-solid fa-bolt text-xs text-emerald-600 dark:text-emerald-300" aria-hidden="true"></i>
                         <span>Emerg Booking</span>

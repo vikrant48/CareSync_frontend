@@ -3,7 +3,7 @@
         <app-page-header variant="hero" title="Health Vitals Tracking"
             subtitle="Log and monitor your key health metrics over time." [hasActions]="true">
             <button type="button" (click)="showLogForm = true"
-                class="btn-size-lg bg-[var(--primary)] hover:bg-[var(--primary-hover)] active:scale-95 text-white font-semibold text-xs sm:text-sm px-5 rounded-xl shadow-lg shadow-[var(--primary)]/25 transition-all flex items-center justify-center gap-2.5">
+                class="btn-size-lg bg-[var(--primary)] hover:bg-[var(--primary-hover)] active:scale-95 text-white font-semibold text-xs sm:text-sm px-5 rounded-xl shadow-lg shadow-[var(--primary)]/25 transition flex items-center justify-center gap-2.5">
                 <i class="fa-solid fa-plus text-xs" aria-hidden="true"></i>
                 <span>Log New Vitals</span>
             </button>
@@ -301,31 +301,31 @@
         </p>
         <div *ngIf="selectedVitalDetails" class="grid grid-cols-2 gap-3 text-xs">
             <div class="bg-[var(--bg)] p-3 rounded-xl border border-[var(--border)]">
-                <div class="text-muted font-bold text-[10px] uppercase mb-1">Blood Pressure</div>
+                <div class="text-muted font-bold text-[10px] mb-1">Blood Pressure</div>
                 <div class="text-sm font-extrabold text-[var(--text)]">{{ selectedVitalDetails.systolicBP ?
                     (selectedVitalDetails.systolicBP + '/' + selectedVitalDetails.diastolicBP + ' mmHg') : '--' }}
                 </div>
             </div>
             <div class="bg-[var(--bg)] p-3 rounded-xl border border-[var(--border)]">
-                <div class="text-muted font-bold text-[10px] uppercase mb-1">Sugar Level</div>
+                <div class="text-muted font-bold text-[10px] mb-1">Sugar Level</div>
                 <div class="text-sm font-extrabold text-amber-700 dark:text-amber-400">{{
                     selectedVitalDetails.sugarLevel ?
                     (selectedVitalDetails.sugarLevel + ' mg/dL') : '--' }}</div>
             </div>
             <div class="bg-[var(--bg)] p-3 rounded-xl border border-[var(--border)]">
-                <div class="text-muted font-bold text-[10px] uppercase mb-1">Weight</div>
+                <div class="text-muted font-bold text-[10px] mb-1">Weight</div>
                 <div class="text-sm font-extrabold text-purple-700 dark:text-purple-400">{{ selectedVitalDetails.weight
                     ?
                     (selectedVitalDetails.weight + ' kg') : '--' }}</div>
             </div>
             <div class="bg-[var(--bg)] p-3 rounded-xl border border-[var(--border)]">
-                <div class="text-muted font-bold text-[10px] uppercase mb-1">Body Temperature</div>
+                <div class="text-muted font-bold text-[10px] mb-1">Body Temperature</div>
                 <div class="text-sm font-extrabold text-rose-700 dark:text-rose-400">{{ selectedVitalDetails.temperature
                     ?
                     (selectedVitalDetails.temperature + ' °F') : '--' }}</div>
             </div>
             <div class="bg-[var(--bg)] p-3 rounded-xl border border-[var(--border)] col-span-2">
-                <div class="text-muted font-bold text-[10px] uppercase mb-1">Heart Rate</div>
+                <div class="text-muted font-bold text-[10px] mb-1">Heart Rate</div>
                 <div class="text-sm font-extrabold text-emerald-700 dark:text-emerald-400">{{
                     selectedVitalDetails.heartRate ?
                     (selectedVitalDetails.heartRate + ' bpm') : '--' }}</div>

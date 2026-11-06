@@ -27,7 +27,7 @@
           class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
 
         <div
-          class="border-2 border-dashed border-[var(--border)] group-hover:border-[var(--accent)]/50 bg-[var(--bg)]/40 rounded-2xl p-6 sm:p-8 transition-all flex flex-col md:flex-row items-center justify-between gap-6"
+          class="border-2 border-dashed border-[var(--border)] group-hover:border-[var(--accent)]/50 bg-[var(--bg)]/40 rounded-2xl p-6 sm:p-8 transition flex flex-col md:flex-row items-center justify-between gap-6"
           [ngClass]="{'border-[var(--accent)] bg-[var(--accent)]/5': selectedFile}">
 
           <!-- Left Text & Info -->
@@ -141,10 +141,10 @@
         </div>
 
         <button type="button" (click)="uploadDocument()" [disabled]="!selectedFile || uploading"
-          class="btn-size-lg px-6 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs sm:text-sm rounded-xl shadow-xl shadow-[var(--accent)]/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-2 transform hover:-translate-y-0.5">
+          class="btn-size-lg px-6 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs sm:text-sm rounded-xl shadow-xl shadow-[var(--accent)]/20 transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-2 transform hover:-translate-y-0.5">
           <i *ngIf="!uploading" class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i>
           <i *ngIf="uploading" class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>
-          <span>{{ uploading ? 'Uploading...' : 'Upload Document' }}</span>
+          <span>{{ uploading ? 'Uploading…' : 'Upload Document' }}</span>
         </button>
       </div>
     </div>
@@ -170,7 +170,7 @@
     <div *ngIf="!loading() && (displayedDocs?.length || 0) > 0"
       class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
       <div *ngFor="let d of displayedDocs; trackBy: trackByDocId"
-        class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 sm:p-5 shadow-xl group hover:border-[var(--accent)]/40 transition-all flex flex-col justify-between space-y-4">
+        class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 sm:p-5 shadow-xl group hover:border-[var(--accent)]/40 transition flex flex-col justify-between space-y-4">
 
         <!-- Top Header & Icon -->
         <div class="space-y-3">
@@ -184,7 +184,7 @@
             <!-- Status Pill -->
             <span
               [class]="getStatusBadge(d).isVerified ? 'bg-[#10b981]/15 border-[#10b981]/30 text-[#10b981]' : 'bg-[var(--accent)]/15 border-[var(--accent)]/30 text-[var(--accent)]'"
-              class="px-2.5 py-0.5 rounded-full text-[10px] font-bold border tracking-wider uppercase">
+ class="px-2.5 py-0.5 rounded-full text-[10px] font-bold border">
               {{ getStatusBadge(d).text }}
             </span>
           </div>
@@ -217,21 +217,21 @@
           <div class="flex items-center gap-1.5">
             <!-- Download Button -->
             <button type="button" (click)="downloadDocument(d)"
-              class="w-8 h-8 rounded-lg bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--muted)] hover:text-[var(--accent)] flex items-center justify-center transition-all cursor-pointer"
+              class="w-8 h-8 rounded-lg bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--muted)] hover:text-[var(--accent)] flex items-center justify-center transition cursor-pointer"
               aria-label="Download document">
               <i class="fa-solid fa-download text-xs" aria-hidden="true"></i>
             </button>
 
             <!-- View Eye Button -->
             <a [href]="d.filePath" target="_blank"
-              class="w-8 h-8 rounded-lg bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--muted)] hover:text-[var(--accent)] flex items-center justify-center transition-all cursor-pointer"
+              class="w-8 h-8 rounded-lg bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--muted)] hover:text-[var(--accent)] flex items-center justify-center transition cursor-pointer"
               aria-label="Preview document" rel="noopener noreferrer">
               <i class="fa-solid fa-eye text-xs" aria-hidden="true"></i>
             </a>
 
             <!-- Delete Button -->
             <button type="button" (click)="deleteDocument(d)"
-              class="w-8 h-8 rounded-lg bg-[var(--bg)] hover:bg-[#ef4444]/20 border border-[var(--bg)] hover:border-[#ef4444]/40 text-[var(--muted)] hover:text-[#ef4444] flex items-center justify-center transition-all cursor-pointer"
+              class="w-8 h-8 rounded-lg bg-[var(--bg)] hover:bg-[#ef4444]/20 border border-[var(--bg)] hover:border-[#ef4444]/40 text-[var(--muted)] hover:text-[#ef4444] flex items-center justify-center transition cursor-pointer"
               aria-label="Delete document">
               <i class="fa-solid fa-trash text-xs" aria-hidden="true"></i>
             </button>

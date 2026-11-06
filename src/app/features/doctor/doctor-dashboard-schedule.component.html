@@ -1,6 +1,6 @@
 <div class="h-full w-full surface p-3 sm:p-5 shadow-sm flex flex-col space-y-3 sm:space-y-4">
   <div class="flex items-center justify-between gap-3 pb-1">
-    <h2 class="text-sm font-extrabold text-[var(--text)] tracking-tight min-w-0">Today's Schedule</h2>
+    <h2 class="text-sm font-extrabold text-[var(--text)] tracking-tight min-w-0">Today’s Schedule</h2>
     <a routerLink="/doctor/schedule" class="shrink-0 whitespace-nowrap text-xs font-bold text-[var(--primary)] hover:underline">View All</a>
   </div>
 
@@ -8,7 +8,7 @@
 
   <div *ngIf="!loading && appointments.length > 0" class="space-y-2.5 flex-1">
     <div *ngFor="let a of appointments; trackBy: trackAppointment"
-         class="inset-surface surface-hover p-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:p-3.5 transition-all cursor-pointer group"
+         class="inset-surface surface-hover p-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:p-3.5 transition cursor-pointer group"
          role="link" tabindex="0"
          (click)="openPatient.emit(a.isReal ? a : null)"
          (keydown.enter)="openPatient.emit(a.isReal ? a : null)"
@@ -31,7 +31,7 @@
           </div>
           <span class="text-xs text-muted truncate font-medium">{{ a.reason || 'Not provided' }}</span>
           <span *ngIf="a.patientActive === false"
-                class="w-fit mt-1 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 border border-rose-500/20">
+ class="w-fit mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 border border-rose-500/20">
             Patient inactive
           </span>
           <div class="hidden sm:flex items-center gap-3 text-[11px] text-muted mt-1.5">
@@ -59,7 +59,7 @@
       </div>
       <div class="hidden sm:flex items-center gap-2.5 shrink-0 ml-2">
         <app-status-badge [status]="a.status" size="md"></app-status-badge>
-        <i class="fa-solid fa-chevron-right text-muted group-hover:text-[var(--text)] text-xs group-hover:translate-x-0.5 transition-all" aria-hidden="true"></i>
+        <i class="fa-solid fa-chevron-right text-muted group-hover:text-[var(--text)] text-xs group-hover:translate-x-0.5 transition" aria-hidden="true"></i>
       </div>
     </div>
   </div>
@@ -75,7 +75,7 @@
       [compact]="true"
       [hasAction]="true"
     >
-      <a routerLink="/doctor/schedule" class="btn-size-lg inline-flex items-center px-4 rounded-xl bg-[var(--primary)] text-[var(--primary-fg)] text-xs font-bold hover:bg-[var(--primary-hover)] transition-all">
+      <a routerLink="/doctor/schedule" class="btn-size-lg inline-flex items-center px-4 rounded-xl bg-[var(--primary)] text-[var(--primary-fg)] text-xs font-bold hover:bg-[var(--primary-hover)] transition">
         Manage Schedule
       </a>
     </app-empty-state>

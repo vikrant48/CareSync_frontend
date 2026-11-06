@@ -17,7 +17,7 @@ export type NotificationTab = 'all' | 'appointments' | 'lab' | 'system';
     <div class="relative group inline-block">
       <!-- Circular Trigger Button -->
       <button 
-        class="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300
+        class="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition duration-300
                bg-[var(--panel)] text-gray-300 hover:text-[var(--text)] hover:bg-[var(--bg)] active:scale-95 border border-[var(--border)] focus:outline-none shadow-sm cursor-pointer"
         [ngClass]="notifOpen ? 'bg-[var(--bg)] text-[var(--text)] border-[var(--primary)] ring-2 ring-[var(--primary)]/30' : ''"
         (click)="toggleNotif()" 
@@ -64,28 +64,28 @@ export type NotificationTab = 'all' | 'appointments' | 'lab' | 'system';
           <!-- Filter Tabs Row -->
           <div class="flex items-center gap-1 px-3 py-2 bg-[var(--panel)] border-b border-[var(--border)] overflow-x-auto no-scrollbar text-xs">
             <button (click)="setTab('all')"
-              class="btn-size-sm px-3 rounded-lg font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+              class="btn-size-sm px-3 rounded-lg font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
               [ngClass]="activeTab === 'all' ? 'bg-[var(--primary)] text-white shadow-sm shadow-[var(--primary)]/30' : 'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--bg)]'">
               <span>All</span>
               <span class="px-1.5 py-0.2 rounded-full text-[10px]" [ngClass]="activeTab === 'all' ? 'bg-white/20 text-[var(--text)]' : 'bg-[var(--bg)] text-[var(--muted)]'">{{ feed.length }}</span>
             </button>
 
             <button (click)="setTab('appointments')"
-              class="btn-size-sm px-3 rounded-lg font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+              class="btn-size-sm px-3 rounded-lg font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
               [ngClass]="activeTab === 'appointments' ? 'bg-[var(--primary)] text-white shadow-sm shadow-[var(--primary)]/30' : 'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--bg)]'">
               <span>Appointments</span>
               <span class="px-1.5 py-0.2 rounded-full text-[10px]" [ngClass]="activeTab === 'appointments' ? 'bg-white/20 text-[var(--text)]' : 'bg-[var(--bg)] text-[var(--muted)]'">{{ appointmentsCount }}</span>
             </button>
 
             <button (click)="setTab('lab')"
-              class="btn-size-sm px-3 rounded-lg font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+              class="btn-size-sm px-3 rounded-lg font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
               [ngClass]="activeTab === 'lab' ? 'bg-[var(--primary)] text-white shadow-sm shadow-[var(--primary)]/30' : 'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--bg)]'">
               <span>Lab Tests</span>
               <span class="px-1.5 py-0.2 rounded-full text-[10px]" [ngClass]="activeTab === 'lab' ? 'bg-white/20 text-[var(--text)]' : 'bg-[var(--bg)] text-[var(--muted)]'">{{ labCount }}</span>
             </button>
 
             <button (click)="setTab('system')"
-              class="btn-size-sm px-3 rounded-lg font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+              class="btn-size-sm px-3 rounded-lg font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
               [ngClass]="activeTab === 'system' ? 'bg-[var(--primary)] text-white shadow-sm shadow-[var(--primary)]/30' : 'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--bg)]'">
               <span>System</span>
               <span class="px-1.5 py-0.2 rounded-full text-[10px]" [ngClass]="activeTab === 'system' ? 'bg-white/20 text-[var(--text)]' : 'bg-[var(--bg)] text-[var(--muted)]'">{{ systemCount }}</span>
@@ -112,7 +112,7 @@ export type NotificationTab = 'all' | 'appointments' | 'lab' | 'system';
               (click)="onNotificationClick(n)"
               role="button" tabindex="0"
               (keydown.enter)="$event.target === $event.currentTarget && onNotificationClick(n)" (keydown.space)="$event.target === $event.currentTarget && $event.preventDefault(); $event.target === $event.currentTarget && onNotificationClick(n)"
-              class="bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--border)] rounded-xl p-3.5 transition-all cursor-pointer group relative shadow-sm"
+              class="bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--border)] rounded-xl p-3.5 transition cursor-pointer group relative shadow-sm"
               [ngClass]="!n.read ? 'ring-1 ring-[var(--primary)]/40' : ''">
               
               <div class="flex items-start gap-3">
@@ -146,11 +146,11 @@ export type NotificationTab = 'all' | 'appointments' | 'lab' | 'system';
                   <div class="flex items-center justify-between pt-2 mt-1">
                     <ng-container [ngSwitch]="getActionButtonType(n)">
                       <button *ngSwitchCase="'view-report'" type="button"
-                        class="btn-size-sm bg-[var(--primary)]/15 hover:bg-[var(--primary)] border border-[var(--primary)]/30 text-[var(--primary)] hover:text-white text-[11px] font-bold px-3 rounded-lg transition-all cursor-pointer inline-flex items-center justify-center">
+                        class="btn-size-sm bg-[var(--primary)]/15 hover:bg-[var(--primary)] border border-[var(--primary)]/30 text-[var(--primary)] hover:text-white text-[11px] font-bold px-3 rounded-lg transition cursor-pointer inline-flex items-center justify-center">
                         View Report
                       </button>
                       <button *ngSwitchCase="'give-feedback'" type="button"
-                        class="btn-size-sm bg-[var(--primary)]/15 hover:bg-[var(--primary)] border border-[var(--primary)]/30 text-[var(--primary)] hover:text-white text-[11px] font-bold px-3 rounded-lg transition-all cursor-pointer inline-flex items-center justify-center">
+                        class="btn-size-sm bg-[var(--primary)]/15 hover:bg-[var(--primary)] border border-[var(--primary)]/30 text-[var(--primary)] hover:text-white text-[11px] font-bold px-3 rounded-lg transition cursor-pointer inline-flex items-center justify-center">
                         Give Feedback
                       </button>
                     </ng-container>

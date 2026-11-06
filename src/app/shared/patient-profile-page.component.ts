@@ -63,13 +63,13 @@ export interface AppointmentCounts {
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full lg:w-auto">
           <!-- TOTAL -->
           <div class="bg-[var(--bg)] border border-[var(--border)] p-3 rounded-xl text-center shadow-sm min-w-[85px]">
-            <div class="text-[9px] sm:text-[10px] text-[var(--muted)] font-bold uppercase tracking-wider">Appointments</div>
+            <div class="text-[9px] sm:text-[10px] text-[var(--muted)] font-bold">Appointments</div>
             <div class="text-lg sm:text-xl font-extrabold text-[var(--text)] mt-0.5">{{ appointmentCounts?.total ?? 0 }}</div>
           </div>
 
           <!-- DONE -->
           <div class="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl text-center shadow-sm min-w-[85px]">
-            <div class="text-[9px] sm:text-[10px] text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider flex items-center justify-center gap-1">
+            <div class="text-[9px] sm:text-[10px] text-emerald-700 dark:text-emerald-400 font-bold flex items-center justify-center gap-1">
               <i class="fa-solid fa-circle-check text-[8px]" aria-hidden="true"></i> DONE
             </div>
             <div class="text-lg sm:text-xl font-extrabold text-emerald-700 dark:text-emerald-400 mt-0.5">{{ appointmentCounts?.completed ?? 0 }}</div>
@@ -77,7 +77,7 @@ export interface AppointmentCounts {
 
           <!-- UPCOMING -->
           <div class="bg-amber-500/10 border border-amber-500/20 p-3 rounded-xl text-center shadow-sm min-w-[85px]">
-            <div class="text-[9px] sm:text-[10px] text-amber-700 dark:text-amber-400 font-bold uppercase tracking-wider flex items-center justify-center gap-1">
+            <div class="text-[9px] sm:text-[10px] text-amber-700 dark:text-amber-400 font-bold flex items-center justify-center gap-1">
               <i class="fa-solid fa-clock text-[8px]" aria-hidden="true"></i> UPCOMING
             </div>
             <div class="text-lg sm:text-xl font-extrabold text-amber-700 dark:text-amber-400 mt-0.5">{{ appointmentCounts?.upcoming ?? 0 }}</div>
@@ -85,7 +85,7 @@ export interface AppointmentCounts {
 
           <!-- CANCELLED -->
           <div class="bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl text-center shadow-sm min-w-[85px]">
-            <div class="text-[9px] sm:text-[10px] text-rose-700 dark:text-rose-400 font-bold uppercase tracking-wider flex items-center justify-center gap-1">
+            <div class="text-[9px] sm:text-[10px] text-rose-700 dark:text-rose-400 font-bold flex items-center justify-center gap-1">
               <i class="fa-solid fa-circle-xmark text-[8px]" aria-hidden="true"></i> CANCELLED
             </div>
             <div class="text-lg sm:text-xl font-extrabold text-rose-700 dark:text-rose-400 mt-0.5">{{ appointmentCounts?.cancelled ?? 0 }}</div>
@@ -133,7 +133,7 @@ export interface AppointmentCounts {
 
           <!-- Edit Button in Tab Bar: Only visible when activeTab === 'overview' -->
           <a *ngIf="activeTab === 'overview'" routerLink="/patient/profile/edit" 
-            class="btn-size-lg shrink-0 bg-[var(--primary)] hover:bg-indigo-600 active:scale-95 text-white font-bold text-xs sm:text-sm px-4 sm:mb-2 rounded-xl shadow-md shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 animate-in fade-in duration-200">
+            class="btn-size-lg shrink-0 bg-[var(--primary)] hover:bg-indigo-600 active:scale-95 text-white font-bold text-xs sm:text-sm px-4 sm:mb-2 rounded-xl shadow-md shadow-indigo-500/20 transition flex items-center justify-center gap-2 animate-in fade-in duration-200">
             <i class="fa-solid fa-pen-to-square text-xs" aria-hidden="true"></i>
             <span>Edit</span>
           </a>
@@ -206,12 +206,12 @@ export interface AppointmentCounts {
 
                             <!-- Profile Strength Progress Bar -->
             <div class="w-full sm:w-64 pt-2">
-              <div class="flex justify-between items-center text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1">
+              <div class="flex justify-between items-center text-[10px] font-bold text-[var(--muted)] mb-1">
                 <span>PROFILE STRENGTH</span>
                 <span class="text-[var(--primary)] font-mono">{{ patient.completionPercentage }}%</span>
               </div>
               <div class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-full h-2 overflow-hidden">
-                <div class="bg-[var(--primary)] h-full rounded-full transition-all duration-1000" [style.width.%]="patient.completionPercentage"></div>
+                <div class="bg-[var(--primary)] h-full rounded-full transition duration-1000" [style.width.%]="patient.completionPercentage"></div>
               </div>
             </div>
 
@@ -260,7 +260,7 @@ export interface AppointmentCounts {
                 </div>
 
                 <div class="bg-rose-500/5 border border-rose-500/20 rounded-xl p-4 space-y-1">
-                  <div class="text-[10px] font-bold uppercase text-rose-700 dark:text-rose-400 tracking-wider">ILLNESS DETAILS</div>
+                  <div class="text-[10px] font-bold text-rose-700 dark:text-rose-400">ILLNESS DETAILS</div>
                   <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                     {{ patient.illnessDetails || 'No critical illness details recorded.' }}
                   </p>
@@ -277,7 +277,7 @@ export interface AppointmentCounts {
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <!-- Action 1: Change Password -->
                   <a routerLink="/patient/change-password" 
-                    class="bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3.5 transition-all group flex flex-col justify-between space-y-3">
+                    class="bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3.5 transition group flex flex-col justify-between space-y-3">
                     <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-[var(--primary)]">
                       <i class="fa-solid fa-lock text-xs" aria-hidden="true"></i>
                     </div>
@@ -291,7 +291,7 @@ export interface AppointmentCounts {
                   </a>
 
                   <!-- Action 2: Notification Settings -->
-                  <div class="bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3.5 transition-all group flex flex-col justify-between space-y-3 cursor-pointer">
+                  <div class="bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3.5 transition group flex flex-col justify-between space-y-3 cursor-pointer">
                     <div class="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-700 dark:text-indigo-400">
                       <i class="fa-solid fa-bell text-xs" aria-hidden="true"></i>
                     </div>
@@ -307,7 +307,7 @@ export interface AppointmentCounts {
                   <!-- Action 3: Download my data (copy of everything CareSync holds about the patient): readable PDF, raw JSON copy below -->
                   <div class="bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3.5 flex flex-col justify-between space-y-2">
                   <button type="button" (click)="downloadMyData()" [disabled]="downloadingData"
-                    class="text-left transition-all group flex flex-col justify-between space-y-3 cursor-pointer disabled:opacity-60">
+                    class="text-left transition group flex flex-col justify-between space-y-3 cursor-pointer disabled:opacity-60">
                     <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
                       <i class="fa-solid fa-shield-halved text-xs" aria-hidden="true"></i>
                     </div>
@@ -327,7 +327,7 @@ export interface AppointmentCounts {
 
                   <!-- Action 4: Health record in FHIR format (for other health apps / ABHA later) -->
                   <button type="button" (click)="downloadFhirRecord()" [disabled]="downloadingFhir"
-                    class="text-left bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3.5 transition-all group flex flex-col justify-between space-y-3 cursor-pointer disabled:opacity-60">
+                    class="text-left bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3.5 transition group flex flex-col justify-between space-y-3 cursor-pointer disabled:opacity-60">
                     <div class="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-700 dark:text-sky-400">
                       <i class="fa-solid fa-file-medical text-xs" aria-hidden="true"></i>
                     </div>

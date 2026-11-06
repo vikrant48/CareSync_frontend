@@ -2,7 +2,7 @@
         <app-page-header variant="hero" title="Lab Test Bookings"
             subtitle="View and manage your diagnostic test appointments" [hasActions]="true">
             <button type="button" (click)="navigateToBooking()"
-                class="btn-size-lg bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold text-xs sm:text-sm px-4 rounded-xl shadow-lg shadow-[var(--primary)]/20 transition-all flex items-center gap-2 w-fit cursor-pointer">
+                class="btn-size-lg bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold text-xs sm:text-sm px-4 rounded-xl shadow-lg shadow-[var(--primary)]/20 transition flex items-center gap-2 w-fit cursor-pointer">
                 <i class="fas fa-plus text-xs" aria-hidden="true"></i>
                 <span>New Test</span>
             </button>
@@ -41,7 +41,7 @@
             class="space-y-4 animate-in fade-in duration-200">
 
             <div *ngFor="let booking of filteredBookings(); trackBy: trackById"
-                class="bg-[var(--panel)] border border-[var(--border)] hover:border-[var(--primary)]/40 rounded-xl sm:rounded-2xl p-3 sm:p-6 transition-all duration-300 shadow-sm space-y-3 sm:space-y-4">
+                class="bg-[var(--panel)] border border-[var(--border)] hover:border-[var(--primary)]/40 rounded-xl sm:rounded-2xl p-3 sm:p-6 transition duration-300 shadow-sm space-y-3 sm:space-y-4">
               <!-- Card row (unchanged layout); the AI explanation opens below it -->
               <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6">
 
@@ -61,7 +61,7 @@
                     <!-- ID & Status & Date -->
                     <div class="space-y-1">
                         <div class="flex items-center gap-3 flex-wrap">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">Booking
+                            <span class="text-[10px] font-bold text-[var(--muted)]">Booking
                                 ID-{{ booking.id }}</span>
 
                             <!-- Inline Status Badge -->
@@ -71,7 +71,7 @@
                                     'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20': (booking.status || '').toUpperCase() === 'CANCELLED',
                                     'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20': (booking.status || '').toUpperCase() === 'IN_PROGRESS'
                                 }"
-                                class="border text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wide">
+ class="border text-[10px] font-extrabold px-2.5 py-0.5 rounded-full tracking-wide">
                                 {{ getStatusLabel(booking.status) }}
                             </span>
                         </div>
@@ -109,7 +109,7 @@
 
                     <!-- Total Amount on the same row (phones and tablets) -->
                     <div class="lg:hidden text-right shrink-0">
-                        <span class="block text-[10px] font-bold uppercase tracking-wider text-[var(--muted)] mb-0.5">Total
+                        <span class="block text-[10px] font-bold text-[var(--muted)] mb-0.5">Total
                             Amount</span>
                         <span class="text-xl font-black text-[#00e676] font-mono tracking-tight">{{ booking.totalPrice | inr }}</span>
                     </div>
@@ -117,7 +117,7 @@
 
                 <!-- Col 3: Total Amount (desktop column) -->
                 <div class="hidden lg:block lg:px-4 shrink-0">
-                    <span class="block text-[10px] font-bold uppercase tracking-wider text-[var(--muted)] mb-0.5">Total
+                    <span class="block text-[10px] font-bold text-[var(--muted)] mb-0.5">Total
                         Amount</span>
                     <span class="text-xl sm:text-2xl font-black text-[#00e676] font-mono tracking-tight">{{ booking.totalPrice | inr }}</span>
                 </div>
@@ -129,7 +129,7 @@
                     <!-- View Report -->
                     <button type="button" *ngIf="booking.labReports && booking.labReports.length > 0"
                         (click)="openLabReport(booking)" aria-label="View report"
-                        class="btn-size-md bg-[var(--bg)] hover:bg-[var(--bg)] border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold px-3 rounded-xl transition-all flex items-center gap-2 cursor-pointer">
+                        class="btn-size-md bg-[var(--bg)] hover:bg-[var(--bg)] border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold px-3 rounded-xl transition flex items-center gap-2 cursor-pointer">
                         <i class="fa-solid fa-eye text-xs" aria-hidden="true"></i>
                         <span class="sm:hidden">View</span><span class="hidden sm:inline">View Report</span>
                     </button>
@@ -141,18 +141,18 @@
                         (explained)="onReportExplained(booking.id, $event)"
                         (toggled)="onExplanationToggled(booking.id, $event)"
                         (failed)="onExplanationFailed(booking.id, $event)"
-                        buttonClass="btn-size-md bg-[var(--bg)] border border-indigo-500/30 hover:border-indigo-500/60 text-indigo-700 dark:text-indigo-300 text-xs font-bold px-3 rounded-xl transition-all inline-flex items-center gap-2 disabled:opacity-60"></app-lab-report-explainer>
+                        buttonClass="btn-size-md bg-[var(--bg)] border border-indigo-500/30 hover:border-indigo-500/60 text-indigo-700 dark:text-indigo-300 text-xs font-bold px-3 rounded-xl transition inline-flex items-center gap-2 disabled:opacity-60"></app-lab-report-explainer>
 
                     <!-- Download Receipt -->
                     <button type="button" (click)="downloadReceipt(booking)" aria-label="Download receipt"
-                        class="btn-size-md bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-slate-700 dark:text-slate-200 hover:text-[var(--text)] text-xs font-bold px-3 rounded-xl transition-all flex items-center gap-2">
+                        class="btn-size-md bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-slate-700 dark:text-slate-200 hover:text-[var(--text)] text-xs font-bold px-3 rounded-xl transition flex items-center gap-2">
                         <i class="fa-solid fa-download text-xs" aria-hidden="true"></i>
                         <span class="hidden sm:inline">Download</span>
                     </button>
 
                     <!-- Pay Now -->
                     <button *ngIf="booking.status === 'PENDING'" (click)="payForBooking(booking)"
-                        class="btn-size-md bg-amber-500 hover:bg-amber-600 border border-amber-500 text-[var(--text)] font-bold text-xs px-3 rounded-xl transition-all flex items-center gap-2 whitespace-nowrap">
+                        class="btn-size-md bg-amber-500 hover:bg-amber-600 border border-amber-500 text-[var(--text)] font-bold text-xs px-3 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
                         <i class="fa-solid fa-credit-card text-xs" aria-hidden="true"></i>
                         <span>Pay Now</span>
                     </button>
@@ -161,11 +161,11 @@
                     <button
                         *ngIf="(booking.status === 'COMPLETED' || booking.status === 'IN_PROGRESS') && (!booking.labReports || booking.labReports.length === 0)"
                         (click)="fileInput.click()"
-                        class="btn-size-md bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-slate-700 dark:text-slate-200 hover:text-[var(--text)] text-xs font-bold px-3 rounded-xl transition-all flex items-center gap-2 whitespace-nowrap">
+                        class="btn-size-md bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-slate-700 dark:text-slate-200 hover:text-[var(--text)] text-xs font-bold px-3 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
                         <i class="fa-solid fa-upload text-xs"
                             [class.fa-spinner]="isUploading() && uploadBookingId() === booking.id"
                             [class.fa-spin]="isUploading() && uploadBookingId() === booking.id" aria-hidden="true"></i>
-                        <span *ngIf="isUploading() && uploadBookingId() === booking.id">Uploading...</span>
+                        <span *ngIf="isUploading() && uploadBookingId() === booking.id">Uploading…</span>
                         <ng-container *ngIf="!(isUploading() && uploadBookingId() === booking.id)">
                             <span class="sm:hidden">Upload</span><span class="hidden sm:inline">Upload Report</span>
                         </ng-container>
@@ -187,7 +187,7 @@
 
                     <!-- Cancel Booking -->
                     <button *ngIf="canCancelBooking(booking)" type="button" (click)="cancelBooking(booking)"
-                        class="btn-size-md bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-700 dark:text-rose-400 text-xs font-bold px-3 rounded-xl transition-all flex items-center gap-2 whitespace-nowrap">
+                        class="btn-size-md bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-700 dark:text-rose-400 text-xs font-bold px-3 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
                         <i class="fa-solid fa-circle-xmark text-xs" aria-hidden="true"></i>
                         <span>Cancel</span>
                     </button>
@@ -256,7 +256,7 @@
                         <app-status-badge [status]="booking.status"></app-status-badge>
                         <div>
                             <p
-                                class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium">
+ class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 tracking-wide font-medium">
                                 Current Status
                             </p>
                             <p class="font-bold text-base sm:text-lg text-gray-900 dark:text-gray-100">{{
@@ -267,7 +267,7 @@
                     <div
                         class="text-left sm:text-right border-t sm:border-t-0 pt-2.5 sm:pt-0 w-full sm:w-auto border-gray-200 dark:border-gray-700/40">
                         <p
-                            class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium">
+ class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 tracking-wide font-medium">
                             Last Updated</p>
                         <p class="font-medium text-xs sm:text-sm text-gray-700 dark:text-gray-300">{{
                             formatDate(booking.updatedAt)
@@ -279,26 +279,26 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div
                         class="p-3.5 sm:p-4 rounded-xl bg-white border border-gray-200 dark:bg-gray-800/30 dark:border-gray-700/30">
-                        <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 uppercase mb-1">Patient</p>
+                        <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mb-1">Patient</p>
                         <p class="font-bold text-sm sm:text-base text-gray-800 dark:text-gray-200">{{
                             booking.patientName }}</p>
                     </div>
                     <div
                         class="p-3.5 sm:p-4 rounded-xl bg-white border border-gray-200 dark:bg-gray-800/30 dark:border-gray-700/30">
-                        <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 uppercase mb-1">Booking Date
+                        <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mb-1">Booking Date
                         </p>
                         <p class="font-bold text-sm sm:text-base text-gray-800 dark:text-gray-200">{{
                             formatDate(booking.bookingDate) }}</p>
                     </div>
                     <div class="p-3.5 sm:p-4 rounded-xl bg-white border border-gray-200 dark:bg-gray-800/30 dark:border-gray-700/30"
                         *ngIf="booking.prescribedBy">
-                        <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 uppercase mb-1">Prescribed By
+                        <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mb-1">Prescribed By
                         </p>
                         <p class="font-bold text-sm sm:text-base text-brand">{{ booking.prescribedBy }}</p>
                     </div>
                     <div class="p-3.5 sm:p-4 rounded-xl bg-white border border-gray-200 dark:bg-gray-800/30 dark:border-gray-700/30"
                         *ngIf="booking.notes">
-                        <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 uppercase mb-1">Notes</p>
+                        <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mb-1">Notes</p>
                         <p class="font-medium text-xs sm:text-sm text-gray-600 dark:text-gray-300 italic">"{{
                             booking.notes }}"</p>
                     </div>

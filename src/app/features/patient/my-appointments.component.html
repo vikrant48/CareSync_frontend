@@ -3,7 +3,7 @@
         <app-page-header variant="hero" title="My Appointments"
             subtitle="Manage and track your scheduled consultations" [hasActions]="true">
             <a routerLink="/patient/book-appointment"
-                class="btn-size-lg px-4 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white text-xs font-bold shadow-lg shadow-[var(--primary)]/25 inline-flex items-center gap-2 transition-all shrink-0">
+                class="btn-size-lg px-4 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white text-xs font-bold shadow-lg shadow-[var(--primary)]/25 inline-flex items-center gap-2 transition shrink-0">
                 <i class="fa-solid fa-circle-plus text-xs" aria-hidden="true"></i>
                 <span>Book New Appointment</span>
             </a>
@@ -41,7 +41,7 @@
             containerClass="bg-[var(--panel)] rounded-2xl border border-[var(--border)] border-dashed px-4 py-8"
             [hasAction]="true">
             <a routerLink="/patient/book-appointment"
-                class="btn-size-lg px-4 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white text-xs font-bold shadow-md transition-all inline-flex items-center justify-center">Book
+                class="btn-size-lg px-4 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white text-xs font-bold shadow-md transition inline-flex items-center justify-center">Book
                 Now</a>
         </app-empty-state>
 
@@ -51,7 +51,7 @@
             containerClass="bg-[var(--panel)] rounded-2xl border border-[var(--border)] border-dashed px-4 py-8"
             [hasAction]="true">
             <button type="button" (click)="clearFilters()"
-                class="btn-size-md px-4 rounded-xl bg-[var(--bg)] hover:bg-[var(--border)] text-[var(--primary)] text-xs font-bold border border-[var(--border)] transition-all inline-flex items-center justify-center">Clear
+                class="btn-size-md px-4 rounded-xl bg-[var(--bg)] hover:bg-[var(--border)] text-[var(--primary)] text-xs font-bold border border-[var(--border)] transition inline-flex items-center justify-center">Clear
                 Filters</button>
         </app-empty-state>
 

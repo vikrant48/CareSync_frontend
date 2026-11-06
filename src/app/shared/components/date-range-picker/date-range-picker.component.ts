@@ -25,7 +25,7 @@ export type PresetRangeKey = 'today' | 'tomorrow' | 'last7' | 'last30' | 'thisMo
         tabindex="0"
         (click)="toggleOpen()"
         [ngClass]="[
-          'w-full bg-[#151b2b] text-[#f5f7ff] text-sm rounded-xl py-2.5 px-3.5 border transition-all duration-200 flex items-center justify-between cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-[#5b6cf0]/20',
+          'w-full bg-[#151b2b] text-[#f5f7ff] text-sm rounded-xl py-2.5 px-3.5 border transition duration-200 flex items-center justify-between cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-[#5b6cf0]/20',
           disabled ? 'opacity-50 !cursor-not-allowed bg-[#151b2b]/50' : 'hover:border-[#3b4763]',
           isOpen ? '!border-[#5b6cf0] ring-2 ring-[#5b6cf0]/20' : 'border-[#2a3347]'
         ]"
@@ -65,7 +65,7 @@ export type PresetRangeKey = 'today' | 'tomorrow' | 'last7' | 'last30' | 'thisMo
             type="button"
             (click)="applyPreset(p.key, $event)"
             [ngClass]="[
-              'px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all',
+              'px-2.5 py-1 text-[11px] font-semibold rounded-lg transition',
               activePreset === p.key ? 'bg-[#5b6cf0] text-white shadow-sm' : 'bg-[#151b2b] text-[#9aa3b8] hover:text-white hover:bg-[#252f44]'
             ]"
           >

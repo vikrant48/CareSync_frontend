@@ -114,7 +114,7 @@
             <app-filter-bar [filters]="userFilterConfigs" [values]="userFilterValues" [theme]="'doctor'"
                 containerClass="!shadow-none" (filterChange)="onUserFilterChange($event)"></app-filter-bar>
 
-            <app-page-loader *ngIf="loadingUsers" label="Loading users..."></app-page-loader>
+            <app-page-loader *ngIf="loadingUsers" label="Loading users…"></app-page-loader>
 
             <ng-container *ngIf="!loadingUsers">
                 <div *ngIf="filteredUsers.length === 0" class="py-12 text-center text-sm text-[var(--muted)]">
@@ -162,7 +162,7 @@
                                         </button>
                                         <button type="button" class="adm-btn adm-btn--sm w-[104px]" [disabled]="togglingUsername === u.username"
                                             [ngClass]="u.isActive ? 'adm-btn--danger' : 'adm-btn--success'" (click)="toggleUserStatus(u)">
-                                            {{ togglingUsername === u.username ? 'Saving...' : (u.isActive ? 'Deactivate' : 'Activate') }}
+                                            {{ togglingUsername === u.username ? 'Saving…' : (u.isActive ? 'Deactivate' : 'Activate') }}
                                         </button>
                                     </div>
                                 </td>
@@ -198,7 +198,7 @@
                             </button>
                             <button type="button" class="adm-btn adm-btn--sm" [disabled]="togglingUsername === u.username"
                                 [ngClass]="u.isActive ? 'adm-btn--danger' : 'adm-btn--success'" (click)="toggleUserStatus(u)">
-                                {{ togglingUsername === u.username ? 'Saving...' : (u.isActive ? 'Deactivate' : 'Activate') }}
+                                {{ togglingUsername === u.username ? 'Saving…' : (u.isActive ? 'Deactivate' : 'Activate') }}
                             </button>
                         </div>
                     </article>
@@ -226,7 +226,7 @@
             <app-filter-bar [filters]="doctorFilterConfigs" [values]="doctorFilterValues" [theme]="'doctor'"
                 containerClass="!shadow-none" (filterChange)="onDoctorFilterChange($event)"></app-filter-bar>
 
-            <app-page-loader *ngIf="loadingDoctors" label="Loading doctors..."></app-page-loader>
+            <app-page-loader *ngIf="loadingDoctors" label="Loading doctors…"></app-page-loader>
 
             <ng-container *ngIf="!loadingDoctors">
                 <div *ngIf="doctors.length === 0" class="py-12 text-center text-sm text-[var(--muted)]">
@@ -271,11 +271,11 @@
                                         </button>
                                         <button *ngIf="!doc.isVerified" type="button" class="adm-btn adm-btn--sm adm-btn--success w-[96px]"
                                             [disabled]="verifyingDoctorId === doc.id" (click)="toggleDoctorVerification(doc, true)">
-                                            {{ verifyingDoctorId === doc.id ? 'Saving...' : 'Verify' }}
+                                            {{ verifyingDoctorId === doc.id ? 'Saving…' : 'Verify' }}
                                         </button>
                                         <button *ngIf="doc.isVerified" type="button" class="adm-btn adm-btn--sm adm-btn--ghost w-[96px]"
                                             [disabled]="verifyingDoctorId === doc.id" (click)="toggleDoctorVerification(doc, false)">
-                                            {{ verifyingDoctorId === doc.id ? 'Saving...' : 'Unverify' }}
+                                            {{ verifyingDoctorId === doc.id ? 'Saving…' : 'Unverify' }}
                                         </button>
                                     </div>
                                 </td>
@@ -330,7 +330,7 @@
                 <section class="adm-card p-4 sm:p-5 space-y-4 min-w-0">
                     <div class="flex items-start justify-between gap-3">
                         <div>
-                            <h2 class="adm-section-title">{{ selectedMasterLabel }}</h2>
+                            <h2 class="adm-section-title break-words min-w-0">{{ selectedMasterLabel }}</h2>
                             <p class="adm-section-subtitle">{{ masterItems.length }} options shown in dropdowns across the app</p>
                         </div>
                         <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" (click)="loadCurrentMasterItems()" [disabled]="loadingMaster">
@@ -346,7 +346,7 @@
                                 [placeholder]="'Type a new option, e.g. ' + masterExample" autocomplete="off" maxlength="100" />
                             <button type="submit" class="adm-btn adm-btn--primary shrink-0" style="height: 38px"
                                 [disabled]="isSubmittingMaster || !newMasterValue.trim() || masterValueExists">
-                                <i class="fa-solid fa-plus" aria-hidden="true"></i> {{ isSubmittingMaster ? 'Adding...' : 'Add' }}
+                                <i class="fa-solid fa-plus" aria-hidden="true"></i> {{ isSubmittingMaster ? 'Adding…' : 'Add' }}
                             </button>
                         </div>
                         <p *ngIf="masterValueExists" class="text-[11px] text-amber-700 dark:text-amber-400">
@@ -357,11 +357,11 @@
                     <!-- Search -->
                     <div *ngIf="masterItems.length > 8" class="relative">
                         <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[var(--muted)]" aria-hidden="true"></i>
-                        <input class="adm-input !pl-8" [(ngModel)]="masterSearch" [placeholder]="'Search ' + selectedMasterLabel.toLowerCase() + '...'"
+                        <input class="adm-input !pl-8" [(ngModel)]="masterSearch" [placeholder]="'Search ' + selectedMasterLabel.toLowerCase() + '…'"
                             aria-label="Search options" />
                     </div>
 
-                    <app-page-loader *ngIf="loadingMaster && masterItems.length === 0" label="Loading options..." [compact]="true"></app-page-loader>
+                    <app-page-loader *ngIf="loadingMaster && masterItems.length === 0" label="Loading options…" [compact]="true"></app-page-loader>
 
                     <div *ngIf="!loadingMaster && filteredMasterItems.length === 0" class="py-10 text-center text-sm text-[var(--muted)]">
                         {{ masterItems.length === 0 ? 'No options yet. Add the first one above.' : 'No options match your search.' }}
@@ -396,7 +396,7 @@
                         </button>
                     </div>
 
-                    <app-page-loader *ngIf="loadingBlockedIPs" label="Loading blocked IPs..." [compact]="true"></app-page-loader>
+                    <app-page-loader *ngIf="loadingBlockedIPs" label="Loading blocked IPs…" [compact]="true"></app-page-loader>
 
                     <div *ngIf="!loadingBlockedIPs && blockedIPs.length === 0" class="py-10 text-center text-sm text-[var(--muted)]">
                         <i class="fa-solid fa-shield-heart text-xl mb-2 block text-emerald-500" aria-hidden="true"></i>
@@ -417,7 +417,7 @@
                                     <td class="text-right">
                                         <button type="button" class="adm-btn adm-btn--sm adm-btn--soft" [disabled]="unblockingIp === ip.ipAddress"
                                             (click)="unblockSingleIP(ip.ipAddress)">
-                                            {{ unblockingIp === ip.ipAddress ? 'Unblocking...' : 'Unblock' }}
+                                            {{ unblockingIp === ip.ipAddress ? 'Unblocking…' : 'Unblock' }}
                                         </button>
                                     </td>
                                 </tr>
@@ -463,7 +463,7 @@
                             </div>
                         </div>
                         <button type="submit" class="adm-btn adm-btn--danger w-full" style="height: 38px" [disabled]="isBlockingIp || !blockIpValid">
-                            <i class="fa-solid fa-ban" aria-hidden="true"></i> {{ isBlockingIp ? 'Blocking...' : 'Block IP address' }}
+                            <i class="fa-solid fa-ban" aria-hidden="true"></i> {{ isBlockingIp ? 'Blocking…' : 'Block IP address' }}
                         </button>
                     </form>
                 </section>
@@ -495,7 +495,7 @@
             <button type="button" class="adm-btn adm-btn--ghost" (click)="itemToDelete = null">Cancel</button>
             <button type="button" class="adm-btn adm-btn--danger" [disabled]="isDeletingMaster" (click)="confirmDeleteMasterItem()">
                 <i *ngIf="isDeletingMaster" class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>
-                {{ isDeletingMaster ? 'Deleting...' : 'Delete' }}
+                {{ isDeletingMaster ? 'Deleting…' : 'Delete' }}
             </button>
         </div>
     </app-modal-shell>
@@ -527,7 +527,7 @@
             </button>
         </div>
 
-        <app-page-loader *ngIf="loadingDoctorDetails" label="Loading profile, experience and certificates..." [compact]="true"></app-page-loader>
+        <app-page-loader *ngIf="loadingDoctorDetails" label="Loading profile, experience and certificates…" [compact]="true"></app-page-loader>
 
         <ng-container *ngIf="!loadingDoctorDetails">
             <section class="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg)]">
@@ -589,7 +589,7 @@
                                 </a>
                                 <button type="button" class="adm-btn adm-btn--sm adm-btn--soft" (click)="reviewCertificate(cert)" [disabled]="reviewingCertificateId === cert.id">
                                     <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
-                                    {{ reviewingCertificateId === cert.id ? 'Checking...' : 'Check details' }}
+                                    {{ reviewingCertificateId === cert.id ? 'Checking…' : 'Check details' }}
                                 </button>
                             </div>
                         </div>
@@ -615,11 +615,11 @@
             <button *ngIf="!selectedDoctor.isVerified" type="button" class="adm-btn adm-btn--success" style="height: 38px"
                 [disabled]="verifyingDoctorId === selectedDoctor.id || loadingDoctorDetails" (click)="toggleDoctorVerification(selectedDoctor, true)">
                 <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
-                {{ verifyingDoctorId === selectedDoctor.id ? 'Verifying...' : 'Verify doctor' }}
+                {{ verifyingDoctorId === selectedDoctor.id ? 'Verifying…' : 'Verify doctor' }}
             </button>
             <button *ngIf="selectedDoctor.isVerified" type="button" class="adm-btn adm-btn--ghost" style="height: 38px"
                 [disabled]="verifyingDoctorId === selectedDoctor.id || loadingDoctorDetails" (click)="toggleDoctorVerification(selectedDoctor, false)">
-                {{ verifyingDoctorId === selectedDoctor.id ? 'Saving...' : 'Remove verification' }}
+                {{ verifyingDoctorId === selectedDoctor.id ? 'Saving…' : 'Remove verification' }}
             </button>
         </div>
     </app-modal-shell>
@@ -677,7 +677,7 @@
             <button type="submit" form="admin-reset-password-form" class="adm-btn adm-btn--primary"
                 [disabled]="isSubmittingPasswordReset || !passwordsMatch">
                 <i *ngIf="isSubmittingPasswordReset" class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>
-                {{ isSubmittingPasswordReset ? 'Saving...' : 'Set new password' }}
+                {{ isSubmittingPasswordReset ? 'Saving…' : 'Set new password' }}
             </button>
         </div>
     </app-modal-shell>

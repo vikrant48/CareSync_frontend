@@ -1,6 +1,6 @@
 <div *ngIf="kind === 'education'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
   <div *ngFor="let e of items; trackBy: trackItem"
-    class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 sm:p-5 shadow-xl flex items-start justify-between group hover:border-[var(--accent)]/40 transition-all">
+    class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 sm:p-5 shadow-xl flex items-start justify-between group hover:border-[var(--accent)]/40 transition">
     <div class="flex items-start gap-3.5">
       <div class="w-11 h-11 rounded-xl bg-[var(--accent)]/15 border border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)] shrink-0">
         <i class="fa-solid fa-graduation-cap text-base" aria-hidden="true"></i>
@@ -33,7 +33,7 @@
 
 <div *ngIf="kind === 'experience'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
   <div *ngFor="let x of items; trackBy: trackItem"
-    class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 sm:p-5 shadow-xl flex items-start justify-between group hover:border-[var(--accent)]/40 transition-all">
+    class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 sm:p-5 shadow-xl flex items-start justify-between group hover:border-[var(--accent)]/40 transition">
     <div class="flex items-start gap-3.5">
       <div class="w-11 h-11 rounded-xl bg-[#a855f7]/15 border border-[#a855f7]/30 flex items-center justify-center text-[#a855f7] shrink-0">
         <i class="fa-solid fa-hospital-user text-base" aria-hidden="true"></i>
@@ -66,7 +66,7 @@
 
 <div *ngIf="kind === 'certificates'" class="space-y-3">
   <div *ngFor="let c of items; trackBy: trackItem"
-    class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 shadow-xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 group hover:border-[var(--accent)]/40 transition-all min-w-0 overflow-hidden">
+    class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 shadow-xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 group hover:border-[var(--accent)]/40 transition min-w-0 overflow-hidden">
     <div class="flex items-center gap-3.5 min-w-0 flex-1">
       <div class="w-11 h-11 rounded-xl bg-[#f59e0b]/15 border border-[#f59e0b]/30 flex items-center justify-center text-[#f59e0b] shrink-0">
         <i class="fa-solid fa-file-contract text-base" aria-hidden="true"></i>
@@ -78,7 +78,7 @@
     </div>
     <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
       <a *ngIf="c.url" [href]="c.url" target="_blank"
-        class="btn-size-md px-3 rounded-lg bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--accent)] text-xs font-bold transition-all flex items-center gap-1.5" rel="noopener noreferrer">
+        class="btn-size-md px-3 rounded-lg bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--accent)] text-xs font-bold transition flex items-center gap-1.5" rel="noopener noreferrer">
         <i class="fa-solid fa-eye text-xs" aria-hidden="true"></i> View
       </a>
       <button type="button" (click)="remove.emit(c)" aria-label="Delete certificate"

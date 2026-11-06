@@ -9,12 +9,12 @@
       <i class="fa-solid fa-user-group" aria-hidden="true"></i>
     </div>
     <p class="text-sm font-bold text-[var(--text)]">No recent patients</p>
-    <p class="text-xs text-muted mt-1">Patients from today's appointments will show up here.</p>
+    <p class="text-xs text-muted mt-1">Patients from today’s appointments will show up here.</p>
   </div>
 
   <div *ngIf="patients.length > 0" class="space-y-2.5 flex-1">
     <div *ngFor="let p of patients; trackBy: trackPatient"
-         class="inset-surface surface-hover p-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:p-3.5 transition-all cursor-pointer group"
+         class="inset-surface surface-hover p-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:p-3.5 transition cursor-pointer group"
          role="link" tabindex="0"
          (click)="openPatient.emit(p.appointment)"
          (keydown.enter)="openPatient.emit(p.appointment)"
@@ -37,7 +37,7 @@
           </div>
           <span class="text-xs text-muted truncate font-medium">{{ p.condition || 'Not provided' }}</span>
           <span *ngIf="p.isActive === false"
-                class="w-fit mt-1 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 border border-rose-500/20">
+ class="w-fit mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 border border-rose-500/20">
             Patient inactive
           </span>
           <div class="hidden sm:flex items-center gap-3 text-[11px] text-muted mt-1.5">
@@ -73,7 +73,7 @@
       </div>
       <div class="hidden sm:flex items-center gap-2.5 shrink-0 ml-2" *ngIf="p.status">
         <app-status-badge [status]="p.status" size="md"></app-status-badge>
-        <i class="fa-solid fa-chevron-right text-muted group-hover:text-[var(--text)] text-xs group-hover:translate-x-0.5 transition-all" aria-hidden="true"></i>
+        <i class="fa-solid fa-chevron-right text-muted group-hover:text-[var(--text)] text-xs group-hover:translate-x-0.5 transition" aria-hidden="true"></i>
       </div>
     </div>
   </div>

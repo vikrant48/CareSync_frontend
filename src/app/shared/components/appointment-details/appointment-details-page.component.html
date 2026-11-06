@@ -5,7 +5,7 @@
         <div class="flex items-center justify-between gap-2 sm:gap-4 min-w-0">
             <div class="flex items-center gap-2 sm:gap-3 min-w-0">
                 <button type="button" (click)="goBack()"
-                    class="w-9 h-9 rounded-xl bg-[var(--panel)] border border-[var(--border)] hover:bg-[var(--border)] text-[var(--text)] flex items-center justify-center transition-all">
+                    class="w-9 h-9 rounded-xl bg-[var(--panel)] border border-[var(--border)] hover:bg-[var(--border)] text-[var(--text)] flex items-center justify-center transition">
                     <i class="fa-solid fa-arrow-left text-sm" aria-hidden="true"></i>
                 </button>
                 <h1 class="text-lg sm:text-2xl font-black text-[var(--text)] tracking-tight truncate">
@@ -36,7 +36,7 @@
             <h3 class="text-base font-bold text-rose-700 dark:text-rose-400">Unable to Load Appointment Details</h3>
             <p class="text-xs text-[var(--muted)] max-w-md mx-auto">{{ errorMsg }}</p>
             <button type="button" (click)="loadAppointmentDetails()"
-                class="btn-size-lg px-5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center">
+                class="btn-size-lg px-5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition inline-flex items-center justify-center">
                 <i class="fa-solid fa-rotate-right mr-1.5" aria-hidden="true"></i> Retry
             </button>
         </div>
@@ -64,7 +64,7 @@
                         class="rounded-xl border bg-[var(--panel)] px-3 py-2.5"
                         [ngClass]="item.suggestion ? 'border-amber-500/30' : 'border-[var(--border)]'">
                         <dt *ngIf="item.label || item.suggestion"
-                            class="flex flex-wrap items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--muted)] mb-1">
+ class="flex flex-wrap items-center gap-1.5 text-[10px] font-bold text-[var(--muted)] mb-1">
                             <span>{{ item.label }}</span>
                             <span *ngIf="item.suggestion"
                                 class="normal-case tracking-normal rounded-full border border-amber-500/30 bg-amber-500/10 px-1.5 py-px text-[9px] font-bold text-amber-700 dark:text-amber-300">AI suggestion</span>
@@ -84,7 +84,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div *ngIf="followThrough?.suggestedFollowUp"
                         class="rounded-xl border border-[var(--border)] bg-[var(--panel)] p-3 space-y-2">
-                        <div class="text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">Suggested
+                        <div class="text-[10px] font-bold text-[var(--muted)]">Suggested
                             follow-up
                         </div>
                         <div class="text-sm font-bold text-[var(--text)]">{{
@@ -97,7 +97,7 @@
                     </div>
                     <div *ngIf="followThrough?.replacementOffer"
                         class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 space-y-2">
-                        <div class="text-[10px] font-bold uppercase tracking-wider text-amber-500 dark:text-amber-300">
+                        <div class="text-[10px] font-bold text-amber-500 dark:text-amber-300">
                             Replacement visit
                         </div>
                         <div class="text-xs text-[var(--text)]">{{ followThrough?.replacementOffer?.reason }}</div>
@@ -119,7 +119,7 @@
             </section>
 
             <section *ngIf="viewerRole === 'DOCTOR'"
-                class="rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-cyan-500/10 to-indigo-500/10 transition-all duration-300"
+                class="rounded-2xl border border-cyan-500/30 bg-cyan-500/10 transition duration-300"
                 [ngClass]="(isPreVisitBriefExpanded && (preVisitBriefLoading || preVisitBriefLoaded)) ? 'p-3 sm:p-5 space-y-3 sm:space-y-4' : 'px-3 sm:px-5 py-3'">
                 <!-- Header with Title, Actions, and Expand/Shrink Toggle -->
                 <div class="flex items-center justify-between gap-3 flex-wrap">
@@ -142,7 +142,7 @@
                         <!-- Generate Brief Button (when not loaded) -->
                         <button *ngIf="!preVisitBriefLoaded" type="button" (click)="loadPreVisitBrief()"
                             [disabled]="preVisitBriefLoading"
-                            class="btn-size-lg px-3.5 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center gap-1.5 cursor-pointer">
+                            class="btn-size-lg px-3.5 bg-cyan-700 hover:bg-cyan-800 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition shadow-md flex items-center gap-1.5 cursor-pointer">
                             <i class="fa-solid"
                                 [ngClass]="preVisitBriefLoading ? 'fa-spinner fa-spin' : 'fa-wand-magic-sparkles'" aria-hidden="true"></i>
                             <span>{{ preVisitBriefLoading ? 'Generating…' : 'Generate Brief' }}</span>
@@ -151,7 +151,7 @@
                         <!-- Refresh Brief Button (when already loaded) -->
                         <button *ngIf="preVisitBriefLoaded" type="button" (click)="loadPreVisitBrief()"
                             [disabled]="preVisitBriefLoading"
-                            class="btn-size-lg px-2.5 bg-[var(--panel)] hover:bg-[var(--border)] border border-[var(--border)] text-[var(--text)] text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                            class="btn-size-lg px-2.5 bg-[var(--panel)] hover:bg-[var(--border)] border border-[var(--border)] text-[var(--text)] text-xs font-semibold rounded-xl transition flex items-center gap-1.5 cursor-pointer"
                             title="Regenerate / Refresh brief" aria-label="Regenerate / Refresh brief">
                             <i class="fa-solid fa-rotate-right text-cyan-500"
                                 [class.fa-spin]="preVisitBriefLoading" aria-hidden="true"></i>
@@ -160,13 +160,13 @@
 
                         <!-- Status badge -->
                         <span *ngIf="preVisitBriefLoaded"
-                            class="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[9px] font-bold uppercase text-amber-500 dark:text-amber-300">
+ class="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[9px] font-bold text-amber-500 dark:text-amber-300">
                             Verify in chart
                         </span>
 
                         <!-- Expand / Shrink (Collapse) Icon Button -->
                         <button *ngIf="preVisitBriefLoaded" type="button" (click)="togglePreVisitBrief()"
-                            class="w-8 h-8 rounded-xl bg-[var(--panel)] border border-[var(--border)] hover:bg-[var(--border)] text-[var(--text)] flex items-center justify-center transition-all cursor-pointer shadow-sm"
+                            class="w-8 h-8 rounded-xl bg-[var(--panel)] border border-[var(--border)] hover:bg-[var(--border)] text-[var(--text)] flex items-center justify-center transition cursor-pointer shadow-sm"
                             [title]="isPreVisitBriefExpanded ? 'Shrink / Hide Data' : 'Expand / Show Data'"
                             [attr.aria-expanded]="isPreVisitBriefExpanded">
                             <i class="fa-solid text-xs transition-transform duration-200"
@@ -190,14 +190,14 @@
                             class="block bg-[var(--panel)]/40 p-3.5 rounded-xl border border-[var(--border)]"></app-ai-text>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div class="rounded-xl border border-[var(--border)] bg-[var(--panel)] p-3">
-                                <div class="text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">
+                                <div class="text-[10px] font-bold text-[var(--muted)]">
                                     Patient-reported
                                     medicines</div>
                                 <div class="mt-1 text-xs text-[var(--text)]">{{ briefMedications || 'Not provided' }}
                                 </div>
                             </div>
                             <div class="rounded-xl border border-[var(--border)] bg-[var(--panel)] p-3">
-                                <div class="text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">
+                                <div class="text-[10px] font-bold text-[var(--muted)]">
                                     Patient-reported
                                     allergies</div>
                                 <div class="mt-1 text-xs text-[var(--text)]">{{ briefAllergies || 'Not provided' }}
@@ -216,7 +216,7 @@
                 <div
                     class="flex items-center gap-1.5 sm:gap-2 border-b border-[var(--border)] overflow-x-auto pb-1 no-scrollbar">
                     <button type="button" (click)="activeTab = 'OVERVIEW'"
-                        class="btn-size-sm px-3 sm:px-5 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 sm:gap-2 relative shrink-0"
+                        class="btn-size-sm px-3 sm:px-5 text-xs font-bold rounded-xl transition flex items-center gap-1.5 sm:gap-2 relative shrink-0"
                         [ngClass]="{
                   'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30': activeTab === 'OVERVIEW',
                   'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--panel)]': activeTab !== 'OVERVIEW'
@@ -226,7 +226,7 @@
                     </button>
 
                     <button type="button" (click)="activeTab = 'PROCESS'"
-                        class="btn-size-sm px-3 sm:px-5 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 sm:gap-2 relative shrink-0"
+                        class="btn-size-sm px-3 sm:px-5 text-xs font-bold rounded-xl transition flex items-center gap-1.5 sm:gap-2 relative shrink-0"
                         [ngClass]="{
                   'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30': activeTab === 'PROCESS',
                   'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--panel)]': activeTab !== 'PROCESS'
@@ -236,7 +236,7 @@
                     </button>
 
                     <button type="button" (click)="activeTab = 'MEDICAL_HISTORY'"
-                        class="btn-size-sm px-3 sm:px-5 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 sm:gap-2 relative shrink-0"
+                        class="btn-size-sm px-3 sm:px-5 text-xs font-bold rounded-xl transition flex items-center gap-1.5 sm:gap-2 relative shrink-0"
                         [ngClass]="{
                   'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30': activeTab === 'MEDICAL_HISTORY',
                   'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--panel)]': activeTab !== 'MEDICAL_HISTORY'

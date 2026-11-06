@@ -43,7 +43,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
                (dragleave)="onDragLeave($event)" 
                (drop)="onDrop($event)"
                [ngClass]="{ 'border-blue-500 bg-blue-500/10': isDragging(), 'border-slate-700 bg-slate-800/40': !isDragging() }"
-               class="relative border-2 border-dashed hover:border-blue-500 rounded-2xl p-8 sm:p-12 text-center transition-all hover:bg-slate-800/80 cursor-pointer group shadow-inner">
+               class="relative border-2 border-dashed hover:border-blue-500 rounded-2xl p-8 sm:p-12 text-center transition hover:bg-slate-800/80 cursor-pointer group shadow-inner">
             
             <input type="file" (change)="onFileSelected($event)" accept="image/*,.pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
 
@@ -55,7 +55,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
               Drag & drop or click to upload a photo of a doctor's prescription, lab test report, or clinical note.
             </p>
 
-            <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-blue-500/20 group-hover:from-blue-500 group-hover:to-indigo-500 transition-all">
+            <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-blue-500/20 group-hover:from-blue-500 group-hover:to-indigo-500 transition">
               <i class="fas fa-camera text-sm" aria-hidden="true"></i> Select File to Scan
             </div>
           </div>
@@ -96,7 +96,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
             <!-- Metadata Header Bar -->
             <div class="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-slate-800/80 border border-slate-700/60">
               <div class="flex items-center gap-3">
-                <span class="px-3 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider shadow-sm"
+                <span class="px-3 py-1 rounded-lg text-[11px] font-bold shadow-sm"
                       [ngClass]="{
                         'bg-purple-900/50 text-purple-300 border border-purple-700/50': scanResult()!.documentType === 'PRESCRIPTION',
                         'bg-emerald-900/50 text-emerald-300 border border-emerald-700/50': scanResult()!.documentType === 'LAB_REPORT',
@@ -133,7 +133,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
 
             <!-- Warnings Alert Box -->
             <div *ngIf="scanResult()!.warnings && scanResult()!.warnings!.length > 0" class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 space-y-1.5">
-              <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
+              <div class="flex items-center gap-2 text-xs font-bold">
                 <i class="fas fa-exclamation-circle text-amber-400" aria-hidden="true"></i> Clinical Flags & Safety Notes:
               </div>
               <ul class="list-disc list-inside text-xs space-y-1 opacity-90">
@@ -143,7 +143,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
 
             <!-- Extracted Medications Table -->
             <div *ngIf="scanResult()!.medications && scanResult()!.medications!.length > 0" class="space-y-3">
-              <h5 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+              <h5 class="text-xs font-bold text-slate-400 flex items-center gap-2">
                 <i class="fas fa-pills text-purple-400" aria-hidden="true"></i> Extracted Medications ({{ scanResult()!.medications!.length }})
               </h5>
               <!-- Mobile cards -->
@@ -185,7 +185,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
 
             <!-- Extracted Lab Results Table -->
             <div *ngIf="scanResult()!.labResults && scanResult()!.labResults!.length > 0" class="space-y-3">
-              <h5 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+              <h5 class="text-xs font-bold text-slate-400 flex items-center gap-2">
                 <i class="fas fa-microscope text-emerald-400" aria-hidden="true"></i> Extracted Lab Test Metrics ({{ scanResult()!.labResults!.length }})
               </h5>
               <!-- Mobile cards -->
@@ -252,7 +252,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
             <button type="button" (click)="closeModal.emit()" class="btn-size-sm px-4 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors inline-flex items-center justify-center">
               Close
             </button>
-            <button type="button" *ngIf="scanResult() && scanResult()!.success" (click)="onConfirm()" class="btn-size-lg px-5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-blue-600/20 hover:from-blue-500 hover:to-indigo-500 transition-all inline-flex items-center justify-center">
+            <button type="button" *ngIf="scanResult() && scanResult()!.success" (click)="onConfirm()" class="btn-size-lg px-5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-blue-600/20 hover:from-blue-500 hover:to-indigo-500 transition inline-flex items-center justify-center">
               <i class="fas fa-check mr-1.5" aria-hidden="true"></i> Done & Import
             </button>
           </div>

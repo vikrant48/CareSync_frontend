@@ -30,7 +30,7 @@ import { TourService } from '../../core/services/tour.service';
         <!-- Content -->
         <div class="relative z-10">
           <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+            <span class="text-xs font-bold text-blue-600 dark:text-blue-400">
               Tutorial
             </span>
             <button (click)="tour.skipTour()" class="text-gray-700 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
@@ -52,7 +52,7 @@ import { TourService } from '../../core/services/tour.service';
             </button>
             <button 
               (click)="tour.nextStep()"
-              class="btn-size-lg px-4 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-lg hover:shadow-blue-500/30 transition-all flex items-center gap-2"
+              class="btn-size-lg px-4 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-lg hover:shadow-blue-500/30 transition flex items-center gap-2"
             >
               {{ tour.isLastStep() ? 'Finish' : 'Next' }}
               <i class="fas" [ngClass]="tour.isLastStep() ? 'fa-check' : 'fa-arrow-right'" aria-hidden="true"></i>

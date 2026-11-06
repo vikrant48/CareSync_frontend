@@ -17,7 +17,7 @@ import { shareDoctorProfile } from './utils/doctor-share.util';
       <!-- Back Button Row -->
       <div class="mb-4">
         <button type="button" (click)="goBack()"
-                class="btn-size-md bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs sm:text-sm font-bold px-4 rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm w-fit">
+                class="btn-size-md bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs sm:text-sm font-bold px-4 rounded-xl transition flex items-center gap-2 cursor-pointer shadow-sm w-fit">
           <i class="fa-solid fa-arrow-left text-xs" aria-hidden="true"></i>
           <span>Back</span>
         </button>
@@ -90,7 +90,7 @@ import { shareDoctorProfile } from './utils/doctor-share.util';
         <!-- Right Side Actions -->
         <div class="w-full lg:w-auto flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0 items-stretch sm:items-center lg:items-end">
           <button *ngIf="enableBooking" type="button" (click)="openBooking.emit()" [disabled]="doctor.isActive === false"
-                  class="btn-size-lg bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold text-xs sm:text-sm px-6 rounded-xl shadow-lg shadow-[var(--primary)]/20 transition-all flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed">
+                  class="btn-size-lg bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold text-xs sm:text-sm px-6 rounded-xl shadow-lg shadow-[var(--primary)]/20 transition flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed">
             <i class="fa-regular fa-calendar-check text-xs" aria-hidden="true"></i>
             <span>{{ doctor.isActive === false ? 'Doctor Inactive' : 'Book Appointment' }}</span>
           </button>
@@ -98,13 +98,13 @@ import { shareDoctorProfile } from './utils/doctor-share.util';
           <div class="flex items-center gap-2 w-full sm:w-auto justify-center">
             <button type="button" (click)="toggleSave()" [disabled]="savingFavorite" [attr.aria-pressed]="saved"
                     [attr.aria-label]="saved ? 'Remove from saved doctors' : 'Save doctor'"
-                    class="btn-size-md flex-1 sm:flex-initial bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs font-semibold px-4 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-all disabled:opacity-60">
+                    class="btn-size-md flex-1 sm:flex-initial bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs font-semibold px-4 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition disabled:opacity-60">
               <i class="fa-heart" [ngClass]="saved ? 'fa-solid text-rose-500' : 'fa-regular'" aria-hidden="true"></i>
               <span>{{ saved ? 'Saved' : 'Save' }}</span>
             </button>
 
             <button type="button" (click)="shareDoctor()"
-                    class="btn-size-md flex-1 sm:flex-initial bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs font-semibold px-4 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-all">
+                    class="btn-size-md flex-1 sm:flex-initial bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs font-semibold px-4 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition">
               <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
               <span>Share</span>
             </button>
@@ -120,7 +120,7 @@ import { shareDoctorProfile } from './utils/doctor-share.util';
             <i class="fa-regular fa-envelope" aria-hidden="true"></i>
           </div>
           <div class="min-w-0">
-            <div class="text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider">Email</div>
+            <div class="text-[11px] font-bold text-[var(--muted)]">Email</div>
             <div class="text-xs sm:text-sm font-bold text-[var(--text)] truncate" [title]="doctor.email">{{ doctor.email || 'N/A' }}</div>
           </div>
         </div>
@@ -131,7 +131,7 @@ import { shareDoctorProfile } from './utils/doctor-share.util';
             <i class="fa-solid fa-phone" aria-hidden="true"></i>
           </div>
           <div class="min-w-0">
-            <div class="text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider">Contact Number</div>
+            <div class="text-[11px] font-bold text-[var(--muted)]">Contact Number</div>
             <div class="text-xs sm:text-sm font-bold text-[var(--text)] truncate">{{ doctor.contactInfo || 'N/A' }}</div>
           </div>
         </div>
@@ -142,7 +142,7 @@ import { shareDoctorProfile } from './utils/doctor-share.util';
             <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
           </div>
           <div class="min-w-0">
-            <div class="text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider">Address</div>
+            <div class="text-[11px] font-bold text-[var(--muted)]">Address</div>
             <div class="text-xs sm:text-sm font-bold text-[var(--text)] truncate" [title]="doctor.address">{{ formattedAddress }}</div>
           </div>
         </div>
@@ -152,28 +152,28 @@ import { shareDoctorProfile } from './utils/doctor-share.util';
       <div class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl px-3 py-2 flex items-center gap-2 overflow-x-auto shadow-md scrollbar-none">
         <button type="button" (click)="activeTab = 'overview'"
                 [ngClass]="activeTab === 'overview' ? 'bg-[var(--primary)]/10 text-[var(--primary)] border-b-2 border-[var(--primary)] font-bold' : 'text-[var(--muted)] hover:text-[var(--text)] font-semibold'"
-                class="btn-size-sm px-4 rounded-lg text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
+                class="btn-size-sm px-4 rounded-lg text-xs sm:text-sm flex items-center gap-2 transition cursor-pointer whitespace-nowrap">
           <i class="fa-solid fa-user-doctor text-xs" aria-hidden="true"></i>
           <span>Overview</span>
         </button>
 
         <button type="button" (click)="activeTab = 'availability'"
                 [ngClass]="activeTab === 'availability' ? 'bg-[var(--primary)]/10 text-[var(--primary)] border-b-2 border-[var(--primary)] font-bold' : 'text-[var(--muted)] hover:text-[var(--text)] font-semibold'"
-                class="btn-size-sm px-4 rounded-lg text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
+                class="btn-size-sm px-4 rounded-lg text-xs sm:text-sm flex items-center gap-2 transition cursor-pointer whitespace-nowrap">
           <i class="fa-regular fa-calendar-days text-xs" aria-hidden="true"></i>
           <span>Availability</span>
         </button>
 
         <button type="button" (click)="activeTab = 'reviews'"
                 [ngClass]="activeTab === 'reviews' ? 'bg-[var(--primary)]/10 text-[var(--primary)] border-b-2 border-[var(--primary)] font-bold' : 'text-[var(--muted)] hover:text-[var(--text)] font-semibold'"
-                class="btn-size-sm px-4 rounded-lg text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
+                class="btn-size-sm px-4 rounded-lg text-xs sm:text-sm flex items-center gap-2 transition cursor-pointer whitespace-nowrap">
           <i class="fa-regular fa-star text-xs" aria-hidden="true"></i>
           <span>Reviews</span>
         </button>
 
         <button type="button" (click)="activeTab = 'clinic'"
                 [ngClass]="activeTab === 'clinic' ? 'bg-[var(--primary)]/10 text-[var(--primary)] border-b-2 border-[var(--primary)] font-bold' : 'text-[var(--muted)] hover:text-[var(--text)] font-semibold'"
-                class="btn-size-sm px-4 rounded-lg text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
+                class="btn-size-sm px-4 rounded-lg text-xs sm:text-sm flex items-center gap-2 transition cursor-pointer whitespace-nowrap">
           <i class="fa-solid fa-hospital-user text-xs" aria-hidden="true"></i>
           <span>Clinic Info</span>
         </button>
@@ -247,12 +247,12 @@ import { shareDoctorProfile } from './utils/doctor-share.util';
 
                 <div class="flex items-center gap-2 shrink-0">
                   <a *ngIf="c.credentialUrl || c.url" [href]="c.credentialUrl || c.url" target="_blank"
-                     class="btn-size-md bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs font-semibold px-3 rounded-lg flex items-center gap-1.5 transition-all" rel="noopener noreferrer">
+                     class="btn-size-md bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs font-semibold px-3 rounded-lg flex items-center gap-1.5 transition" rel="noopener noreferrer">
                     <i class="fa-regular fa-eye text-xs" aria-hidden="true"></i>
                     <span>View</span>
                   </a>
                   <a *ngIf="c.credentialUrl || c.url" [href]="c.credentialUrl || c.url" download
-                     class="bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs font-semibold p-1.5 rounded-lg transition-all" title="Download">
+                     class="bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs font-semibold p-1.5 rounded-lg transition" title="Download">
                     <i class="fa-solid fa-download text-xs" aria-hidden="true"></i>
                   </a>
                 </div>

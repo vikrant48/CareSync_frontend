@@ -56,7 +56,7 @@ let nextSelectId = 0;
               [attr.aria-activedescendant]="isOpen && highlightedIndex >= 0 ? optionId(highlightedIndex) : null"
               [attr.aria-required]="required || null"
               [attr.aria-invalid]="errorMessage ? true : null"
-              [class]="customButtonClass || 'w-full filter-control-height rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3.5 text-xs sm:text-sm cursor-pointer relative transition-all duration-200 group flex items-center justify-between text-left font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 hover:border-gray-300 dark:hover:border-gray-500'"
+              [class]="customButtonClass || 'w-full filter-control-height rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3.5 text-xs sm:text-sm cursor-pointer relative transition duration-200 group flex items-center justify-between text-left font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 hover:border-gray-300 dark:hover:border-gray-500'"
               [class.!border-rose-500]="!!errorMessage"
               [class.opacity-50]="isDisabled"
               [class.cursor-not-allowed]="isDisabled">

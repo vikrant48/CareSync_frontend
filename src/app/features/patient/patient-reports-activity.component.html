@@ -20,7 +20,7 @@
         <table class="w-full text-left border-collapse">
             <thead>
                 <tr
-                    class="bg-[var(--bg)]/70 text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider border-b border-[var(--border)]">
+ class="bg-[var(--bg)]/70 text-[11px] font-bold text-[var(--muted)] border-b border-[var(--border)]">
                     <th class="py-3 px-5">DATE</th>
                     <th class="py-3 px-5">DOCTOR</th>
                     <th class="py-3 px-5">TYPE</th>
@@ -87,12 +87,12 @@
             </div>
             <div class="grid grid-cols-2 gap-2 text-xs">
                 <div>
-                    <p class="text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">Date</p>
+                    <p class="text-[10px] font-bold text-[var(--muted)]">Date</p>
                     <p class="font-semibold text-[var(--text)]">{{ a.appointmentDate | date:'dd MMM yyyy' }}</p>
                     <p *ngIf="a.appointmentTime" class="text-[11px] text-[var(--muted)]">{{ a.appointmentTime }}</p>
                 </div>
                 <div>
-                    <p class="text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">Amount</p>
+                    <p class="text-[10px] font-bold text-[var(--muted)]">Amount</p>
                     <p *ngIf="a.consultationFees != null" class="font-extrabold text-[var(--text)]">{{ a.consultationFees | inr }}</p>
                     <p *ngIf="a.reason || visitLabel(a)" class="text-[11px] text-[var(--muted)]">{{ a.reason }}<span *ngIf="a.reason && visitLabel(a)"> · </span>{{ visitLabel(a) }}</p>
                 </div>

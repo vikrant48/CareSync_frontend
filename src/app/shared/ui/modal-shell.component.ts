@@ -196,12 +196,26 @@ export class ModalShellComponent implements OnChanges, OnDestroy {
   private ownsHistoryEntry = false;
   private static readonly HISTORY_KEY = 'caresyncModal';
 
+  /**
+   * A modal that just closed and is about to step back over its history entry. If another modal opens in the
+   * same tick (booking modal -> payment popup), the new one takes over that entry instead; otherwise the
+   * delayed history.back() would land on the new modal and close it as if the user had pressed Back.
+   */
+  private static pendingRemoval: { marker: string } | null = null;
+
   private addHistoryEntry(): void {
     const history = this.doc.defaultView?.history;
     if (!history) return;
     try {
+      const pending = ModalShellComponent.pendingRemoval;
       // Same URL: the router ignores it; existing state (the router's navigation id) is kept
-      history.pushState({ ...(history.state ?? {}), [ModalShellComponent.HISTORY_KEY]: this.autoTitleId }, '');
+      const state = { ...(history.state ?? {}), [ModalShellComponent.HISTORY_KEY]: this.autoTitleId };
+      if (pending && this.currentHistoryMarker() === pending.marker) {
+        ModalShellComponent.pendingRemoval = null; // hand-off: reuse the closing modal's entry
+        history.replaceState(state, '');
+      } else {
+        history.pushState(state, '');
+      }
       this.ownsHistoryEntry = true;
     } catch {
       // History not available (e.g. sandboxed frame): Back simply behaves as before
@@ -214,9 +228,16 @@ export class ModalShellComponent implements OnChanges, OnDestroy {
     this.ownsHistoryEntry = false;
     const history = this.doc.defaultView?.history;
     // Only step back if our entry is still the current one (a page change has already moved past it)
-    if (history && this.currentHistoryMarker() === this.autoTitleId) {
-      history.back();
-    }
+    if (!history || this.currentHistoryMarker() !== this.autoTitleId) return;
+
+    const pending = { marker: this.autoTitleId };
+    ModalShellComponent.pendingRemoval = pending;
+    // Wait for the rest of this change-detection pass: a modal opening right now takes the entry over
+    queueMicrotask(() => {
+      if (ModalShellComponent.pendingRemoval !== pending) return;
+      ModalShellComponent.pendingRemoval = null;
+      if (this.currentHistoryMarker() === pending.marker) history.back();
+    });
   }
 
   private currentHistoryMarker(): string | undefined {

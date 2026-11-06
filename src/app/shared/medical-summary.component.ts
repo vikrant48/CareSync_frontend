@@ -17,7 +17,7 @@ import { escapeHtml } from './utils/escape-html';
           </div>
           <div>
             <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100 italic">AI Medical Summary</h3>
-            <p class="text-[10px] text-gray-500 uppercase tracking-widest font-semibold mt-0.5">Powered by CareSync AI</p>
+            <p class="text-[10px] text-gray-500 font-semibold mt-0.5">Powered by CareSync AI</p>
           </div>
         </div>
         <button 

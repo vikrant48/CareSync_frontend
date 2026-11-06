@@ -14,7 +14,7 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
       [disabled]="disabled || loading"
       (click)="onClick($event)"
       [ngClass]="[
-        'inline-flex items-center justify-center flex-nowrap whitespace-nowrap max-w-full font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#5b6cf0]/50 select-none cursor-pointer',
+        'inline-flex items-center justify-center flex-nowrap whitespace-nowrap max-w-full font-semibold rounded-xl transition duration-200 focus:outline-none focus:ring-2 focus:ring-[#5b6cf0]/50 select-none cursor-pointer',
         fullWidth ? 'w-full' : '',
         getSizeClasses(),
         getVariantClasses(),

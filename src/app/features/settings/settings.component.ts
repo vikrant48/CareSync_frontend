@@ -86,7 +86,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 
               <div class="grid grid-cols-3 gap-2 sm:gap-3 pt-2" role="group" aria-label="Theme">
                 <button type="button" (click)="setTheme('light')"
-                  class="theme-option p-2.5 sm:p-4 transition-all flex flex-col items-center justify-center gap-1.5 sm:gap-2 text-center cursor-pointer"
+                  class="theme-option p-2.5 sm:p-4 transition flex flex-col items-center justify-center gap-1.5 sm:gap-2 text-center cursor-pointer"
                   [class.is-selected]="currentTheme === 'light'"
                   [attr.aria-pressed]="currentTheme === 'light'">
                   <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-yellow-500 text-base shadow-sm">
@@ -98,7 +98,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
                 </button>
 
                 <button type="button" (click)="setTheme('dark')"
-                  class="theme-option p-2.5 sm:p-4 transition-all flex flex-col items-center justify-center gap-1.5 sm:gap-2 text-center cursor-pointer"
+                  class="theme-option p-2.5 sm:p-4 transition flex flex-col items-center justify-center gap-1.5 sm:gap-2 text-center cursor-pointer"
                   [class.is-selected]="currentTheme === 'dark'"
                   [attr.aria-pressed]="currentTheme === 'dark'">
                   <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-brand text-base shadow-sm">
@@ -110,7 +110,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
                 </button>
 
                 <button type="button" (click)="setTheme('system')"
-                  class="theme-option p-2.5 sm:p-4 transition-all flex flex-col items-center justify-center gap-1.5 sm:gap-2 text-center cursor-pointer"
+                  class="theme-option p-2.5 sm:p-4 transition flex flex-col items-center justify-center gap-1.5 sm:gap-2 text-center cursor-pointer"
                   [class.is-selected]="currentTheme === 'system'"
                   [attr.aria-pressed]="currentTheme === 'system'">
                   <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-muted text-base shadow-sm">

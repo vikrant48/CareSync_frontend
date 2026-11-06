@@ -71,7 +71,7 @@ export interface PaymentDetails {
         
         <!-- LEFT COLUMN: Select Payment Method -->
         <div class="md:col-span-5 p-4 sm:p-5 border-b md:border-b-0 md:border-r border-[var(--border)] space-y-3 bg-[var(--panel)]/60">
-          <div class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider mb-2">SELECT PAYMENT METHOD</div>
+          <div class="text-[10px] font-bold text-[var(--muted)] mb-2">SELECT PAYMENT METHOD</div>
           
           <div class="space-y-2.5">
             <!-- UPI Payment Option -->
@@ -79,7 +79,7 @@ export interface PaymentDetails {
               type="button"
               (click)="selectPaymentMethod('upi')"
               [ngClass]="selectedMethod() === 'upi' ? 'bg-[var(--primary-soft)] border-2 border-[var(--primary)] shadow-md' : 'bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)]'"
-              class="w-full p-3.5 rounded-2xl flex items-center justify-between transition-all duration-200 text-left cursor-pointer group"
+              class="w-full p-3.5 rounded-2xl flex items-center justify-between transition duration-200 text-left cursor-pointer group"
             >
               <div class="flex items-center gap-3 min-w-0">
                 <div class="w-9 h-9 rounded-xl bg-[var(--primary)]/15 text-[var(--primary)] flex items-center justify-center text-base shrink-0">
@@ -102,7 +102,7 @@ export interface PaymentDetails {
               type="button"
               (click)="selectPaymentMethod('card')"
               [ngClass]="selectedMethod() === 'card' ? 'bg-[var(--primary-soft)] border-2 border-[var(--primary)] shadow-md' : 'bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)]'"
-              class="w-full p-3.5 rounded-2xl flex items-center justify-between transition-all duration-200 text-left cursor-pointer group"
+              class="w-full p-3.5 rounded-2xl flex items-center justify-between transition duration-200 text-left cursor-pointer group"
             >
               <div class="flex items-center gap-3 min-w-0">
                 <div class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-700 dark:text-purple-400 flex items-center justify-center text-base shrink-0">
@@ -124,7 +124,7 @@ export interface PaymentDetails {
               type="button"
               (click)="selectPaymentMethod('qr')"
               [ngClass]="selectedMethod() === 'qr' ? 'bg-[var(--primary-soft)] border-2 border-[var(--primary)] shadow-md' : 'bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)]'"
-              class="w-full p-3.5 rounded-2xl flex items-center justify-between transition-all duration-200 text-left cursor-pointer group"
+              class="w-full p-3.5 rounded-2xl flex items-center justify-between transition duration-200 text-left cursor-pointer group"
             >
               <div class="flex items-center gap-3 min-w-0">
                 <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-base shrink-0">
@@ -192,7 +192,7 @@ export interface PaymentDetails {
 
             <!-- UPI ID Input Form -->
             <div class="space-y-1.5 relative">
-              <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider">UPI ID</label>
+              <label class="block text-xs font-bold text-[var(--muted)]">UPI ID</label>
               <div class="relative flex items-center">
                 <div class="absolute left-3.5 text-[var(--primary)] pointer-events-none text-sm">
                   <i class="fa-solid fa-at" aria-hidden="true"></i>
@@ -235,7 +235,7 @@ export interface PaymentDetails {
                   type="button"
                   (click)="processPayment()"
                   [disabled]="!canProcessPayment() || isProcessing()"
-                  class="w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold text-xs sm:text-sm py-3 rounded-xl shadow-lg shadow-[var(--primary)]/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  class="w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold text-xs sm:text-sm py-3 rounded-xl shadow-lg shadow-[var(--primary)]/20 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   <i *ngIf="isProcessing()" class="fa-solid fa-circle-notch animate-spin text-xs" aria-hidden="true"></i>
                   <span>Pay ₹{{ amount | number:'1.2-2' }}</span>
@@ -246,7 +246,7 @@ export interface PaymentDetails {
             <!-- OR Divider -->
             <div class="relative flex py-1 items-center">
               <div class="flex-grow border-t border-[var(--border)]"></div>
-              <span class="flex-shrink mx-3 text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider">OR</span>
+              <span class="flex-shrink mx-3 text-[10px] font-bold text-[var(--muted)]">OR</span>
               <div class="flex-grow border-t border-[var(--border)]"></div>
             </div>
 
@@ -262,7 +262,7 @@ export interface PaymentDetails {
                   <span class="text-[11px] text-amber-700 dark:text-amber-400 font-semibold flex items-center gap-1">
                     <i class="fa-regular fa-clock" aria-hidden="true"></i> QR expires in {{ formatTimer(qrCountdown()) }}
                   </span>
-                  <button type="button" (click)="downloadQR()" class="btn-size-sm bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-[11px] font-semibold px-2.5 rounded-lg flex items-center gap-1 transition-all cursor-pointer">
+                  <button type="button" (click)="downloadQR()" class="btn-size-sm bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-[11px] font-semibold px-2.5 rounded-lg flex items-center gap-1 transition cursor-pointer">
                     <i class="fa-solid fa-download text-[10px]" aria-hidden="true"></i> Download QR
                   </button>
                 </div>
@@ -281,7 +281,7 @@ export interface PaymentDetails {
 
             <div class="bg-[var(--panel)] border border-[var(--border)] rounded-xl p-4 space-y-3.5">
               <div>
-                <label class="block text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1" for="payment-popup-card-number-1">Card Number</label>
+                <label class="block text-[11px] font-bold text-[var(--muted)] mb-1" for="payment-popup-card-number-1">Card Number</label>
                 <input id="payment-popup-card-number-1" 
                   type="text" 
                   [(ngModel)]="cardDetails.cardNumber"
@@ -292,7 +292,7 @@ export interface PaymentDetails {
               </div>
 
               <div>
-                <label class="block text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1" for="payment-popup-cardholder-name-2">Cardholder Name</label>
+                <label class="block text-[11px] font-bold text-[var(--muted)] mb-1" for="payment-popup-cardholder-name-2">Cardholder Name</label>
                 <input id="payment-popup-cardholder-name-2" 
                   type="text" 
                   [(ngModel)]="cardDetails.cardholderName"
@@ -303,7 +303,7 @@ export interface PaymentDetails {
 
               <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <label class="block text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1" for="payment-popup-expiry-date-3">Expiry Date</label>
+                  <label class="block text-[11px] font-bold text-[var(--muted)] mb-1" for="payment-popup-expiry-date-3">Expiry Date</label>
                   <input id="payment-popup-expiry-date-3" 
                     type="text" 
                     [(ngModel)]="cardDetails.expiryDate"
@@ -313,7 +313,7 @@ export interface PaymentDetails {
                   />
                 </div>
                 <div>
-                  <label class="block text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1" for="payment-popup-cvv-4">CVV</label>
+                  <label class="block text-[11px] font-bold text-[var(--muted)] mb-1" for="payment-popup-cvv-4">CVV</label>
                   <input id="payment-popup-cvv-4" 
                     type="password" 
                     [(ngModel)]="cardDetails.cvv"
@@ -329,7 +329,7 @@ export interface PaymentDetails {
               type="button"
               (click)="processPayment()"
               [disabled]="!canProcessPayment() || isProcessing()"
-              class="w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold text-xs sm:text-sm py-3 rounded-xl shadow-lg shadow-[var(--primary)]/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              class="w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold text-xs sm:text-sm py-3 rounded-xl shadow-lg shadow-[var(--primary)]/20 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
               <i *ngIf="isProcessing()" class="fa-solid fa-circle-notch animate-spin text-xs" aria-hidden="true"></i>
               <span>Pay ₹{{ amount | number:'1.2-2' }}</span>
@@ -358,7 +358,7 @@ export interface PaymentDetails {
               type="button"
               (click)="processPayment()"
               [disabled]="isProcessing()"
-              class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+              class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2 cursor-pointer"
             >
               <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
               <span>I Have Made the Payment</span>

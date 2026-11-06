@@ -79,7 +79,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
       *ngIf="!isOpen()"
       id="ai-widget-trigger"
       (click)="toggleChat()"
-      class="fixed bottom-20 right-4 xl:bottom-8 xl:right-8 w-12 h-12 xl:w-14 xl:h-14 bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-[60] group"
+      class="fixed bottom-20 right-4 xl:bottom-8 xl:right-8 w-12 h-12 xl:w-14 xl:h-14 bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition z-[60] group"
     >
       <i class="fas fa-robot text-xl md:text-2xl group-hover:rotate-12 transition-transform" aria-hidden="true"></i>
       <span class="absolute -top-1 -right-1 flex h-3 w-3" *ngIf="messages().length === 0">
@@ -103,21 +103,21 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
             <h3 class="font-bold text-sm tracking-wide">{{ isDoctor() ? 'Clinical AI Assistant' : 'CareSync AI Assistant' }}</h3>
             <div class="flex items-center gap-1.5">
               <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span class="text-[10px] text-blue-100 uppercase tracking-wider font-semibold">Online</span>
+              <span class="text-[10px] text-blue-100 font-semibold">Online</span>
             </div>
           </div>
         </div>
         <div class="flex items-center gap-1.5">
-           <button (click)="expandChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-1.5 rounded-lg hover:bg-white/10 transition-all" title="Expand Assistant (Fullscreen)" aria-label="Expand Assistant (Fullscreen)">
+           <button (click)="expandChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-1.5 rounded-lg hover:bg-white/10 transition" title="Expand Assistant (Fullscreen)" aria-label="Expand Assistant (Fullscreen)">
              <i class="fas fa-expand text-xs sm:text-sm" aria-hidden="true"></i>
            </button>
-           <button (click)="isVisionScannerOpen.set(true)" class="text-[var(--text)]/80 hover:text-[var(--text)] p-1.5 rounded-lg hover:bg-white/10 transition-all" title="Scan Prescription / Lab Report (Vision AI)" aria-label="Scan Prescription / Lab Report (Vision AI)">
+           <button (click)="isVisionScannerOpen.set(true)" class="text-[var(--text)]/80 hover:text-[var(--text)] p-1.5 rounded-lg hover:bg-white/10 transition" title="Scan Prescription / Lab Report (Vision AI)" aria-label="Scan Prescription / Lab Report (Vision AI)">
              <i class="fas fa-camera text-sm" aria-hidden="true"></i>
            </button>
-           <button (click)="clearChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-1.5 rounded-lg hover:bg-white/10 transition-all" title="Clear Chat" aria-label="Clear Chat">
+           <button (click)="clearChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-1.5 rounded-lg hover:bg-white/10 transition" title="Clear Chat" aria-label="Clear Chat">
              <i class="fas fa-trash-alt text-sm" aria-hidden="true"></i>
            </button>
-           <button (click)="toggleChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-1.5 rounded-lg hover:bg-white/10 transition-all" title="Close Assistant" aria-label="Close Assistant">
+           <button (click)="toggleChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-1.5 rounded-lg hover:bg-white/10 transition" title="Close Assistant" aria-label="Close Assistant">
              <i class="fas fa-times text-base" aria-hidden="true"></i>
            </button>
         </div>
@@ -141,14 +141,14 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
             [attr.maxlength]="maxMessageLength"
             [disabled]="isLoading() || isListening()"
             [placeholder]="isListening() ? 'Listening...' : (isDoctor() ? 'Ask about a patient (type @ to pick one) or your schedule...' : 'Ask anything, e.g. book a skin doctor tomorrow after 5pm')"
-            class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl py-3 pl-4 pr-24 text-sm text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] disabled:opacity-50 transition-all"
+            class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl py-3 pl-4 pr-24 text-sm text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] disabled:opacity-50 transition"
           />
           <div class="absolute right-2.5 flex items-center gap-1">
             <button
               type="button"
               (click)="isVisionScannerOpen.set(true)"
               [disabled]="isLoading()"
-              class="w-8 h-8 flex items-center justify-center text-[var(--muted)] hover:text-[var(--text)] hover:bg-white/10 rounded-lg transition-all"
+              class="w-8 h-8 flex items-center justify-center text-[var(--muted)] hover:text-[var(--text)] hover:bg-white/10 rounded-lg transition"
               title="Scan Prescription / Lab Report (Vision AI)" aria-label="Scan Prescription / Lab Report (Vision AI)">
               <i class="fas fa-camera text-sm" aria-hidden="true"></i>
             </button>
@@ -158,19 +158,19 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
               [disabled]="isLoading()"
               [class.text-red-400]="isListening()"
               [class.animate-pulse]="isListening()"
-              class="w-8 h-8 flex items-center justify-center text-[var(--muted)] hover:text-[var(--text)] hover:bg-white/10 rounded-lg transition-all"
+              class="w-8 h-8 flex items-center justify-center text-[var(--muted)] hover:text-[var(--text)] hover:bg-white/10 rounded-lg transition"
               title="Voice Input" aria-label="Voice Input">
               <i class="fas" [class.fa-microphone]="!isListening()" [class.fa-microphone-slash]="isListening()" aria-hidden="true"></i>
             </button>
             <button *ngIf="streaming()" type="button" (click)="stopStreaming()" title="Stop" aria-label="Stop the answer"
-              class="w-8 h-8 flex items-center justify-center bg-rose-600 hover:bg-rose-700 text-white rounded-xl transition-all shadow-md">
+              class="w-8 h-8 flex items-center justify-center bg-rose-600 hover:bg-rose-700 text-white rounded-xl transition shadow-md">
               <i class="fas fa-stop text-xs" aria-hidden="true"></i>
             </button>
             <button
               *ngIf="!streaming()"
               type="submit"
               [disabled]="!userInput.trim() || isLoading() || isListening()"
-              class="w-8 h-8 flex items-center justify-center bg-[var(--primary)] hover:bg-indigo-600 disabled:bg-[var(--border)] text-white disabled:text-[var(--muted)] rounded-xl transition-all shadow-md shadow-[var(--primary)]/20"
+              class="w-8 h-8 flex items-center justify-center bg-[var(--primary)] hover:bg-indigo-600 disabled:bg-[var(--border)] text-white disabled:text-[var(--muted)] rounded-xl transition shadow-md shadow-[var(--primary)]/20"
             >
               <i class="fas fa-paper-plane text-xs" aria-hidden="true"></i>
             </button>
@@ -198,22 +198,22 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
               <h3 class="font-bold text-sm sm:text-base tracking-wide">{{ isDoctor() ? 'Clinical AI Assistant' : 'CareSync AI Assistant' }}</h3>
               <div class="flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span class="text-[10px] text-blue-100 uppercase tracking-wider font-semibold">Online</span>
+                <span class="text-[10px] text-blue-100 font-semibold">Online</span>
               </div>
             </div>
           </div>
           <div class="flex items-center gap-2">
-             <button (click)="isVisionScannerOpen.set(true)" class="text-[var(--text)]/80 hover:text-[var(--text)] p-2 rounded-lg hover:bg-white/10 transition-all flex items-center gap-1.5 text-xs font-semibold" title="Scan Prescription / Lab Report (Vision AI)" aria-label="Scan Prescription / Lab Report (Vision AI)">
+             <button (click)="isVisionScannerOpen.set(true)" class="text-[var(--text)]/80 hover:text-[var(--text)] p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-xs font-semibold" title="Scan Prescription / Lab Report (Vision AI)" aria-label="Scan Prescription / Lab Report (Vision AI)">
                <i class="fas fa-camera text-sm" aria-hidden="true"></i>
                <span class="hidden sm:inline">Scan Vision</span>
              </button>
-             <button (click)="clearChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-2 rounded-lg hover:bg-white/10 transition-all" title="Clear Chat" aria-label="Clear Chat">
+             <button (click)="clearChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-2 rounded-lg hover:bg-white/10 transition" title="Clear Chat" aria-label="Clear Chat">
                <i class="fas fa-trash-alt text-sm" aria-hidden="true"></i>
              </button>
-             <button (click)="minimizeChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-2 rounded-lg hover:bg-white/10 transition-all" title="Minimize Window" aria-label="Minimize Window">
+             <button (click)="minimizeChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-2 rounded-lg hover:bg-white/10 transition" title="Minimize Window" aria-label="Minimize Window">
                <i class="fas fa-compress text-sm" aria-hidden="true"></i>
              </button>
-             <button (click)="toggleChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-2 rounded-lg hover:bg-white/10 transition-all" title="Close Assistant" aria-label="Close Assistant">
+             <button (click)="toggleChat()" class="text-[var(--text)]/80 hover:text-[var(--text)] p-2 rounded-lg hover:bg-white/10 transition" title="Close Assistant" aria-label="Close Assistant">
                <i class="fas fa-times text-base" aria-hidden="true"></i>
              </button>
           </div>
@@ -228,7 +228,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
               <!-- New Chat Button -->
               <button 
                 (click)="clearChat()"
-                class="btn-size-lg w-full bg-[var(--primary)] hover:bg-indigo-600 active:scale-95 text-white font-bold text-sm px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-[var(--primary)]/25"
+                class="btn-size-lg w-full bg-[var(--primary)] hover:bg-indigo-600 active:scale-95 text-white font-bold text-sm px-4 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-[var(--primary)]/25"
               >
                 <i class="fas fa-plus text-xs" aria-hidden="true"></i>
                 <span>New Chat</span>
@@ -236,7 +236,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
 
               <!-- Recent Chats Header -->
               <div class="flex items-center justify-between px-1 mb-1">
-                <span class="text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider">Recent Chats</span>
+                <span class="text-[11px] font-bold text-[var(--muted)]">Recent Chats</span>
                 <div class="flex items-center gap-1.5">
                   <span class="text-[9px] bg-[var(--bg)] border border-[var(--border)] text-emerald-700 dark:text-emerald-400 px-1.5 py-0.5 rounded-md font-semibold flex items-center gap-1" title="Your chats are saved securely and available on every device">
                     <i class="fa-solid fa-cloud text-[9px]" aria-hidden="true"></i> Synced
@@ -259,7 +259,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
                 <div 
                   *ngFor="let chat of recentChats()"
                   (click)="selectRecentChat(chat)"
-                  class="p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between group"
+                  class="p-3 rounded-xl border transition cursor-pointer flex items-center justify-between group"
                   [ngClass]="activeSessionId === chat.id ? 'bg-[var(--bg)] border-[var(--primary)]/60 shadow-md' : 'bg-transparent border-transparent hover:bg-[var(--bg)]/60 hover:border-[var(--border)]'"
                 >
                   <div class="flex items-center gap-3 min-w-0">
@@ -310,10 +310,10 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
               
               <!-- Suggestions for the user's role (shown until the chat starts) -->
               <div *ngIf="messages().length === 0" class="mb-4">
-                <div class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-2.5 px-1">You can also ask me about:</div>
+                <div class="text-xs font-semibold text-[var(--muted)] mb-2.5 px-1">You can also ask me about:</div>
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                   <button *ngFor="let s of suggestions()" type="button" (click)="useSuggestion(s)" [disabled]="isLoading()"
-                          class="p-2.5 bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--primary)]/50 rounded-xl text-left transition-all flex items-center gap-2.5 group disabled:opacity-60 min-w-0"
+                          class="p-2.5 bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--primary)]/50 rounded-xl text-left transition flex items-center gap-2.5 group disabled:opacity-60 min-w-0"
                           [title]="s.prompt || s.hint">
                     <span class="w-7 h-7 rounded-lg border flex items-center justify-center text-xs shrink-0 group-hover:scale-110 transition-transform"
                           [ngClass]="s.tone">
@@ -344,14 +344,14 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
                   [attr.maxlength]="maxMessageLength"
                   [disabled]="isLoading() || isListening()"
                   [placeholder]="isListening() ? 'Listening...' : (isDoctor() ? 'Ask about a patient (type @ to pick one) or your schedule...' : 'Ask anything, e.g. book a skin doctor tomorrow after 5pm')"
-                  class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-2xl py-3.5 pl-5 pr-28 text-sm text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] disabled:opacity-50 transition-all"
+                  class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-2xl py-3.5 pl-5 pr-28 text-sm text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] disabled:opacity-50 transition"
                 />
                 <div class="absolute right-3 flex items-center gap-1.5">
                   <button
                     type="button"
                     (click)="isVisionScannerOpen.set(true)"
                     [disabled]="isLoading()"
-                    class="w-9 h-9 flex items-center justify-center text-[var(--muted)] hover:text-[var(--text)] hover:bg-white/10 rounded-xl transition-all"
+                    class="w-9 h-9 flex items-center justify-center text-[var(--muted)] hover:text-[var(--text)] hover:bg-white/10 rounded-xl transition"
                     title="Scan Prescription / Lab Report (Vision AI)" aria-label="Scan Prescription / Lab Report (Vision AI)">
                     <i class="fas fa-camera text-sm" aria-hidden="true"></i>
                   </button>
@@ -361,19 +361,19 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
                     [disabled]="isLoading()"
                     [class.text-red-400]="isListening()"
                     [class.animate-pulse]="isListening()"
-                    class="w-9 h-9 flex items-center justify-center text-[var(--muted)] hover:text-[var(--text)] hover:bg-white/10 rounded-xl transition-all"
+                    class="w-9 h-9 flex items-center justify-center text-[var(--muted)] hover:text-[var(--text)] hover:bg-white/10 rounded-xl transition"
                     title="Voice Input" aria-label="Voice Input">
                     <i class="fas" [class.fa-microphone]="!isListening()" [class.fa-microphone-slash]="isListening()" aria-hidden="true"></i>
                   </button>
                   <button *ngIf="streaming()" type="button" (click)="stopStreaming()" title="Stop" aria-label="Stop the answer"
-                    class="w-9 h-9 flex items-center justify-center bg-rose-600 hover:bg-rose-700 text-white rounded-xl transition-all shadow-md">
+                    class="w-9 h-9 flex items-center justify-center bg-rose-600 hover:bg-rose-700 text-white rounded-xl transition shadow-md">
                     <i class="fas fa-stop text-xs" aria-hidden="true"></i>
                   </button>
                   <button
                     *ngIf="!streaming()"
                     type="submit"
                     [disabled]="!userInput.trim() || isLoading() || isListening()"
-                    class="w-9 h-9 flex items-center justify-center bg-[var(--primary)] hover:bg-indigo-600 disabled:bg-[var(--border)] text-white disabled:text-[var(--muted)] rounded-xl transition-all shadow-md shadow-[var(--primary)]/20"
+                    class="w-9 h-9 flex items-center justify-center bg-[var(--primary)] hover:bg-indigo-600 disabled:bg-[var(--border)] text-white disabled:text-[var(--muted)] rounded-xl transition shadow-md shadow-[var(--primary)]/20"
                   >
                     <i class="fas fa-paper-plane text-xs" aria-hidden="true"></i>
                   </button>
@@ -451,7 +451,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
             <button 
               *ngIf="!isDoctor()"
               (click)="startBooking()"
-              class="btn-size-lg flex items-center gap-2 px-3.5 bg-[var(--primary)] hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-all transform active:scale-95 shadow-md shadow-[var(--primary)]/20"
+              class="btn-size-lg flex items-center gap-2 px-3.5 bg-[var(--primary)] hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition transform active:scale-95 shadow-md shadow-[var(--primary)]/20"
             >
               <i class="fas fa-calendar-plus" aria-hidden="true"></i>
               Book Appointment
@@ -459,20 +459,20 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
 
             <button 
               (click)="isVisionScannerOpen.set(true)"
-              class="btn-size-lg flex items-center gap-2 px-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition-all transform active:scale-95 shadow-md shadow-purple-500/20"
+              class="btn-size-lg flex items-center gap-2 px-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition transform active:scale-95 shadow-md shadow-purple-500/20"
             >
               <i class="fas fa-camera" aria-hidden="true"></i>
               Scan Prescription
             </button>
 
             <button *ngIf="isDoctor()" type="button" (click)="askTopic('Brief me on my next patient')" [disabled]="isLoading()"
-              class="btn-size-lg flex items-center gap-2 px-3.5 bg-[var(--primary)] hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-all transform active:scale-95 shadow-md shadow-[var(--primary)]/20">
+              class="btn-size-lg flex items-center gap-2 px-3.5 bg-[var(--primary)] hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition transform active:scale-95 shadow-md shadow-[var(--primary)]/20">
               <i class="fas fa-user-clock" aria-hidden="true"></i>
               Brief my next patient
             </button>
 
             <button *ngIf="isDoctor()" type="button" (click)="askTopic('What is my schedule today?')" [disabled]="isLoading()"
-              class="btn-size-lg flex items-center gap-2 px-3.5 bg-transparent border border-[var(--border)] hover:border-[var(--primary)] text-[var(--text)] rounded-xl text-xs font-bold transition-all transform active:scale-95">
+              class="btn-size-lg flex items-center gap-2 px-3.5 bg-transparent border border-[var(--border)] hover:border-[var(--primary)] text-[var(--text)] rounded-xl text-xs font-bold transition transform active:scale-95">
               <i class="fas fa-calendar-day" aria-hidden="true"></i>
               Today's schedule
             </button>
@@ -480,7 +480,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
             <button 
               *ngIf="isDoctor()"
               (click)="isClinicalDictationOpen.set(true)"
-              class="btn-size-lg flex items-center gap-2 px-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition-all transform active:scale-95 shadow-md shadow-blue-500/20"
+              class="btn-size-lg flex items-center gap-2 px-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition transform active:scale-95 shadow-md shadow-blue-500/20"
             >
               <i class="fas fa-microphone-alt" aria-hidden="true"></i>
               Voice Dictation (SOAP)
@@ -543,7 +543,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
            <div *ngIf="msg.suggestion.type === 'SPECIALIZATIONS'" class="flex flex-wrap gap-2 py-1">
               <button *ngFor="let spec of msg.suggestion.specializations" 
                       (click)="selectSpecialization(spec, msg.suggestion.reason)"
-                      class="btn-size-sm px-3 bg-[var(--panel)] border border-[var(--border)] text-[var(--text)] rounded-lg text-[11px] font-semibold hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all shadow-sm inline-flex items-center justify-center">
+                      class="btn-size-sm px-3 bg-[var(--panel)] border border-[var(--border)] text-[var(--text)] rounded-lg text-[11px] font-semibold hover:border-[var(--primary)] hover:text-[var(--primary)] transition shadow-sm inline-flex items-center justify-center">
                  {{ spec }}
               </button>
            </div>
@@ -553,7 +553,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
              <div class="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
                 <div *ngFor="let doc of msg.suggestion.doctors" 
                      (click)="chooseDoctorSuggestion(doc, msg.suggestion.reason)"
-                     class="min-w-[200px] bg-[var(--panel)] border border-[var(--border)] p-4 rounded-xl shadow-md hover:border-[var(--primary)] border-2 cursor-pointer transition-all hover:shadow-lg">
+                     class="min-w-[200px] bg-[var(--panel)] border border-[var(--border)] p-4 rounded-xl shadow-md hover:border-[var(--primary)] border-2 cursor-pointer transition hover:shadow-lg">
                    <div class="flex items-start gap-3 mb-3">
                       <div class="w-12 h-12 rounded-full bg-[var(--bg)] flex items-center justify-center overflow-hidden shrink-0 border border-[var(--border)]">
                          <img *ngIf="doc.profileImageUrl" [src]="doc.profileImageUrl" class="w-full h-full object-cover">
@@ -599,10 +599,10 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
 
            <!-- DATE SELECTION -->
            <div *ngIf="msg.suggestion.type === 'DATES'" class="bg-[var(--panel)] border border-[var(--border)] p-4 rounded-xl shadow-md">
-              <div class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest mb-3">Select Appointment Date</div>
+              <div class="text-[10px] font-bold text-[var(--muted)] mb-3">Select Appointment Date</div>
               <div class="flex flex-wrap gap-2 mb-3">
-                  <button (click)="selectRelativeDate(msg.suggestion.doctorId!, 0, msg.suggestion.reason)" class="btn-size-md px-4 bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)] rounded-lg text-xs font-bold hover:bg-[var(--primary)] hover:text-white transition-all inline-flex items-center justify-center">Today</button>
-                 <button (click)="selectRelativeDate(msg.suggestion.doctorId!, 1, msg.suggestion.reason)" class="btn-size-md px-4 bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)] rounded-lg text-xs font-bold hover:bg-[var(--primary)] hover:text-white transition-all inline-flex items-center justify-center">Tomorrow</button>
+                  <button (click)="selectRelativeDate(msg.suggestion.doctorId!, 0, msg.suggestion.reason)" class="btn-size-md px-4 bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)] rounded-lg text-xs font-bold hover:bg-[var(--primary)] hover:text-white transition inline-flex items-center justify-center">Today</button>
+                 <button (click)="selectRelativeDate(msg.suggestion.doctorId!, 1, msg.suggestion.reason)" class="btn-size-md px-4 bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)] rounded-lg text-xs font-bold hover:bg-[var(--primary)] hover:text-white transition inline-flex items-center justify-center">Tomorrow</button>
                  
                  <div class="mt-2 text-[var(--text)]">
                     <app-date-picker
@@ -622,13 +622,13 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
            <!-- SLOT GRID -->
            <div *ngIf="msg.suggestion.type === 'SLOTS'" class="bg-[var(--panel)] border border-[var(--border)] p-4 rounded-xl shadow-md">
               <div class="flex justify-between items-center mb-3">
-                 <div class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Available Slots</div>
+                 <div class="text-[10px] font-bold text-[var(--muted)]">Available Slots</div>
                  <div class="text-[10px] font-bold text-[var(--primary)]">{{ msg.suggestion.date | date:'mediumDate' }}</div>
               </div>
               <div class="grid grid-cols-3 gap-2 mb-3">
                  <button *ngFor="let slot of msg.suggestion.slots" 
                          (click)="selectFinalSlot(msg.suggestion.doctorId!, msg.suggestion.date!, slot, msg.suggestion.reason)"
-                         class="btn-size-sm px-2 bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] rounded-lg text-[10px] font-bold hover:bg-[var(--primary)] hover:text-white hover:border-[var(--primary)] transition-all inline-flex items-center justify-center">
+                         class="btn-size-sm px-2 bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] rounded-lg text-[10px] font-bold hover:bg-[var(--primary)] hover:text-white hover:border-[var(--primary)] transition inline-flex items-center justify-center">
                     {{ slot }}
                  </button>
               </div>
@@ -640,7 +640,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
             <!-- CONFIRMATION & PAYMENT -->
            <div *ngIf="msg.suggestion.type === 'CONFIRM'" class="bg-gradient-to-br from-[var(--primary)] to-indigo-700 text-white p-5 rounded-xl shadow-lg relative overflow-hidden">
               <div class="relative z-10">
-                 <div class="text-[10px] opacity-80 mb-1 uppercase tracking-wider">
+                 <div class="text-[10px] opacity-80 mb-1">
                     {{ msg.suggestion.reason?.startsWith('RESCHEDULE') ? 'Rescheduling Overview' : 'Appointment Overview' }}
                  </div>
                  <div class="font-bold text-base mb-1">{{ msg.suggestion.doctorName }}</div>
@@ -679,7 +679,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
 
                  <button
                    (click)="openPaymentPopup(msg.suggestion)"
-                   class="w-full py-3 bg-white text-indigo-700 rounded-xl text-xs font-bold shadow-xl hover:bg-blue-50 transition-all active:scale-95 flex items-center justify-center gap-2 mb-3"
+                   class="w-full py-3 bg-white text-indigo-700 rounded-xl text-xs font-bold shadow-xl hover:bg-blue-50 transition active:scale-95 flex items-center justify-center gap-2 mb-3"
                  >
                    <i class="fas fa-check-circle" aria-hidden="true"></i>
                    {{ msg.suggestion.reason?.startsWith('RESCHEDULE') ? 'Confirm Reschedule' : 'Confirm & Pay Now' }}
@@ -712,11 +712,11 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
                  </div>
                  <div class="flex gap-2">
                     <button (click)="cancelAppointment(appt.id)" 
-                            class="flex-1 py-2 bg-red-900/30 text-red-700 dark:text-red-400 border border-red-800 rounded-lg text-[10px] font-bold hover:bg-red-600 hover:text-[var(--text)] transition-all">
+                            class="flex-1 py-2 bg-red-900/30 text-red-700 dark:text-red-400 border border-red-800 rounded-lg text-[10px] font-bold hover:bg-red-600 hover:text-[var(--text)] transition">
                        Cancel
                     </button>
                     <button (click)="rescheduleAppointment(appt.id)" 
-                            class="flex-1 py-2 bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)] rounded-lg text-[10px] font-bold hover:bg-[var(--primary)] hover:text-white transition-all">
+                            class="flex-1 py-2 bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)] rounded-lg text-[10px] font-bold hover:bg-[var(--primary)] hover:text-white transition">
                        Reschedule
                     </button>
                  </div>

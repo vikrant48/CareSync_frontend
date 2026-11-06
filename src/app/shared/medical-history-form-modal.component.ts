@@ -45,7 +45,7 @@ export interface MedicationItem {
             <button type="button" 
                     (click)="isDictationOpen = true"
                     [disabled]="disabled"
-                    class="btn-size-lg px-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-blue-600/20 transition-all transform active:scale-95 disabled:opacity-50">
+                    class="btn-size-lg px-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-blue-600/20 transition transform active:scale-95 disabled:opacity-50">
                <i class="fa-solid fa-microphone-lines text-sm" aria-hidden="true"></i>
                <span class="hidden sm:inline">🎙️ AI Voice Dictation</span>
             </button>
@@ -79,7 +79,7 @@ export interface MedicationItem {
                  <button type="button" 
                          (click)="isDictationOpen = true"
                          [disabled]="disabled"
-                         class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-blue-700 flex items-center gap-1 transition-all active:scale-95 disabled:opacity-50"
+                         class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-blue-700 flex items-center gap-1 transition active:scale-95 disabled:opacity-50"
                          title="Dictate Consultation Notes" aria-label="Dictate Consultation Notes">
                     <i class="fa-solid fa-microphone" aria-hidden="true"></i>
                     Voice Dictation
@@ -87,7 +87,7 @@ export interface MedicationItem {
                  <button type="button" 
                          (click)="onSuggest()" 
                          [disabled]="disabled || loadingSuggestions || !form.symptoms"
-                         class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-50"
+                         class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1.5 transition active:scale-95 disabled:opacity-50"
                          title="Get AI Suggestions" aria-label="Get AI Suggestions">
                     <i class="fa-solid fa-wand-magic-sparkles" [class.animate-pulse]="loadingSuggestions" aria-hidden="true"></i>
                     AI Suggest
@@ -101,7 +101,7 @@ export interface MedicationItem {
          <!-- 3. AI Suggestions Area -->
          <div *ngIf="clinicalSuggestions.length > 0" class="bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30 rounded-xl p-4 animate-in fade-in slide-in-from-top-2 duration-300">
             <div class="flex items-center justify-between mb-3">
-               <h4 class="text-xs font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+               <h4 class="text-xs font-black text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
                   <i class="fa-solid fa-robot" aria-hidden="true"></i> AI Clinical Suggestions
                </h4>
                <button type="button" (click)="clinicalSuggestions = []" class="text-gray-700 dark:text-gray-400 hover:text-gray-600 text-xs">Clear</button>
@@ -109,7 +109,7 @@ export interface MedicationItem {
             <div class="space-y-3">
                <div *ngFor="let s of clinicalSuggestions" 
                     (click)="applySuggestion(s)"
-                    class="group bg-white dark:bg-gray-800 p-3 rounded-lg border border-indigo-100 dark:border-indigo-700/50 hover:border-indigo-400 dark:hover:border-indigo-500 cursor-pointer transition-all shadow-sm hover:shadow-md">
+                    class="group bg-white dark:bg-gray-800 p-3 rounded-lg border border-indigo-100 dark:border-indigo-700/50 hover:border-indigo-400 dark:hover:border-indigo-500 cursor-pointer transition shadow-sm hover:shadow-md">
                   <div class="flex justify-between items-start mb-1">
                      <div class="font-bold text-gray-900 dark:text-white text-sm group-hover:text-indigo-600 transition-colors">{{ s.diagnosis }}</div>
                      <i class="fa-solid fa-plus-circle text-indigo-600 dark:text-indigo-300 group-hover:text-indigo-600" aria-hidden="true"></i>
@@ -144,7 +144,7 @@ export interface MedicationItem {
                <button type="button" 
                        (click)="addMedication()" 
                        [disabled]="disabled"
-                       class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1 transition-all active:scale-95 disabled:opacity-50">
+                       class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1 transition active:scale-95 disabled:opacity-50">
                   <i class="fa-solid fa-plus text-xs" aria-hidden="true"></i> Add Medication
                </button>
             </div>
@@ -164,7 +164,7 @@ export interface MedicationItem {
                           (click)="removeMedication(i)" 
                           *ngIf="medicationList.length > 1"
                           [disabled]="disabled"
-                          class="w-9 h-9 flex items-center justify-center text-gray-700 dark:text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"
+                          class="w-9 h-9 flex items-center justify-center text-gray-700 dark:text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition"
                           title="Remove medication" aria-label="Remove medication">
                      <i class="fa-solid fa-trash-can text-sm" aria-hidden="true"></i>
                   </button>
@@ -197,7 +197,7 @@ export interface MedicationItem {
             <button type="button" (click)="close.emit()" class="btn-size-lg px-5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors inline-flex items-center justify-center">
                Cancel
             </button>
-            <button type="submit" [disabled]="disabled || saving" class="btn-size-lg px-6 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg shadow-blue-500/20 transition-all transform hover:scale-[1.02] disabled:opacity-70 disabled:cursor-not-allowed inline-flex items-center justify-center">
+            <button type="submit" [disabled]="disabled || saving" class="btn-size-lg px-6 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg shadow-blue-500/20 transition transform hover:scale-[1.02] disabled:opacity-70 disabled:cursor-not-allowed inline-flex items-center justify-center">
                <span *ngIf="!saving"><i class="fa-solid fa-save mr-2" aria-hidden="true"></i> Save Record</span>
                <span *ngIf="saving"><i class="fa-solid fa-circle-notch fa-spin mr-2" aria-hidden="true"></i> Saving...</span>
             </button>
@@ -215,7 +215,7 @@ export interface MedicationItem {
   `,
    styles: [`
     .input-modern {
-      @apply block w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-gray-400;
+      @apply block w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition placeholder-gray-400;
     }
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px;
