@@ -23,7 +23,7 @@
                         </div>
                     </ng-container>
                     <ng-template #nameReady>
-                        <div class="text-[11px] font-bold text-muted tracking-wider uppercase">{{ greeting }}</div>
+                        <div class="text-[11px] font-bold text-muted">{{ greeting }}</div>
                         <h1 class="text-xl sm:text-2xl font-extrabold text-[var(--text)] truncate mt-0.5 tracking-tight">
                             {{ patientName || 'Patient' }}
                         </h1>
@@ -33,7 +33,7 @@
                                 <span class="font-bold text-[var(--primary)] shrink-0">{{ completionPercentage }}%</span>
                             </div>
                             <div class="w-full bg-[var(--bg)] rounded-full h-1.5 overflow-hidden">
-                                <div class="bg-[var(--primary)] h-1.5 rounded-full transition-all duration-500 shadow-sm shadow-[var(--primary)]"
+                                <div class="bg-[var(--primary)] h-1.5 rounded-full transition duration-500 shadow-sm shadow-[var(--primary)]"
                                     [style.width.%]="completionPercentage"></div>
                             </div>
                         </div>
@@ -71,7 +71,7 @@
         <section *ngIf="financialStats"
             class="grid grid-flow-col auto-cols-[minmax(160px,1fr)] sm:grid-flow-row sm:auto-cols-auto sm:grid-cols-3 gap-2.5 sm:gap-3.5 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
             <!-- Total Spent Card -->
-            <div class="surface surface-hover p-3 sm:p-4 shadow-sm flex items-center justify-between transition-all">
+            <div class="surface surface-hover p-3 sm:p-4 shadow-sm flex items-center justify-between transition">
                 <div class="flex items-center gap-3">
                     <div
                         class="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center text-base shrink-0">
@@ -86,7 +86,7 @@
             </div>
 
             <!-- Appointments Spend Card -->
-            <div class="surface surface-hover p-3 sm:p-4 shadow-sm flex items-center justify-between transition-all">
+            <div class="surface surface-hover p-3 sm:p-4 shadow-sm flex items-center justify-between transition">
                 <div class="flex items-center gap-3">
                     <div
                         class="w-10 h-10 rounded-xl bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center text-base shrink-0">
@@ -101,7 +101,7 @@
             </div>
 
             <!-- Lab Tests Spend Card -->
-            <div class="surface surface-hover p-3 sm:p-4 shadow-sm flex items-center justify-between transition-all">
+            <div class="surface surface-hover p-3 sm:p-4 shadow-sm flex items-center justify-between transition">
                 <div class="flex items-center gap-3">
                     <div
                         class="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center text-base shrink-0">

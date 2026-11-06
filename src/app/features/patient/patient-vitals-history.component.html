@@ -33,7 +33,7 @@
                 <table class="w-full text-left text-xs border-collapse">
                     <thead>
                         <tr
-                            class="bg-[var(--bg)]/80 border-b border-[var(--border)] text-[var(--muted)] font-bold tracking-wider uppercase text-[10px]">
+ class="bg-[var(--bg)]/80 border-b border-[var(--border)] text-[var(--muted)] font-bold text-[10px]">
                             <th class="py-3.5 px-5">DATE & TIME</th>
                             <th class="py-3.5 px-5">BLOOD PRESSURE</th>
                             <th class="py-3.5 px-5">SUGAR LEVEL</th>
@@ -138,26 +138,26 @@
 
                     <div class="grid grid-cols-2 gap-2 text-xs">
                         <div class="bg-[var(--panel)] p-2.5 rounded-lg border border-[var(--border)]">
-                            <div class="text-[10px] text-[var(--muted)] uppercase font-bold mb-0.5">BP</div>
+                            <div class="text-[10px] text-[var(--muted)] font-bold mb-0.5">BP</div>
                             <div class="font-extrabold text-[var(--text)]">{{ vital.systolicBP ? (vital.systolicBP + '/' +
                                 vital.diastolicBP) : '--' }} <span
                                     class="text-[10px] font-normal text-[var(--muted)]">mmHg</span></div>
                         </div>
 
                         <div class="bg-[var(--panel)] p-2.5 rounded-lg border border-[var(--border)]">
-                            <div class="text-[10px] text-[var(--muted)] uppercase font-bold mb-0.5">Sugar</div>
+                            <div class="text-[10px] text-[var(--muted)] font-bold mb-0.5">Sugar</div>
                             <div class="font-extrabold text-[var(--text)]">{{ vital.sugarLevel || '--' }} <span
                                     class="text-[10px] font-normal text-[var(--muted)]">mg/dL</span></div>
                         </div>
 
                         <div class="bg-[var(--panel)] p-2.5 rounded-lg border border-[var(--border)]">
-                            <div class="text-[10px] text-[var(--muted)] uppercase font-bold mb-0.5">Weight</div>
+                            <div class="text-[10px] text-[var(--muted)] font-bold mb-0.5">Weight</div>
                             <div class="font-extrabold text-[var(--text)]">{{ vital.weight || '--' }} <span
                                     class="text-[10px] font-normal text-[var(--muted)]">kg</span></div>
                         </div>
 
                         <div class="bg-[var(--panel)] p-2.5 rounded-lg border border-[var(--border)]">
-                            <div class="text-[10px] text-[var(--muted)] uppercase font-bold mb-0.5">Temp</div>
+                            <div class="text-[10px] text-[var(--muted)] font-bold mb-0.5">Temp</div>
                             <div class="font-extrabold text-[var(--text)]">{{ vital.temperature || '--' }} <span
                                     class="text-[10px] font-normal text-[var(--muted)]">°F</span></div>
                         </div>

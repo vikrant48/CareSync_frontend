@@ -33,7 +33,7 @@
                   class="absolute inset-0 z-30 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center p-2 text-center">
                   <img [src]="profileImagePreviewUrl" class="absolute inset-0 w-full h-full object-cover opacity-40" />
                   <div class="relative z-10 space-y-1">
-                    <p class="text-[9px] font-bold text-[var(--text)] uppercase tracking-widest">New Image</p>
+                    <p class="text-[9px] font-bold text-[var(--text)]">New Image</p>
                     <div class="flex gap-1.5">
                       <button type="button" (click)="$event.stopPropagation(); uploadSelectedProfileImage()"
                         class="w-7 h-7 rounded-full bg-[#10b981] text-[var(--text)] flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
@@ -119,15 +119,15 @@
           <div class="grid grid-cols-2 gap-2 w-full md:w-auto shrink-0">
             <div
               class="bg-[var(--panel)] border border-[var(--border)] rounded-xl px-3 py-2 text-center w-full md:w-36 h-[4.5rem] shadow-lg flex flex-col items-center justify-center">
-              <span class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider">Consultation Fee</span>
+              <span class="text-[10px] font-bold text-[var(--muted)]">Consultation Fee</span>
               <span class="text-sm font-black text-[var(--accent)] mt-0.5">{{ feeLabel() }}</span>
             </div>
             <div
               class="bg-[var(--panel)] border border-[var(--border)] rounded-xl px-3 py-2 text-center w-full md:w-36 h-[4.5rem] shadow-lg flex flex-col items-center justify-center gap-1">
-              <span class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider">Profile Strength</span>
+              <span class="text-[10px] font-bold text-[var(--muted)]">Profile Strength</span>
               <span class="text-sm font-black text-[var(--text)]">{{ completionPercent() }}%</span>
               <div class="w-full bg-[var(--bg)] rounded-full h-1.5 overflow-hidden">
-                <div class="bg-[#10b981] h-1.5 rounded-full transition-all duration-500"
+                <div class="bg-[#10b981] h-1.5 rounded-full transition duration-500"
                   [style.width.%]="completionPercent()"></div>
               </div>
             </div>
@@ -142,33 +142,33 @@
         <div class="responsive-action-row flex-1">
           <button type="button" (click)="activeTab='overview'" [attr.aria-pressed]="activeTab==='overview'"
             [class]="activeTab==='overview' ? 'bg-[var(--accent)] text-[var(--accent-fg)] font-black' : 'bg-[var(--panel)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] font-bold'"
-            class="btn-size-sm px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-md shrink-0">
+            class="btn-size-sm px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-md shrink-0">
             <i class="fa-solid fa-user-doctor" aria-hidden="true"></i> Overview
           </button>
           <button type="button" (click)="activeTab='education'" [attr.aria-pressed]="activeTab==='education'"
             [class]="activeTab==='education' ? 'bg-[var(--accent)] text-[var(--accent-fg)] font-black' : 'bg-[var(--panel)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] font-bold'"
-            class="btn-size-sm px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-md shrink-0">
+            class="btn-size-sm px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-md shrink-0">
             <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i> Education
           </button>
           <button type="button" (click)="activeTab='experience'" [attr.aria-pressed]="activeTab==='experience'"
             [class]="activeTab==='experience' ? 'bg-[var(--accent)] text-[var(--accent-fg)] font-black' : 'bg-[var(--panel)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] font-bold'"
-            class="btn-size-sm px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-md shrink-0">
+            class="btn-size-sm px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-md shrink-0">
             <i class="fa-solid fa-briefcase" aria-hidden="true"></i> Experience
           </button>
           <button type="button" (click)="activeTab='certificates'" [attr.aria-pressed]="activeTab==='certificates'"
             [class]="activeTab==='certificates' ? 'bg-[var(--accent)] text-[var(--accent-fg)] font-black' : 'bg-[var(--panel)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] font-bold'"
-            class="btn-size-sm px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-md shrink-0">
+            class="btn-size-sm px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-md shrink-0">
             <i class="fa-solid fa-award" aria-hidden="true"></i> Certificates
           </button>
           <button type="button" (click)="onQuickAction('documents')"
-            class="btn-size-md bg-[var(--panel)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] font-bold px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-md shrink-0">
+            class="btn-size-md bg-[var(--panel)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] font-bold px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-md shrink-0">
             <i class="fa-solid fa-file-lines" aria-hidden="true"></i> Documents
           </button>
         </div>
 
         <!-- Far Right Edit Profile Button -->
         <button type="button" (click)="startEditOverview()" *ngIf="!editingOverview"
-          class="btn-size-md px-3 sm:px-5 bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--text)] font-bold text-xs sm:text-sm rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 sm:gap-2 shadow-lg self-end sm:self-auto shrink-0">
+          class="btn-size-md px-3 sm:px-5 bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--text)] font-bold text-xs sm:text-sm rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 sm:gap-2 shadow-lg self-end sm:self-auto shrink-0">
           <i class="fa-solid fa-pen-to-square text-[var(--accent)]" aria-hidden="true"></i>
           <span>Edit Profile</span>
         </button>
@@ -303,7 +303,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <!-- Tile 1: Update Personal Details -->
               <button type="button" (click)="onQuickAction('personal')"
-                class="bg-[var(--bg)]/60 hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--accent)]/40 p-3.5 rounded-2xl transition-all flex items-center justify-between group cursor-pointer text-left">
+                class="bg-[var(--bg)]/60 hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--accent)]/40 p-3.5 rounded-2xl transition flex items-center justify-between group cursor-pointer text-left">
                 <div class="flex items-center gap-3">
                   <div
                     class="w-9 h-9 rounded-xl bg-[var(--accent)]/15 border border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)]">
@@ -322,7 +322,7 @@
 
               <!-- Tile 2: Manage Education -->
               <button type="button" (click)="onQuickAction('education')"
-                class="bg-[var(--bg)]/60 hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--primary)]/40 p-3.5 rounded-2xl transition-all flex items-center justify-between group cursor-pointer text-left">
+                class="bg-[var(--bg)]/60 hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--primary)]/40 p-3.5 rounded-2xl transition flex items-center justify-between group cursor-pointer text-left">
                 <div class="flex items-center gap-3">
                   <div
                     class="w-9 h-9 rounded-xl bg-[var(--primary)]/15 border border-[var(--primary)]/30 flex items-center justify-center text-[var(--primary)]">
@@ -342,7 +342,7 @@
 
               <!-- Tile 3: Add Experience -->
               <button type="button" (click)="onQuickAction('experience')"
-                class="bg-[var(--bg)]/60 hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[#a855f7]/40 p-3.5 rounded-2xl transition-all flex items-center justify-between group cursor-pointer text-left">
+                class="bg-[var(--bg)]/60 hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[#a855f7]/40 p-3.5 rounded-2xl transition flex items-center justify-between group cursor-pointer text-left">
                 <div class="flex items-center gap-3">
                   <div
                     class="w-9 h-9 rounded-xl bg-[#a855f7]/15 border border-[#a855f7]/30 flex items-center justify-center text-[#a855f7]">
@@ -361,7 +361,7 @@
 
               <!-- Tile 4: Upload Certificates -->
               <button type="button" (click)="onQuickAction('certificates')"
-                class="bg-[var(--bg)]/60 hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[#f59e0b]/40 p-3.5 rounded-2xl transition-all flex items-center justify-between group cursor-pointer text-left">
+                class="bg-[var(--bg)]/60 hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[#f59e0b]/40 p-3.5 rounded-2xl transition flex items-center justify-between group cursor-pointer text-left">
                 <div class="flex items-center gap-3">
                   <div
                     class="w-9 h-9 rounded-xl bg-[#f59e0b]/15 border border-[#f59e0b]/30 flex items-center justify-center text-[#f59e0b]">
@@ -379,7 +379,7 @@
 
               <!-- Tile 5: Manage Documents -->
               <button type="button" (click)="onQuickAction('documents')"
-                class="bg-[var(--bg)]/60 hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[#10b981]/40 p-3.5 rounded-2xl transition-all flex items-center justify-between group cursor-pointer text-left">
+                class="bg-[var(--bg)]/60 hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[#10b981]/40 p-3.5 rounded-2xl transition flex items-center justify-between group cursor-pointer text-left">
                 <div class="flex items-center gap-3">
                   <div
                     class="w-9 h-9 rounded-xl bg-[#10b981]/15 border border-[#10b981]/30 flex items-center justify-center text-[#10b981]">
@@ -397,7 +397,7 @@
 
               <!-- Tile 6: Change Password -->
               <button type="button" (click)="onQuickAction('password')"
-                class="bg-[var(--bg)]/60 hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[#ef4444]/40 p-3.5 rounded-2xl transition-all flex items-center justify-between group cursor-pointer text-left">
+                class="bg-[var(--bg)]/60 hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[#ef4444]/40 p-3.5 rounded-2xl transition flex items-center justify-between group cursor-pointer text-left">
                 <div class="flex items-center gap-3">
                   <div
                     class="w-9 h-9 rounded-xl bg-[#ef4444]/15 border border-[#ef4444]/30 flex items-center justify-center text-[#ef4444]">
@@ -700,7 +700,7 @@
           <div class="flex items-center gap-3 pt-2">
             <button (click)="uploadCertificate()" [disabled]="uploadingCertificate || !certFile"
               class="btn-size-lg px-5 bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-fg)] font-black text-xs rounded-xl cursor-pointer disabled:opacity-40 inline-flex items-center justify-center">
-              {{ uploadingCertificate ? 'Uploading...' : 'Start Upload' }}
+              {{ uploadingCertificate ? 'Uploading…' : 'Start Upload' }}
             </button>
             <button (click)="cancelAddCertificate()"
               class="btn-size-lg px-4 bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--bg)] text-[var(--text)] font-bold text-xs rounded-xl cursor-pointer inline-flex items-center justify-center">

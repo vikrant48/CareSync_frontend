@@ -1,3 +1,8 @@
+/* Hallmark · checked: 2026-11-06 · genre: modern-minimal (inferred) · scope: app (all screens), static lint only
+ * fixed: 10a transition-all, 67 tracked-caps labels (templates, .btn-sm, .status-badge, .filter-label, admin tables),
+ *   2a/2b gradients, 12 bounce, 30a emoji stars, 33 svg labels, F1/F2 punctuation · kept: wordmark gradient, carousel copy
+ * left for the owner: 48 colour literals (tokens), 29 glass, F24 border+shadow, 39a .input-modern focus, 74 stock palette
+ * built: the project · redesign: polish · v2.0.0 */
 @import url("@fortawesome/fontawesome-free/css/all.min.css");
 @import "flatpickr/dist/flatpickr.min.css";
 
@@ -69,6 +74,7 @@ html.dark {
 
 html {
   scrollbar-gutter: stable;
+  overflow-x: clip;
 }
 
 html,
@@ -89,7 +95,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
-  overflow-x: hidden;
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -100,6 +106,7 @@ h2,
 .app-title {
   font-family: Outfit, ui-sans-serif, system-ui, sans-serif;
   letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
 /* Global Thin & Theme-Matching Scrollbars */
@@ -248,11 +255,11 @@ a:focus-visible,
 }
 
 .bg-brand-gradient {
-  background-image: linear-gradient(135deg, var(--primary) 0%, var(--primary-deep) 100%);
+  background-color: var(--primary);
 }
 
 .bg-brand-hero {
-  background-image: linear-gradient(90deg, var(--primary) 0%, var(--primary-deep) 100%);
+  background-color: var(--primary);
 }
 
 /* Refined Panel for 'Clean' look */
@@ -382,7 +389,7 @@ a:focus-visible,
 
 /* ---- Status chips (unified language) ---- */
 .status-badge {
-  @apply inline-flex items-center px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold tracking-wide uppercase border shadow-sm whitespace-nowrap;
+  @apply inline-flex items-center px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[11px] sm:text-xs font-semibold border shadow-sm whitespace-nowrap;
 }
 
 .status-badge--success {
@@ -587,7 +594,7 @@ body.light .btn-modern-secondary:hover {
 }
 
 .btn-sm {
-  @apply px-3 py-0 text-xs min-h-[26px] h-auto font-bold rounded-lg uppercase tracking-wider;
+  @apply px-3 py-0 text-xs min-h-[26px] h-auto font-semibold rounded-lg;
 }
 
 }
@@ -710,7 +717,7 @@ select.input-modern:focus {
    Unified Filter Controls System (44px height & label alignment)
    ============================================================ */
 .filter-label {
-  @apply block text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1 leading-tight;
+  @apply block text-[11px] sm:text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1 leading-tight;
 }
 
 /* Filter bars: every control in a filter row is exactly this tall (search, text, select, date, segmented, buttons). */

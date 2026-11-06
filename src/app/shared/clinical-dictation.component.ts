@@ -49,7 +49,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
                           'bg-rose-600 hover:bg-rose-700 shadow-rose-600/30 animate-pulse': isRecording(),
                           'bg-blue-600 hover:bg-blue-700 shadow-blue-600/30': !isRecording()
                         }"
-                        class="btn-size-sm px-5 rounded-xl text-white text-xs font-bold flex items-center gap-2 transition-all transform active:scale-95 shadow-lg">
+                        class="btn-size-sm px-5 rounded-xl text-white text-xs font-bold flex items-center gap-2 transition transform active:scale-95 shadow-lg">
                   <i class="fas" [ngClass]="{ 'fa-stop-circle text-base': isRecording(), 'fa-microphone text-base': !isRecording() }" aria-hidden="true"></i>
                   {{ isRecording() ? 'Stop Recording' : 'Start Live Dictation' }}
                 </button>
@@ -76,7 +76,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
                 (ngModelChange)="transcriptText.set($event)"
                 placeholder="Click 'Start Live Dictation' and speak into your microphone (e.g. 'Patient 45yo male presenting with throbbing headache for 3 days. Prescribe Paracetamol 500mg...'), or type consultation notes here..."
                 rows="4"
-                class="w-full bg-slate-950 border border-slate-700/80 rounded-xl p-4 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all custom-scrollbar">
+                class="w-full bg-slate-950 border border-slate-700/80 rounded-xl p-4 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition custom-scrollbar">
               </textarea>
             </div>
 
@@ -89,7 +89,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
                 type="button"
                 (click)="processDictation()"
                 [disabled]="!transcriptText().trim() || isProcessing()"
-                class="btn-size-lg px-5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-blue-600/20 transition-all">
+                class="btn-size-lg px-5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-blue-600/20 transition">
                 <i class="fas" [ngClass]="{ 'fa-spinner fa-spin': isProcessing(), 'fa-magic': !isProcessing() }" aria-hidden="true"></i>
                 {{ isProcessing() ? 'Structuring Clinical Note...' : '✨ Structure into SOAP Note' }}
               </button>
@@ -111,24 +111,24 @@ import { ModalShellComponent } from './ui/modal-shell.component';
             <!-- Quick Summary Header -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Chief Complaint</span>
+                <span class="text-[10px] font-bold text-slate-400 block mb-1">Chief Complaint</span>
                 <p class="text-xs font-semibold text-blue-300">{{ dictationResult()!.chiefComplaint || 'Not provided' }}</p>
               </div>
 
               <div class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Diagnosis</span>
+                <span class="text-[10px] font-bold text-slate-400 block mb-1">Diagnosis</span>
                 <p class="text-xs font-semibold text-indigo-300">{{ dictationResult()!.diagnosis || 'Not provided' }}</p>
               </div>
 
               <div class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Vitals / Follow-up</span>
+                <span class="text-[10px] font-bold text-slate-400 block mb-1">Vitals / Follow-up</span>
                 <p class="text-xs font-semibold text-cyan-300">{{ dictationResult()!.vitals || dictationResult()!.followUp || 'Not provided' }}</p>
               </div>
             </div>
 
             <!-- S.O.A.P Clinical Cards -->
             <div *ngIf="dictationResult()!.soapNote" class="space-y-3">
-              <h5 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+              <h5 class="text-xs font-bold text-slate-400 flex items-center gap-2">
                 <i class="fas fa-notes-medical text-blue-400" aria-hidden="true"></i> S.O.A.P Clinical Note Format
               </h5>
               
@@ -177,7 +177,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
 
             <!-- Structured Prescriptions Table -->
             <div *ngIf="dictationResult()!.prescriptions && dictationResult()!.prescriptions!.length > 0" class="space-y-3">
-              <h5 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+              <h5 class="text-xs font-bold text-slate-400 flex items-center gap-2">
                 <i class="fas fa-pills text-purple-400" aria-hidden="true"></i> Structured Prescriptions ({{ dictationResult()!.prescriptions!.length }})
               </h5>
               <!-- Mobile cards -->
@@ -219,7 +219,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
 
             <!-- Lab Orders -->
             <div *ngIf="dictationResult()!.labOrders && dictationResult()!.labOrders!.length > 0" class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 space-y-1.5">
-              <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
+              <div class="flex items-center gap-2 text-xs font-bold">
                 <i class="fas fa-vials text-amber-400" aria-hidden="true"></i> Recommended Lab Orders:
               </div>
               <ul class="list-disc list-inside text-xs space-y-1 opacity-90">
@@ -243,7 +243,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
             <button type="button" (click)="closeModal.emit()" class="btn-size-sm px-4 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors inline-flex items-center justify-center">
               Close
             </button>
-            <button *ngIf="dictationResult() && dictationResult()!.success" type="button" (click)="onConfirm()" class="btn-size-lg px-5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-blue-600/20 hover:from-blue-500 hover:to-indigo-500 transition-all inline-flex items-center justify-center">
+            <button *ngIf="dictationResult() && dictationResult()!.success" type="button" (click)="onConfirm()" class="btn-size-lg px-5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-blue-600/20 hover:from-blue-500 hover:to-indigo-500 transition inline-flex items-center justify-center">
               <i class="fas fa-check mr-1.5" aria-hidden="true"></i> Insert into Consultation
             </button>
           </div>

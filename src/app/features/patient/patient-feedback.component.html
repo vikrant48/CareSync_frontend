@@ -61,7 +61,7 @@
                         class="bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3.5 flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <div
-                                class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                                class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-md">
                                 {{ (activeAppointment.doctorName[0] || 'D') | uppercase }}
                             </div>
                             <div>
@@ -131,7 +131,7 @@
                             </button>
                             <button (click)="submit(activeAppointment)"
                                 [disabled]="!form[activeAppointment.appointmentId].rating"
-                                class="btn-size-lg px-3 sm:px-5 rounded-xl bg-[var(--primary)] hover:bg-indigo-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs shadow-lg shadow-indigo-500/25 transition-all flex items-center gap-2 whitespace-nowrap">
+                                class="btn-size-lg px-3 sm:px-5 rounded-xl bg-[var(--primary)] hover:bg-indigo-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs shadow-lg shadow-indigo-500/25 transition flex items-center gap-2 whitespace-nowrap">
                                 <i class="fa-solid fa-paper-plane text-xs" aria-hidden="true"></i>
                                 <span class="sm:hidden">Submit</span><span class="hidden sm:inline">Submit Feedback</span>
                             </button>
@@ -225,10 +225,10 @@
                         <div class="space-y-2">
                             <!-- 5 Stars -->
                             <div class="flex items-center gap-2 text-xs">
-                                <span class="w-6 text-[var(--muted)] font-bold text-[11px]">5 ★</span>
+                                <span class="w-6 text-[var(--muted)] font-bold text-[11px]">5 <i class="fa-solid fa-star text-[9px]" aria-hidden="true"></i></span>
                                 <div
                                     class="flex-1 bg-[var(--bg)] h-2 rounded-full overflow-hidden border border-[var(--border)]">
-                                    <div class="bg-[var(--primary)] h-full rounded-full transition-all duration-500"
+                                    <div class="bg-[var(--primary)] h-full rounded-full transition duration-500"
                                         [style.width.%]="ratingDistribution[5].percent"></div>
                                 </div>
                                 <span class="w-16 text-right text-[10px] text-[var(--muted)] font-mono">
@@ -238,10 +238,10 @@
 
                             <!-- 4 Stars -->
                             <div class="flex items-center gap-2 text-xs">
-                                <span class="w-6 text-[var(--muted)] font-bold text-[11px]">4 ★</span>
+                                <span class="w-6 text-[var(--muted)] font-bold text-[11px]">4 <i class="fa-solid fa-star text-[9px]" aria-hidden="true"></i></span>
                                 <div
                                     class="flex-1 bg-[var(--bg)] h-2 rounded-full overflow-hidden border border-[var(--border)]">
-                                    <div class="bg-cyan-500 h-full rounded-full transition-all duration-500"
+                                    <div class="bg-cyan-500 h-full rounded-full transition duration-500"
                                         [style.width.%]="ratingDistribution[4].percent"></div>
                                 </div>
                                 <span class="w-16 text-right text-[10px] text-[var(--muted)] font-mono">
@@ -251,10 +251,10 @@
 
                             <!-- 3 Stars -->
                             <div class="flex items-center gap-2 text-xs">
-                                <span class="w-6 text-[var(--muted)] font-bold text-[11px]">3 ★</span>
+                                <span class="w-6 text-[var(--muted)] font-bold text-[11px]">3 <i class="fa-solid fa-star text-[9px]" aria-hidden="true"></i></span>
                                 <div
                                     class="flex-1 bg-[var(--bg)] h-2 rounded-full overflow-hidden border border-[var(--border)]">
-                                    <div class="bg-amber-400 h-full rounded-full transition-all duration-500"
+                                    <div class="bg-amber-400 h-full rounded-full transition duration-500"
                                         [style.width.%]="ratingDistribution[3].percent"></div>
                                 </div>
                                 <span class="w-16 text-right text-[10px] text-[var(--muted)] font-mono">
@@ -264,10 +264,10 @@
 
                             <!-- 2 Stars -->
                             <div class="flex items-center gap-2 text-xs">
-                                <span class="w-6 text-[var(--muted)] font-bold text-[11px]">2 ★</span>
+                                <span class="w-6 text-[var(--muted)] font-bold text-[11px]">2 <i class="fa-solid fa-star text-[9px]" aria-hidden="true"></i></span>
                                 <div
                                     class="flex-1 bg-[var(--bg)] h-2 rounded-full overflow-hidden border border-[var(--border)]">
-                                    <div class="bg-orange-500 h-full rounded-full transition-all duration-500"
+                                    <div class="bg-orange-500 h-full rounded-full transition duration-500"
                                         [style.width.%]="ratingDistribution[2].percent"></div>
                                 </div>
                                 <span class="w-16 text-right text-[10px] text-[var(--muted)] font-mono">
@@ -277,10 +277,10 @@
 
                             <!-- 1 Star -->
                             <div class="flex items-center gap-2 text-xs">
-                                <span class="w-6 text-[var(--muted)] font-bold text-[11px]">1 ★</span>
+                                <span class="w-6 text-[var(--muted)] font-bold text-[11px]">1 <i class="fa-solid fa-star text-[9px]" aria-hidden="true"></i></span>
                                 <div
                                     class="flex-1 bg-[var(--bg)] h-2 rounded-full overflow-hidden border border-[var(--border)]">
-                                    <div class="bg-rose-500 h-full rounded-full transition-all duration-500"
+                                    <div class="bg-rose-500 h-full rounded-full transition duration-500"
                                         [style.width.%]="ratingDistribution[1].percent"></div>
                                 </div>
                                 <span class="w-16 text-right text-[10px] text-[var(--muted)] font-mono">
@@ -382,7 +382,7 @@
             <div *ngIf="!loadingGiven && filteredGivenFeedback.length > 0" class="hidden xl:block overflow-x-auto">
                 <table class="w-full text-xs text-left">
                     <thead
-                        class="bg-[var(--bg)] text-[var(--muted)] uppercase text-[10px] font-bold tracking-wider border-b border-[var(--border)]">
+ class="bg-[var(--bg)] text-[var(--muted)] text-[10px] font-bold border-b border-[var(--border)]">
                         <tr>
                             <th class="px-4 py-3">DATE</th>
                             <th class="px-4 py-3">DOCTOR</th>
@@ -522,7 +522,7 @@
                 </span>
             </div>
             <div class="space-y-1">
-                <label class="text-[10px] font-bold uppercase text-muted">Feedback Comment</label>
+                <label class="text-[10px] font-bold text-muted">Feedback Comment</label>
                 <p
                     class="text-xs text-[var(--text)] leading-relaxed bg-[var(--bg)] p-3 rounded-xl border border-[var(--border)]">
                     {{ selectedFeedbackForDetails.comment || 'No comment provided.' }}

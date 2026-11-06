@@ -57,7 +57,7 @@
     <!-- Medical History Timeline List -->
     <div *ngIf="!loading && filteredHistories.length > 0" class="space-y-4">
         <div *ngFor="let record of filteredHistories"
-            class="bg-[var(--panel)] border border-[var(--border)] hover:border-indigo-500/40 rounded-2xl p-6 shadow-xl transition-all space-y-4">
+            class="bg-[var(--panel)] border border-[var(--border)] hover:border-indigo-500/40 rounded-2xl p-6 shadow-xl transition space-y-4">
 
             <!-- Record Header -->
             <div
@@ -87,11 +87,11 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                 <div class="space-y-1 bg-[var(--bg)]/50 p-3 rounded-xl border border-[var(--border)]">
                     <span
-                        class="font-bold text-[var(--muted)] uppercase tracking-wider text-[10px] block">Symptoms</span>
+ class="font-bold text-[var(--muted)] text-[10px] block">Symptoms</span>
                     <p class="text-[var(--text)] leading-relaxed">{{ record.symptoms || 'None documented' }}</p>
                 </div>
                 <div class="space-y-1 bg-[var(--bg)]/50 p-3 rounded-xl border border-[var(--border)]">
-                    <span class="font-bold text-[var(--muted)] uppercase tracking-wider text-[10px] block">Prescribed
+                    <span class="font-bold text-[var(--muted)] text-[10px] block">Prescribed
                         Medication & Doses</span>
                     <ul *ngIf="medicineRows(record).length; else noMedicines" class="space-y-0.5">
                         <li *ngFor="let row of medicineRows(record)" class="text-emerald-600 dark:text-emerald-400 font-semibold leading-relaxed">

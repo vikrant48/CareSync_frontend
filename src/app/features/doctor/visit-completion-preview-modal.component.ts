@@ -41,7 +41,7 @@ import { CompletionPreview } from '../../core/models/appointment.models';
         </div>
 
         <div class="bg-[var(--bg)] border border-[var(--border)] rounded-xl p-4 space-y-3">
-          <div class="text-xs font-bold text-cyan-700 dark:text-cyan-300 uppercase tracking-wider flex items-center gap-2">
+          <div class="text-xs font-bold text-cyan-700 dark:text-cyan-300 flex items-center gap-2">
             <i class="fa-solid fa-user-pen" aria-hidden="true"></i> Stage 3: Patient Intake & AI Triage Summary
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
@@ -60,7 +60,7 @@ import { CompletionPreview } from '../../core/models/appointment.models';
         </div>
 
         <div class="bg-[var(--bg)] border border-[var(--border)] rounded-xl p-4 space-y-3">
-          <div class="text-xs font-bold text-purple-700 dark:text-purple-300 uppercase tracking-wider flex items-center gap-2">
+          <div class="text-xs font-bold text-purple-700 dark:text-purple-300 flex items-center gap-2">
             <i class="fa-solid fa-notes-medical" aria-hidden="true"></i> Stage 6: AI SOAP Clinical Notes
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
@@ -84,7 +84,7 @@ import { CompletionPreview } from '../../core/models/appointment.models';
         </div>
 
         <div class="bg-[var(--bg)] border border-[var(--border)] rounded-xl p-4 space-y-3">
-          <div class="text-xs font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider flex items-center gap-2">
+          <div class="text-xs font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
             <i class="fa-solid fa-file-prescription" aria-hidden="true"></i> Medical Record & Prescriptions
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">

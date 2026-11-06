@@ -102,7 +102,7 @@ export class FilterBarComponent implements OnInit, OnChanges, OnDestroy {
         const surface = this.theme === 'doctor'
             ? 'bg-[var(--bg)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/30'
             : 'bg-[var(--panel)] focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]/30';
-        return `w-full filter-control relative flex items-center justify-between text-left cursor-pointer transition-all duration-200 text-base sm:text-xs font-medium rounded-xl px-3.5 border border-[var(--border)] text-[var(--text)] shadow-inner focus:outline-none ${surface}`;
+        return `w-full filter-control relative flex items-center justify-between text-left cursor-pointer transition duration-200 text-base sm:text-xs font-medium rounded-xl px-3.5 border border-[var(--border)] text-[var(--text)] shadow-inner focus:outline-none ${surface}`;
     }
     private debouncedSubject = new Subject<void>();
     private debounceSubscription?: Subscription;

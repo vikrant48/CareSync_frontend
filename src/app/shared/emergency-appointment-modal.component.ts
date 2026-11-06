@@ -41,7 +41,7 @@ import { doctorDisplayName, doctorInitial as getDoctorInitial } from './utils/do
           <button 
             type="button" 
             aria-label="Close emergency booking" 
-            class="w-7 h-7 rounded-lg bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-100 hover:text-white transition-all flex items-center justify-center shrink-0 cursor-pointer" 
+            class="w-7 h-7 rounded-lg bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-100 hover:text-white transition flex items-center justify-center shrink-0 cursor-pointer" 
             (click)="close()"
           >
             <i class="fa-solid fa-xmark text-xs" aria-hidden="true"></i>
@@ -139,14 +139,14 @@ import { doctorDisplayName, doctorInitial as getDoctorInitial } from './utils/do
         <!-- Tick Radio Confirmation Option -->
         <div 
           (click)="toggleConfirmation()"
-          class="p-2.5 sm:p-3 rounded-xl border transition-all cursor-pointer select-none flex items-start sm:items-center gap-2.5 group"
+          class="p-2.5 sm:p-3 rounded-xl border transition cursor-pointer select-none flex items-start sm:items-center gap-2.5 group"
           [ngClass]="isConfirmed 
             ? 'bg-rose-500/10 dark:bg-rose-950/30 border-rose-500 text-[var(--text)] ring-1 ring-rose-500/30' 
             : 'bg-[var(--panel)] border-[var(--border)] text-[var(--muted)] hover:border-rose-400/50'"
         >
           <!-- Radio / Tick Circle Icon -->
           <div 
-            class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0 transition-all duration-200"
+            class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0 transition duration-200"
             [ngClass]="isConfirmed 
               ? 'border-rose-600 bg-rose-600 text-white shadow-sm shadow-rose-500/50 scale-105' 
               : 'border-gray-400 dark:border-gray-500 bg-transparent group-hover:border-rose-400'"
@@ -171,7 +171,7 @@ import { doctorDisplayName, doctorInitial as getDoctorInitial } from './utils/do
       <div modalFooter class="p-3 sm:p-3.5 border-t border-[var(--border)] bg-[var(--bg)] flex items-center justify-end gap-2.5 rounded-b-2xl shrink-0">
         <button 
           type="button"
-          class="btn-size-md px-3 text-xs font-medium rounded-xl border border-[var(--border)] bg-[var(--panel)] text-[var(--text)] hover:bg-[var(--bg)] transition-all flex items-center gap-1.5 cursor-pointer" 
+          class="btn-size-md px-3 text-xs font-medium rounded-xl border border-[var(--border)] bg-[var(--panel)] text-[var(--text)] hover:bg-[var(--bg)] transition flex items-center gap-1.5 cursor-pointer" 
           (click)="close()" 
           [disabled]="booking"
         >
@@ -181,7 +181,7 @@ import { doctorDisplayName, doctorInitial as getDoctorInitial } from './utils/do
 
         <button 
           type="button"
-          class="btn-size-md px-3 rounded-xl font-bold text-xs text-white transition-all shadow-sm flex items-center gap-1.5 cursor-pointer border"
+          class="btn-size-md px-3 rounded-xl font-bold text-xs text-white transition shadow-sm flex items-center gap-1.5 cursor-pointer border"
           [disabled]="booking || !isConfirmed || !selectedDoctorId"
           [ngClass]="{
             'opacity-40 !cursor-not-allowed bg-gray-500 border-transparent': !isConfirmed || !selectedDoctorId,

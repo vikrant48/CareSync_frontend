@@ -34,7 +34,7 @@ import flatpickr from 'flatpickr';
   ],
   template: `
     <div class="space-y-1 relative" [id]="containerId">
-      <label *ngIf="label" class="block text-[10px] sm:text-[9px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500">
+      <label *ngIf="label" class="block text-[10px] sm:text-[9px] font-black text-gray-400 dark:text-gray-500">
         {{ label }}
       </label>
       

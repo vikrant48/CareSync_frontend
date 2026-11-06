@@ -1,6 +1,6 @@
 <div (click)="onViewAppointment()" role="link" tabindex="0"
     (keydown.enter)="$event.target === $event.currentTarget && onViewAppointment()" [attr.aria-label]="'View appointment with ' + otherPersonName"
-    class="bg-[var(--panel)] border border-[var(--border)] hover:border-[var(--border)] rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-xl transition-all duration-200 flex flex-col justify-between h-full cursor-pointer group hover:shadow-2xl">
+    class="bg-[var(--panel)] border border-[var(--border)] hover:border-[var(--border)] rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-xl transition duration-200 flex flex-col justify-between h-full cursor-pointer group hover:shadow-2xl">
 
     <div class="space-y-3.5">
         <!-- Header: Avatar + Person Info + (Receipt Icon & Status Badge) -->
@@ -16,7 +16,7 @@
                         {{ otherPersonSubtext }}
                     </p>
                     <span *ngIf="!otherPersonActive"
-                          class="inline-flex mt-1 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-600 border border-rose-500/20">
+ class="inline-flex mt-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-600 border border-rose-500/20">
                         Inactive
                     </span>
                 </div>
@@ -25,7 +25,7 @@
             <!-- Receipt Download Icon & Stage Status Badge on top right -->
             <div class="shrink-0 flex items-center gap-1.5">
                 <button *ngIf="viewerRole === 'PATIENT'" type="button" (click)="onDownloadReceipt($event)"
-                    class="w-[38px] h-[38px] shrink-0 text-[var(--muted)] hover:text-[var(--primary)] hover:bg-[var(--bg)] border border-transparent hover:border-[var(--border)] rounded-lg transition-all flex items-center justify-center"
+                    class="w-[38px] h-[38px] shrink-0 text-[var(--muted)] hover:text-[var(--primary)] hover:bg-[var(--bg)] border border-transparent hover:border-[var(--border)] rounded-lg transition flex items-center justify-center"
                     title="Download Booking Receipt" aria-label="Download Booking Receipt">
                     <i class="fa-solid fa-download text-xs" aria-hidden="true"></i>
                 </button>
@@ -54,7 +54,7 @@
             <!-- DOCTOR COMPLETED ACTIONS -->
             <ng-container *ngIf="viewerRole === 'DOCTOR'">
                 <button type="button" (click)="onViewMedicalRecord($event)"
-                    class="h-[38px] py-0 w-full px-4 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2">
+                    class="h-[38px] py-0 w-full px-4 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white text-xs font-bold rounded-xl transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2">
                     <i class="fa-solid fa-file-medical" aria-hidden="true"></i>
                     <span>View Medical Record</span>
                 </button>
@@ -64,18 +64,18 @@
             <ng-container *ngIf="viewerRole === 'PATIENT'">
                 <div class="grid grid-cols-2 gap-2 w-full">
                     <button type="button" (click)="onViewPrescription($event)"
-                        class="h-[38px] py-0 px-3 bg-[var(--bg)] hover:bg-[var(--border)] text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5">
+                        class="h-[38px] py-0 px-3 bg-[var(--bg)] hover:bg-[var(--border)] text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-eye text-xs" aria-hidden="true"></i>
                         <span>View Rx</span>
                     </button>
                     <button type="button" (click)="onDownloadPrescription($event)"
-                        class="h-[38px] py-0 px-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5">
+                        class="h-[38px] py-0 px-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-file-pdf text-xs" aria-hidden="true"></i>
                         <span>Download Rx</span>
                     </button>
                 </div>
                 <button *ngIf="!appointment.feedbackSubmitted" type="button" (click)="onGiveFeedback($event)"
-                    class="h-[38px] py-0 w-full px-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5">
+                    class="h-[38px] py-0 w-full px-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-xs font-semibold rounded-xl transition flex items-center justify-center gap-1.5">
                     <i class="fa-solid fa-star text-amber-700 dark:text-amber-400 text-xs" aria-hidden="true"></i>
                     <span>Give Feedback</span>
                 </button>
@@ -83,7 +83,7 @@
 
             <!-- Secondary button for details -->
             <button type="button" (click)="onViewAppointment(); $event.stopPropagation()"
-                class="h-[38px] py-0 w-full px-3 bg-[var(--bg)] hover:bg-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] text-xs font-medium rounded-xl transition-all flex items-center justify-center gap-1.5">
+                class="h-[38px] py-0 w-full px-3 bg-[var(--bg)] hover:bg-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] text-xs font-medium rounded-xl transition flex items-center justify-center gap-1.5">
                 <span>View Details</span>
                 <i class="fa-solid fa-chevron-right text-[10px]" aria-hidden="true"></i>
             </button>
@@ -91,7 +91,7 @@
 
         <ng-template #defaultAction>
             <button type="button" (click)="onViewAppointment(); $event.stopPropagation()"
-                class="h-[38px] py-0 w-full px-4 bg-[#5b6cf0]/25 hover:bg-[#5b6cf0]/40 text-indigo-700 dark:text-indigo-100 border border-[#5b6cf0]/45 active:scale-[0.99] text-xs font-bold rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5">
+                class="h-[38px] py-0 w-full px-4 bg-[#5b6cf0]/25 hover:bg-[#5b6cf0]/40 text-indigo-700 dark:text-indigo-100 border border-[#5b6cf0]/45 active:scale-[0.99] text-xs font-bold rounded-xl transition shadow-md flex items-center justify-center gap-1.5">
                 <span>View Appointment</span>
                 <i class="fa-solid fa-chevron-right text-[10px]" aria-hidden="true"></i>
             </button>
@@ -99,17 +99,17 @@
                 (click)="$event.stopPropagation()">
                 <div *ngIf="canPatientReschedule" class="grid grid-cols-2 gap-2">
                     <button type="button" (click)="onReschedule($event)"
-                        class="h-[38px] py-0 px-3 bg-[var(--bg)] hover:bg-[var(--border)] text-[var(--text)] border border-[var(--border)] hover:border-[var(--muted)] text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1.5">
+                        class="h-[38px] py-0 px-3 bg-[var(--bg)] hover:bg-[var(--border)] text-[var(--text)] border border-[var(--border)] hover:border-[var(--muted)] text-xs font-bold rounded-xl transition inline-flex items-center justify-center gap-1.5">
                         Reschedule
                     </button>
                     <button type="button" (click)="onCancel($event)" [disabled]="!canPatientCancel"
-                        class="h-[38px] py-0 px-3 bg-[var(--bg)] hover:bg-rose-500/10 text-[var(--muted)] hover:text-rose-600 dark:hover:text-rose-300 border border-[var(--border)] hover:border-rose-500/40 text-xs font-bold rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center justify-center gap-1.5"
+                        class="h-[38px] py-0 px-3 bg-[var(--bg)] hover:bg-rose-500/10 text-[var(--muted)] hover:text-rose-600 dark:hover:text-rose-300 border border-[var(--border)] hover:border-rose-500/40 text-xs font-bold rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center justify-center gap-1.5"
                         aria-label="Cancel appointment">
                         Cancel
                     </button>
                 </div>
                 <button *ngIf="canOpenChat" type="button" (click)="onOpenChat($event)"
-                    class="h-[38px] py-0 w-full px-3 bg-[var(--bg)] hover:bg-[var(--border)] text-[var(--text)] text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5">
+                    class="h-[38px] py-0 w-full px-3 bg-[var(--bg)] hover:bg-[var(--border)] text-[var(--text)] text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5">
                     <i class="fa-solid fa-comments text-xs" aria-hidden="true"></i>
                     <span>Chat with Doctor</span>
                 </button>

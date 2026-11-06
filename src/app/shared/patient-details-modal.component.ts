@@ -97,7 +97,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
           <div *ngIf="activeTab === 'history'" class="space-y-4 animate-in fade-in slide-in-from-right-2 duration-300">
             
             <div *ngFor="let h of sortedHistory(); trackBy: trackHistory" 
-                 class="group relative bg-white dark:bg-gray-700/50 rounded-xl p-4 border border-gray-100 dark:border-gray-600 hover:shadow-md hover:border-blue-200 dark:hover:border-blue-700 transition-all cursor-pointer"
+                 class="group relative bg-white dark:bg-gray-700/50 rounded-xl p-4 border border-gray-100 dark:border-gray-600 hover:shadow-md hover:border-blue-200 dark:hover:border-blue-700 transition cursor-pointer"
                  (click)="historyClick.emit(h)">
                 
                 <div class="flex justify-between items-start mb-2">

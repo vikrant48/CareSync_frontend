@@ -95,7 +95,7 @@ interface AdminNavGroup {
 
       <nav class="flex-1 overflow-y-auto custom-scrollbar px-3 py-4 space-y-5">
         <div *ngFor="let group of navGroups">
-          <div class="px-2 mb-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">{{ group.title }}</div>
+          <div class="px-2 mb-1.5 text-[10px] font-bold text-[var(--muted)]">{{ group.title }}</div>
           <div class="space-y-0.5">
             <a *ngFor="let item of group.items" [routerLink]="linkFor(item.section)" [queryParams]="queryFor(item.section)"
               (click)="menuOpen = false" class="admin-nav-link" [class.admin-nav-link--active]="section === item.section"

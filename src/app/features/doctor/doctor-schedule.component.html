@@ -7,7 +7,7 @@
                 {{ todayDate | date:'EEEE, MMMM d, yyyy' }}
             </div>
             <button type="button" (click)="refreshToday()" aria-label="Refresh schedule"
-                class="w-11 h-11 rounded-xl bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)] flex items-center justify-center text-sm transition-all cursor-pointer shadow-sm shrink-0"
+                class="w-11 h-11 rounded-xl bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)] flex items-center justify-center text-sm transition cursor-pointer shadow-sm shrink-0"
                 title="Refresh Schedule">
                 <i class="fa-solid fa-rotate" [class.animate-spin]="loading" aria-hidden="true"></i>
             </button>
@@ -21,7 +21,7 @@
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
             <!-- Stat 1: Total Appointments -->
             <div
-                class="bg-[var(--panel)] border border-[var(--border)] rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl flex items-center gap-2.5 sm:gap-4 transition-all hover:border-[var(--accent)]/40 min-w-0">
+                class="bg-[var(--panel)] border border-[var(--border)] rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl flex items-center gap-2.5 sm:gap-4 transition hover:border-[var(--accent)]/40 min-w-0">
                 <div
                     class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[var(--bg)] text-[var(--primary)] flex items-center justify-center text-base sm:text-xl shrink-0 shadow-inner">
                     <i class="fa-regular fa-calendar-check" aria-hidden="true"></i>
@@ -37,7 +37,7 @@
 
             <!-- Stat 2: Confirmed -->
             <div
-                class="bg-[var(--panel)] border border-[var(--border)] rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl flex items-center gap-2.5 sm:gap-4 transition-all hover:border-[var(--accent)]/40 min-w-0">
+                class="bg-[var(--panel)] border border-[var(--border)] rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl flex items-center gap-2.5 sm:gap-4 transition hover:border-[var(--accent)]/40 min-w-0">
                 <div
                     class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center text-base sm:text-xl shrink-0 shadow-inner">
                     <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
@@ -52,7 +52,7 @@
 
             <!-- Stat 3: Pending -->
             <div
-                class="bg-[var(--panel)] border border-[var(--border)] rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl flex items-center gap-2.5 sm:gap-4 transition-all hover:border-[var(--accent)]/40 min-w-0">
+                class="bg-[var(--panel)] border border-[var(--border)] rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl flex items-center gap-2.5 sm:gap-4 transition hover:border-[var(--accent)]/40 min-w-0">
                 <div
                     class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[var(--accent-soft)] text-amber-700 dark:text-amber-400 flex items-center justify-center text-base sm:text-xl shrink-0 shadow-inner">
                     <i class="fa-regular fa-clock" aria-hidden="true"></i>
@@ -67,7 +67,7 @@
 
             <!-- Stat 4: Cancelled -->
             <div
-                class="bg-[var(--panel)] border border-[var(--border)] rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl flex items-center gap-2.5 sm:gap-4 transition-all hover:border-[var(--accent)]/40 min-w-0">
+                class="bg-[var(--panel)] border border-[var(--border)] rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl flex items-center gap-2.5 sm:gap-4 transition hover:border-[var(--accent)]/40 min-w-0">
                 <div
                     class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[var(--danger-soft)] text-rose-700 dark:text-rose-400 flex items-center justify-center text-base sm:text-xl shrink-0 shadow-inner">
                     <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>

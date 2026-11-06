@@ -23,7 +23,7 @@ import { AbstractControl } from '@angular/forms';
         <div class="space-y-1 sm:space-y-2 mb-6">
           <div class="flex items-center gap-3">
             <a [routerLink]="backLink"
-               class="btn-size-md bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--border)] text-[var(--text)] text-xs sm:text-sm font-bold px-3.5 rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm">
+               class="btn-size-md bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--border)] text-[var(--text)] text-xs sm:text-sm font-bold px-3.5 rounded-xl transition flex items-center gap-2 cursor-pointer shadow-sm">
               <i class="fa-solid fa-arrow-left text-xs" aria-hidden="true"></i>
               <span>Back</span>
             </a>
@@ -75,7 +75,7 @@ import { AbstractControl } from '@angular/forms';
               <span class="text-[var(--primary)] font-bold">{{ completionPercentage }}%</span>
             </div>
             <div class="w-full h-2 bg-[var(--bg)] rounded-full overflow-hidden border border-[var(--border)]/40">
-              <div class="h-full bg-[var(--primary)] rounded-full transition-all duration-500" [style.width.%]="completionPercentage"></div>
+              <div class="h-full bg-[var(--primary)] rounded-full transition duration-500" [style.width.%]="completionPercentage"></div>
             </div>
             <div class="flex items-center gap-1.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400 pt-0.5">
               <i class="fa-solid fa-circle-check text-xs" aria-hidden="true"></i>
@@ -99,7 +99,7 @@ import { AbstractControl } from '@angular/forms';
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
               <!-- First Name -->
               <div class="space-y-1.5">
-                <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider" for="pe-firstName">
+                <label class="block text-xs font-bold text-[var(--muted)]" for="pe-firstName">
                   FIRST NAME <span class="text-rose-500" aria-hidden="true">*</span><span class="sr-only">(required)</span>
                 </label>
                 <input class="w-full bg-[var(--bg)] border border-[var(--border)] focus:border-[var(--primary)] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-[var(--text)] placeholder-[var(--muted)] outline-none transition-colors"
@@ -109,7 +109,7 @@ import { AbstractControl } from '@angular/forms';
 
               <!-- Last Name -->
               <div class="space-y-1.5">
-                <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider" for="pe-lastName">
+                <label class="block text-xs font-bold text-[var(--muted)]" for="pe-lastName">
                   LAST NAME <span class="text-rose-500" aria-hidden="true">*</span><span class="sr-only">(required)</span>
                 </label>
                 <input class="w-full bg-[var(--bg)] border border-[var(--border)] focus:border-[var(--primary)] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-[var(--text)] placeholder-[var(--muted)] outline-none transition-colors"
@@ -119,7 +119,7 @@ import { AbstractControl } from '@angular/forms';
 
               <!-- Email Address -->
               <div class="space-y-1.5">
-                <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider" for="pe-email">
+                <label class="block text-xs font-bold text-[var(--muted)]" for="pe-email">
                   EMAIL ADDRESS <span class="text-rose-500" aria-hidden="true">*</span><span class="sr-only">(required)</span>
                 </label>
                 <div class="relative flex items-center">
@@ -134,7 +134,7 @@ import { AbstractControl } from '@angular/forms';
 
               <!-- Contact Number -->
               <div class="space-y-1.5">
-                <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider" for="pe-contactInfo">
+                <label class="block text-xs font-bold text-[var(--muted)]" for="pe-contactInfo">
                   CONTACT NUMBER <span class="text-rose-500" aria-hidden="true">*</span><span class="sr-only">(required)</span>
                 </label>
                 <div class="relative flex items-center">
@@ -197,7 +197,7 @@ import { AbstractControl } from '@angular/forms';
             </div>
 
             <div class="space-y-1.5">
-              <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider" for="pe-illnessDetails">
+              <label class="block text-xs font-bold text-[var(--muted)]" for="pe-illnessDetails">
                 MEDICAL HISTORY / ILLNESS DETAILS
               </label>
               <div class="relative">
@@ -233,11 +233,11 @@ import { AbstractControl } from '@angular/forms';
 
             <div class="flex items-center gap-3 ml-auto">
               <a [routerLink]="backLink"
-                 class="btn-size-lg bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs sm:text-sm font-bold px-5 rounded-xl transition-all cursor-pointer inline-flex items-center justify-center">
+                 class="btn-size-lg bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-xs sm:text-sm font-bold px-5 rounded-xl transition cursor-pointer inline-flex items-center justify-center">
                 Cancel
               </a>
               <button type="submit" [disabled]="saving"
-                      class="btn-size-lg bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white text-xs sm:text-sm font-bold px-5 rounded-xl shadow-lg shadow-[var(--primary)]/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50">
+                      class="btn-size-lg bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white text-xs sm:text-sm font-bold px-5 rounded-xl shadow-lg shadow-[var(--primary)]/20 transition flex items-center gap-2 cursor-pointer disabled:opacity-50">
                 <i class="fa-solid fa-floppy-disk text-xs" *ngIf="!saving" aria-hidden="true"></i>
                 <i class="fa-solid fa-circle-notch animate-spin text-xs" *ngIf="saving" aria-hidden="true"></i>
                 <span>{{ saving ? 'Saving...' : 'Save Changes' }}</span>

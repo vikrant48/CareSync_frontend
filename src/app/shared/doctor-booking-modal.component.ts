@@ -104,7 +104,7 @@ import { doctorDisplayName, doctorInitial as getDoctorInitial } from './utils/do
             <button
               type="button"
               *ngFor="let s of slots"
-              class="btn-size-md px-1 text-sm rounded-lg border transition-all duration-200 inline-flex items-center justify-center"
+              class="btn-size-md px-1 text-sm rounded-lg border transition duration-200 inline-flex items-center justify-center"
               [ngClass]="
                 selectedSlot === s
                   ? 'bg-blue-500 text-white border-emerald-500 shadow-md ring-2 ring-emerald-500/20'

@@ -38,7 +38,7 @@ import { LabReportExplainerComponent } from '../../shared/lab-report-explainer.c
       <div *ngIf="expanded()" id="healthBriefBody" class="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <!-- Next appointment and how to prepare -->
         <div class="inset-surface rounded-lg p-3">
-          <div class="text-[10px] font-bold uppercase tracking-wider text-[var(--muted)] mb-1.5">Next appointment</div>
+          <div class="text-[10px] font-bold text-[var(--muted)] mb-1.5">Next appointment</div>
           <ng-container *ngIf="b.nextAppointment as next; else nothingBooked">
             <a [routerLink]="['/patient/appointments', next.appointmentId]"
                class="block text-xs font-bold text-[var(--text)] hover:text-[var(--primary)]">
@@ -64,7 +64,7 @@ import { LabReportExplainerComponent } from '../../shared/lab-report-explainer.c
 
         <!-- Pending follow-ups -->
         <div class="inset-surface rounded-lg p-3">
-          <div class="text-[10px] font-bold uppercase tracking-wider text-[var(--muted)] mb-1.5">To do</div>
+          <div class="text-[10px] font-bold text-[var(--muted)] mb-1.5">To do</div>
           <p *ngIf="b.pendingFollowUps.length === 0" class="text-[11px] text-[var(--muted)]">Nothing pending.</p>
           <ul class="space-y-1.5">
             <li *ngFor="let item of b.pendingFollowUps" class="text-[11px] text-[var(--text)] flex gap-1.5">
@@ -84,7 +84,7 @@ import { LabReportExplainerComponent } from '../../shared/lab-report-explainer.c
 
         <!-- Unread lab reports -->
         <div class="inset-surface rounded-lg p-3">
-          <div class="text-[10px] font-bold uppercase tracking-wider text-[var(--muted)] mb-1.5">
+          <div class="text-[10px] font-bold text-[var(--muted)] mb-1.5">
             New lab reports
             <span *ngIf="b.unreadLabReports.length" class="ml-1 px-1.5 py-px rounded-full bg-purple-500/15 text-purple-700 dark:text-purple-300">{{ b.unreadLabReports.length }}</span>
           </div>
