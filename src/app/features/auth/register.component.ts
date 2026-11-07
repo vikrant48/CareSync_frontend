@@ -188,9 +188,9 @@ export class RegisterComponent implements OnInit {
     if (this.currentStep === 1) {
       if (this.basicForm.valid) {
         this.loading = true;
-        const { username, email } = this.basicForm.value;
+        const { username } = this.basicForm.value;
 
-        this.auth.checkAvailability(username, email).subscribe({
+        this.auth.checkAvailability(username).subscribe({
           next: (res) => {
             this.loading = false;
             let hasError = false;
@@ -200,14 +200,6 @@ export class RegisterComponent implements OnInit {
               username?.setErrors({ taken: true });
               username?.markAsTouched();
               this.toast.showError('Username is already taken');
-              hasError = true;
-            }
-
-            if (!res.emailAvailable) {
-              const email = this.basicForm.get('email');
-              email?.setErrors({ taken: true });
-              email?.markAsTouched();
-              this.toast.showError('Email is already registered');
               hasError = true;
             }
 
