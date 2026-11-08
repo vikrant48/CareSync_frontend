@@ -7,18 +7,17 @@
 }
 
 .docs-shell {
-  max-width: 1200px;
   margin: 0 auto;
   padding: 24px 16px 96px;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 40px;
+  gap: 32px;
 }
 
 @media (min-width: 1024px) {
   .docs-shell {
-    grid-template-columns: 232px minmax(0, 1fr);
-    padding: 32px 24px 96px;
+    grid-template-columns: 240px minmax(0, 1fr);
+    padding: 32px 32px 96px;
   }
 }
 
@@ -118,7 +117,6 @@
 
 .docs-main {
   min-width: 0;
-  max-width: 860px;
 }
 
 .docs-error {
@@ -159,6 +157,12 @@
   font-weight: 600;
   margin: 32px 0 12px;
   scroll-margin-top: 80px;
+}
+
+.docs-article ::ng-deep h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 24px 0 8px;
 }
 
 .docs-article ::ng-deep p {
@@ -278,6 +282,29 @@
 .docs-article ::ng-deep .docs-diagram svg {
   max-width: 100%;
   height: auto;
+}
+
+.docs-article ::ng-deep .docs-video {
+  margin: 8px 0 24px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.docs-article ::ng-deep .docs-video video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  background: var(--bg);
+}
+
+.docs-article ::ng-deep .docs-video figcaption {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
 }
 
 @media (prefers-reduced-motion: reduce) {

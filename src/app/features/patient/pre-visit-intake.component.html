@@ -22,20 +22,20 @@
           </div>
         </div>
 
-        <div class="bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-6 space-y-4">
+        <div class="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-6 space-y-4">
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <h2 class="text-sm font-bold text-[var(--text)] flex items-center gap-2">
-                        <i class="fa-solid fa-wand-magic-sparkles text-indigo-700 dark:text-indigo-400" aria-hidden="true"></i>
+                        <i class="fa-solid fa-wand-magic-sparkles text-blue-700 dark:text-blue-400" aria-hidden="true"></i>
                         Start with an AI intake draft
                     </h2>
                     <p class="text-xs text-muted mt-1">Describe the concern by text or voice. AI will fill the form, but will never submit it for you.</p>
                 </div>
-                <span class="text-[10px] font-bold text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 rounded-full px-2 py-1">Draft only</span>
+                <span class="text-[10px] font-bold text-blue-700 dark:text-blue-300 border border-blue-500/30 rounded-full px-2 py-1">Draft only</span>
             </div>
             <textarea [(ngModel)]="aiNarrative" rows="3"
                 placeholder="For example: I have had a dry cough and mild fever for two days. I take cetirizine and I am allergic to penicillin."
-                class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3 text-sm text-[var(--text)] placeholder:text-[var(--muted)] focus:outline-none focus:border-indigo-500"></textarea>
+                class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3 text-sm text-[var(--text)] placeholder:text-[var(--muted)] focus:outline-none focus:border-blue-500"></textarea>
             <div class="flex flex-wrap items-center gap-2">
                 <button *ngIf="speechSupported" type="button" (click)="toggleListening()"
                     class="btn-size-lg px-4 rounded-xl border text-xs font-bold transition inline-flex items-center justify-center"
@@ -44,7 +44,7 @@
                     {{ listening ? 'Stop voice note' : 'Add voice note' }}
                 </button>
                 <button type="button" (click)="draftWithAi()" [disabled]="drafting || aiNarrative.trim().length < 5"
-                    class="btn-size-lg px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-bold inline-flex items-center justify-center">
+                    class="btn-size-lg px-5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold inline-flex items-center justify-center">
                     <i class="fa-solid" [ngClass]="drafting ? 'fa-spinner fa-spin' : 'fa-wand-magic-sparkles'" aria-hidden="true"></i>
                     {{ drafting ? 'Drafting intake…' : 'Fill form with AI' }}
                 </button>
@@ -129,27 +129,27 @@
         <!-- Step 2: Medications & History -->
         <div *ngIf="activeStep === 2" class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-6 space-y-5">
             <h2 class="text-base font-semibold text-[var(--text)] flex items-center gap-2">
-                <i class="fa-solid fa-pills text-cyan-700 dark:text-cyan-400" aria-hidden="true"></i> Current Medications & Known Allergies
+                <i class="fa-solid fa-pills text-teal-700 dark:text-teal-400" aria-hidden="true"></i> Current Medications & Known Allergies
             </h2>
 
             <div>
                 <label class="block text-xs font-medium text-[var(--text)] mb-1.5" for="pre-visit-intake-current-medications-opti-5">Current Medications (Optional)</label>
                 <textarea id="pre-visit-intake-current-medications-opti-5" [(ngModel)]="intakeData.currentMedications" rows="3"
                     placeholder="e.g., Paracetamol 500mg as needed, Cetirizine 10mg daily..."
-                    class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3 text-sm text-[var(--text)] placeholder:text-[var(--muted)] focus:outline-none focus:border-cyan-500 transition"></textarea>
+                    class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3 text-sm text-[var(--text)] placeholder:text-[var(--muted)] focus:outline-none focus:border-teal-500 transition"></textarea>
             </div>
 
             <div>
                 <label class="block text-xs font-medium text-[var(--text)] mb-1.5" for="pre-visit-intake-known-allergies-optional-6">Known Allergies (Optional)</label>
                 <input id="pre-visit-intake-known-allergies-optional-6" type="text" [(ngModel)]="intakeData.allergies" placeholder="e.g., Penicillin, Dust, Peanuts..."
-                    class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3 text-sm text-[var(--text)] placeholder:text-[var(--muted)] focus:outline-none focus:border-cyan-500 transition" />
+                    class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3 text-sm text-[var(--text)] placeholder:text-[var(--muted)] focus:outline-none focus:border-teal-500 transition" />
             </div>
         </div>
 
         <!-- Step 3: Consent & Summary -->
         <div *ngIf="activeStep === 3" class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-6 space-y-5">
             <h2 class="text-base font-semibold text-[var(--text)] flex items-center gap-2">
-                <i class="fa-solid fa-file-signature text-purple-700 dark:text-purple-300" aria-hidden="true"></i> Consent & Final Submission
+                <i class="fa-solid fa-file-signature text-blue-700 dark:text-blue-300" aria-hidden="true"></i> Consent & Final Submission
             </h2>
 
             <!-- Summary Card -->
@@ -199,7 +199,7 @@
 
                 <button *ngIf="activeStep === 3" (click)="submitIntake()"
                     [disabled]="submitting || !intakeData.consentGiven"
-                    class="btn-size-lg px-6 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 disabled:opacity-50 text-gray-950 font-bold text-xs transition shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+                    class="btn-size-lg px-6 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-gray-950 font-bold text-xs transition shadow-lg shadow-emerald-500/20 flex items-center gap-2">
                     <i *ngIf="submitting" class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
                     <span class="sm:hidden">Submit</span>
                     <span class="hidden sm:inline">Submit Pre-Visit Intake</span>

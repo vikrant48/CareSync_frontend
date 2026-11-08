@@ -132,7 +132,7 @@ interface Bar {
           <div class="space-y-2">
             <div *ngFor="let b of conditionBars" class="text-xs">
               <div class="flex justify-between gap-2 mb-0.5"><span class="truncate">{{ b.label }}</span><span class="font-semibold">{{ b.value }}</span></div>
-              <div class="h-1.5 rounded-full bg-[var(--panel)] overflow-hidden"><div class="h-full rounded-full bg-violet-500" [style.width.%]="b.percent"></div></div>
+              <div class="h-1.5 rounded-full bg-[var(--panel)] overflow-hidden"><div class="h-full rounded-full bg-blue-500" [style.width.%]="b.percent"></div></div>
             </div>
           </div>
         </div>

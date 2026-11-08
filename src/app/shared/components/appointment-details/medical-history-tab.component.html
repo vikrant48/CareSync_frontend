@@ -7,10 +7,10 @@
                 class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)] text-xs" aria-hidden="true"></i>
             <input type="text" [(ngModel)]="searchQuery" (input)="filterRecords()"
                 placeholder="Search symptoms, diagnosis, medicine..."
-                class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl pl-9 pr-4 py-2 text-xs text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-indigo-500 transition-colors" />
+                class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl pl-9 pr-4 py-2 text-xs text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-blue-500 transition-colors" />
         </div>
         <div class="flex items-center gap-2 text-xs font-semibold text-[var(--muted)]">
-            <i class="fa-solid fa-clock-rotate-left text-cyan-600 dark:text-cyan-400" aria-hidden="true"></i>
+            <i class="fa-solid fa-clock-rotate-left text-teal-600 dark:text-teal-400" aria-hidden="true"></i>
             <span>Showing {{ filteredHistories.length }} Medical Entry(s)</span>
         </div>
     </div>
@@ -27,9 +27,9 @@
 
     <!-- Pre-completion Patient Banner -->
     <div *ngIf="viewerRole === 'PATIENT' && appointmentStatus !== 'COMPLETED'"
-        class="bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-6 flex items-start gap-4 shadow-xl">
+        class="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-6 flex items-start gap-4 shadow-xl">
         <div
-            class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold shrink-0">
+            class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold shrink-0">
             <i class="fa-solid fa-clock-rotate-left text-lg" aria-hidden="true"></i>
         </div>
         <div>
@@ -57,14 +57,14 @@
     <!-- Medical History Timeline List -->
     <div *ngIf="!loading && filteredHistories.length > 0" class="space-y-4">
         <div *ngFor="let record of filteredHistories"
-            class="bg-[var(--panel)] border border-[var(--border)] hover:border-indigo-500/40 rounded-2xl p-6 shadow-xl transition space-y-4">
+            class="bg-[var(--panel)] border border-[var(--border)] hover:border-blue-500/40 rounded-2xl p-6 shadow-xl transition space-y-4">
 
             <!-- Record Header -->
             <div
                 class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border)]">
                 <div class="flex items-center gap-3">
                     <div
-                        class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center font-bold">
+                        class="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center font-bold">
                         <i class="fa-solid fa-notes-medical" aria-hidden="true"></i>
                     </div>
                     <div>

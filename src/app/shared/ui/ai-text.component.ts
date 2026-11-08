@@ -30,12 +30,12 @@ interface Block {
       <ng-container *ngFor="let block of blocks">
         <h4 *ngIf="block.kind === 'heading'"
             class="font-bold text-[var(--text)] first:mt-0"
-            [ngClass]="block.level <= 2 ? 'text-sm mt-3 pb-1 border-b border-[var(--border)]' : 'text-xs mt-3 text-cyan-700 dark:text-cyan-300 uppercase tracking-wide'">
+            [ngClass]="block.level <= 2 ? 'text-sm mt-3 pb-1 border-b border-[var(--border)]' : 'text-xs mt-3 text-teal-700 dark:text-teal-300 uppercase tracking-wide'">
           <ng-container *ngTemplateOutlet="segmentsTpl; context: { $implicit: block.segments }"></ng-container>
         </h4>
         <div *ngIf="block.kind === 'bullet'" class="flex gap-2" [style.padding-left.rem]="block.level * 1.1">
           <span class="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full"
-                [ngClass]="block.level === 0 ? 'bg-cyan-500' : 'bg-[var(--muted)]'" aria-hidden="true"></span>
+                [ngClass]="block.level === 0 ? 'bg-teal-500' : 'bg-[var(--muted)]'" aria-hidden="true"></span>
           <span class="min-w-0"><ng-container *ngTemplateOutlet="segmentsTpl; context: { $implicit: block.segments }"></ng-container></span>
         </div>
         <p *ngIf="block.kind === 'paragraph'">

@@ -52,7 +52,7 @@
                             'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20': (booking.status || '').toUpperCase() === 'COMPLETED',
                             'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20': (booking.status || '').toUpperCase() === 'UPCOMING' || (booking.status || '').toUpperCase() === 'PENDING' || (booking.status || '').toUpperCase() === 'SCHEDULED',
                             'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20': (booking.status || '').toUpperCase() === 'CANCELLED',
-                            'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20': (booking.status || '').toUpperCase() === 'IN_PROGRESS'
+                            'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20': (booking.status || '').toUpperCase() === 'IN_PROGRESS'
                         }"
                         class="w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl border shrink-0 flex items-center justify-center text-lg sm:text-2xl shadow-inner">
                         <i class="fa-solid fa-flask" aria-hidden="true"></i>
@@ -69,7 +69,7 @@
                                     'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20': (booking.status || '').toUpperCase() === 'COMPLETED',
                                     'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20': (booking.status || '').toUpperCase() === 'UPCOMING' || (booking.status || '').toUpperCase() === 'PENDING' || (booking.status || '').toUpperCase() === 'SCHEDULED',
                                     'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20': (booking.status || '').toUpperCase() === 'CANCELLED',
-                                    'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20': (booking.status || '').toUpperCase() === 'IN_PROGRESS'
+                                    'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20': (booking.status || '').toUpperCase() === 'IN_PROGRESS'
                                 }"
  class="border text-[10px] font-extrabold px-2.5 py-0.5 rounded-full tracking-wide">
                                 {{ getStatusLabel(booking.status) }}
@@ -141,7 +141,7 @@
                         (explained)="onReportExplained(booking.id, $event)"
                         (toggled)="onExplanationToggled(booking.id, $event)"
                         (failed)="onExplanationFailed(booking.id, $event)"
-                        buttonClass="btn-size-md bg-[var(--bg)] border border-indigo-500/30 hover:border-indigo-500/60 text-indigo-700 dark:text-indigo-300 text-xs font-bold px-3 rounded-xl transition inline-flex items-center gap-2 disabled:opacity-60"></app-lab-report-explainer>
+                        buttonClass="btn-size-md bg-[var(--bg)] border border-blue-500/30 hover:border-blue-500/60 text-blue-700 dark:text-blue-300 text-xs font-bold px-3 rounded-xl transition inline-flex items-center gap-2 disabled:opacity-60"></app-lab-report-explainer>
 
                     <!-- Download Receipt -->
                     <button type="button" (click)="downloadReceipt(booking)" aria-label="Download receipt"
@@ -217,10 +217,10 @@
 
                 <!-- AI explanation, opened from the Explain button -->
                 <div *ngIf="expandedExplanationId() === booking.id && !explanationErrors()[booking.id] && explanations()[booking.id] as exp"
-                    class="w-full rounded-xl border border-indigo-500/30 bg-indigo-500/5 p-3 sm:p-4 space-y-2">
+                    class="w-full rounded-xl border border-blue-500/30 bg-blue-500/5 p-3 sm:p-4 space-y-2">
                     <div class="flex items-center justify-between gap-2">
                         <h4 class="text-xs font-bold text-[var(--text)] flex items-center gap-1.5">
-                            <i class="fa-solid fa-wand-magic-sparkles text-indigo-600 dark:text-indigo-400" aria-hidden="true"></i>
+                            <i class="fa-solid fa-wand-magic-sparkles text-blue-600 dark:text-blue-400" aria-hidden="true"></i>
                             Your report in plain words
                         </h4>
                         <button type="button" (click)="onExplanationToggled(booking.id, false)" aria-label="Close explanation"

@@ -41,7 +41,7 @@ import { CompletionPreview } from '../../core/models/appointment.models';
         </div>
 
         <div class="bg-[var(--bg)] border border-[var(--border)] rounded-xl p-4 space-y-3">
-          <div class="text-xs font-bold text-cyan-700 dark:text-cyan-300 flex items-center gap-2">
+          <div class="text-xs font-bold text-teal-700 dark:text-teal-300 flex items-center gap-2">
             <i class="fa-solid fa-user-pen" aria-hidden="true"></i> Stage 3: Patient Intake & AI Triage Summary
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
@@ -54,13 +54,13 @@ import { CompletionPreview } from '../../core/models/appointment.models';
               <div class="text-[var(--text)]">{{ previewData.intake?.symptoms || 'N/A' }} ({{ previewData.intake?.duration || 'N/A' }})</div>
             </div>
           </div>
-          <div *ngIf="previewData.intake?.aiTriageSummary" class="bg-cyan-50 dark:bg-cyan-950/30 border border-cyan-200 dark:border-cyan-500/30 rounded-lg p-3 text-xs text-cyan-900 dark:text-cyan-100">
+          <div *ngIf="previewData.intake?.aiTriageSummary" class="bg-teal-50 dark:bg-teal-950/30 border border-teal-200 dark:border-teal-500/30 rounded-lg p-3 text-xs text-teal-900 dark:text-teal-100">
             <span class="font-bold">AI Intake Triage Summary:</span> {{ previewData.intake.aiTriageSummary }}
           </div>
         </div>
 
         <div class="bg-[var(--bg)] border border-[var(--border)] rounded-xl p-4 space-y-3">
-          <div class="text-xs font-bold text-purple-700 dark:text-purple-300 flex items-center gap-2">
+          <div class="text-xs font-bold text-blue-700 dark:text-blue-300 flex items-center gap-2">
             <i class="fa-solid fa-notes-medical" aria-hidden="true"></i> Stage 6: AI SOAP Clinical Notes
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
@@ -77,7 +77,7 @@ import { CompletionPreview } from '../../core/models/appointment.models';
               <p class="text-[var(--text)] whitespace-pre-wrap">{{ previewData.soapReport?.assessment || 'None' }}</p>
             </div>
             <div class="bg-[var(--panel)] p-3 rounded-lg border border-[var(--border)] space-y-1">
-              <div class="text-purple-700 dark:text-purple-300 font-bold">Plan:</div>
+              <div class="text-blue-700 dark:text-blue-300 font-bold">Plan:</div>
               <p class="text-[var(--text)] whitespace-pre-wrap">{{ previewData.soapReport?.plan || 'None' }}</p>
             </div>
           </div>

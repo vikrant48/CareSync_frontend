@@ -28,7 +28,7 @@ import { doctorDisplayName, doctorInitial as getDoctorInitial } from './utils/do
       (close)="close()"
     >
       <!-- Header -->
-      <div modalHeader class="bg-gradient-to-r from-[#53131c] via-[#6d1825] to-[#801b2a] px-4 sm:px-5 py-3 flex items-center justify-between border-b border-red-900/40 shrink-0 relative overflow-hidden">
+      <div modalHeader class="bg-[#53131c] px-4 sm:px-5 py-3 flex items-center justify-between border-b border-red-900/40 shrink-0 relative overflow-hidden">
         <div class="min-w-0 z-10">
           <h2 class="text-sm sm:text-base font-bold text-white tracking-tight">Emergency Booking Confirmation</h2>
           <p class="text-red-100 text-[11px] font-medium">Review and confirm immediate consultation</p>
@@ -185,7 +185,7 @@ import { doctorDisplayName, doctorInitial as getDoctorInitial } from './utils/do
           [disabled]="booking || !isConfirmed || !selectedDoctorId"
           [ngClass]="{
             'opacity-40 !cursor-not-allowed bg-gray-500 border-transparent': !isConfirmed || !selectedDoctorId,
-            'bg-gradient-to-r from-[#63141f] to-[#7f1a28] hover:from-[#761825] hover:to-[#911e2e] active:scale-[0.98] border-[#9b2232]/50 shadow-sm': isConfirmed && selectedDoctorId
+            ' bg-[#63141f] hover:bg-[#761825] active:scale-[0.98] border-[#9b2232]/50 shadow-sm': isConfirmed && selectedDoctorId
           }"
           (click)="bookEmergencyAppointment()" 
         >

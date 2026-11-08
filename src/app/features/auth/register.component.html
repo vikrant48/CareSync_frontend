@@ -203,7 +203,7 @@
                             </button>
                         </div>
                         <button type="button" (click)="verifyEmail()" [disabled]="loading"
-                            class="btn-size-lg w-full flex justify-center px-4 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50">
+                            class="btn-size-lg w-full flex justify-center px-4 rounded-xl text-sm font-semibold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50">
                             <span *ngIf="!loading">Verify & Proceed</span>
                             <span *ngIf="loading"><i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i></span>
                         </button>
@@ -320,7 +320,7 @@
                     <div class="flex-1"></div>
                     <button *ngIf="currentStep === 1 || currentStep === 2" type="button" (click)="next()"
                         [disabled]="loading"
-                        class="btn-size-lg flex items-center justify-center gap-2 px-6 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50 min-w-[140px]">
+                        class="btn-size-lg flex items-center justify-center gap-2 px-6 rounded-xl text-sm font-semibold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 min-w-[140px]">
                         <span *ngIf="!loading" class="flex items-center gap-1.5">Continue <i
                                 class="fa-solid fa-arrow-right text-xs" aria-hidden="true"></i></span>
                         <span *ngIf="loading"><i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i></span>

@@ -136,7 +136,7 @@ export class ChartWidgetComponent implements AfterViewInit, OnDestroy, OnChanges
   }
 
   private generateColors(n: number): string[] {
-    const palette = ['#3b82f6', '#a78bfa', '#ef4444', '#eab308', '#64748b', '#10b981', '#f43f5e', '#8b5cf6'];
+    const palette = ['#3b82f6', '#14b8a6', '#ef4444', '#eab308', '#64748b', '#10b981', '#f43f5e', '#f97316'];
     const colors: string[] = [];
     for (let i = 0; i < n; i++) colors.push(palette[i % palette.length]);
     return colors;

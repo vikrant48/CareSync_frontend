@@ -9,13 +9,13 @@
                     {{ otherPersonName }}
                 </h2>
                 <span *ngIf="viewerRole === 'PATIENT' && appointment?.doctorIsVerified"
- class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-[10px] font-bold text-cyan-600 dark:text-cyan-400">
+ class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-500/10 border border-teal-500/30 text-[10px] font-bold text-teal-600 dark:text-teal-400">
                     <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
                     <span>Verified</span>
                 </span>
             </div>
 
-            <p *ngIf="otherPersonSubtext" class="text-sm font-semibold text-cyan-600 dark:text-cyan-400 truncate">
+            <p *ngIf="otherPersonSubtext" class="text-sm font-semibold text-teal-600 dark:text-teal-400 truncate">
                 {{ otherPersonSubtext }}
             </p>
 

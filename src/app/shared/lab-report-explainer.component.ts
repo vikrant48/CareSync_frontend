@@ -15,7 +15,7 @@ import { extractApiError } from './utils/api-error.util';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <button type="button" (click)="open($event)" [disabled]="loading()"
-      [class]="buttonClass || 'inline-flex items-center gap-1.5 text-[11px] font-bold text-indigo-700 dark:text-indigo-300 bg-transparent border border-indigo-500/30 hover:border-indigo-500/60 rounded-lg px-2.5 py-1 transition-colors disabled:opacity-60'"
+      [class]="buttonClass || 'inline-flex items-center gap-1.5 text-[11px] font-bold text-blue-700 dark:text-blue-300 bg-transparent border border-blue-500/30 hover:border-blue-500/60 rounded-lg px-2.5 py-1 transition-colors disabled:opacity-60'"
       [attr.aria-expanded]="inline ? expanded : null"
       [attr.aria-label]="'Explain ' + (filename || 'this lab report') + ' in plain language'">
       <i class="fa-solid" [ngClass]="loading() ? 'fa-circle-notch fa-spin' : 'fa-wand-magic-sparkles'" aria-hidden="true"></i>
@@ -29,7 +29,7 @@ import { extractApiError } from './utils/api-error.util';
         <div class="flex items-center justify-between gap-3 px-4 py-3 border-b border-[var(--border)]">
           <div class="min-w-0">
             <h3 class="text-sm font-black text-[var(--text)] flex items-center gap-2">
-              <i class="fa-solid fa-wand-magic-sparkles text-indigo-600 dark:text-indigo-400" aria-hidden="true"></i>
+              <i class="fa-solid fa-wand-magic-sparkles text-blue-600 dark:text-blue-400" aria-hidden="true"></i>
               Your report in plain words
             </h3>
             <p *ngIf="filename" class="text-[10px] text-[var(--muted)] truncate">{{ filename }}</p>

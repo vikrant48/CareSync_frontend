@@ -109,7 +109,7 @@ export interface PaymentDetails {
               class="w-full p-3.5 rounded-2xl flex items-center justify-between transition duration-200 text-left cursor-pointer group"
             >
               <div class="flex items-center gap-3 min-w-0">
-                <div class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-700 dark:text-purple-400 flex items-center justify-center text-base shrink-0">
+                <div class="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-700 dark:text-blue-400 flex items-center justify-center text-base shrink-0">
                   <i class="fa-regular fa-credit-card" aria-hidden="true"></i>
                 </div>
                 <div class="min-w-0">
@@ -202,7 +202,7 @@ export interface PaymentDetails {
               <!-- UPI App Icons -->
               <div class="flex items-center gap-1.5 shrink-0">
                 <span class="bg-[var(--panel)] border border-[var(--border)] px-2 py-1 rounded-lg text-[10px] font-extrabold text-blue-700 dark:text-blue-400">GPay</span>
-                <span class="bg-[var(--panel)] border border-[var(--border)] px-2 py-1 rounded-lg text-[10px] font-extrabold text-purple-700 dark:text-purple-400">Pe</span>
+                <span class="bg-[var(--panel)] border border-[var(--border)] px-2 py-1 rounded-lg text-[10px] font-extrabold text-blue-700 dark:text-blue-400">Pe</span>
                 <span class="bg-[var(--panel)] border border-[var(--border)] px-2 py-1 rounded-lg text-[10px] font-extrabold text-sky-700 dark:text-sky-400">Paytm</span>
                 <span class="bg-[var(--panel)] border border-[var(--border)] px-2 py-1 rounded-lg text-[10px] font-extrabold text-amber-700 dark:text-amber-400">BHIM</span>
               </div>
@@ -299,7 +299,7 @@ export interface PaymentDetails {
           <div *ngIf="selectedMethod() === 'card'" class="space-y-4 animate-in fade-in duration-300">
             <div class="space-y-0.5">
               <h3 class="font-bold text-[var(--text)] text-sm sm:text-base flex items-center gap-2">
-                <i class="fa-regular fa-credit-card text-purple-700 dark:text-purple-400" aria-hidden="true"></i> Card Payment
+                <i class="fa-regular fa-credit-card text-blue-700 dark:text-blue-400" aria-hidden="true"></i> Card Payment
               </h3>
               <p class="text-xs text-[var(--muted)]">Pay securely using your Credit or Debit Card</p>
             </div>
@@ -408,7 +408,7 @@ export interface PaymentDetails {
           <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)] flex items-center justify-center text-xs shadow-md">
             <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
           </div>
-          <div class="absolute top-1/4 -right-2 w-8 h-8 rounded-full bg-[var(--bg)] border border-[var(--border)] text-purple-700 dark:text-purple-400 flex items-center justify-center text-xs shadow-md">
+          <div class="absolute top-1/4 -right-2 w-8 h-8 rounded-full bg-[var(--bg)] border border-[var(--border)] text-blue-700 dark:text-blue-400 flex items-center justify-center text-xs shadow-md">
             <i class="fa-regular fa-credit-card" aria-hidden="true"></i>
           </div>
           <div class="absolute bottom-1/4 -left-2 w-8 h-8 rounded-full bg-[var(--bg)] border border-[var(--border)] text-amber-700 dark:text-amber-400 flex items-center justify-center text-xs shadow-md">

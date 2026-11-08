@@ -21,7 +21,7 @@ import { PageLoaderComponent } from './ui/page-loader.component';
           <img *ngIf="profileImageUrl; else defaultAvatar" [src]="profileImageUrl" alt="Patient Avatar"
                class="w-10 h-10 rounded-full ring-2 ring-[var(--primary)]/30 object-cover shrink-0" />
           <ng-template #defaultAvatar>
-            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[var(--primary)] to-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-sm shrink-0">
+            <div class="w-10 h-10 rounded-full bg-[var(--primary)] text-white font-bold flex items-center justify-center text-sm shadow-sm shrink-0">
               {{ (patientName || 'P').charAt(0).toUpperCase() }}
             </div>
           </ng-template>

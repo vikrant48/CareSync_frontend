@@ -376,8 +376,8 @@ export class NotificationDropdownComponent implements OnInit, OnChanges {
     switch ((type || '').toLowerCase()) {
       case 'appointment': return 'bg-[var(--primary)]/20 text-[var(--primary)]';
       case 'cancellation': return 'bg-rose-500/20 text-rose-700 dark:text-rose-400';
-      case 'lab': case 'report': case 'lab_report': return 'bg-purple-500/20 text-purple-700 dark:text-purple-400';
-      case 'feedback': case 'message': return 'bg-indigo-500/20 text-indigo-700 dark:text-indigo-400';
+      case 'lab': case 'report': case 'lab_report': return 'bg-teal-500/20 text-teal-700 dark:text-teal-400';
+      case 'feedback': case 'message': return 'bg-sky-500/20 text-sky-700 dark:text-sky-400';
       case 'system': case 'security': return 'bg-blue-500/20 text-blue-700 dark:text-blue-400';
       default: return 'bg-[var(--bg)] text-[var(--muted)]';
     }
@@ -387,8 +387,8 @@ export class NotificationDropdownComponent implements OnInit, OnChanges {
     switch ((type || '').toLowerCase()) {
       case 'appointment': return 'bg-emerald-400';
       case 'cancellation': return 'bg-rose-500';
-      case 'lab': case 'report': case 'lab_report': return 'bg-purple-400';
-      case 'feedback': return 'bg-indigo-400';
+      case 'lab': case 'report': case 'lab_report': return 'bg-teal-400';
+      case 'feedback': return 'bg-sky-400';
       case 'system': case 'security': return 'bg-amber-400';
       default: return 'bg-[var(--primary)]';
     }

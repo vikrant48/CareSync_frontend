@@ -60,7 +60,7 @@
           <div
             class="hidden sm:flex items-center justify-center relative shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
             <div
-              class="w-28 h-20 bg-gradient-to-br from-[var(--accent)]/20 to-transparent border border-[var(--accent)]/30 rounded-2xl flex items-center justify-center relative overflow-hidden shadow-xl">
+              class="w-28 h-20 bg-[var(--accent)]/20 border border-[var(--accent)]/30 rounded-2xl flex items-center justify-center relative overflow-hidden shadow-xl">
               <i class="fa-solid fa-file-shield text-4xl text-[var(--accent)]/60" aria-hidden="true"></i>
               <div class="absolute inset-0 bg-gradient-to-t from-[var(--panel)] via-transparent to-transparent"></div>
             </div>
@@ -69,7 +69,7 @@
       </div>
 
       <div *ngIf="classifying || documentScan"
-        class="rounded-2xl border border-indigo-500/30 bg-indigo-500/5 p-4 space-y-2">
+        class="rounded-2xl border border-blue-500/30 bg-blue-500/5 p-4 space-y-2">
         <div class="text-xs font-bold text-[var(--text)]">AI document review</div>
         <div *ngIf="classifying" class="text-xs text-[var(--muted)]">Classifying and extracting fields…</div>
         <ng-container *ngIf="!classifying && documentScan">

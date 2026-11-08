@@ -23,7 +23,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
       backdropClass="bg-gray-900/60"
       (close)="close.emit()"
     >
-      <div modalHeader class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between shrink-0">
+      <div modalHeader class="bg-blue-50 dark:bg-gray-800 px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between shrink-0">
         <div class="flex items-center gap-3">
            <div class="w-12 h-12 rounded-full bg-brand-soft flex items-center justify-center text-brand font-bold text-xl shadow-inner">
               {{ patient?.firstName?.charAt(0) || 'P' }}

@@ -13,12 +13,12 @@ import { ESignCompletionResponse } from '../../core/models/appointment.models';
     template: `
     <app-modal-shell [open]="isOpen" title="Doctor Electronic Signature" subtitle="Legal Non-Repudiation Authorization"
       titleId="esign-modal-title" icon="fa-solid fa-file-signature"
-      iconWrapClass="bg-purple-500/15 text-purple-700 dark:text-purple-300" maxWidthClass="max-w-lg"
+      iconWrapClass="bg-blue-500/15 text-blue-700 dark:text-blue-300" maxWidthClass="max-w-lg"
       bodyClass="p-4 sm:p-6 space-y-4" footerClass="p-4 flex flex-col-reverse sm:flex-row sm:justify-end gap-2"
       [hasFooter]="true" (close)="closeModal()">
 
-      <div class="bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-500/30 rounded-xl p-3.5 flex items-start gap-3 text-xs text-purple-900 dark:text-purple-100">
-        <i class="fa-solid fa-shield-halved text-purple-600 dark:text-purple-300 text-base mt-0.5 shrink-0" aria-hidden="true"></i>
+      <div class="bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-500/30 rounded-xl p-3.5 flex items-start gap-3 text-xs text-blue-900 dark:text-blue-100">
+        <i class="fa-solid fa-shield-halved text-blue-600 dark:text-blue-300 text-base mt-0.5 shrink-0" aria-hidden="true"></i>
         <div>
           <div class="font-bold">Cryptographic Signing Audit</div>
           <div class="text-[11px] mt-0.5">

@@ -28,7 +28,7 @@
                 <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-xs transition duration-300 shadow-md"
                     [ngClass]="{
                 'bg-emerald-500 text-gray-950 ring-4 ring-emerald-500/20': stage.state === 'COMPLETED',
-                'bg-indigo-600 text-white ring-4 ring-indigo-500/40 animate-pulse': stage.state === 'CURRENT',
+                'bg-blue-600 text-white ring-4 ring-blue-500/40 animate-pulse': stage.state === 'CURRENT',
                 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 border border-gray-300 dark:border-gray-700': stage.state === 'UPCOMING',
                 'bg-rose-900/40 text-rose-700 dark:text-rose-400 border border-rose-700': stage.state === 'CANCELLED'
               }">
@@ -39,7 +39,7 @@
                 <!-- Stage Title -->
                 <span class="text-[10px] sm:text-[11px] font-semibold tracking-tight transition-colors" [ngClass]="{
                 'text-emerald-600 dark:text-emerald-400 font-bold': stage.state === 'COMPLETED',
-                'text-indigo-600 dark:text-indigo-400 font-bold': stage.state === 'CURRENT',
+                'text-blue-600 dark:text-blue-400 font-bold': stage.state === 'CURRENT',
                 'text-[var(--muted)]': stage.state === 'UPCOMING',
                 'text-rose-600 dark:text-rose-400': stage.state === 'CANCELLED'
               }">
@@ -50,7 +50,7 @@
             <!-- Connecting Line Connector -->
             <div *ngIf="!isLast" class="h-[1.5px] flex-1 -mx-2 sm:-mx-3 transition duration-300" [ngClass]="{
              'bg-emerald-500': stage.state === 'COMPLETED',
-             'bg-gradient-to-r from-emerald-500 to-gray-300 dark:to-gray-800': stage.state === 'CURRENT',
+             'bg-emerald-500/50': stage.state === 'CURRENT',
              'bg-gray-200 dark:bg-gray-800': stage.state === 'UPCOMING'
            }">
             </div>

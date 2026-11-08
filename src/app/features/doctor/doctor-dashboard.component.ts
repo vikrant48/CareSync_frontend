@@ -174,7 +174,7 @@ export class DoctorDashboardComponent implements OnInit {
     const palette = [
       { label: 'Follow-up', colorClass: 'text-[var(--accent)]', dotClass: 'bg-[var(--accent)]' },
       { label: 'New Patient', colorClass: 'text-[var(--primary)]', dotClass: 'bg-[var(--primary)]' },
-      { label: 'Lab Review', colorClass: 'text-purple-500', dotClass: 'bg-purple-500' },
+      { label: 'Lab Review', colorClass: 'text-blue-500', dotClass: 'bg-blue-500' },
       { label: 'Others', colorClass: 'text-[var(--muted)]', dotClass: 'bg-[var(--muted)]' },
     ];
     const counts = new Map(palette.map(item => [item.label, 0]));

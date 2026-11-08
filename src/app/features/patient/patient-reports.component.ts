@@ -54,7 +54,7 @@ export class PatientReportsComponent implements OnInit {
   doctorVisitData: number[] = [];
   appointmentStatusLabels: string[] = ['Completed', 'Scheduled', 'Cancelled', 'Rescheduled', 'No Show'];
   appointmentStatusData: number[] = [0, 0, 0, 0, 0];
-  statusColors: string[] = ['#3b82f6', '#a78bfa', '#ef4444', '#eab308', '#64748b'];
+  statusColors: string[] = ['#3b82f6', '#14b8a6', '#ef4444', '#eab308', '#64748b'];
   overviewLabels: string[] = [];
   overviewData: number[] = [];
 
