@@ -96,6 +96,10 @@ export class PaymentSuccessModalComponent {
 
   getPaymentMethodDisplay(): string {
     if (!this.paymentDetails) return 'UPI';
+    const labels: Record<string, string> = { UPI: 'UPI', CARD: 'Card', NET_BANKING: 'Netbanking', WALLET: 'Wallet', QR_CODE: 'Scan QR' };
+    if (this.paymentDetails.methodLabel) {
+      return labels[this.paymentDetails.methodLabel] || this.paymentDetails.methodLabel.replace(/_/g, ' ');
+    }
 
     switch (this.paymentDetails.method) {
       case 'upi':
@@ -110,7 +114,8 @@ export class PaymentSuccessModalComponent {
   }
 
   getCurrentDateTime(): string {
-    return new Date().toLocaleString('en-GB', {
+    const paidAt = this.paymentDetails?.paidAt ? new Date(this.paymentDetails.paidAt) : new Date();
+    return paidAt.toLocaleString('en-GB', {
       day: '2-digit', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit', hour12: true
     });

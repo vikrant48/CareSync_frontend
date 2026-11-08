@@ -105,6 +105,7 @@ export class AppointmentService {
     paymentMethod: string;
     upiId?: string;
     cardDetails?: any;
+    gateway?: 'RAZORPAY' | 'DEMO';
   }) {
     return this.http.post<PatientAppointmentItem>(`${this.baseUrl}/api/appointments/patient/book-with-payment`, payload);
   }

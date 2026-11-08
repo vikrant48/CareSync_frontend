@@ -2,7 +2,8 @@ import { Component, EventEmitter, Input, Output, signal, inject, OnDestroy, OnCh
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
-import { PaymentService, PaymentRequest, SavedPaymentMethod } from '../core/services/payment.service';
+import { PaymentService, PaymentRequest, SavedPaymentMethod, RazorpayCheckout } from '../core/services/payment.service';
+import { RazorpayCheckoutService } from '../core/services/razorpay-checkout.service';
 import { AppointmentService } from '../core/services/appointment.service';
 import { LabTestService, BookingRequest } from '../core/services/lab-test.service';
 import { AuthService } from '../core/services/auth.service';
@@ -25,6 +26,9 @@ export interface PaymentDetails {
   patientName?: string;
   bookingId?: number;
   appointmentId?: number;
+  methodLabel?: string;
+  paidAt?: string;
+  paidTo?: string;
 }
 
 @Component({
@@ -146,6 +150,26 @@ export interface PaymentDetails {
         <!-- RIGHT COLUMN: Payment Method Form Details -->
         <div class="md:col-span-7 p-5 sm:p-6 space-y-4 bg-[var(--panel)] flex flex-col justify-between">
 
+          <!-- Razorpay or demo, when the server offers both -->
+          <div *ngIf="gatewayMode() === 'RAZORPAY' && demoAvailable()" class="space-y-1.5">
+            <div class="text-[11px] font-bold text-[var(--muted)]">Pay with</div>
+            <div class="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Payment provider">
+              <button type="button" role="radio" [attr.aria-checked]="provider() === 'RAZORPAY'"
+                      (click)="selectProvider('RAZORPAY')" [disabled]="isProcessing()"
+                      class="rounded-xl px-3 py-2 text-xs font-bold border transition cursor-pointer flex items-center justify-center gap-1.5"
+                      [ngClass]="provider() === 'RAZORPAY' ? 'bg-[var(--primary-soft)] border-[var(--primary)] text-[var(--primary)]' : 'bg-[var(--bg)] border-[var(--border)] text-[var(--muted)]'">
+                <i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Razorpay
+              </button>
+              <button type="button" role="radio" [attr.aria-checked]="provider() === 'DEMO'"
+                      (click)="selectProvider('DEMO')" [disabled]="isProcessing()"
+                      class="rounded-xl px-3 py-2 text-xs font-bold border transition cursor-pointer flex items-center justify-center gap-1.5"
+                      [ngClass]="provider() === 'DEMO' ? 'bg-[var(--primary-soft)] border-[var(--primary)] text-[var(--primary)]' : 'bg-[var(--bg)] border-[var(--border)] text-[var(--muted)]'">
+                <i class="fa-solid fa-flask" aria-hidden="true"></i> Demo
+              </button>
+            </div>
+            <p *ngIf="provider() === 'DEMO'" class="text-[11px] text-amber-700 dark:text-amber-400">Demo payment: marked as paid instantly, no money is charged.</p>
+          </div>
+
           <!-- Last used payment method (saved by the backend after a successful payment) -->
           <div *ngIf="savedMethod() as saved"
                class="flex items-center justify-between gap-3 bg-[var(--bg)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 text-xs">
@@ -192,8 +216,9 @@ export interface PaymentDetails {
 
             <!-- UPI ID Input Form -->
             <div class="space-y-1.5 relative">
-              <label class="block text-xs font-bold text-[var(--muted)]">UPI ID</label>
-              <div class="relative flex items-center">
+              <p *ngIf="isGateway()" class="text-[11px] text-[var(--muted)] flex items-center gap-1.5"><i class="fa-solid fa-lock text-[var(--primary)]" aria-hidden="true"></i> Pay with any UPI app, QR code or UPI ID in the secure Razorpay window.</p>
+              <label *ngIf="!isGateway()" class="block text-xs font-bold text-[var(--muted)]">UPI ID</label>
+              <div *ngIf="!isGateway()" class="relative flex items-center">
                 <div class="absolute left-3.5 text-[var(--primary)] pointer-events-none text-sm">
                   <i class="fa-solid fa-at" aria-hidden="true"></i>
                 </div>
@@ -211,7 +236,7 @@ export interface PaymentDetails {
               </div>
 
               <!-- Autocomplete Suggestions -->
-              <div *ngIf="showUpiSuggestions() && upiSuggestions.length > 0" 
+              <div *ngIf="!isGateway() && showUpiSuggestions() && upiSuggestions.length > 0" 
                    class="absolute z-20 w-full mt-1 bg-[var(--bg)] border border-[var(--border)] rounded-xl shadow-2xl overflow-hidden">
                 <button 
                   *ngFor="let suggestion of upiSuggestions"
@@ -224,7 +249,7 @@ export interface PaymentDetails {
                 </button>
               </div>
 
-              <div class="flex items-center justify-between text-[11px] pt-0.5">
+              <div *ngIf="!isGateway()" class="flex items-center justify-between text-[11px] pt-0.5">
                 <span class="text-[var(--muted)]">Enter your UPI ID (e.g. name&#64;bank)</span>
                 <span *ngIf="errorMessage()" class="text-rose-700 dark:text-rose-400 font-semibold">{{ errorMessage() }}</span>
               </div>
@@ -244,14 +269,14 @@ export interface PaymentDetails {
             </div>
 
             <!-- OR Divider -->
-            <div class="relative flex py-1 items-center">
+            <div *ngIf="!isGateway()" class="relative flex py-1 items-center">
               <div class="flex-grow border-t border-[var(--border)]"></div>
               <span class="flex-shrink mx-3 text-[10px] font-bold text-[var(--muted)]">OR</span>
               <div class="flex-grow border-t border-[var(--border)]"></div>
             </div>
 
             <!-- Scan with your UPI app Section -->
-            <div class="bg-[var(--panel)] border border-[var(--border)] rounded-xl p-3.5 flex flex-col sm:flex-row items-center gap-3.5">
+            <div *ngIf="!isGateway()" class="bg-[var(--panel)] border border-[var(--border)] rounded-xl p-3.5 flex flex-col sm:flex-row items-center gap-3.5">
               <div class="w-20 h-20 bg-white p-1.5 rounded-xl shrink-0 flex items-center justify-center shadow-md">
                 <img [src]="qrCodeUrl" class="w-full h-full object-contain" alt="UPI QR Code" />
               </div>
@@ -279,7 +304,8 @@ export interface PaymentDetails {
               <p class="text-xs text-[var(--muted)]">Pay securely using your Credit or Debit Card</p>
             </div>
 
-            <div class="bg-[var(--panel)] border border-[var(--border)] rounded-xl p-4 space-y-3.5">
+            <p *ngIf="isGateway()" class="text-[11px] text-[var(--muted)] flex items-center gap-1.5"><i class="fa-solid fa-lock text-[var(--primary)]" aria-hidden="true"></i> You will enter your card details in the secure Razorpay window. CareSync never sees your card number.</p>
+            <div *ngIf="!isGateway()" class="bg-[var(--panel)] border border-[var(--border)] rounded-xl p-4 space-y-3.5">
               <div>
                 <label class="block text-[11px] font-bold text-[var(--muted)] mb-1" for="payment-popup-card-number-1">Card Number</label>
                 <input id="payment-popup-card-number-1" 
@@ -345,13 +371,14 @@ export interface PaymentDetails {
               <p class="text-xs text-[var(--muted)]">Scan this QR code using any UPI app</p>
             </div>
 
-            <div class="bg-white p-3 rounded-2xl shadow-xl border-4 border-[var(--primary)]/20 inline-block">
+            <div *ngIf="!isGateway()" class="bg-white p-3 rounded-2xl shadow-xl border-4 border-[var(--primary)]/20 inline-block">
               <img [src]="qrCodeUrl" class="w-48 h-48 object-contain" alt="QR Code" />
             </div>
 
             <div class="space-y-1 text-xs">
               <div class="text-[var(--text)] font-bold">Total Amount: ₹{{ amount | number:'1.2-2' }}</div>
-              <div class="text-[var(--muted)]">{{ merchantUpiId }}</div>
+              <div *ngIf="!isGateway()" class="text-[var(--muted)]">{{ merchantUpiId }}</div>
+              <div *ngIf="isGateway()" class="text-[var(--muted)]">Razorpay will show a QR code for this exact amount.</div>
             </div>
 
             <button 
@@ -361,7 +388,7 @@ export interface PaymentDetails {
               class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2 cursor-pointer"
             >
               <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
-              <span>I Have Made the Payment</span>
+              <span>{{ isGateway() ? 'Show QR code' : 'I Have Made the Payment' }}</span>
             </button>
           </div>
 
@@ -459,7 +486,7 @@ export interface PaymentDetails {
     <app-payment-success-modal
       [isVisible]="showSuccessModal()"
       [paymentDetails]="successPaymentDetails"
-      [recipientUpiId]="merchantUpiId"
+      [recipientUpiId]="successPaymentDetails?.paidTo || merchantUpiId"
       (modalClose)="closeSuccessModal()">
     </app-payment-success-modal>
   `
@@ -491,6 +518,17 @@ export class PaymentPopupComponent implements OnDestroy, OnChanges {
   private labTestService = inject(LabTestService);
   private authService = inject(AuthService);
   private toast = inject(ToastService);
+  private razorpay = inject(RazorpayCheckoutService);
+
+  gatewayMode = signal<'DEMO' | 'RAZORPAY'>('DEMO');
+  demoAvailable = signal(false);
+  provider = signal<'RAZORPAY' | 'DEMO'>('RAZORPAY');
+  isGateway = () => this.gatewayMode() === 'RAZORPAY' && this.provider() === 'RAZORPAY';
+
+  selectProvider(provider: 'RAZORPAY' | 'DEMO') {
+    this.provider.set(provider);
+    this.errorMessage.set('');
+  }
 
   selectedMethod = signal<'upi' | 'card' | 'qr'>('upi');
   savedMethod = signal<SavedPaymentMethod | null>(null);
@@ -529,6 +567,7 @@ export class PaymentPopupComponent implements OnDestroy, OnChanges {
         this.selectedMethod.set('upi');
         this.startQrTimer();
         this.loadSavedMethod();
+        this.loadGatewayMode();
       } else {
         this.stopQrTimer();
       }
@@ -537,6 +576,17 @@ export class PaymentPopupComponent implements OnDestroy, OnChanges {
 
   ngOnDestroy() {
     this.stopQrTimer();
+  }
+
+  private loadGatewayMode() {
+    this.paymentService.getConfig().subscribe({
+      next: (config) => {
+        this.gatewayMode.set(config?.mode === 'RAZORPAY' ? 'RAZORPAY' : 'DEMO');
+        this.demoAvailable.set(config?.mode === 'RAZORPAY' && !!config?.demoAvailable);
+        this.provider.set('RAZORPAY');
+      },
+      error: () => this.gatewayMode.set('DEMO'),
+    });
   }
 
   /** Pre-select the patient's last used method and fill in what was saved (UPI ID, cardholder name). */
@@ -667,6 +717,7 @@ export class PaymentPopupComponent implements OnDestroy, OnChanges {
   canProcessPayment(): boolean {
     const method = this.selectedMethod();
     if (!method) return false;
+    if (this.isGateway()) return true;
 
     switch (method) {
       case 'upi':
@@ -702,11 +753,12 @@ export class PaymentPopupComponent implements OnDestroy, OnChanges {
       additionalInfo: this.additionalInfo,
       description: this.title,
       bookingId: this.bookingId,
-      appointmentId: this.appointmentId
+      appointmentId: this.appointmentId,
+      gateway: this.isGateway() ? 'RAZORPAY' : 'DEMO'
     };
 
-    if (this.selectedMethod() === 'upi') paymentRequest.upiId = this.upiId;
-    if (this.selectedMethod() === 'card') {
+    if (this.selectedMethod() === 'upi' && !this.isGateway()) paymentRequest.upiId = this.upiId;
+    if (this.selectedMethod() === 'card' && !this.isGateway()) {
       const parts = this.cardDetails.expiryDate.split('/');
       paymentRequest.cardDetails = {
         cardNumber: this.cardDetails.cardNumber.replace(/\s/g, ''),
@@ -726,11 +778,12 @@ export class PaymentPopupComponent implements OnDestroy, OnChanges {
         amount: this.amount,
         paymentMethod: paymentRequest.paymentMethod,
         upiId: paymentRequest.upiId,
-        cardDetails: paymentRequest.cardDetails
+        cardDetails: paymentRequest.cardDetails,
+        gateway: paymentRequest.gateway
       };
 
       this.appointmentService.bookAppointmentWithPayment(payload).subscribe({
-        next: (response) => this.handleSuccess(response),
+        next: (response) => this.continueWithGateway(response),
         error: (error) => this.handleError(error)
       });
       return;
@@ -747,12 +800,13 @@ export class PaymentPopupComponent implements OnDestroy, OnChanges {
           patientId: this.patientId || parseInt(this.authService.userId() || '0'),
           currency: 'INR',
           upiId: paymentRequest.upiId,
-          cardDetails: paymentRequest.cardDetails
+          cardDetails: paymentRequest.cardDetails,
+          gateway: paymentRequest.gateway
         }
       };
 
       this.labTestService.createPatientBookingWithPayment(patientBookingWithPayment).subscribe({
-        next: (response) => this.handleSuccess(response),
+        next: (response) => this.continueWithGateway(response),
         error: (error) => this.handleError(error)
       });
       return;
@@ -763,8 +817,64 @@ export class PaymentPopupComponent implements OnDestroy, OnChanges {
       : this.paymentService.initiatePayment(paymentRequest);
 
     request$.subscribe({
-      next: (response) => this.handleSuccess(response),
+      next: (response) => this.continueWithGateway(response),
       error: (error) => this.handleError(error)
+    });
+  }
+
+  /** Opens Razorpay Checkout when the server started an order; demo-mode responses are already paid. */
+  private continueWithGateway(response: any) {
+    const checkout: RazorpayCheckout | undefined = response?.checkout;
+    if (!checkout?.orderId) {
+      this.handleSuccess(response);
+      return;
+    }
+    const method = this.selectedMethod() === 'card' ? 'card' : 'upi';
+    this.razorpay.open(checkout, method).then(
+      (result) => {
+        if (result.status === 'dismissed') {
+          this.abandonCheckout(checkout, response);
+          return;
+        }
+        this.paymentService.verifyRazorpay({
+          razorpayOrderId: result.response.razorpay_order_id,
+          razorpayPaymentId: result.response.razorpay_payment_id,
+          razorpaySignature: result.response.razorpay_signature,
+        }).subscribe({
+          next: (paid) => {
+            if (paid?.paymentStatus === 'SUCCESS') {
+              const shownId = paid.gatewayPaymentId || result.response.razorpay_payment_id || checkout.transactionId;
+              this.handleSuccess({ ...response, transactionId: shownId, paymentTransactionId: shownId,
+                gatewayMethod: paid.paymentMethod, paidVia: 'RAZORPAY' });
+            } else {
+              this.handleError({ error: { message: paid?.failureReason || 'Payment is not confirmed yet. Please check your payment history.' } });
+            }
+          },
+          error: (error) => this.handleError(error),
+        });
+      },
+      (error) => {
+        this.abandonCheckout(checkout, response, error?.message || 'Could not open Razorpay checkout');
+      }
+    );
+  }
+
+  /** The patient closed Checkout: cancel the pending order (the server settles it instead if it was paid). */
+  private abandonCheckout(checkout: RazorpayCheckout, response: any, reason?: string) {
+    this.paymentService.cancelPayment(checkout.transactionId).subscribe({
+      next: (res) => {
+        if (res?.paymentStatus === 'SUCCESS') {
+          const shownId = res.gatewayPaymentId || checkout.transactionId;
+          this.handleSuccess({ ...response, transactionId: shownId, paymentTransactionId: shownId, paidVia: 'RAZORPAY' });
+          return;
+        }
+        this.isProcessing.set(false);
+        this.toast.showError(reason || 'Payment cancelled. Nothing was charged.');
+      },
+      error: () => {
+        this.isProcessing.set(false);
+        this.toast.showError(reason || 'Payment was not completed.');
+      },
     });
   }
 
@@ -782,7 +892,10 @@ export class PaymentPopupComponent implements OnDestroy, OnChanges {
           bookingId: labBookingId,
           appointmentId: apptId,
           patientId: this.patientId,
-          upiId: this.upiId
+          upiId: response.paidVia === 'RAZORPAY' ? undefined : this.upiId,
+          methodLabel: response.gatewayMethod,
+          paidAt: new Date().toISOString(),
+          paidTo: response.paidVia === 'RAZORPAY' ? 'CareSync (via Razorpay)' : this.merchantUpiId
         };
         this.showSuccessModal.set(true);
         this.isVisible = false;
