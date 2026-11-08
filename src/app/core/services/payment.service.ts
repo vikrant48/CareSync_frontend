@@ -12,6 +12,22 @@ export interface SavedPaymentMethod {
   updatedAt?: string;
 }
 
+export interface RazorpayCheckout {
+  keyId: string;
+  orderId: string;
+  amount: number;
+  currency: string;
+  transactionId: string;
+  description?: string;
+}
+
+export interface PaymentConfig {
+  mode: 'DEMO' | 'RAZORPAY';
+  demoAvailable?: boolean;
+  keyId?: string;
+  currency?: string;
+}
+
 export interface PaymentRequest {
   amount: number;
   description?: string; // Optional - will be auto-generated if not provided
@@ -22,6 +38,7 @@ export interface PaymentRequest {
   bookingId?: number;
   appointmentId?: number;
   currency?: string;
+  gateway?: 'RAZORPAY' | 'DEMO';
   // UPI specific field (flattened from upiDetails)
   upiId?: string;
   // Card details (matching backend CardDetailsDto structure)
@@ -44,6 +61,8 @@ export interface PaymentResponse {
   paymentUrl?: string;
   qrCodeData?: string;
   razorpayOrderId?: string;
+  checkout?: RazorpayCheckout;
+  gatewayPaymentId?: string;
   status?: string;
   createdAt?: string;
   // Additional fields from backend PaymentResponseDto
@@ -83,6 +102,7 @@ export interface PaymentStatusResponse {
   cardLastFour?: string;
   cardType?: string;
   razorpayPaymentId?: string;
+  gatewayPaymentId?: string;
   upiTransactionId?: string;
   doctorName?: string;
   doctorSpecialization?: string;
@@ -150,6 +170,14 @@ export class PaymentService {
     return payments.find(p => p.transactionId === transactionId) || null;
   }
 
+  getConfig(): Observable<PaymentConfig> {
+    return this.http.get<PaymentConfig>(`${this.baseUrl}/api/payments/config`);
+  }
+
+  verifyRazorpay(body: { razorpayOrderId: string; razorpayPaymentId: string; razorpaySignature: string }): Observable<PaymentResponse> {
+    return this.http.post<PaymentResponse>(`${this.baseUrl}/api/payments/razorpay/verify`, body);
+  }
+
   /**
    * Initiate payment using the selected method
    */
@@ -211,8 +239,9 @@ export class PaymentService {
   /**
    * Cancel a pending payment
    */
-  cancelPayment(transactionId: string): Observable<{ success: boolean; message: string }> {
-    return this.http.post<{ success: boolean; message: string }>(`${this.baseUrl}/api/payments/${transactionId}/cancel`, {});
+  cancelPayment(transactionId: string): Observable<{ status: string; paymentStatus: string; transactionId: string; gatewayPaymentId?: string }> {
+    return this.http.post<{ status: string; paymentStatus: string; transactionId: string; gatewayPaymentId?: string }>(
+      `${this.baseUrl}/api/payments/cancel/${encodeURIComponent(transactionId)}`, {});
   }
 
   /**

@@ -392,7 +392,8 @@ export class PdfService {
       next: (payment) => {
         const amt = Number(payment.amount) > 0 ? Number(payment.amount) : Number(bookingData?.totalPrice || 0);
         const receiptData: PaymentReceiptData = {
-          transactionId: payment.transactionId,
+          transactionId: payment.gatewayPaymentId || payment.transactionId,
+          paidTo: payment.gatewayPaymentId ? 'CareSync (via Razorpay)' : undefined,
           amount: amt,
           currency: payment.currency || 'INR',
           paymentMethod: payment.paymentMethod,
@@ -438,12 +439,13 @@ export class PdfService {
 
         const doctorName = appointmentData?.doctorName || payment.doctorName;
         const doctorSpec = appointmentData?.doctorSpecialization || payment.doctorSpecialization;
-        const apptDate = appointmentData?.appointmentDate;
-        const apptTime = appointmentData?.appointmentTime;
+        const apptDate = appointmentData?.appointmentDate || payment.appointmentDate;
+        const apptTime = appointmentData?.appointmentTime || payment.appointmentTime;
         const reasonStr = appointmentData?.reason || payment.additionalInfo || payment.description || 'Not provided';
 
         const receiptData: PaymentReceiptData = {
-          transactionId: payment.transactionId,
+          transactionId: payment.gatewayPaymentId || payment.transactionId,
+          paidTo: payment.gatewayPaymentId ? 'CareSync (via Razorpay)' : undefined,
           amount: amt,
           currency: payment.currency || 'INR',
           paymentMethod: payment.paymentMethod,
