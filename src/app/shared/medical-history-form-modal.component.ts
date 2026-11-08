@@ -30,7 +30,7 @@ export interface MedicationItem {
       backdropClass="bg-gray-900/60"
       (close)="close.emit()"
     >
-      <div modalHeader class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between shrink-0">
+      <div modalHeader class="bg-blue-50 dark:bg-gray-800 px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between shrink-0">
          <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
                <i class="fa-solid fa-file-medical-alt text-lg" aria-hidden="true"></i>
@@ -45,7 +45,7 @@ export interface MedicationItem {
             <button type="button" 
                     (click)="isDictationOpen = true"
                     [disabled]="disabled"
-                    class="btn-size-lg px-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-blue-600/20 transition transform active:scale-95 disabled:opacity-50">
+                    class="btn-size-lg px-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-blue-600/20 transition transform active:scale-95 disabled:opacity-50">
                <i class="fa-solid fa-microphone-lines text-sm" aria-hidden="true"></i>
                <span class="hidden sm:inline">🎙️ AI Voice Dictation</span>
             </button>
@@ -99,9 +99,9 @@ export interface MedicationItem {
          </div>
 
          <!-- 3. AI Suggestions Area -->
-         <div *ngIf="clinicalSuggestions.length > 0" class="bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30 rounded-xl p-4 animate-in fade-in slide-in-from-top-2 duration-300">
+         <div *ngIf="clinicalSuggestions.length > 0" class="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/30 rounded-xl p-4 animate-in fade-in slide-in-from-top-2 duration-300">
             <div class="flex items-center justify-between mb-3">
-               <h4 class="text-xs font-black text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+               <h4 class="text-xs font-black text-blue-600 dark:text-blue-400 flex items-center gap-2">
                   <i class="fa-solid fa-robot" aria-hidden="true"></i> AI Clinical Suggestions
                </h4>
                <button type="button" (click)="clinicalSuggestions = []" class="text-gray-700 dark:text-gray-400 hover:text-gray-600 text-xs">Clear</button>
@@ -109,16 +109,16 @@ export interface MedicationItem {
             <div class="space-y-3">
                <div *ngFor="let s of clinicalSuggestions" 
                     (click)="applySuggestion(s)"
-                    class="group bg-white dark:bg-gray-800 p-3 rounded-lg border border-indigo-100 dark:border-indigo-700/50 hover:border-indigo-400 dark:hover:border-indigo-500 cursor-pointer transition shadow-sm hover:shadow-md">
+                    class="group bg-white dark:bg-gray-800 p-3 rounded-lg border border-blue-100 dark:border-blue-700/50 hover:border-blue-400 dark:hover:border-blue-500 cursor-pointer transition shadow-sm hover:shadow-md">
                   <div class="flex justify-between items-start mb-1">
-                     <div class="font-bold text-gray-900 dark:text-white text-sm group-hover:text-indigo-600 transition-colors">{{ s.diagnosis }}</div>
-                     <i class="fa-solid fa-plus-circle text-indigo-600 dark:text-indigo-300 group-hover:text-indigo-600" aria-hidden="true"></i>
+                     <div class="font-bold text-gray-900 dark:text-white text-sm group-hover:text-blue-600 transition-colors">{{ s.diagnosis }}</div>
+                     <i class="fa-solid fa-plus-circle text-blue-600 dark:text-blue-300 group-hover:text-blue-600" aria-hidden="true"></i>
                   </div>
                   <div class="text-[10px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
                      <strong>Treatment:</strong> {{ s.treatment }} 
                      <span *ngIf="s.medicine">| <strong>Rx:</strong> {{ s.medicine }} ({{ s.dosage }})</span>
                   </div>
-                  <div class="mt-2 text-[9px] italic text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity">Click to auto-fill record</div>
+                  <div class="mt-2 text-[9px] italic text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">Click to auto-fill record</div>
                </div>
             </div>
          </div>

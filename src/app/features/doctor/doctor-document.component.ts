@@ -340,14 +340,14 @@ export class DoctorDocumentsComponent implements OnInit {
     const type = (doc?.contentType || doc?.originalFilename || '').toLowerCase();
     if (type.includes('pdf')) return 'fa-file-pdf text-[#ef4444]';
     if (type.includes('image') || type.includes('jpg') || type.includes('png') || type.includes('jpeg')) return 'fa-file-image text-[#10b981]';
-    return 'fa-file-lines text-[#a855f7]';
+    return 'fa-file-lines text-[#3b82f6]';
   }
 
   getDocIconBgClass(doc: DocumentItem): string {
     const type = (doc?.contentType || doc?.originalFilename || '').toLowerCase();
     if (type.includes('pdf')) return 'bg-[#ef4444]/15 border border-[#ef4444]/30';
     if (type.includes('image') || type.includes('jpg') || type.includes('png') || type.includes('jpeg')) return 'bg-[#10b981]/15 border border-[#10b981]/30';
-    return 'bg-[#a855f7]/15 border border-[#a855f7]/30';
+    return 'bg-[#3b82f6]/15 border border-[#3b82f6]/30';
   }
 
   getStatusBadge(doc: DocumentItem): { text: string; isVerified: boolean } {

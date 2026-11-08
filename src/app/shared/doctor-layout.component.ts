@@ -20,7 +20,7 @@ import { PageLoaderComponent } from './ui/page-loader.component';
           <img *ngIf="profileImageUrl; else defaultAvatar" [src]="profileImageUrl" alt="Doctor profile photo"
                class="w-10 h-10 rounded-full ring-2 ring-[var(--accent)]/40 object-cover shrink-0" />
           <ng-template #defaultAvatar>
-            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[var(--accent)] to-[var(--primary)] text-white font-bold flex items-center justify-center text-sm shadow-sm shrink-0">
+            <div class="w-10 h-10 rounded-full bg-[var(--primary)] text-white font-bold flex items-center justify-center text-sm shadow-sm shrink-0">
               {{ doctorInitial }}
             </div>
           </ng-template>
@@ -90,9 +90,9 @@ export class DoctorLayoutComponent implements OnInit {
 
   readonly menuLinks: AppShellLink[] = [
     { label: 'Documents', icon: 'fa-solid fa-folder-open', link: '/doctor/documents', tileClass: 'flex flex-col items-center justify-center p-4 rounded-2xl bg-orange-50 dark:bg-orange-900/10 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/20 transition-colors' },
-    { label: 'Reports', icon: 'fa-solid fa-chart-line', link: '/doctor/reports', tileClass: 'flex flex-col items-center justify-center p-4 rounded-2xl bg-purple-50 dark:bg-purple-900/10 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/20 transition-colors' },
+    { label: 'Reports', icon: 'fa-solid fa-chart-line', link: '/doctor/reports', tileClass: 'flex flex-col items-center justify-center p-4 rounded-2xl bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/20 transition-colors' },
     { label: 'Earnings', icon: 'fa-solid fa-indian-rupee-sign', link: '/doctor/earnings', tileClass: 'flex flex-col items-center justify-center p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-900/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/20 transition-colors' },
-    { label: 'Lab Tests', icon: 'fa-solid fa-flask', link: '/lab-tests', tileClass: 'flex flex-col items-center justify-center p-4 rounded-2xl bg-cyan-50 dark:bg-cyan-900/10 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-100 dark:hover:bg-cyan-900/20 transition-colors' },
+    { label: 'Lab Tests', icon: 'fa-solid fa-flask', link: '/lab-tests', tileClass: 'flex flex-col items-center justify-center p-4 rounded-2xl bg-teal-50 dark:bg-teal-900/10 text-teal-600 dark:text-teal-400 hover:bg-teal-100 dark:hover:bg-teal-900/20 transition-colors' },
     { label: 'Manage Tests', icon: 'fa-solid fa-flask-vial', link: '/doctor/lab-test-management', labelClass: 'text-sm font-medium text-center', tileClass: 'flex flex-col items-center justify-center p-4 rounded-2xl bg-teal-50 dark:bg-teal-900/10 text-teal-600 dark:text-teal-400 hover:bg-teal-100 dark:hover:bg-teal-900/20 transition-colors' },
     { label: 'Change Password', icon: 'fa-solid fa-key', link: '/doctor/change-password', labelClass: 'text-sm font-medium text-center', tileClass: 'flex flex-col items-center justify-center p-4 rounded-2xl bg-yellow-50 dark:bg-yellow-900/10 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-900/20 transition-colors' },
     { label: 'Leaves', icon: 'fa-solid fa-calendar-minus', link: '/doctor/leaves', labelClass: 'text-sm font-medium text-center', tileClass: 'flex flex-col items-center justify-center p-4 rounded-2xl bg-brand-soft text-brand hover:brightness-95 transition-colors' },

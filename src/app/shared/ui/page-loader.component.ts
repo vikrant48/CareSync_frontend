@@ -109,10 +109,7 @@ import { CommonModule } from '@angular/common';
       font-weight: 800;
       letter-spacing: 0.16em;
       text-transform: uppercase;
-      background: linear-gradient(90deg, #34d399, #2dd4bf, #2563eb);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
+      color: var(--accent);
     }
 
     @keyframes caresync-spin {

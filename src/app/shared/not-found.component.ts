@@ -23,7 +23,7 @@ import { SUPPORT_EMAIL } from './utils/app-contact';
         </div>
 
         <div class="relative py-2 sm:py-4">
-          <p class="text-7xl sm:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 tracking-tighter select-none" aria-hidden="true">
+          <p class="text-7xl sm:text-9xl font-black text-emerald-500 tracking-tighter select-none" aria-hidden="true">
             404
           </p>
           <div class="w-24 h-1 bg-brand-gradient mx-auto rounded-full mt-2"></div>

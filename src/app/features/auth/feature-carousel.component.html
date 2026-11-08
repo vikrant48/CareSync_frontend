@@ -1,5 +1,5 @@
 <div #carouselContainer
-    class="relative w-full h-full flex flex-col justify-between p-5 sm:p-6 lg:p-7 bg-gradient-to-br from-emerald-50 via-white to-teal-50 text-[var(--text)] dark:from-[#0c3933] dark:via-[#082924] dark:to-[#031311] dark:text-white select-none overflow-hidden group"
+    class="relative w-full h-full flex flex-col justify-between p-5 sm:p-6 lg:p-7 bg-emerald-50 text-[var(--text)] dark:bg-[#0c3933] dark:text-white select-none overflow-hidden group"
     (mousedown)="onMouseDown($event)" (mousemove)="onMouseMove($event)" (mouseup)="onMouseUp()"
     (mouseleave)="onMouseLeave()" (mouseenter)="setInteractionPaused(true)"
     (focusin)="setInteractionPaused(true)" (focusout)="setInteractionPaused(false)"

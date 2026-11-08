@@ -32,7 +32,7 @@ import { AiEmergencyInfo, DoctorSuggestion } from '../../core/models/ai.models';
           </button>
         </div>
         <button type="submit" [disabled]="loading() || !description.trim()"
-                class="h-[38px] px-4 rounded-xl bg-[var(--primary)] hover:bg-indigo-600 disabled:bg-[var(--border)] text-white disabled:text-[var(--muted)] text-xs font-bold inline-flex items-center justify-center gap-2 transition">
+                class="h-[38px] px-4 rounded-xl bg-[var(--primary)] hover:bg-blue-600 disabled:bg-[var(--border)] text-white disabled:text-[var(--muted)] text-xs font-bold inline-flex items-center justify-center gap-2 transition">
           <i class="fa-solid" [ngClass]="loading() ? 'fa-circle-notch fa-spin' : 'fa-wand-magic-sparkles'" aria-hidden="true"></i>
           {{ loading() ? 'Finding...' : 'Find doctors with AI' }}
         </button>

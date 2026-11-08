@@ -38,13 +38,13 @@ interface ChatSuggestion {
 
 const TONE = {
   emerald: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400',
-  blue: 'bg-blue-500/10 border-blue-500/20 text-blue-700 dark:text-blue-400',
+  blue: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400',
   amber: 'bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400',
-  purple: 'bg-purple-500/10 border-purple-500/20 text-purple-700 dark:text-purple-400',
-  indigo: 'bg-indigo-500/10 border-indigo-500/20 text-indigo-700 dark:text-indigo-400',
+  purple: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400',
+  indigo: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400',
   rose: 'bg-rose-500/10 border-rose-500/20 text-rose-700 dark:text-rose-400',
-  cyan: 'bg-cyan-500/10 border-cyan-500/20 text-cyan-700 dark:text-cyan-400',
-  slate: 'bg-slate-500/10 border-slate-500/20 text-slate-700 dark:text-slate-300'
+  cyan: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400',
+  slate: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400'
 };
 
 const PATIENT_SUGGESTIONS: ChatSuggestion[] = [
@@ -79,31 +79,31 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
       *ngIf="!isOpen()"
       id="ai-widget-trigger"
       (click)="toggleChat()"
-      class="fixed bottom-20 right-4 xl:bottom-8 xl:right-8 w-12 h-12 xl:w-14 xl:h-14 bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition z-[60] group"
+      class="ai-theme fixed bottom-20 right-4 xl:bottom-8 xl:right-8 w-12 h-12 xl:w-14 xl:h-14 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition z-[60] group"
     >
       <i class="fas fa-robot text-xl md:text-2xl group-hover:rotate-12 transition-transform" aria-hidden="true"></i>
       <span class="absolute -top-1 -right-1 flex h-3 w-3" *ngIf="messages().length === 0">
-        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-        <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
       </span>
     </button>
 
     <!-- FLOATING CHAT WINDOW (Compact Mode) -->
     <div
       *ngIf="isOpen() && !isExpanded()"
-      class="fixed bottom-20 right-3 sm:right-6 md:bottom-6 md:right-8 w-[min(calc(100vw-1.5rem),440px)] max-h-[calc(100dvh-5.5rem)] h-[min(calc(100dvh-6rem),620px)] bg-[var(--bg)] dark:bg-gray-900 rounded-2xl shadow-2xl border border-[var(--border)] flex flex-col overflow-hidden z-[60] animate-in slide-in-from-bottom-5 duration-300 text-[var(--text)]"
+      class="ai-theme fixed bottom-20 right-3 sm:right-6 md:bottom-6 md:right-8 w-[min(calc(100vw-1.5rem),440px)] max-h-[calc(100dvh-5.5rem)] h-[min(calc(100dvh-6rem),620px)] bg-[var(--bg)] dark:bg-gray-900 rounded-2xl shadow-2xl border border-[var(--border)] flex flex-col overflow-hidden z-[60] animate-in slide-in-from-bottom-5 duration-300 text-[var(--text)]"
     >
       <!-- Header -->
-      <div class="p-3.5 sm:p-4 bg-gradient-to-r from-[var(--primary)] via-indigo-600 to-indigo-700 text-white flex items-center justify-between shrink-0 shadow-md">
+      <div class="p-3.5 sm:p-4 bg-[var(--panel)] text-[var(--text)] border-b border-[var(--border)] flex items-center justify-between shrink-0 shadow-md">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shadow-inner">
+          <div class="w-10 h-10 rounded-full bg-[var(--primary-soft)] text-[var(--ai-accent)] flex items-center justify-center">
             <i class="fas fa-robot text-xl" aria-hidden="true"></i>
           </div>
           <div>
             <h3 class="font-bold text-sm tracking-wide">{{ isDoctor() ? 'Clinical AI Assistant' : 'CareSync AI Assistant' }}</h3>
             <div class="flex items-center gap-1.5">
               <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span class="text-[10px] text-blue-100 font-semibold">Online</span>
+              <span class="text-[10px] text-[var(--muted)] font-semibold">Online</span>
             </div>
           </div>
         </div>
@@ -141,7 +141,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
             [attr.maxlength]="maxMessageLength"
             [disabled]="isLoading() || isListening()"
             [placeholder]="isListening() ? 'Listening...' : (isDoctor() ? 'Ask about a patient (type @ to pick one) or your schedule...' : 'Ask anything, e.g. book a skin doctor tomorrow after 5pm')"
-            class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl py-3 pl-4 pr-24 text-sm text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] disabled:opacity-50 transition"
+            class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl py-3 pl-4 pr-24 text-sm text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--ai-accent)] focus:ring-1 focus:ring-[var(--ai-accent)] disabled:opacity-50 transition"
           />
           <div class="absolute right-2.5 flex items-center gap-1">
             <button
@@ -170,7 +170,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
               *ngIf="!streaming()"
               type="submit"
               [disabled]="!userInput.trim() || isLoading() || isListening()"
-              class="w-8 h-8 flex items-center justify-center bg-[var(--primary)] hover:bg-indigo-600 disabled:bg-[var(--border)] text-white disabled:text-[var(--muted)] rounded-xl transition shadow-md shadow-[var(--primary)]/20"
+              class="w-8 h-8 flex items-center justify-center bg-[var(--primary)] hover:bg-[var(--primary-hover)] disabled:bg-[var(--border)] text-white disabled:text-[var(--muted)] rounded-xl transition shadow-md shadow-[var(--primary)]/20"
             >
               <i class="fas fa-paper-plane text-xs" aria-hidden="true"></i>
             </button>
@@ -183,22 +183,22 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
     <!-- EXPANDED MODAL OVERLAY (Fullscreen Mode - 85-90% Viewport) -->
     <div
       *ngIf="isOpen() && isExpanded()"
-      class="fixed inset-x-0 bottom-0 top-[4.25rem] bg-black/75 backdrop-blur-md z-[70] flex items-center justify-center px-2 pb-3 sm:px-4 sm:pb-4 md:px-6 md:pb-6 animate-in fade-in duration-300"
+      class="ai-theme fixed inset-x-0 bottom-0 top-[4.25rem] bg-black/75 backdrop-blur-md z-[70] flex items-center justify-center px-2 pb-3 sm:px-4 sm:pb-4 md:px-6 md:pb-6 animate-in fade-in duration-300"
     >
       <div
         class="w-full max-w-6xl h-[min(88dvh,calc(100dvh-5.25rem))] max-h-[860px] bg-[var(--bg)] rounded-3xl shadow-2xl border border-[var(--border)] flex flex-col overflow-hidden text-[var(--text)] relative"
       >
         <!-- Expanded Modal Header -->
-        <div class="p-3.5 sm:p-4 bg-gradient-to-r from-[var(--primary)] via-indigo-600 to-indigo-700 text-white flex items-center justify-between shrink-0 shadow-md">
+        <div class="p-3.5 sm:p-4 bg-[var(--panel)] text-[var(--text)] border-b border-[var(--border)] flex items-center justify-between shrink-0 shadow-md">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shadow-inner">
+            <div class="w-10 h-10 rounded-full bg-[var(--primary-soft)] text-[var(--ai-accent)] flex items-center justify-center">
               <i class="fas fa-robot text-xl" aria-hidden="true"></i>
             </div>
             <div>
               <h3 class="font-bold text-sm sm:text-base tracking-wide">{{ isDoctor() ? 'Clinical AI Assistant' : 'CareSync AI Assistant' }}</h3>
               <div class="flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span class="text-[10px] text-blue-100 font-semibold">Online</span>
+                <span class="text-[10px] text-[var(--muted)] font-semibold">Online</span>
               </div>
             </div>
           </div>
@@ -228,7 +228,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
               <!-- New Chat Button -->
               <button 
                 (click)="clearChat()"
-                class="btn-size-lg w-full bg-[var(--primary)] hover:bg-indigo-600 active:scale-95 text-white font-bold text-sm px-4 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-[var(--primary)]/25"
+                class="btn-size-lg w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] active:scale-95 text-white font-bold text-sm px-4 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-[var(--primary)]/25"
               >
                 <i class="fas fa-plus text-xs" aria-hidden="true"></i>
                 <span>New Chat</span>
@@ -260,22 +260,22 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
                   *ngFor="let chat of recentChats()"
                   (click)="selectRecentChat(chat)"
                   class="p-3 rounded-xl border transition cursor-pointer flex items-center justify-between group"
-                  [ngClass]="activeSessionId === chat.id ? 'bg-[var(--bg)] border-[var(--primary)]/60 shadow-md' : 'bg-transparent border-transparent hover:bg-[var(--bg)]/60 hover:border-[var(--border)]'"
+                  [ngClass]="activeSessionId === chat.id ? 'bg-[var(--bg)] border-[var(--ai-accent)]/60 shadow-md' : 'bg-transparent border-transparent hover:bg-[var(--bg)]/60 hover:border-[var(--border)]'"
                 >
                   <div class="flex items-center gap-3 min-w-0">
-                    <i class="fa-regular fa-comments text-xs" [ngClass]="activeSessionId === chat.id ? 'text-[var(--primary)]' : 'text-[var(--muted)]'" aria-hidden="true"></i>
+                    <i class="fa-regular fa-comments text-xs" [ngClass]="activeSessionId === chat.id ? 'text-[var(--ai-accent)]' : 'text-[var(--muted)]'" aria-hidden="true"></i>
                     <div class="min-w-0">
                       <input *ngIf="renamingId === chat.id" type="text" [(ngModel)]="renameDraft" maxlength="80"
                              (click)="$event.stopPropagation()" (keydown.enter)="saveRename(chat)" (keydown.escape)="cancelRename()"
                              (blur)="saveRename(chat)" aria-label="Chat name"
-                             class="w-full text-xs font-bold bg-[var(--bg)] border border-[var(--primary)] rounded px-1.5 py-0.5 text-[var(--text)] focus:outline-none" />
+                             class="w-full text-xs font-bold bg-[var(--bg)] border border-[var(--ai-accent)] rounded px-1.5 py-0.5 text-[var(--text)] focus:outline-none" />
                       <h5 *ngIf="renamingId !== chat.id" class="text-xs font-bold truncate" [ngClass]="activeSessionId === chat.id ? 'text-[var(--text)]' : 'text-[var(--muted)] group-hover:text-[var(--text)]'">{{ chat.title }}</h5>
                       <span class="text-[10px] text-[var(--muted)] opacity-80 truncate block">{{ chat.time }}</span>
                     </div>
                   </div>
                   <button *ngIf="renamingId !== chat.id"
                     (click)="startRename(chat, $event)"
-                    class="text-[var(--muted)] hover:text-[var(--primary)] p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    class="text-[var(--muted)] hover:text-[var(--ai-accent)] p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                     title="Rename chat" aria-label="Rename chat">
                     <i class="fa-solid fa-pen text-[10px]" aria-hidden="true"></i>
                   </button>
@@ -313,14 +313,14 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
                 <div class="text-xs font-semibold text-[var(--muted)] mb-2.5 px-1">You can also ask me about:</div>
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                   <button *ngFor="let s of suggestions()" type="button" (click)="useSuggestion(s)" [disabled]="isLoading()"
-                          class="p-2.5 bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--primary)]/50 rounded-xl text-left transition flex items-center gap-2.5 group disabled:opacity-60 min-w-0"
+                          class="p-2.5 bg-[var(--panel)] hover:bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--ai-accent)]/50 rounded-xl text-left transition flex items-center gap-2.5 group disabled:opacity-60 min-w-0"
                           [title]="s.prompt || s.hint">
                     <span class="w-7 h-7 rounded-lg border flex items-center justify-center text-xs shrink-0 group-hover:scale-110 transition-transform"
                           [ngClass]="s.tone">
                       <i class="fa-solid" [ngClass]="s.icon" aria-hidden="true"></i>
                     </span>
                     <span class="min-w-0">
-                      <span class="block text-[11px] font-bold text-[var(--text)] group-hover:text-[var(--primary)] transition-colors truncate">{{ s.label }}</span>
+                      <span class="block text-[11px] font-bold text-[var(--text)] group-hover:text-[var(--ai-accent)] transition-colors truncate">{{ s.label }}</span>
                       <span class="block text-[10px] text-[var(--muted)] truncate">{{ s.hint }}</span>
                     </span>
                   </button>
@@ -344,7 +344,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
                   [attr.maxlength]="maxMessageLength"
                   [disabled]="isLoading() || isListening()"
                   [placeholder]="isListening() ? 'Listening...' : (isDoctor() ? 'Ask about a patient (type @ to pick one) or your schedule...' : 'Ask anything, e.g. book a skin doctor tomorrow after 5pm')"
-                  class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-2xl py-3.5 pl-5 pr-28 text-sm text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] disabled:opacity-50 transition"
+                  class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-2xl py-3.5 pl-5 pr-28 text-sm text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--ai-accent)] focus:ring-1 focus:ring-[var(--ai-accent)] disabled:opacity-50 transition"
                 />
                 <div class="absolute right-3 flex items-center gap-1.5">
                   <button
@@ -373,7 +373,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
                     *ngIf="!streaming()"
                     type="submit"
                     [disabled]="!userInput.trim() || isLoading() || isListening()"
-                    class="w-9 h-9 flex items-center justify-center bg-[var(--primary)] hover:bg-indigo-600 disabled:bg-[var(--border)] text-white disabled:text-[var(--muted)] rounded-xl transition shadow-md shadow-[var(--primary)]/20"
+                    class="w-9 h-9 flex items-center justify-center bg-[var(--primary)] hover:bg-[var(--primary-hover)] disabled:bg-[var(--border)] text-white disabled:text-[var(--muted)] rounded-xl transition shadow-md shadow-[var(--primary)]/20"
                   >
                     <i class="fas fa-paper-plane text-xs" aria-hidden="true"></i>
                   </button>
@@ -393,7 +393,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
       <div *ngIf="isDoctor()" class="relative mb-2">
         <div class="flex items-center gap-2 flex-wrap">
           <span *ngIf="copilotPatient() as picked"
-                class="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/30 rounded-full pl-2.5 pr-1 py-0.5">
+                class="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-[var(--primary)]/10 text-[var(--ai-accent)] border border-[var(--ai-accent)]/30 rounded-full pl-2.5 pr-1 py-0.5">
             <i class="fas fa-user-injured text-[10px]" aria-hidden="true"></i>
             About: {{ picked.name }}
             <button type="button" (click)="clearCopilotPatient()" [disabled]="isLoading()"
@@ -403,7 +403,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
             </button>
           </span>
           <button *ngIf="!copilotPatient()" type="button" (click)="openPatientPicker()" [disabled]="isLoading()"
-                  class="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-full px-2.5 py-0.5 transition-colors"
+                  class="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--muted)] hover:text-[var(--ai-accent)] border border-[var(--border)] rounded-full px-2.5 py-0.5 transition-colors"
                   title="Pick one of your patients (or type @ in the message)">
             <i class="fas fa-at text-[10px]" aria-hidden="true"></i> Patient
           </button>
@@ -416,7 +416,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
             <input type="text" [ngModel]="patientQuery()" (ngModelChange)="patientQuery.set($event)" name="copilotPatientQuery"
                    (keydown.escape)="closePatientPicker()" (keydown.enter)="pickFirstPatient($event)"
                    placeholder="Search your patients..." aria-label="Search your patients"
-                   class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--primary)]" />
+                   class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--ai-accent)]" />
           </div>
           <div class="max-h-52 overflow-y-auto">
             <p *ngIf="copilotPatientsLoading()" class="px-3 py-2 text-xs text-[var(--muted)]">Loading your patients...</p>
@@ -439,8 +439,8 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
     <ng-template #chatMessagesContent>
       <!-- Welcome Message -->
       <div class="flex gap-2.5 max-w-[92%]">
-        <div class="w-9 h-9 rounded-full bg-[var(--primary)]/20 border border-[var(--primary)]/40 flex items-center justify-center shrink-0">
-          <i class="fas fa-robot text-xs text-[var(--primary)]" aria-hidden="true"></i>
+        <div class="w-9 h-9 rounded-full bg-[var(--primary)]/20 border border-[var(--ai-accent)]/40 flex items-center justify-center shrink-0">
+          <i class="fas fa-robot text-xs text-[var(--ai-accent)]" aria-hidden="true"></i>
         </div>
         <div class="bg-[var(--panel)] p-3.5 rounded-2xl rounded-tl-none shadow-md border border-[var(--border)] text-[var(--text)]">
           <p class="text-sm" *ngIf="!isDoctor()">Hello! I'm your CareSync Assistant. Tell me what you need in your own words: I can find doctors, check open slots, book, move or cancel appointments (you confirm every change), and explain health topics.</p>
@@ -451,7 +451,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
             <button 
               *ngIf="!isDoctor()"
               (click)="startBooking()"
-              class="btn-size-lg flex items-center gap-2 px-3.5 bg-[var(--primary)] hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition transform active:scale-95 shadow-md shadow-[var(--primary)]/20"
+              class="btn-size-lg flex items-center gap-2 px-3.5 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white rounded-xl text-xs font-bold transition transform active:scale-95 shadow-md shadow-[var(--primary)]/20"
             >
               <i class="fas fa-calendar-plus" aria-hidden="true"></i>
               Book Appointment
@@ -459,20 +459,20 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
 
             <button 
               (click)="isVisionScannerOpen.set(true)"
-              class="btn-size-lg flex items-center gap-2 px-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition transform active:scale-95 shadow-md shadow-purple-500/20"
+              class="btn-size-lg flex items-center gap-2 px-3.5 bg-[var(--panel)] border border-[var(--border)] hover:border-[var(--ai-accent)] text-[var(--text)] rounded-xl text-xs font-bold transition transform active:scale-95"
             >
               <i class="fas fa-camera" aria-hidden="true"></i>
               Scan Prescription
             </button>
 
             <button *ngIf="isDoctor()" type="button" (click)="askTopic('Brief me on my next patient')" [disabled]="isLoading()"
-              class="btn-size-lg flex items-center gap-2 px-3.5 bg-[var(--primary)] hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition transform active:scale-95 shadow-md shadow-[var(--primary)]/20">
+              class="btn-size-lg flex items-center gap-2 px-3.5 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white rounded-xl text-xs font-bold transition transform active:scale-95 shadow-md shadow-[var(--primary)]/20">
               <i class="fas fa-user-clock" aria-hidden="true"></i>
               Brief my next patient
             </button>
 
             <button *ngIf="isDoctor()" type="button" (click)="askTopic('What is my schedule today?')" [disabled]="isLoading()"
-              class="btn-size-lg flex items-center gap-2 px-3.5 bg-transparent border border-[var(--border)] hover:border-[var(--primary)] text-[var(--text)] rounded-xl text-xs font-bold transition transform active:scale-95">
+              class="btn-size-lg flex items-center gap-2 px-3.5 bg-transparent border border-[var(--border)] hover:border-[var(--ai-accent)] text-[var(--text)] rounded-xl text-xs font-bold transition transform active:scale-95">
               <i class="fas fa-calendar-day" aria-hidden="true"></i>
               Today's schedule
             </button>
@@ -480,7 +480,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
             <button 
               *ngIf="isDoctor()"
               (click)="isClinicalDictationOpen.set(true)"
-              class="btn-size-lg flex items-center gap-2 px-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition transform active:scale-95 shadow-md shadow-blue-500/20"
+              class="btn-size-lg flex items-center gap-2 px-3.5 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white rounded-xl text-xs font-bold transition transform active:scale-95 shadow-md shadow-[var(--primary)]/20"
             >
               <i class="fas fa-microphone-alt" aria-hidden="true"></i>
               Voice Dictation (SOAP)
@@ -493,13 +493,13 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
       <div *ngFor="let msg of messages()" class="flex flex-col gap-2" [ngClass]="msg.isAi ? 'max-w-[95%]' : 'max-w-[85%] ml-auto'">
         <div class="flex gap-2.5" [ngClass]="msg.isAi ? '' : 'flex-row-reverse text-right'">
           <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-md" 
-               [ngClass]="msg.isAi ? 'bg-[var(--primary)]/20 border border-[var(--primary)]/40' : 'bg-[var(--primary)]'">
-            <i class="fas" [ngClass]="msg.isAi ? 'fa-robot text-xs text-[var(--primary)]' : 'fa-user text-xs text-[var(--text)]'" aria-hidden="true"></i>
+               [ngClass]="msg.isAi ? 'bg-[var(--primary)]/20 border border-[var(--ai-accent)]/40' : 'bg-[var(--primary)]'">
+            <i class="fas" [ngClass]="msg.isAi ? 'fa-robot text-xs text-[var(--ai-accent)]' : 'fa-user text-xs text-[var(--text)]'" aria-hidden="true"></i>
           </div>
           <div class="p-3.5 rounded-2xl shadow-md border" 
-               [ngClass]="msg.isAi ? 'bg-[var(--panel)] text-[var(--text)] rounded-tl-none border-[var(--border)]' : 'bg-[var(--primary)] text-white rounded-tr-none border-[var(--primary)]'">
+               [ngClass]="msg.isAi ? 'bg-[var(--panel)] text-[var(--text)] rounded-tl-none border-[var(--border)]' : 'bg-[var(--primary)] text-white rounded-tr-none border-[var(--ai-accent)]'">
             <div *ngIf="msg.isAi && msg.status && !msg.text" class="flex items-center gap-2 text-xs text-[var(--muted)]">
-              <i class="fas fa-circle-notch fa-spin text-[var(--primary)]" aria-hidden="true"></i> {{ msg.status }}
+              <i class="fas fa-circle-notch fa-spin text-[var(--ai-accent)]" aria-hidden="true"></i> {{ msg.status }}
             </div>
             <div *ngIf="msg.isAi" [innerHTML]="formatAiMessage(msg.text)" class="text-sm" [attr.aria-busy]="msg.streaming || null"></div>
             <span *ngIf="msg.streaming && msg.text" class="inline-block w-1.5 h-3.5 align-middle bg-[var(--primary)] animate-pulse rounded-sm" aria-hidden="true"></span>
@@ -543,7 +543,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
            <div *ngIf="msg.suggestion.type === 'SPECIALIZATIONS'" class="flex flex-wrap gap-2 py-1">
               <button *ngFor="let spec of msg.suggestion.specializations" 
                       (click)="selectSpecialization(spec, msg.suggestion.reason)"
-                      class="btn-size-sm px-3 bg-[var(--panel)] border border-[var(--border)] text-[var(--text)] rounded-lg text-[11px] font-semibold hover:border-[var(--primary)] hover:text-[var(--primary)] transition shadow-sm inline-flex items-center justify-center">
+                      class="btn-size-sm px-3 bg-[var(--panel)] border border-[var(--border)] text-[var(--text)] rounded-lg text-[11px] font-semibold hover:border-[var(--ai-accent)] hover:text-[var(--ai-accent)] transition shadow-sm inline-flex items-center justify-center">
                  {{ spec }}
               </button>
            </div>
@@ -553,19 +553,19 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
              <div class="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
                 <div *ngFor="let doc of msg.suggestion.doctors" 
                      (click)="chooseDoctorSuggestion(doc, msg.suggestion.reason)"
-                     class="min-w-[200px] bg-[var(--panel)] border border-[var(--border)] p-4 rounded-xl shadow-md hover:border-[var(--primary)] border-2 cursor-pointer transition hover:shadow-lg">
+                     class="min-w-[200px] bg-[var(--panel)] border border-[var(--border)] p-4 rounded-xl shadow-md hover:border-[var(--ai-accent)] border-2 cursor-pointer transition hover:shadow-lg">
                    <div class="flex items-start gap-3 mb-3">
                       <div class="w-12 h-12 rounded-full bg-[var(--bg)] flex items-center justify-center overflow-hidden shrink-0 border border-[var(--border)]">
                          <img *ngIf="doc.profileImageUrl" [src]="doc.profileImageUrl" class="w-full h-full object-cover">
-                         <i *ngIf="!doc.profileImageUrl" class="fas fa-user-md text-xl text-[var(--primary)]" aria-hidden="true"></i>
+                         <i *ngIf="!doc.profileImageUrl" class="fas fa-user-md text-xl text-[var(--ai-accent)]" aria-hidden="true"></i>
                       </div>
                        <div class="overflow-hidden">
                           <div class="text-[12px] font-bold truncate flex items-center gap-1.5 text-[var(--text)]">
                              {{ doc.name }}
-                             <i *ngIf="doc.isVerified" class="fa-solid fa-circle-check text-[var(--primary)] text-[10px]" title="Verified" aria-hidden="true"></i>
+                             <i *ngIf="doc.isVerified" class="fa-solid fa-circle-check text-[var(--ai-accent)] text-[10px]" title="Verified" aria-hidden="true"></i>
                              <span *ngIf="doc['isOnLeave']" class="px-1.5 py-0.5 bg-red-900/40 text-red-700 dark:text-red-400 text-[8px] font-black uppercase rounded-md border border-red-800 shrink-0">Away</span>
                           </div>
-                          <div class="text-[10px] text-[var(--primary)] font-medium truncate">{{ doc.specialization }}</div>
+                          <div class="text-[10px] text-[var(--ai-accent)] font-medium truncate">{{ doc.specialization }}</div>
                        </div>
                    </div>
                    
@@ -575,7 +575,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
                          <span>{{ doc.experience }} Years Experience</span>
                       </div>
                       <div class="flex items-center gap-1.5 text-[10px] text-[var(--muted)]">
-                         <i class="fas fa-language text-indigo-700 dark:text-indigo-400" aria-hidden="true"></i>
+                         <i class="fas fa-language text-[var(--ai-accent)]" aria-hidden="true"></i>
                          <span class="truncate">{{ doctorLanguages(doc.languages) }}</span>
                       </div>
                    </div>
@@ -592,7 +592,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
                 </div>
              </div>
              
-             <button (click)="startBooking()" class="text-xs text-[var(--primary)] hover:text-indigo-300 hover:underline flex items-center gap-1 pl-1">
+             <button (click)="startBooking()" class="text-xs text-[var(--ai-accent)] hover:text-[var(--text)] hover:underline flex items-center gap-1 pl-1">
                 <i class="fas fa-arrow-left" aria-hidden="true"></i> Change Specialization
              </button>
            </div>
@@ -601,8 +601,8 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
            <div *ngIf="msg.suggestion.type === 'DATES'" class="bg-[var(--panel)] border border-[var(--border)] p-4 rounded-xl shadow-md">
               <div class="text-[10px] font-bold text-[var(--muted)] mb-3">Select Appointment Date</div>
               <div class="flex flex-wrap gap-2 mb-3">
-                  <button (click)="selectRelativeDate(msg.suggestion.doctorId!, 0, msg.suggestion.reason)" class="btn-size-md px-4 bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)] rounded-lg text-xs font-bold hover:bg-[var(--primary)] hover:text-white transition inline-flex items-center justify-center">Today</button>
-                 <button (click)="selectRelativeDate(msg.suggestion.doctorId!, 1, msg.suggestion.reason)" class="btn-size-md px-4 bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)] rounded-lg text-xs font-bold hover:bg-[var(--primary)] hover:text-white transition inline-flex items-center justify-center">Tomorrow</button>
+                  <button (click)="selectRelativeDate(msg.suggestion.doctorId!, 0, msg.suggestion.reason)" class="btn-size-md px-4 bg-[var(--bg)] border border-[var(--border)] text-[var(--ai-accent)] rounded-lg text-xs font-bold hover:bg-[var(--primary)] hover:text-white transition inline-flex items-center justify-center">Today</button>
+                 <button (click)="selectRelativeDate(msg.suggestion.doctorId!, 1, msg.suggestion.reason)" class="btn-size-md px-4 bg-[var(--bg)] border border-[var(--border)] text-[var(--ai-accent)] rounded-lg text-xs font-bold hover:bg-[var(--primary)] hover:text-white transition inline-flex items-center justify-center">Tomorrow</button>
                  
                  <div class="mt-2 text-[var(--text)]">
                     <app-date-picker
@@ -614,7 +614,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
                     </app-date-picker>
                  </div>
               </div>
-              <button (click)="changeDoctor(msg.suggestion)" class="text-xs text-[var(--primary)] hover:text-indigo-300 hover:underline flex items-center gap-1 pl-1">
+              <button (click)="changeDoctor(msg.suggestion)" class="text-xs text-[var(--ai-accent)] hover:text-[var(--text)] hover:underline flex items-center gap-1 pl-1">
                 <i class="fas fa-arrow-left" aria-hidden="true"></i> Change Doctor
              </button>
            </div>
@@ -623,22 +623,22 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
            <div *ngIf="msg.suggestion.type === 'SLOTS'" class="bg-[var(--panel)] border border-[var(--border)] p-4 rounded-xl shadow-md">
               <div class="flex justify-between items-center mb-3">
                  <div class="text-[10px] font-bold text-[var(--muted)]">Available Slots</div>
-                 <div class="text-[10px] font-bold text-[var(--primary)]">{{ msg.suggestion.date | date:'mediumDate' }}</div>
+                 <div class="text-[10px] font-bold text-[var(--ai-accent)]">{{ msg.suggestion.date | date:'mediumDate' }}</div>
               </div>
               <div class="grid grid-cols-3 gap-2 mb-3">
                  <button *ngFor="let slot of msg.suggestion.slots" 
                          (click)="selectFinalSlot(msg.suggestion.doctorId!, msg.suggestion.date!, slot, msg.suggestion.reason)"
-                         class="btn-size-sm px-2 bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] rounded-lg text-[10px] font-bold hover:bg-[var(--primary)] hover:text-white hover:border-[var(--primary)] transition inline-flex items-center justify-center">
+                         class="btn-size-sm px-2 bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] rounded-lg text-[10px] font-bold hover:bg-[var(--primary)] hover:text-white hover:border-[var(--ai-accent)] transition inline-flex items-center justify-center">
                     {{ slot }}
                  </button>
               </div>
-              <button (click)="selectDoctor(msg.suggestion.doctorId!, msg.suggestion.reason)" class="text-xs text-[var(--primary)] hover:text-indigo-300 hover:underline flex items-center gap-1 pl-1">
+              <button (click)="selectDoctor(msg.suggestion.doctorId!, msg.suggestion.reason)" class="text-xs text-[var(--ai-accent)] hover:text-[var(--text)] hover:underline flex items-center gap-1 pl-1">
                 <i class="fas fa-arrow-left" aria-hidden="true"></i> Change Date
              </button>
            </div>
 
             <!-- CONFIRMATION & PAYMENT -->
-           <div *ngIf="msg.suggestion.type === 'CONFIRM'" class="bg-gradient-to-br from-[var(--primary)] to-indigo-700 text-white p-5 rounded-xl shadow-lg relative overflow-hidden">
+           <div *ngIf="msg.suggestion.type === 'CONFIRM'" class="bg-[var(--primary)] text-white p-5 rounded-xl shadow-lg relative overflow-hidden">
               <div class="relative z-10">
                  <div class="text-[10px] opacity-80 mb-1">
                     {{ msg.suggestion.reason?.startsWith('RESCHEDULE') ? 'Rescheduling Overview' : 'Appointment Overview' }}
@@ -679,7 +679,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
 
                  <button
                    (click)="openPaymentPopup(msg.suggestion)"
-                   class="w-full py-3 bg-white text-indigo-700 rounded-xl text-xs font-bold shadow-xl hover:bg-blue-50 transition active:scale-95 flex items-center justify-center gap-2 mb-3"
+                   class="w-full py-3 bg-white text-emerald-800 rounded-xl text-xs font-bold shadow-xl hover:bg-emerald-50 transition active:scale-95 flex items-center justify-center gap-2 mb-3"
                  >
                    <i class="fas fa-check-circle" aria-hidden="true"></i>
                    {{ msg.suggestion.reason?.startsWith('RESCHEDULE') ? 'Confirm Reschedule' : 'Confirm & Pay Now' }}
@@ -716,7 +716,7 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
                        Cancel
                     </button>
                     <button (click)="rescheduleAppointment(appt.id)" 
-                            class="flex-1 py-2 bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)] rounded-lg text-[10px] font-bold hover:bg-[var(--primary)] hover:text-white transition">
+                            class="flex-1 py-2 bg-[var(--bg)] border border-[var(--border)] text-[var(--ai-accent)] rounded-lg text-[10px] font-bold hover:bg-[var(--primary)] hover:text-white transition">
                        Reschedule
                     </button>
                  </div>
@@ -728,8 +728,8 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
 
       <!-- Loading State -->
       <div *ngIf="isLoading() && !streaming()" class="flex gap-2 max-w-[85%]">
-        <div class="w-8 h-8 rounded-full bg-[var(--primary)]/20 border border-[var(--primary)]/40 flex items-center justify-center shrink-0">
-          <i class="fas fa-robot text-xs text-[var(--primary)]" aria-hidden="true"></i>
+        <div class="w-8 h-8 rounded-full bg-[var(--primary)]/20 border border-[var(--ai-accent)]/40 flex items-center justify-center shrink-0">
+          <i class="fas fa-robot text-xs text-[var(--ai-accent)]" aria-hidden="true"></i>
         </div>
         <div class="bg-[var(--panel)] p-3 rounded-2xl rounded-tl-none shadow-sm border border-[var(--border)] flex items-center gap-1.5">
           <span class="w-1.5 h-1.5 rounded-full bg-[var(--primary)] animate-bounce"></span>
@@ -769,6 +769,18 @@ const DOCTOR_SUGGESTIONS: ChatSuggestion[] = [
   `,
   styles: [`
     :host { display: block; }
+    .ai-theme {
+      --primary: #047857;
+      --primary-hover: #065f46;
+      --primary-soft: rgba(4, 120, 87, 0.12);
+      --ai-accent: #047857;
+    }
+    :host-context(.dark) .ai-theme {
+      --primary: #047857;
+      --primary-hover: #059669;
+      --primary-soft: rgba(52, 211, 153, 0.14);
+      --ai-accent: #34d399;
+    }
     .animate-in { animation: slideUp 0.3s ease-out; }
     @keyframes slideUp {
       from { transform: translateY(20px); opacity: 0; }
@@ -1492,9 +1504,9 @@ export class AiAssistantWidgetComponent implements AfterViewChecked, OnInit {
     let formatted = escapeHtml(text);
 
     formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-[var(--text)]">$1</strong>');
-    formatted = formatted.replace(/^### (.*$)/gim, '<h3 class="text-xs font-bold text-[var(--primary)] mt-2 mb-1 flex items-center gap-1.5"><i class="fas fa-notes-medical"></i> $1</h3>');
-    formatted = formatted.replace(/^## (.*$)/gim, '<h2 class="text-sm font-bold text-indigo-600 dark:text-indigo-300 mt-3 mb-1 border-b border-[var(--border)] pb-1 flex items-center gap-1.5"><i class="fas fa-file-medical-alt"></i> $1</h2>');
-    formatted = formatted.replace(/^[ \t]*[\*\-] (.*$)/gim, '<li class="ml-2 mb-1 flex items-start gap-1.5"><span class="text-[var(--primary)] font-bold mt-0.5">•</span><span>$1</span></li>');
+    formatted = formatted.replace(/^### (.*$)/gim, '<h3 class="text-xs font-bold text-[var(--ai-accent)] mt-2 mb-1 flex items-center gap-1.5"><i class="fas fa-notes-medical"></i> $1</h3>');
+    formatted = formatted.replace(/^## (.*$)/gim, '<h2 class="text-sm font-bold text-[var(--ai-accent)] mt-3 mb-1 border-b border-[var(--border)] pb-1 flex items-center gap-1.5"><i class="fas fa-file-medical-alt"></i> $1</h2>');
+    formatted = formatted.replace(/^[ \t]*[\*\-] (.*$)/gim, '<li class="ml-2 mb-1 flex items-start gap-1.5"><span class="text-[var(--ai-accent)] font-bold mt-0.5">•</span><span>$1</span></li>');
     formatted = formatted.replace(/(<li[\s\S]*?<\/li>)+/g, '<ul class="my-2 space-y-1 bg-[var(--bg)] p-2.5 rounded-xl border border-[var(--border)]">$&</ul>');
     formatted = formatted.replace(/\n{2,}/g, '<div class="my-1.5"></div>');
 

@@ -61,7 +61,7 @@ export class DoctorReportsComponent implements OnInit {
   reportRange: 'month' | 'sixMonths' = 'month';
   doctorAppointments: DoctorAppointmentItem[] = [];
   loadingAppointments = true;
-  readonly demographicColors = ['#a855f7', '#6366f1', '#14b8a6', '#f59e0b', '#ef4444', '#22c55e', '#94a3b8'];
+  readonly demographicColors = ['#3b82f6', '#f97316', '#14b8a6', '#f59e0b', '#ef4444', '#22c55e', '#94a3b8'];
   readonly satisfactionRows = [
     { key: 'excellent', label: 'Excellent', icon: 'fa-face-smile', color: '#10b981' },
     { key: 'good', label: 'Good', icon: 'fa-face-meh', color: 'var(--primary)' },

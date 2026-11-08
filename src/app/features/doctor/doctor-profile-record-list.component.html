@@ -35,14 +35,14 @@
   <div *ngFor="let x of items; trackBy: trackItem"
     class="bg-[var(--panel)] border border-[var(--border)] rounded-2xl p-4 sm:p-5 shadow-xl flex items-start justify-between group hover:border-[var(--accent)]/40 transition">
     <div class="flex items-start gap-3.5">
-      <div class="w-11 h-11 rounded-xl bg-[#a855f7]/15 border border-[#a855f7]/30 flex items-center justify-center text-[#a855f7] shrink-0">
+      <div class="w-11 h-11 rounded-xl bg-[#3b82f6]/15 border border-[#3b82f6]/30 flex items-center justify-center text-[#3b82f6] shrink-0">
         <i class="fa-solid fa-hospital-user text-base" aria-hidden="true"></i>
       </div>
       <div class="space-y-1">
         <h4 class="font-bold text-[var(--text)] text-sm sm:text-base">{{ x.position }}</h4>
         <p class="text-xs text-[var(--muted)] font-medium">{{ x.hospitalName }}</p>
         <div class="flex items-center gap-2 text-[10px] text-[var(--muted)] font-bold mt-1">
-          <span class="bg-[var(--bg)] border border-[var(--bg)] px-2 py-0.5 rounded text-[#a855f7]">{{ x.yearsOfService }} Years</span>
+          <span class="bg-[var(--bg)] border border-[var(--bg)] px-2 py-0.5 rounded text-[#3b82f6]">{{ x.yearsOfService }} Years</span>
           <span *ngIf="x.details">• {{ x.details }}</span>
         </div>
       </div>

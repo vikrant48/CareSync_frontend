@@ -40,24 +40,24 @@
             class="surface p-3.5 h-full shadow-sm transition surface-hover">
             <div class="flex items-center justify-between mb-2.5 border-b border-[var(--border)] pb-1.5">
                 <div class="font-bold text-xs text-[var(--text)] tracking-wide flex items-center gap-2">
-                    <i class="fa-solid fa-flask text-purple-700 dark:text-purple-400" aria-hidden="true"></i> Test Results
+                    <i class="fa-solid fa-flask text-blue-700 dark:text-blue-400" aria-hidden="true"></i> Test Results
                 </div>
                 <a routerLink="/patient/lab-bookings"
-                    class="text-[11px] text-purple-700 dark:text-purple-400 hover:text-purple-300 font-semibold inline-flex items-center px-1">View
+                    class="text-[11px] text-blue-700 dark:text-blue-400 hover:text-blue-300 font-semibold inline-flex items-center px-1">View
                     All</a>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div *ngFor="let d of patientLabReports"
-                    class="inset-surface rounded-lg p-2.5 cursor-pointer surface-hover transition group focus:outline-none focus:ring-1 focus:ring-purple-500/40"
+                    class="inset-surface rounded-lg p-2.5 cursor-pointer surface-hover transition group focus:outline-none focus:ring-1 focus:ring-blue-500/40"
                     (click)="openDocument.emit(d)" (keydown.enter)="openDocument.emit(d)" tabindex="0" role="button">
                     <div class="flex items-center gap-2.5">
                         <div
-                            class="w-7 h-7 rounded bg-purple-500/10 text-purple-700 dark:text-purple-400 flex items-center justify-center text-xs shrink-0">
+                            class="w-7 h-7 rounded bg-blue-500/10 text-blue-700 dark:text-blue-400 flex items-center justify-center text-xs shrink-0">
                             <i class="fa-regular fa-file-pdf" aria-hidden="true"></i>
                         </div>
                         <div class="min-w-0">
                             <div
-                                class="font-semibold text-xs text-[var(--text)] truncate group-hover:text-purple-700 dark:text-purple-400 transition-colors">
+                                class="font-semibold text-xs text-[var(--text)] truncate group-hover:text-blue-700 dark:text-blue-400 transition-colors">
                                 {{ d.filename }}</div>
                             <div class="text-[9px] text-muted">{{ d.uploadDate | date:'mediumDate' }}</div>
                         </div>
@@ -69,7 +69,7 @@
                 <div *ngIf="patientLabReports.length === 0" class="col-span-2">
                     <app-empty-state icon="fa-solid fa-flask" title="" message="No lab reports available."
                         [compact]="true"
-                        iconWrapClass="bg-purple-100 dark:bg-purple-500/10 text-purple-500"></app-empty-state>
+                        iconWrapClass="bg-blue-100 dark:bg-blue-500/10 text-blue-500"></app-empty-state>
                 </div>
             </div>
         </div>

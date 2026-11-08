@@ -116,16 +116,16 @@ export class LabTestsComponent implements OnInit {
       return { category: 'Liver', icon: 'fa-cubes text-[#f97316]', iconBg: 'bg-orange-500/10 border-orange-500/20', isPopular: true };
     }
     if (name.includes('ana') || name.includes('autoimmune') || name.includes('antibody') || name.includes('antibodies')) {
-      return { category: 'Autoimmune', icon: 'fa-shield-halved text-indigo-700 dark:text-indigo-400', iconBg: 'bg-indigo-500/10 border-indigo-500/20', isPopular: true };
+      return { category: 'Autoimmune', icon: 'fa-shield-halved text-blue-700 dark:text-blue-400', iconBg: 'bg-blue-500/10 border-blue-500/20', isPopular: true };
     }
     if (name.includes('tpo') || name.includes('thyroid') || name.includes('tsh') || name.includes('t3') || name.includes('t4')) {
-      return { category: 'Thyroid', icon: 'fa-dna text-purple-700 dark:text-purple-400', iconBg: 'bg-purple-500/10 border-purple-500/20' };
+      return { category: 'Thyroid', icon: 'fa-dna text-blue-700 dark:text-blue-400', iconBg: 'bg-blue-500/10 border-blue-500/20' };
     }
     if (name.includes('hcg') || name.includes('beta') || name.includes('pregnancy')) {
       return { category: 'Pregnancy', icon: 'fa-baby text-pink-400', iconBg: 'bg-pink-500/10 border-pink-500/20' };
     }
     if (name.includes('urea') || name.includes('kidney') || name.includes('creatinine') || name.includes('kft')) {
-      return { category: 'Kidney', icon: 'fa-filter text-violet-700 dark:text-violet-400', iconBg: 'bg-violet-500/10 border-violet-500/20' };
+      return { category: 'Kidney', icon: 'fa-filter text-blue-700 dark:text-blue-400', iconBg: 'bg-blue-500/10 border-blue-500/20' };
     }
     if (name.includes('ck-mb') || name.includes('heart') || name.includes('cardiac') || name.includes('troponin')) {
       return { category: 'Heart', icon: 'fa-heart-pulse text-rose-500', iconBg: 'bg-rose-500/10 border-rose-500/20' };
@@ -166,10 +166,10 @@ export class LabTestsComponent implements OnInit {
       { id: 'ALL', label: 'All Tests', icon: 'fa-table-cells-large', count: total },
       { id: 'POPULAR', label: 'Popular', icon: 'fa-star text-amber-700 dark:text-amber-400', count: popularCount },
       { id: 'BLOOD', label: 'Blood Tests', icon: 'fa-droplet text-red-500', count: bloodCount },
-      { id: 'THYROID', label: 'Thyroid', icon: 'fa-dna text-purple-700 dark:text-purple-400', count: thyroidCount },
+      { id: 'THYROID', label: 'Thyroid', icon: 'fa-dna text-blue-700 dark:text-blue-400', count: thyroidCount },
       { id: 'DIABETES', label: 'Diabetes', icon: 'fa-bullseye text-amber-700 dark:text-amber-400', count: diabetesCount },
       { id: 'LIVER', label: 'Liver', icon: 'fa-cubes text-orange-700 dark:text-orange-400', count: liverCount },
-      { id: 'KIDNEY', label: 'Kidney', icon: 'fa-filter text-violet-700 dark:text-violet-400', count: kidneyCount },
+      { id: 'KIDNEY', label: 'Kidney', icon: 'fa-filter text-blue-700 dark:text-blue-400', count: kidneyCount },
     ];
   });
 

@@ -211,13 +211,13 @@ export class VitalsTrackingComponent implements OnInit, OnDestroy {
         {
           label: 'Weight (kg)',
           data: dataSet.map(v => v.weight ?? null),
-          borderColor: '#a78bfa',
-          backgroundColor: 'rgba(167, 139, 250, 0.15)',
+          borderColor: '#14b8a6',
+          backgroundColor: 'rgba(20, 184, 166, 0.15)',
           tension: 0.35,
           pointRadius: 4,
           pointHoverRadius: 6,
           pointBackgroundColor: '#ffffff',
-          pointBorderColor: '#a78bfa',
+          pointBorderColor: '#14b8a6',
           pointBorderWidth: 2,
         }
       ], labels));

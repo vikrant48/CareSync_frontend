@@ -22,7 +22,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
       backdropClass="bg-slate-950/80"
       (close)="closeModal.emit()"
     >
-        <div modalHeader class="px-6 py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-between text-white shrink-0 border-b border-white/10">
+        <div modalHeader class="px-6 py-4 bg-blue-600 flex items-center justify-between text-white shrink-0 border-b border-white/10">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center text-xl shadow-inner">
               ✨
@@ -47,7 +47,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
             
             <input type="file" (change)="onFileSelected($event)" accept="image/*,.pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
 
-            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-tr from-blue-600/20 to-indigo-600/20 border border-blue-500/30 text-blue-400 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-lg">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-blue-600/20 border border-blue-500/30 text-blue-400 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-lg">
               <i class="fas fa-file-medical" aria-hidden="true"></i>
             </div>
             <h4 class="text-base sm:text-lg font-bold text-slate-100 mb-1">Upload Medical Document or Prescription</h4>
@@ -55,7 +55,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
               Drag & drop or click to upload a photo of a doctor's prescription, lab test report, or clinical note.
             </p>
 
-            <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-blue-500/20 group-hover:from-blue-500 group-hover:to-indigo-500 transition">
+            <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 text-white text-xs font-bold shadow-lg shadow-blue-500/20 group-hover:bg-blue-500 transition">
               <i class="fas fa-camera text-sm" aria-hidden="true"></i> Select File to Scan
             </div>
           </div>
@@ -69,12 +69,12 @@ import { ModalShellComponent } from './ui/modal-shell.component';
               </div>
 
               <!-- Scanning Laser Beam -->
-              <div class="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_20px_rgba(34,211,238,1)] animate-pulse"
+              <div class="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-teal-400 to-transparent shadow-[0_0_20px_rgba(45,212,191,1)] animate-pulse"
                    style="animation: scanLaser 2s ease-in-out infinite;"></div>
             </div>
 
             <div class="space-y-2">
-              <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-mono font-bold border border-cyan-500/30 animate-pulse">
+              <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-500/10 text-teal-400 text-xs font-mono font-bold border border-teal-500/30 animate-pulse">
                 <i class="fas fa-microchip" aria-hidden="true"></i> AI is extracting data...
               </div>
               <p class="text-xs sm:text-sm font-medium text-slate-300">Parsing handwriting, medications, dosages & lab metrics...</p>
@@ -98,7 +98,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
               <div class="flex items-center gap-3">
                 <span class="px-3 py-1 rounded-lg text-[11px] font-bold shadow-sm"
                       [ngClass]="{
-                        'bg-purple-900/50 text-purple-300 border border-purple-700/50': scanResult()!.documentType === 'PRESCRIPTION',
+                        'bg-teal-900/50 text-teal-300 border border-teal-700/50': scanResult()!.documentType === 'PRESCRIPTION',
                         'bg-emerald-900/50 text-emerald-300 border border-emerald-700/50': scanResult()!.documentType === 'LAB_REPORT',
                         'bg-blue-900/50 text-blue-300 border border-blue-700/50': scanResult()!.documentType === 'MEDICAL_NOTE',
                         'bg-slate-800 text-slate-300 border border-slate-700': !scanResult()!.documentType || scanResult()!.documentType === 'UNKNOWN'
@@ -144,12 +144,12 @@ import { ModalShellComponent } from './ui/modal-shell.component';
             <!-- Extracted Medications Table -->
             <div *ngIf="scanResult()!.medications && scanResult()!.medications!.length > 0" class="space-y-3">
               <h5 class="text-xs font-bold text-slate-400 flex items-center gap-2">
-                <i class="fas fa-pills text-purple-400" aria-hidden="true"></i> Extracted Medications ({{ scanResult()!.medications!.length }})
+                <i class="fas fa-pills text-blue-400" aria-hidden="true"></i> Extracted Medications ({{ scanResult()!.medications!.length }})
               </h5>
               <!-- Mobile cards -->
               <div class="md:hidden space-y-2">
                 <article *ngFor="let med of scanResult()!.medications" class="rounded-xl border border-slate-800 bg-slate-900/60 p-3 space-y-2">
-                  <div class="font-bold text-purple-400 text-sm">{{ med.name }}</div>
+                  <div class="font-bold text-blue-400 text-sm">{{ med.name }}</div>
                   <div class="grid grid-cols-2 gap-2 text-xs">
                     <div><span class="text-slate-500 block text-[10px] uppercase">Dosage</span><span class="font-mono text-slate-300">{{ med.dosage || '-' }}</span></div>
                     <div><span class="text-slate-500 block text-[10px] uppercase">Frequency</span><span class="text-slate-300">{{ med.frequency || '-' }}</span></div>
@@ -172,7 +172,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
                   </thead>
                   <tbody class="divide-y divide-slate-800 bg-slate-900/60">
                     <tr *ngFor="let med of scanResult()!.medications" class="hover:bg-slate-800/50">
-                      <td class="p-3 font-bold text-purple-400">{{ med.name }}</td>
+                      <td class="p-3 font-bold text-blue-400">{{ med.name }}</td>
                       <td class="p-3 font-mono text-slate-300">{{ med.dosage || '-' }}</td>
                       <td class="p-3 text-slate-300">{{ med.frequency || '-' }}</td>
                       <td class="p-3 text-slate-300">{{ med.duration || '-' }}</td>
@@ -252,7 +252,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
             <button type="button" (click)="closeModal.emit()" class="btn-size-sm px-4 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors inline-flex items-center justify-center">
               Close
             </button>
-            <button type="button" *ngIf="scanResult() && scanResult()!.success" (click)="onConfirm()" class="btn-size-lg px-5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-blue-600/20 hover:from-blue-500 hover:to-indigo-500 transition inline-flex items-center justify-center">
+            <button type="button" *ngIf="scanResult() && scanResult()!.success" (click)="onConfirm()" class="btn-size-lg px-5 rounded-xl bg-blue-600 text-white text-xs font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition inline-flex items-center justify-center">
               <i class="fas fa-check mr-1.5" aria-hidden="true"></i> Done & Import
             </button>
           </div>

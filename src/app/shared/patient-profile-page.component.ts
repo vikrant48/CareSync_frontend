@@ -133,7 +133,7 @@ export interface AppointmentCounts {
 
           <!-- Edit Button in Tab Bar: Only visible when activeTab === 'overview' -->
           <a *ngIf="activeTab === 'overview'" routerLink="/patient/profile/edit" 
-            class="btn-size-lg shrink-0 bg-[var(--primary)] hover:bg-indigo-600 active:scale-95 text-white font-bold text-xs sm:text-sm px-4 sm:mb-2 rounded-xl shadow-md shadow-indigo-500/20 transition flex items-center justify-center gap-2 animate-in fade-in duration-200">
+            class="btn-size-lg shrink-0 bg-[var(--primary)] hover:bg-blue-600 active:scale-95 text-white font-bold text-xs sm:text-sm px-4 sm:mb-2 rounded-xl shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-2 animate-in fade-in duration-200">
             <i class="fa-solid fa-pen-to-square text-xs" aria-hidden="true"></i>
             <span>Edit</span>
           </a>
@@ -292,11 +292,11 @@ export interface AppointmentCounts {
 
                   <!-- Action 2: Notification Settings -->
                   <div class="bg-[var(--bg)] hover:bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3.5 transition group flex flex-col justify-between space-y-3 cursor-pointer">
-                    <div class="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-700 dark:text-indigo-400">
+                    <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-700 dark:text-blue-400">
                       <i class="fa-solid fa-bell text-xs" aria-hidden="true"></i>
                     </div>
                     <div>
-                      <div class="text-xs font-bold text-[var(--text)] group-hover:text-indigo-400 transition-colors flex items-center justify-between">
+                      <div class="text-xs font-bold text-[var(--text)] group-hover:text-blue-400 transition-colors flex items-center justify-between">
                         <span>Notification</span>
                         <i class="fa-solid fa-chevron-right text-[10px] opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true"></i>
                       </div>

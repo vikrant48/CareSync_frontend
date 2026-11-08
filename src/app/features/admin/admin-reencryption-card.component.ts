@@ -26,7 +26,7 @@ interface ColumnRow {
     <section class="adm-card p-4 sm:p-5 space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
         <div class="flex items-start gap-3">
-          <div class="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/30 text-violet-600 dark:text-violet-300 flex items-center justify-center shrink-0">
+          <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-600 dark:text-blue-300 flex items-center justify-center shrink-0">
             <i class="fa-solid fa-lock" aria-hidden="true"></i>
           </div>
           <div>

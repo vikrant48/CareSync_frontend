@@ -23,7 +23,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
       backdropClass="bg-slate-950/80"
       (close)="closeModal.emit()"
     >
-        <div modalHeader class="px-6 py-4.5 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 flex items-center justify-between text-white shrink-0 border-b border-white/10">
+        <div modalHeader class="px-6 py-4.5 bg-emerald-600 flex items-center justify-between text-white shrink-0 border-b border-white/10">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center text-xl shadow-inner">
               🎙️
@@ -89,7 +89,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
                 type="button"
                 (click)="processDictation()"
                 [disabled]="!transcriptText().trim() || isProcessing()"
-                class="btn-size-lg px-5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-blue-600/20 transition">
+                class="btn-size-lg px-5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-blue-600/20 transition">
                 <i class="fas" [ngClass]="{ 'fa-spinner fa-spin': isProcessing(), 'fa-magic': !isProcessing() }" aria-hidden="true"></i>
                 {{ isProcessing() ? 'Structuring Clinical Note...' : '✨ Structure into SOAP Note' }}
               </button>
@@ -117,12 +117,12 @@ import { ModalShellComponent } from './ui/modal-shell.component';
 
               <div class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700">
                 <span class="text-[10px] font-bold text-slate-400 block mb-1">Diagnosis</span>
-                <p class="text-xs font-semibold text-indigo-300">{{ dictationResult()!.diagnosis || 'Not provided' }}</p>
+                <p class="text-xs font-semibold text-blue-300">{{ dictationResult()!.diagnosis || 'Not provided' }}</p>
               </div>
 
               <div class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700">
                 <span class="text-[10px] font-bold text-slate-400 block mb-1">Vitals / Follow-up</span>
-                <p class="text-xs font-semibold text-cyan-300">{{ dictationResult()!.vitals || dictationResult()!.followUp || 'Not provided' }}</p>
+                <p class="text-xs font-semibold text-teal-300">{{ dictationResult()!.vitals || dictationResult()!.followUp || 'Not provided' }}</p>
               </div>
             </div>
 
@@ -156,7 +156,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
                 <!-- Assessment -->
                 <div class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/80 space-y-1.5">
                   <div class="flex items-center justify-between">
-                    <span class="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase bg-purple-900/50 text-purple-300 border border-purple-700/50">
+                    <span class="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase bg-blue-900/50 text-blue-300 border border-blue-700/50">
                       A - Assessment
                     </span>
                   </div>
@@ -166,7 +166,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
                 <!-- Plan -->
                 <div class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/80 space-y-1.5">
                   <div class="flex items-center justify-between">
-                    <span class="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase bg-cyan-900/50 text-cyan-300 border border-cyan-700/50">
+                    <span class="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase bg-teal-900/50 text-teal-300 border border-teal-700/50">
                       P - Plan
                     </span>
                   </div>
@@ -178,12 +178,12 @@ import { ModalShellComponent } from './ui/modal-shell.component';
             <!-- Structured Prescriptions Table -->
             <div *ngIf="dictationResult()!.prescriptions && dictationResult()!.prescriptions!.length > 0" class="space-y-3">
               <h5 class="text-xs font-bold text-slate-400 flex items-center gap-2">
-                <i class="fas fa-pills text-purple-400" aria-hidden="true"></i> Structured Prescriptions ({{ dictationResult()!.prescriptions!.length }})
+                <i class="fas fa-pills text-blue-400" aria-hidden="true"></i> Structured Prescriptions ({{ dictationResult()!.prescriptions!.length }})
               </h5>
               <!-- Mobile cards -->
               <div class="md:hidden space-y-2">
                 <article *ngFor="let med of dictationResult()!.prescriptions" class="rounded-xl border border-slate-800 bg-slate-900/60 p-3 space-y-2">
-                  <div class="font-bold text-purple-400 text-sm">{{ med.name }}</div>
+                  <div class="font-bold text-blue-400 text-sm">{{ med.name }}</div>
                   <div class="grid grid-cols-2 gap-2 text-xs">
                     <div><span class="text-slate-500 block text-[10px] uppercase">Dosage</span><span class="font-mono text-slate-300">{{ med.dosage || '-' }}</span></div>
                     <div><span class="text-slate-500 block text-[10px] uppercase">Frequency</span><span class="text-slate-300">{{ med.frequency || '-' }}</span></div>
@@ -206,7 +206,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
                   </thead>
                   <tbody class="divide-y divide-slate-800 bg-slate-900/60">
                     <tr *ngFor="let med of dictationResult()!.prescriptions" class="hover:bg-slate-800/50">
-                      <td class="p-3 font-bold text-purple-400">{{ med.name }}</td>
+                      <td class="p-3 font-bold text-blue-400">{{ med.name }}</td>
                       <td class="p-3 font-mono text-slate-300">{{ med.dosage || '-' }}</td>
                       <td class="p-3 text-slate-300">{{ med.frequency || '-' }}</td>
                       <td class="p-3 text-slate-300">{{ med.duration || '-' }}</td>
@@ -243,7 +243,7 @@ import { ModalShellComponent } from './ui/modal-shell.component';
             <button type="button" (click)="closeModal.emit()" class="btn-size-sm px-4 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors inline-flex items-center justify-center">
               Close
             </button>
-            <button *ngIf="dictationResult() && dictationResult()!.success" type="button" (click)="onConfirm()" class="btn-size-lg px-5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-blue-600/20 hover:from-blue-500 hover:to-indigo-500 transition inline-flex items-center justify-center">
+            <button *ngIf="dictationResult() && dictationResult()!.success" type="button" (click)="onConfirm()" class="btn-size-lg px-5 rounded-xl bg-blue-600 text-white text-xs font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition inline-flex items-center justify-center">
               <i class="fas fa-check mr-1.5" aria-hidden="true"></i> Insert into Consultation
             </button>
           </div>

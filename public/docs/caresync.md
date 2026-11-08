@@ -1,6 +1,6 @@
 # CareSync: Technical Overview
 
-CareSync is a telehealth platform for patients, doctors and admins: appointment booking with online payment, video consultations, medical records, lab tests, and an AI assistant woven into every journey. This page explains **what it is built with, how it works and how it is secured**, for reviewers who want to understand the engineering without reading the source.
+CareSync is an **AI-first telehealth platform** for patients, doctors and admins: a tool-calling AI agent for booking, a clinical co-pilot and voice-to-SOAP for doctors, document reading with vision models, plus appointment booking with online payment, video consultations, medical records and lab tests. This page explains **what it is built with, how it works and how it is secured**, for reviewers who want to understand the engineering without reading the source. Short screen recordings from the running app appear next to the features they show.
 
 > **Live app:** [caresync-vikrant.vercel.app](https://caresync-vikrant.vercel.app/) · Built and maintained by **Vikrant Chauhan** · Source code is private; a walkthrough is available on request.
 
@@ -14,7 +14,7 @@ CareSync is a telehealth platform for patients, doctors and admins: appointment 
 | **Backend** | Java 21 · Spring Boot 3.5 · Spring Security · Spring Data JPA · WebSocket (STOMP) |
 | **Frontend** | Angular 19 (standalone components, signals) · Tailwind CSS · RxJS |
 | **Data** | PostgreSQL (Neon) with 19 Flyway migrations · Redis for cache, locks, quotas and AI memory |
-| **AI** | Groq (gpt-oss-120b / 20b) for agents and summaries · Gemini 2.5 Flash for documents and images |
+| **AI** | Own tool-calling agent (17 tools) on Groq gpt-oss-120b / 20b · Gemini 2.5 Flash for PDFs and images · SSE streaming · rule-based triage · no MCP (MCP-ready tool layer) |
 | **Integrations** | Razorpay payments · LiveKit video · Supabase Storage (private bucket) · Resend email · Google sign-in |
 | **Hosting** | Backend in Docker on Render · Frontend on Vercel · Database on Neon |
 | **Size** | 25 REST controllers · 30 JPA entities · 33 repositories · 79 service classes · 58 test classes |
@@ -41,7 +41,311 @@ CareSync is a telehealth platform for patients, doctors and admins: appointment 
 
 ---
 
-## 2. High-level design (HLD)
+## 2. AI architecture (AI-first)
+
+AI is built into every journey: patients book by chatting, doctors dictate notes and ask a co-pilot about their own patients, and admins get help checking certificates. One rule runs through all of it: **the AI reads and prepares; a person confirms, pays or signs.** The model has no tool that can write to the database.
+
+### 2.1 Capability map
+
+```mermaid
+flowchart LR
+    subgraph PAT["Patient"]
+        P1["Chat booking agent"]
+        P2["Symptom search"]
+        P3["Health brief"]
+        P4["Lab report explainer"]
+        P5["Pre-visit form from free text"]
+        P6["After-visit summary"]
+        P7["Document scanner"]
+        P8["Emergency triage"]
+    end
+    subgraph DOC["Doctor"]
+        D1["Clinical co-pilot<br/>own patients, cited"]
+        D2["Next-patient brief"]
+        D3["Voice dictation to SOAP"]
+        D4["SOAP draft from transcript"]
+        D5["Diagnosis suggestions"]
+        D6["History summary"]
+    end
+    subgraph ADM["Admin"]
+        A1["Certificate check<br/>(vision)"]
+    end
+    PAT --> CORE["CareSync AI layer<br/>agent loop · tools · guardrails · audit"]
+    DOC --> CORE
+    ADM --> CORE
+    CORE --> G["Groq<br/>gpt-oss-120b · gpt-oss-20b"]
+    CORE --> V["Gemini 2.5 Flash<br/>PDF and image reading"]
+```
+
+| Area | How it is built |
+|---|---|
+| **Providers** | Groq (OpenAI-compatible chat completions with native tool calling) and Gemini 2.5 Flash for documents and images. Both called over plain HTTPS; no SDK lock-in |
+| **Agent** | Own tool-calling loop, bounded to 5 model calls per message and 3 tool calls per step |
+| **Tools** | 10 patient tools and 7 read-only doctor tools, each with a JSON-Schema definition and server-side validation |
+| **Streaming** | Server-Sent Events: `status` (e.g. "Finding doctors…"), `delta` (text), `done` (answer + card), `error`; Stop button cancels mid-answer |
+| **Safety** | Rule-based emergency triage before any AI, prompt-injection framing, minimum-necessary patient data, disclaimers, human confirmation for every action |
+| **Cost control** | Per-user quota (20 calls/min, 200/day), per-IP limit, input caps, encrypted answer cache, small model for simple tasks |
+| **Privacy** | Chat memory, saved chats, cached answers and audit text all encrypted with AES-256-GCM; AI text expires automatically |
+
+### 2.2 One chat message, end to end
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as Patient or doctor
+    participant FE as Angular chat
+    participant API as AI endpoint (SSE)
+    participant Q as Quota and limits
+    participant R as Red-flag rules
+    participant A as Agent loop
+    participant L as Groq LLM
+    participant T as Server tools
+    participant M as Memory and history
+    U->>FE: types a message
+    FE->>API: POST chat/stream (Bearer token)
+    API->>Q: per-user quota, 2000-char cap
+    API->>R: emergency rules (no AI)
+    alt red flag found
+        R-->>FE: emergency card with 112 / 108 / 14416
+    else normal message
+        API->>M: load last 10 messages (encrypted)
+        API->>A: run as the signed-in user
+        loop up to 5 steps
+            A->>L: stream with tool definitions
+            L-->>FE: delta text
+            L->>A: tool call(s), max 3
+            A-->>FE: status, e.g. Finding doctors
+            A->>T: execute with validated arguments
+            T-->>A: JSON result + UI card
+        end
+        A-->>FE: done (answer + card)
+        API->>M: save turn, card and audit record (encrypted)
+    end
+```
+
+The browser reads the stream with `fetch` and a small SSE parser (EventSource cannot send a POST body or an auth header). If the stream fails before any text arrives, the app retries once as a normal request so the token-refresh interceptor can run.
+
+### 2.3 The bounded agent loop
+
+```mermaid
+flowchart TD
+    START(["User message"]) --> STEP{"Step 5 or less?"}
+    STEP -- yes --> LAST{"Last step?"}
+    LAST -- no --> OFFER["Offer the tool list"]
+    LAST -- yes --> NOTOOLS["Offer no tools<br/>(model must answer)"]
+    OFFER --> CALL["Call the model"]
+    NOTOOLS --> CALL
+    CALL --> WANTS{"Tool calls?"}
+    WANTS -- no --> ANSWER(["Final answer + card"])
+    WANTS -- yes --> LIMIT["Run at most 3"]
+    LIMIT --> VALIDATE["Validate arguments<br/>ids · dates within 90 days · HH:mm"]
+    VALIDATE --> ACCESS["Access checks<br/>as the signed-in user"]
+    ACCESS --> RESULT["JSON result back to the model<br/>card to the UI"]
+    RESULT --> STOP{"User pressed Stop?"}
+    STOP -- no --> STEP
+    STOP -- yes --> ANSWER
+    STEP -- no --> ANSWER
+```
+
+- Bad arguments, unknown tools or failed checks go back to the model as `{"error": …}`, so it can correct itself instead of crashing the turn.
+- Streams run on a small dedicated thread pool (4 workers, queue of 20) that carries the user's security context; when it is full the user gets "The AI assistant is busy" instead of a hung request.
+- Token use and the tools used are summed per message and written to the audit log.
+
+### 2.4 Tool catalogue
+
+```mermaid
+flowchart LR
+    subgraph PT["Patient agent · 10 tools"]
+        t1["flag_urgent_symptoms"]
+        t2["list_specializations"]
+        t3["search_doctors"]
+        t4["get_available_slots"]
+        t5["prepare_booking"]
+        t6["list_my_appointments"]
+        t7["prepare_cancel"]
+        t8["prepare_reschedule"]
+        t9["my_saved_doctors"]
+        t10["search_lab_tests"]
+    end
+    subgraph DT["Doctor co-pilot · 7 read-only tools"]
+        d1["list_my_patients"]
+        d2["get_patient_summary"]
+        d3["get_recent_vitals"]
+        d4["get_medical_history"]
+        d5["list_lab_reports"]
+        d6["get_schedule"]
+        d7["brief_next_patient"]
+    end
+    PT --> BOX["AgentToolbox<br/>definitions() · execute(name, args)"]
+    DT --> BOX
+    BOX --> LLM["Groq native tool calling"]
+```
+
+| Tool type | Guarantees |
+|---|---|
+| **Search / list** (`search_doctors`, `get_available_slots`, `list_my_appointments`…) | Read only; results limited (e.g. 5 doctors, 15 lab tests); return a card the UI renders |
+| **`prepare_*`** (booking, cancel, reschedule) | Check ownership, slot availability, doctor leave and duplicates, then return a **confirmation card**. They never book, cancel or pay |
+| **Doctor tools** | Read-only transactions; every call re-checks that the patient is the doctor's own (unknown ids and other doctors' patients get the same answer, so ids cannot be probed); every read is audited; no phone, email, address or date of birth is ever returned |
+
+The last card of a turn is shown to the user, and the agent keeps a short hidden note of it (doctor ids, slots), so follow-ups like "book the second one" work.
+
+### 2.5 Human in the loop: AI prepares, the user confirms
+
+```mermaid
+sequenceDiagram
+    actor P as Patient
+    participant AI as Agent
+    participant T as prepare_booking
+    participant UI as Confirm card
+    participant PAY as Payment popup
+    participant B as Booking API
+    P->>AI: "a skin doctor tomorrow after 5 pm"
+    AI->>T: doctor_id, date, time
+    T->>T: doctor active, not on leave, slot free, no duplicate
+    T-->>UI: CONFIRM card (nothing booked yet)
+    UI-->>P: doctor · date · time · fee · reason
+    P->>PAY: Confirm and pay
+    PAY->>B: normal booking API, source AI_ASSISTED
+    B-->>P: booked and paid
+    Note over AI,B: The model has no tool that books, cancels, reschedules or pays
+```
+
+<figure class="docs-video">
+  <video src="/docs/media/patient-ai-booking.webm" poster="/docs/media/patient-ai-booking.png" controls muted loop playsinline preload="metadata" aria-label="Screen recording: a patient asks the AI for a dermatologist and gets a confirmation card"></video>
+  <figcaption>Recorded in the app: "Find a dermatologist for tomorrow after 5 pm" → doctor cards → one click → confirmation card. Nothing is booked until the patient presses Confirm &amp; Pay.</figcaption>
+</figure>
+
+Card buttons send fixed commands (for example "select slot 3 of doctor 12"), so a click never depends on the model re-reading free text. The same pattern appears elsewhere: the AI fills the pre-visit form but never submits it, and AI SOAP drafts must be reviewed and e-signed by the doctor.
+
+### 2.6 Two-layer emergency triage
+
+```mermaid
+flowchart LR
+    M["Patient text"] --> L1{"Layer 1: rules<br/>48 medical + 16 mental-health phrases<br/>English and Romanised Hindi<br/>negation-aware"}
+    L1 -- match --> E["Emergency notice<br/>112 · ambulance 108 · Tele-MANAS 14416<br/>+ emergency doctors"]
+    L1 -- no match --> L2["Layer 2: AI agent"]
+    L2 -- "calls flag_urgent_symptoms" --> E
+    L2 -- routine --> N["Normal answer"]
+    E --> AU["Audit: decision only,<br/>never the patient's words"]
+```
+
+<figure class="docs-video">
+  <video src="/docs/media/patient-emergency-triage.webm" poster="/docs/media/patient-emergency-triage.png" controls muted loop playsinline preload="metadata" aria-label="Screen recording: a chest-pain message triggers the emergency notice"></video>
+  <figcaption>Recorded in the app: a chest-pain message triggers the rule-based emergency notice with 112 and 108, an emergency booking option and general-medicine doctors.</figcaption>
+</figure>
+
+- The rules run before any AI and need no network, so the safety net works even when the model is down.
+- Negation is handled ("no chest pain" does not fire), as are false friends such as "heat stroke".
+- Mental-health signals are always treated as emergencies and routed to crisis lines. Used in chat, symptom search and the pre-visit form.
+
+### 2.7 Model routing and fallback
+
+```mermaid
+flowchart LR
+    TASK["AI task"] --> TIER{"Tier"}
+    TIER -- "SMART<br/>agent · co-pilot · SOAP · diagnosis · history" --> M1["gpt-oss-120b"]
+    TIER -- "FAST<br/>summaries · intake · tips" --> M2["gpt-oss-20b"]
+    TIER -- "VISION<br/>PDFs and images" --> M3["Gemini 2.5 Flash"]
+    M1 -- "rate limit · model gone · bad tool JSON · empty" --> M2
+    M2 -- "clinical tasks" --> M3
+    M3 -- "unavailable" --> F["Recorded facts or checklist<br/>booking still works with buttons"]
+```
+
+- Each model gets two attempts with backoff on server errors and timeouts before the next one is tried.
+- Low temperature (0.2) and JSON mode for structured outputs (SOAP, scans, intake), so the UI receives fields rather than prose.
+- Provider keys travel in headers, never in URLs, and are read only from environment variables.
+
+### 2.8 Clinical AI for doctors
+
+```mermaid
+flowchart LR
+    MIC["Browser speech-to-text<br/>(Web Speech API)"] --> TR["Transcript only<br/>no audio leaves the device"]
+    TR --> SOAP["Structure to SOAP<br/>Groq JSON mode"]
+    SOAP --> REV["Doctor reviews every field<br/>AI text marked 'verify'"]
+    REV --> SIGN["Doctor e-signs<br/>record becomes final"]
+    SIGN --> SUM["After-visit summary for the patient<br/>regenerated only if the record changes"]
+```
+
+<figure class="docs-video">
+  <video src="/docs/media/doctor-copilot.webm" poster="/docs/media/doctor-copilot.png" controls muted loop playsinline preload="metadata" aria-label="Screen recording: a doctor asks the co-pilot to brief the next patient"></video>
+  <figcaption>Recorded in the app: "Brief me on my next patient". The co-pilot reads only the doctor's own patient and cites each fact with its date.</figcaption>
+</figure>
+
+- **Co-pilot:** the doctor picks a patient with an `@` mention (only their own patients appear); answers cite the record and date for each fact.
+- **SOAP draft:** uses the intake summary and vitals recorded within 7 days of the visit; empty fields stay empty instead of being invented; patients never see a draft, only the signed report.
+- **Diagnosis suggestions and history summary:** always carry a disclaimer; the history summary uses at most 10 visits.
+- **Pre-visit brief:** a one-screen summary before the visit, labelled "Verify in chart".
+
+### 2.9 Reading documents (vision)
+
+```mermaid
+flowchart LR
+    UP["Upload<br/>PDF · PNG · JPEG · WebP"] --> G["Gemini 2.5 Flash<br/>file sent inline, strict JSON out"]
+    G --> LAB["Lab report explainer<br/>plain-words answer + not-a-diagnosis note<br/>saved encrypted, shown instantly next time"]
+    G --> SCAN["Document scanner<br/>medicines · lab values · safety flags"]
+    G --> CERT["Certificate check for admins<br/>name · organisation · credential id · mismatches"]
+    CERT --> ADMIN["Admin decides<br/>(AI never verifies a doctor)"]
+```
+
+- Certificates are read only from files already in CareSync storage, never from a link a user typed, which removes a server-side request forgery risk.
+- If a file is not actually a lab report, the answer says so and nothing is saved.
+
+### 2.10 Memory, history and data lifecycle
+
+```mermaid
+flowchart LR
+    MSG["Chat turn"] --> MEM["Redis memory<br/>last 10 messages · 24 h<br/>AES-256-GCM, per user"]
+    MSG --> HIST["Saved chats (PostgreSQL)<br/>title · text · cards encrypted<br/>owner only"]
+    MSG --> AUD["Audit log<br/>model · tokens · latency · tools"]
+    HIST --> ACT["Rename · delete · delete all"]
+    HIST --> RET1["Deleted after 90 days unused"]
+    HIST --> EXP["Included in the patient's data export"]
+    AUD --> RET2["Prompt and answer text cleared after 30 days<br/>usage numbers kept"]
+```
+
+### 2.11 Guardrails and cost control
+
+```mermaid
+flowchart TD
+    IN["AI request"] --> Q1["Per-IP limit<br/>20 per minute on AI routes"]
+    Q1 --> Q2["Per-user quota<br/>20 per minute · 200 per day"]
+    Q2 --> Q3["Input caps<br/>chat 2000 chars · search 500 · files 5-8 MB"]
+    Q3 --> Q4["Encrypted answer cache<br/>key = SHA-256 of task + facts"]
+    Q4 --> Q5["Prompt-injection framing<br/>tool output and documents are data, not instructions"]
+    Q5 --> Q6["Minimum necessary data<br/>no contact details · age instead of date of birth"]
+    Q6 --> Q7["Audit every call"]
+```
+
+- The cache key is a hash of the exact facts, so a changed record can never be answered from a stale cache. Summaries that rarely change are also stored with a hash of their source and regenerated only when that hash changes, so reopening a visit costs no model call.
+- AI text on screen is HTML-escaped before a small Markdown subset is rendered, so a model answer cannot inject markup.
+
+### 2.12 MCP (Model Context Protocol): status and readiness
+
+CareSync **does not use MCP today**, neither as an MCP server nor as a client. Tools run in-process through the provider's native function calling, which keeps latency low and lets every tool reuse the app's own security context and access checks.
+
+The tool layer was designed so it can be exposed over MCP without rewriting tools:
+
+```mermaid
+flowchart LR
+    subgraph NOW["Today"]
+        TB["AgentToolbox<br/>definitions(): JSON Schema<br/>execute(name, args)"]
+        TB --> GQ["Groq tool calling<br/>(in-process)"]
+    end
+    subgraph NEXT["MCP adapter (roadmap)"]
+        LIST["tools/list"] --> TB
+        CALL["tools/call"] --> TB
+        AUTH["Per-session auth<br/>maps to the signed-in user"] --> CALL
+    end
+    EXT["External MCP clients<br/>e.g. desktop assistants"] --> LIST
+    EXT --> CALL
+```
+
+- `definitions()` already produces JSON-Schema tool descriptions, which map to MCP `tools/list`; `execute(name, args)` maps to `tools/call`.
+- What an adapter would add: per-session authentication (tools currently take the user from the request's security context) and mapping UI cards and emergency notices to MCP structured content.
+
+---
+
+## 3. High-level design (HLD)
 
 ### System architecture
 
@@ -89,14 +393,28 @@ flowchart LR
 
 ### Deployment
 
+```mermaid
+flowchart LR
+    PUSH["git push<br/>dev / main"] --> CI["GitHub Actions"]
+    CI --> T["Build + full test suite"]
+    CI --> GL["Secret scan<br/>gitleaks, whole history"]
+    CI --> CQ["CodeQL security scan<br/>also weekly"]
+    REL["Release script"] --> IMG["Multi-stage Docker build<br/>JRE only · non-root · health check"]
+    IMG --> REG["Container registry"]
+    REG --> RENDER["Render<br/>runs the image"]
+    RENDER --> FW["Flyway migrates<br/>Hibernate validates the schema"]
+    FW --> LIVE["API live"]
+    FEP["Frontend push"] --> VER["Vercel<br/>static SPA + security headers"]
+```
+
 - **Backend:** multi-stage Docker image running as a non-root user on Render. Flyway migrates the database on startup; the app refuses to start if the schema and entities disagree.
 - **Frontend:** static build on Vercel with strict security headers (Content-Security-Policy, HSTS, frame and referrer policies).
 - **Configuration:** every secret comes from environment variables; none are stored in code or logs.
-- **CI:** GitHub Actions builds and runs the full test suite on every push, plus static analysis.
+- **CI:** on every push and pull request to `dev` and `main`, GitHub Actions runs the full build and test suite, scans the whole git history for leaked secrets (gitleaks), and runs a CodeQL security analysis, which also runs weekly when nothing is pushed.
 
 ---
 
-## 3. Low-level design (LLD)
+## 4. Low-level design (LLD)
 
 ### Backend structure
 
@@ -220,10 +538,61 @@ flowchart LR
     RZ --> REC["Payment marked refunded<br/>amount · reason · date"]
 ```
 
+<figure class="docs-video">
+  <video src="/docs/media/patient-payments.webm" poster="/docs/media/patient-payments.png" controls muted loop playsinline preload="metadata" aria-label="Screen recording: the patient payment history"></video>
+  <figcaption>Recorded in the app: the patient's payment history with status, method, payment id, refunds and receipt download.</figcaption>
+</figure>
+
 - The job catches every cancellation path, so new features cannot forget to refund. Each refund runs in its own transaction and is retried if the gateway fails.
 - The cancel dialog shows the exact refund before the patient confirms, computed by the same policy code.
 - **Admin finance:** gross, refunds and net revenue by day and month, failed payments, abandoned checkouts.
 - **Doctor earnings:** what each doctor's visits earned after refunds (display only; no money is routed to doctors, which would require a licensed split-payment product).
+
+### Video consultation
+
+```mermaid
+sequenceDiagram
+    actor D as Doctor
+    actor P as Patient
+    participant API as CareSync API
+    participant LK as LiveKit
+    D->>API: request video token for appointment
+    API->>API: caller is this appointment's doctor or patient (exact account + role)
+    API->>API: inside the window: 10 min before to 45 min after the start
+    API->>API: room name appt-id-random UUID (unguessable)
+    API-->>D: token for this room only, expires when the window closes
+    D->>LK: join (WebRTC, encrypted in transit)
+    P->>API: request video token
+    API-->>P: token for the same room
+    P->>LK: join
+    D->>API: end consultation
+    API->>LK: close the room
+    Note over API: Visit stays IN_PROGRESS so the doctor can finish notes. Nothing is recorded.
+```
+
+### Real-time consultation chat
+
+```mermaid
+sequenceDiagram
+    participant C as Client (SockJS / STOMP)
+    participant I as Channel interceptor
+    participant G as AccessGuard
+    participant H as Chat handler
+    participant DB as PostgreSQL
+    C->>I: CONNECT with Bearer JWT
+    I->>I: valid token and live session, remember the session id
+    C->>I: SUBSCRIBE /topic/appointment/{id}
+    I->>G: is this user a participant of the appointment?
+    G-->>I: yes
+    C->>I: SEND /app/chat.sendMessage
+    I->>I: session still live, account still enabled?
+    I->>H: allowed
+    H->>DB: save message
+    H-->>C: broadcast to /topic/appointment/{id}
+    Note over I: Every frame is re-checked, so logout or blocking cuts an open socket off
+```
+
+The consultation chat is deleted when the visit is completed.
 
 ### Reliability patterns
 
@@ -238,53 +607,119 @@ flowchart LR
 
 ---
 
-## 4. The AI layer
-
-AI is part of every journey, but it never acts alone: it **prepares**, a human **confirms**.
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor U as Patient / Doctor
-    participant FE as Angular chat
-    participant API as AI endpoint (SSE)
-    participant R as Red-flag rules
-    participant A as Agent loop
-    participant L as LLM
-    participant T as Server-side tools
-    U->>FE: message
-    FE->>API: stream request
-    API->>R: emergency rules (no AI)
-    alt red flag
-        R-->>FE: emergency card (112 / 108 / 14416)
-    else normal
-        API->>A: run with encrypted memory
-        loop up to 5 steps, max 3 tools per step
-            A->>L: stream with tool definitions
-            A->>T: run tool as the signed-in user
-            T-->>A: JSON result + UI card
-        end
-        A-->>FE: answer + action card
-    end
-```
-
-- **Patient agent (10 tools):** search doctors, check slots, prepare booking / cancel / reschedule, list appointments, lab tests. `prepare_*` tools only return a confirmation card; nothing changes until the patient presses Confirm.
-- **Doctor co-pilot (7 read-only tools):** every call re-checks that the patient is the doctor's own; only minimum data reaches the model (no phone, email, address or date of birth); answers cite their source.
-- **Two-layer triage:** deterministic red-flag rules (including negation and Hindi) run before any AI.
-- **Model routing:** large model for agents, small model for summaries, vision model for files, with automatic fallback.
-- **Guardrails and cost:** per-user quotas (20/min, 200/day), input limits, encrypted response cache, prompt-injection handling (tool output is data, not instructions), full audit of every AI call (model, tokens, latency, tools), AI text encrypted and expired.
-
----
-
 ## 5. Security
 
 Health data needs defence in depth. Each layer assumes the one before it might fail.
+
+### Threat model
+
+Every arrow that crosses a boundary below is treated as hostile until checked on the trusted side.
+
+```mermaid
+flowchart LR
+    subgraph NET["Untrusted: the internet"]
+        U["Patients, doctors, admins"]
+        A["Attacker"]
+    end
+    subgraph EDGE["Edge"]
+        FE["Static SPA on Vercel<br/>CSP · HSTS · frame-deny"]
+    end
+    subgraph CORE["Trusted: CareSync API"]
+        F["Rate limit · IP block"]
+        AU["JWT + live session"]
+        AZ["Role rules · @PreAuthorize<br/>AccessGuard"]
+        SV["Services<br/>validation · state machine"]
+        F --> AU --> AZ --> SV
+    end
+    subgraph DATA["Data stores"]
+        DB[("PostgreSQL<br/>encrypted fields")]
+        RD[("Redis<br/>encrypted values")]
+        ST[("Private file bucket")]
+    end
+    subgraph EXT["Third parties"]
+        AI["Groq · Gemini"]
+        PAY["Razorpay"]
+        VID["LiveKit"]
+        MAIL["Resend · Google"]
+    end
+    U --> FE
+    A -.-> FE
+    FE -- "TB1: HTTPS, Bearer token" --> F
+    A -. "direct API calls" .-> F
+    SV -- "TB2: TLS, app-level encryption" --> DB
+    SV --> RD
+    SV -- "signed links only" --> ST
+    SV -- "TB3: minimum data, keys in headers" --> AI
+    SV -- "server-priced orders, verified" --> PAY
+    SV -- "short-lived room tokens" --> VID
+    SV --> MAIL
+    PAY -. "TB4: signed webhooks" .-> F
+```
+
+| Threat | Example | Defences in CareSync |
+|---|---|---|
+| **Spoofing** | Password guessing, stolen or replayed tokens | Per-IP rate limiting and IP blocking; OTP attempt limits per account; admin second factor by email; 15-minute access tokens bound to a server session; single-use refresh tokens; new-device alerts; Google sign-in only claims accounts safely |
+| **Tampering** | Changing a price, faking "payment succeeded", editing a signed record | Prices only from the server; Razorpay signature plus server-side fetch of the payment; AES-GCM encryption is tamper-evident; signed records cannot be overwritten; records bound to their appointment's patient and doctor |
+| **Repudiation** | "I never opened that record" | Audit trail of every patient-data request (including refused ones); audit of every AI call and co-pilot read; appointment status history; e-signed medical records |
+| **Information disclosure** | Reading another patient's data by changing an id (IDOR) | Object-level AccessGuard on every record; unknown and forbidden ids answered the same way; encrypted columns, cache and AI text; files only via expiring signed links; draft records hidden from patients; minimum data to AI; no health data in logs or emails |
+| **Denial of service** | Flooding logins, the AI or bookings | Token-bucket rate limits; AI quotas per user; bounded AI thread pool; booking caps and one slot hold per patient; concurrency limit on payment gateway calls |
+| **Elevation of privilege** | A patient calling doctor or admin endpoints, a case-variant username | URL role rules, method security and object checks in three layers; identity resolved by user id; usernames unique regardless of case; lab catalogue changes need a verified doctor |
+| **Cross-site scripting** | Script injected through text or an AI answer | Strict Content-Security-Policy (own scripts plus named providers only); Angular escaping; AI text HTML-escaped before a small Markdown subset is rendered |
+| **Clickjacking and CSRF** | Framing the app, forged requests | `frame-ancestors 'none'` and `X-Frame-Options`; authentication uses a Bearer token in a header, not a cookie, so the browser cannot attach it to a forged request |
+| **Server-side request forgery** | Making the server fetch an internal URL | The vision AI reads only files already in CareSync storage, never a user-supplied link |
+| **Prompt injection** | Instructions hidden in a document or a tool result | Tool output and documents framed as data, not instructions; tools run as the signed-in user with access checks; no tool can write data; every action needs human confirmation |
+| **Secrets and supply chain** | Leaked keys, vulnerable code | Secrets only in environment variables; gitleaks scans the full git history on every push; CodeQL security analysis on every push and weekly |
 
 ### Authentication and sessions
 - Short-lived JWT access tokens plus rotating refresh tokens, **both bound to a server-side session**, so logout, password change and admin revocation take effect immediately.
 - Sessions end after 1 hour idle or 24 hours total; users can see and sign out their other devices; changing a password signs out every other device.
 - Email ownership verified by OTP; Google sign-in only takes over an existing account whose email was verified, otherwise it claims it safely (new password, all sessions ended).
 - Admin sign-in requires a second factor (one-time code by email). OTP attempts are limited per account, not just per IP.
+
+#### Sign-in flow
+
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant SPA as Angular app
+    participant API as Auth API
+    participant S as Session store
+    participant E as Email
+    U->>SPA: username + password
+    SPA->>API: login
+    API->>API: rate limit, record the attempt, check password
+    alt admin account
+        API->>E: one-time login code
+        API-->>SPA: code required (no tokens yet)
+        U->>SPA: enters the code
+        SPA->>API: verify code
+    end
+    API->>S: create session (device, IP)
+    API-->>SPA: access token (15 min) + refresh token
+    Note over SPA,API: Every request: valid JWT AND live session (idle 1 h, max 24 h)
+    SPA->>API: refresh when the access token expires
+    API->>S: session still live?
+    API-->>SPA: new access + new refresh token (old one deleted)
+    U->>SPA: logout, password change or admin revoke
+    API->>S: end session: next request gets 401, WebSocket frames refused
+```
+
+**Google sign-in** follows the same session model, with one extra rule for existing accounts:
+
+```mermaid
+flowchart LR
+    G["Google ID token"] --> V{"Issued to CareSync?"}
+    V -- no --> X["Refused"]
+    V -- yes --> E{"Account with<br/>this email?"}
+    E -- no --> N["Create account<br/>email marked verified"]
+    E -- "yes, email verified" --> S["Sign in"]
+    E -- "yes, never verified" --> C["Claim safely<br/>new random password<br/>all old sessions ended"]
+    N --> SS["Server session + tokens"]
+    S --> SS
+    C --> SS
+```
+
+A sign-in from a new device also triggers an email alert, and users can see and end their other sessions.
 
 ### Authorization in three layers
 1. **URL rules** per role in Spring Security.
@@ -322,7 +757,62 @@ In 2026 I ran a structured security review of the platform covering authenticati
 
 ---
 
-## 6. Data and migrations
+## 6. Where patient data goes (privacy by design)
+
+CareSync relies on a few outside services. Each one receives only what its job needs, and health data is encrypted before it is stored anywhere.
+
+```mermaid
+flowchart LR
+    B["Patient / doctor<br/>browser"] -- "HTTPS" --> API["CareSync API<br/>(Render)"]
+    B -- "card / UPI details<br/>typed in Razorpay's window" --> RZC["Razorpay Checkout"]
+    B -- "live audio and video" --> LK["LiveKit<br/>video"]
+    API -- "all records<br/>health fields encrypted" --> DB[("Neon PostgreSQL")]
+    API -- "encrypted cache, chat memory<br/>counters" --> RD[("Redis")]
+    API -- "uploaded files<br/>private bucket" --> ST[("Supabase Storage")]
+    API -- "chat text + minimum<br/>tool facts" --> GQ["Groq<br/>text AI"]
+    API -- "only the file the user<br/>asked to read" --> GM["Gemini<br/>vision AI"]
+    API -- "amount, currency,<br/>receipt id" --> RZ["Razorpay API"]
+    API -- "account emails only<br/>codes and alerts" --> EM["Resend<br/>email"]
+    API -- "ID token check" --> GG["Google sign-in"]
+    API -- "short-lived room token<br/>assigned doctor and patient" --> LK
+```
+
+### What each service receives
+
+| Service | Why | Receives | Never receives | Protection |
+|---|---|---|---|---|
+| **Neon PostgreSQL** | System of record | All records; health fields are encrypted with AES-256-GCM before they leave the API | The encryption key | TLS; app-level encryption, so a database copy does not reveal health data |
+| **Redis** | Cache, slot holds, quotas, AI chat memory | Encrypted cached values and chat memory; counters | Readable health data | Values encrypted; chat memory expires after 24 hours |
+| **Supabase Storage** | Medical files, certificates, profile pictures | The files users upload | Public links | Private bucket; files open through signed links that expire within minutes, or an authenticated download that re-checks access |
+| **Groq** | Text AI (chat, summaries, SOAP) | The messages a user types; minimum facts returned by tools (for example name, age, gender, vitals, finalised visit notes for the doctor's own patient); de-identified facts for health tips | Phone, email, address, date of birth; anything about other patients | Access checks before every tool call; per-user quotas; audit of every call |
+| **Gemini** | Reading PDFs and images | Only the file a user explicitly asked to explain or scan; for admins, certificates already in CareSync storage | Files the user did not choose; links typed by users | Results stored encrypted; certificates are never fetched from user-supplied URLs |
+| **Razorpay** | Payments and refunds | Amount, currency, an internal receipt id, a generic description such as "Appointment Booking Payment" | Reason for visit, diagnosis or any health data; card and UPI details never reach CareSync servers | Signature and server-side verification of every payment |
+| **LiveKit** | Video consultations | Live audio and video during the visit; a room name made of the appointment number and a random id; participant id and display name | Recordings (none are made); medical records | Room tokens issued only to the assigned doctor and patient; WebRTC encryption in transit |
+| **Resend** | Email | Email address, name, one-time codes, new-device alerts | Appointment details or any health data | Only account-security emails are sent; appointment updates stay inside the app |
+| **Google** | "Sign in with Google" | The Google ID token, for verification, only when the user chooses Google | Health data | Token must be issued to CareSync (audience check) |
+| **Vercel** | Hosts the web app | Static files only | Patient data | Strict security headers and Content-Security-Policy |
+
+The API itself runs on Render: requests are processed in memory, and logs never contain request bodies, query strings or free text.
+
+### How long data is kept
+
+| Data | Kept for |
+|---|---|
+| AI chat memory (Redis) | 24 hours |
+| Saved AI chats | Deleted after 90 days without use (patients can delete earlier) |
+| Text of AI prompts and answers in the audit log | 30 days; usage numbers (model, tokens, latency) are kept |
+| Doctor–patient consultation chat | Deleted when the visit is completed |
+| Signed file links | Minutes |
+| Medical records and the audit trail | Kept; retention jobs never delete them, and signed records cannot be overwritten |
+
+### Patient rights
+- **Export:** patients can download their data, including a FHIR export and their saved AI chats.
+- **Control:** saved AI chats can be renamed, deleted one by one, or all at once; saved payment methods can be forgotten.
+- **Transparency:** AI answers are labelled, health tips and lab explanations carry a "not a diagnosis" note, and the AI never acts without the patient's confirmation.
+
+---
+
+## 7. Data and migrations
 
 - PostgreSQL schema managed by **19 Flyway migrations**; each recent migration documents its lock and downtime risk and has a matching rollback script.
 - Hot-query indexes are built `CONCURRENTLY` to avoid write locks.
@@ -331,7 +821,7 @@ In 2026 I ran a structured security review of the platform covering authenticati
 
 ---
 
-## 7. Testing and quality
+## 8. Testing and quality
 
 - **58 backend test classes** with JUnit 5, Mockito and Spring Boot MockMvc tests on H2 in PostgreSQL mode.
 - Focus areas: endpoint access control, `AccessGuard`, session enforcement (logout, rotation, idle and maximum lifetime), field encryption, Flyway script checks, payment rules, and the AI layer (agent loop, tool validation, triage rules, quotas, cache, memory, co-pilot access).
@@ -340,7 +830,7 @@ In 2026 I ran a structured security review of the platform covering authenticati
 
 ---
 
-## 8. Frontend architecture
+## 9. Frontend architecture
 
 - **Angular 19 standalone components** with signals, lazy-loaded routes per role, and a small shared design system (page header, stat cards, pills, modals, paginator, confirm dialog).
 - **Auth:** HTTP interceptor attaches the access token and refreshes it silently; guards protect routes by role.
@@ -350,7 +840,117 @@ In 2026 I ran a structured security review of the platform covering authenticati
 
 ---
 
-## 9. Key engineering decisions
+## 10. Hard problems I solved
+
+Real problems from building and running CareSync, each with what I did and how it turned out.
+
+### AI
+
+**1. Letting an AI act without letting it act alone**
+- **Problem:** I wanted patients to book by chat, but a model can misread "Tuesday" or pick the wrong doctor, and a wrong booking costs real money.
+- **What I did:** split the tools into read tools and `prepare_*` tools that only return a confirmation card; validated every argument on the server (ids, dates within 90 days, times); capped the loop at 5 steps and 3 tools per step, with no tools on the last step.
+- **Result:** "book a skin doctor tomorrow after 5 pm" works end to end, yet nothing changes until the patient presses Confirm and pays.
+
+**2. Emergencies can't depend on a language model**
+- **Problem:** someone typing "chest pain spreading to my arm" must get help at once, even if the AI is slow, rate-limited or down.
+- **What I did:** deterministic red-flag rules (64 phrases, English and Romanised Hindi, negation-aware) run before any AI; the agent's `flag_urgent_symptoms` tool is a second layer; an emergency notice is never downgraded by a milder one; each decision is audited without storing the patient's words.
+- **Result:** emergency guidance with 112, 108 and Tele-MANAS 14416 appears in milliseconds, with no network call.
+
+**3. A co-pilot that cannot leak other patients' data**
+- **Problem:** a doctor's AI assistant reads health records; one wrong id must not expose someone else's history.
+- **What I did:** every doctor tool re-checks that the patient is the doctor's own; unknown and forbidden ids get the same answer (no probing); every read is audited; contact details and date of birth never reach the model; answers cite the record and date.
+- **Result:** doctors can ask "any BP trend for this patient?" and verify every fact, with a full audit trail.
+
+**4. "Access Denied" after every streamed answer**
+- **Problem:** the logs showed an authorization error after every AI chat, even though the answers arrived.
+- **Root cause:** when a Server-Sent Events stream completes, the servlet container sends the same request through the security filters again (an async dispatch). The JWT filter runs once per request, so that second pass had no login.
+
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant F as Security filters
+    participant C as AI controller
+    B->>F: POST chat/stream (JWT)
+    F->>C: authorized, stream starts
+    C-->>B: status, delta, done events
+    C->>F: async dispatch to finish the request
+    F-->>F: no login on this pass, denied
+    Note over F: Fix: permit only the ASYNC dispatcher type
+```
+
+- **Fix:** permit only the `ASYNC` dispatcher type. It is safe because it only finishes a request that was already fully authorized, and a browser cannot trigger it.
+
+**5. Running a production-like AI layer for free**
+- **Problem:** the original models were retired, and free tiers have strict rate limits.
+- **What I did:** moved to supported models, added a fallback chain with SMART and FAST tiers, per-user quotas, an encrypted answer cache, input limits, and hash-keyed caching of tips and summaries until their inputs change.
+- **Result:** the AI keeps working through rate limits, and the running cost stays at zero.
+
+### Reliability
+
+**6. No double booking under load**
+- **Problem:** two patients clicking the same slot at the same moment must not both get it, and nobody should be able to hoard slots.
+- **What I did:** a short Redis hold while the patient confirms, then a `PESSIMISTIC_WRITE` lock on the doctor row plus a conflict query in the same transaction. Bookings must also land on the doctor's real slot grid within 90 days, with per-patient caps and one hold at a time.
+- **Result:** races are resolved by the database, and slot hoarding is blocked by design.
+
+**7. Emails for bookings that never happened**
+- **Problem:** sending confirmation emails inside the transaction means that if it later rolls back, the patient gets an email for a booking that does not exist.
+- **What I did:** an after-commit dispatcher that queues side effects (emails, notifications) and runs them only once the database commit succeeds.
+- **Result:** no phantom notifications, and slow email delivery never holds a database transaction open.
+
+**8. A scheduled job that failed every five minutes**
+- **Problem:** the new payment-reconcile job logged an error on every run.
+- **Root cause:** jobs use a PostgreSQL advisory lock so only one instance runs them, and that lock only exists inside a transaction; the new job had none.
+- **What I did:** made the job transactional to hold the lock, and ran each payment in its own new transaction, so one failing payment cannot roll back the others.
+- **Result:** the job runs once across instances and isolates failures per payment.
+
+### Security
+
+**9. Logout that really ends access**
+- **Problem:** plain JWTs stay valid until they expire, so logout, password changes and admin blocks do not take effect, and an open WebSocket kept working after logout.
+- **What I did:** bound access and refresh tokens to a server-side session (idle 1 hour, maximum 24 hours) checked on every request; refresh tokens rotate; a password change signs out other devices; WebSocket frames are re-checked against the session, not just at connect.
+- **Result:** logout, revocation and blocking take effect immediately, over HTTP and WebSocket alike.
+
+**10. Auditing my own platform**
+- **Problem:** a health app needs more than "it works"; I needed evidence it was safe.
+- **What I did:** a structured security review across authentication, object-level access, injection, health-data exposure, secrets, encryption, dependencies, retention and rate limiting. One example: Google sign-in could attach to an existing account whose email had never been verified. I added an email-verified flag (with a migration that marks doctors, who always verify, as verified), and made Google sign-in claim such accounts safely (new password, all sessions ended).
+- **Result:** 18 confirmed findings (4 high, 5 medium, 9 low) fixed, most with regression tests; migrations that add unique constraints skip themselves with a notice instead of failing a deploy on existing duplicates.
+
+**11. Stronger encryption without downtime**
+- **Problem:** older encrypted columns used AES/ECB, which leaks patterns and is not tamper-evident.
+- **What I did:** switched to AES-256-GCM with a random IV per value, and a batched re-encryption job that rewrites old values in place, reads both formats during the migration, and never overwrites a concurrent edit.
+
+```mermaid
+flowchart LR
+    OLD["Column value<br/>AES/ECB (old)"] --> READ{"Read"}
+    READ -- "v2 prefix" --> GCM["Decrypt AES-256-GCM"]
+    READ -- "no prefix" --> ECB["Decrypt legacy ECB"]
+    JOB["Batched re-encryption job"] --> CHK{"Value unchanged<br/>since read?"}
+    CHK -- yes --> WRITE["Write v2 GCM value"]
+    CHK -- no --> SKIP["Skip, retry next batch"]
+```
+
+- **Result:** every value moved to authenticated encryption while the app stayed online.
+
+**12. A flaky security test**
+- **Problem:** the test proving one patient cannot write into another patient's chat failed at random.
+- **Root cause:** MockMvc clears the test thread's login after each request, and the current-user lookup was cached per request, so the direct service call ran as nobody, or as the wrong user.
+- **Fix:** a helper that runs each direct call with its own explicit login, outside the shared mock request. The test now proves what it claims, every time.
+
+### Payments
+
+**13. Payments the browser cannot fake**
+- **Problem:** a checkout page can be tampered with; a client saying "paid" proves nothing.
+- **What I did:** prices come only from the server; the browser gets a Razorpay order, and on success the server checks the HMAC signature, fetches the payment from Razorpay, and compares order, amount and currency before marking it paid under a row lock. Closed checkouts cancel the order and free the slot; a reconcile job settles or cancels anything left pending, and refunds a payment that arrives after its booking was released.
+- **Result:** payment state always matches Razorpay, with no double charges and no slots held by abandoned checkouts.
+
+**14. Refunds that cannot be forgotten**
+- **Problem:** appointments are cancelled from many places (patient, doctor, admin, schedulers); adding a refund call to each would eventually miss one.
+- **What I did:** one refund job that finds paid bookings whose visit ended up cancelled, whatever cancelled it, and applies a single policy (100% if the doctor or clinic cancels or the patient cancels 24+ hours ahead, 50% later). The cancel dialog previews the refund using the same policy code.
+- **Result:** every cancellation path refunds correctly, including ones added in future, and patients see the amount before they confirm.
+
+---
+
+## 11. Key engineering decisions
 
 | Decision | Why |
 |---|---|
@@ -363,7 +963,7 @@ In 2026 I ran a structured security review of the platform covering authenticati
 
 ---
 
-## 10. Honest limitations and roadmap
+## 12. Honest limitations and roadmap
 
 - Doctor payouts would need Razorpay Route (linked accounts, KYC) once the business is registered.
 - Free-tier hosting means cold starts after idle periods.

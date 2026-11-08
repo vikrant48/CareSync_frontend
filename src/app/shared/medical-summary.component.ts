@@ -12,8 +12,8 @@ import { escapeHtml } from './utils/escape-html';
       <!-- Header -->
       <div class="px-5 py-4 bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-            <i class="fas fa-file-medical-alt text-indigo-600 dark:text-indigo-400" aria-hidden="true"></i>
+          <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+            <i class="fas fa-file-medical-alt text-blue-600 dark:text-blue-400" aria-hidden="true"></i>
           </div>
           <div>
             <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100 italic">AI Medical Summary</h3>
@@ -23,7 +23,7 @@ import { escapeHtml } from './utils/escape-html';
         <button 
           (click)="loadSummary()" 
           [disabled]="isLoading()"
-          class="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1.5 transition-colors disabled:opacity-50"
+          class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1.5 transition-colors disabled:opacity-50"
         >
           <i class="fas fa-sync-alt" [class.animate-spin]="isLoading()" aria-hidden="true"></i>
           <span>{{ summary() ? 'Refresh' : 'Generate' }}</span>
@@ -65,7 +65,7 @@ import { escapeHtml } from './utils/escape-html';
         </div>
 
         <!-- Summary Text -->
-        <div *ngIf="!isLoading() && summary()" class="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 prose-headings:text-indigo-600 dark:prose-headings:text-indigo-400 prose-headings:font-bold prose-headings:mt-4 prose-headings:mb-2 prose-p:leading-relaxed prose-li:my-1">
+        <div *ngIf="!isLoading() && summary()" class="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 prose-headings:text-blue-600 dark:prose-headings:text-blue-400 prose-headings:font-bold prose-headings:mt-4 prose-headings:mb-2 prose-p:leading-relaxed prose-li:my-1">
           <div [innerHTML]="formattedSummary()" class="whitespace-pre-wrap"></div>
         </div>
 
@@ -130,11 +130,11 @@ export class MedicalSummaryComponent implements OnInit {
     text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-gray-900 dark:text-gray-100">$1</strong>');
 
     // Convert headers ## and ###
-    text = text.replace(/^### (.*$)/gim, '<h3 class="text-sm font-bold text-indigo-600 dark:text-indigo-400 mt-4 mb-2 flex items-center gap-1.5"><i class="fas fa-notes-medical"></i> $1</h3>');
-    text = text.replace(/^## (.*$)/gim, '<h2 class="text-base font-bold text-indigo-700 dark:text-indigo-300 mt-5 mb-3 border-b border-gray-100 dark:border-gray-700 pb-1 flex items-center gap-2"><i class="fas fa-file-medical-alt"></i> $1</h2>');
+    text = text.replace(/^### (.*$)/gim, '<h3 class="text-sm font-bold text-blue-600 dark:text-blue-400 mt-4 mb-2 flex items-center gap-1.5"><i class="fas fa-notes-medical"></i> $1</h3>');
+    text = text.replace(/^## (.*$)/gim, '<h2 class="text-base font-bold text-blue-700 dark:text-blue-300 mt-5 mb-3 border-b border-gray-100 dark:border-gray-700 pb-1 flex items-center gap-2"><i class="fas fa-file-medical-alt"></i> $1</h2>');
 
     // Convert bullet points (* or -)
-    text = text.replace(/^[ \t]*[\*\-] (.*$)/gim, '<li class="ml-2 mb-2 flex items-start gap-2"><span class="text-indigo-500 font-bold mt-1">•</span><span>$1</span></li>');
+    text = text.replace(/^[ \t]*[\*\-] (.*$)/gim, '<li class="ml-2 mb-2 flex items-start gap-2"><span class="text-blue-500 font-bold mt-1">•</span><span>$1</span></li>');
 
     // Wrap continuous <li> elements into styled container card
     text = text.replace(/(<li[\s\S]*?<\/li>)+/g, '<ul class="my-3 space-y-1 bg-gray-50/80 dark:bg-gray-900/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800">$&</ul>');

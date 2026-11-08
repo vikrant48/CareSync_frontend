@@ -20,7 +20,7 @@ import { LabReportExplainerComponent } from '../../shared/lab-report-explainer.c
       <div class="flex items-center justify-between gap-2 border-[var(--border)]"
            [ngClass]="expanded() ? 'mb-3 border-b pb-1.5' : ''">
         <h2 class="font-bold text-xs text-[var(--text)] uppercase tracking-wide flex items-center gap-2">
-          <i class="fa-solid fa-wand-magic-sparkles text-indigo-600 dark:text-indigo-400" aria-hidden="true"></i>
+          <i class="fa-solid fa-wand-magic-sparkles text-blue-600 dark:text-blue-400" aria-hidden="true"></i>
           AI health brief
         </h2>
         <div class="flex items-center gap-2 min-w-0">
@@ -47,7 +47,7 @@ import { LabReportExplainerComponent } from '../../shared/lab-report-explainer.c
             <div class="text-[11px] text-[var(--muted)] mb-2">{{ next.dateTime | date:'EEE d MMM, h:mm a' }}</div>
             <div class="text-[10px] font-bold text-[var(--muted)] mb-1 flex items-center gap-1.5">
               How to prepare
-              <span *ngIf="b.tipsFromAi" class="px-1.5 py-px rounded bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-[9px]">AI</span>
+              <span *ngIf="b.tipsFromAi" class="px-1.5 py-px rounded bg-blue-500/10 text-blue-700 dark:text-blue-300 text-[9px]">AI</span>
             </div>
             <ul class="space-y-1">
               <li *ngFor="let tip of b.preparationTips" class="text-[11px] text-[var(--text)] flex gap-1.5">
@@ -69,7 +69,7 @@ import { LabReportExplainerComponent } from '../../shared/lab-report-explainer.c
           <ul class="space-y-1.5">
             <li *ngFor="let item of b.pendingFollowUps" class="text-[11px] text-[var(--text)] flex gap-1.5">
               <i class="fa-solid text-[10px] mt-0.5"
-                 [ngClass]="item.type === 'PRE_VISIT_FORM' ? 'fa-clipboard-list text-amber-600 dark:text-amber-400' : 'fa-flask text-purple-600 dark:text-purple-400'"
+                 [ngClass]="item.type === 'PRE_VISIT_FORM' ? 'fa-clipboard-list text-amber-600 dark:text-amber-400' : 'fa-flask text-blue-600 dark:text-blue-400'"
                  aria-hidden="true"></i>
               <span>
                 {{ item.text }}
@@ -86,7 +86,7 @@ import { LabReportExplainerComponent } from '../../shared/lab-report-explainer.c
         <div class="inset-surface rounded-lg p-3">
           <div class="text-[10px] font-bold text-[var(--muted)] mb-1.5">
             New lab reports
-            <span *ngIf="b.unreadLabReports.length" class="ml-1 px-1.5 py-px rounded-full bg-purple-500/15 text-purple-700 dark:text-purple-300">{{ b.unreadLabReports.length }}</span>
+            <span *ngIf="b.unreadLabReports.length" class="ml-1 px-1.5 py-px rounded-full bg-blue-500/15 text-blue-700 dark:text-blue-300">{{ b.unreadLabReports.length }}</span>
           </div>
           <p *ngIf="b.unreadLabReports.length === 0" class="text-[11px] text-[var(--muted)]">You've seen all your lab reports.</p>
           <ul class="space-y-2">

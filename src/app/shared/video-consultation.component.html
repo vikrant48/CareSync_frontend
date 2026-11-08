@@ -211,14 +211,14 @@
 
                 <!-- Full-Screen Demo User Profile when Camera is Off or Waiting -->
                 <div *ngIf="!hasRemoteVideo"
-                    class="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-gray-950 via-slate-900 to-gray-950 relative overflow-hidden">
+                    class="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-gray-950 relative overflow-hidden">
 
                     <!-- Subtle Background Glow Effects -->
                     <div
                         class="absolute w-96 h-96 rounded-full bg-emerald-600/10 blur-3xl -top-20 -left-20 pointer-events-none">
                     </div>
                     <div
-                        class="absolute w-96 h-96 rounded-full bg-purple-600/10 blur-3xl -bottom-20 -right-20 pointer-events-none">
+                        class="absolute w-96 h-96 rounded-full bg-blue-600/10 blur-3xl -bottom-20 -right-20 pointer-events-none">
                     </div>
 
                     <!-- Main Profile Card Container -->
@@ -293,7 +293,7 @@
 
                 <!-- Local User Demo Profile Card when Camera is Off -->
                 <div *ngIf="!cameraEnabled"
-                    class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-slate-900 to-gray-950 text-gray-300 p-2 text-center relative border border-gray-800/50">
+                    class="w-full h-full flex flex-col items-center justify-center bg-gray-900 text-gray-300 p-2 text-center relative border border-gray-800/50">
                     <div
                         class="w-9 h-9 rounded-full bg-brand-soft border border-brand/30 flex items-center justify-center text-brand text-xs font-bold mb-1 shadow-sm">
                         <i class="fa-solid fa-user" aria-hidden="true"></i>

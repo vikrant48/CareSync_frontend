@@ -67,7 +67,7 @@
 
         <app-empty-state *ngIf="view === 'all' && !loadingDoctors && doctors.length === 0" icon="fa-solid fa-face-frown"
             title="No doctors found" message="No doctors found matching your criteria." [hasAction]="true">
-            <button type="button" class="h-6 py-0 rounded-lg text-[var(--primary)] hover:text-indigo-300 text-xs font-bold px-3 inline-flex items-center justify-center"
+            <button type="button" class="h-6 py-0 rounded-lg text-[var(--primary)] hover:text-blue-300 text-xs font-bold px-3 inline-flex items-center justify-center"
                 (click)="resetFilters()">Clear Filters</button>
         </app-empty-state>
 
@@ -161,7 +161,7 @@
                 <div class="mt-3 pt-2 flex items-center gap-2">
                     <button type="button" [disabled]="d.isActive === false"
                         (click)="goToDoctorAndBook(d); $event.stopPropagation()"
-                        class="h-[38px] py-0 flex-1 min-w-0 px-3 bg-[#5b6cf0]/25 hover:bg-[#5b6cf0]/40 text-indigo-700 dark:text-indigo-100 border border-[#5b6cf0]/45 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed font-semibold rounded-xl transition shadow-md flex items-center justify-center gap-1.5 text-xs sm:text-sm truncate cursor-pointer">
+                        class="h-[38px] py-0 flex-1 min-w-0 px-3 bg-[#5b6cf0]/25 hover:bg-[#5b6cf0]/40 text-blue-700 dark:text-blue-100 border border-[#5b6cf0]/45 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed font-semibold rounded-xl transition shadow-md flex items-center justify-center gap-1.5 text-xs sm:text-sm truncate cursor-pointer">
                         <span class="truncate">{{ d.isActive === false ? 'Doctor Inactive' : 'View & Book Appointment'
                             }}</span>
                     </button>
