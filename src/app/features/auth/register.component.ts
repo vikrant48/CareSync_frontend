@@ -97,6 +97,7 @@ export class RegisterComponent implements OnInit {
   showPassword = false;
   isEmailVerified = false;
   isVerificationSkipped = false;
+  private verifiedEmail = '';
   verificationMessage = '';
   verificationError = '';
 
@@ -176,8 +177,8 @@ export class RegisterComponent implements OnInit {
   getStepLabel(step: number): string {
     switch (step) {
       case 1: return 'Details';
-      case 2: return 'Verify';
-      case 3: return 'Role';
+      case 2: return 'Role';
+      case 3: return 'Verify';
       case 4: return 'Finish';
       default: return '';
     }
@@ -206,10 +207,6 @@ export class RegisterComponent implements OnInit {
             if (!hasError) {
               this.currentStep = 2;
               this.showValidationErrors = false;
-              // Keep verification email in sync with basic form
-              this.verificationForm.patchValue({ email: this.basicForm.value.email || '' });
-              // Initiate email verification and send OTP
-              this.sendVerificationCode();
             }
           },
           error: (err) => {
@@ -223,27 +220,37 @@ export class RegisterComponent implements OnInit {
         this.markFormGroupTouched(this.basicForm);
       }
     } else if (this.currentStep === 2) {
-      // Only proceed if email verified
+      if (!this.roleForm.valid) {
+        this.showValidationErrors = true;
+        this.markFormGroupTouched(this.roleForm);
+        return;
+      }
+      if (this.isDoctor && this.isVerificationSkipped) {
+        this.isEmailVerified = false;
+        this.isVerificationSkipped = false;
+      }
+      this.currentStep = 3;
+      this.showValidationErrors = false;
+      const email = this.basicForm.value.email || '';
+      this.verificationForm.patchValue({ email });
+      // Send a code unless this exact email is already verified
+      if (!this.isEmailVerified || this.verifiedEmail !== email) {
+        this.isEmailVerified = false;
+        this.isVerificationSkipped = false;
+        this.sendVerificationCode();
+      }
+    } else if (this.currentStep === 3) {
       if (this.isEmailVerified) {
-        // Sync the possibly edited email back to basic form
         const verifiedEmail = this.verificationForm.value.email || this.basicForm.value.email;
         if (verifiedEmail) {
           this.basicForm.patchValue({ email: verifiedEmail });
         }
-        this.currentStep = 3;
+        this.currentStep = 4;
         this.showValidationErrors = false;
       } else {
         this.showValidationErrors = true;
         this.markFormGroupTouched(this.verificationForm);
         this.toast.showError('Please verify your email before continuing.');
-      }
-    } else if (this.currentStep === 3) {
-      if (this.roleForm.valid) {
-        this.currentStep = 4;
-        this.showValidationErrors = false;
-      } else {
-        this.showValidationErrors = true;
-        this.markFormGroupTouched(this.roleForm);
       }
     }
   }
@@ -264,6 +271,10 @@ export class RegisterComponent implements OnInit {
       const control = formGroup.get(key);
       control?.markAsTouched();
     });
+  }
+
+  get isDoctor(): boolean {
+    return this.roleForm?.value?.role === 'DOCTOR';
   }
 
   stage4Valid(): boolean {
@@ -405,13 +416,15 @@ export class RegisterComponent implements OnInit {
 
           this.showValidationErrors = false;
 
-          // Auto-advance to Role Selection
+          // Auto-advance to the final details
           const verifiedEmail = this.verificationForm.value.email || this.basicForm.value.email;
           if (verifiedEmail) {
             this.basicForm.patchValue({ email: verifiedEmail });
+            this.verifiedEmail = verifiedEmail;
           }
+          this.isVerificationSkipped = false;
           setTimeout(() => {
-            this.currentStep = 3;
+            this.currentStep = 4;
           }, 800);
         } else {
           this.verificationError = resp?.message || 'Verification failed';
@@ -428,10 +441,14 @@ export class RegisterComponent implements OnInit {
   }
 
   skipVerification() {
+    if (this.isDoctor) {
+      this.toast.showError('Doctors must verify their email to register.');
+      return;
+    }
     this.isEmailVerified = true;
     this.isVerificationSkipped = true;
     this.toast.showInfo('Email verification skipped.');
-    this.currentStep = 3;
+    this.currentStep = 4;
     this.showValidationErrors = false;
   }
 

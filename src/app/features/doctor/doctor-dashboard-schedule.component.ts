@@ -17,6 +17,14 @@ export class DoctorDashboardScheduleComponent {
   @Input() appointments: any[] = [];
   @Output() openPatient = new EventEmitter<any>();
 
+  private static readonly CLOSED = /CANCELLED|REJECTED|NO_SHOW|AUTO_CLOSED/;
+
+  /** The first 3 of today: active visits first, cancelled or missed ones only if there is room. */
+  get topAppointments(): any[] {
+    const isClosed = (a: any) => DoctorDashboardScheduleComponent.CLOSED.test(String(a?.status || ""));
+    return [...this.appointments.filter((a) => !isClosed(a)), ...this.appointments.filter(isClosed)].slice(0, 3);
+  }
+
   trackAppointment(index: number, item: any): string | number {
     return item?.appointmentId ?? `${item?.appointmentTime}-${item?.patientName}-${index}`;
   }

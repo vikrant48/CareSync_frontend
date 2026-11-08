@@ -5,7 +5,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
 
 export type AdminSection = 'overview' | 'specializations' | 'users' | 'doctors' | 'appointments' | 'labtests' | 'master'
-  | 'security' | 'analytics';
+  | 'security' | 'analytics' | 'finance';
 type ThemeChoice = 'light' | 'dark' | 'system';
 
 interface AdminNavItem {
@@ -184,6 +184,7 @@ export class AdminChromeComponent implements OnInit {
       items: [
         { section: 'overview', label: 'Overview', icon: 'fa-solid fa-gauge-high', hint: 'Key numbers and what needs your attention' },
         { section: 'analytics', label: 'Analytics', icon: 'fa-solid fa-chart-line', hint: 'Appointment volume, completion and no-show rates' },
+        { section: 'finance', label: 'Finance', icon: 'fa-solid fa-indian-rupee-sign', hint: 'Revenue, refunds and failed payments' },
         { section: 'specializations', label: 'Specializations', icon: 'fa-solid fa-stethoscope', hint: 'Doctors per specialization and where doctors are missing' },
       ],
     },
@@ -218,11 +219,13 @@ export class AdminChromeComponent implements OnInit {
   }
 
   linkFor(section: AdminSection): string {
-    return section === 'analytics' ? '/admin/appointment-analytics' : '/admin';
+    if (section === 'analytics') return '/admin/appointment-analytics';
+    if (section === 'finance') return '/admin/finance';
+    return '/admin';
   }
 
   queryFor(section: AdminSection): Record<string, string> | null {
-    return section === 'analytics' ? null : { tab: section };
+    return section === 'analytics' || section === 'finance' ? null : { tab: section };
   }
 
   badgeFor(section: AdminSection): { value: number; alert: boolean } | null {

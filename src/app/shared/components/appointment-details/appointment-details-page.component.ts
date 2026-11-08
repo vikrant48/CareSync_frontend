@@ -10,6 +10,8 @@ import { AppointmentOverviewTabComponent } from './appointment-overview-tab.comp
 import { AppointmentProcessTabComponent } from './appointment-process-tab.component';
 import { MedicalHistoryTabComponent } from './medical-history-tab.component';
 import { AuthService } from '../../../core/services/auth.service';
+import { ConfirmService } from '../../../core/services/confirm.service';
+import { PaymentService } from '../../../core/services/payment.service';
 
 import { IntakeSummaryModalComponent } from '../../../features/doctor/intake-summary-modal.component';
 import { SoapReportEditorComponent } from '../../../features/doctor/soap-report-editor.component';
@@ -53,6 +55,8 @@ export class AppointmentDetailsPageComponent implements OnInit {
     private appointmentApiService = inject(AppointmentApiService);
     private appointmentService = inject(AppointmentService);
     private patientProfileService = inject(PatientProfileService);
+    private confirmService = inject(ConfirmService);
+    private paymentService = inject(PaymentService);
 
     appointmentId?: number;
     appointment: AppointmentDetails | null = null;
@@ -223,6 +227,33 @@ export class AppointmentDetailsPageComponent implements OnInit {
         this.location.back();
     }
 
+    /** Styled confirm that also says what the patient gets back if they cancel now. */
+    private confirmCancel(aptId: number): void {
+        const ask = (refundLine: string) => this.confirmService.ask({
+            title: 'Cancel this appointment?',
+            message: refundLine
+                ? 'This cannot be undone. ' + refundLine
+                : 'This cannot be undone.',
+            confirmLabel: 'Cancel appointment',
+            cancelLabel: 'Keep appointment',
+            danger: true,
+        }).then((yes) => {
+            if (yes) this.executeActionApi(aptId, 'CANCEL');
+        });
+
+        this.paymentService.getCancellationPreview(aptId).subscribe({
+            next: (preview) => {
+                if (!preview?.paid) {
+                    ask('');
+                    return;
+                }
+                const fmt = (v: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: preview.currency || 'INR' }).format(Number(v) || 0);
+                ask(`Refund: ${fmt(preview.refund)} of ${fmt(preview.amount)} paid. ${preview.message} Refunds reach your account in 5-7 working days.`);
+            },
+            error: () => ask(''),
+        });
+    }
+
     handleProcessAction(actionKey: string): void {
         const aptId = this.appointment?.appointmentId;
         if (!this.appointment || !aptId) return;
@@ -238,9 +269,7 @@ export class AppointmentDetailsPageComponent implements OnInit {
                 break;
 
             case 'CANCEL':
-                if (confirm('Are you sure you want to cancel this appointment?')) {
-                    this.executeActionApi(aptId, 'CANCEL');
-                }
+                this.confirmCancel(aptId);
                 break;
 
             case 'CONFIRM':
