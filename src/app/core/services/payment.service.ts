@@ -103,12 +103,95 @@ export interface PaymentStatusResponse {
   cardType?: string;
   razorpayPaymentId?: string;
   gatewayPaymentId?: string;
+  appointmentId?: number;
+  demoMode?: boolean;
+  refundAmount?: number;
+  refundStatus?: string;
+  refundReason?: string;
+  refundedAt?: string;
   upiTransactionId?: string;
   doctorName?: string;
   doctorSpecialization?: string;
   appointmentDate?: string;
   appointmentTime?: string;
   additionalInfo?: string;
+}
+
+export interface PageResult<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
+export interface FinanceBucket {
+  period: string;
+  gross: number;
+  refunds: number;
+  net: number;
+  successful: number;
+  failed: number;
+  refunded: number;
+}
+
+export interface FinanceTotals {
+  gross: number;
+  refunds: number;
+  net: number;
+  successful: number;
+  failed: number;
+  cancelledCheckouts: number;
+  refunded: number;
+  pending: number;
+  averagePayment: number;
+}
+
+export interface FinancePaymentLine {
+  transactionId: string;
+  gatewayPaymentId?: string;
+  patientName?: string;
+  doctorName?: string;
+  amount: number;
+  refundAmount: number;
+  status: string;
+  method?: string;
+  reason?: string;
+  at: string;
+  demo: boolean;
+}
+
+export interface FinanceStatistics {
+  currency: string;
+  days: number;
+  includeDemo: boolean;
+  totals: FinanceTotals;
+  daily: FinanceBucket[];
+  monthly: FinanceBucket[];
+  recentRefunds: FinancePaymentLine[];
+  recentFailures: FinancePaymentLine[];
+  demoPayments: number;
+  refundPolicy: string;
+}
+
+export interface EarningLine {
+  appointmentId: number;
+  patientName?: string;
+  visitDate?: string;
+  paid: number;
+  refunded: number;
+  net: number;
+  status: string;
+  method?: string;
+  demo: boolean;
+}
+
+export interface DoctorEarnings {
+  currency: string;
+  totals: FinanceTotals;
+  thisMonth: FinanceBucket;
+  monthly: FinanceBucket[];
+  recent: EarningLine[];
 }
 
 @Injectable({
@@ -168,6 +251,23 @@ export class PaymentService {
   getStoredPayment(transactionId: string): PaymentStatusResponse | null {
     const payments = this.getStoredPayments();
     return payments.find(p => p.transactionId === transactionId) || null;
+  }
+
+  getMyPayments(page = 0, size = 10): Observable<PageResult<PaymentStatusResponse>> {
+    return this.http.get<PageResult<PaymentStatusResponse>>(`${this.baseUrl}/api/payments/me`, { params: { page, size } });
+  }
+
+  getFinanceStatistics(days = 30, includeDemo = true): Observable<FinanceStatistics> {
+    return this.http.get<FinanceStatistics>(`${this.baseUrl}/api/payments/statistics`, { params: { days, includeDemo } });
+  }
+
+  getMyEarnings(): Observable<DoctorEarnings> {
+    return this.http.get<DoctorEarnings>(`${this.baseUrl}/api/payments/doctor/me/earnings`);
+  }
+
+  getCancellationPreview(appointmentId: number): Observable<{ paid: boolean; amount: number; refund: number; currency?: string; message: string }> {
+    return this.http.get<{ paid: boolean; amount: number; refund: number; currency?: string; message: string }>(
+      `${this.baseUrl}/api/payments/refund-preview/appointment/${appointmentId}`);
   }
 
   getConfig(): Observable<PaymentConfig> {

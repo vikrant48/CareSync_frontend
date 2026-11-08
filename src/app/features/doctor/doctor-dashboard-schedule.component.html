@@ -7,7 +7,7 @@
   <app-page-loader *ngIf="loading" label="Loading schedule..." accent="doctor" [compact]="true"></app-page-loader>
 
   <div *ngIf="!loading && appointments.length > 0" class="space-y-2.5 flex-1">
-    <div *ngFor="let a of appointments; trackBy: trackAppointment"
+    <div *ngFor="let a of topAppointments; trackBy: trackAppointment"
          class="inset-surface surface-hover p-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:p-3.5 transition cursor-pointer group"
          role="link" tabindex="0"
          (click)="openPatient.emit(a.isReal ? a : null)"

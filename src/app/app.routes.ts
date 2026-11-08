@@ -21,6 +21,12 @@ export const routes: Routes = [
     data: { roles: ['ADMIN'] }
   },
   {
+    path: 'admin/finance',
+    loadComponent: () => import('./features/admin/admin-finance.component').then((m) => m.AdminFinanceComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ADMIN'] }
+  },
+  {
     path: 'admin/appointment-analytics',
     loadComponent: () => import('./features/admin/appointment-analytics-dashboard.component').then((m) => m.AppointmentAnalyticsDashboardComponent),
     canActivate: [authGuard, roleGuard],
@@ -61,6 +67,7 @@ export const routes: Routes = [
       { path: 'profile', loadComponent: () => import('./features/doctor/doctor-profile.component').then((m) => m.DoctorProfileComponent), canDeactivate: [unsavedChangesGuard] },
       { path: 'change-password', loadComponent: () => import('./features/doctor/doctor-change-password.component').then((m) => m.DoctorChangePasswordComponent) },
       { path: 'reports', loadComponent: () => import('./features/doctor/doctor-reports.component').then((m) => m.DoctorReportsComponent) },
+      { path: 'earnings', loadComponent: () => import('./features/doctor/doctor-earnings.component').then((m) => m.DoctorEarningsComponent) },
       { path: 'documents', loadComponent: () => import('./features/doctor/doctor-document.component').then((m) => m.DoctorDocumentsComponent) },
       { path: 'lab-test-management', loadComponent: () => import('./features/doctor/lab-test-management.component').then((m) => m.LabTestManagementComponent) },
       { path: 'leaves', loadComponent: () => import('./features/doctor/doctor-leave-management.component').then((m) => m.DoctorLeaveManagementComponent) },
@@ -84,6 +91,7 @@ export const routes: Routes = [
       { path: 'appointments/:id', loadComponent: () => import('./shared/components/appointment-details/appointment-details-page.component').then((m) => m.AppointmentDetailsPageComponent) },
       { path: 'reports', loadComponent: () => import('./features/patient/patient-reports.component').then((m) => m.PatientReportsComponent) },
       { path: 'lab-bookings', loadComponent: () => import('./features/patient/patient-lab-bookings.component').then((m) => m.PatientLabBookingsComponent) },
+      { path: 'payments', loadComponent: () => import('./features/patient/patient-payments.component').then((m) => m.PatientPaymentsComponent) },
       { path: 'feedback', loadComponent: () => import('./features/patient/patient-feedback.component').then((m) => m.PatientFeedbackComponent) },
       { path: 'doctor/:username', loadComponent: () => import('./features/patient/doctor-public-profile.component').then((m) => m.DoctorPublicProfileComponent) },
       { path: 'vitals', loadComponent: () => import('./features/patient/patient-vitals.component').then((m) => m.VitalsTrackingComponent) },
@@ -106,5 +114,6 @@ export const routes: Routes = [
     ]
   },
 
+  { path: 'docs', title: 'CareSync · Technical overview', loadComponent: () => import('./features/docs/docs.component').then((m) => m.DocsComponent) },
   { path: '**', loadComponent: () => import('./shared/not-found.component').then((m) => m.NotFoundComponent) }
 ];
