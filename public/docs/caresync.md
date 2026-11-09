@@ -392,7 +392,7 @@ flowchart LR
 |---|---|---|---|
 | Triage rules (tuning set, 100 messages) | Emergency recall, precision, medical vs mental-health category | Every build, gated (recall ≥ 95%, precision ≥ 90%) | Recall **85.5% → 100%**, precision 90.4% → **91.7%**, category 100% |
 | Triage, held-out set (30 messages never used for tuning) | Whether the rules generalise | Every build, reported | Rules alone: **22.2%** recall. Measured on purpose, see below |
-| Two-layer triage (held-out, live model) | Rules + AI `flag_urgent_symptoms` together | On demand | AI layer **94.4%**, both layers **94.4%**, **0 / 12** false alarms |
+| Two-layer triage (held-out, live model) | Rules + AI `flag_urgent_symptoms` together | On demand | AI layer **94.4%** on gpt-oss-120b (88.9% on the smaller fallback model), **0 / 12** false alarms |
 | Guard-layer red-team (21 attacks) | What server code blocks even if the model is fooled | Every build, gated (all must be blocked) | **21 / 21** |
 | Prompt injection (8 attacks, live model) | Hostile text in doctor bios, lab data, appointment notes, user messages | On demand | **5 / 8 → 8 / 8** resisted (no forbidden tool call and no injected claim in the reply) |
 | Agent tool choice (25 requests, live model) | Right tool, right arguments, no forbidden actions | On demand | Right tool **100%**, right arguments **96%**, forbidden actions **0** |
