@@ -129,6 +129,18 @@
   line-height: 1.7;
 }
 
+/* Embedded page (interactive architecture map) */
+.docs-article ::ng-deep iframe.docs-embed {
+  display: block;
+  width: 100%;
+  height: 80vh;
+  min-height: 560px;
+  margin: 16px 0 24px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel, #fff);
+}
+
 .docs-article ::ng-deep h1,
 .docs-article ::ng-deep h2,
 .docs-article ::ng-deep h3 {
