@@ -3,7 +3,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup, FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
-import { RegisterRequest, Role } from '../../core/models/auth.models';
+import { CONSENT_VERSION, RegisterRequest, Role, SignUpConsent } from '../../core/models/auth.models';
 import { ToastService } from '../../core/services/toast.service';
 import { SelectDropdownComponent } from '../../shared/select-dropdown.component';
 import { SpecializationService } from '../../core/services/specialization.service';
@@ -156,6 +156,27 @@ export class RegisterComponent implements OnInit {
 
   // Flag to show validation errors when user tries to navigate
   showValidationErrors = false;
+
+  // Data-processing consent: required for both sign-up paths (form and Google)
+  consentAccepted = false;
+  showConsentError = false;
+
+  setConsent(checked: boolean) {
+    this.consentAccepted = checked;
+    if (checked) this.showConsentError = false;
+  }
+
+  private get consent(): SignUpConsent {
+    return { consentAccepted: this.consentAccepted, consentVersion: CONSENT_VERSION };
+  }
+
+  /** False (and shows the error under the checkbox) when consent is missing. */
+  private requireConsent(): boolean {
+    if (this.consentAccepted) return true;
+    this.showConsentError = true;
+    this.toast.showError('Please accept the consent to create your account.');
+    return false;
+  }
 
   navigateToStep(step: number) {
     // Allow navigation to previous steps only
@@ -326,6 +347,7 @@ export class RegisterComponent implements OnInit {
       this.markFormGroupTouched(currentForm);
       return;
     }
+    if (!this.requireConsent()) return;
 
     this.loading = true;
     this.error = '';
@@ -344,6 +366,7 @@ export class RegisterComponent implements OnInit {
       contactInfo: base.contactInfo && base.contactInfo.trim() !== '+91 ' ? base.contactInfo : undefined,
       dateOfBirth: base.dateOfBirth || undefined,
       skipEmailVerification: this.isVerificationSkipped || undefined,
+      ...this.consent,
     } as RegisterRequest & any;
 
     if (role === 'DOCTOR') {
@@ -455,6 +478,7 @@ export class RegisterComponent implements OnInit {
   googleRole: 'PATIENT' | 'DOCTOR' = 'PATIENT';
 
   onGoogleSignUp() {
+    if (!this.requireConsent()) return;
     if (typeof (window as any).google === 'undefined') {
       const script = document.createElement('script');
       script.src = 'https://accounts.google.com/gsi/client';
@@ -496,7 +520,7 @@ export class RegisterComponent implements OnInit {
     // Use selected googleRole or role from roleForm
     const targetRole = this.googleRole || this.roleForm.value.role || 'PATIENT';
 
-    this.auth.loginWithGoogle(response.credential, targetRole).subscribe({
+    this.auth.loginWithGoogle(response.credential, targetRole, this.consent).subscribe({
       next: (resp) => {
         this.auth.storeAuth(resp);
         this.toast.showSuccess(`Google Sign Up successful as ${resp.role}!`);

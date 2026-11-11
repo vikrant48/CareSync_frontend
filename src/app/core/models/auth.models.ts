@@ -1,3 +1,5 @@
+import { environment } from '../../../../environments/environment';
+
 export type Role = 'DOCTOR' | 'PATIENT' | 'ADMIN';
 
 export interface AuthenticationResponse {
@@ -39,6 +41,15 @@ export interface RegisterRequest {
   gender?: string; // gender field for both doctor and patient
   bloodGroup?: string; // patient-only
   skipEmailVerification?: boolean;
+  consentAccepted?: boolean;
+  consentVersion?: string;
+}
+
+export const CONSENT_VERSION: string = environment.consentVersion;
+
+export interface SignUpConsent {
+  consentAccepted: boolean;
+  consentVersion: string;
 }
 
 export interface RefreshTokenRequest {

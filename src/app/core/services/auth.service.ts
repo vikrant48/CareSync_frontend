@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, finalize, shareReplay } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
-import { AuthenticationResponse, LoginRequest, RefreshTokenRequest, RegisterRequest, Role, SignedInDevice } from '../models/auth.models';
+import { AuthenticationResponse, LoginRequest, RefreshTokenRequest, RegisterRequest, Role, SignedInDevice, SignUpConsent } from '../models/auth.models';
 import { SavedDoctorsService } from './saved-doctors.service';
 
 @Injectable({ providedIn: 'root' })
@@ -87,8 +87,9 @@ export class AuthService {
     return this.http.post<AuthenticationResponse>(`${this.baseUrl}/api/auth/login/verify-code`, { challengeId, code });
   }
 
-  loginWithGoogle(idToken: string, role?: string) {
-    return this.http.post<AuthenticationResponse>(`${this.baseUrl}/api/auth/google`, { idToken, role });
+  /** Consent is only needed when the Google account has no CareSync account yet (sign-up). */
+  loginWithGoogle(idToken: string, role?: string, consent?: SignUpConsent) {
+    return this.http.post<AuthenticationResponse>(`${this.baseUrl}/api/auth/google`, { idToken, role, ...consent });
   }
 
   // Refresh tokens are single-use, so parallel requests must share one refresh call
