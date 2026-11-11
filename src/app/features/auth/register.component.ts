@@ -10,13 +10,14 @@ import { SpecializationService } from '../../core/services/specialization.servic
 import { MasterDataService } from '../../core/services/master-data.service';
 import { DatePickerComponent } from '../../shared/date-picker.component';
 import { FeatureCarouselComponent } from './feature-carousel.component';
+import { ModalShellComponent } from '../../shared/ui/modal-shell.component';
 import { environment } from '../../../../environments/environment';
 import { AppValidators, validationMessage } from '../../shared/utils/validators';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, SelectDropdownComponent, DatePickerComponent, FeatureCarouselComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, SelectDropdownComponent, DatePickerComponent, FeatureCarouselComponent, ModalShellComponent],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css'
 })
@@ -157,25 +158,38 @@ export class RegisterComponent implements OnInit {
   // Flag to show validation errors when user tries to navigate
   showValidationErrors = false;
 
-  // Data-processing consent: required for both sign-up paths (form and Google)
+  // Data-processing consent: asked in a pop-up before either sign-up path (Finish or Google) creates the account
   consentAccepted = false;
-  showConsentError = false;
-
-  setConsent(checked: boolean) {
-    this.consentAccepted = checked;
-    if (checked) this.showConsentError = false;
-  }
+  /** Which sign-up the open consent pop-up will continue; null when the pop-up is closed. */
+  consentDialogFor: 'form' | 'google' | null = null;
+  consentTicked = false;
 
   private get consent(): SignUpConsent {
     return { consentAccepted: this.consentAccepted, consentVersion: CONSENT_VERSION };
   }
 
-  /** False (and shows the error under the checkbox) when consent is missing. */
-  private requireConsent(): boolean {
-    if (this.consentAccepted) return true;
-    this.showConsentError = true;
-    this.toast.showError('Please accept the consent to create your account.');
-    return false;
+  /** Opens the consent pop-up, unticked every time. */
+  private askConsent(next: 'form' | 'google') {
+    this.consentTicked = false;
+    this.consentDialogFor = next;
+  }
+
+  /** Cancel, Esc, backdrop or Back: nothing is created or sent. */
+  cancelConsent() {
+    this.consentDialogFor = null;
+    this.consentTicked = false;
+  }
+
+  continueAfterConsent() {
+    const next = this.consentDialogFor;
+    if (!this.consentTicked || !next) return;
+    this.consentAccepted = true;
+    this.consentDialogFor = null;
+    if (next === 'form') {
+      this.submitRegistration();
+    } else {
+      this.startGoogleSignUp();
+    }
   }
 
   navigateToStep(step: number) {
@@ -347,8 +361,11 @@ export class RegisterComponent implements OnInit {
       this.markFormGroupTouched(currentForm);
       return;
     }
-    if (!this.requireConsent()) return;
+    // Everything is valid: ask for consent; Continue in the pop-up submits
+    this.askConsent('form');
+  }
 
+  private submitRegistration() {
     this.loading = true;
     this.error = '';
 
@@ -477,8 +494,12 @@ export class RegisterComponent implements OnInit {
 
   googleRole: 'PATIENT' | 'DOCTOR' = 'PATIENT';
 
+  /** Sign up with Google: consent first; Continue in the pop-up opens Google's account picker. */
   onGoogleSignUp() {
-    if (!this.requireConsent()) return;
+    this.askConsent('google');
+  }
+
+  private startGoogleSignUp() {
     if (typeof (window as any).google === 'undefined') {
       const script = document.createElement('script');
       script.src = 'https://accounts.google.com/gsi/client';

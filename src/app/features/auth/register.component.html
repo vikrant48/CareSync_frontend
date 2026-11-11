@@ -312,28 +312,6 @@
                     </div>
                 </section>
 
-                <!-- Data-processing consent: required to create an account by form or with Google -->
-                <div class="mt-3.5 rounded-xl border p-3"
-                    [class]="showConsentError ? 'border-red-400 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30'">
-                    <label for="reg-consent" class="flex items-start gap-2.5 cursor-pointer">
-                        <input id="reg-consent" type="checkbox" [checked]="consentAccepted"
-                            (change)="setConsent($any($event.target).checked)"
-                            [attr.aria-invalid]="showConsentError ? true : null"
-                            [attr.aria-describedby]="showConsentError ? 'reg-consent-error' : null"
-                            class="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500" />
-                        <span class="text-xs leading-relaxed text-gray-600 dark:text-gray-300">
-                            I consent to CareSync collecting and processing my personal and health information
-                            (such as my profile, appointments, medical records and payments) to create my account and
-                            provide care. I can ask for my data or withdraw consent at any time.
-                            <a href="/docs#6-where-patient-data-goes-privacy-by-design" target="_blank" rel="noopener"
-                                class="font-semibold text-emerald-600 dark:text-emerald-400 underline"
-                                (click)="$event.stopPropagation()">How CareSync handles your data</a>
-                        </span>
-                    </label>
-                    <p *ngIf="showConsentError" id="reg-consent-error" role="alert" class="mt-1.5 text-xs text-red-500">
-                        Please accept the consent to create your account.</p>
-                </div>
-
                 <div class="mt-3.5 flex items-center gap-3">
                     <button *ngIf="currentStep > 1" type="button" (click)="prev()"
                         class="px-3 py-2 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center gap-1.5 min-h-[40px]">
@@ -377,9 +355,7 @@
                             <i class="fa-solid fa-user-md mr-1 text-[10px]" aria-hidden="true"></i> Doctor Account
                         </button>
                     </div>
-                    <p *ngIf="!consentAccepted" class="text-[11px] text-center text-gray-500 dark:text-gray-400">
-                        Tick the consent above to sign up with Google.</p>
-                    <button type="button" (click)="onGoogleSignUp()" [disabled]="loading || !consentAccepted"
+                    <button type="button" (click)="onGoogleSignUp()" [disabled]="loading"
                         class="btn-size-md w-full flex items-center justify-center gap-2.5 px-4 border border-gray-300 dark:border-gray-600 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50">
                         <svg aria-hidden="true" focusable="false" class="w-4 h-4" viewBox="0 0 24 24">
                             <path fill="#4285F4"
@@ -407,3 +383,35 @@
         </div>
     </div>
 </div>
+
+<!-- Consent pop-up: shown on Finish (form sign-up) and on Sign up with Google, before any account is created -->
+<app-modal-shell [open]="consentDialogFor !== null" title="Your consent" titleId="reg-consent-title"
+    subtitle="Required to create your CareSync account" icon="fa-solid fa-shield-halved"
+    iconWrapClass="bg-emerald-500/10 text-emerald-600" maxWidthClass="max-w-md" bodyClass="px-5 pb-5 pt-4"
+    [closeOnBackdrop]="true" [closeOnEscape]="true" [fullScreenMobile]="true" zIndexClass="z-[300]"
+    (close)="cancelConsent()">
+    <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+        To create your account, CareSync needs to collect and process your personal and health information, such as
+        your profile, appointments, medical records and payments. It is used to provide your care, and you can ask for
+        your data or withdraw consent at any time.
+        <a href="/docs#6-where-patient-data-goes-privacy-by-design" target="_blank" rel="noopener"
+            class="font-semibold text-emerald-600 dark:text-emerald-400 underline">How CareSync handles your data</a>
+    </p>
+
+    <label for="reg-consent-agree"
+        class="mt-4 flex items-start gap-3 rounded-xl border p-3 cursor-pointer transition"
+        [class]="consentTicked ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : 'border-gray-200 dark:border-gray-700'">
+        <input id="reg-consent-agree" type="radio" name="reg-consent" [checked]="consentTicked"
+            (change)="consentTicked = true" data-autofocus
+            class="mt-0.5 h-4 w-4 shrink-0 border-gray-300 text-emerald-600 focus:ring-emerald-500" />
+        <span class="text-sm font-medium text-gray-800 dark:text-gray-100">
+            I agree to CareSync processing my personal and health information as described above.
+        </span>
+    </label>
+
+    <div class="mt-5 flex flex-col-reverse sm:flex-row gap-2 sm:gap-3">
+        <button type="button" class="btn-secondary flex-1" (click)="cancelConsent()">Cancel</button>
+        <button type="button" class="btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+            [disabled]="!consentTicked" (click)="continueAfterConsent()">Continue</button>
+    </div>
+</app-modal-shell>
