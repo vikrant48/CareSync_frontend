@@ -448,6 +448,12 @@ flowchart LR
     RZ -. "signed webhooks" .-> API
 ```
 
+### Interactive architecture map
+
+A detailed, explorable version of the diagram above, generated from the backend source. It shows each backend module, the security filter chain in order, data stores, external services, all 303 endpoints, and five request journeys traced step by step (login, lab-test booking with payment, the Razorpay webhook, AI chat and a cached doctor profile). Every item cites the file and line it comes from. [Open it full screen](/docs/architecture.html).
+
+<iframe class="docs-embed" src="/docs/architecture.html" title="CareSync backend architecture map" loading="lazy"></iframe>
+
 ### Main building blocks
 
 | Component | Responsibility |

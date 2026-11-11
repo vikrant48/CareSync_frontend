@@ -1,0 +1,993 @@
+{
+  "project": {
+    "name": "careSync",
+    "summary": "Spring Boot backend for a doctor/patient care platform: accounts and sessions, doctor and patient records, appointments with video consults and chat, lab-test bookings, Razorpay payments and refunds, and an AI assistant on Groq and Gemini. It is one deployable app on PostgreSQL, with Redis for caching, rate and quota counters, and Supabase S3 for files.",
+    "languages": ["Java", "SQL"],
+    "frameworks": ["Spring Boot 3.5", "Spring Security", "Spring Data JPA", "Spring Data Redis", "Spring WebSocket (STOMP)", "Flyway", "Bucket4j", "JJWT", "AWS SDK S3", "Razorpay Java", "LiveKit server SDK", "springdoc-openapi"]
+  },
+  "nodes": [
+    {
+      "id": "client", "name": "Client / User", "type": "client", "domain": "platform", "tier": "client", "importance": 3,
+      "description": "Every browser and app that calls the API or opens the /ws STOMP socket. Allowed origins come from APP_CORS_ALLOWED_ORIGINS.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 132, "note": "CORS allowed origins" },
+        { "file": "docker-compose.yml", "line": 33, "note": "app exposed directly on 8080, no proxy" }
+      ]
+    },
+    {
+      "id": "razorpay-webhook", "name": "Razorpay (webhook)", "type": "external-caller", "tech": "razorpay", "domain": "payments", "tier": "caller", "importance": 1,
+      "description": "Razorpay posts signed payment events (payment.captured, payment.authorized, order.paid) when PAYMENT_WEBHOOK_SECRET is set and demo mode is off.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/controller/PaymentController.java", "line": 220 },
+        { "file": "src/main/java/com/vikrant/careSync/service/PaymentService.java", "line": 81, "note": "only enabled when not in demo mode and a secret is set" }
+      ]
+    },
+    {
+      "id": "cors-mw", "name": "CorsFilter", "type": "middleware", "category": "cors", "tech": "spring-security", "owner": "auth-module", "domain": "platform", "tier": "service", "importance": 3,
+      "description": "Checks Origin against APP_CORS_ALLOWED_ORIGINS and adds CORS headers, exposing Authorization and Content-Disposition.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 47 },
+        { "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 125 }
+      ]
+    },
+    {
+      "id": "rate-limit-mw", "name": "RateLimitingFilter", "type": "middleware", "category": "rate-limit", "tech": "bucket4j", "owner": "auth-module", "domain": "platform", "tier": "service", "importance": 2,
+      "description": "In-memory per-IP token buckets: 5/min for OTP paths, 10/min for login/register/refresh and 20/min for /api/ai/*; over the limit it answers 429.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/security/filter/RateLimitingFilter.java", "line": 32 },
+        { "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 116 }
+      ]
+    },
+    {
+      "id": "ip-block-mw", "name": "SecurityFilter (IP block)", "type": "middleware", "category": "security", "owner": "auth-module", "domain": "platform", "tier": "service", "importance": 3,
+      "description": "Rejects requests from blocked client IPs with 403; skips /api/auth/ and /api/admin/ (login does its own IP check).",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/security/filter/SecurityFilter.java", "line": 20 },
+        { "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 117 }
+      ]
+    },
+    {
+      "id": "jwt-auth-mw", "name": "JwtAuthenticationFilter", "type": "middleware", "category": "auth", "tech": "jwt", "owner": "auth-module", "domain": "platform", "tier": "service", "importance": 3,
+      "description": "Validates a Bearer JWT, loads the user and checks the server-side session is still live before setting the security context; with no token it passes the request on.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/security/filter/JwtAuthenticationFilter.java", "line": 25 },
+        { "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 118 }
+      ]
+    },
+    {
+      "id": "authz-rules", "name": "Authorization rules", "type": "middleware", "category": "auth", "tech": "spring-security", "owner": "auth-module", "domain": "platform", "tier": "service", "importance": 3,
+      "description": "URL rules (permitAll auth/webhook/public routes, role rules per prefix, anyRequest authenticated) plus @PreAuthorize on handlers; no login gives 401, a wrong role gives 403.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 49 },
+        { "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 114, "note": "401 entry point" }
+      ]
+    },
+    {
+      "id": "audit-interceptor", "name": "AuditTrailInterceptor", "type": "middleware", "category": "logging", "owner": "auth-module", "domain": "platform", "tier": "service", "importance": 3,
+      "description": "Spring MVC interceptor on /api/**: after each request to a patient-data or admin prefix it writes route template, record ids, status, user and IP to the audit log.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/security/audit/AuditTrailInterceptor.java", "line": 29 },
+        { "file": "src/main/java/com/vikrant/careSync/config/AuditWebConfig.java", "line": 17 }
+      ]
+    },
+    {
+      "id": "error-handler", "name": "GlobalExceptionHandler", "type": "middleware", "category": "error-handler", "owner": "auth-module", "domain": "platform", "tier": "service", "importance": 1,
+      "description": "@RestControllerAdvice mapping AccessDenied (403), upload size, bad input, data and runtime exceptions to safe JSON errors.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/exception/GlobalExceptionHandler.java", "line": 19 },
+        { "file": "src/main/java/com/vikrant/careSync/exception/GlobalExceptionHandler.java", "line": 27 }
+      ]
+    },
+    {
+      "id": "stomp-auth", "name": "StompAuthChannelInterceptor", "type": "middleware", "category": "auth", "owner": "chat-ws", "domain": "scheduling", "tier": "service", "importance": 1,
+      "description": "Inbound STOMP channel interceptor that authenticates WebSocket frames before they reach @MessageMapping handlers.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/config/WebSocketConfig.java", "line": 46 }
+      ]
+    },
+    {
+      "id": "auth-module", "name": "Auth & sessions", "type": "service", "tech": "spring-boot", "domain": "identity", "tier": "service", "importance": 1,
+      "description": "AuthController with AuthenticationService, GoogleAuthService, SecurityService and TokenIssuer: login (admin second step by emailed code), register, Google sign-in, refresh, OTP and password reset, device sessions.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/controller/AuthController.java", "line": 36 },
+        { "file": "src/main/java/com/vikrant/careSync/service/AuthenticationService.java", "line": 230 }
+      ]
+    },
+    {
+      "id": "care-records", "name": "Doctors, patients & records", "type": "service", "tech": "spring-boot", "domain": "clinical", "tier": "service", "importance": 1,
+      "description": "Doctor, Patient, MedicalHistory, Vital, LabTest, Feedback, SavedDoctor, DoctorLeave and FileUpload controllers with their services: profiles, medical history, vitals, lab-test catalogue, feedback and documents.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/controller/DoctorController.java", "line": 34 },
+        { "file": "src/main/java/com/vikrant/careSync/controller/PatientController.java", "line": 42 },
+        { "file": "src/main/java/com/vikrant/careSync/service/DocumentService.java", "line": 112 }
+      ]
+    },
+    {
+      "id": "appointments", "name": "Appointments & video consults", "type": "service", "tech": "spring-boot", "domain": "scheduling", "tier": "service", "importance": 1,
+      "description": "Appointment, AppointmentAction and VideoConsultation controllers: slot holds, booking (with payment), state machine, SOAP drafts and sign-off, LiveKit video rooms.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/controller/AppointmentController.java", "line": 33 },
+        { "file": "src/main/java/com/vikrant/careSync/service/AppointmentService.java", "line": 169 },
+        { "file": "src/main/java/com/vikrant/careSync/controller/VideoConsultationController.java", "line": 32 }
+      ]
+    },
+    {
+      "id": "chat-ws", "name": "Appointment chat (STOMP)", "type": "service", "tech": "spring-websocket", "domain": "scheduling", "tier": "service", "importance": 1,
+      "description": "ChatController: receives /app/chat.sendMessage over the /ws socket, stores the message and broadcasts it on /topic/appointment/{id}; also serves chat history over REST.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/controller/ChatController.java", "line": 41 },
+        { "file": "src/main/java/com/vikrant/careSync/controller/ChatController.java", "line": 69 },
+        { "file": "src/main/java/com/vikrant/careSync/config/WebSocketConfig.java", "line": 27, "note": "in-memory simple broker" }
+      ]
+    },
+    {
+      "id": "bookings", "name": "Lab-test bookings", "type": "service", "tech": "spring-boot", "domain": "scheduling", "tier": "service", "importance": 1,
+      "description": "BookingController and BookingService: lab-test bookings by patients (with payment) and doctors, status changes and cancellation.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/controller/BookingController.java", "line": 25 },
+        { "file": "src/main/java/com/vikrant/careSync/service/BookingService.java", "line": 69 }
+      ]
+    },
+    {
+      "id": "payments", "name": "Payments & refunds", "type": "service", "tech": "spring-boot", "domain": "payments", "tier": "service", "importance": 2,
+      "description": "PaymentController with PaymentService, RazorpayService and PaymentRefundService: Razorpay checkout (or demo mode), verification, webhook settlement, refunds and earnings.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/controller/PaymentController.java", "line": 37 },
+        { "file": "src/main/java/com/vikrant/careSync/service/PaymentService.java", "line": 128 }
+      ]
+    },
+    {
+      "id": "ai-module", "name": "AI assistant", "type": "service", "tech": "spring-boot", "domain": "ai", "tier": "service", "importance": 1,
+      "description": "AiController and AiConversationController with AiService, the patient agent, doctor co-pilot, emergency triage, quota and conversation memory; calls Groq for chat and Gemini for vision and fallback.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/controller/AiController.java", "line": 43 },
+        { "file": "src/main/java/com/vikrant/careSync/service/AiService.java", "line": 82 }
+      ]
+    },
+    {
+      "id": "admin-reporting", "name": "Admin, analytics & reporting", "type": "service", "tech": "spring-boot", "domain": "admin", "tier": "service", "importance": 1,
+      "description": "Admin, Analytics, Reporting, Seeding and Master controllers: user and doctor moderation, IP blocks, sessions, audit logs, analytics, reports, seed data and master lists.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/controller/AdminController.java", "line": 35 },
+        { "file": "src/main/java/com/vikrant/careSync/controller/AnalyticsController.java", "line": 19 },
+        { "file": "src/main/java/com/vikrant/careSync/controller/ReportingController.java", "line": 15 }
+      ]
+    },
+    {
+      "id": "notifications", "name": "Notifications & email", "type": "service", "tech": "spring-boot", "domain": "platform", "tier": "service", "importance": 1,
+      "description": "NotificationController, NotificationService (stored notifications pushed to /user/queue/notifications) and EmailService (Resend HTTP first, SMTP fallback, logged to communications).",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/controller/NotificationController.java", "line": 22 },
+        { "file": "src/main/java/com/vikrant/careSync/service/NotificationService.java", "line": 402 },
+        { "file": "src/main/java/com/vikrant/careSync/service/EmailService.java", "line": 66 }
+      ]
+    },
+    {
+      "id": "schedulers", "name": "Scheduled jobs", "type": "service", "tech": "spring-scheduling", "domain": "platform", "tier": "service", "importance": 1,
+      "description": "In-process @Scheduled jobs: appointment reminders (every minute), no-show cleanup (15 min), stale checkout reconcile (5 min), due refunds (every minute) and nightly deactivation.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/scheduler/AppointmentReminderScheduler.java", "line": 29 },
+        { "file": "src/main/java/com/vikrant/careSync/scheduler/PaymentReconcileScheduler.java", "line": 38 },
+        { "file": "src/main/java/com/vikrant/careSync/scheduler/PaymentRefundScheduler.java", "line": 34 },
+        { "file": "src/main/java/com/vikrant/careSync/scheduler/AppointmentCleanupScheduler.java", "line": 32 }
+      ]
+    },
+    {
+      "id": "postgres", "name": "PostgreSQL", "type": "database", "tech": "postgres", "domain": "shared", "tier": "datastore", "importance": 3,
+      "description": "Primary store (JPA + Flyway migrations) for users, sessions, appointments, bookings, payments, records, audit and AI history. Address from SPRING_DATASOURCE_URL.",
+      "evidence": [
+        { "file": "docker-compose.yml", "line": 6 },
+        { "file": "src/main/resources/application.properties", "line": 4, "note": "spring.datasource.url" },
+        { "file": "src/main/resources/application.properties", "line": 24, "note": "Flyway enabled" }
+      ]
+    },
+    {
+      "id": "redis", "name": "Redis", "type": "cache", "tech": "redis", "domain": "shared", "tier": "datastore", "importance": 3,
+      "description": "Spring cache (encrypted values, per-cache TTLs), slot locks, OTP and admin login codes, AI quota counters and AI conversation memory. Address from REDIS_HOST/REDIS_PORT.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/config/CacheConfig.java", "line": 57 },
+        { "file": "src/main/resources/application.properties", "line": 209, "note": "spring.data.redis.host" },
+        { "file": "docker-compose.yml", "line": 62 }
+      ]
+    },
+    {
+      "id": "supabase-s3", "name": "Supabase S3 storage", "type": "storage", "tech": "s3", "domain": "clinical", "tier": "datastore", "importance": 1,
+      "description": "Object storage for documents and images via the AWS S3 SDK, with presigned URLs for private files. Configured by SUPABASE_S3_* variables.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/config/SupabaseConfig.java", "line": 31 },
+        { "file": "src/main/java/com/vikrant/careSync/service/SupabaseStorageService.java", "line": 115 }
+      ]
+    },
+    {
+      "id": "razorpay-api", "name": "Razorpay API", "type": "external-api", "tech": "razorpay", "domain": "payments", "tier": "external", "importance": 2,
+      "description": "Payment gateway: orders created, payments fetched and captured, refunds issued. Keys from RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/service/RazorpayService.java", "line": 70 },
+        { "file": "src/main/resources/application.properties", "line": 117, "note": "app.payment.razorpay.key-id" }
+      ]
+    },
+    {
+      "id": "groq", "name": "Groq API", "type": "external-api", "tech": "groq", "domain": "ai", "tier": "external", "importance": 1,
+      "description": "OpenAI-compatible chat completions (with tools and streaming) and model fallbacks for the AI assistant. Key from app.ai.groq.api-key.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/service/ai/GroqClient.java", "line": 69 },
+        { "file": "src/main/java/com/vikrant/careSync/service/ai/GroqClient.java", "line": 335 }
+      ]
+    },
+    {
+      "id": "gemini", "name": "Google Gemini API", "type": "external-api", "tech": "gemini", "domain": "ai", "tier": "external", "importance": 1,
+      "description": "Vision analysis of uploaded medical documents and certificates, and a text fallback for dictation. Key from GEMINI_API_KEY.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/service/ai/GeminiClient.java", "line": 40 },
+        { "file": "src/main/java/com/vikrant/careSync/service/ai/GeminiClient.java", "line": 107 }
+      ]
+    },
+    {
+      "id": "resend", "name": "Resend email API", "type": "external-api", "tech": "resend", "domain": "platform", "tier": "external", "importance": 1,
+      "description": "HTTP email provider tried first for transactional mail (OTP, admin login codes). Key from resend.api.key.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/service/ResendEmailClient.java", "line": 47 },
+        { "file": "src/main/java/com/vikrant/careSync/service/ResendEmailClient.java", "line": 70 }
+      ]
+    },
+    {
+      "id": "smtp", "name": "SMTP mail server", "type": "external-api", "tech": "smtp", "domain": "platform", "tier": "external", "importance": 1,
+      "description": "JavaMailSender fallback (or primary when MAIL_API_PROVIDER=smtp). Host from SPRING_MAIL_HOST.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/service/EmailService.java", "line": 82 },
+        { "file": "src/main/resources/application.properties", "line": 153, "note": "spring.mail.host" }
+      ]
+    },
+    {
+      "id": "google-oauth", "name": "Google OAuth tokeninfo", "type": "external-api", "tech": "google", "domain": "identity", "tier": "external", "importance": 1,
+      "description": "Verifies Google ID tokens for Google sign-in; audience checked against GOOGLE_CLIENT_ID.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/service/GoogleAuthService.java", "line": 60 },
+        { "file": "src/main/java/com/vikrant/careSync/service/GoogleAuthService.java", "line": 63 }
+      ]
+    },
+    {
+      "id": "livekit", "name": "LiveKit Cloud", "type": "external-api", "tech": "livekit", "domain": "scheduling", "tier": "external", "importance": 1,
+      "description": "Video rooms for consultations: participant listing and room deletion through RoomServiceClient; join tokens are signed locally. Configured by LIVEKIT_URL / LIVEKIT_API_KEY.",
+      "evidence": [
+        { "file": "src/main/java/com/vikrant/careSync/service/LiveKitService.java", "line": 63 },
+        { "file": "src/main/resources/application.properties", "line": 227, "note": "livekit.url" }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "client", "target": "auth-module", "kind": "http", "label": "Auth REST API (20 endpoints)",
+      "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/AuthController.java", "line": 36 }],
+      "endpoints": [
+{"method":"POST","path":"/api/auth/google","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AuthController.java","line":57}]},
+{"method":"POST","path":"/api/auth/register","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AuthController.java","line":72}]},
+{"method":"POST","path":"/api/auth/email-verification/start","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AuthController.java","line":83}]},
+{"method":"POST","path":"/api/auth/email-verification/verify","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AuthController.java","line":97}]},
+{"method":"GET","path":"/api/auth/email-verification/status","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AuthController.java","line":115}]},
+{"method":"GET","path":"/api/auth/check-availability","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AuthController.java","line":128}]},
+{"method":"POST","path":"/api/auth/login","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AuthController.java","line":136}]},
+{"method":"POST","path":"/api/auth/login/verify-code","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AuthController.java","line":153}]},
+{"method":"GET","path":"/api/auth/sessions","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AuthController.java","line":169}]},
+{"method":"DELETE","path":"/api/auth/sessions/{id}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AuthController.java","line":175}]},
+{"method":"POST","path":"/api/auth/sessions/sign-out-others","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AuthController.java","line":182}]},
+{"method":"POST","path":"/api/auth/refresh","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AuthController.java","line":198}]},
+{"method":"POST","path":"/api/auth/logout","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AuthController.java","line":241}]},
+{"method":"POST","path":"/api/auth/change-password","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AuthController.java","line":266}]},
+{"method":"POST","path":"/api/auth/forgot-password","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AuthController.java","line":289}]},
+{"method":"POST","path":"/api/auth/forgot-password-otp","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AuthController.java","line":303}]},
+{"method":"POST","path":"/api/auth/reset-password","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AuthController.java","line":316}]},
+{"method":"POST","path":"/api/auth/verify-otp","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AuthController.java","line":330}]},
+{"method":"POST","path":"/api/auth/reset-password-otp","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AuthController.java","line":343}]},
+{"method":"GET","path":"/api/auth/current-user","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AuthController.java","line":356}]}
+      ]
+    },
+    {
+      "source": "client", "target": "care-records", "kind": "http", "label": "Doctors, patients & records REST API (107 endpoints)",
+      "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/DoctorController.java", "line": 34 }],
+      "endpoints": [
+{"method":"GET","path":"/api/doctors","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":47}]},
+{"method":"GET","path":"/api/doctors/search","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":65}]},
+{"method":"GET","path":"/api/doctors/search/count","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":93}]},
+{"method":"GET","path":"/api/doctors/for-patients","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":113}]},
+{"method":"GET","path":"/api/doctors/public/{username}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":132}]},
+{"method":"GET","path":"/api/doctors/{id}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":141}]},
+{"method":"GET","path":"/api/doctors/profile/{username}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":151}]},
+{"method":"PUT","path":"/api/doctors/profile/{username}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":192}]},
+{"method":"PUT","path":"/api/doctors/profile/{username}/image","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":207}]},
+{"method":"GET","path":"/api/doctors/specialization/{specialization}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":221}]},
+{"method":"POST","path":"/api/doctors/profile/{username}/experiences","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":231}]},
+{"method":"GET","path":"/api/doctors/profile/{username}/experiences","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":250}]},
+{"method":"GET","path":"/api/doctors/{id}/experiences","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":259}]},
+{"method":"PUT","path":"/api/doctors/profile/{username}/experiences/{experienceId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":266}]},
+{"method":"DELETE","path":"/api/doctors/profile/{username}/experiences/{experienceId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":286}]},
+{"method":"POST","path":"/api/doctors/profile/{username}/educations","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":299}]},
+{"method":"GET","path":"/api/doctors/profile/{username}/educations","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":318}]},
+{"method":"GET","path":"/api/doctors/{id}/educations","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":327}]},
+{"method":"PUT","path":"/api/doctors/profile/{username}/educations/{educationId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":334}]},
+{"method":"DELETE","path":"/api/doctors/profile/{username}/educations/{educationId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":353}]},
+{"method":"POST","path":"/api/doctors/profile/{username}/certificates","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":366}]},
+{"method":"GET","path":"/api/doctors/profile/{username}/certificates","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":389}]},
+{"method":"GET","path":"/api/doctors/{id}/certificates","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":398}]},
+{"method":"PUT","path":"/api/doctors/profile/{username}/certificates/{certificateId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":405}]},
+{"method":"DELETE","path":"/api/doctors/profile/{username}/certificates/{certificateId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorController.java","line":428}]},
+{"method":"GET","path":"/api/patients","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":62}]},
+{"method":"GET","path":"/api/patients/count","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":72}]},
+{"method":"GET","path":"/api/patients/me/export","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":79}]},
+{"method":"GET","path":"/api/patients/me/export/fhir","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":90}]},
+{"method":"GET","path":"/api/patients/{id}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":101}]},
+{"method":"GET","path":"/api/patients/username/{username}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":110}]},
+{"method":"GET","path":"/api/patients/profile/{username}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":120}]},
+{"method":"GET","path":"/api/patients/{patientId}/complete-data","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":136}]},
+{"method":"PUT","path":"/api/patients/{id}/profile","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":207}]},
+{"method":"GET","path":"/api/patients/illness/{illnessKeyword}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":231}]},
+{"method":"PUT","path":"/api/patients/{id}/illness-details","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":241}]},
+{"method":"PUT","path":"/api/patients/{id}/contact-info","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":256}]},
+{"method":"PUT","path":"/api/patients/{id}/profile-image","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":271}]},
+{"method":"PUT","path":"/api/patients/profile/{username}/image","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":283}]},
+{"method":"POST","path":"/api/patients/{patientId}/medical-history","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":297}]},
+{"method":"GET","path":"/api/patients/{patientId}/medical-history","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":319}]},
+{"method":"GET","path":"/api/patients/{patientId}/medical-history/date-range","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":328}]},
+{"method":"PUT","path":"/api/patients/medical-history/{historyId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":348}]},
+{"method":"DELETE","path":"/api/patients/medical-history/{historyId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":370}]},
+{"method":"POST","path":"/api/patients/{patientId}/upload/profile-image","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":387}]},
+{"method":"POST","path":"/api/patients/{patientId}/upload/medical-document","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":407}]},
+{"method":"POST","path":"/api/patients/{patientId}/upload/prescription","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":430}]},
+{"method":"POST","path":"/api/patients/{patientId}/upload/lab-report","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":450}]},
+{"method":"POST","path":"/api/patients/{patientId}/upload/insurance","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":470}]},
+{"method":"POST","path":"/api/patients/{patientId}/upload/identification","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":490}]},
+{"method":"GET","path":"/api/patients/{patientId}/documents","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":510}]},
+{"method":"GET","path":"/api/patients/{patientId}/documents/type/{documentType}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":527}]},
+{"method":"GET","path":"/api/patients/{patientId}/profile-image","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PatientController.java","line":547}]},
+{"method":"POST","path":"/api/medical-history","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MedicalHistoryController.java","line":39}]},
+{"method":"POST","path":"/api/medical-history/with-doctor","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MedicalHistoryController.java","line":71}]},
+{"method":"GET","path":"/api/medical-history/{id}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MedicalHistoryController.java","line":105}]},
+{"method":"GET","path":"/api/medical-history/appointment/{appointmentId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MedicalHistoryController.java","line":117}]},
+{"method":"GET","path":"/api/medical-history/patient/{patientId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MedicalHistoryController.java","line":132}]},
+{"method":"GET","path":"/api/medical-history/patient/{patientId}/recent","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MedicalHistoryController.java","line":147}]},
+{"method":"GET","path":"/api/medical-history/patient/{patientId}/by-date-range","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MedicalHistoryController.java","line":163}]},
+{"method":"PUT","path":"/api/medical-history/{id}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MedicalHistoryController.java","line":182}]},
+{"method":"DELETE","path":"/api/medical-history/{id}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MedicalHistoryController.java","line":205}]},
+{"method":"GET","path":"/api/medical-history/patient/{patientId}/summary","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MedicalHistoryController.java","line":219}]},
+{"method":"GET","path":"/api/medical-history/patient/{patientId}/diagnosis/{diagnosis}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MedicalHistoryController.java","line":231}]},
+{"method":"GET","path":"/api/medical-history/patient/{patientId}/with-doctor","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MedicalHistoryController.java","line":249}]},
+{"method":"POST","path":"/api/vitals","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/VitalController.java","line":26}]},
+{"method":"GET","path":"/api/vitals/patient/{patientId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/VitalController.java","line":33}]},
+{"method":"GET","path":"/api/lab-tests","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/LabTestController.java","line":35}]},
+{"method":"GET","path":"/api/lab-tests/all","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/LabTestController.java","line":50}]},
+{"method":"GET","path":"/api/lab-tests/{id}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/LabTestController.java","line":65}]},
+{"method":"POST","path":"/api/lab-tests","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/LabTestController.java","line":82}]},
+{"method":"PUT","path":"/api/lab-tests/{id}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/LabTestController.java","line":103}]},
+{"method":"DELETE","path":"/api/lab-tests/{id}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/LabTestController.java","line":124}]},
+{"method":"GET","path":"/api/lab-tests/search","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/LabTestController.java","line":146}]},
+{"method":"POST","path":"/api/lab-tests/calculate-price","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/LabTestController.java","line":161}]},
+{"method":"POST","path":"/api/feedback","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FeedbackController.java","line":35}]},
+{"method":"GET","path":"/api/feedback/{id}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FeedbackController.java","line":55}]},
+{"method":"GET","path":"/api/feedback/patient/pending","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FeedbackController.java","line":67}]},
+{"method":"GET","path":"/api/feedback/doctor/{doctorId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FeedbackController.java","line":81}]},
+{"method":"GET","path":"/api/feedback/patient/{patientId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FeedbackController.java","line":95}]},
+{"method":"GET","path":"/api/feedback/appointment/{appointmentId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FeedbackController.java","line":110}]},
+{"method":"PUT","path":"/api/feedback/{id}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FeedbackController.java","line":122}]},
+{"method":"DELETE","path":"/api/feedback/{id}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FeedbackController.java","line":138}]},
+{"method":"GET","path":"/api/feedback/doctor/{doctorId}/average-rating","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FeedbackController.java","line":152}]},
+{"method":"GET","path":"/api/feedback/doctor/{doctorId}/rating-distribution","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FeedbackController.java","line":166}]},
+{"method":"GET","path":"/api/patients/me/saved-doctors","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/SavedDoctorController.java","line":29}]},
+{"method":"PUT","path":"/api/patients/me/saved-doctors/{doctorId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/SavedDoctorController.java","line":35}]},
+{"method":"DELETE","path":"/api/patients/me/saved-doctors/{doctorId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/SavedDoctorController.java","line":42}]},
+{"method":"POST","path":"/api/doctor-leaves","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorLeaveController.java","line":34}]},
+{"method":"GET","path":"/api/doctor-leaves/my-leaves","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorLeaveController.java","line":51}]},
+{"method":"GET","path":"/api/doctor-leaves/upcoming","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorLeaveController.java","line":66}]},
+{"method":"DELETE","path":"/api/doctor-leaves/{id}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/DoctorLeaveController.java","line":81}]},
+{"method":"POST","path":"/api/files/upload/certificate","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FileUploadController.java","line":55}]},
+{"method":"POST","path":"/api/files/upload/profile-image/doctor","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FileUploadController.java","line":93}]},
+{"method":"POST","path":"/api/files/upload/profile-image/patient","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FileUploadController.java","line":115}]},
+{"method":"POST","path":"/api/files/upload/medical-document","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FileUploadController.java","line":137}]},
+{"method":"POST","path":"/api/files/upload/doctor-document","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FileUploadController.java","line":157}]},
+{"method":"POST","path":"/api/files/upload/lab-report","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FileUploadController.java","line":178}]},
+{"method":"GET","path":"/api/files/download/{documentId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FileUploadController.java","line":197}]},
+{"method":"GET","path":"/api/files/view/{documentId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FileUploadController.java","line":225}]},
+{"method":"DELETE","path":"/api/files/{documentId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FileUploadController.java","line":248}]},
+{"method":"GET","path":"/api/files/doctor/{doctorId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FileUploadController.java","line":264}]},
+{"method":"GET","path":"/api/files/patient/{patientId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FileUploadController.java","line":278}]},
+{"method":"GET","path":"/api/files/doctor/{doctorId}/type/{documentType}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FileUploadController.java","line":290}]},
+{"method":"GET","path":"/api/files/patient/{patientId}/type/{documentType}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FileUploadController.java","line":307}]},
+{"method":"PUT","path":"/api/files/{documentId}/description","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FileUploadController.java","line":325}]},
+{"method":"GET","path":"/api/files/recent","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/FileUploadController.java","line":341}]}
+      ]
+    },
+    {
+      "source": "client", "target": "appointments", "kind": "http", "label": "Appointments & video REST API (50 endpoints)",
+      "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/AppointmentController.java", "line": 33 }],
+      "endpoints": [
+{"method":"POST","path":"/api/appointments/patient/book","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":64}]},
+{"method":"POST","path":"/api/appointments/patient/hold-slot","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":100}]},
+{"method":"POST","path":"/api/appointments/patient/release-slot","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":121}]},
+{"method":"POST","path":"/api/appointments/patient/book-with-payment","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":147}]},
+{"method":"POST","path":"/api/appointments/patient/{id}/intake","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":162}]},
+{"method":"GET","path":"/api/appointments/{id}/follow-through","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":178}]},
+{"method":"GET","path":"/api/appointments/{id}/intake-summary","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":190}]},
+{"method":"GET","path":"/api/appointments/{id}/pre-visit-brief","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":202}]},
+{"method":"POST","path":"/api/appointments/{id}/generate-soap-draft","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":214}]},
+{"method":"GET","path":"/api/appointments/{id}/soap-draft","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":230}]},
+{"method":"PUT","path":"/api/appointments/{id}/soap-draft","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":247}]},
+{"method":"POST","path":"/api/appointments/{id}/sign-report","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":261}]},
+{"method":"GET","path":"/api/appointments/admin/analytics","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":277}]},
+{"method":"GET","path":"/api/appointments/{id}/audit-trail","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":293}]},
+{"method":"GET","path":"/api/appointments/patient/my-appointments","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":312}]},
+{"method":"GET","path":"/api/appointments/patient/my-appointments/upcoming","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":326}]},
+{"method":"GET","path":"/api/appointments/patient/my-appointments/status/{status}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":340}]},
+{"method":"GET","path":"/api/appointments/patient/my-appointments/completed","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":356}]},
+{"method":"GET","path":"/api/appointments/patient/my-appointments/cancelled","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":371}]},
+{"method":"PUT","path":"/api/appointments/patient/{id}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":386}]},
+{"method":"DELETE","path":"/api/appointments/patient/{id}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":409}]},
+{"method":"PUT","path":"/api/appointments/patient/{id}/reschedule","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":426}]},
+{"method":"GET","path":"/api/appointments/doctor/dashboard-metrics","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":459}]},
+{"method":"GET","path":"/api/appointments/doctor/my-patients","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":472}]},
+{"method":"GET","path":"/api/appointments/doctor/my-patients/paginated","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":486}]},
+{"method":"GET","path":"/api/appointments/doctor/my-patients/count","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":505}]},
+{"method":"GET","path":"/api/appointments/doctor/my-patients/upcoming","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":521}]},
+{"method":"GET","path":"/api/appointments/doctor/my-patients/today","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":535}]},
+{"method":"GET","path":"/api/appointments/doctor/my-patients/status/{status}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":549}]},
+{"method":"GET","path":"/api/appointments/doctor/my-patients/completed","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":565}]},
+{"method":"GET","path":"/api/appointments/doctor/my-patients/cancelled","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":579}]},
+{"method":"GET","path":"/api/appointments/doctor/unique-patients","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":593}]},
+{"method":"PUT","path":"/api/appointments/doctor/{id}/status","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":615}]},
+{"method":"PUT","path":"/api/appointments/{id}/status","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":634}]},
+{"method":"PUT","path":"/api/appointments/doctor/{id}/confirm","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":669}]},
+{"method":"PUT","path":"/api/appointments/doctor/{id}/complete","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":684}]},
+{"method":"PUT","path":"/api/appointments/doctor/{id}/cancel","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":699}]},
+{"method":"GET","path":"/api/appointments/{id}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":713}]},
+{"method":"GET","path":"/api/appointments/{id}/details","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":752}]},
+{"method":"GET","path":"/api/appointments/admin/{id}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":784}]},
+{"method":"DELETE","path":"/api/appointments/admin/{id}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":790}]},
+{"method":"GET","path":"/api/appointments/available-slots","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":806}]},
+{"method":"POST","path":"/api/appointments/patient/book-emergency","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":838}]},
+{"method":"GET","path":"/api/appointments/{id}/completion-preview","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":860}]},
+{"method":"POST","path":"/api/appointments/{id}/esign-and-complete","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentController.java","line":872}]},
+{"method":"GET","path":"/api/appointments/{id}/allowed-actions","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentActionController.java","line":70}]},
+{"method":"POST","path":"/api/appointments/{id}/actions/{action}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AppointmentActionController.java","line":83}]},
+{"method":"POST","path":"/api/appointments/{id}/video/token","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/VideoConsultationController.java","line":50}]},
+{"method":"GET","path":"/api/appointments/{id}/video/status","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/VideoConsultationController.java","line":136}]},
+{"method":"POST","path":"/api/appointments/{id}/video/end","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/VideoConsultationController.java","line":166}]}
+      ]
+    },
+    {
+      "source": "client", "target": "chat-ws", "kind": "other", "label": "WebSocket/STOMP chat + history (3 endpoints)",
+      "evidence": [{ "file": "src/main/java/com/vikrant/careSync/config/WebSocketConfig.java", "line": 39 }],
+      "endpoints": [
+{"method":"WS","path":"/ws","evidence":[{"file":"src/main/java/com/vikrant/careSync/config/WebSocketConfig.java","line":39}]},
+{"method":"STOMP","path":"/app/chat.sendMessage","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/ChatController.java","line":41}]},
+{"method":"GET","path":"/api/chat/{appointmentId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/ChatController.java","line":78}]}
+      ]
+    },
+    {
+      "source": "client", "target": "bookings", "kind": "http", "label": "Lab-test bookings REST API (12 endpoints)",
+      "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/BookingController.java", "line": 25 }],
+      "endpoints": [
+{"method":"POST","path":"/api/bookings/patient/with-payment","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/BookingController.java","line":36}]},
+{"method":"POST","path":"/api/bookings/doctor","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/BookingController.java","line":60}]},
+{"method":"POST","path":"/api/bookings","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/BookingController.java","line":81}]},
+{"method":"GET","path":"/api/bookings/user/{userId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/BookingController.java","line":102}]},
+{"method":"GET","path":"/api/bookings","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/BookingController.java","line":123}]},
+{"method":"GET","path":"/api/bookings/my-bookings","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/BookingController.java","line":141}]},
+{"method":"GET","path":"/api/bookings/{bookingId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/BookingController.java","line":162}]},
+{"method":"PUT","path":"/api/bookings/{bookingId}/status","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/BookingController.java","line":183}]},
+{"method":"GET","path":"/api/bookings/status/{status}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/BookingController.java","line":205}]},
+{"method":"GET","path":"/api/bookings/user/{userId}/count","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/BookingController.java","line":223}]},
+{"method":"GET","path":"/api/bookings/date-range","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/BookingController.java","line":247}]},
+{"method":"PUT","path":"/api/bookings/{bookingId}/cancel","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/BookingController.java","line":273}]}
+      ]
+    },
+    {
+      "source": "client", "target": "payments", "kind": "http", "label": "Payments REST API (16 endpoints)",
+      "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/PaymentController.java", "line": 37 }],
+      "endpoints": [
+{"method":"POST","path":"/api/payments/booking/{bookingId}/pay","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PaymentController.java","line":58}]},
+{"method":"POST","path":"/api/payments/initiate","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PaymentController.java","line":85}]},
+{"method":"GET","path":"/api/payments/transaction/{transactionId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PaymentController.java","line":108}]},
+{"method":"GET","path":"/api/payments/booking/{bookingId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PaymentController.java","line":128}]},
+{"method":"GET","path":"/api/payments/patient/{patientId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PaymentController.java","line":152}]},
+{"method":"GET","path":"/api/payments/all","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PaymentController.java","line":179}]},
+{"method":"GET","path":"/api/payments/config","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PaymentController.java","line":195}]},
+{"method":"POST","path":"/api/payments/razorpay/verify","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PaymentController.java","line":202}]},
+{"method":"POST","path":"/api/payments/verify/{transactionId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PaymentController.java","line":245}]},
+{"method":"POST","path":"/api/payments/cancel/{transactionId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PaymentController.java","line":267}]},
+{"method":"GET","path":"/api/payments/statistics","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PaymentController.java","line":297}]},
+{"method":"GET","path":"/api/payments/me","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PaymentController.java","line":306}]},
+{"method":"GET","path":"/api/payments/refund-preview/appointment/{appointmentId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PaymentController.java","line":317}]},
+{"method":"GET","path":"/api/payments/doctor/me/earnings","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PaymentController.java","line":328}]},
+{"method":"GET","path":"/api/payments/preferences/me","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PaymentController.java","line":339}]},
+{"method":"DELETE","path":"/api/payments/preferences/me","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/PaymentController.java","line":350}]}
+      ]
+    },
+    {
+      "source": "client", "target": "ai-module", "kind": "http", "label": "AI REST/SSE API (18 endpoints)",
+      "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/AiController.java", "line": 43 }],
+      "endpoints": [
+{"method":"POST","path":"/api/ai/chat","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AiController.java","line":69}]},
+{"method":"POST","path":"/api/ai/chat/stream","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AiController.java","line":81}]},
+{"method":"GET","path":"/api/ai/chat/stream","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AiController.java","line":148}]},
+{"method":"POST","path":"/api/ai/symptom-search","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AiController.java","line":161}]},
+{"method":"GET","path":"/api/ai/patient/health-brief","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AiController.java","line":168}]},
+{"method":"GET","path":"/api/ai/lab-reports/{documentId}/explanation","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AiController.java","line":175}]},
+{"method":"POST","path":"/api/ai/lab-reports/{documentId}/explain","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AiController.java","line":189}]},
+{"method":"GET","path":"/api/ai/doctor/patients","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AiController.java","line":207}]},
+{"method":"GET","path":"/api/ai/summarize/{patientId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AiController.java","line":213}]},
+{"method":"POST","path":"/api/ai/suggest-diagnosis","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AiController.java","line":219}]},
+{"method":"POST","path":"/api/ai/scan-document","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AiController.java","line":225}]},
+{"method":"POST","path":"/api/ai/dictate-note","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AiController.java","line":232}]},
+{"method":"POST","path":"/api/ai/draft-intake","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AiController.java","line":240}]},
+{"method":"GET","path":"/api/ai/conversations","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AiConversationController.java","line":30}]},
+{"method":"GET","path":"/api/ai/conversations/{conversationId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AiConversationController.java","line":36}]},
+{"method":"PATCH","path":"/api/ai/conversations/{conversationId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AiConversationController.java","line":42}]},
+{"method":"DELETE","path":"/api/ai/conversations/{conversationId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AiConversationController.java","line":49}]},
+{"method":"DELETE","path":"/api/ai/conversations","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AiConversationController.java","line":57}]}
+      ]
+    },
+    {
+      "source": "client", "target": "admin-reporting", "kind": "http", "label": "Admin, analytics, reports, seed & master REST API (61 endpoints)",
+      "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/AdminController.java", "line": 35 }],
+      "endpoints": [
+{"method":"GET","path":"/api/admin/users","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":54}]},
+{"method":"GET","path":"/api/admin/doctors","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":62}]},
+{"method":"GET","path":"/api/admin/doctors/{doctorId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":71}]},
+{"method":"PUT","path":"/api/admin/users/{username}/toggle-active","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":78}]},
+{"method":"PUT","path":"/api/admin/users/{username}/status","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":101}]},
+{"method":"PUT","path":"/api/admin/doctors/{doctorId}/verify","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":123}]},
+{"method":"POST","path":"/api/admin/doctors/{doctorId}/certificates/{certificateId}/review","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":145}]},
+{"method":"POST","path":"/api/admin/doctors/{doctorId}/verify","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":157}]},
+{"method":"POST","path":"/api/admin/doctors/{doctorId}/unverify","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":162}]},
+{"method":"DELETE","path":"/api/admin/blocked-ips/{ipAddress}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":167}]},
+{"method":"DELETE","path":"/api/admin/blocked-ips","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":172}]},
+{"method":"GET","path":"/api/admin/blocked-ips","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":177}]},
+{"method":"POST","path":"/api/admin/unblock-ip/{ipAddress}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":189}]},
+{"method":"POST","path":"/api/admin/unblock-all-ips","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":202}]},
+{"method":"POST","path":"/api/admin/cleanup-expired","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":215}]},
+{"method":"POST","path":"/api/admin/block-doctor/{doctorId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":229}]},
+{"method":"POST","path":"/api/admin/block-patient/{patientId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":255}]},
+{"method":"POST","path":"/api/admin/unblock-doctor/{doctorId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":281}]},
+{"method":"POST","path":"/api/admin/unblock-patient/{patientId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":305}]},
+{"method":"POST","path":"/api/admin/block-ip","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":329}]},
+{"method":"GET","path":"/api/admin/sessions/{username}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":348}]},
+{"method":"POST","path":"/api/admin/sessions/deactivate/{sessionId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":360}]},
+{"method":"POST","path":"/api/admin/sessions/deactivate-all/{username}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":374}]},
+{"method":"POST","path":"/api/admin/sessions/cleanup-expired","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":387}]},
+{"method":"PUT","path":"/api/admin/users/{userId}/password","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":400}]},
+{"method":"POST","path":"/api/admin/storage/move-medical-files","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":444}]},
+{"method":"POST","path":"/api/admin/security/reencrypt-fields","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":456}]},
+{"method":"GET","path":"/api/admin/audit-logs","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AdminController.java","line":463}]},
+{"method":"GET","path":"/api/analytics/overall","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AnalyticsController.java","line":30}]},
+{"method":"GET","path":"/api/analytics/doctor/{doctorId}/peak-hours","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AnalyticsController.java","line":44}]},
+{"method":"GET","path":"/api/analytics/doctor/{doctorId}/day-of-week","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AnalyticsController.java","line":59}]},
+{"method":"GET","path":"/api/analytics/doctor/{doctorId}/patient-retention","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AnalyticsController.java","line":74}]},
+{"method":"GET","path":"/api/analytics/doctor/{doctorId}/appointment-duration","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AnalyticsController.java","line":86}]},
+{"method":"GET","path":"/api/analytics/doctor/{doctorId}/feedback-sentiment","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AnalyticsController.java","line":102}]},
+{"method":"GET","path":"/api/analytics/doctor/{doctorId}/seasonal-trends","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AnalyticsController.java","line":114}]},
+{"method":"GET","path":"/api/analytics/doctor/{doctorId}/patient-demographics","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AnalyticsController.java","line":128}]},
+{"method":"GET","path":"/api/analytics/doctor/{doctorId}/cancellation-patterns","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AnalyticsController.java","line":140}]},
+{"method":"GET","path":"/api/analytics/patient/{patientId}/financial","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/AnalyticsController.java","line":156}]},
+{"method":"GET","path":"/api/reports/doctor/{doctorId}/performance","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/ReportingController.java","line":22}]},
+{"method":"GET","path":"/api/reports/patient/{patientId}/analytics","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/ReportingController.java","line":37}]},
+{"method":"GET","path":"/api/reports/clinic/overview","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/ReportingController.java","line":49}]},
+{"method":"GET","path":"/api/reports/appointments/trends","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/ReportingController.java","line":63}]},
+{"method":"GET","path":"/api/reports/specialization/analysis","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/ReportingController.java","line":77}]},
+{"method":"GET","path":"/api/reports/patients/demographics","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/ReportingController.java","line":89}]},
+{"method":"GET","path":"/api/reports/revenue/analysis","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/ReportingController.java","line":101}]},
+{"method":"POST","path":"/api/seed/public/seed-single","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/SeedingController.java","line":34}]},
+{"method":"POST","path":"/api/seed/patients/public/seed-single","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/SeedingController.java","line":34}]},
+{"method":"POST","path":"/api/seed/public/seed-bulk","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/SeedingController.java","line":49}]},
+{"method":"POST","path":"/api/seed/patients/public/seed-bulk","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/SeedingController.java","line":49}]},
+{"method":"GET","path":"/api/master/all","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MasterController.java","line":17}]},
+{"method":"GET","path":"/api/master/genders","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MasterController.java","line":32}]},
+{"method":"GET","path":"/api/master/specializations","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MasterController.java","line":37}]},
+{"method":"GET","path":"/api/master/statuses","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MasterController.java","line":42}]},
+{"method":"GET","path":"/api/master/blood-groups","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MasterController.java","line":47}]},
+{"method":"GET","path":"/api/master/languages","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MasterController.java","line":52}]},
+{"method":"GET","path":"/api/master/degrees","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MasterController.java","line":57}]},
+{"method":"GET","path":"/api/master/institutions","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MasterController.java","line":62}]},
+{"method":"GET","path":"/api/master/hospitals","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MasterController.java","line":67}]},
+{"method":"GET","path":"/api/master/positions","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MasterController.java","line":72}]},
+{"method":"POST","path":"/api/master/{type}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MasterController.java","line":77}]},
+{"method":"DELETE","path":"/api/master/{type}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/MasterController.java","line":87}]}
+      ]
+    },
+    {
+      "source": "client", "target": "notifications", "kind": "http", "label": "Notifications REST API (16 endpoints)",
+      "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/NotificationController.java", "line": 22 }],
+      "endpoints": [
+{"method":"POST","path":"/api/notifications/appointment-reminder/{appointmentId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/NotificationController.java","line":29}]},
+{"method":"GET","path":"/api/notifications/doctor/{doctorId}/feed","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/NotificationController.java","line":41}]},
+{"method":"GET","path":"/api/notifications/doctor/{doctorId}/unread-count","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/NotificationController.java","line":50}]},
+{"method":"GET","path":"/api/notifications/patient/{patientId}/feed","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/NotificationController.java","line":56}]},
+{"method":"GET","path":"/api/notifications/patient/{patientId}/unread-count","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/NotificationController.java","line":65}]},
+{"method":"POST","path":"/api/notifications/{notificationId}/read","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/NotificationController.java","line":71}]},
+{"method":"POST","path":"/api/notifications/appointment-reminder","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/NotificationController.java","line":78}]},
+{"method":"POST","path":"/api/notifications/appointment-confirmation/{appointmentId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/NotificationController.java","line":94}]},
+{"method":"POST","path":"/api/notifications/appointment-cancellation/{appointmentId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/NotificationController.java","line":106}]},
+{"method":"POST","path":"/api/notifications/appointment-reschedule/{appointmentId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/NotificationController.java","line":118}]},
+{"method":"POST","path":"/api/notifications/daily-schedule/{doctorId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/NotificationController.java","line":130}]},
+{"method":"POST","path":"/api/notifications/weekly-schedule/{doctorId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/NotificationController.java","line":142}]},
+{"method":"POST","path":"/api/notifications/feedback-reminder/{appointmentId}","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/NotificationController.java","line":154}]},
+{"method":"POST","path":"/api/notifications/system-notification","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/NotificationController.java","line":166}]},
+{"method":"POST","path":"/api/notifications/bulk-notification","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/NotificationController.java","line":181}]},
+{"method":"POST","path":"/api/notifications/custom-notification","evidence":[{"file":"src/main/java/com/vikrant/careSync/controller/NotificationController.java","line":197}]}
+      ]
+    },
+    {
+      "source": "razorpay-webhook", "target": "payments", "kind": "http", "label": "Razorpay webhook (1 endpoint)",
+      "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 69, "note": "POST webhook is permitAll" }],
+      "endpoints": [
+        { "method": "POST", "path": "/api/payments/webhook/razorpay", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/PaymentController.java", "line": 220 }] }
+      ]
+    },
+
+    { "source": "cors-mw", "target": "rate-limit-mw", "kind": "middleware-next", "label": "next filter", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 116 }] },
+    { "source": "rate-limit-mw", "target": "ip-block-mw", "kind": "middleware-next", "label": "next filter", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 117 }] },
+    { "source": "ip-block-mw", "target": "jwt-auth-mw", "kind": "middleware-next", "label": "next filter", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 118 }] },
+    { "source": "jwt-auth-mw", "target": "authz-rules", "kind": "middleware-next", "label": "authorization", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 49 }] },
+    { "source": "authz-rules", "target": "audit-interceptor", "kind": "middleware-next", "label": "DispatcherServlet interceptor", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/config/AuditWebConfig.java", "line": 17 }] },
+    { "source": "audit-interceptor", "target": "auth-module", "kind": "middleware-next", "label": "/api/auth/**", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/config/AuditWebConfig.java", "line": 17 }] },
+    { "source": "audit-interceptor", "target": "care-records", "kind": "middleware-next", "label": "/api/doctors, /api/patients, ...", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/config/AuditWebConfig.java", "line": 17 }] },
+    { "source": "audit-interceptor", "target": "appointments", "kind": "middleware-next", "label": "/api/appointments/**", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/config/AuditWebConfig.java", "line": 17 }] },
+    { "source": "audit-interceptor", "target": "chat-ws", "kind": "middleware-next", "label": "/api/chat/**", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/config/AuditWebConfig.java", "line": 17 }] },
+    { "source": "audit-interceptor", "target": "bookings", "kind": "middleware-next", "label": "/api/bookings/**", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/config/AuditWebConfig.java", "line": 17 }] },
+    { "source": "audit-interceptor", "target": "payments", "kind": "middleware-next", "label": "/api/payments/**", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/config/AuditWebConfig.java", "line": 17 }] },
+    { "source": "audit-interceptor", "target": "ai-module", "kind": "middleware-next", "label": "/api/ai/**", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/config/AuditWebConfig.java", "line": 17 }] },
+    { "source": "audit-interceptor", "target": "admin-reporting", "kind": "middleware-next", "label": "/api/admin, /api/analytics, ...", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/config/AuditWebConfig.java", "line": 17 }] },
+    { "source": "audit-interceptor", "target": "notifications", "kind": "middleware-next", "label": "/api/notifications/**", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/config/AuditWebConfig.java", "line": 17 }] },
+    { "source": "stomp-auth", "target": "chat-ws", "kind": "middleware-next", "label": "inbound STOMP frames", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/config/WebSocketConfig.java", "line": 46 }] },
+
+    { "source": "ip-block-mw", "target": "postgres", "kind": "db-query", "label": "SELECT active blocked IPs", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/service/SecurityService.java", "line": 85 }] },
+    { "source": "jwt-auth-mw", "target": "postgres", "kind": "db-query", "label": "load user + live session", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/CustomUserDetailsService.java", "line": 29 }, { "file": "src/main/java/com/vikrant/careSync/security/service/SecurityService.java", "line": 169 }] },
+    { "source": "audit-interceptor", "target": "postgres", "kind": "db-query", "label": "INSERT audit log", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/AuditService.java", "line": 54 }] },
+    { "source": "care-records", "target": "error-handler", "kind": "response", "label": "exceptions mapped to JSON errors (e.g. 403)", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/exception/GlobalExceptionHandler.java", "line": 27 }] },
+    { "source": "error-handler", "target": "cors-mw", "kind": "response", "label": "error reply leaves through the filter chain", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/exception/GlobalExceptionHandler.java", "line": 30 }] },
+
+    { "source": "auth-module", "target": "postgres", "kind": "db-query", "label": "login attempts, sessions, refresh tokens", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/service/SecurityService.java", "line": 58 }, { "file": "src/main/java/com/vikrant/careSync/security/service/SecurityService.java", "line": 156 }, { "file": "src/main/java/com/vikrant/careSync/security/service/RefreshTokenService.java", "line": 33 }] },
+    { "source": "auth-module", "target": "redis", "kind": "cache-write", "label": "SET admin login code / INCR OTP attempts", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/service/AdminLoginCodeService.java", "line": 62 }, { "file": "src/main/java/com/vikrant/careSync/security/service/OtpAttemptLimiter.java", "line": 45 }] },
+    { "source": "auth-module", "target": "redis", "kind": "cache-read", "label": "GET admin login code", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/service/AdminLoginCodeService.java", "line": 99 }] },
+    { "source": "auth-module", "target": "notifications", "kind": "call", "label": "EmailService: OTP / admin login code", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/AuthenticationService.java", "line": 296 }, { "file": "src/main/java/com/vikrant/careSync/service/AuthenticationService.java", "line": 443 }] },
+    { "source": "auth-module", "target": "google-oauth", "kind": "http", "label": "GET tokeninfo?id_token", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/GoogleAuthService.java", "line": 63 }] },
+
+    { "source": "care-records", "target": "postgres", "kind": "db-query", "label": "doctors, patients, history, documents", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/DoctorService.java", "line": 146 }, { "file": "src/main/java/com/vikrant/careSync/service/DocumentService.java", "line": 132 }] },
+    { "source": "care-records", "target": "redis", "kind": "cache-read", "label": "@Cacheable DOCTOR:* / PATIENT:*", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/DoctorService.java", "line": 144 }, { "file": "src/main/java/com/vikrant/careSync/service/DocumentService.java", "line": 149 }] },
+    { "source": "care-records", "target": "redis", "kind": "cache-write", "label": "@Cacheable populate / @CacheEvict", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/DoctorService.java", "line": 144 }, { "file": "src/main/java/com/vikrant/careSync/service/DoctorService.java", "line": 162 }] },
+    { "source": "care-records", "target": "supabase-s3", "kind": "http", "label": "S3 put / get / delete / presign", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/DocumentService.java", "line": 112 }, { "file": "src/main/java/com/vikrant/careSync/service/SupabaseStorageService.java", "line": 115 }] },
+
+    { "source": "appointments", "target": "postgres", "kind": "db-query", "label": "appointments + status log", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/AppointmentService.java", "line": 169 }, { "file": "src/main/java/com/vikrant/careSync/service/AppointmentService.java", "line": 174 }] },
+    { "source": "appointments", "target": "redis", "kind": "cache-read", "label": "slot locks, upcoming appointments cache", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/SlotLockService.java", "line": 40 }, { "file": "src/main/java/com/vikrant/careSync/service/AppointmentService.java", "line": 304 }] },
+    { "source": "appointments", "target": "redis", "kind": "cache-write", "label": "SETNX slot lock, cache evictions", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/SlotLockService.java", "line": 47 }, { "file": "src/main/java/com/vikrant/careSync/service/AppointmentService.java", "line": 356 }] },
+    { "source": "appointments", "target": "payments", "kind": "call", "label": "initiatePayment (book-with-payment)", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/AppointmentService.java", "line": 212 }] },
+    { "source": "appointments", "target": "notifications", "kind": "call", "label": "after-commit / @Async event notifications", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/AppointmentService.java", "line": 184 }, { "file": "src/main/java/com/vikrant/careSync/listener/AppointmentEventListener.java", "line": 25 }] },
+    { "source": "appointments", "target": "livekit", "kind": "http", "label": "RoomService listParticipants / deleteRoom", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/LiveKitService.java", "line": 63 }, { "file": "src/main/java/com/vikrant/careSync/service/LiveKitService.java", "line": 95 }] },
+
+    { "source": "chat-ws", "target": "postgres", "kind": "db-query", "label": "INSERT / SELECT chat messages", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/ChatController.java", "line": 66 }, { "file": "src/main/java/com/vikrant/careSync/controller/ChatController.java", "line": 82 }] },
+
+    { "source": "bookings", "target": "postgres", "kind": "db-query", "label": "lab tests, bookings", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/BookingService.java", "line": 92 }, { "file": "src/main/java/com/vikrant/careSync/service/BookingService.java", "line": 103 }] },
+    { "source": "bookings", "target": "payments", "kind": "call", "label": "PaymentService.initiatePayment", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/BookingService.java", "line": 111 }] },
+    { "source": "bookings", "target": "redis", "kind": "cache-write", "label": "@CacheEvict ANALYTICS:OVERALL, PATIENT:FINANCIAL", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/BookingService.java", "line": 65 }] },
+
+    { "source": "payments", "target": "postgres", "kind": "db-query", "label": "payments, bookings (row locks)", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/PaymentService.java", "line": 262 }, { "file": "src/main/java/com/vikrant/careSync/service/PaymentService.java", "line": 327 }] },
+    { "source": "payments", "target": "razorpay-api", "kind": "http", "label": "orders.create, payments.fetch/capture/refund", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/RazorpayService.java", "line": 70 }, { "file": "src/main/java/com/vikrant/careSync/service/RazorpayService.java", "line": 83 }, { "file": "src/main/java/com/vikrant/careSync/service/RazorpayService.java", "line": 126 }] },
+
+    { "source": "ai-module", "target": "groq", "kind": "http", "label": "POST chat/completions (tools, stream)", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/ai/GroqClient.java", "line": 178 }, { "file": "src/main/java/com/vikrant/careSync/service/ai/GroqClient.java", "line": 335 }] },
+    { "source": "ai-module", "target": "gemini", "kind": "http", "label": "generateContent (vision / text)", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/ai/GeminiClient.java", "line": 107 }, { "file": "src/main/java/com/vikrant/careSync/service/AiService.java", "line": 542 }] },
+    { "source": "ai-module", "target": "redis", "kind": "cache-read", "label": "GET conversation memory", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/ai/AiConversationMemoryService.java", "line": 67 }] },
+    { "source": "ai-module", "target": "redis", "kind": "cache-write", "label": "SET memory (TTL), INCR quota", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/ai/AiConversationMemoryService.java", "line": 99 }, { "file": "src/main/java/com/vikrant/careSync/service/ai/AiQuotaService.java", "line": 75 }] },
+    { "source": "ai-module", "target": "postgres", "kind": "db-query", "label": "agent tool queries, chat history, AI audit", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/ai/agent/PatientAgentTools.java", "line": 229 }, { "file": "src/main/java/com/vikrant/careSync/service/ai/AiChatHistoryService.java", "line": 84 }, { "file": "src/main/java/com/vikrant/careSync/service/ai/AiAuditService.java", "line": 72 }] },
+    { "source": "ai-module", "target": "appointments", "kind": "call", "label": "AppointmentService.getAvailableSlots", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/ai/AiBookingService.java", "line": 124 }] },
+
+    { "source": "admin-reporting", "target": "postgres", "kind": "db-query", "label": "users, analytics aggregates, reports", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/AdminController.java", "line": 56 }, { "file": "src/main/java/com/vikrant/careSync/service/AnalyticsService.java", "line": 352 }] },
+    { "source": "admin-reporting", "target": "redis", "kind": "cache-read", "label": "@Cacheable ANALYTICS:OVERALL", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/AnalyticsService.java", "line": 343 }] },
+    { "source": "admin-reporting", "target": "redis", "kind": "cache-write", "label": "@Cacheable populate / @CacheEvict doctor caches", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/AnalyticsService.java", "line": 343 }, { "file": "src/main/java/com/vikrant/careSync/controller/AdminController.java", "line": 79 }] },
+    { "source": "admin-reporting", "target": "care-records", "kind": "call", "label": "DoctorService (admin doctor list)", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/AdminController.java", "line": 68 }] },
+
+    { "source": "notifications", "target": "postgres", "kind": "db-query", "label": "notifications, communications log", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/NotificationService.java", "line": 391 }, { "file": "src/main/java/com/vikrant/careSync/service/EmailService.java", "line": 93 }] },
+    { "source": "notifications", "target": "resend", "kind": "http", "label": "POST /emails", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/ResendEmailClient.java", "line": 70 }] },
+    { "source": "notifications", "target": "smtp", "kind": "other", "label": "SMTP send (JavaMailSender)", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/EmailService.java", "line": 82 }] },
+
+    { "source": "schedulers", "target": "payments", "kind": "call", "label": "reconcile stale checkouts, run due refunds", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/scheduler/PaymentReconcileScheduler.java", "line": 48 }, { "file": "src/main/java/com/vikrant/careSync/scheduler/PaymentRefundScheduler.java", "line": 42 }] },
+    { "source": "schedulers", "target": "notifications", "kind": "call", "label": "appointment reminders", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/scheduler/AppointmentReminderScheduler.java", "line": 46 }] },
+    { "source": "schedulers", "target": "postgres", "kind": "db-query", "label": "no-show cleanup, advisory job lock", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/scheduler/AppointmentCleanupScheduler.java", "line": 48 }, { "file": "src/main/java/com/vikrant/careSync/scheduler/ClusterJobLock.java", "line": 36 }] }
+  ],
+  "flows": [
+    {
+      "id": "post-login",
+      "name": "POST /api/auth/login",
+      "summary": "A user signs in with username and password; the backend checks IP block and lockout, verifies the password, records the attempt and starts a server-side session with JWT access and refresh tokens.",
+      "steps": [
+        { "id": "s1", "node": "client", "direction": "request", "action": "The client posts credentials to the login endpoint.", "data": "username + password (JSON body)", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/AuthController.java", "line": 136 }] },
+        { "id": "s2", "node": "cors-mw", "direction": "request", "action": "Origin is checked against the allowed origins.", "data": "Origin header", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 47 }] },
+        { "id": "s3", "node": "rate-limit-mw", "direction": "request", "action": "Login counts against the per-IP auth bucket of 10 requests per minute.", "data": "client IP token consumed", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/filter/RateLimitingFilter.java", "line": 97 }] },
+        { "id": "s4", "node": "ip-block-mw", "direction": "request", "action": "/api/auth/ paths skip the filter's IP block (login checks it itself).", "data": "passed through", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/filter/SecurityFilter.java", "line": 34 }] },
+        { "id": "s5", "node": "jwt-auth-mw", "direction": "request", "action": "No Bearer header, so JWT processing is skipped.", "data": "anonymous request", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/filter/JwtAuthenticationFilter.java", "line": 40 }] },
+        { "id": "s6", "node": "authz-rules", "direction": "request", "action": "/api/auth/login is on the permitAll list.", "data": "access granted", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 54 }] },
+        { "id": "s7", "node": "auth-module", "direction": "request", "action": "AuthController passes the request, client IP and User-Agent to AuthenticationService.authenticate.", "data": "AuthenticationRequest, IP, User-Agent", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/AuthController.java", "line": 144 }] },
+        { "id": "s8", "node": "postgres", "direction": "request", "action": "Blocked IPs and recent failed attempts for this username and IP are read.", "data": "blocked_ip rows, failed-attempt counts", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/service/SecurityService.java", "line": 85 }, { "file": "src/main/java/com/vikrant/careSync/security/service/SecurityService.java", "line": 110 }] },
+        { "id": "s9", "node": "auth-module", "direction": "request", "action": "The AuthenticationManager verifies the password against the stored hash.", "data": "username + password token", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/AuthenticationService.java", "line": 244 }] },
+        { "id": "s10", "node": "postgres", "direction": "request", "action": "The successful attempt, a new user session and a refresh token are saved.", "data": "login_attempt, user_session, refresh_token rows", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/service/SecurityService.java", "line": 58 }, { "file": "src/main/java/com/vikrant/careSync/security/service/SecurityService.java", "line": 156 }, { "file": "src/main/java/com/vikrant/careSync/security/service/RefreshTokenService.java", "line": 33 }] },
+        { "id": "s11", "node": "postgres", "direction": "response", "action": "Saved rows, including the new session id, are returned.", "data": "session id", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/service/SecurityService.java", "line": 156 }] },
+        { "id": "s12", "node": "auth-module", "direction": "response", "action": "TokenIssuer signs an access JWT carrying the sessionId claim, and the response is built with both tokens and user data.", "data": "accessToken, refreshToken, tokenType Bearer, user data", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/service/TokenIssuer.java", "line": 44 }, { "file": "src/main/java/com/vikrant/careSync/service/AuthenticationService.java", "line": 556 }] },
+        { "id": "s13", "node": "cors-mw", "direction": "response", "action": "CORS headers are added, exposing Authorization.", "data": "Access-Control-* headers", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 136 }] },
+        { "id": "s14", "node": "client", "direction": "response", "action": "The client receives the tokens.", "data": "200 AuthenticationResponse", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/AuthController.java", "line": 145 }] }
+      ],
+      "branches": [
+        {
+          "id": "rate-limited-429", "label": "Too many login attempts (429)", "condition": "The IP has used its 10 auth requests this minute", "after": "s2", "rejoin": null,
+          "outcome": { "status": 429, "description": "Rejected by the rate limiter before reaching the controller." },
+          "steps": [
+            { "id": "r1", "node": "rate-limit-mw", "direction": "request", "action": "The bucket is empty, so the filter writes a 429 JSON error and stops the chain.", "data": "429 Too Many Requests", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/filter/RateLimitingFilter.java", "line": 108 }] },
+            { "id": "r2", "node": "cors-mw", "direction": "response", "action": "CORS headers are still applied.", "data": "Access-Control-* headers", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 136 }] },
+            { "id": "r3", "node": "client", "direction": "response", "action": "The client receives the 429.", "data": "429 error body", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/filter/RateLimitingFilter.java", "line": 111 }] }
+          ]
+        },
+        {
+          "id": "bad-credentials-400", "label": "Wrong password or locked (400)", "condition": "Password check fails, or the account/IP is locked or blocked", "after": "s9", "rejoin": null,
+          "outcome": { "status": 400, "description": "Failed attempt recorded; generic error returned." },
+          "steps": [
+            { "id": "c1", "node": "auth-module", "direction": "response", "action": "The failure is recorded as a login attempt and rethrown as a generic message; the controller returns 400.", "data": "Invalid username or password", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/AuthenticationService.java", "line": 282 }, { "file": "src/main/java/com/vikrant/careSync/controller/AuthController.java", "line": 148 }] },
+            { "id": "c2", "node": "cors-mw", "direction": "response", "action": "CORS headers are added.", "data": "Access-Control-* headers", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 136 }] },
+            { "id": "c3", "node": "client", "direction": "response", "action": "The client receives the 400 error.", "data": "400 error body", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/AuthController.java", "line": 148 }] }
+          ]
+        },
+        {
+          "id": "admin-second-step", "label": "Admin: emailed one-time code", "condition": "The user's role is ADMIN", "after": "s9", "rejoin": null,
+          "outcome": { "status": 200, "description": "No tokens yet; the admin must post the code to /api/auth/login/verify-code." },
+          "steps": [
+            { "id": "a1", "node": "redis", "direction": "request", "action": "A one-time login code is stored under a challenge id with a TTL.", "data": "challenge key, code (TTL)", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/service/AdminLoginCodeService.java", "line": 62 }] },
+            { "id": "a2", "node": "auth-module", "direction": "request", "action": "The code is handed to EmailService for delivery.", "data": "admin email, code", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/AuthenticationService.java", "line": 296 }] },
+            { "id": "a3", "node": "notifications", "direction": "request", "action": "EmailService tries the Resend HTTP provider first.", "data": "HTML email", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/EmailService.java", "line": 66 }] },
+            { "id": "a4", "node": "resend", "direction": "request", "action": "Resend accepts the email.", "data": "POST /emails", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/ResendEmailClient.java", "line": 70 }] },
+            { "id": "a5", "node": "notifications", "direction": "response", "action": "The send result is returned to the caller.", "data": "sent flag", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/EmailService.java", "line": 66 }] },
+            { "id": "a6", "node": "auth-module", "direction": "response", "action": "A response with mfaRequired and the challenge id (no tokens) is built.", "data": "mfaRequired, mfaChallengeId, masked email", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/AuthenticationService.java", "line": 301 }] },
+            { "id": "a7", "node": "cors-mw", "direction": "response", "action": "CORS headers are added.", "data": "Access-Control-* headers", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 136 }] },
+            { "id": "a8", "node": "client", "direction": "response", "action": "The client shows the code prompt.", "data": "200 with mfaChallengeId", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/AuthController.java", "line": 145 }] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "post-booking-with-payment",
+      "name": "POST /api/bookings/patient/with-payment",
+      "summary": "A patient books lab tests and starts payment: the booking is saved as PENDING, PaymentService creates a payment row and a Razorpay order, and the client gets checkout details.",
+      "steps": [
+        { "id": "s1", "node": "client", "direction": "request", "action": "The patient posts the selected tests and the payment request.", "data": "bookingRequest (test ids), paymentRequest (amount, method)", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/BookingController.java", "line": 36 }] },
+        { "id": "s2", "node": "cors-mw", "direction": "request", "action": "Origin is checked.", "data": "Origin header", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 47 }] },
+        { "id": "s3", "node": "ip-block-mw", "direction": "request", "action": "The client IP is checked against active IP blocks.", "data": "client IP", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/filter/SecurityFilter.java", "line": 44 }] },
+        { "id": "s4", "node": "jwt-auth-mw", "direction": "request", "action": "The Bearer JWT is validated, the user loaded and the session confirmed live.", "data": "JWT, sessionId claim", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/filter/JwtAuthenticationFilter.java", "line": 59 }] },
+        { "id": "s5", "node": "authz-rules", "direction": "request", "action": "The request must be authenticated and @PreAuthorize requires role PATIENT.", "data": "ROLE_PATIENT", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 108 }, { "file": "src/main/java/com/vikrant/careSync/controller/BookingController.java", "line": 37 }] },
+        { "id": "s6", "node": "bookings", "direction": "request", "action": "BookingController calls BookingService.createBookingWithPayment.", "data": "booking + payment requests", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/BookingController.java", "line": 41 }] },
+        { "id": "s7", "node": "postgres", "direction": "request", "action": "The patient and tests are loaded, the total priced and a PENDING booking saved.", "data": "lab test prices, booking row", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/BookingService.java", "line": 92 }, { "file": "src/main/java/com/vikrant/careSync/service/BookingService.java", "line": 103 }] },
+        { "id": "s8", "node": "bookings", "direction": "request", "action": "The amount must equal the booking total; then the payment request goes to PaymentService.", "data": "bookingId, patientId, amount", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/BookingService.java", "line": 95 }, { "file": "src/main/java/com/vikrant/careSync/service/BookingService.java", "line": 111 }] },
+        { "id": "s9", "node": "payments", "direction": "request", "action": "Outside demo mode, startCheckout validates the target and creates the payment record.", "data": "payment row (PENDING)", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/PaymentService.java", "line": 132 }, { "file": "src/main/java/com/vikrant/careSync/service/PaymentService.java", "line": 243 }] },
+        { "id": "s10", "node": "razorpay-api", "direction": "request", "action": "A Razorpay order is created for the amount in paise.", "data": "amount, currency, receipt", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/RazorpayService.java", "line": 70 }] },
+        { "id": "s11", "node": "razorpay-api", "direction": "response", "action": "Razorpay returns the order id.", "data": "order id", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/RazorpayService.java", "line": 70 }] },
+        { "id": "s12", "node": "payments", "direction": "response", "action": "The order id is saved on the payment and checkout details built.", "data": "razorpayOrderId, checkout", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/PaymentService.java", "line": 262 }, { "file": "src/main/java/com/vikrant/careSync/service/PaymentService.java", "line": 266 }] },
+        { "id": "s13", "node": "bookings", "direction": "response", "action": "The booking response carries the transaction id, payment status and checkout.", "data": "BookingResponse", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/BookingService.java", "line": 122 }] },
+        { "id": "s14", "node": "redis", "direction": "response", "action": "@CacheEvict clears ANALYTICS:OVERALL and the patient's PATIENT:FINANCIAL entry.", "data": "cache entries evicted", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/BookingService.java", "line": 65 }] },
+        { "id": "s15", "node": "bookings", "direction": "response", "action": "The controller returns 201 Created.", "data": "201 BookingResponse", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/BookingController.java", "line": 44 }] },
+        { "id": "s16", "node": "audit-interceptor", "direction": "response", "action": "After completion the route, record ids, status, user and IP are written to the audit log.", "data": "audit entry", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/audit/AuditTrailInterceptor.java", "line": 55 }] },
+        { "id": "s17", "node": "cors-mw", "direction": "response", "action": "CORS headers are added.", "data": "Access-Control-* headers", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 136 }] },
+        { "id": "s18", "node": "client", "direction": "response", "action": "The client opens Razorpay checkout with the returned order.", "data": "201 with checkout", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/BookingController.java", "line": 44 }] }
+      ],
+      "branches": [
+        {
+          "id": "no-login-401", "label": "No or expired login (401)", "condition": "No valid Bearer token or the session has ended", "after": "s3", "rejoin": null,
+          "outcome": { "status": 401, "description": "Rejected by Spring Security before the controller." },
+          "steps": [
+            { "id": "n1", "node": "jwt-auth-mw", "direction": "request", "action": "No usable token, so no authentication is set.", "data": "anonymous", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/filter/JwtAuthenticationFilter.java", "line": 40 }] },
+            { "id": "n2", "node": "authz-rules", "direction": "response", "action": "The authentication entry point answers 401.", "data": "401 Unauthorized", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 114 }] },
+            { "id": "n3", "node": "cors-mw", "direction": "response", "action": "CORS headers are added.", "data": "Access-Control-* headers", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 136 }] },
+            { "id": "n4", "node": "client", "direction": "response", "action": "The client refreshes the token or asks the user to sign in again.", "data": "401", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 114 }] }
+          ]
+        },
+        {
+          "id": "payment-start-fails-400", "label": "Payment cannot start (400)", "condition": "Razorpay keys missing, order creation fails, or amount/target invalid", "after": "s9", "rejoin": null,
+          "outcome": { "status": 400, "description": "Booking stays PENDING so the patient can retry payment." },
+          "steps": [
+            { "id": "p1", "node": "payments", "direction": "response", "action": "startCheckout throws (for example Razorpay is not configured).", "data": "error", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/PaymentService.java", "line": 236 }] },
+            { "id": "p2", "node": "bookings", "direction": "response", "action": "The service wraps it as Payment failed and the controller answers 400.", "data": "400 error body", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/BookingService.java", "line": 130 }, { "file": "src/main/java/com/vikrant/careSync/controller/BookingController.java", "line": 47 }] },
+            { "id": "p3", "node": "audit-interceptor", "direction": "response", "action": "The refused request is still audited with its status.", "data": "audit entry status=400", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/audit/AuditTrailInterceptor.java", "line": 55 }] },
+            { "id": "p4", "node": "cors-mw", "direction": "response", "action": "CORS headers are added.", "data": "Access-Control-* headers", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 136 }] },
+            { "id": "p5", "node": "client", "direction": "response", "action": "The client shows the error.", "data": "400", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/BookingController.java", "line": 47 }] }
+          ]
+        }
+      ],
+      "notes": "With PAYMENT_DEMO_MODE on (the compose default), PaymentService takes the demo path instead of calling Razorpay (PaymentService.java:130-150). Settlement happens later through POST /api/payments/razorpay/verify or the Razorpay webhook."
+    },
+    {
+      "id": "post-razorpay-webhook",
+      "name": "POST /api/payments/webhook/razorpay",
+      "summary": "Razorpay reports a captured payment; the backend verifies the signature, locks the payment row, re-fetches the payment from Razorpay, settles it and completes the booking.",
+      "steps": [
+        { "id": "s1", "node": "razorpay-webhook", "direction": "request", "action": "Razorpay posts a signed event.", "data": "raw JSON body, X-Razorpay-Signature header", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/PaymentController.java", "line": 220 }] },
+        { "id": "s1a", "node": "cors-mw", "direction": "request", "action": "The request enters the filter chain; a server-to-server call has no browser Origin, so CORS has nothing to check.", "data": "no Origin header", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 47 }] },
+        { "id": "s2", "node": "ip-block-mw", "direction": "request", "action": "The caller IP is checked against active IP blocks.", "data": "client IP", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/filter/SecurityFilter.java", "line": 44 }] },
+        { "id": "s3", "node": "authz-rules", "direction": "request", "action": "POST /api/payments/webhook/razorpay is permitAll.", "data": "access granted", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 69 }] },
+        { "id": "s4", "node": "payments", "direction": "request", "action": "The controller checks webhooks are enabled, then the HMAC signature is verified.", "data": "payload, signature", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/PaymentController.java", "line": 224 }, { "file": "src/main/java/com/vikrant/careSync/service/PaymentService.java", "line": 308 }] },
+        { "id": "s5", "node": "postgres", "direction": "request", "action": "The payment for the Razorpay order id is locked for update.", "data": "SELECT ... FOR UPDATE by order id", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/PaymentService.java", "line": 327 }] },
+        { "id": "s6", "node": "payments", "direction": "request", "action": "The body is only trusted for ids; the payment is re-fetched from Razorpay.", "data": "razorpay payment id", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/PaymentService.java", "line": 331 }] },
+        { "id": "s7", "node": "razorpay-api", "direction": "request", "action": "payments.fetch is called.", "data": "payment id", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/RazorpayService.java", "line": 83 }] },
+        { "id": "s8", "node": "razorpay-api", "direction": "response", "action": "Razorpay returns the payment entity.", "data": "order id, amount, currency, status", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/RazorpayService.java", "line": 83 }] },
+        { "id": "s9", "node": "payments", "direction": "response", "action": "settle checks order and amount, and captures an authorized payment.", "data": "captured payment", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/PaymentService.java", "line": 383 }, { "file": "src/main/java/com/vikrant/careSync/service/PaymentService.java", "line": 390 }] },
+        { "id": "s10", "node": "postgres", "direction": "response", "action": "The payment is saved as SUCCESS and a PENDING booking becomes COMPLETED.", "data": "payment + booking rows updated", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/PaymentService.java", "line": 430 }, { "file": "src/main/java/com/vikrant/careSync/service/PaymentService.java", "line": 436 }] },
+        { "id": "s11", "node": "payments", "direction": "response", "action": "The controller answers 200 status success.", "data": "200", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/PaymentController.java", "line": 230 }] },
+        { "id": "s12", "node": "audit-interceptor", "direction": "response", "action": "The /api/payments request is written to the audit log.", "data": "audit entry", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/audit/AuditTrailInterceptor.java", "line": 55 }] },
+        { "id": "s12a", "node": "cors-mw", "direction": "response", "action": "The response leaves through the filter chain.", "data": "200 response", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 47 }] },
+        { "id": "s13", "node": "razorpay-webhook", "direction": "response", "action": "Razorpay receives the acknowledgement.", "data": "200 {status: success}", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/PaymentController.java", "line": 230 }] }
+      ],
+      "branches": [
+        {
+          "id": "webhook-disabled-404", "label": "Webhooks disabled (404)", "condition": "Demo mode on or PAYMENT_WEBHOOK_SECRET not set", "after": "s3", "rejoin": null,
+          "outcome": { "status": 404, "description": "Webhook endpoint answers 404 when not enabled." },
+          "steps": [
+            { "id": "w1", "node": "payments", "direction": "response", "action": "isWebhookConfigured is false, so the controller answers 404.", "data": "404", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/PaymentController.java", "line": 225 }] },
+            { "id": "w2", "node": "audit-interceptor", "direction": "response", "action": "The request is audited.", "data": "audit entry status=404", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/audit/AuditTrailInterceptor.java", "line": 55 }] },
+            { "id": "w2a", "node": "cors-mw", "direction": "response", "action": "The response leaves through the filter chain.", "data": "404 response", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 47 }] },
+            { "id": "w3", "node": "razorpay-webhook", "direction": "response", "action": "Razorpay receives 404.", "data": "404", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/PaymentController.java", "line": 225 }] }
+          ]
+        },
+        {
+          "id": "bad-signature-401", "label": "Invalid signature (401)", "condition": "X-Razorpay-Signature does not match the HMAC of the body", "after": "s4", "rejoin": null,
+          "outcome": { "status": 401, "description": "Event rejected; nothing settled." },
+          "steps": [
+            { "id": "g1", "node": "payments", "direction": "response", "action": "SecurityException is caught and the controller answers 401.", "data": "401", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/PaymentController.java", "line": 233 }] },
+            { "id": "g2", "node": "audit-interceptor", "direction": "response", "action": "The refused request is audited.", "data": "audit entry status=401", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/audit/AuditTrailInterceptor.java", "line": 55 }] },
+            { "id": "g2a", "node": "cors-mw", "direction": "response", "action": "The response leaves through the filter chain.", "data": "401 response", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 47 }] },
+            { "id": "g3", "node": "razorpay-webhook", "direction": "response", "action": "Razorpay receives 401.", "data": "401", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/PaymentController.java", "line": 233 }] }
+          ]
+        }
+      ],
+      "notes": "The rate limiter (not a limited path) and the JWT filter (no Bearer header) do nothing for this request, so they are not shown as steps. CORS appears only as the chain's entry and exit."
+    },
+    {
+      "id": "post-ai-chat",
+      "name": "POST /api/ai/chat",
+      "summary": "A patient chats with the AI assistant: rule-based emergency triage, conversation memory from Redis, the Groq tool-calling agent with a per-user quota, then memory, chat history and an AI audit record are saved.",
+      "steps": [
+        { "id": "s1", "node": "client", "direction": "request", "action": "The user posts a chat message.", "data": "message, conversationId", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/AiController.java", "line": 69 }] },
+        { "id": "s2", "node": "cors-mw", "direction": "request", "action": "Origin is checked.", "data": "Origin header", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 47 }] },
+        { "id": "s3", "node": "rate-limit-mw", "direction": "request", "action": "The request counts against the per-IP AI bucket of 20 per minute.", "data": "client IP token consumed", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/filter/RateLimitingFilter.java", "line": 100 }] },
+        { "id": "s4", "node": "ip-block-mw", "direction": "request", "action": "The client IP is checked against active IP blocks.", "data": "client IP", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/filter/SecurityFilter.java", "line": 44 }] },
+        { "id": "s5", "node": "jwt-auth-mw", "direction": "request", "action": "The Bearer JWT and session are validated.", "data": "JWT", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/filter/JwtAuthenticationFilter.java", "line": 59 }] },
+        { "id": "s6", "node": "authz-rules", "direction": "request", "action": "/api/ai/chat requires role PATIENT or DOCTOR.", "data": "ROLE_PATIENT / ROLE_DOCTOR", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 86 }, { "file": "src/main/java/com/vikrant/careSync/controller/AiController.java", "line": 70 }] },
+        { "id": "s7", "node": "ai-module", "direction": "request", "action": "AiService.getResponse runs rule-based emergency triage for patients (no AI).", "data": "message", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/AiController.java", "line": 72 }, { "file": "src/main/java/com/vikrant/careSync/service/AiService.java", "line": 112 }] },
+        { "id": "s8", "node": "redis", "direction": "request", "action": "Recent conversation history is read (stored encrypted).", "data": "conversation key", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/ai/AiConversationMemoryService.java", "line": 67 }] },
+        { "id": "s9", "node": "ai-module", "direction": "request", "action": "The patient agent calls Groq with tools; each model call first consumes the user's AI quota.", "data": "messages + tool definitions", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/ai/agent/AiAgentService.java", "line": 157 }, { "file": "src/main/java/com/vikrant/careSync/service/ai/GroqClient.java", "line": 309 }] },
+        { "id": "s10", "node": "redis", "direction": "request", "action": "Per-minute and per-day quota counters are incremented with a TTL.", "data": "INCR quota key", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/ai/AiQuotaService.java", "line": 75 }] },
+        { "id": "s11", "node": "ai-module", "direction": "request", "action": "The chat-completions request is sent to Groq.", "data": "model, messages, tools", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/ai/GroqClient.java", "line": 335 }] },
+        { "id": "s12", "node": "groq", "direction": "request", "action": "Groq runs the model (with configured fallback models).", "data": "chat completion request", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/ai/GroqClient.java", "line": 335 }] },
+        { "id": "s13", "node": "groq", "direction": "response", "action": "Groq returns tool calls or the final text.", "data": "tool calls / answer, token usage", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/ai/GroqClient.java", "line": 335 }] },
+        { "id": "s14", "node": "ai-module", "direction": "response", "action": "Requested tools are executed on the server as this patient.", "data": "tool name + arguments", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/ai/agent/AiAgentService.java", "line": 219 }] },
+        { "id": "s15", "node": "postgres", "direction": "request", "action": "Tools query data such as matching doctors.", "data": "doctor search", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/ai/agent/PatientAgentTools.java", "line": 229 }] },
+        { "id": "s16", "node": "postgres", "direction": "response", "action": "Rows are returned to the tool.", "data": "doctor rows", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/ai/agent/PatientAgentTools.java", "line": 229 }] },
+        { "id": "s17", "node": "ai-module", "direction": "response", "action": "The agent's final reply (text, optional booking card, emergency notice) is assembled and the turn saved to memory.", "data": "AiChatResponse", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/AiService.java", "line": 149 }, { "file": "src/main/java/com/vikrant/careSync/service/AiService.java", "line": 152 }] },
+        { "id": "s18", "node": "redis", "direction": "response", "action": "The conversation memory is written back, encrypted, with a TTL.", "data": "SET conversation key", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/ai/AiConversationMemoryService.java", "line": 99 }] },
+        { "id": "s19", "node": "ai-module", "direction": "response", "action": "The turn is recorded in saved chat history and an AI audit record is logged.", "data": "conversation, messages, audit", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/AiService.java", "line": 225 }, { "file": "src/main/java/com/vikrant/careSync/service/AiService.java", "line": 233 }] },
+        { "id": "s20", "node": "postgres", "direction": "response", "action": "Conversation, message and AI audit rows are saved.", "data": "ai_conversation, messages, ai_audit_log", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/ai/AiChatHistoryService.java", "line": 84 }, { "file": "src/main/java/com/vikrant/careSync/service/ai/AiAuditService.java", "line": 72 }] },
+        { "id": "s21", "node": "ai-module", "direction": "response", "action": "The controller returns 200 with the response.", "data": "200 AiChatResponse", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/AiController.java", "line": 72 }] },
+        { "id": "s22", "node": "audit-interceptor", "direction": "response", "action": "The /api/ai request is written to the audit log.", "data": "audit entry", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/audit/AuditTrailInterceptor.java", "line": 55 }] },
+        { "id": "s23", "node": "cors-mw", "direction": "response", "action": "CORS headers are added.", "data": "Access-Control-* headers", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 136 }] },
+        { "id": "s24", "node": "client", "direction": "response", "action": "The client renders the reply.", "data": "200 AiChatResponse", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/AiController.java", "line": 72 }] }
+      ],
+      "branches": [
+        {
+          "id": "emergency-rules", "label": "Emergency detected by rules", "condition": "A patient's message matches red-flag rules", "after": "s7", "rejoin": "s18",
+          "steps": [
+            { "id": "e1", "node": "ai-module", "direction": "response", "action": "An emergency response is built without calling the model, then the turn is saved to memory.", "data": "emergency notice", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/AiService.java", "line": 115 }, { "file": "src/main/java/com/vikrant/careSync/service/AiService.java", "line": 206 }] }
+          ]
+        },
+        {
+          "id": "quota-exceeded", "label": "AI allowance used up", "condition": "The per-minute or per-day quota is exceeded", "after": "s10", "rejoin": null,
+          "outcome": { "status": 200, "description": "success=false with a friendly message; failure audited." },
+          "steps": [
+            { "id": "q1", "node": "ai-module", "direction": "response", "action": "AiQuotaExceededException is caught, logged to AI audit, and a friendly message returned.", "data": "success=false", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/ai/AiQuotaService.java", "line": 63 }, { "file": "src/main/java/com/vikrant/careSync/service/AiService.java", "line": 244 }] },
+            { "id": "q2", "node": "audit-interceptor", "direction": "response", "action": "The request is audited.", "data": "audit entry", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/audit/AuditTrailInterceptor.java", "line": 55 }] },
+            { "id": "q3", "node": "cors-mw", "direction": "response", "action": "CORS headers are added.", "data": "Access-Control-* headers", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 136 }] },
+            { "id": "q4", "node": "client", "direction": "response", "action": "The client shows the allowance message.", "data": "200 success=false", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/AiController.java", "line": 72 }] }
+          ]
+        },
+        {
+          "id": "ai-rate-limited-429", "label": "Too many AI requests (429)", "condition": "The IP used its 20 AI requests this minute", "after": "s2", "rejoin": null,
+          "outcome": { "status": 429, "description": "Rejected by the rate limiter." },
+          "steps": [
+            { "id": "l1", "node": "rate-limit-mw", "direction": "request", "action": "The AI bucket is empty, so the filter answers 429.", "data": "429 Too Many Requests", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/filter/RateLimitingFilter.java", "line": 108 }] },
+            { "id": "l2", "node": "cors-mw", "direction": "response", "action": "CORS headers are added.", "data": "Access-Control-* headers", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 136 }] },
+            { "id": "l3", "node": "client", "direction": "response", "action": "The client receives the 429.", "data": "429", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/filter/RateLimitingFilter.java", "line": 111 }] }
+          ]
+        }
+      ],
+      "notes": "Traced for a patient. Doctors go through DoctorCopilotService (AiService.java:163) instead, falling back to a basic assistant on error. The streaming variant POST /api/ai/chat/stream shares getResponse but replies as server-sent events."
+    },
+    {
+      "id": "get-doctor-by-id",
+      "name": "GET /api/doctors/{id}",
+      "summary": "A doctor or admin reads a doctor profile; DoctorService serves it from the encrypted Redis cache DOCTOR:PROFILE (1h TTL) or loads it from PostgreSQL and caches it.",
+      "steps": [
+        { "id": "s1", "node": "client", "direction": "request", "action": "The client requests a doctor profile by id.", "data": "path id", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/DoctorController.java", "line": 141 }] },
+        { "id": "s2", "node": "cors-mw", "direction": "request", "action": "Origin is checked.", "data": "Origin header", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 47 }] },
+        { "id": "s3", "node": "ip-block-mw", "direction": "request", "action": "The client IP is checked against active IP blocks.", "data": "client IP", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/filter/SecurityFilter.java", "line": 44 }] },
+        { "id": "s4", "node": "jwt-auth-mw", "direction": "request", "action": "The Bearer JWT and session are validated.", "data": "JWT", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/filter/JwtAuthenticationFilter.java", "line": 59 }] },
+        { "id": "s5", "node": "authz-rules", "direction": "request", "action": "/api/doctors/** allows DOCTOR, PATIENT or ADMIN at URL level.", "data": "role check", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 78 }] },
+        { "id": "s6", "node": "care-records", "direction": "request", "action": "@PreAuthorize narrows the handler to DOCTOR or ADMIN, which calls getDoctorDtoById.", "data": "doctor id", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/DoctorController.java", "line": 142 }, { "file": "src/main/java/com/vikrant/careSync/controller/DoctorController.java", "line": 144 }] },
+        { "id": "s7", "node": "redis", "direction": "request", "action": "@Cacheable looks up DOCTOR:PROFILE id_{id} (miss on the main path).", "data": "cache key id_{id}", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/DoctorService.java", "line": 144 }] },
+        { "id": "s8", "node": "care-records", "direction": "request", "action": "On a miss the method body runs and queries the repository.", "data": "doctor id", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/DoctorService.java", "line": 146 }] },
+        { "id": "s9", "node": "postgres", "direction": "request", "action": "The doctor row is selected by id.", "data": "SELECT doctor by id", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/DoctorService.java", "line": 146 }] },
+        { "id": "s10", "node": "postgres", "direction": "response", "action": "The doctor row is returned.", "data": "doctor row", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/DoctorService.java", "line": 146 }] },
+        { "id": "s11", "node": "care-records", "direction": "response", "action": "The entity is mapped to DoctorDto with stats.", "data": "DoctorDto", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/DoctorService.java", "line": 146 }] },
+        { "id": "s12", "node": "redis", "direction": "response", "action": "The DTO is cached encrypted with a 1 hour TTL.", "data": "DOCTOR:PROFILE id_{id}, TTL 1h", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/DoctorService.java", "line": 144 }, { "file": "src/main/java/com/vikrant/careSync/config/CacheConfig.java", "line": 88 }] },
+        { "id": "s13", "node": "care-records", "direction": "response", "action": "The DTO is filtered for the current viewer and returned with 200.", "data": "200 DoctorDto", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/DoctorController.java", "line": 145 }, { "file": "src/main/java/com/vikrant/careSync/controller/DoctorController.java", "line": 146 }] },
+        { "id": "s14", "node": "cors-mw", "direction": "response", "action": "CORS headers are added.", "data": "Access-Control-* headers", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 136 }] },
+        { "id": "s15", "node": "client", "direction": "response", "action": "The client renders the profile.", "data": "200 DoctorDto", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/DoctorController.java", "line": 146 }] }
+      ],
+      "branches": [
+        {
+          "id": "cache-hit", "label": "Cache hit", "condition": "Redis holds DOCTOR:PROFILE id_{id}", "after": "s7", "rejoin": "s13",
+          "steps": [
+            { "id": "h1", "node": "redis", "direction": "response", "action": "The cached, decrypted DTO is returned and PostgreSQL is skipped.", "data": "cached DoctorDto", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/service/DoctorService.java", "line": 144 }] }
+          ]
+        },
+        {
+          "id": "not-found-404", "label": "Doctor not found (404)", "condition": "No doctor with this id", "after": "s10", "rejoin": null,
+          "outcome": { "status": 404, "description": "Empty Optional mapped to 404." },
+          "steps": [
+            { "id": "f1", "node": "care-records", "direction": "response", "action": "The empty result becomes 404 Not Found.", "data": "404", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/DoctorController.java", "line": 147 }] },
+            { "id": "f2", "node": "cors-mw", "direction": "response", "action": "CORS headers are added.", "data": "Access-Control-* headers", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 136 }] },
+            { "id": "f3", "node": "client", "direction": "response", "action": "The client receives 404.", "data": "404", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/DoctorController.java", "line": 147 }] }
+          ]
+        },
+        {
+          "id": "patient-forbidden-403", "label": "Patient caller (403)", "condition": "The caller is a PATIENT (allowed by the URL rule but not by @PreAuthorize)", "after": "s5", "rejoin": null,
+          "outcome": { "status": 403, "description": "AccessDeniedException handled by GlobalExceptionHandler." },
+          "steps": [
+            { "id": "d1", "node": "care-records", "direction": "request", "action": "@PreAuthorize rejects the PATIENT role and throws AccessDeniedException.", "data": "AccessDeniedException", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/controller/DoctorController.java", "line": 142 }] },
+            { "id": "d2", "node": "error-handler", "direction": "response", "action": "GlobalExceptionHandler maps it to 403 with a generic body.", "data": "403 Access denied", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/exception/GlobalExceptionHandler.java", "line": 27 }, { "file": "src/main/java/com/vikrant/careSync/exception/GlobalExceptionHandler.java", "line": 30 }] },
+            { "id": "d3", "node": "cors-mw", "direction": "response", "action": "CORS headers are added.", "data": "Access-Control-* headers", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/security/SecurityConfig.java", "line": 136 }] },
+            { "id": "d4", "node": "client", "direction": "response", "action": "The client receives 403.", "data": "403", "evidence": [{ "file": "src/main/java/com/vikrant/careSync/exception/GlobalExceptionHandler.java", "line": 30 }] }
+          ]
+        }
+      ],
+      "notes": "/api/doctors is not an audited prefix, so AuditTrailInterceptor writes nothing for this request (AuditTrailInterceptor.java:32)."
+    }
+  ],
+  "uncertain": [
+    {
+      "source": "care-records", "target": "Cloudinary", "suspected_kind": "http",
+      "reason": "CLOUDINARY_* variable names appear in .env_sample and comments mention Cloudinary URLs, but no Cloudinary client, dependency or call exists in main code; files go to Supabase S3.",
+      "would_confirm": "A Cloudinary SDK dependency in pom.xml and an upload/download call in src/main.",
+      "hints": [
+        { "file": ".env_sample", "line": 7, "note": "CLOUDINARY_CLOUD_NAME (name only)" },
+        { "file": "src/main/java/com/vikrant/careSync/service/DocumentService.java", "line": 179, "note": "stale comment" }
+      ]
+    },
+    {
+      "source": "notifications", "target": "SendGrid", "suspected_kind": "http",
+      "reason": ".env_sample describes a SendGrid fallback and compose sets SENDGRID_API_KEY, but the only HTTP mail client is ResendEmailClient (api.resend.com).",
+      "would_confirm": "A SendGrid client or a call to the SendGrid API that reads SENDGRID_API_KEY.",
+      "hints": [
+        { "file": ".env_sample", "line": 28, "note": "SENDGRID_API_KEY (name only)" },
+        { "file": "docker-compose.yml", "line": 76, "note": "SENDGRID_API_KEY mapped from RESEND_API_KEY" }
+      ]
+    }
+  ],
+  "meta": {
+    "generated_at": "2026-11-11",
+    "skipped": [
+      "Frontend: src/main/resources/templates (server-side email templates), not analyzed",
+      "Flows not traced: appointment booking and state machine, video consult token/status/end, file upload to S3, STOMP chat, Google sign-in, refresh/logout, scheduled jobs, admin endpoints",
+      "Tests (src/test) not analyzed"
+    ],
+    "limitations": [
+      "Single deployable Spring Boot app with no gateway: compose exposes port 8080 directly (docker-compose.yml:33). Service nodes are modules grouped from controllers and their services, not separate deployables.",
+      "RateLimitingFilter, SecurityFilter and JwtAuthenticationFilter are all added before UsernamePasswordAuthenticationFilter (SecurityConfig.java:116-118). The chain shows them in registration order, assuming Spring keeps insertion order for filters anchored the same way. CORS is assumed to run first, as Spring Security places CorsFilter.",
+      "The Security filter chain and AuditTrailInterceptor are shared by every REST module. Their owner is set to auth-module by convention, and the last link fans out to each module.",
+      "AuditTrailInterceptor acts only in afterCompletion, so flows show it on the response side only.",
+      "The Razorpay webhook is active only when demo mode is off and PAYMENT_WEBHOOK_SECRET is set. The compose default PAYMENT_DEMO_MODE=true sends payments down the demo path, with no Razorpay calls.",
+      "NotificationService and ChatController push to clients over the in-memory STOMP broker (/user/queue/notifications, /topic/appointment/{id}). These server-to-client pushes are not drawn as edges.",
+      "Endpoint lists were taken from class- and method-level mapping annotations; no runtime context path is configured. GET /api/master/** is public; other /api/master methods require ADMIN.",
+      "app.file.upload.path and the app_uploads volume are declared (application.properties:46, docker-compose.yml:95), but no Java code reading the path was found.",
+      "No Kubernetes files: hosts, replicas and the Redis/Supabase/LiveKit deployments come from env variable names only.",
+      "Renderer warning left on purpose: the webhook flow enters and leaves the filter chain at CorsFilter (razorpay-webhook <-> cors-mw). Its only edge goes to the payments service, as the schema requires for external callers."
+    ]
+  }
+}
