@@ -159,20 +159,21 @@ The browser reads the stream with `fetch` and a small SSE parser (EventSource ca
 ### 2.3 The bounded agent loop
 
 ```mermaid
-flowchart TD
-    START(["User message"]) --> STEP{"Step 5 or less?"}
-    STEP -- yes --> LAST{"Last step?"}
-    LAST -- no --> OFFER["Offer the tool list"]
-    LAST -- yes --> NOTOOLS["Offer no tools<br/>(model must answer)"]
-    OFFER --> CALL["Call the model"]
+%%{init: {"flowchart": {"rankSpacing": 30, "nodeSpacing": 24}}}%%
+flowchart LR
+    START(["User message"]) --> STEP{"Step 5<br/>or less?"}
+    STEP -- yes --> LAST{"Last<br/>step?"}
+    LAST -- no --> OFFER["Offer the<br/>tool list"]
+    LAST -- yes --> NOTOOLS["Offer no tools<br/>(model must<br/>answer)"]
+    OFFER --> CALL["Call the<br/>model"]
     NOTOOLS --> CALL
-    CALL --> WANTS{"Tool calls?"}
-    WANTS -- no --> ANSWER(["Final answer + card"])
-    WANTS -- yes --> LIMIT["Run at most 3"]
-    LIMIT --> VALIDATE["Validate arguments<br/>ids · dates within 90 days · HH:mm"]
-    VALIDATE --> ACCESS["Access checks<br/>as the signed-in user"]
-    ACCESS --> RESULT["JSON result back to the model<br/>card to the UI"]
-    RESULT --> STOP{"User pressed Stop?"}
+    CALL --> WANTS{"Tool<br/>calls?"}
+    WANTS -- no --> ANSWER(["Final answer<br/>+ card"])
+    WANTS -- yes --> LIMIT["Run at<br/>most 3"]
+    LIMIT --> VALIDATE["Validate arguments<br/>ids · dates<br/>within 90 days<br/>HH:mm"]
+    VALIDATE --> ACCESS["Access checks<br/>as the<br/>signed-in user"]
+    ACCESS --> RESULT["JSON result<br/>back to the model<br/>card to the UI"]
+    RESULT --> STOP{"User<br/>pressed<br/>Stop?"}
     STOP -- no --> STEP
     STOP -- yes --> ANSWER
     STEP -- no --> ANSWER
@@ -311,6 +312,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
+    %% width: 720
     UP["Upload<br/>PDF · PNG · JPEG · WebP"] --> G["Gemini 2.5 Flash<br/>file sent inline, strict JSON out"]
     G --> LAB["Lab report explainer<br/>plain-words answer + not-a-diagnosis note<br/>saved encrypted, shown instantly next time"]
     G --> SCAN["Document scanner<br/>medicines · lab values · safety flags"]
@@ -325,6 +327,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
+    %% width: 520
     MSG["Chat turn"] --> MEM["Redis memory<br/>last 10 messages · 24 h<br/>AES-256-GCM, per user"]
     MSG --> HIST["Saved chats (PostgreSQL)<br/>title · text · cards encrypted<br/>owner only"]
     MSG --> AUD["Audit log<br/>model · tokens · latency · tools"]
@@ -337,14 +340,15 @@ flowchart LR
 ### 2.11 Guardrails and cost control
 
 ```mermaid
-flowchart TD
-    IN["AI request"] --> Q1["Per-IP limit<br/>20 per minute on AI routes"]
-    Q1 --> Q2["Per-user quota<br/>20 per minute · 200 per day"]
-    Q2 --> Q3["Input caps<br/>chat 2000 chars · search 500 · files 5-8 MB"]
-    Q3 --> Q4["Encrypted answer cache<br/>key = SHA-256 of task + facts"]
-    Q4 --> Q5["Prompt-injection framing<br/>tool output and documents are data, not instructions"]
-    Q5 --> Q6["Minimum necessary data<br/>no contact details · age instead of date of birth"]
-    Q6 --> Q7["Audit every call"]
+%%{init: {"flowchart": {"rankSpacing": 28, "nodeSpacing": 24}}}%%
+flowchart LR
+    IN["AI request"] --> Q1["Per-IP limit<br/>20 per minute<br/>on AI routes"]
+    Q1 --> Q2["Per-user quota<br/>20 per minute<br/>200 per day"]
+    Q2 --> Q3["Input caps<br/>chat 2000 chars<br/>search 500<br/>files 5-8 MB"]
+    Q3 --> Q4["Encrypted<br/>answer cache<br/>key = SHA-256<br/>of task + facts"]
+    Q4 --> Q5["Prompt-injection<br/>framing<br/>tool output and<br/>documents are data,<br/>not instructions"]
+    Q5 --> Q6["Minimum<br/>necessary data<br/>no contact details<br/>age instead of<br/>date of birth"]
+    Q6 --> Q7["Audit<br/>every call"]
 ```
 
 - The cache key is a hash of the exact facts, so a changed record can never be answered from a stale cache. Summaries that rarely change are also stored with a hash of their source and regenerated only when that hash changes, so reopening a visit costs no model call.
@@ -380,6 +384,7 @@ Every AI claim on this page is backed by a labelled test set. The suites produce
 
 ```mermaid
 flowchart LR
+    %% width: 680
     DS["Labelled datasets<br/>triage · agent · injection · clinical"] --> OFF["Offline suites<br/>every build, gated in CI"]
     DS --> LIVE["Live suites<br/>real model, on demand"]
     OFF --> SC["Scorecards<br/>Markdown + JSON"]
@@ -412,6 +417,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
+    %% width: 700
     TC["Model asks for a tool"] --> G{"Server gate"}
     G -- "cancel / reschedule:<br/>did the patient ask?" --> C1{"Patient's words"}
     G -- "emergency flag after tool results:<br/>re-check on patient's words only" --> C2{"Isolated check"}
@@ -433,7 +439,9 @@ flowchart LR
 ### System architecture
 
 ```mermaid
+%%{init: {"flowchart": {"rankSpacing": 40, "nodeSpacing": 16}}}%%
 flowchart LR
+    %% width: 640
     U["Angular 19 SPA<br/>(Vercel)"] -- "HTTPS REST + SSE" --> API["Spring Boot 3.5 API<br/>(Docker on Render)"]
     U -- "WebSocket / STOMP" --> API
     U -- "WebRTC" --> LK["LiveKit<br/>video"]
@@ -480,27 +488,6 @@ flowchart LR
     F4 -. "every patient-data route" .-> AU["Audit trail"]
 ```
 
-### Deployment
-
-```mermaid
-flowchart LR
-    PUSH["git push<br/>dev / main"] --> CI["GitHub Actions"]
-    CI --> T["Build + full test suite"]
-    CI --> GL["Secret scan<br/>gitleaks, whole history"]
-    CI --> CQ["CodeQL security scan<br/>also weekly"]
-    REL["Release script"] --> IMG["Multi-stage Docker build<br/>JRE only · non-root · health check"]
-    IMG --> REG["Container registry"]
-    REG --> RENDER["Render<br/>runs the image"]
-    RENDER --> FW["Flyway migrates<br/>Hibernate validates the schema"]
-    FW --> LIVE["API live"]
-    FEP["Frontend push"] --> VER["Vercel<br/>static SPA + security headers"]
-```
-
-- **Backend:** multi-stage Docker image running as a non-root user on Render. Flyway migrates the database on startup; the app refuses to start if the schema and entities disagree.
-- **Frontend:** static build on Vercel with strict security headers (Content-Security-Policy, HSTS, frame and referrer policies).
-- **Configuration:** every secret comes from environment variables; none are stored in code or logs.
-- **CI:** on every push and pull request to `dev` and `main`, GitHub Actions runs the full build and test suite, scans the whole git history for leaked secrets (gitleaks), and runs a CodeQL security analysis, which also runs weekly when nothing is pushed.
-
 ---
 
 ## 4. Low-level design (LLD)
@@ -546,7 +533,9 @@ Patients and doctors share the user's primary key (`@MapsId`), so one id identif
 Every transition is validated against the current state and the actor's role, and recorded in a status history log.
 
 ```mermaid
+%%{init: {"state": {"nodeSpacing": 20, "rankSpacing": 30}}}%%
 stateDiagram-v2
+    %% width: 500
     [*] --> BOOKED: patient books (and pays)
     BOOKED --> CONFIRMED: doctor accepts
     BOOKED --> REJECTED: doctor declines
@@ -792,6 +781,7 @@ sequenceDiagram
 
 ```mermaid
 flowchart LR
+    %% width: 880
     G["Google ID token"] --> V{"Issued to CareSync?"}
     V -- no --> X["Refused"]
     V -- yes --> E{"Account with<br/>this email?"}
@@ -846,7 +836,9 @@ In 2026 I ran a structured security review of the platform covering authenticati
 CareSync relies on a few outside services. Each one receives only what its job needs, and health data is encrypted before it is stored anywhere.
 
 ```mermaid
+%%{init: {"flowchart": {"rankSpacing": 40, "nodeSpacing": 12}}}%%
 flowchart LR
+    %% width: 680
     B["Patient / doctor<br/>browser"] -- "HTTPS" --> API["CareSync API<br/>(Render)"]
     B -- "card / UPI details<br/>typed in Razorpay's window" --> RZC["Razorpay Checkout"]
     B -- "live audio and video" --> LK["LiveKit<br/>video"]
@@ -1006,6 +998,7 @@ sequenceDiagram
 
 ```mermaid
 flowchart LR
+    %% width: 560
     OLD["Column value<br/>AES/ECB (old)"] --> READ{"Read"}
     READ -- "v2 prefix" --> GCM["Decrypt AES-256-GCM"]
     READ -- "no prefix" --> ECB["Decrypt legacy ECB"]

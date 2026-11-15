@@ -163,9 +163,13 @@ export class DocsComponent implements OnInit {
       const pre = code.parentElement;
       const figure = document.createElement('figure');
       figure.className = 'docs-diagram';
+      const source = code.textContent || '';
+      const width = source.match(/^\s*%%\s*width:\s*(\d+)\s*$/m)?.[1];
       try {
-        const { svg } = await mermaid.render(`docs-diagram-${i}`, code.textContent || '');
+        const { svg } = await mermaid.render(`docs-diagram-${i}`, source.replace(/^\s*%%\s*width:.*$/m, ''));
         figure.innerHTML = svg;
+        const el = figure.querySelector('svg');
+        if (width && el) el.style.maxWidth = `${width}px`;
       } catch {
         figure.textContent = 'Diagram could not be drawn.';
       }
